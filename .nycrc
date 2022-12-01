@@ -1,0 +1,19 @@
+{
+  "include": [
+    "app/**/*.js",
+    "lib/**/*.js",
+    "config/**/*.js"
+  ],
+  "reporter": [
+    "lcov",
+    "json",
+    "text",
+    "text-summary",
+    "clover"
+  ],
+  "check-coverage": true,
+  "branches": 60,
+  "lines": 60,
+  "functions": 60,
+  "statements": 60
+}
