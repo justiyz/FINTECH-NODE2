@@ -2,8 +2,6 @@ import express from 'express';
 import 'dotenv/config';
 import config from './config/index.js';
 import enums from './lib/enums/index.js';
-
-// Bootstrap express
 import expressConfig from '../src/config/express/index.js';
 
 const port = config.SEEDFI_PORT || 8080;
