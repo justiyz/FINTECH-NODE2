@@ -117,3 +117,6 @@ reports/
 
 #hooks
 .husky
+.husky/
+pre-commit
+pre-push
