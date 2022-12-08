@@ -1,4 +1,4 @@
-import { devEnv, prodEnv, testEnv } from './env/index.js';
+import { devEnv, prodEnv, testEnv } from './env/index';
 
 const { SEEDFI_NODE_ENV } = process.env;
 

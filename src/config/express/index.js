@@ -3,9 +3,9 @@ import { json, urlencoded } from 'express';
 import compression from 'compression';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import loggerInit from '../logger/index.js';
-import enums from '../../lib/enums/index.js';
-import routes from '../routes/index.js';
+import loggerInit from '../logger/index';
+import enums from '../../lib/enums/index';
+import routes from '../routes/index';
 
 const expressConfig = app => {
   let logger;
@@ -38,7 +38,17 @@ const expressConfig = app => {
   app.use(compression());
   app.use(fileUpload());
 
-  app.get('/', (req, res) => {
+  // allow certain domains and allow certain HTTP methods
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Origin, Content-Type, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+  });
+
+  // Welcome route
+  app.get('/', (_req, res) => {
     res.send({ message: enums.WELCOME });
   });
 
@@ -48,14 +58,14 @@ const expressConfig = app => {
   // error handlers
 
   // catch 404 and forward to error handler
-  app.use((req, res) => res.status(enums.HTTP_NOT_FOUND).json({
+  app.use((_req, res) => res.status(enums.HTTP_NOT_FOUND).json({
     status: enums.ERROR_STATUS,
     code: enums.HTTP_NOT_FOUND,
     message: enums.DEAD_END_MESSAGE
   }));
 
   // catch server related errors and forward to error handler
-  app.use((err, req, res) => {
+  app.use((err, _req, res) => {
     res.status(enums.HTTP_INTERNAL_SERVER_ERROR).json({
       status: err.status || enums.ERROR_STATUS,
       message: err.message || enums.SOMETHING_BROKE_MESSAGE

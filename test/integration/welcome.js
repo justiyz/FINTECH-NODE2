@@ -1,7 +1,7 @@
 import assert from 'assert';
 import request from 'supertest';
 
-import app from '../../src/app.js';
+import app from '../../src/app';
 
 describe('Welcome Integration test', () => {
   it('Welcome', done => {

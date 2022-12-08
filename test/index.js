@@ -1,1 +1,1 @@
-import './integration/welcome.js';
+import './integration/welcome';

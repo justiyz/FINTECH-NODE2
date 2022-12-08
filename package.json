@@ -10,14 +10,13 @@
     "node": "16.8.0",
     "npm": "8.19.2"
   },
-  "type": "module",
   "scripts": {
     "lint": "eslint --fix src/ --ext .js",
-    "dev": "nodemon src/app.js",
+    "dev": "nodemon --exec babel-node src/app.js",
     "prestart": "npm run migrate:up && npm run seed:up",
-    "start": "node src/app.js",
+    "start": "babel-node  src/app.js",
     "pretest": "cross-env SEEDFI_NODE_ENV=test npm run lint && cross-env SEEDFI_NODE_ENV=test npm run seed:reset:test && cross-env SEEDFI_NODE_ENV=test npm run migrate:reset:test && cross-env SEEDFI_NODE_ENV=test npm run migrate:up:test && cross-env SEEDFI_NODE_ENV=test npm run seed:up:test",
-    "test": "cross-env SEEDFI_NODE_ENV=test debug=true nyc --reporter=lcov --reporter=text --reporter=text-summary  mocha test/index --timeout 120000 --exit",
+    "test": "cross-env SEEDFI_NODE_ENV=test debug=true nyc --reporter=lcov --reporter=text --reporter=text-summary  mocha --timeout 120000 --require @babel/register test/index --exit",
     "migrate:create": "db-migrate create --config database.json",
     "migrate:up": "db-migrate up --config database.json",
     "migrate:down": "db-migrate down --config database.json",
@@ -29,7 +28,14 @@
     "migrate:up:test": "db-migrate up --config database.json -e test",
     "migrate:reset:test": "db-migrate reset --config database.json -e test",
     "seed:up:test": "db-migrate up:seed --config database.json -e test",
-    "seed:reset:test": "db-migrate reset:seed --config database.json -e test"
+    "seed:reset:test": "db-migrate reset:seed --config database.json -e test",
+    "build": "babel src -d dist --source-maps"
+  },
+  "husky": {
+    "hooks": {
+        "pre-commit": "npm run lint",
+        "pre-push": "npm run test"
+    }
   },
   "dependencies": {
     "bluebird": "^3.7.2",
@@ -47,10 +53,18 @@
     "winston": "^3.8.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.20.5",
+    "@babel/node": "^7.20.5",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/register": "^7.18.9",
     "chai": "^4.3.7",
     "chai-http": "^4.3.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.29.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^8.0.2",
     "mocha": "^10.1.0",
     "nodemon": "^2.0.20",
     "nyc": "^15.1.0",

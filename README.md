@@ -137,9 +137,13 @@ ___
 ## Technologies
 
 - NodeJS
-- Express
+- ExpressJs
+- Supertest
+- Mocha
+- Chai
 - Postman
 - PostgreSQL
+- Google Firebase
 
 ---
 

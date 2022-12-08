@@ -1,8 +1,8 @@
 import express from 'express';
 import 'dotenv/config';
-import config from './config/index.js';
-import enums from './lib/enums/index.js';
-import expressConfig from '../src/config/express/index.js';
+import config from './config/index';
+import enums from './lib/enums/index';
+import expressConfig from './config/express/index';
 
 const port = config.SEEDFI_PORT || 8080;
 const app = express();

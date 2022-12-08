@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import ApiResponse from '../../lib/http/lib.http.responses.js';
+import ApiResponse from '../../lib/http/lib.http.responses';
 
 const router = Router();
 
