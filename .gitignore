@@ -114,3 +114,11 @@ package-lock.json
 
 #generated reports
 reports/
+
+#hooks
+.husky
+.husky/
+pre-commit
+pre-push
+**/pre-commit
+**/pre-push

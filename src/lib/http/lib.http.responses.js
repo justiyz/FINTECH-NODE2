@@ -1,5 +1,5 @@
 import status from 'http-status';
-import enums from '../enums/index.js';
+import enums from '../enums/index';
 
 export default {
   success: (res, message, code, data) => res.status(code).json({

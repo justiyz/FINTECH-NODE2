@@ -1,6 +1,6 @@
-import devEnv from './development.js';
-import prodEnv from './production.js';
-import testEnv from './test.js';
+import devEnv from './development';
+import prodEnv from './production';
+import testEnv from './test';
 
 export {
   devEnv, prodEnv, testEnv
