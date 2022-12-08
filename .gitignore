@@ -120,3 +120,5 @@ reports/
 .husky/
 pre-commit
 pre-push
+**/pre-commit
+**/pre-push
