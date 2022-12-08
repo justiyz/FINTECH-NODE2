@@ -114,3 +114,6 @@ package-lock.json
 
 #generated reports
 reports/
+
+#hooks
+.husky

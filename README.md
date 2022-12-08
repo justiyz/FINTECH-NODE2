@@ -67,6 +67,16 @@ run these scripts in your code terminal in the stated order to run up the sql mi
 
 ---
 
+## Setting up husky hooks
+
+run these scripts in your code terminal in the stated order
+
+    $ npx husky install (to add husky directory to the root)
+    $ npx husky add .husky/pre-commit "npm run lint" (To ensure that before every git commit, the lint script runs)
+    $ npx husky add .husky/pre-push "npm run test" (To ensure that before every git push, the test script runs)
+
+---
+
 ## Start server locally
 
 run this script in your code terminal
@@ -125,6 +135,7 @@ Npm scripts basically allow us to call (and chain) terminal commands via npm.
 | `migrate:reset:test`      | Runs in the `pretest` script to drop all existing migrations from the test DB when `npm run test` is invoked      |
 | `seed:up:test`            | Runs in the `pretest` script to add existing seed migrations to the test DB when `npm run test` is invoked      |
 | `seed:reset:test`         | Runs in the `pretest` script to drop drop all existing seed migrations from the test DB when `npm run test` is invoked      |
+| `build`                   | Runs to generate the build file into a dist folder using babel      |
 
 ---
 
