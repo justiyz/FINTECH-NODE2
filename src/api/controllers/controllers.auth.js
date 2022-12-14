@@ -22,7 +22,7 @@ const { SEEDFI_NODE_ENV } = config;
 export const signup = async(req, res, next) => {
   try {
     const { body, otp } = req;
-    const expireAt = dayjs().add(30, 'minutes');
+    const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
     const payload = AuthPayload.register(body, otp, expireAt);
     const [ registeredUser ] = await AuthService.registerUser(payload);
