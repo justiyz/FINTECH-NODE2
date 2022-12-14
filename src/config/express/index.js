@@ -29,6 +29,7 @@ const expressConfig = app => {
 
   global.logger = logger;
   logger.info(`${enums.CURRENT_TIME_STAMP} Application starting...`);
+  logger.debug('Overriding \'Express\' logger');
   logger.info(`${enums.CURRENT_TIME_STAMP} Environment is ${app.get('env')}`);
 
   app.use(urlencoded({ extended: true }));

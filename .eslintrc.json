@@ -12,6 +12,8 @@
         "sourceType": "module"
     },
     "globals": {
+        "var1": "writable",
+        "var2": "readonly",
         "logger": true
       },
     "rules": {

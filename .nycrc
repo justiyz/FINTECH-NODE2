@@ -8,6 +8,7 @@
   "exclude": [
     "src/config/express",
     "src/config/logger",
+    "src/config/sms",
     "src/services"
   ],
   "reporter": [
