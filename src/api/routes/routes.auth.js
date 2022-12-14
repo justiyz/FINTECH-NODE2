@@ -43,7 +43,6 @@ router.post(
   AuthMiddleware.isCompletedKyc,
   AuthMiddleware.isPasswordCreated,
   AuthMiddleware.checkIfEmailAlreadyExist,
-  AuthMiddleware.hashPassword,
   AuthController.completeProfile
 );
 

@@ -310,26 +310,3 @@ export const checkIfEmailAlreadyExist = async(req, res, next) => {
     return next(error);
   }
 };
-
-/**
- * Hash password
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON object containing the hashed user password
- * @memberof AuthMiddleware
- */
-export const hashPassword = async(req, res, next) => {
-  try {
-    const { body, user } = req;
-    const payload = body.password;
-    const hash = await Hash.hashData(payload.trim());
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully hashed user password middlewares.auth.js`);
-    req.hashed = hash;
-    return next();
-  } catch (error) {
-    error.label = enums.HASH_PASSWORD_MIDDLEWARE;
-    logger.error(`hashing user sent plain password failed:::${enums.HASH_PASSWORD_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
