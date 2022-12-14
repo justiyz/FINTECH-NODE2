@@ -8,7 +8,7 @@ import enums from '../../lib/enums';
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const getUser = (type = '') => async(req, res, next) => {
+export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) => {
   try {
     const { body } = req;
     const payload = body.phone_number || req.user.phone_number;

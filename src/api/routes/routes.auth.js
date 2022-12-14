@@ -10,7 +10,7 @@ const router = Router();
 router.post(
   '/signup',
   Model(Schema.signup, 'payload'),
-  UserMiddleware.getUser('validate'),
+  UserMiddleware.validateUnAuthenticatedUser('validate'),
   AuthMiddleware.checkIfReferralCodeExists,
   AuthMiddleware.generateVerificationToken,
   AuthController.signup,
@@ -20,7 +20,7 @@ router.post(
 router.post(
   '/resend-signup-otp',
   Model(Schema.resendPhoneNumberVerificationOTP, 'payload'),
-  UserMiddleware.getUser('authenticate'),
+  UserMiddleware.validateUnAuthenticatedUser('authenticate'),
   AuthMiddleware.generateVerificationToken,
   AuthController.resendSignupOtp
 );
@@ -29,7 +29,7 @@ router.post(
   '/verify-phone-number',
   Model(Schema.verifyPhoneNumber, 'payload'),
   AuthMiddleware.verifyVerificationToken,
-  UserMiddleware.getUser('authenticate'),
+  UserMiddleware.validateUnAuthenticatedUser('authenticate'),
   AuthMiddleware.generateReferralCode,
   AuthMiddleware.generateTokens,
   AuthController.verifyAccount

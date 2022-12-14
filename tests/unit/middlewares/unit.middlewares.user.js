@@ -23,7 +23,7 @@ describe('', () => {
   describe('User middleware catch block unit testings', () => {
     it('should call getUser', async() => {
       const req = { body: '' };
-      const data = await UserMiddleware.getUser('validate')(req, res, next);
+      const data = await UserMiddleware.validateUnAuthenticatedUser('validate')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
