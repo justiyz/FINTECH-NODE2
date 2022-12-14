@@ -67,11 +67,7 @@ CREATE TABLE IF NOT EXISTS users(
     verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
     password TEXT,
-    password_reset_token TEXT,
-    password_reset_token_expires TIMESTAMPTZ,
     pin TEXT,
-    pin_reset_token TEXT,
-    pin_reset_token_expires TIMESTAMPTZ,
     is_verified_phone_number BOOLEAN DEFAULT false,
     is_verified_email BOOLEAN DEFAULT false,
     is_uploaded_selfie_image BOOLEAN DEFAULT false,
@@ -153,8 +149,6 @@ CREATE INDEX users_user_id_index ON users(user_id);
 CREATE INDEX users_phone_number_index ON users(phone_number);
 CREATE INDEX users_email_index ON users(email);
 CREATE INDEX users_verification_token_index ON users(verification_token);
-CREATE INDEX users_password_reset_token_index ON users(password_reset_token);
-CREATE INDEX users_pin_reset_token_index ON users(pin_reset_token);
 CREATE INDEX users_status_index ON users(status);
 CREATE INDEX users_refresh_token_index ON users(refresh_token);
 CREATE INDEX users_referral_code_index ON users(referral_code);

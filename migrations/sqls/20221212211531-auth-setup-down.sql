@@ -4,8 +4,6 @@ DROP INDEX IF EXISTS users_user_id_index;
 DROP INDEX IF EXISTS users_phone_number_index;
 DROP INDEX IF EXISTS users_email_index;
 DROP INDEX IF EXISTS users_verification_token_index;
-DROP INDEX IF EXISTS users_password_reset_token_index;
-DROP INDEX IF EXISTS users_pin_reset_token_index;
 DROP INDEX IF EXISTS users_status_index;
 DROP INDEX IF EXISTS users_refresh_token_index;
 

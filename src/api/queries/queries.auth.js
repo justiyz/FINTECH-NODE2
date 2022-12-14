@@ -11,8 +11,8 @@ export default {
     ON CONFLICT(phone_number)
     DO UPDATE SET
     referral_code = EXCLUDED.referral_code,
-      verification_token = EXCLUDED.verification_token,
-      verification_token_expires = EXCLUDED.verification_token_expires
+    verification_token = EXCLUDED.verification_token,
+    verification_token_expires = EXCLUDED.verification_token_expires
     RETURNING user_id, phone_number, tier, status, verification_token_expires, is_deleted`,
 
   updateVerificationToken: `
