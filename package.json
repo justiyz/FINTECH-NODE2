@@ -16,7 +16,7 @@
     "prestart": "npm run migrate:up && npm run seed:up",
     "start": "babel-node  src/app.js",
     "pretest": "cross-env SEEDFI_NODE_ENV=test npm run lint && cross-env SEEDFI_NODE_ENV=test npm run seed:reset:test && cross-env SEEDFI_NODE_ENV=test npm run migrate:reset:test && cross-env SEEDFI_NODE_ENV=test npm run migrate:up:test && cross-env SEEDFI_NODE_ENV=test npm run seed:up:test",
-    "test": "cross-env SEEDFI_NODE_ENV=test debug=true nyc --reporter=lcov --reporter=text --reporter=text-summary  mocha --timeout 120000 --require @babel/register test/index --exit",
+    "test": "cross-env SEEDFI_NODE_ENV=test debug=true nyc --reporter=lcov --reporter=text --reporter=text-summary  mocha --timeout 120000 --require @babel/register tests/index.js --exit",
     "migrate:create": "db-migrate create --config database.json",
     "migrate:up": "db-migrate up --config database.json",
     "migrate:down": "db-migrate down --config database.json",
@@ -33,14 +33,18 @@
   },
   "husky": {
     "hooks": {
-        "pre-commit": "npm run lint",
-        "pre-push": "npm run test"
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run test"
     }
   },
   "dependencies": {
+    "@joi/date": "^2.1.0",
+    "africastalking": "^0.5.7",
+    "bcrypt": "^5.1.0",
     "bluebird": "^3.7.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dayjs": "^1.11.6",
     "db-migrate": "^0.11.13",
     "db-migrate-pg": "^1.2.2",
@@ -49,6 +53,8 @@
     "express-fileupload": "^1.4.0",
     "helmet": "^6.0.1",
     "http-status": "^1.5.3",
+    "joi": "^17.7.0",
+    "jsonwebtoken": "^8.5.1",
     "pg-promise": "^10.15.4",
     "winston": "^3.8.2"
   },
@@ -58,6 +64,7 @@
     "@babel/node": "^7.20.5",
     "@babel/preset-env": "^7.20.2",
     "@babel/register": "^7.18.9",
+    "assert": "^2.0.0",
     "chai": "^4.3.7",
     "chai-http": "^4.3.0",
     "cross-env": "^7.0.3",
@@ -68,6 +75,7 @@
     "mocha": "^10.1.0",
     "nodemon": "^2.0.20",
     "nyc": "^15.1.0",
+    "sinon": "^15.0.0",
     "supertest": "^6.3.2"
   }
 }
