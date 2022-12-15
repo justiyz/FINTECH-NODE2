@@ -6,7 +6,7 @@ import enums from '../../lib/enums';
 export const updateFcmToken = async (req, res) => {
   try {
     const {user, body} = req;
-    UserService.updateUserFcmToken(user.user_id, body.fcm_token);
+    UserService.updateUserFcmToken([user.user_id, body.fcm_token]);
     const data = {
       user_id: user.user_id,
       fcm_token: body.fcm_token

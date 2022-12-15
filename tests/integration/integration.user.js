@@ -26,6 +26,8 @@ describe('update fcm-token', () => {
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
         expect(res.body).to.have.property('data');
+        expect(res.body.data).to.have.property('fcm_token');
+        expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
         expect(res.body.message).to.equal(enums.USER_FCM_TOKEN_UPDATED);
         expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
         done();
@@ -63,6 +65,8 @@ describe('update fcm-token', () => {
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
         expect(res.body).to.have.property('data');
+        expect(res.body.data).to.have.property('fcm_token');
+        expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_TWO_USER_ID);
         expect(res.body.message).to.equal(enums.USER_FCM_TOKEN_UPDATED);
         expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
         done();
