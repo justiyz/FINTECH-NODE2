@@ -1,4 +1,3 @@
-import AuthPayload from '../../lib/payloads/lib.payload.user';
 import * as  UserService from '../services/services.user';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
@@ -7,8 +6,7 @@ import enums from '../../lib/enums';
 export const updateFcmToken = async (req, res) => {
   try {
     const {user, body} = req;
-    const payload = AuthPayload.updateUserFcmToken(user, body);
-    UserService.updateUserFcmToken(payload);
+    UserService.updateUserFcmToken(user.user_id, body.fcm_token);
     const data = {
       user_id: user.user_id,
       fcm_token: body.fcm_token
