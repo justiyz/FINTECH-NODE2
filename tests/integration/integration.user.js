@@ -12,7 +12,7 @@ chai.use(chaiHttp);
 describe('update fcm-token', () => {
   it('should update the fcm-token of user one successfully', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/update-fcm-token')
+      .patch('/api/v1/user/fcm-token')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -33,7 +33,7 @@ describe('update fcm-token', () => {
   });
   it('should throw error when fcm token is not sent for user one', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/update-fcm-token')
+      .patch('/api/v1/user/fcm-token')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -49,7 +49,7 @@ describe('update fcm-token', () => {
   });
   it('should update the fcm-token of user two successfully', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/update-fcm-token')
+      .patch('/api/v1/user/fcm-token')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -70,7 +70,7 @@ describe('update fcm-token', () => {
   });
   it('should throw error when fcm token is not sent for user two', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/update-fcm-token')
+      .patch('/api/v1/user/fcm-token')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
