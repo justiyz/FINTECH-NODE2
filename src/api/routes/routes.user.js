@@ -7,7 +7,7 @@ import * as UserController from '../controllers/controllers.user';
 const router = Router();
 
 router.patch(
-  '/update-fcm-token',
+  '/fcm-token',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateFcmToken, 'payload'),
