@@ -20,3 +20,4 @@ export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
 export const USER_PROFILE_COMPLETED = 'User profile completed successfully';
 export const USER_EMAIL_EXIST = 'Account with this email address already exist';
+export const USER_FCM_TOKEN_UPDATED = 'User fcm token updated';
