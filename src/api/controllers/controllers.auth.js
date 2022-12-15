@@ -8,7 +8,6 @@ import config from '../../config';
 import sendSMS from '../../config/sms';
 import { signupSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
-import * as Hash from '../../lib/utils/lib.util.hash';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -23,7 +22,7 @@ const { SEEDFI_NODE_ENV } = config;
 export const signup = async(req, res, next) => {
   try {
     const { body, otp } = req;
-    const expireAt = dayjs().add(10, 'minutes');
+    const expireAt = dayjs().add(30, 'minutes');
     const expirationTime = dayjs(expireAt);
     const payload = AuthPayload.register(body, otp, expireAt);
     const [ registeredUser ] = await AuthService.registerUser(payload);
@@ -151,12 +150,10 @@ export const verifyAccount = async(req, res, next) => {
  */
 export const completeProfile = async(req, res, next) => {
   try {
-    const { user, body } = req;
-    const hash = await Hash.hashData(body.password.trim());
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully hashed user password controllers.auth.js`);
-    const payload = AuthPayload.completeProfile(user, body, hash);
+    const { hashed, user, body } = req;
+    const payload = AuthPayload.completeProfile(user, body, hashed);
     const [ data ] = await AuthService.completeUserProfile(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved hashed password in the db controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved hashed password in the db controller.auth.js`);
     userActivityTracking(user.user_id, 7, 'success');
     return ApiResponse.success(res, enums.USER_PROFILE_COMPLETED, enums.HTTP_OK, data);
   } catch (error) {
