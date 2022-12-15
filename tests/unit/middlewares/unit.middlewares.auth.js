@@ -69,6 +69,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call comparePassword', async() => {
+      const req = { user: '', body: '' };
+      const data = await AuthMiddleware.comparePassword(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call isPasswordCreated', async() => {
       const req = { user: '' };
       const data = await AuthMiddleware.isPasswordCreated(req, res, next);

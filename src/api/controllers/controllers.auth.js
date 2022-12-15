@@ -6,7 +6,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
 import sendSMS from '../../config/sms';
-import { signupSms } from '../../lib/templates/sms';
+import { signupSms, resendSignupOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
@@ -27,10 +27,10 @@ export const signup = async(req, res, next) => {
     const expirationTime = dayjs(expireAt);
     const payload = AuthPayload.register(body, otp, expireAt);
     const [ registeredUser ] = await AuthService.registerUser(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database signup.controllers.auth.js`);
     const data = { ...registeredUser, otp, otpExpire: expirationTime };
     if(body.referral_code) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload controllers.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload signup.controllers.auth.js`);
       req.registeredUser = registeredUser;
       req.expirationTime = expirationTime;
       return next();
@@ -62,7 +62,7 @@ export const processReferral = async(req, res, next) => {
     const [ referralPreviouslyRecorded ] = await AuthService.checkIfReferralPreviouslyRecorded([ referringUserDetails.user_id, registeredUser.user_id ]);
     if (!referralPreviouslyRecorded) {
       await AuthService.updateReferralTrail([ referringUserDetails.user_id, registeredUser.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully updated the referral trails controllers.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully updated the referral trails processReferral.controllers.auth.js`);
     }
     const data = { ...registeredUser, otp, otpExpire: expirationTime };
     userActivityTracking(registeredUser.user_id, 1, 'success');
@@ -93,10 +93,10 @@ export const resendSignupOtp = async(req, res, next) => {
     const expirationTime = dayjs(expireAt);
     const payload = AuthPayload.register(body, otp, expireAt);
     await AuthService.updateVerificationToken(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new verification token into the DB controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new verification token into the DB resendSignupOtp.controllers.auth.js`);
     const data = { user_id: user.user_id, otp, otpExpire: expirationTime };
     userActivityTracking(user.user_id, 6, 'success');
-    await sendSMS(body.phone_number, signupSms(data));
+    await sendSMS(body.phone_number, resendSignupOTPSms(data));
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, data);
     }
@@ -124,9 +124,9 @@ export const verifyAccount = async(req, res, next) => {
     } = req;
     const payload = AuthPayload.verifyUserAccount(user, refreshToken, body, referralCode);
     await AuthService.verifyUserAccount(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully verified users account in the database controllers.auth.js`);
-    const [ newUserDetails ] = await UserService.getUser(user.phone_number);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully verified users account in the database verifyAccount.controllers.auth.js`);
+    const [ newUserDetails ] = await UserService.getUserByPhoneNumber(user.phone_number);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database verifyAccount.controllers.auth.js`);
     const {
       // eslint-disable-next-line no-unused-vars
       password, pin, ...userData
@@ -137,6 +137,29 @@ export const verifyAccount = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 2, 'fail');
     error.label = enums.VERIFY_ACCOUNT_CONTROLLER;
     logger.error(`Verifying user account failed::${enums.VERIFY_ACCOUNT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+/* login user account
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response with the users details
+ * @memberof AuthController
+ */
+export const login = async(req, res, next) => {
+  try {
+    const { user, tokenDetails: { token, refreshToken, tokenExpireAt } } = req;
+    const [ loggedInUser ] = await AuthService.loginUserAccount([ user.user_id, refreshToken ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user login login.controllers.auth.js`);
+    userActivityTracking(user.user_id, 15, 'success');
+    return ApiResponse.success(res, enums.USER_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...loggedInUser, token, tokenExpireAt });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 15, 'fail');
+    error.label = enums.LOGIN_CONTROLLER;
+    logger.error(`Login user failed::${enums.LOGIN_CONTROLLER}`, error.message);
     return next(error);
   }
 };
@@ -153,10 +176,10 @@ export const completeProfile = async(req, res, next) => {
   try {
     const { user, body } = req;
     const hash = await Hash.hashData(body.password.trim());
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully hashed user password controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully hashed user password completeProfile.controllers.auth.js`);
     const payload = AuthPayload.completeProfile(user, body, hash);
     const [ data ] = await AuthService.completeUserProfile(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved hashed password in the db controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved hashed password in the db completeProfile.controllers.auth.js`);
     userActivityTracking(user.user_id, 7, 'success');
     return ApiResponse.success(res, enums.USER_PROFILE_COMPLETED, enums.HTTP_OK, data);
   } catch (error) {
