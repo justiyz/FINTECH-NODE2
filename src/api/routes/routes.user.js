@@ -8,11 +8,10 @@ const router = Router();
 
 router.patch(
   '/update-fcm-token',
-  Model(Schema.updateFcmToken, 'payload'),
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
+  Model(Schema.updateFcmToken, 'payload'),
   UserController.updateFcmToken
-
 );
 
 export default router;
