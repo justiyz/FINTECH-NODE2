@@ -15,6 +15,7 @@ describe('Hash unit Tests', () => {
   });
   it('should hashData', () => {
     const data = Hash.hashData('myNameSeedfi');
+    process.env.SEEDFI_TESTING_HASH_TOKEN = data;
     expect(data).to.be.a('string');
   });
   it('should decodeToken', () => {
@@ -23,6 +24,11 @@ describe('Hash unit Tests', () => {
     expect(data).to.have.property('iat');
     expect(data).to.have.property('exp');
     expect(data.user_id).to.equal('ur-74yh678ty8y78768ryry');
+  });
+  it('should compareData', () => {
+    const data = Hash.compareData('myNameSeedfi', process.env.SEEDFI_TESTING_HASH_TOKEN);
+    expect(data).to.be.a('boolean');
+    expect(data).to.equal(true);
   });
 });
 

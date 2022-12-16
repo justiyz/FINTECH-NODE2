@@ -21,7 +21,6 @@ describe('update fcm-token', () => {
         fcm_token: Hash.generateRandomString(20)
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(enums.HTTP_OK);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -41,7 +40,6 @@ describe('update fcm-token', () => {
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -60,7 +58,6 @@ describe('update fcm-token', () => {
         fcm_token: Hash.generateRandomString(20)
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(enums.HTTP_OK);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -80,7 +77,6 @@ describe('update fcm-token', () => {
         Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');

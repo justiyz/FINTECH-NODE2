@@ -665,4 +665,141 @@ describe('Auth', () => {
         });
     });
   });
+  describe('Login', () => {
+    it('Should log user one in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userOneProfile.email,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_kyc).to.equal(true);
+          process.env.SEEDFI_USER_ONE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_ONE_REFRESH_TOKEN = res.body.data.refresh_token;
+          done();
+        });
+    });
+    it('Should log user two in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userTwoProfile.email,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_kyc).to.equal(true);
+          process.env.SEEDFI_USER_TWO_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_TWO_REFRESH_TOKEN = res.body.data.refresh_token;
+          done();
+        });
+    });
+    it('Should log user three in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userThreeProfile.email,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_kyc).to.equal(true);
+          process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_THREE_REFRESH_TOKEN = res.body.data.refresh_token;
+          done();
+        });
+    });
+    it('Should return error if non existing email is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: `${userThreeProfile.email}.ng`,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.INVALID_EMAIL_ADDRESS);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if wrong password is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userThreeProfile.email,
+          password: `6748${password}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.INVALID_PASSWORD);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if email field missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          password: `6748${password}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if password field is missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userThreeProfile.email
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('password is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
 });

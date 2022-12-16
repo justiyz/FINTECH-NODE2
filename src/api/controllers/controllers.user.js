@@ -7,6 +7,7 @@ export const updateFcmToken = async (req, res) => {
   try {
     const {user, body} = req;
     UserService.updateUserFcmToken([user.user_id, body.fcm_token]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user fcm token to the database signup.controllers.user.js`);
     const data = {
       user_id: user.user_id,
       fcm_token: body.fcm_token

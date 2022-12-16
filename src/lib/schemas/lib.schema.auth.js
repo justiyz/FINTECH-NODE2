@@ -19,6 +19,11 @@ const resendPhoneNumberVerificationOTP = Joi.object().keys({
     }).required()
 });
 
+const login = Joi.object().keys({
+  email: Joi.string().email().required(),
+  password: Joi.string().required()
+});
+
 const verifyPhoneNumber = Joi.object().keys({
   otp: Joi.string().required().length(6),
   fcm_token: Joi.string().required()
@@ -34,9 +39,11 @@ const completeProfile = Joi.object().keys({
   password: Joi.string().required().min(8)
 });
 
+
 export default {
   signup,
   resendPhoneNumberVerificationOTP,
+  login,
   verifyPhoneNumber,
   completeProfile
 };

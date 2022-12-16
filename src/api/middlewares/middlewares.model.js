@@ -25,10 +25,10 @@ const validateData = (schema, type) => async(req, res, next) => {
 
     const isValid = await schema.validate(data, options);
     if (!isValid.error) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully validates ${getType[type]} middlewares.model.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully validates ${getType[type]} validateData.middlewares.model.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: failed to validate ${getType[type]} middlewares.model.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: failed to validate ${getType[type]} validateData.middlewares.model.js`);
     const { message } = isValid.error.details[0];
     return Response.error(res, message.replace(/["]/gi, ''), HTTP_UNPROCESSABLE_ENTITY, VALIDATE_DATA_MIDDLEWARE);
   } catch (error) {

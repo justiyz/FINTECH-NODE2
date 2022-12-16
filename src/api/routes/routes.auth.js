@@ -46,4 +46,13 @@ router.post(
   AuthController.completeProfile
 );
 
+router.post(
+  '/login',
+  Model(Schema.login, 'payload'),
+  UserMiddleware.validateUnAuthenticatedUser('login'),
+  AuthMiddleware.comparePassword,
+  AuthMiddleware.generateTokens,
+  AuthController.login
+);
+
 export default router;

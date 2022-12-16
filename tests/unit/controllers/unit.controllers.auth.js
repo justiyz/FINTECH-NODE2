@@ -39,6 +39,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call login', async() => {
+      const req = { user: '' };
+      const data = await AuthController.login(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call verifyAccount', async() => {
       const req = { body: '', user: '', referralCode: null };
       const data = await AuthController.verifyAccount(req, res, next);

@@ -31,6 +31,8 @@ export const hashData = (data) => {
   return false;
 };
 
+export const compareData = (data, hash) => bcrypt.compareSync(data, hash);
+
 export const decodeToken = (token) => {
   try {
     return jwt.verify(token, SEEDFI_ENCODING_AUTHENTICATION_SECRET);
