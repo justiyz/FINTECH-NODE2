@@ -236,8 +236,12 @@ export const resetPassword = async(req, res, next) => {
     const { user, body } = req;
     const hash = Hash.hashData(body.password.trim());
     const payload = [user.email, hash];
+    if(!user.is_verified_email){
+      await AuthService.verifyUserEmail(user.user_id);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      user email successfully verified. controllers.auth.js`);
+    }
     await AuthService.resetPassword(payload);
-    await AuthService.verifyUserEmail(user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user password in the db. controllers.auth.js`);
     userActivityTracking(req.user.user_id, 9, 'success');
