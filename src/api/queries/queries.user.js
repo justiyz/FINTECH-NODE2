@@ -25,13 +25,11 @@ export default {
       SET 
         updated_at = NOW(),
         fcm_token = $2
-      WHERE user_id = $1
-  `,
+      WHERE user_id = $1`,
   updateUserRefreshToken:`
       UPDATE users
       SET
         updated_at = NOW(),
         refresh_token = $2
-      WHERE user_id = $1
-  `
+      WHERE user_id = $1`
 };
