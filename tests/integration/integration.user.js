@@ -21,6 +21,7 @@ describe('update fcm-token', () => {
         fcm_token: Hash.generateRandomString(20)
       })
       .end((err, res) => {
+        console.log('=====>>>', process.env.SEEDFI_USER_ONE_ACCESS_TOKEN);
         expect(res.statusCode).to.equal(enums.HTTP_OK);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -80,6 +81,70 @@ describe('update fcm-token', () => {
         expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+});
+
+describe('update refresh token', () => {
+  it('should update the refresh token of user one successfully', (done) => {
+    chai.request(app)
+      .get('/api/v1/user/refresh-token')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .query({
+        refreshtoken: process.env.SEEDFI_USER_ONE_REFRESH_TOKEN
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(enums.HTTP_OK);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body).to.have.property('data');
+        expect(res.body.data).to.have.property('refresh_token');
+        expect(res.body.data).to.have.property('token');
+        expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
+        expect(res.body.message).to.equal(enums.USER_REFRESH_TOKEN_UPDATED);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('should return error if refresh token is invalid', (done) => {
+    chai.request(app)
+      .get('/api/v1/user/refresh-token')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .query({
+        refreshtoken: `${process.env.SEEDFI_USER_ONE_REFRESH_TOKEN}jdjdshgdsggfdg`
+      })
+      .end((err, res) => {
+        console.log(res.body.messgae);
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal(enums.INVALID_USER_REFRESH_TOKEN);
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('should return error if refreshtoken is not sent', (done) => {
+    chai.request(app)
+      .get('/api/v1/user/refresh-token')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(422);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('refreshtoken is required');
+        expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
         expect(res.body.status).to.equal(enums.ERROR_STATUS);
         done();
       });

@@ -24,3 +24,5 @@ export const USER_EMAIL_EXIST = 'Account with this email address already exist';
 export const USER_FCM_TOKEN_UPDATED = 'User fcm token updated';
 export const INVALID_EMAIL_ADDRESS = 'Invalid email/password';
 export const INVALID_PASSWORD = 'Invalid email or password';
+export const USER_REFRESH_TOKEN_UPDATED = 'User refresh token updated successfully';
+export const INVALID_USER_REFRESH_TOKEN = 'Invalid refresh token';
