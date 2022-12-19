@@ -14,6 +14,15 @@ export const generateAuthToken = (user) => {
   }
 };
 
+export const generateResetPasswordToken = (user) => {
+  try {
+    const { email } = user;
+    return jwt.sign({ email }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '5m' });
+  } catch (error) {
+    return error;
+  }
+};
+
 export const generateRandomString = (size) => {
   try {
     return Crypto.randomBytes(size).toString('hex');

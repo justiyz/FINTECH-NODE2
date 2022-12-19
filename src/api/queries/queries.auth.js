@@ -1,6 +1,6 @@
 export default {
   getUserByVerificationToken: `
-    SELECT id, phone_number, user_id, verification_token, verification_token_expires, is_verified_email
+    SELECT id, email, phone_number, user_id, verification_token, verification_token_expires, is_verified_email
     FROM users 
     WHERE verification_token = $1`,
 

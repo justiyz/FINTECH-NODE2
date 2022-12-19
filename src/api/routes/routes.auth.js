@@ -64,9 +64,18 @@ router.post(
 );
 
 router.post(
+  '/verify-reset-token',
+  Model(Schema.verifyOtp, 'payload'),
+  AuthMiddleware.verifyVerificationToken,
+  AuthMiddleware.generateResetPasswordToken
+
+);
+
+router.post(
   '/reset-password',
   Model(Schema.resetPassword, 'payload'),
-  AuthMiddleware.verifyVerificationToken,
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
   AuthController.resetPassword
 );
 

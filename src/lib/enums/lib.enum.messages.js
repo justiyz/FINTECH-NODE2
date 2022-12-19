@@ -27,3 +27,5 @@ export const INVALID_PASSWORD = 'Invalid email or password';
 export const PASSWORD_RESET = 'Password reset successful';
 export const USER_REFRESH_TOKEN_UPDATED = 'User refresh token updated successfully';
 export const INVALID_USER_REFRESH_TOKEN = 'Invalid refresh token';
+export const GENERATE_RESET_PASSWORD_TOKEN = 'Password token Successfully generate';
+export const PASSWORD_TOKEN = 'Password reset token sent';

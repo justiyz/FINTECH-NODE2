@@ -43,8 +43,11 @@ const forgotPassword = Joi.object().keys({
   email: Joi.string().email().required()
 });
 
+const verifyOtp = Joi.object().keys({
+  otp: Joi.string().required().length(6)
+});
+ 
 const resetPassword = Joi.object().keys({
-  otp: Joi.string().required().length(6),
   password: Joi.string().required().min(8)
 });
  
@@ -55,5 +58,6 @@ export default {
   verifyPhoneNumber,
   completeProfile,
   forgotPassword,
+  verifyOtp,
   resetPassword
 };

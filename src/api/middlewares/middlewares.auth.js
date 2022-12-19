@@ -202,6 +202,22 @@ export const validateAuthToken = async(req, res, next) => {
     const decoded = Hash.decodeToken(token);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully decoded authentication token sent using the authentication secret
     validateAuthToken.middlewares.auth.js`);
+    if(decoded.message != 'jwt expired' && decoded.email){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully decoded authentication token sent using the authentication secret
+      validateAuthToken.middlewares.auth.js`);
+      const [ user ] = await UserService.getUserByEmail(decoded.email);
+      if (!user) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded email does not exist in the DB validateAuthToken.middlewares.auth.js`);
+        return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
+      }
+      if(user && (user.is_deleted || user.status === 'suspended' || user.status === 'deactivated')) {
+        const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database validateAuthToken.middlewares.auth.js`);
+        return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
+      }
+      req.user = user;
+      return next();
+    }
     if (decoded.message) {
       if (decoded.message === 'jwt expired') {
         return ApiResponse.error(res, enums.SESSION_EXPIRED, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
@@ -337,6 +353,33 @@ export const comparePassword = async(req, res, next) => {
   } catch (error) {
     error.label = enums.COMPARE_PASSWORD_MIDDLEWARE;
     logger.error(`comparing incoming and already set password in the DB failed:::${enums.COMPARE_PASSWORD_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Generate jwt password token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const generateResetPasswordToken = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const token = await Hash.generateResetPasswordToken(user);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: successfully generated password token generateResetPasswordToken.middlewares.auth.js`);
+    const tokenExpiration = await JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched token expiration time generateResetPasswordToken.middlewares.auth.js`);
+    const myDate = new Date(tokenExpiration * 1000);
+    const tokenExpireAt = dayjs(myDate);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully converted time from epoch time to a readable format generateResetPasswordToken.middlewares.auth.js`);
+    req.passwordToken = { token, tokenExpireAt };
+    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {token });
+  } catch (error) {
+    error.label = enums.GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE;
+    logger.error(`generating reset password token failed::${enums.GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
