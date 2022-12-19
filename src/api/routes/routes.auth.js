@@ -67,7 +67,6 @@ router.post(
   '/reset-password',
   Model(Schema.resetPassword, 'payload'),
   AuthMiddleware.verifyVerificationToken,
-  UserMiddleware.validateUnAuthenticatedUser('verify'),
   AuthController.resetPassword
 );
 

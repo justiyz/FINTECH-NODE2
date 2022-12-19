@@ -1,6 +1,6 @@
 export default {
   getUserByVerificationToken: `
-    SELECT id, phone_number, user_id, verification_token, verification_token_expires
+    SELECT id, phone_number, user_id, verification_token, verification_token_expires, is_verified_email
     FROM users 
     WHERE verification_token = $1`,
 
@@ -99,7 +99,7 @@ export default {
       verification_token = NULL,
       verification_token_expires = NULL,
       updated_at = NOW()
-     WHERE email = $1
+     WHERE user_id = $1
     `,
   verifyUserEmail: `
     UPDATE users

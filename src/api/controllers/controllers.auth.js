@@ -202,13 +202,13 @@ Forgot password
 export const forgotPassword = async(req, res, next) => {
   try {
     const { user, otp } = req;
-    const expireAt = dayjs().add(50, 'minutes');
+    const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = AuthPayload.forgotPassword(user, otp, expireAt);
+    const payload = [user.email, otp, expireAt];
     await AuthService.forgotPassword(payload);
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
-      Info: email for user to reset password has been sent successfully to users mail successfully.controller.auth.js`);
+      Info: email for user to reset password has been sent successfully to users mail successfully forgotPassword.controller.auth.js`);
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
     }
@@ -235,15 +235,15 @@ export const resetPassword = async(req, res, next) => {
   try {
     const { user, body } = req;
     const hash = Hash.hashData(body.password.trim());
-    const payload = [user.email, hash];
+    const payload = [user.user_id, hash];
     if(!user.is_verified_email){
       await AuthService.verifyUserEmail(user.user_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-      user email successfully verified. controllers.auth.js`);
+      user email successfully verified. resetPassword.controllers.auth.js`);
     }
     await AuthService.resetPassword(payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    successfully reset user password in the db. controllers.auth.js`);
+    successfully reset user password in the db. resetPassword.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 9, 'success');
     return ApiResponse.success(res, enums.PASSWORD_RESET, enums.HTTP_OK);
   } catch (error) {

@@ -45,7 +45,6 @@ const forgotPassword = Joi.object().keys({
 
 const resetPassword = Joi.object().keys({
   otp: Joi.string().required().length(6),
-  email: Joi.string().email().required(),
   password: Joi.string().required().min(8)
 });
  

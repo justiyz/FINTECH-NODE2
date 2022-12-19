@@ -869,11 +869,11 @@ describe('Auth', () => {
           email: 'miracle@enyata.com'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(404);
+          expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('Account does not exist');
-          expect(res.body.error).to.equal('NOT_FOUND');
+          expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -898,7 +898,6 @@ describe('Auth', () => {
         .post('/api/v1/auth/reset-password')
         .send({
           otp: '989862',
-          email: userOneProfile.email,
           password: 'cpcjksjs2'
         })
         .end((err, res) => {
@@ -911,12 +910,11 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should throw error if length of otp is more than six', (done) => {
+    it('Should throw error if length of otp is greater or less than six', (done) => {
       chai.request(app)
         .post('/api/v1/auth/reset-password')
         .send({
           otp: '98986221',
-          email: userOneProfile.email,
           password: 'cpcjksjs2'
         })
         .end((err, res) => {
@@ -929,20 +927,20 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should throw error if email does not exist', (done) => {
+    it('Should throw error if no otp is sent.', (done) => {
       chai.request(app)
         .post('/api/v1/auth/reset-password')
         .send({
-          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP,
+          otp: '',
           email: 'testing@gmail.com',
           password: 'cpcjksjs2'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(404);
+          expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Account does not exist');
-          expect(res.body.error).to.equal('NOT_FOUND');
+          expect(res.body.message).to.equal('otp is not allowed to be empty');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -952,7 +950,6 @@ describe('Auth', () => {
         .post('/api/v1/auth/reset-password')
         .send({
           otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP,
-          email: userOneProfile.email,
           password: 'userPassword1'
         })
         .end((err, res) => {
