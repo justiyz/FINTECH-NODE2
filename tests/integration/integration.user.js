@@ -21,7 +21,6 @@ describe('update fcm-token', () => {
         fcm_token: Hash.generateRandomString(20)
       })
       .end((err, res) => {
-        console.log('=====>>>', process.env.SEEDFI_USER_ONE_ACCESS_TOKEN);
         expect(res.statusCode).to.equal(enums.HTTP_OK);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');

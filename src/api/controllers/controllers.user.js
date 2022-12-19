@@ -24,9 +24,9 @@ export const updateFcmToken = async (req, res) => {
 export const updateUserRefreshToken = async (req, res) => {
   try {
     const { tokenDetails: { token, refreshToken}, user } = req;
-    const [loggedInUser] = await AuthService.loginUserAccount([user.user_id, refreshToken]);
+    const [updatedUser] = await AuthService.loginUserAccount([user.user_id, refreshToken]);
     const data = {
-      ...loggedInUser,
+      ...updatedUser,
       token
     };
     return ApiResponse.success(res, enums.USER_REFRESH_TOKEN_UPDATED, enums.HTTP_OK, data);
