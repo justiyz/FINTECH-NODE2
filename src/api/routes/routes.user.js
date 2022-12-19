@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Model from '../middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
+import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
 
 const router = Router();
@@ -12,6 +13,16 @@ router.patch(
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateFcmToken, 'payload'),
   UserController.updateFcmToken
+);
+
+router.get(
+  '/refresh-token',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.updateRefreshToken, 'query'),
+  UserMiddleware.validateRefreshToken,
+  AuthMiddleware.generateTokens,
+  UserController.updateUserRefreshToken
 );
 
 export default router;

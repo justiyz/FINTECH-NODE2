@@ -25,3 +25,5 @@ export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'AuthMiddleware::isEmailVerified';
 export const FORGOT_PASSWORD_CONTROLLER = 'AuthMiddleware::forgotPassword';
 export const RESET_PASSWORD_CONTROLLER = 'AuthMiddleware::resetPassword';
 export const PASSWORD_TOKEN = 'Password reset token sent';
+export const UPDATE_USER_REFRESH_TOKEN_CONTROLLER = 'UserController::updateUserRefreshToken';
+export const VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE = 'UserMiddleware::validateRefreshToken';

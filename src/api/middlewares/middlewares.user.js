@@ -53,3 +53,23 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
     return next(error);
   }
 };
+
+/**
+ * validates user refresh token
+ * @param {string} type - a type to know which of the response to return
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const validateRefreshToken = async (req, res, next) => {
+  try {
+    const { query: { refreshtoken },  user } = req;
+    if (refreshtoken !== user.refresh_token) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database validateRefreshToken.middlewares.user.js`);
+      return ApiResponse.error(res, enums.INVALID_USER_REFRESH_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE;
+    logger.error(`validating user refresh token failed::${enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE}`, error.message);
+  }
+};
