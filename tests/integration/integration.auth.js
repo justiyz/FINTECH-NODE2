@@ -997,7 +997,6 @@ describe('Auth', () => {
           password: 'cpcjksjs2'
         })
         .end((err, res) => {
-          console.log(res.body);
           expect(res.statusCode).to.equal(401);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
