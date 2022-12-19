@@ -11,3 +11,6 @@ export const verifyUserAccount = (payload) => DB.transact('verifyUserAccount', p
 export const loginUserAccount = (payload) => DB.transact('loginUserAccount', payload, enums.AUTH_QUERY);
 export const updateVerificationToken = (payload) => DB.transact('updateVerificationToken', payload, enums.AUTH_QUERY);
 export const completeUserProfile = (payload) => DB.transact('completeUserProfile', payload, enums.AUTH_QUERY);
+export const resetPassword = (payload) => DB.transact('resetPassword', payload, enums.AUTH_QUERY);
+export const forgotPassword = (payload) => DB.transact('forgotPassword', payload, enums.AUTH_QUERY);
+export const verifyUserEmail = (payload) => DB.transact('verifyUserEmail', payload, enums.AUTH_QUERY);

@@ -21,3 +21,7 @@ export const IS_PASSWORD_CREATED_MIDDLEWARE = 'AuthMiddleware::isPasswordCreated
 export const CHECK_IF_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AuthMiddleware::checkIfEmailAlreadyExist';
 export const COMPARE_PASSWORD_MIDDLEWARE = 'AuthMiddleware::comparePassword';
 export const UPDATE_USER_FCM_TOKEN_CONTROLLER = 'UserController::updateUserFcmToken';
+export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'AuthMiddleware::isEmailVerified';
+export const FORGOT_PASSWORD_CONTROLLER = 'AuthMiddleware::forgotPassword';
+export const RESET_PASSWORD_CONTROLLER = 'AuthMiddleware::resetPassword';
+export const PASSWORD_TOKEN = 'Password reset token sent';

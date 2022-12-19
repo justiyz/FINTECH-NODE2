@@ -57,5 +57,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call forgetPassword', async() => {
+      const req = { user: '', body: '' };
+      const data = await AuthController.forgotPassword(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call resetPassword', async() => {
+      const req = { user: '', body: '', hashed: null };
+      const data = await AuthController.resetPassword(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

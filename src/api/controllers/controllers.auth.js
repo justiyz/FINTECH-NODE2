@@ -9,6 +9,7 @@ import sendSMS from '../../config/sms';
 import { signupSms, resendSignupOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import MailService from '../services/services.email';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -186,6 +187,65 @@ export const completeProfile = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 7, 'fail');
     error.label = enums.COMPLETE_PROFILE_CONTROLLER;
     logger.error(`Creating user password failed::${enums.COMPLETE_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+Forgot password
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const forgotPassword = async(req, res, next) => {
+  try {
+    const { user, otp } = req;
+    const expireAt = dayjs().add(50, 'minutes');
+    const expirationTime = dayjs(expireAt);
+    const payload = AuthPayload.forgotPassword(user, otp, expireAt);
+    await AuthService.forgotPassword(payload);
+    const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
+    logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
+      Info: email for user to reset password has been sent successfully to users mail successfully.controller.auth.js`);
+    if (SEEDFI_NODE_ENV === 'test') {
+      return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
+    }
+    MailService('Reset your password', 'forgotPassword', { otp, ...user });
+    userActivityTracking(req.user.user_id, 8, 'success');
+    return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 8, 'fail');
+    error.label = enums.FORGOT_PASSWORD_CONTROLLER;
+    logger.error(`user forgot password request failed:::${enums.FORGOT_PASSWORD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+Reset user password
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const resetPassword = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const hash = Hash.hashData(body.password.trim());
+    const payload = [user.email, hash];
+    await AuthService.resetPassword(payload);
+    await AuthService.verifyUserEmail(user.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully reset user password in the db. controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 9, 'success');
+    return ApiResponse.success(res, enums.PASSWORD_RESET, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 9, 'fail');
+    error.label = enums.RESET_PASSWORD_CONTROLLER;
+    logger.error(`resetting user password failed:::${enums.RESET_PASSWORD_CONTROLLER}`, error.message);
     return next(error);
   }
 };

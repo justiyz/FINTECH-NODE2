@@ -802,4 +802,167 @@ describe('Auth', () => {
         });
     });
   });
+  describe(' Forgot password', () => {
+    it('Should send a reset password mail', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: userOneProfile.email
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('should return error if invalid fields', done => {
+      chai
+        .request(app)
+        .post('/api/v1/auth/forget-password')
+        .end((err, res) => {
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('code');
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.equal('email is required');
+          done();
+        });
+    });
+    it('Should return error if email field is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: ''
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is not allowed to be empty');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if pass invalid email', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: `${userOneProfile.email}0`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email must be a valid email');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if email does not exist', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: 'miracle@enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(404);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Account does not exist');
+          expect(res.body.error).to.equal('NOT_FOUND');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Reset password', () => {
+    it('Should throw error if any of the fields are empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid verification otp is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .send({
+          otp: '989862',
+          email: userOneProfile.email,
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Invalid verification otp');
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if length of otp is more than six', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .send({
+          otp: '98986221',
+          email: userOneProfile.email,
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp length must be 6 characters long');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if email does not exist', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .send({
+          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP,
+          email: 'testing@gmail.com',
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(404);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Account does not exist');
+          expect(res.body.error).to.equal('NOT_FOUND');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully reset user password', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .send({
+          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP,
+          email: userOneProfile.email,
+          password: 'userPassword1'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Password reset successful');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
 });

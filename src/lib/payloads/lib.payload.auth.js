@@ -10,5 +10,8 @@ export default {
     body.date_of_birth, 
     body.gender, 
     hashed 
+  ],
+  forgotPassword: (user, otp, expireAt) => [
+    user.email, otp, expireAt 
   ]
 };
