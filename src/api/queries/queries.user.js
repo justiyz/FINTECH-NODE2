@@ -42,5 +42,6 @@ export default {
         tier = '2',
         bvn = $2
       WHERE user_id = $1
-      RETURNING id, user_id, first_name, middle_name, last_name, email, tier, gender, date_of_birth, status, is_completed_kyc, is_verified_bvn`
+      RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
+      gender, date_of_birth, status, is_completed_kyc, is_verified_bvn`
 };
