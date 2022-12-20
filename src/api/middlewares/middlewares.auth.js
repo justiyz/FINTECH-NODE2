@@ -359,6 +359,7 @@ export const generateResetPasswordToken = async(req, res, next) => {
     req.passwordToken = token;
     return next();
   } catch (error) {
+    userActivityTracking(req.user.user_id, 20, 'fail');
     error.label = enums.GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE;
     logger.error(`generating reset password token failed::${enums.GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE}`, error.message);
     return next(error);

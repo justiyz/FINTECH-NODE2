@@ -17,6 +17,11 @@ export const operations = {
   16: 'CFMTRPN', // confirm transaction pin
   17: 'UPSIMG', // upload selfie image
   18: 'UPNID', // upload valid national id
-  19: 'UPPRFL' // update user profile
+  19: 'UPPRFL', // update user profile
+  20: 'VRYRPDOP', // verify reset password otp
+  21: 'CRTARLE', // create admin role type
+  22: 'EDTARLE', // edit admin role type
+  23: 'IVTADM', // invite other admin types
+  24: 'ADMCPPR' // admin completes profile
 };
   

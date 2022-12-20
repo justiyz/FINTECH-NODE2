@@ -236,8 +236,10 @@ export const resetPasswordToken = async(req, res, next) => {
     const { user, passwordToken} = req;
     logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
     decoded that generated password token was successful resetPasswordToken.middlewares.auth.js`);
+    userActivityTracking(req.user.user_id, 20, 'success');
     return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {passwordToken});
   } catch (error) {
+    userActivityTracking(req.user.user_id, 20, 'fail');
     error.label = enums.RESET_PASSWORD_TOKEN_CONTROLLER;
     logger.error(`generating reset password token failed::${enums.RESET_PASSWORD_TOKEN_CONTROLLER}`, error.message);
     return next(error);
