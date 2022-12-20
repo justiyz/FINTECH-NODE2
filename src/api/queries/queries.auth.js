@@ -1,6 +1,6 @@
 export default {
   getUserByVerificationToken: `
-    SELECT id, phone_number, user_id, verification_token, verification_token_expires
+    SELECT id, email, phone_number, user_id, verification_token, verification_token_expires, is_verified_email
     FROM users 
     WHERE verification_token = $1`,
 
@@ -81,5 +81,31 @@ export default {
     WHERE user_id = $1
     RETURNING id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
     is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-    is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, refresh_token`
+    is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, refresh_token`,
+
+  forgotPassword: `
+    UPDATE users
+    SET
+      verification_token = $2,
+      verification_token_expires = $3,
+      updated_at = NOW()
+     WHERE email = $1
+     RETURNING user_id, first_name, middle_name, last_name, status`,
+
+  resetPassword: `
+    UPDATE users
+    SET
+      password = $2,
+      verification_token = NULL,
+      verification_token_expires = NULL,
+      updated_at = NOW()
+     WHERE user_id = $1
+    `,
+  verifyUserEmail: `
+    UPDATE users
+    SET
+      is_verified_email = TRUE,
+      updated_at = NOW()
+    WHERE user_id = $1
+    `
 };

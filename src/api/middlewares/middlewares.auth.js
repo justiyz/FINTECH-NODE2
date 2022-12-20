@@ -340,3 +340,62 @@ export const comparePassword = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * Generate jwt password token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const generateResetPasswordToken = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const token = await Hash.generateResetPasswordToken(user);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
+    successfully generated password token generateResetPasswordToken.middlewares.auth.js`);
+    req.passwordToken = token;
+    return next();
+  } catch (error) {
+    error.label = enums.GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE;
+    logger.error(`generating reset password token failed::${enums.GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * validate forgot password token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const validateForgotPasswordToken = async(req, res, next) => {
+  try {
+    const { token } = req;
+    const decoded = Hash.decodeToken(token);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully decoded authentication token sent using the authentication secret
+    validateForgotPasswordToken.middlewares.auth.js`);
+    if (decoded.message) {
+      if (decoded.message === 'jwt expired') {
+        return ApiResponse.error(res, enums.SESSION_EXPIRED, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully decoded authentication token has a message which is an 
+      error message validateForgotPasswordToken.middlewares.auth.js`);
+      return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
+    }
+    if(decoded.email){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully decoded authentication token sent using the authentication secret
+      validateForgotPasswordToken.middlewares.auth.js`);
+      const [ user ] = await UserService.getUserByEmail(decoded.email);
+      req.user = user;
+      return next();
+    }
+  } catch (error) {
+    error.label = enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE;
+    logger.error(`validating authentication token failed:::${enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

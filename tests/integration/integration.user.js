@@ -121,7 +121,6 @@ describe('update refresh token', () => {
         refreshtoken: `${process.env.SEEDFI_USER_ONE_REFRESH_TOKEN}jdjdshgdsggfdg`
       })
       .end((err, res) => {
-        console.log(res.body.messgae);
         expect(res.statusCode).to.equal(401);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');

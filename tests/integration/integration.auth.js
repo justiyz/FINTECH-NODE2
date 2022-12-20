@@ -802,4 +802,247 @@ describe('Auth', () => {
         });
     });
   });
+  describe(' Forgot password', () => {
+    it('Should send a reset password mail', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: userOneProfile.email
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('should return error if invalid fields', done => {
+      chai
+        .request(app)
+        .post('/api/v1/auth/forget-password')
+        .end((err, res) => {
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('code');
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.equal('email is required');
+          done();
+        });
+    });
+    it('Should return error if email field is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: ''
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is not allowed to be empty');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if pass invalid email', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: `${userOneProfile.email}0`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email must be a valid email');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if email does not exist', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forget-password')
+        .send({
+          email: 'miracle@enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Account does not exist');
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Verify reset password token', () => {
+    it('Should return error if otp is wrong', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-reset-token')
+        .send({
+          otp: '162611'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Invalid verification otp');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if otp is wrong', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-reset-token')
+        .send({
+          otp: ''
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp is not allowed to be empty');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully verify and generate reset password token', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-reset-token')
+        .send({
+          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Password token Successfully generate');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN = res.body.data.passwordToken;
+          done();
+        });
+    });
+  });
+  describe('Reset password', () => {
+    it('Should throw error if any of the fields are empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN}`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('password is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid otp is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN}0op`
+        })
+        .send({
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if otp is malformed', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}0op`
+        })
+        .send({
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('jwt malformed');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if length of otp is less than six', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN}`
+        })
+        .send({
+          password: 'ksj02'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('password length must be at least 8 characters long');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if no token is sent.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${''}`
+        })
+        .send({
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Invalid/Expired Token');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully reset user password', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN}`
+        })
+        .send({
+          password: 'userPassword1'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Password reset successful');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
 });

@@ -55,4 +55,29 @@ router.post(
   AuthController.login
 );
 
+router.post(
+  '/forget-password',
+  Model(Schema.forgotPassword, 'payload'),
+  UserMiddleware.validateUnAuthenticatedUser('verify'),
+  AuthMiddleware.generateVerificationToken,
+  AuthController.forgotPassword
+);
+
+router.post(
+  '/verify-reset-token',
+  Model(Schema.verifyOtp, 'payload'),
+  AuthMiddleware.verifyVerificationToken,
+  AuthMiddleware.generateResetPasswordToken,
+  AuthController.resetPasswordToken
+
+);
+
+router.post(
+  '/reset-password',
+  Model(Schema.resetPassword, 'payload'),
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateForgotPasswordToken,
+  AuthController.resetPassword
+);
+
 export default router;
