@@ -364,7 +364,14 @@ export const generateResetPasswordToken = async(req, res, next) => {
   }
 };
 
-
+/**
+ * validate forgot password token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
 export const validateForgotPasswordToken = async(req, res, next) => {
   try {
     const { token } = req;
