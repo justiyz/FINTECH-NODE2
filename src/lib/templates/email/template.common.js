@@ -70,7 +70,7 @@ export const commonTemplate = (messageType, data) => {
           </div>
           
           <div style="color: #fff; font-weight: 300; padding-bottom: 34px">
-            <span>You are receiving this email because you have signed up on the ToNote platform. <br />
+            <span>You are receiving this email because you have signed up on the Seedfi platform. <br />
             © ${new Date(new Date()).getFullYear()}, SEEDFI . All rights reserved.
             </span>
           </div>
