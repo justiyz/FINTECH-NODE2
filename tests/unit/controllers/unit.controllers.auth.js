@@ -63,6 +63,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call resetPasswordToken', async() => {
+      const req = { user: '', passwordToken: '' };
+      const data = await AuthController.resetPasswordToken(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call resetPassword', async() => {
       const req = { user: '', body: '', hashed: null };
       const data = await AuthController.resetPassword(req, res, next);

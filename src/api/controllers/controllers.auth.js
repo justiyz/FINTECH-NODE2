@@ -224,6 +224,27 @@ export const forgotPassword = async(req, res, next) => {
 };
 
 /**
+Reset password token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const resetPasswordToken = async(req, res, next) => {
+  try {
+    const { user, passwordToken} = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
+    decoded that generated password token was successful resetPasswordToken.middlewares.auth.js`);
+    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {passwordToken});
+  } catch (error) {
+    error.label = enums.RESET_PASSWORD_TOKEN_CONTROLLER;
+    logger.error(`generating reset password token failed::${enums.RESET_PASSWORD_TOKEN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
 Reset user password
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -235,13 +256,12 @@ export const resetPassword = async(req, res, next) => {
   try {
     const { user, body } = req;
     const hash = Hash.hashData(body.password.trim());
-    const payload = [user.user_id, hash];
     if(!user.is_verified_email){
       await AuthService.verifyUserEmail(user.user_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       user email successfully verified. resetPassword.controllers.auth.js`);
     }
-    await AuthService.resetPassword(payload);
+    await AuthService.resetPassword([user.user_id, hash]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user password in the db. resetPassword.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 9, 'success');

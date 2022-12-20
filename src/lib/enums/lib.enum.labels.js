@@ -28,3 +28,4 @@ export const PASSWORD_TOKEN = 'Password reset token sent';
 export const UPDATE_USER_REFRESH_TOKEN_CONTROLLER = 'UserController::updateUserRefreshToken';
 export const VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE = 'UserMiddleware::validateRefreshToken';
 export const GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE = 'AuthMiddleware::generateResetPasswordToken';
+export const RESET_PASSWORD_TOKEN_CONTROLLER = 'AuthMiddleware::resetPasswordToken';

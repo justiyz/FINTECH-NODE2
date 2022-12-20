@@ -922,7 +922,7 @@ describe('Auth', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('Password token Successfully generate');
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN = res.body.data.passwordToken;
           done();
         });
     });
@@ -961,6 +961,26 @@ describe('Auth', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if otp is malformed', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/reset-password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}0op`
+        })
+        .send({
+          password: 'cpcjksjs2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('jwt malformed');
           expect(res.body.error).to.equal('UNAUTHORIZED');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
