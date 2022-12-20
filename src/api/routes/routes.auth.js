@@ -40,7 +40,7 @@ router.post(
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.completeProfile, 'payload'),
-  AuthMiddleware.isCompletedKyc,
+  AuthMiddleware.isCompletedKyc('complete'),
   AuthMiddleware.isPasswordCreated,
   AuthMiddleware.checkIfEmailAlreadyExist,
   AuthController.completeProfile

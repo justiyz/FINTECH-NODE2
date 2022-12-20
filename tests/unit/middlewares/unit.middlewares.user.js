@@ -27,5 +27,21 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call validateRefreshToken', async() => {
+      const req = { user: '', query: '' };
+      const data = await UserMiddleware.validateRefreshToken(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call isVerifiedBvn', async() => {
+      const req = null;
+      const data = await UserMiddleware.isVerifiedBvn('confirm')(req, res, next);
+      expect(data).to.equal(undefined);
+    });
+    it('should call verifyBvn', async() => {
+      const req = { body: '', user: '' };
+      const data = await UserMiddleware.verifyBvn(req, res, next);
+      expect(data).to.equal(undefined);
+    });
   });
 });

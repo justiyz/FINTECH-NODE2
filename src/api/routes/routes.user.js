@@ -25,4 +25,15 @@ router.get(
   UserController.updateUserRefreshToken
 );
 
+router.post(
+  '/verify-bvn',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.bvnVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isVerifiedBvn('complete'),
+  UserMiddleware.verifyBvn,
+  UserController.updateBvn
+);
+
 export default router;

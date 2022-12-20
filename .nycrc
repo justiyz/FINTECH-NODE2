@@ -9,7 +9,9 @@
     "src/config/express",
     "src/config/logger",
     "src/config/sms",
-    "src/services"
+    "src/services",
+    "src/lib/templates/**/*.js",
+    "src/api/services/services.email.js"
   ],
   "reporter": [
     "lcov",

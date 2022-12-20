@@ -4,7 +4,9 @@ import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/lib/enums';
 import * as Hash from '../../src/lib/utils/lib.util.hash';
-import { userOneProfile, userTwoProfile, userThreeProfile, userThreeInvalidEmailProfile, userThreeExistingEmailProfile } from '../payload/payload.auth';
+import { userOneProfile, userTwoProfile, userThreeProfile, userThreeInvalidEmailProfile, userThreeExistingEmailProfile,
+  userThreeInvalidDateProfile
+} from '../payload/payload.auth';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -76,6 +78,28 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_THREE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_THREE_PHONE_NUMBER = res.body.data.phone_number;
           process.env.SEEDFI_USER_THREE_VERIFICATION_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should create user five successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signup')
+        .send({
+          phone_number: '+2347058703094'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.phone_number).to.equal('+2347058703094');
+          process.env.SEEDFI_USER_FIVE_USER_ID = res.body.data.user_id;
+          process.env.SEEDFI_USER_FIVE_PHONE_NUMBER = res.body.data.phone_number;
+          process.env.SEEDFI_USER_FIVE_VERIFICATION_OTP = res.body.data.otp;
           done();
         });
     });
@@ -279,6 +303,32 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_THREE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_THREE_REFERRAL_CODE = res.body.data.referral_code;
+          done();
+        });
+    });
+    it('Should verify user five phone number successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-phone-number')
+        .send({
+          otp: process.env.SEEDFI_USER_FIVE_VERIFICATION_OTP,
+          fcm_token: Hash.generateRandomString(20)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_ACCOUNT_VERIFIED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_phone_number).to.equal(true);
+          expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_FIVE_PHONE_NUMBER);
+          process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_FIVE_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_FIVE_REFERRAL_CODE = res.body.data.referral_code;
           done();
         });
     });
@@ -561,6 +611,27 @@ describe('Auth', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('email must be a valid email');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid date of birth format is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/complete-profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          ...userThreeInvalidDateProfile,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('date_of_birth must be in YYYY-MM-DD format');
           expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();

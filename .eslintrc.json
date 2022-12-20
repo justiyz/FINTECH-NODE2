@@ -28,6 +28,8 @@
             "always"
         ],
         "comma-dangle": "error",
-        "eol-last": "error"
+        "eol-last": "error",
+        "array-bracket-spacing": ["error", "always"],
+        "valid-jsdoc": "error"
     }
 }

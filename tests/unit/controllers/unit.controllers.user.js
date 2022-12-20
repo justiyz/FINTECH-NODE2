@@ -55,5 +55,17 @@ describe('', () => {
       expect(res.code).to.equal(500);
       expect(res.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call update fcm token', async() => {
+      const req = { user: '', body: undefined };
+      await UserController.updateFcmToken(req, res, next);
+      expect(res.code).to.equal(500);
+      expect(res.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call update bvn', async() => {
+      const req = { body: '', user: '' };
+      await UserController.updateBvn(req, res, next);
+      expect(res.code).to.equal(500);
+      expect(res.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

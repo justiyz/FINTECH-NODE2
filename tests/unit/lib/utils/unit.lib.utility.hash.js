@@ -30,5 +30,15 @@ describe('Hash unit Tests', () => {
     expect(data).to.be.a('boolean');
     expect(data).to.equal(true);
   });
+  it('should encrypt value', async() => {
+    const data = await Hash.encrypt('30028900567890');
+    expect(data).to.be.a('string');
+    process.env.SEEDFI_TESTING_ENCRYPT_VALUE = data;
+  });
+  it('should decrypt encrypted value', async() => {
+    const data = await Hash.decrypt(process.env.SEEDFI_TESTING_ENCRYPT_VALUE);
+    expect(data).to.be.a('string');
+    expect(data).to.equal('30028900567890');
+  });
 });
 

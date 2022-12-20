@@ -204,7 +204,7 @@ export const forgotPassword = async(req, res, next) => {
     const { user, otp } = req;
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = [user.email, otp, expireAt];
+    const payload = [ user.email, otp, expireAt ];
     await AuthService.forgotPassword(payload);
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
@@ -236,8 +236,10 @@ export const resetPasswordToken = async(req, res, next) => {
     const { user, passwordToken} = req;
     logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
     decoded that generated password token was successful resetPasswordToken.middlewares.auth.js`);
+    userActivityTracking(req.user.user_id, 20, 'success');
     return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {passwordToken});
   } catch (error) {
+    userActivityTracking(req.user.user_id, 20, 'fail');
     error.label = enums.RESET_PASSWORD_TOKEN_CONTROLLER;
     logger.error(`generating reset password token failed::${enums.RESET_PASSWORD_TOKEN_CONTROLLER}`, error.message);
     return next(error);
@@ -261,7 +263,7 @@ export const resetPassword = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       user email successfully verified. resetPassword.controllers.auth.js`);
     }
-    await AuthService.resetPassword([user.user_id, hash]);
+    await AuthService.resetPassword([ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user password in the db. resetPassword.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 9, 'success');
