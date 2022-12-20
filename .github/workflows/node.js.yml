@@ -1,0 +1,53 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Build
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - develop
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: mypass
+          POSTGRES_DB: seedfi
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 54321:5432
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install nyc -g
+      - name: Install dependencies
+        run:  npm install
+      - name: Run Tests
+        run:  npm run test
+        env:
+          SEEDFI_NODE_ENV : 'test'
+          SEEDFI_DEV_PORT : '4000'
+          SEEDFI_TEST_DATABASE_URL : 'postgres://postgres:mypass@localhost:54321/seedfi'
+          SEEDFI_TEST_MESSAGE_FORWARDING: 'false'
+          SEEDFI_TEST_AFRICASTALKING_SMS_API_KEY : '297d0efa1a837c94284983c88723e0acebdaf88b5e3e48decc76d986ddd04e11'
+          SEEDFI_TEST_AFRICASTALKING_SMS_USERNAME : 'sandbox'
+          SEEDFI_TEST_AFRICASTALKING_SMS_SENDER_ID : 'seedfi'
+          SEEDFI_TEST_ENCODING_AUTHENTICATION_SECRET : 'anyrandomstringforencodingjwtlevels'
+          SEEDFI_TEST_BCRYPT_SALT_ROUND : '10'
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
