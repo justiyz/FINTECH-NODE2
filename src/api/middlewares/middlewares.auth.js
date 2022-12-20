@@ -233,21 +233,22 @@ export const validateAuthToken = async(req, res, next) => {
 
 /**
  * check if user kyc has been previously completed
- * @param {String} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
+ * @param {string} type - a type to know which of the response to return
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const isCompletedKyc = async(req, res, next) => {
+export const isCompletedKyc = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
-    if (user.is_completed_kyc) {
+    if (user.is_completed_kyc && type === 'complete') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously completed their kyc isCompletedKyc.middlewares.auth.js`);
       userActivityTracking(user.user_id, 7, 'fail');
       return ApiResponse.error(res, enums.KYC_PREVIOUSLY_COMPLETED, enums.HTTP_FORBIDDEN, enums.IS_COMPLETED_KYC_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has complete their kyc isCompletedKyc.middlewares.auth.js`);
+    if (!user.is_completed_kyc && type === 'confirm') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not completed their kyc isCompletedKyc.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.KYC_NOT_PREVIOUSLY_COMPLETED, enums.HTTP_FORBIDDEN, enums.IS_COMPLETED_KYC_MIDDLEWARE);
+    }
     return next();
   } catch (error) {
     userActivityTracking(req.user.user_id, 7, 'fail');

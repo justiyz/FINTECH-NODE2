@@ -65,7 +65,7 @@ describe('', () => {
     });
     it('should call isCompletedKyc', async() => {
       const req = { user: '' };
-      const data = await AuthMiddleware.isCompletedKyc(req, res, next);
+      const data = await AuthMiddleware.isCompletedKyc('confirm')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

@@ -5,10 +5,15 @@ const updateFcmToken = Joi.object().keys({
 });
 
 const updateRefreshToken = Joi.object().keys({
-  refreshtoken: Joi.string().required()
+  refreshToken: Joi.string().required()
+});
+
+const bvnVerification = Joi.object().keys({
+  bvn: Joi.string().required()
 });
 
 export default  {
   updateFcmToken,
-  updateRefreshToken
+  updateRefreshToken,
+  bvnVerification
 };   

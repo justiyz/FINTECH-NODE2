@@ -34,7 +34,7 @@ const completeProfile = Joi.object().keys({
   middle_name: Joi.string().allow(''),
   last_name: Joi.string().required(),
   email: Joi.string().email().required(),
-  date_of_birth: Joi.date().format('DD-MM-YYY').required(),
+  date_of_birth: Joi.date().format('YYYY-MM-DD').required(),
   gender: Joi.string().required().valid('male', 'female'),
   password: Joi.string().required().min(8)
 });

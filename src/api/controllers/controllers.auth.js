@@ -204,7 +204,7 @@ export const forgotPassword = async(req, res, next) => {
     const { user, otp } = req;
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = [user.email, otp, expireAt];
+    const payload = [ user.email, otp, expireAt ];
     await AuthService.forgotPassword(payload);
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
@@ -261,7 +261,7 @@ export const resetPassword = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       user email successfully verified. resetPassword.controllers.auth.js`);
     }
-    await AuthService.resetPassword([user.user_id, hash]);
+    await AuthService.resetPassword([ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user password in the db. resetPassword.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 9, 'success');
