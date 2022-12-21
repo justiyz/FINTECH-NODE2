@@ -57,7 +57,7 @@ router.post(
 
 router.post(
   '/forget-password',
-  Model(Schema.email, 'payload'),
+  Model(Schema.forgotPassword, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   AuthMiddleware.generateVerificationToken,
   AuthController.forgotPassword
@@ -77,23 +77,5 @@ router.post(
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateForgotPasswordToken,
   AuthController.resetPassword
-);
-
-router.post(
-  '/update-email',
-  AuthMiddleware.getAuthToken,
-  AuthMiddleware.validateAuthToken,
-  Model(Schema.email, 'payload'),
-  AuthMiddleware.isEmailVerified,
-  AuthMiddleware.generateVerificationToken,
-  AuthController.updateEmail
-);
-
-router.post(
-  '/verify-email',
-  Model(Schema.verifyOtp, 'payload'),
-  AuthMiddleware.verifyVerificationToken,
-  UserMiddleware.validateUnAuthenticatedUser('verify'),
-  AuthController.verifyEmail
 );
 export default router;

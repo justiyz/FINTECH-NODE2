@@ -31,7 +31,6 @@ export const UPDATE_USER_REFRESH_TOKEN_CONTROLLER = 'UserController::updateUserR
 export const VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE = 'UserMiddleware::validateRefreshToken';
 export const GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE = 'AuthMiddleware::generateResetPasswordToken';
 export const RESET_PASSWORD_TOKEN_CONTROLLER = 'AuthMiddleware::resetPasswordToken';
-export const UPDATE_EMAIL_CONTROLLER = 'AuthController::updateEmail';
-export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'AuthMiddleware::isEmailVerified';
-export const VERIFY_EMAIL_CONTROLLER = 'AuthController::verifyEmail';
+export const REQUEST_EMAIL_VERIFICATION_CONTROLLER = 'UserController::requestEmailVerification';
+export const VERIFY_EMAIL_CONTROLLER = 'UserController::verifyEmail';
 

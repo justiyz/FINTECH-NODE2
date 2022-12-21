@@ -2,7 +2,8 @@
 import getTemplate from '.';
 
 const heading = {
-  forgotPassword: 'Password Reset Request'
+  forgotPassword: 'Password Reset Request',
+  verifyEmail: 'Verify your email address 🎉'
 };
 
 export const commonTemplate = (messageType, data) => {

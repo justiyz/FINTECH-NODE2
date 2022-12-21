@@ -107,21 +107,5 @@ export default {
       is_verified_email = TRUE,
       updated_at = NOW()
     WHERE user_id = $1
-    `,
-  editEmail: `
-    UPDATE users
-    SET
-      email =$2,
-      updated_at = NOW()
-    WHERE user_id = $1
-    RETURNING user_id, first_name, last_name, email
-  `,
-  updateUserEmail: `
-    UPDATE users
-    SET
-      verification_token = $2,
-      verification_token_expires = $3,
-      updated_at = NOW()
-    WHERE email = $1
     `
 };
