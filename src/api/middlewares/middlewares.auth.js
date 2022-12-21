@@ -401,3 +401,27 @@ export const validateForgotPasswordToken = async(req, res, next) => {
     return next(error);
   }
 };
+
+export const isEmailVerified = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    if (user.is_verified_email) {
+      logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id}, Info: successfully decoded that user email has already been 
+        isEmailVerified.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.IS_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
+    }
+    if(user.email !== body.email) {
+      logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id}, Info: successfully decoded that user email has already been 
+        isEmailVerified in the DB.middlewares.auth.js`);
+      const [ userDetails ] = await AuthService.editEmail([ user.user_id, body.email ]);
+      logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id}, Info: successfully update user email in the DB. isEmailVerified.middlewares.auth.js`);
+      req.user = userDetails;
+      return next();
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_EMAIL_VERIFIED_MIDDLEWARE;
+    logger.error(`checking users verification status failed:::${enums.IS_EMAIL_VERIFIED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

@@ -5,13 +5,8 @@ export const forgotPassword = (data) => `
         </td>
     </tr>
     <tr>
-        <td style="padding-bottom: 24px;">
-          We're sending you this email because you requested a password reset. Click on the button to create a new password:
-        </td>
-    </tr>
-    <tr>
         <td style="padding-bottom: 40px">
-        <h3">${data.otp}</h3>
+        <h1>${data.otp}</h1>
         </td>
     </tr>
     <tr>

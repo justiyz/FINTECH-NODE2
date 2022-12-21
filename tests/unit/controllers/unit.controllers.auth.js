@@ -75,5 +75,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call updateEmail', async() => {
+      const req = { user: '', otp: '' };
+      const data = await AuthController.updateEmail(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateEmail', async() => {
+      const req = { user: '' };
+      const data = await AuthController.verifyEmail(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

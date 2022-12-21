@@ -37,3 +37,6 @@ export const USER_REFRESH_TOKEN_UPDATED = 'User refresh token updated successful
 export const INVALID_USER_REFRESH_TOKEN = 'Invalid refresh token';
 export const GENERATE_RESET_PASSWORD_TOKEN = 'Password token Successfully generate';
 export const PASSWORD_TOKEN = 'Password reset token sent';
+export const UPDATE_EMAIL = 'Email verification otp sent Successfully.';
+export const VERIFY_EMAIL = 'Email verified successfully.';
+export const IS_VERIFIED = 'User already verified.';

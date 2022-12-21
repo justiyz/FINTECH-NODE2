@@ -39,7 +39,7 @@ const completeProfile = Joi.object().keys({
   password: Joi.string().required().min(8)
 });
 
-const forgotPassword = Joi.object().keys({
+const email = Joi.object().keys({
   email: Joi.string().email().required()
 });
 
@@ -57,7 +57,7 @@ export default {
   login,
   verifyPhoneNumber,
   completeProfile,
-  forgotPassword,
+  email,
   verifyOtp,
   resetPassword
 };

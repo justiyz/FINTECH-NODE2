@@ -25,11 +25,13 @@ export const IS_VERIFIED_BVN_MIDDLEWARE = 'UserMiddleware::isVerifiedBvn';
 export const VERIFY_BVN_MIDDLEWARE = 'UserMiddleware::verifyBvn';
 export const UPDATE_BVN_CONTROLLER = 'UserController::updateBvn';
 export const UPDATE_USER_FCM_TOKEN_CONTROLLER = 'UserController::updateUserFcmToken';
-export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'AuthMiddleware::isEmailVerified';
 export const FORGOT_PASSWORD_CONTROLLER = 'AuthMiddleware::forgotPassword';
 export const RESET_PASSWORD_CONTROLLER = 'AuthMiddleware::resetPassword';
-export const PASSWORD_TOKEN = 'Password reset token sent';
 export const UPDATE_USER_REFRESH_TOKEN_CONTROLLER = 'UserController::updateUserRefreshToken';
 export const VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE = 'UserMiddleware::validateRefreshToken';
 export const GENERATE_RESET_PASSWORD_TOKEN_MIDDLEWARE = 'AuthMiddleware::generateResetPasswordToken';
 export const RESET_PASSWORD_TOKEN_CONTROLLER = 'AuthMiddleware::resetPasswordToken';
+export const UPDATE_EMAIL_CONTROLLER = 'AuthController::updateEmail';
+export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'AuthMiddleware::isEmailVerified';
+export const VERIFY_EMAIL_CONTROLLER = 'AuthController::verifyEmail';
+

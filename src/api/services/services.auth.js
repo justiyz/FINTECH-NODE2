@@ -14,3 +14,5 @@ export const completeUserProfile = (payload) => DB.transact('completeUserProfile
 export const resetPassword = (payload) => DB.transact('resetPassword', payload, enums.AUTH_QUERY);
 export const forgotPassword = (payload) => DB.transact('forgotPassword', payload, enums.AUTH_QUERY);
 export const verifyUserEmail = (payload) => DB.transact('verifyUserEmail', payload, enums.AUTH_QUERY);
+export const updateUserEmail = (payload) => DB.transact('updateUserEmail', payload, enums.AUTH_QUERY);
+export const editEmail = (payload) => DB.transact('editEmail', payload, enums.AUTH_QUERY);
