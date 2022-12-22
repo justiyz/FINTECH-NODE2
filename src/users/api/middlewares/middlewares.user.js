@@ -3,6 +3,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { bvnVerificationCheck } from '../../services/service.sterling';
 import { userActivityTracking } from '../../lib/monitor';
+import * as Hash from '../../lib/utils/lib.util.hash';
 
 /**
  * Fetch user details from the database
@@ -97,6 +98,33 @@ export const isVerifiedBvn = (type = '') => async(req, res, next) => {
   } catch (error) {
     error.label = enums.IS_VERIFIED_BVN_MIDDLEWARE;
     logger.error(`checking if user bvn previously verified failed::${enums.IS_VERIFIED_BVN_MIDDLEWARE}`, error.message);
+  }
+};
+
+export const isBvnPreviouslyExisting = async(req, res, next) => {
+  try {
+    const { body, user } = req;
+    const allExistingBvns = await UserService.fetchAllExistingBvns();
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing bvns isBvnPreviouslyExisting.middlewares.user.js`);
+    const plainBvns = [];
+    const decryptBvns = allExistingBvns.forEach(async(data) => {
+      const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+      plainBvns.push(decryptedBvn);
+    });
+    await Promise.all([ decryptBvns ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted bvns isBvnPreviouslyExisting.middlewares.user.js`);
+    if (plainBvns.includes(body.bvn.trim())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously used by another user isBvnPreviouslyExisting.middlewares.user.js`);
+      userActivityTracking(user.user_id, 5, 'fail');
+      return ApiResponse.error(res, enums.BVN_USED_BY_ANOTHER_USER, enums.HTTP_BAD_REQUEST, enums.IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is unique and not previously used by another user isBvnPreviouslyExisting.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 5, 'fail');
+    error.label = enums.IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE;
+    logger.error(`checking if sent bvn has not been previously used failed:::${enums.IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE}`, error.message);
+    return next(error);
   }
 };
 
