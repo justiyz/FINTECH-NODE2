@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import enums from '../../../src/lib/enums';
-import * as UserMiddleware from '../../../src/api/middlewares/middlewares.user';
+import enums from '../../../src/users/lib/enums';
+import * as UserMiddleware from '../../../src/users/api/middlewares/middlewares.user';
 
 describe('', () => {
   let status,

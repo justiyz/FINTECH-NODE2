@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as Helpers from '../../../../src/lib/utils/lib.util.helpers';
+import * as Helpers from '../../../../src/users/lib/utils/lib.util.helpers';
 
 describe('Helpers unit Tests', () => {
   it('should generateOtp', () => {
