@@ -438,7 +438,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should verify user three phone number successfully.', (done) => {
+    it('Should verify user three phone number with resend otp successfully.', (done) => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({

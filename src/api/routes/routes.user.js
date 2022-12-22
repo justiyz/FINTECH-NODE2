@@ -43,6 +43,7 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.verifyEmail, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
+  UserMiddleware.isEmailVerified('validate'),
   AuthMiddleware.generateVerificationToken,
   UserController.requestEmailVerification
 );

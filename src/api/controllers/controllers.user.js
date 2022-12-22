@@ -104,7 +104,7 @@ export const requestEmailVerification = async(req, res, next) => {
     MailService('Verify your email 🎉', 'verifyEmail', { otp, ...user });
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email verification has been sent successfully to user mail. requestEmailVerification.controller.auth.js`);
-    return ApiResponse.success(res, enums.UPDATE_EMAIL, enums.HTTP_OK);
+    return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.REQUEST_EMAIL_VERIFICATION_CONTROLLER;
     logger.error(`updating user email failed:::${enums.REQUEST_EMAIL_VERIFICATION_CONTROLLER}`, error.message);
@@ -124,9 +124,9 @@ export const verifyEmail = async(req, res, next) => {
   try {
     const { user } = req;
     await UserService.verifyEmail([ user.user_id ]);
-    userActivityTracking(req.user.user_id, 4, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     User email address verified in the DB verifyEmail.controller.user.js`);
+    userActivityTracking(req.user.user_id, 4, 'success');
     return ApiResponse.success(res, enums.VERIFY_EMAIL, enums.HTTP_OK);
   } catch (error) {
     userActivityTracking(req.user.user_id, 4, 'fail');

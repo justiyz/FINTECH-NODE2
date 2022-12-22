@@ -146,3 +146,24 @@ export const verifyBvn = async (req, res, next) => {
     logger.error(`verifying user bvn failed::${enums.VERIFY_BVN_MIDDLEWARE}`, error.message);
   }
 };
+
+
+export const isEmailVerified = (type = 'authenticate') => async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (type === 'authenticate' && !user.is_verified_email) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user is not verified yet isEmailVerified.middleware.user.js`);
+      return ApiResponse.error(res, enums.EMAIL_NOT_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
+    }
+    if (type === 'validate' && user.is_verified_email) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user has already been 
+      isEmailVerified.middleware.user.js`);
+      return ApiResponse.error(res, enums.EMAIL_ALREADY_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_EMAIL_VERIFIED_MIDDLEWARE;
+    logger.error(`checking user is verified failed:::${enums.IS_EMAIL_VERIFIED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

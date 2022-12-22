@@ -365,6 +365,25 @@ describe('User', () => {
           done();
         });
     });
+    it('Should wrong if user is already verified.', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_TWO_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.have.equal('User email already verified.');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should return error if less than or more than six OTP digits is sent', (done) => {
       chai.request(app)
         .post('/api/v1/user/verify-email')
