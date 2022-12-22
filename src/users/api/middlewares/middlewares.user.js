@@ -101,6 +101,14 @@ export const isVerifiedBvn = (type = '') => async(req, res, next) => {
   }
 };
 
+/**
+ * check if no previously existing BVN is verified again
+ * @param {String} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
 export const isBvnPreviouslyExisting = async(req, res, next) => {
   try {
     const { body, user } = req;
@@ -175,7 +183,12 @@ export const verifyBvn = async (req, res, next) => {
   }
 };
 
-
+/**
+ * check if email is already verified
+ * @param {string} type - a type to know which of the response to return
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
 export const isEmailVerified = (type = 'authenticate') => async(req, res, next) => {
   try {
     const { user } = req;
