@@ -43,5 +43,11 @@ describe('', () => {
       const data = await UserMiddleware.verifyBvn(req, res, next);
       expect(data).to.equal(undefined);
     });
+    it('should call isBvnPreviouslyExisting', async() => {
+      const req = { user: '', body: '' };
+      const data = await UserMiddleware.isBvnPreviouslyExisting(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

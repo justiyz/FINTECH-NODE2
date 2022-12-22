@@ -3,6 +3,7 @@ import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
+import * as Helpers from '../../src/users/lib/utils/lib.util.helpers';
 import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 
 
@@ -86,7 +87,6 @@ describe('User', () => {
         });
     });
   });
-  
   describe('update refresh token', () => {
     it('should update the refresh token of user one successfully', (done) => {
       chai.request(app)
@@ -158,7 +158,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          bvn: Hash.generateRandomString(5)
+          bvn: Helpers.generateElevenDigits()
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -182,7 +182,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          bvn: Hash.generateRandomString(5)
+          bvn: '23499654394'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -218,7 +218,7 @@ describe('User', () => {
       chai.request(app)
         .post('/api/v1/user/verify-bvn')
         .send({
-          bvn: Hash.generateRandomString(5)
+          bvn: Helpers.generateElevenDigits()
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
@@ -238,7 +238,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
         })
         .send({
-          bvn: Hash.generateRandomString(5)
+          bvn: Helpers.generateElevenDigits()
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -257,13 +257,32 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          bvn: Hash.generateRandomString(5)
+          bvn: Helpers.generateElevenDigits()
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.BVN_PREVIOUSLY_VERIFIED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error when user 3 tries to use user 2 bvn', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/verify-bvn')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          bvn: '23499654394'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.BVN_USED_BY_ANOTHER_USER);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -276,7 +295,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
         })
         .send({
-          bvn: Hash.generateRandomString(5)
+          bvn: Helpers.generateElevenDigits()
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

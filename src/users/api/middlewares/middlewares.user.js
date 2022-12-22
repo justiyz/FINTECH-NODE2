@@ -3,6 +3,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { bvnVerificationCheck } from '../../services/service.sterling';
 import { userActivityTracking } from '../../lib/monitor';
+import * as Hash from '../../lib/utils/lib.util.hash';
 
 /**
  * Fetch user details from the database
@@ -101,6 +102,41 @@ export const isVerifiedBvn = (type = '') => async(req, res, next) => {
 };
 
 /**
+ * check if no previously existing BVN is verified again
+ * @param {String} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const isBvnPreviouslyExisting = async(req, res, next) => {
+  try {
+    const { body, user } = req;
+    const allExistingBvns = await UserService.fetchAllExistingBvns();
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing bvns isBvnPreviouslyExisting.middlewares.user.js`);
+    const plainBvns = [];
+    const decryptBvns = allExistingBvns.forEach(async(data) => {
+      const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+      plainBvns.push(decryptedBvn);
+    });
+    await Promise.all([ decryptBvns ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted bvns isBvnPreviouslyExisting.middlewares.user.js`);
+    if (plainBvns.includes(body.bvn.trim())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously used by another user isBvnPreviouslyExisting.middlewares.user.js`);
+      userActivityTracking(user.user_id, 5, 'fail');
+      return ApiResponse.error(res, enums.BVN_USED_BY_ANOTHER_USER, enums.HTTP_BAD_REQUEST, enums.IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is unique and not previously used by another user isBvnPreviouslyExisting.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 5, 'fail');
+    error.label = enums.IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE;
+    logger.error(`checking if sent bvn has not been previously used failed:::${enums.IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * verify user entered bvn
  * @param {String} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -147,7 +183,12 @@ export const verifyBvn = async (req, res, next) => {
   }
 };
 
-
+/**
+ * check if email is already verified
+ * @param {string} type - a type to know which of the response to return
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
 export const isEmailVerified = (type = 'authenticate') => async(req, res, next) => {
   try {
     const { user } = req;

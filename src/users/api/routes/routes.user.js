@@ -32,6 +32,7 @@ router.post(
   Model(Schema.bvnVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isVerifiedBvn('complete'),
+  UserMiddleware.isBvnPreviouslyExisting,
   UserMiddleware.verifyBvn,
   UserController.updateBvn
 );

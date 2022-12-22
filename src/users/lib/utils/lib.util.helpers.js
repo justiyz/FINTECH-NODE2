@@ -8,3 +8,5 @@ export const generateReferralCode = (size) => {
     return error;
   }
 };
+
+export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');

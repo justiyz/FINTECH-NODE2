@@ -9,3 +9,4 @@ export const updateUserRefreshToken = (payload) => DB.singleTransact('updateUser
 export const updateUserBvn = (payload) => DB.transact('updateUserBvn', payload, enums.USER_QUERY);
 export const emailVerificationToken = (payload) => DB.transact('emailVerificationToken', payload, enums.USER_QUERY);
 export const verifyEmail = (payload) => DB.transact('verifyEmail', payload, enums.USER_QUERY);
+export const fetchAllExistingBvns = (payload) => DB.transact('fetchAllExistingBvns', payload, enums.USER_QUERY);

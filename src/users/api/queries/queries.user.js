@@ -44,6 +44,7 @@ export default {
       WHERE user_id = $1
       RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
       gender, date_of_birth, status, is_completed_kyc, is_verified_bvn`,
+
   emailVerificationToken: `
       UPDATE users
       SET
@@ -52,6 +53,12 @@ export default {
         updated_at = NOW()
       WHERE email = $1
       `,
+
+  fetchAllExistingBvns: `
+  SELECT bvn 
+  FROM users
+  WHERE bvn IS NOT NULL`,
+
   verifyEmail: `
       UPDATE users
       SET

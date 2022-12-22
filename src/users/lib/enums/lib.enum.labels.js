@@ -34,3 +34,4 @@ export const RESET_PASSWORD_TOKEN_CONTROLLER = 'AuthMiddleware::resetPasswordTok
 export const REQUEST_EMAIL_VERIFICATION_CONTROLLER = 'UserController::requestEmailVerification';
 export const VERIFY_EMAIL_CONTROLLER = 'UserController::verifyEmail';
 export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'UserMiddleware::isEmailVerified';
+export const IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE = 'UserMiddleware::isBvnPreviouslyExisting';
