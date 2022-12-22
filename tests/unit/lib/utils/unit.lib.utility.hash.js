@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import 'dotenv/config';
-import * as Hash from '../../../../src/lib/utils/lib.util.hash';
+import * as Hash from '../../../../src/users/lib/utils/lib.util.hash';
 
 describe('Hash unit Tests', () => {
   it('should generateRandomString', () => {

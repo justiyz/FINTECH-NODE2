@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import enums from '../../../src/lib/enums';
-import * as UserController from '../../../src/api/controllers/controllers.user';
+import enums from '../../../src/users/lib/enums';
+import * as UserController from '../../../src/users/api/controllers/controllers.user';
 
 describe('', () => {
   let status,

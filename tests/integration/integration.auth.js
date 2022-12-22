@@ -2,8 +2,8 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../src/app';
-import enums from '../../src/lib/enums';
-import * as Hash from '../../src/lib/utils/lib.util.hash';
+import enums from '../../src/users/lib/enums';
+import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 import { userOneProfile, userTwoProfile, userThreeProfile, userThreeInvalidEmailProfile, userThreeExistingEmailProfile,
   userThreeInvalidDateProfile
 } from '../payload/payload.auth';

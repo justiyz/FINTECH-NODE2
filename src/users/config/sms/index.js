@@ -1,6 +1,6 @@
 import AfricasTalking from 'africastalking';
 import enums from '../../lib/enums';
-import config from '../../config';
+import config from '..';
 
 async function sendSMS(sendTo, messageBody) {
   try {

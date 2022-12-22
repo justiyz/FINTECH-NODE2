@@ -1,17 +1,14 @@
 {
   "include": [
-    "src/api/**/*.js",
-    "src/lib/**/*.js",
-    "src/config/**/*.js",
-    "src/services/**/*.js"
+    "src/**/**/**/*.js"
   ],
   "exclude": [
-    "src/config/express",
-    "src/config/logger",
-    "src/config/sms",
-    "src/services",
-    "src/lib/templates/**/*.js",
-    "src/api/services/services.email.js"
+    "src/users/config/express",
+    "src/users/config/logger",
+    "src/users/config/sms",
+    "src/users/services",
+    "src/users/lib/templates/**/*.js",
+    "src/users/api/services/services.email.js"
   ],
   "reporter": [
     "lcov",

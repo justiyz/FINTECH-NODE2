@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import enums from '../../../../src/lib/enums';
+import enums from '../../../../src/users/lib/enums';
 
 
 describe('HTTP Status code Enums Tests', () => {
