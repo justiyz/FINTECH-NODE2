@@ -69,7 +69,6 @@ router.post(
   AuthMiddleware.verifyVerificationToken,
   AuthMiddleware.generateResetPasswordToken,
   AuthController.resetPasswordToken
-
 );
 
 router.post(
@@ -79,5 +78,4 @@ router.post(
   AuthMiddleware.validateForgotPasswordToken,
   AuthController.resetPassword
 );
-
 export default router;

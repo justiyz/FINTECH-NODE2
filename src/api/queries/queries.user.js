@@ -43,5 +43,22 @@ export default {
         bvn = $2
       WHERE user_id = $1
       RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
-      gender, date_of_birth, status, is_completed_kyc, is_verified_bvn`
+      gender, date_of_birth, status, is_completed_kyc, is_verified_bvn`,
+  emailVerificationToken: `
+      UPDATE users
+      SET
+        verification_token = $2,
+        verification_token_expires = $3,
+        updated_at = NOW()
+      WHERE email = $1
+      `,
+  verifyEmail: `
+      UPDATE users
+      SET
+        is_verified_email = TRUE,
+        verification_token = NULL,
+        verification_token_expires = NULL,
+        updated_at = NOW()
+      WHERE user_id = $1
+      `
 };

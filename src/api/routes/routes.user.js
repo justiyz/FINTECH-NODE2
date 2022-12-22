@@ -36,4 +36,24 @@ router.post(
   UserController.updateBvn
 );
 
+
+router.post(
+  '/request-email-verification',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.verifyEmail, 'payload'),
+  UserMiddleware.validateUnAuthenticatedUser('verify'),
+  UserMiddleware.isEmailVerified('validate'),
+  AuthMiddleware.generateVerificationToken,
+  UserController.requestEmailVerification
+);
+
+router.post(
+  '/verify-email',
+  Model(Schema.verifyOtp, 'payload'),
+  AuthMiddleware.verifyVerificationToken,
+  UserMiddleware.validateUnAuthenticatedUser('verify'),
+  UserController.verifyEmail
+);
+
 export default router;

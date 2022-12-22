@@ -1,7 +1,6 @@
 import Crypto from 'crypto';
 
-export const generateOtp = () => Crypto.randomInt(0, 10000).toString().padStart(6, '41');
-
+export const generateOtp = () => Crypto.randomInt(0, 1000000).toString();
 export const generateReferralCode = (size) => {
   try {
     return Crypto.randomBytes(size).toString('hex').toUpperCase();

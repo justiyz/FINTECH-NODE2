@@ -438,7 +438,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should verify user three phone number successfully', (done) => {
+    it('Should verify user three phone number with resend otp successfully.', (done) => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
@@ -780,6 +780,7 @@ describe('Auth', () => {
           expect(res.body.data.is_completed_kyc).to.equal(true);
           process.env.SEEDFI_USER_TWO_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_TWO_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_TWO_EMAIL = res.body.data.email;
           done();
         });
     });

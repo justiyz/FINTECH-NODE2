@@ -293,4 +293,127 @@ describe('User', () => {
         });
     });
   });
+  describe('update and send email', () => {
+    it('Should send a verify otp email', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_TWO_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should throw error if otp is malformed', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('jwt malformed');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if any of the field is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('verify email', () => {
+    it('Should successfully verify user email', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/verify-email')
+        .send({
+          otp: process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Email verified successfully.');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should wrong if user is already verified.', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_TWO_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.have.equal('User email already verified.');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if less than or more than six OTP digits is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/verify-email')
+        .send({
+          otp: '2392'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp length must be 6 characters long');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if otp is wrong', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/verify-email')
+        .send({
+          otp: '162611'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Invalid verification otp');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
 });

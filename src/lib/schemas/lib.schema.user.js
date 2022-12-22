@@ -12,8 +12,18 @@ const bvnVerification = Joi.object().keys({
   bvn: Joi.string().required()
 });
 
+const verifyEmail = Joi.object().keys({
+  email: Joi.string().email().required()
+});
+
+const verifyOtp = Joi.object().keys({
+  otp: Joi.string().required().length(6)
+});
+
 export default  {
   updateFcmToken,
   updateRefreshToken,
-  bvnVerification
+  bvnVerification,
+  verifyEmail,
+  verifyOtp
 };   
