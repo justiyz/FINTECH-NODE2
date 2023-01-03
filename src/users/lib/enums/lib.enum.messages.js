@@ -9,7 +9,7 @@ export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = 'Account does not exist';
 export const INVALID = (text) => `Invalid ${text}`;
 export const ACCOUNT_CREATED = 'Account created successfully';
-export const VERIFICATION_OTP_RESENT = 'Verification OTP resent successfully';
+export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const EXPIRED_VERIFICATION_TOKEN = 'Verification OTP is expired';
 export const NO_TOKEN = 'Please provide a token';
 export const INVALID_TOKEN = 'Invalid/Expired Token';

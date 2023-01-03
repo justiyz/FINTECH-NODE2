@@ -429,7 +429,7 @@ describe('User', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Invalid verification otp');
+          expect(res.body.message).to.equal('Invalid OTP code');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

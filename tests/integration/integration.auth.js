@@ -343,7 +343,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.INVALID('verification otp'));
+          expect(res.body.message).to.equal(enums.INVALID('OTP code'));
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -877,7 +877,7 @@ describe('Auth', () => {
   describe(' Forgot password', () => {
     it('Should send a reset password mail', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/forget-password')
+        .post('/api/v1/auth/forgot-password')
         .send({
           email: userOneProfile.email
         })
@@ -893,7 +893,7 @@ describe('Auth', () => {
     it('should return error if invalid fields', done => {
       chai
         .request(app)
-        .post('/api/v1/auth/forget-password')
+        .post('/api/v1/auth/forgot-password')
         .end((err, res) => {
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('code');
@@ -904,7 +904,7 @@ describe('Auth', () => {
     });
     it('Should return error if email field is empty', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/forget-password')
+        .post('/api/v1/auth/forgot-password')
         .send({
           email: ''
         })
@@ -920,7 +920,7 @@ describe('Auth', () => {
     });
     it('Should return error if pass invalid email', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/forget-password')
+        .post('/api/v1/auth/forgot-password')
         .send({
           email: `${userOneProfile.email}0`
         })
@@ -936,7 +936,7 @@ describe('Auth', () => {
     });
     it('Should return error if email does not exist', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/forget-password')
+        .post('/api/v1/auth/forgot-password')
         .send({
           email: 'miracle@enyata.com'
         })
@@ -962,7 +962,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Invalid verification otp');
+          expect(res.body.message).to.equal('Invalid OTP code');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
