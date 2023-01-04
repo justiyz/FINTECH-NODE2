@@ -23,7 +23,7 @@ describe('', () => {
   describe('Auth middleware catch block unit testings', () => {
     it('should call generateVerificationToken', async() => {
       const req = null;
-      const data = await AuthMiddleware.generateVerificationToken(req, res, next);
+      const data = await AuthMiddleware.generateVerificationToken('otp')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

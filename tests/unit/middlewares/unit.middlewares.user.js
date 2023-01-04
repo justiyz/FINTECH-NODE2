@@ -36,16 +36,30 @@ describe('', () => {
     it('should call isVerifiedBvn', async() => {
       const req = null;
       const data = await UserMiddleware.isVerifiedBvn('confirm')(req, res, next);
-      expect(data).to.equal(undefined);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call verifyBvn', async() => {
       const req = { body: '', user: '' };
       const data = await UserMiddleware.verifyBvn(req, res, next);
-      expect(data).to.equal(undefined);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call isBvnPreviouslyExisting', async() => {
       const req = { user: '', body: '' };
       const data = await UserMiddleware.isBvnPreviouslyExisting(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call verifyEmailVerificationToken', async() => {
+      const req = { query: '' };
+      const data = await UserMiddleware.verifyEmailVerificationToken(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call isUploadedImageSelfie', async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.isUploadedImageSelfie('confirm')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

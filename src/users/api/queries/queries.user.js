@@ -34,6 +34,18 @@ export default {
         refresh_token = $2
       WHERE user_id = $1`,
 
+  updateUserSelfieImage: `
+      UPDATE users
+      SET
+        updated_at = NOW(),
+        is_uploaded_selfie_image = TRUE,
+        image_url = $2,
+        verification_token = $3
+      WHERE user_id = $1
+      RETURNING id, user_id, first_name, middle_name, last_name, email, tier, image_url,
+      gender, date_of_birth, status, is_completed_kyc, is_verified_bvn, is_uploaded_selfie_image
+      `,
+
   updateUserBvn: `
       UPDATE users
       SET

@@ -14,10 +14,11 @@ const { SEEDFI_NODE_ENV } = config;
  * update user device fcm token
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
  * @returns { JSON } - A JSON with the users updated fcm token
  * @memberof UserController
  */
-export const updateFcmToken = async (req, res) => {
+export const updateFcmToken = async (req, res, next) => {
   try {
     const {user, body} = req;
     await UserService.updateUserFcmToken([ user.user_id, body.fcm_token ]);
@@ -30,7 +31,7 @@ export const updateFcmToken = async (req, res) => {
   } catch (error) {
     error.label = enums.UPDATE_USER_FCM_TOKEN_CONTROLLER;
     logger.error(`user token update failed::${enums.UPDATE_USER_FCM_TOKEN_CONTROLLER}`, error.message);
-    return (error);
+    return next(error);
   }
 };
 
@@ -38,10 +39,11 @@ export const updateFcmToken = async (req, res) => {
  * refresh user auth token using refresh token
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
  * @returns { JSON } - A JSON response with the users details
  * @memberof UserController
  */
-export const updateUserRefreshToken = async (req, res) => {
+export const updateUserRefreshToken = async (req, res, next) => {
   try {
     const { tokenDetails: { token, refreshToken}, user } = req;
     const [ updatedUser ] = await AuthService.loginUserAccount([ user.user_id, refreshToken ]);
@@ -54,7 +56,30 @@ export const updateUserRefreshToken = async (req, res) => {
   } catch (error) {
     error.label = enums.UPDATE_USER_REFRESH_TOKEN_CONTROLLER;
     logger.error(`user token update failed::${enums.UPDATE_USER_REFRESH_TOKEN_CONTROLLER}`, error.message);
-    return (error);
+    return next(error);
+  }
+};
+
+/**
+ * update user selfie image
+ * @param {String} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns a successful image upload response
+ * @memberof UserController
+ */
+export const updateSelfieImage = async (req, res, next) => {
+  try {
+    const { user, body, otp } = req;
+    const [ updateUserSelfie ] = await UserService.updateUserSelfieImage([ user.user_id, body.image_url.trim(), otp ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database updateSelfieImage.controllers.user.js`);
+    MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp, ...user });
+    userActivityTracking(user.user_id, 17, 'success');
+    return ApiResponse.success(res, enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updateUserSelfie);
+  } catch (error) {
+    error.label = enums.UPDATE_SELFIE_IMAGE_CONTROLLER;
+    logger.error(`updating user selfie image and email verification token in the DB failed::${enums.UPDATE_SELFIE_IMAGE_CONTROLLER}`, error.message);
+    return next(error);
   }
 };
 
@@ -62,10 +87,11 @@ export const updateUserRefreshToken = async (req, res) => {
  * update user bvn
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
  * @returns { JSON } - A JSON response with the users details
  * @memberof UserController
  */
-export const updateBvn = async (req, res) => {
+export const updateBvn = async (req, res, next) => {
   try {
     const { body: { bvn }, user } = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
@@ -77,7 +103,7 @@ export const updateBvn = async (req, res) => {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
     logger.error(`updating user bvn after verification failed::${enums.UPDATE_BVN_CONTROLLER}`, error.message);
-    return (error);
+    return next(error);
   }
 };
 
@@ -99,9 +125,9 @@ export const requestEmailVerification = async(req, res, next) => {
     await UserService.emailVerificationToken(payload);
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     if (SEEDFI_NODE_ENV === 'test') {
-      return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
+      return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK, data);
     }
-    MailService('Verify your email 🎉', 'verifyEmail', { otp, ...user });
+    MailService('Verify your email', 'requestVerifyEmail', { otp, ...user });
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email verification has been sent successfully to user mail. requestEmailVerification.controller.auth.js`);
     return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK);
@@ -127,7 +153,7 @@ export const verifyEmail = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     User email address verified in the DB verifyEmail.controller.user.js`);
     userActivityTracking(req.user.user_id, 4, 'success');
-    return ApiResponse.success(res, enums.VERIFY_EMAIL, enums.HTTP_OK);
+    return SEEDFI_NODE_ENV === 'test' ? ApiResponse.success(res, enums.VERIFY_EMAIL, enums.HTTP_OK) : res.redirect(config.SEEDFI_VERIFY_EMAIL_MOBILE_REDIRECT_URL);
   } catch (error) {
     userActivityTracking(req.user.user_id, 4, 'fail');
     error.label = enums.VERIFY_EMAIL_CONTROLLER;

@@ -26,6 +26,17 @@ router.get(
 );
 
 router.post(
+  '/upload-selfie',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.selfieUpload, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('complete'),
+  AuthMiddleware.generateVerificationToken('token'),
+  UserController.updateSelfieImage
+);
+
+router.post(
   '/verify-bvn',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
@@ -45,14 +56,14 @@ router.post(
   Model(Schema.verifyEmail, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   UserMiddleware.isEmailVerified('validate'),
-  AuthMiddleware.generateVerificationToken,
+  AuthMiddleware.generateVerificationToken('token'),
   UserController.requestEmailVerification
 );
 
-router.post(
+router.get(
   '/verify-email',
-  Model(Schema.verifyOtp, 'payload'),
-  AuthMiddleware.verifyVerificationToken,
+  Model(Schema.verifyOtp, 'query'),
+  UserMiddleware.verifyEmailVerificationToken,
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   UserController.verifyEmail
 );

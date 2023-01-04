@@ -1,9 +1,13 @@
 import * as UserService from '../services/services.user';
+import * as AuthService from '../services/services.auth';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { bvnVerificationCheck } from '../../services/service.sterling';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import config from '../../config';
+
+const { SEEDFI_NODE_ENV } = config;
 
 /**
  * Fetch user details from the database
@@ -73,6 +77,33 @@ export const validateRefreshToken = async (req, res, next) => {
   } catch (error) {
     error.label = enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE;
     logger.error(`validating user refresh token failed::${enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user selfie image previously verified
+ * @param {string} type - a type to know which of the response to return
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const isUploadedImageSelfie = (type = '') => async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (user.is_uploaded_selfie_image && type === 'complete') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image isUploadedImageSelfie.middlewares.user.js`);
+      userActivityTracking(user.user_id, 17, 'fail');
+      return ApiResponse.error(res, enums.SELFIE_IMAGE_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
+    }
+    if (!user.is_uploaded_selfie_image && type === 'confirm') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image isUploadedImageSelfie.middlewares.user.js`);
+      return ApiResponse.error(res, enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE;
+    logger.error(`checking if user selfie image previously uploaded failed::${enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE}`, error.message);
+    return next(error);
   }
 };
 
@@ -86,18 +117,19 @@ export const isVerifiedBvn = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
     if (user.is_verified_bvn && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously verified bvn isVerifiedBvn.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously verified bvn isVerifiedBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.BVN_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_BVN_MIDDLEWARE);
     }
     if (!user.is_verified_bvn && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not completed their kyc isVerifiedBvn.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously verified bvn isVerifiedBvn.middlewares.user.js`);
       return ApiResponse.error(res, enums.BVN_NOT_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_BVN_MIDDLEWARE);
     }
     return next();
   } catch (error) {
     error.label = enums.IS_VERIFIED_BVN_MIDDLEWARE;
     logger.error(`checking if user bvn previously verified failed::${enums.IS_VERIFIED_BVN_MIDDLEWARE}`, error.message);
+    return next(error);
   }
 };
 
@@ -180,6 +212,7 @@ export const verifyBvn = async (req, res, next) => {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.VERIFY_BVN_MIDDLEWARE;
     logger.error(`verifying user bvn failed::${enums.VERIFY_BVN_MIDDLEWARE}`, error.message);
+    return next(error);
   }
 };
 
@@ -205,6 +238,34 @@ export const isEmailVerified = (type = 'authenticate') => async(req, res, next) 
   } catch (error) {
     error.label = enums.IS_EMAIL_VERIFIED_MIDDLEWARE;
     logger.error(`checking user is verified failed:::${enums.IS_EMAIL_VERIFIED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * verify email verification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const verifyEmailVerificationToken = async(req, res, next) => {
+  try {
+    const { query: { verifyValue } } = req;
+    const [ tokenUser ] = await AuthService.getUserByVerificationToken(verifyValue);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct verification token is sent verifyEmailVerificationToken.middlewares.user.js`);
+    if (!tokenUser) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: sent token is invalid verifyEmailVerificationToken.middlewares.user.js`);
+      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN, enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE) :
+        res.send(enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${tokenUser.user_id}:::Info: sent token is valid verifyEmailVerificationToken.middlewares.user.js`);
+    req.user = tokenUser;
+    return next();
+  } catch (error) {
+    error.label = enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE;
+    logger.error(`verify verification token failed::${enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
