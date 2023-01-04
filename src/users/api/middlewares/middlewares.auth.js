@@ -20,7 +20,7 @@ export const generateVerificationToken  = (type = '') => async(req, res, next) =
     const [ existingOtp ] = await AuthService.getUserByVerificationToken(otp);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database generateVerificationToken.middlewares.auth.js`);
     if (existingOtp) {
-      generateVerificationToken(type = '')(req, res, next);
+      generateVerificationToken(type)(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random OTP generateVerificationToken.middlewares.auth.js`);
     req.otp = otp;
