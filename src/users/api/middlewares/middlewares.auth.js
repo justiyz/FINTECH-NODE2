@@ -108,7 +108,7 @@ export const verifyVerificationToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct OTP is sent verifyVerificationToken.middlewares.auth.js`);
     if (!otpUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: OTP is invalid verifyVerificationToken.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.INVALID('verification otp'), enums.HTTP_BAD_REQUEST, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpUser.user_id}:::Info: OTP is valid verifyVerificationToken.middlewares.auth.js`);
     const isExpired = new Date().getTime() > new Date(otpUser.verification_token_expires).getTime();

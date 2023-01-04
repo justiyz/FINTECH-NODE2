@@ -56,7 +56,7 @@ router.post(
 );
 
 router.post(
-  '/forget-password',
+  '/forgot-password',
   Model(Schema.forgotPassword, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   AuthMiddleware.generateVerificationToken,

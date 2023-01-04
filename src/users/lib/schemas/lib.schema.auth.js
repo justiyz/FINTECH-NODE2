@@ -31,7 +31,7 @@ const verifyPhoneNumber = Joi.object().keys({
 
 const completeProfile = Joi.object().keys({
   first_name: Joi.string().required(),
-  middle_name: Joi.string().allow(''),
+  middle_name: Joi.string().optional(),
   last_name: Joi.string().required(),
   email: Joi.string().email().required(),
   date_of_birth: Joi.date().format('YYYY-MM-DD').required(),

@@ -20,7 +20,6 @@ export const userTwoProfile = {
 
 export const userThreeProfile = {
   first_name: 'Elizabeth',
-  middle_name: '',
   last_name: 'Agboka',
   email: 'eli@enyata.com',
   date_of_birth: '1954-08-08',
@@ -38,7 +37,6 @@ export const userThreeInvalidDateProfile = {
 
 export const userThreeInvalidEmailProfile = {
   first_name: 'Elizabeth',
-  middle_name: '',
   last_name: 'Agboka',
   email: 'victoryenyata.com',
   date_of_birth: '1954-08-08',
@@ -47,7 +45,6 @@ export const userThreeInvalidEmailProfile = {
 
 export const userThreeExistingEmailProfile = {
   first_name: 'Elizabeth',
-  middle_name: '',
   last_name: 'Agboka',
   email: 'victory@enyata.com',
   date_of_birth: '1954-09-29',

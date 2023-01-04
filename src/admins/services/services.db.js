@@ -1,12 +1,8 @@
-import { db } from '../config/db';
-import authQuery from '../api/queries/queries.auth';
-import userQuery from '../api/queries/queries.user';
-import logQueries from '../api/queries/queries.log';
+import { db } from '../../users/config/db';
+import adminAuthQuery from '../api/queries/queries.auth';
 
 export const queries = {
-  authQuery,
-  userQuery,
-  logQueries
+  adminAuthQuery
 };
 
 export default {
