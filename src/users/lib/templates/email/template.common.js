@@ -3,7 +3,8 @@ import getTemplate from '.';
 
 const heading = {
   forgotPassword: 'Password Reset Request',
-  verifyEmail: 'Verify your email address 🎉'
+  verifyEmail: 'Welcome to SeedFi 🎉',
+  requestVerifyEmail: 'Verify your email'
 };
 
 export const commonTemplate = (messageType, data) => {

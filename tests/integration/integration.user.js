@@ -149,6 +149,153 @@ describe('User', () => {
         });
     });
   });
+  describe('Upload selfie image', () => {
+    it('should upload selfie for user one successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_bvn).to.equal(false);
+          expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
+          done();
+        });
+    });
+    it('should upload selfie for user one successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_bvn).to.equal(false);
+          expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
+          done();
+        });
+    });
+    it('should throw error when image url is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('image_url is required');
+          done();
+        });
+    });
+    it('Should return error if token is not set', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .send({
+          image_url: 'https://tired.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error when user is yet to complete kyc', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://tired.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.KYC_NOT_PREVIOUSLY_COMPLETED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error when user has previously uploaded selfie image', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://example.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SELFIE_IMAGE_PREVIOUSLY_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should verify bvn for user three successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://tired.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_bvn).to.equal(false);
+          expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
+          done();
+        });
+    });
+  });
   describe('verify bvn', () => {
     it('should verify bvn for user one successfully', (done) => {
       chai.request(app)
@@ -312,7 +459,7 @@ describe('User', () => {
         });
     });
   });
-  describe('update and send email', () => {
+  describe('Request email verification', () => {
     it('Should send a verify otp email', (done) => {
       chai.request(app)
         .post('/api/v1/user/request-email-verification')
@@ -328,6 +475,7 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_EMAIL_VERIFICATION);
           process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP = res.body.data.otp;
           done();
         });
@@ -371,9 +519,9 @@ describe('User', () => {
   describe('verify email', () => {
     it('Should successfully verify user email', (done) => {
       chai.request(app)
-        .post('/api/v1/user/verify-email')
-        .send({
-          otp: process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP
+        .get('/api/v1/user/verify-email')
+        .query({
+          verifyValue: process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -384,7 +532,7 @@ describe('User', () => {
           done();
         });
     });
-    it('Should wrong if user is already verified.', (done) => {
+    it('Should throw error if user is already verified.', (done) => {
       chai.request(app)
         .post('/api/v1/user/request-email-verification')
         .set({
@@ -403,33 +551,17 @@ describe('User', () => {
           done();
         });
     });
-    it('Should return error if less than or more than six OTP digits is sent', (done) => {
-      chai.request(app)
-        .post('/api/v1/user/verify-email')
-        .send({
-          otp: '2392'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(422);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('otp length must be 6 characters long');
-          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
     it('Should return error if otp is wrong', (done) => {
       chai.request(app)
-        .post('/api/v1/user/verify-email')
-        .send({
-          otp: '162611'
+        .get('/api/v1/user/verify-email')
+        .query({
+          verifyValue: '162611'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Invalid OTP code');
+          expect(res.body.message).to.equal(enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

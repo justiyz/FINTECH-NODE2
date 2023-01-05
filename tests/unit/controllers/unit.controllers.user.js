@@ -79,5 +79,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call updateSelfieImage', async() => {
+      const req = { user: '', body: '', otp: null };
+      const data = await UserController.updateSelfieImage(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

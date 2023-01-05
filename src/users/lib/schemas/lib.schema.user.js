@@ -8,6 +8,10 @@ const updateRefreshToken = Joi.object().keys({
   refreshToken: Joi.string().required()
 });
 
+const selfieUpload = Joi.object().keys({
+  image_url: Joi.string().required()
+});
+
 const bvnVerification = Joi.object().keys({
   bvn: Joi.string().required()
 });
@@ -17,12 +21,13 @@ const verifyEmail = Joi.object().keys({
 });
 
 const verifyOtp = Joi.object().keys({
-  otp: Joi.string().required().length(6)
+  verifyValue: Joi.string().required()
 });
 
 export default  {
   updateFcmToken,
   updateRefreshToken,
+  selfieUpload,
   bvnVerification,
   verifyEmail,
   verifyOtp

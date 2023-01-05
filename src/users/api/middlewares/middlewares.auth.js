@@ -9,20 +9,18 @@ import { userActivityTracking } from '../../lib/monitor';
 
 /**
  * generate phone number verification token
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
+ * @param {String} type - a type to know which of the response to return
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const generateVerificationToken = async(req, res, next) => {
+export const generateVerificationToken  = (type = '') => async(req, res, next) => {
   try {
-    const otp = Helpers.generateOtp();
+    const otp = type === 'otp' ? Helpers.generateOtp() : Hash.generateRandomString(50);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated generateVerificationToken.middlewares.auth.js`);
     const [ existingOtp ] = await AuthService.getUserByVerificationToken(otp);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database generateVerificationToken.middlewares.auth.js`);
     if (existingOtp) {
-      generateVerificationToken(req, res, next);
+      generateVerificationToken(type)(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random OTP generateVerificationToken.middlewares.auth.js`);
     req.otp = otp;
