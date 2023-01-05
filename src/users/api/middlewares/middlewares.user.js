@@ -82,7 +82,7 @@ export const validateRefreshToken = async (req, res, next) => {
 };
 
 /**
- * check if user selfie image previously verified
+ * check if user selfie image previously uploaded
  * @param {string} type - a type to know which of the response to return
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
