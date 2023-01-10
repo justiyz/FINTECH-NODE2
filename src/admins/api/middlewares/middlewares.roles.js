@@ -47,7 +47,7 @@ export const adminAccess = (resource, action) => async(req, res, next) => {
 export const checkRoleNameIsUnique = async(req, res, next) => {
   try {
     const { body: { name } } = req;
-    const roleCode = await Helpers.generateRandomAlphabets(5);
+    const roleCode = Helpers.generateRandomAlphabets(5);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: random role code generated for the role checkRoleNameIsUnique.admin.middlewares.roles.js`);
     const [ codeExists ] = await RoleService.fetchRole([ roleCode.trim().toUpperCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: fetch result on if role code exists already in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
