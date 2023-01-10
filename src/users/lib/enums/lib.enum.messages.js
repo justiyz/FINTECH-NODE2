@@ -46,3 +46,14 @@ export const REQUEST_EMAIL_VERIFICATION = 'Email verification otp sent Successfu
 export const VERIFY_EMAIL = 'Email verified successfully.';
 export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
 export const EMAIL_NOT_VERIFIED = 'User email not verified';
+
+// admin module related messages
+export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
+export const ADMIN_HAS_NO_PERMISSIONS = 'Admin has no active permissions';
+export const ADMIN_LOGIN_SUCCESSFULLY = 'Admin logged in successfully';
+export const ADMIN_ROLE_NAME_EXISTS = (name) => `A role withe the name "${name}" already exists in the DB`;
+export const ADMIN_CANNOT_PERFORM_ACTION = (action, resource) => `Admin cannot perform "${action}" action on ${resource} module`;
+export const RESOURCE_ID_SENT_NOT_EXISTS = (resource_id) => `resource with resource id ${resource_id} does not exist`;
+export const RESOURCE_REPEATING_IN_PAYLOAD = (resource_name) => `resource "${resource_name}" is repeating more than once`;
+export const ROLE_CREATION_SUCCESSFUL = 'Role with permissions created successfully';
+export const ADMIN_RESOURCES_FETCHED_SUCCESSFULLY = 'Admin resources fetched successfully';

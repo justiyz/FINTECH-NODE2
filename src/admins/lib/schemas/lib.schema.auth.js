@@ -5,6 +5,11 @@ const login = Joi.object().keys({
   password: Joi.string().required()
 });
 
+const verifyLogin = Joi.object().keys({
+  otp: Joi.string().required().length(6)
+});
+
 export default {
-  login
+  login,
+  verifyLogin
 };

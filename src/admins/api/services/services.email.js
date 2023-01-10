@@ -1,5 +1,6 @@
 import sgMail from '../../../users/config/email';
 import config from '../../../users/config/index';
+import { commonTemplate } from '../../lib/templates/email/template.common';
 
 const AdminMailService = async(subject, messageType, data) => {
   const msg = {
@@ -7,7 +8,7 @@ const AdminMailService = async(subject, messageType, data) => {
     cc: '',
     from: config.SEEDFI_SENDGRID_FROM,
     subject,
-    html: ''
+    html: commonTemplate(messageType, data)
   };
   try {
     if (config.SEEDFI_MESSAGE_FORWARDING) {
