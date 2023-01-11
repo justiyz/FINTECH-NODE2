@@ -11,6 +11,11 @@ export const login = (data) => `
     </tr>
     <tr>
         <td style="padding-bottom: 40px">
+        <p>OTP expires by ${data.expireTime} if not used</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
         <h1>${data.token}</h1>
         </td>
     </tr>

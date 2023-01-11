@@ -186,9 +186,13 @@ describe('Admin Auth', () => {
     });
   });
   describe('Fetch admin permission resources', () => {
-    it('Should return error if token is not set', (done) => {
+    it('Should return all admin permission resources', (done) => {
       chai.request(app)
         .get('/api/v1/admin/role/admin-resources')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');

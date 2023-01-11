@@ -20,6 +20,9 @@ router.post(
 
 router.get(
   '/admin-resources',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('role management', 'read'),
   RolesController.adminPermissionResources
 );
 

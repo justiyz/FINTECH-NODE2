@@ -85,14 +85,13 @@ export const verifyLoginVerificationToken = async(req, res, next) => {
     const isExpired = new Date().getTime() > new Date(otpAdmin.verification_token_expires).getTime();
     if (isExpired) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token has expired verifyLoginVerificationToken.admin.middlewares.auth.js`);
-      adminActivityTracking(req.admin.admin_id, 10, 'fail');
+      adminActivityTracking(otpAdmin.admin_id, 10, 'fail');
       return ApiResponse.error(res, enums.EXPIRED_VERIFICATION_TOKEN, enums.HTTP_FORBIDDEN, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token is still active verifyLoginVerificationToken.admin.middlewares.auth.js`);
     req.admin = otpAdmin;
     return next();
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 10, 'fail');
     error.label = enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE;
     logger.error(`verify login verification token failed::${enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE}`, error.message);
     return next(error);

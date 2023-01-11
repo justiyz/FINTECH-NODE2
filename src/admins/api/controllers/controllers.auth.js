@@ -20,10 +20,11 @@ const { SEEDFI_NODE_ENV } = config;
 export const completeAdminLoginRequest = async(req, res, next) => {
   try {
     const { token, admin } = req;
-    const expireAt = dayjs().add(5, 'minutes');
+    const expireAt = dayjs().add(3, 'minutes');
+    const expireTime = dayjs(expireAt).format('HH:mm:ss');
     const [ updatedAdmin ] = await AuthService.updateLoginToken([ admin.admin_id, token, expireAt ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set in the DB completeAdminLoginRequest.admin.controllers.auth.js`);
-    MailService('Complete Login with OTP', 'login', { token, ...admin });
+    MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
     adminActivityTracking(req.admin.admin_id, 9, 'success');
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.LOGIN_REQUEST_SUCCESSFUL, enums.HTTP_OK, { ...updatedAdmin, token });
