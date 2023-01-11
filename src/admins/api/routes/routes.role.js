@@ -26,4 +26,11 @@ router.get(
   RolesController.adminPermissionResources
 );
 
+router.get(
+  '/regular-admins',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RolesController.nonSuperAdminRoles
+);
+
 export default router;

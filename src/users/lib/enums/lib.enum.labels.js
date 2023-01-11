@@ -54,3 +54,4 @@ export const CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE = 'AdminRoleMiddleware::checkR
 export const CHECK_ADMIN_RESOURCES_MIDDLEWARE = 'AdminRoleMiddleware::checkAdminResources';
 export const CREATE_ROLE_CONTROLLER = 'AdminRoleController::createRole';
 export const ADMIN_PERMISSION_RESOURCES_CONTROLLER = 'AdminRoleController::adminPermissionResources';
+export const NON_SUPER_ADMIN_CONTROLLER = 'AdminRoleController::nonSuperAdminRoles';

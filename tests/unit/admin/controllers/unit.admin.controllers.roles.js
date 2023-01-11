@@ -27,5 +27,20 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+
+    it('should call adminPermissionResources', async() => {
+      const req = {  admin: '' };
+      const data = await AdminRolesController.adminPermissionResources(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    
+    it('should call non-super admin roles', async() => {
+      const req = {  admin: ''};
+      const data = await AdminRolesController.nonSuperAdminRoles(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
+  
 });

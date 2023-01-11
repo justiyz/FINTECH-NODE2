@@ -6,3 +6,5 @@ export const fetchAdminResourceById = (payload) => DB.transact('fetchAdminResour
 export const createAdminUserRole = (payload) => DB.transact('createAdminUserRole', payload, enums.ADMIN_ROLE_QUERY);
 export const createRolesPermissions = (payload) => DB.transact('createRolesPermissions', payload, enums.ADMIN_ROLE_QUERY);
 export const fetchAdminResources = (payload) => DB.transact('fetchAdminResources', payload, enums.ADMIN_ROLE_QUERY);
+export const fetchNonSuperAdminRoles = (payload) => DB.singleTransact('fetchNonSuperAdminRoles', payload, enums.ADMIN_ROLE_QUERY);
+
