@@ -492,8 +492,8 @@ describe('Admin Auth', () => {
   });
 });
 
-describe('Fetch all non-super admins', () => {
-  it('Should fetch all non super admins', (done) => {
+describe('Fetch all non-super admin roles', () => {
+  it('Should fetch all non-super admin roles', (done) => {
     chai.request(app)
       .get('/api/v1/admin/role/regular-admins')
       .set({

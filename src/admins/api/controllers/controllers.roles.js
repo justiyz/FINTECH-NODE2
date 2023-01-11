@@ -42,8 +42,9 @@ export const createRole = async(req, res, next) => {
  */
 export const adminPermissionResources = async(req, res, next) => {
   try {
+    const { admin } = req;
     const resources = await RoleService.fetchAdminResources();
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin module permission resources fetched from the DB adminPermissionResources.admin.controllers.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: admin module permission resources fetched from the DB adminPermissionResources.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ADMIN_RESOURCES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, resources);
   } catch (error) {
     error.label = enums.ADMIN_PERMISSION_RESOURCES_CONTROLLER;
@@ -63,12 +64,13 @@ export const adminPermissionResources = async(req, res, next) => {
 
 export const nonSuperAdminRoles = async(req, res, next) => {
   try {
+    const { admin } = req;
     const admins = await RoleService.fetchNonSuperAdminRoles();
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: non-super admins successfully fetched from the DB nonSuperAdminRoles.admin.controllers.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: non-super admin roles successfully fetched from the DB nonSuperAdminRoles.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, admins);
   } catch (error) {
     error.label = enums.NON_SUPER_ADMIN_CONTROLLER;
-    logger.error(`fetching all non-super admins from the DB failed:::${enums.NON_SUPER_ADMIN_CONTROLLER}`, error.message);
+    logger.error(`fetching all non-super admin roles from the DB failed:::${enums.NON_SUPER_ADMIN_CONTROLLER}`, error.message);
     return next(error);
   }
 };
