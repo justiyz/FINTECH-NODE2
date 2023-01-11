@@ -14,9 +14,9 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
     const payload = body.email || req.admin.email;
     const [ admin ] = await AdminService.getAdminByEmail([ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched admin details from the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
-    if (!admin && type === 'login') {
+    if (!admin && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that admin's email is not existing in the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
-      return ApiResponse.error(res, enums.INVALID_PASSWORD, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
+      return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Admin'), enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
     }
     if (admin && type === 'login' && (admin.status !== 'active' || admin.is_deleted )) {
       // eslint-disable-next-line no-nested-ternary

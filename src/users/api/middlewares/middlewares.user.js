@@ -34,12 +34,12 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
     if (!user && type === 'authenticate') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that user account does not exists in
         the database validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
+      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('User'), enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }
     if (!user && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that user's email is not existing in the database validateUnAuthenticatedUser.middlewares.user.js`);
       return ApiResponse.error(res,
-        type === 'login' ? enums.INVALID_EMAIL_ADDRESS : enums.ACCOUNT_NOT_EXIST,
+        type === 'login' ? enums.INVALID_EMAIL_ADDRESS : enums.ACCOUNT_NOT_EXIST('User'),
         enums.HTTP_BAD_REQUEST,
         enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }

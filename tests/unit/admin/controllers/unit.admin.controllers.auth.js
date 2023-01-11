@@ -33,5 +33,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call setPassword', async() => {
+      const req = { body: '', admin: '' };
+      const data = await AdminAuthController.setPassword('first')(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call forgotPassword', async() => {
+      const req = { token: '', admin: '' };
+      const data = await AdminAuthController.forgotPassword(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call sendAdminPasswordToken', async() => {
+      const req = { passwordToken: '', admin: '' };
+      const data = await AdminAuthController.sendAdminPasswordToken(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

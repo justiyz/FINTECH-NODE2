@@ -209,11 +209,11 @@ export const forgotPassword = async(req, res, next) => {
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email for user to reset password has been sent successfully to users mail successfully forgotPassword.controller.auth.js`);
+    userActivityTracking(req.user.user_id, 8, 'success');
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
     }
     MailService('Reset your password', 'forgotPassword', { otp, ...user });
-    userActivityTracking(req.user.user_id, 8, 'success');
     return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK);
   } catch (error) {
     userActivityTracking(req.user.user_id, 8, 'fail');

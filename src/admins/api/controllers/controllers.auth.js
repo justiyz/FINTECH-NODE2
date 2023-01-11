@@ -63,3 +63,77 @@ export const login = async(req, res, next) => {
   }
 };
 
+/** 
+*  set admin password
+ * @param {String} type - The type to know which action is being carried out.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AdminAuthController
+ */
+export const setPassword =  (type = '') => async(req, res, next) => {
+  try {
+    const { admin, body } = req;
+    const hash = await Hash.hashData(body.password.trim());
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: password hashed setPassword.admin.controllers.auth.js`);
+    const [ setNewPassword ] = await AuthService.setNewAdminPassword([ admin.admin_id, hash ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: hashed password saved in the DB setPassword.admin.controllers.auth.js`);
+    const typeMonitor = type === 'first' ? 11 : 2;
+    adminActivityTracking(req.admin.admin_id, typeMonitor, 'success');
+    return ApiResponse.success(res, enums.PASSWORD_SET_SUCCESSFULLY, enums.HTTP_OK, setNewPassword);
+  } catch (error) {
+    error.label = enums.SET_PASSWORD_CONTROLLER;
+    logger.error(`admin set new password:::${enums.SET_PASSWORD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/** 
+*  Admin Forgot password
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AdminAuthController
+ */
+export const forgotPassword = async(req, res, next) => {
+  try {
+    const { admin, token } = req;
+    const expireAt = dayjs().add(5, 'minutes');
+    const expireTime = dayjs(expireAt).format('HH:mm:ss');
+    const payload = [ admin.email, token, expireAt ];
+    await AuthService.adminForgotPassword(payload);
+    const data ={ admin_id: admin.admin_id, token };
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: reset password token set in the DB forgotPassword.admin.controllers.auth.js`);
+    adminActivityTracking(req.admin.admin_id, 1, 'success');
+    if (SEEDFI_NODE_ENV === 'test') {
+      return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
+    }
+    MailService('Reset your password', 'forgotPassword', { token, expireTime, ...admin });
+    return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 1, 'fail');
+    error.label = enums.ADMIN_FORGOT_PASSWORD_CONTROLLER;
+    logger.error(`admin forgot password request failed:::${enums.ADMIN_FORGOT_PASSWORD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/** 
+*  send admin reset password token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AdminAuthController
+ */
+export const sendAdminPasswordToken = async(req, res, next) => {
+  try {
+    const { admin, passwordToken} = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: successfully generated password token sendAdminPasswordToken.admin.middlewares.auth.js`);
+    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {passwordToken});
+  } catch (error) {
+    error.label = enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER;
+    logger.error(`send password reset token failed${enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+

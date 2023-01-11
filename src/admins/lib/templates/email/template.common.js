@@ -2,7 +2,8 @@
 import getTemplate from '.';
 
 const heading = {
-  login: 'Complete Login with OTP'
+  login: 'Complete Login with OTP',
+  forgotPassword: 'Reset your password'
 };
 
 export const commonTemplate = (messageType, data) => {

@@ -26,4 +26,38 @@ router.post(
   AuthController.login
 );
 
+router.post(
+  '/set-first-password',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.setPassword, 'payload'),
+  AuthMiddleware.checkIfChangedDefaultPassword('validate'),
+  AuthController.setPassword('first')
+);
+
+router.post(
+  '/forgot-password',
+  Model(Schema.forgotPassword, 'payload'),
+  AdminMiddleware.validateUnAuthenticatedAdmin('verify'),
+  AuthMiddleware.checkIfChangedDefaultPassword('verify'),
+  AuthMiddleware.generateAdminVerificationToken,
+  AuthController.forgotPassword
+);
+
+router.post(
+  '/verify-password-token',
+  Model(Schema.verifyLogin, 'payload'),
+  AuthMiddleware.verifyLoginVerificationToken,
+  AuthMiddleware.generateAdminResetPasswordToken,
+  AuthController.sendAdminPasswordToken
+);
+
+router.post(
+  '/reset-password',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminResetPasswordToken,
+  Model(Schema.setPassword, 'payload'),
+  AuthController.setPassword('reset')
+);
+
 export default router;

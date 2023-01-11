@@ -12,6 +12,7 @@ import './unit/admin/middlewares/unit.admin.middlewares.roles';
 import './unit/admin/middlewares/unit.admin.middlewares.admin';
 import './unit/admin/controllers/unit.admin.controllers.auth';
 import './unit/admin/controllers/unit.admin.controllers.roles';
+import './unit/admin/lib/utils/unit.admin.lib.utility.hash';
 import './unit/admin/lib/utils/unit.admin.lib.utility.helpers';
 
 // Integration test

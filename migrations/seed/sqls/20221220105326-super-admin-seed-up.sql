@@ -22,7 +22,7 @@ INSERT INTO admins (
     'SADM',
     'dayor@enyata.com',
     '$2b$10$QFJnosYyoCGiLM43T1OK.uq81faIHle/4AJfr8diyRI/tik5MmrCC',
-    true,
+    false,
     true,
     'active'
 )

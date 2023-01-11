@@ -182,7 +182,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST);
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('User'));
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -944,7 +944,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Account does not exist');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('User'));
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();

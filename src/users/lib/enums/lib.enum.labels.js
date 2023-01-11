@@ -43,10 +43,16 @@ export const IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE = 'UserMiddleware::isBvnPrevi
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
 export const COMPARE_ADMIN_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::compareAdminPassword';
+export const VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::validateAdminResetPasswordToken';
 export const GENERATE_ADMIN_VERIFICATION_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::generateAdminVerificationToken';
+export const CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::checkIfChangedDefaultPassword';
+export const GENERATE_ADMIN_RESET_PASSWORD_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::generateAdminResetPasswordToken';
 export const COMPLETE_ADMIN_LOGIN_REQUEST_CONTROLLER = 'AdminAuthController::completeAdminLoginRequest';
 export const VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::verifyLoginVerificationToken';
 export const ADMIN_LOGIN_CONTROLLER = 'AdminAuthController::login';
+export const ADMIN_FORGOT_PASSWORD_CONTROLLER = 'AdminAuthController::forgotPassword';
+export const SET_PASSWORD_CONTROLLER = 'AdminAuthController::setPassword';
+export const SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER = 'AdminAuthController::sendAdminPasswordToken';
 export const GET_ADMIN_AUTH_TOKEN_MIDDLEWARE = 'AuthMiddleware::getAdminAuthToken';
 export const VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::validateAdminAuthToken';
 export const ADMIN_ACCESS_MIDDLEWARE = 'AdminRoleMiddleware::adminAccess';

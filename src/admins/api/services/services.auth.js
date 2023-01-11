@@ -9,3 +9,5 @@ export const fetchPermissions = async(role_type, admin_id) => DB.multipleTransac
   await DB.transact('fetchRolePermissions', role_type, enums.ADMIN_AUTH_QUERY),
   await DB.transact('fetchAdminPermissions', admin_id, enums.ADMIN_AUTH_QUERY)
 ]);
+export const adminForgotPassword = (payload) => DB.transact('adminForgotPassword', payload, enums.ADMIN_AUTH_QUERY);
+export const setNewAdminPassword = (payload) => DB.transact('setNewAdminPassword', payload, enums.ADMIN_AUTH_QUERY);
