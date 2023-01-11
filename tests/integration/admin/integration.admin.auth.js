@@ -491,3 +491,40 @@ describe('Admin Auth', () => {
     });
   });
 });
+
+describe('Fetch all non-super admins', () => {
+  it('Should fetch all non super admins', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/role/regular-admins')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal(enums.NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+
+  it('Should return error if invalid token is set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/role/regular-admins')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+});

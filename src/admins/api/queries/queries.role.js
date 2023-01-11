@@ -28,5 +28,15 @@ export default {
       id,
       resource_id,
       name
-    FROM admin_resources`
+    FROM admin_resources`,
+  fetchNonSuperAdminRoles:`
+      SELECT
+        id,
+        code,
+        name,
+        status
+      FROM admin_roles
+      WHERE code NOT IN ('SADM')
+  `
+
 };

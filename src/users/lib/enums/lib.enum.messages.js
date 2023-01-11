@@ -57,3 +57,4 @@ export const RESOURCE_ID_SENT_NOT_EXISTS = (resource_id) => `resource with resou
 export const RESOURCE_REPEATING_IN_PAYLOAD = (resource_name) => `resource "${resource_name}" is repeating more than once`;
 export const ROLE_CREATION_SUCCESSFUL = 'Role with permissions created successfully';
 export const ADMIN_RESOURCES_FETCHED_SUCCESSFULLY = 'Admin resources fetched successfully';
+export const NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY = 'Non-super admins fetched successfully';

@@ -51,3 +51,24 @@ export const adminPermissionResources = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * fetch all non-super admin roles
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns non-super admin roles .
+ * @memberof AdminRoleController
+ */
+
+export const nonSuperAdminRoles = async(req, res, next) => {
+  try {
+    const admins = await RoleService.fetchNonSuperAdminRoles();
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: non-super admins successfully fetched from the DB nonSuperAdminRoles.admin.controllers.roles.js`);
+    return ApiResponse.success(res, enums.NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, admins);
+  } catch (error) {
+    error.label = enums.NON_SUPER_ADMIN_CONTROLLER;
+    logger.error(`fetching all non-super admins from the DB failed:::${enums.NON_SUPER_ADMIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
