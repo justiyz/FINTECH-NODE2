@@ -1,8 +1,48 @@
 export default {
-  getAdminByEmail: `
-      SELECT id, admin_id, role_type, email, phone_number, first_name, middle_name, last_name, gender, date_of_birth, image_url,
-        is_verified_email, is_created_password, is_completed_profile, status, refresh_token, is_deleted
-      FROM admins
-      WHERE email = $1`
+  fetchAdminPassword: `
+      SELECT id, admin_id, password
+      FROM admins 
+      WHERE admin_id = $1`,
+
+  fetchAdminByVerificationToken: `
+      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password
+      FROM admins 
+      WHERE verification_token = $1`,
+
+  updateLoginToken: `
+      UPDATE admins
+      SET 
+        updated_at = NOW(),
+        is_verified_email = TRUE,
+        verification_token = $2,
+        verification_token_expires = $3
+      WHERE admin_id = $1
+      RETURNING id, admin_id, first_name, last_name, role_type, image_url email, is_created_password, is_verified_email, is_completed_profile, status`,
+
+  fetchRolePermissions: `
+      SELECT 
+        admin_roles.code,
+        admin_resources.name,
+        admin_role_permissions.resource_id,
+        admin_role_permissions.permissions
+      FROM admin_role_permissions
+      LEFT JOIN admin_resources
+      ON admin_role_permissions.resource_id = admin_resources.resource_id
+      LEFT JOIN admin_roles
+      ON admin_role_permissions.role_type = admin_roles.code
+      WHERE admin_role_permissions.role_type = $1
+      AND admin_roles.status = 'active'`,
+
+  fetchAdminPermissions: `
+      SELECT 
+        admin_user_permissions.admin_id,
+        admin_resources.name,
+        admin_user_permissions.resource_id,
+        admin_user_permissions.permissions
+      FROM admin_user_permissions
+      LEFT JOIN admin_resources
+      ON admin_user_permissions.resource_id = admin_resources.resource_id
+      WHERE admin_user_permissions.admin_id = $1`
+
 };
   

@@ -11,10 +11,11 @@ const MailService = async(subject, messageType, data) => {
     html: commonTemplate(messageType, data)
   };
   try {
-    if (config.SEEDFI_MESSAGE_FORWARDING) {
+    if (config.SEEDFI_MESSAGE_FORWARDING === 'true') {
       await sgMail.send(msg);
       logger.info(`Message sent to ${data.email}`);
     }
+    return;
   } catch (error) {
     logger.error(`Error sending mail :: ${error}`);
   }

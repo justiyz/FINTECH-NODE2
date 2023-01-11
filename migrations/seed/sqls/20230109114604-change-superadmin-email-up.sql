@@ -22,7 +22,7 @@ INSERT INTO admins (
     'SADM',
     'dayor@enyata.com',
     '$2b$10$QFJnosYyoCGiLM43T1OK.uq81faIHle/4AJfr8diyRI/tik5MmrCC',
-    true,
+    false,
     true,
     'active'
 )
@@ -31,6 +31,5 @@ DO
 UPDATE
 SET
 role_type = EXCLUDED.role_type,
-is_created_password = EXCLUDED.is_created_password,
 is_verified_email = EXCLUDED.is_verified_email,
 status = EXCLUDED.status;
