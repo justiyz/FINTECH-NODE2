@@ -527,4 +527,18 @@ describe('Fetch all non-super admin roles', () => {
         done();
       });
   });
+
+  it('Should return error if token is not set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/role/regular-admins')
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('Please provide a token');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
 });
