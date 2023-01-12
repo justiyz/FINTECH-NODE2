@@ -59,7 +59,7 @@ export const checkRoleNameIsUnique = async(req, res, next) => {
     if (roleName) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role already exists in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
       adminActivityTracking(req.admin.admin_id, 4, 'fail');
-      return ApiResponse.error(res, enums.ADMIN_ROLE_NAME_EXISTS(name), enums.HTTP_BAD_REQUEST, enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE);
+      return ApiResponse.error(res, enums.ADMIN_ROLE_NAME_EXISTS(name), enums.HTTP_CONFLICT, enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role does not exists in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
     req.roleCode = roleCode.trim().toUpperCase();
@@ -118,6 +118,22 @@ export const checkAdminResources = async(req, res, next) => {
     adminActivityTracking(req.admin.admin_id, 4, 'fail');
     error.label = enums.CHECK_ADMIN_RESOURCES_MIDDLEWARE;
     logger.error(`checking if admin resource to be assigned to the role exists and are unique in the DB failed:::${enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
+  try {
+    const { params:{ role_code }, admin } = req;
+    const admins = await RoleService.fetchAdminById(admin.admin_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his Id checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
+    if (admins.role_type === role_code) {
+      return ApiResponse.error(res, enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN, enums.HTTP_BAD_REQUEST);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_ROLE_HAS_BEEN_ASSIGNED;
+    logger.error(`checking if  role has already been assigned to an admin in the DB failed:::${enums.CHECK_IF_ROLE_HAS_BEEN_ASSIGNED}`, error.message);
     return next(error);
   }
 };

@@ -381,11 +381,11 @@ describe('Admin Auth', () => {
           ]
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(400);
+          expect(res.statusCode).to.equal(409);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.ADMIN_ROLE_NAME_EXISTS('Super Admin'));
-          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.error).to.equal('CONFLICT');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

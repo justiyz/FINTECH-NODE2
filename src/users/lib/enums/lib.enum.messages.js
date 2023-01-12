@@ -58,3 +58,5 @@ export const RESOURCE_REPEATING_IN_PAYLOAD = (resource_name) => `resource "${res
 export const ROLE_CREATION_SUCCESSFUL = 'Role with permissions created successfully';
 export const ADMIN_RESOURCES_FETCHED_SUCCESSFULLY = 'Admin resources fetched successfully';
 export const NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY = 'Non-super admin roles fetched successfully';
+export const ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN = 'Role has already been assigned to an admin';
+export const ROLE_DELETED_SUCCESSFULLY = 'Role deleted successfully';

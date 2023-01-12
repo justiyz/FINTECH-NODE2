@@ -74,3 +74,27 @@ export const nonSuperAdminRoles = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * delete a role
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @memberof AdminRoleController
+ */
+
+export const deleteRole = async (req, res, next) => {
+  try {
+    const { params: { role_code }, admin } = req;
+    await RoleService.deleteRole(role_code);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully deleted a role from the DB deleteRole.admin.controllers.roles.js`);
+    adminActivityTracking(req.admin.admin_id, 14, 'success');
+    return ApiResponse.success(res, enums.ROLE_DELETED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 14, 'fail');
+    error.label = enums.DELETE_ROLE_CONTROLLER;
+    logger.error(`deleting role in the DB failed:::${enums.DELETE_ROLE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+  
+};
