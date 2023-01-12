@@ -59,7 +59,187 @@ describe('Admin roles', () => {
     });
   });
 
-  describe('Create role', () => {
+  describe('Create Admin role', () => {
+    it('Should return error if token is not set', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .send({
+          name: 'Head ops'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .send({
+          name: 'Head ops'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if name is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          permissions: [
+            {
+              resource_id: process.env.SEEDFI_ADMIN_USER_RESOURCE_ID,
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('name is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if permission is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Head ops'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('permissions is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if empty array permission is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Head ops',
+          permissions: [ ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('permissions does not contain 1 required value(s)');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if resource id is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Head ops',
+          permissions: [ 
+            {
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('permissions[0].resource_id is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if an invalid user permission option is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Head ops',
+          permissions: [ 
+            {
+              resource_id: process.env.SEEDFI_ADMIN_USER_RESOURCE_ID,
+              user_permissions: [ 'create', 'view', 'edit', 'delete' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('permissions[0].user_permissions[1] must be one of [create, read, update, delete, approve, reject]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS); 
+          done();
+        });
+    });
+    it('Should return error if an already existing admin name is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Super Admin',
+          permissions: [ 
+            {
+              resource_id: process.env.SEEDFI_ADMIN_USER_RESOURCE_ID,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(409);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_ROLE_NAME_EXISTS('Super Admin'));
+          expect(res.body.error).to.equal('CONFLICT');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+
     it('Should create role for head sales successfully', (done) => {
       chai.request(app)
         .post('/api/v1/admin/role')
