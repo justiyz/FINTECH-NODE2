@@ -42,7 +42,24 @@ export default {
       FROM admin_user_permissions
       LEFT JOIN admin_resources
       ON admin_user_permissions.resource_id = admin_resources.resource_id
-      WHERE admin_user_permissions.admin_id = $1`
+      WHERE admin_user_permissions.admin_id = $1`,
 
+  adminForgotPassword: `
+    UPDATE admins
+    SET
+      verification_token = $2,
+      verification_token_expires = $3,
+      updated_at = NOW()
+    WHERE email = $1
+    RETURNING admin_id, first_name, last_name, status`,
+
+  setNewAdminPassword: `
+    UPDATE admins
+    SET 
+      updated_at = NOW(),
+      is_created_password = TRUE,
+      password = $2
+    WHERE admin_id = $1
+    RETURNING admin_id, status, is_created_password, is_verified_email, is_completed_profile`
 };
   

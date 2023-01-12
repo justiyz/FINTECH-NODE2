@@ -57,5 +57,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfChangedDefaultPassword', async() => {
+      const req = { admin: '' };
+      const data = await AdminAuthMiddleware.checkIfChangedDefaultPassword('validate')(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call generateAdminResetPasswordToken', async() => {
+      const req = { admin: '' };
+      const data = await AdminAuthMiddleware.generateAdminResetPasswordToken(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call validateAdminResetPasswordToken', async() => {
+      const req = { token: '' };
+      const data = await AdminAuthMiddleware.validateAdminResetPasswordToken(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

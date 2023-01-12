@@ -185,6 +185,322 @@ describe('Admin Auth', () => {
         });
     });
   });
+  describe('Set first password', () => {
+    it('Should return error if admin has not set password and wants to do forgot password ', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/forgot-password')
+        .send({
+          email: 'dayor@enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_NOT_SET_NEW_PASSWORD);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should set super admin first password successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/set-first-password')
+        .send({
+          password: 'seedfi@Admin2'
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.PASSWORD_SET_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          expect(res.body.data.is_created_password).to.equal(true);
+          done();
+        });
+    });
+    it('Should return error if password field missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/set-first-password')
+        .send({
+
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('password is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if password field is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/set-first-password')
+        .send({
+          password: ''
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('password is not allowed to be empty');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if admin has set password and wants to set again', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/set-first-password')
+        .send({
+          password: 'admin89@w'
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_ALREADY_SET_NEW_PASSWORD);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('admin forgot password', () => {
+    it('Should do forgot password successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/forgot-password')
+        .send({
+          email: 'dayor@enyata.com'
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.PASSWORD_TOKEN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_OTP = res.body.data.token;
+          done();
+        });
+    });
+    it('Should return error if email field missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/forgot-password')
+        .send({
+
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if email field is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/forgot-password')
+        .send({
+          email: ''
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is not allowed to be empty');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if admin email does not exist', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/forgot-password')
+        .send({
+          email: 'admin89@mail.com'
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('Admin'));
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('admin verify password reset token', () => {
+    it('Should return error if otp field missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-password-token')
+        .send({
+
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if more than 6 digit otp is sent field is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-password-token')
+        .send({
+          otp: '6578699987'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp length must be 6 characters long');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid toke is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-password-token')
+        .send({
+          otp: '000000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.INVALID('OTP code'));
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully verify password reset otp', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-password-token')
+        .send({
+          otp: process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_OTP
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.GENERATE_RESET_PASSWORD_TOKEN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_TOKEN = res.body.data.passwordToken;
+          done();
+        });
+    });
+  });
+  describe('admin reset password', () => {
+    it('Should return error if token is not set', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/reset-password')
+        .send({
+          password: '5678uiyy87879'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Please provide a token');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is not set', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/reset-password')
+        .send({
+          password: '5678uiyy87879'
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_TOKEN}5879`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully set new password for super admin', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/reset-password')
+        .send({
+          password: 'Seedfi@Admin02'
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.PASSWORD_SET_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          expect(res.body.data.is_created_password).to.equal(true);
+          done();
+        });
+    });
+  });
   describe('Fetch admin permission resources', () => {
     it('Should return all admin permission resources', (done) => {
       chai.request(app)
