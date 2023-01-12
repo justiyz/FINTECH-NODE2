@@ -20,3 +20,4 @@ import './integration/integration.welcome';
 import './integration/integration.auth';
 import './integration/integration.user';
 import './integration/admin/integration.admin.auth';
+import './integration/admin/integration.admin.roles';

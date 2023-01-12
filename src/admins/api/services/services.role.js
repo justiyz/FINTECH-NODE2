@@ -7,4 +7,7 @@ export const createAdminUserRole = (payload) => DB.transact('createAdminUserRole
 export const createRolesPermissions = (payload) => DB.transact('createRolesPermissions', payload, enums.ADMIN_ROLE_QUERY);
 export const fetchAdminResources = (payload) => DB.transact('fetchAdminResources', payload, enums.ADMIN_ROLE_QUERY);
 export const fetchNonSuperAdminRoles = (payload) => DB.transact('fetchNonSuperAdminRoles', payload, enums.ADMIN_ROLE_QUERY);
+export const deleteRole = (payload) => DB.noReturnTransact('deleteRole', payload, enums.ADMIN_ROLE_QUERY);
+export const fetchAdminByRoleType = (payload) => DB.singleTransact('fetchAdminByRoleType', payload, enums.ADMIN_ROLE_QUERY);
+export const deleteRoleType = (payload) => DB.noReturnTransact('deleteRoleType', payload, enums.ADMIN_ROLE_QUERY);
 
