@@ -10,4 +10,5 @@ export const fetchNonSuperAdminRoles = (payload) => DB.transact('fetchNonSuperAd
 export const deleteRole = (payload) => DB.noReturnTransact('deleteRole', payload, enums.ADMIN_ROLE_QUERY);
 export const fetchAdminByRoleType = (payload) => DB.singleTransact('fetchAdminByRoleType', payload, enums.ADMIN_ROLE_QUERY);
 export const deleteRoleType = (payload) => DB.noReturnTransact('deleteRoleType', payload, enums.ADMIN_ROLE_QUERY);
+export const fetchRoleByCode = (payload) => DB.transact('fetchRoleByCode', payload, enums.ADMIN_ROLE_QUERY);
 

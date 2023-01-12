@@ -1,3 +1,5 @@
+import config from '../../../../users/config/index';
+
 export const login = (data) => `
     <tr>
         <td style="padding-bottom: 30px;">
@@ -69,3 +71,24 @@ export const forgotPassword = (data) => `
           <span style="display: block;">Call: +234 814 650 7035</span>
         </td>
     </tr>`;
+export const  adminInviteMail = (data) => `<tr>
+    <td style="padding: 10px 0;">
+      <p style="font-weight: 500; font-size: 14px; line-height: 160%; color: #4F4F4F;">
+      <br>
+      <br>
+      You have been invited by SeedFi as an admin.
+      <br>
+      <br>
+      All you need to do is log in via the link and the credentials provided below.
+      <br>
+      <br>
+      Email Address - ${data.email}  <br>
+      <br> Default Password - ${data.password}
+      <br>
+      <br>
+      Kindly change your password and update your profile on your first log in.
+      <br>
+      <br>
+      Login <a style="color: #1ECAAB" href='${config.CLIENT_DOMAIN}/vendors/auth/login?invited=true'>here</a>.
+      </p>
+    </td>`;

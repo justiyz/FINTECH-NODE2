@@ -20,7 +20,7 @@ describe('', () => {
     next.returns(res);
   });
 
-  describe('Auth middleware catch block unit testings', () => {
+  describe('Role middleware catch block unit testings', () => {
     it('should call adminAccess', async() => {
       const req = { admin: '' };
       const data = await AdminRolesMiddleware.adminAccess('users', 'read')(req, res, next);

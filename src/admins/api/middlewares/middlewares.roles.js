@@ -154,3 +154,28 @@ export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
   }
 };
   
+/**
+ * check if role code matches with the role in the DB.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const validateRoleCode = async(req, res, next) => {
+  try {
+    const [ roleCode ] =  await RoleService.fetchRoleByCode([ req.body.role_type ]);
+    if (!roleCode) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.body.code}:::Info: 
+    successfully confirms that role code ${req.body.code} doesn't exist in the database. validateRoleCode.admin.middlewares.admin.js`);
+      return ApiResponse.error(res, enums.VALIDATE_ROLE_CODE_NOT_EXIST, enums.HTTP_FORBIDDEN, enums.VALIDATE_ROLE_CODE_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
+    successfully confirms that role code exist in the database. validateRoleCode.admin.middlewares.admin.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_ADMIN_RESOURCES_MIDDLEWARE;
+    logger.error(`checking if role code exist failed:::${enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE}`, error.message);
+    next(error);
+  }
+};
