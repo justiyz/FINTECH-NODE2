@@ -59,10 +59,53 @@ describe('Admin roles', () => {
     });
   });
 
+  describe('Create role', () => {
+    it('Should create role for head sales successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Head sales',
+          permissions: [ 
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_ROLE_MANAGEMENT_RESOURCE_ID}`,
+              user_permissions:  [ 'read' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ROLE_CREATION_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.name).to.equal('Head sales');
+          process.env.SEEDFI_ADMIN_ROLE_TYPE = res.body.data.roleCode;
+          done();
+        });
+    });
+  });
+
   describe('Delete a particular role', () => {
     it('Should delete a role', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/role/delete-role/JRPST')
+        .delete(`/api/v1/admin/role/${process.env.SEEDFI_ADMIN_ROLE_TYPE}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -79,7 +122,7 @@ describe('Admin roles', () => {
 
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/role/delete-role/JRPST')
+        .delete(`/api/v1/admin/role/${process.env.SEEDFI_ADMIN_ROLE_TYPE}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -97,7 +140,7 @@ describe('Admin roles', () => {
 
     it('Should return error if token is not set', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/role/delete-role/JRPST')
+        .delete(`/api/v1/admin/role/${process.env.SEEDFI_ADMIN_ROLE_TYPE}`)
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
           expect(res.body).to.have.property('message');
@@ -111,9 +154,8 @@ describe('Admin roles', () => {
 
     it('Should return error if role code is not sent', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/role/delete-role')
+        .delete('/api/v1/admin/role/')
         .end((err, res) => {
-          console.log(res.body);
           expect(res.statusCode).to.equal(404);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');

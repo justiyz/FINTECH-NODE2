@@ -122,11 +122,27 @@ export const checkAdminResources = async(req, res, next) => {
   }
 };
 
+export const checkIfRoleExists = async (req, res, next) => {
+  try {
+    const  { params: { role_code } } = req;
+    const role = await RoleService.fetchRole(role_code);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched role by its code checkIfRoleExists.admin.middlewares.roles.js`);
+    if (role.length === 0) {
+      return ApiResponse.error(res, enums.ROLE_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_ROLE_EXIST_MIDDLEWARE;
+    logger.error(`checking if role exists in the DB failed:::${enums.CHECK_IF_ROLE_EXIST_MIDDLEWARE}`, error.message);
+    return next(error); 
+  }
+};
+
 export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
   try {
     const { params:{ role_code }, admin } = req;
-    const admins = await RoleService.fetchAdminById(admin.admin_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his Id checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
+    const admins = await RoleService.fetchAdminByRoleType(admin.role_type);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his role type checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
     if (admins.role_type === role_code) {
       return ApiResponse.error(res, enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN, enums.HTTP_BAD_REQUEST);
     }

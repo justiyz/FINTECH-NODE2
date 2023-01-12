@@ -46,10 +46,17 @@ export default {
       WHERE code = $1  
   `,
 
-  fetchAdminById: `
-  SELECT id, email, admin_id, role_type
+  deleteRoleType: `
+      DELETE 
+        FROM admin_role_permissions
+      WHERE role_type = $1
+  `,
+
+  fetchAdminByRoleType: `
+  SELECT role_type
     FROM admins 
-  WHERE admin_id = $1
+  WHERE role_type = $1
+  LIMIT 1
   `
 
 };

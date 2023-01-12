@@ -11,7 +11,7 @@ const createRole = Joi.object().keys({
 });
 
 const deleteRole = Joi.object().keys({
-  role_code: Joi.number().required()
+  role_code: Joi.string().required()
 });
 
 export default {

@@ -34,11 +34,12 @@ router.get(
 );
 
 router.delete(
-  '/delete-role/:role_code',
+  '/:role_code',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'delete'),
   Model(Schema.deleteRole, 'param'),
+  RoleMiddleware.checkIfRoleExists,
   RoleMiddleware.checkIfRoleHasBeenAssigned,
   RolesController.deleteRole
 );

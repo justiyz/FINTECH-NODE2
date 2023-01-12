@@ -63,3 +63,4 @@ export const ADMIN_PERMISSION_RESOURCES_CONTROLLER = 'AdminRoleController::admin
 export const NON_SUPER_ADMIN_CONTROLLER = 'AdminRoleController::nonSuperAdminRoles';
 export const CHECK_IF_ROLE_HAS_BEEN_ASSIGNED = 'AdminRoleMiddleware::checkIfRoleHasBeenAssigned';
 export const DELETE_ROLE_CONTROLLER = 'AdminRoleController::deleteRole';
+export const CHECK_IF_ROLE_EXIST_MIDDLEWARE = 'AdminRoleMiddleware::checkIfRoleExists';

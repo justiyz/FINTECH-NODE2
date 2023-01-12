@@ -63,3 +63,4 @@ export const ADMIN_RESOURCES_FETCHED_SUCCESSFULLY = 'Admin resources fetched suc
 export const NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY = 'Non-super admin roles fetched successfully';
 export const ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN = 'Role has already been assigned to an admin';
 export const ROLE_DELETED_SUCCESSFULLY = 'Role deleted successfully';
+export const ROLE_DOES_NOT_EXIST = 'The role you are trying to delete does not exist in the DB';

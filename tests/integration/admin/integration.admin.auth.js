@@ -676,7 +676,7 @@ describe('Admin Auth', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('permissions[0].user_permissions[1] must be one of [create, read, update, delete, approve, reject]');
           expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS); 
           done();
         });
     });
