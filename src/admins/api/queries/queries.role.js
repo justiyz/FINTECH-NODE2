@@ -29,6 +29,7 @@ export default {
       resource_id,
       name
     FROM admin_resources`,
+
   fetchNonSuperAdminRoles:`
       SELECT
         id,
@@ -37,6 +38,18 @@ export default {
         status
       FROM admin_roles
       WHERE code NOT IN ('SADM')
+  `,
+
+  deleteRole: `
+      DELETE
+         FROM admin_roles
+      WHERE code = $1  
+  `,
+
+  fetchAdminById: `
+  SELECT id, email, admin_id, role_type
+    FROM admins 
+  WHERE admin_id = $1
   `
 
 };
