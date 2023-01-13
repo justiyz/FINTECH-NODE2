@@ -37,14 +37,14 @@ describe('Admin', () => {
         })
         .send({ 
           ...inviteAdmin,
-          role_type: ''
+          role_code: ''
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res).to.have.property('body');
-          expect(res.body.message).to.equal('role_type is not allowed to be empty');
+          expect(res.body.message).to.equal('role_code is not allowed to be empty');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -58,7 +58,7 @@ describe('Admin', () => {
         })
         .send({ 
           ...inviteAdmin,
-          role_type: 'WASH'
+          role_code: 'WASH'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -80,7 +80,7 @@ describe('Admin', () => {
         })
         .send({ 
           ...inviteAdmin,
-          role_type: process.env.SEEDFI_ADMIN_ROLE_Head_OPS
+          role_code: process.env.SEEDFI_ADMIN_ROLE_Head_OPS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -101,7 +101,7 @@ describe('Admin', () => {
         })
         .send({ 
           ...inviteAdmin,
-          role_type: process.env.SEEDFI_ADMIN_ROLE_Head_OPS
+          role_code: process.env.SEEDFI_ADMIN_ROLE_Head_OPS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
