@@ -89,6 +89,6 @@ export const  adminInviteMail = (data) => `<tr>
       Kindly change your password and update your profile on your first log in.
       <br>
       <br>
-      Login <a style="color: #1ECAAB" href='${config.SEEDFI_VERIFY_EMAIL_WEB_REDIRECT_URL}/vendors/auth/login?invited=true'>here</a>.
+      Login <a style="color: #1ECAAB" href='${config.SEEDFI_ADMIN_WEB_BASE_URL}/auth/login'>here</a>.
       </p>
     </td>`;
