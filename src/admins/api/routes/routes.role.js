@@ -38,10 +38,19 @@ router.delete(
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'delete'),
-  Model(Schema.deleteRole, 'param'),
+  Model(Schema.deleteRole, 'params'),
   RoleMiddleware.validateRoleCode,
   RoleMiddleware.checkIfRoleHasBeenAssigned,
   RolesController.deleteRole
+);
+
+router.get(
+  '/fetch-roles',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('role management', 'read'),
+  Model(Schema.fetchRoles, 'query'),
+  RolesController.fetchRoles
 );
 
 export default router;
