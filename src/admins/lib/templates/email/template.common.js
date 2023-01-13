@@ -3,7 +3,8 @@ import getTemplate from '.';
 
 const heading = {
   login: 'Complete Login with OTP',
-  forgotPassword: 'Reset your password'
+  forgotPassword: 'Reset your password',
+  adminInviteMail: 'Admin Invite'
 };
 
 export const commonTemplate = (messageType, data) => {

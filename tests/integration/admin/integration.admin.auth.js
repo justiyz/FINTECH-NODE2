@@ -802,6 +802,7 @@ describe('Admin Auth', () => {
           expect(res.body.message).to.equal(enums.ROLE_CREATION_SUCCESSFUL);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.name).to.equal('Head ops');
+          process.env.SEEDFI_ADMIN_ROLE_Head_OPS = res.body.data.roleCode;
           done();
         });
     });

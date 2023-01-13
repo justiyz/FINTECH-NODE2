@@ -32,3 +32,29 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
     return next(error);
   }
 };
+
+/**
+ * check if admin email being sent previously exists in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
+  try {
+    const [ adminEmail ] = await AdminService.getAdminByEmail(req.body.email.trim().toLowerCase());
+    if (!adminEmail) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      successfully confirms that admin's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.auth.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+    successfully confirms that admin's email is existing in the database checkIfAminEmailAlreadyExist.middlewares.auth.js`);
+    return ApiResponse.error(res, enums.ADMIN_EMAIL_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE;
+    logger.error(`checking if user email is not already existing failed::${enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

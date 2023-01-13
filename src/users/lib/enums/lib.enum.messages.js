@@ -64,3 +64,7 @@ export const NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY = 'Non-super admin roles fetc
 export const ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN = 'Role has already been assigned to an admin';
 export const ROLE_DELETED_SUCCESSFULLY = 'Role deleted successfully';
 export const ROLE_DOES_NOT_EXIST = 'The role you are trying to delete does not exist in the DB';
+export const VALIDATE_ROLE_CODE_NOT_EXIST = 'Role code does not exist';
+export const ADMIN_SUCCESSFULLY_INVITED = 'Admin invited successfully.';
+export const ADMIN_EMAIL_EXIST = 'Account with this email address already exist';
+export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;

@@ -64,3 +64,7 @@ export const NON_SUPER_ADMIN_CONTROLLER = 'AdminRoleController::nonSuperAdminRol
 export const CHECK_IF_ROLE_HAS_BEEN_ASSIGNED = 'AdminRoleMiddleware::checkIfRoleHasBeenAssigned';
 export const DELETE_ROLE_CONTROLLER = 'AdminRoleController::deleteRole';
 export const CHECK_IF_ROLE_EXIST_MIDDLEWARE = 'AdminRoleMiddleware::checkIfRoleExists';
+export const INVITE_ADMIN_CONTROLLER = 'AdminController::inviteAdmin';
+export const VALIDATE_ROLE_CODE_MIDDLEWARE = 'AdminRoleMiddleware::validateRoleCode';
+export const CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AuthMiddleware::checkIfAminEmailAlreadyExist';
+export const IS_ROLE_ACTIVE_MIDDLEWARE = 'AdminRoleMiddleware::isRoleActive';

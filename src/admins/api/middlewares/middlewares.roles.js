@@ -122,22 +122,14 @@ export const checkAdminResources = async(req, res, next) => {
   }
 };
 
-export const checkIfRoleExists = async (req, res, next) => {
-  try {
-    const  { params: { role_code } } = req;
-    const role = await RoleService.fetchRole(role_code);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched role by its code checkIfRoleExists.admin.middlewares.roles.js`);
-    if (role.length === 0) {
-      return ApiResponse.error(res, enums.ROLE_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_ROLE_EXIST_MIDDLEWARE;
-    logger.error(`checking if role exists in the DB failed:::${enums.CHECK_IF_ROLE_EXIST_MIDDLEWARE}`, error.message);
-    return next(error); 
-  }
-};
-
+/**
+ * check if role has been assigned
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminRoleMiddleware
+ */
 export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
   try {
     const { params:{ role_code }, admin } = req;
@@ -154,3 +146,46 @@ export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
   }
 };
   
+/**
+ * check if role code matches with the role in the DB.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const validateRoleCode = async(req, res, next) => {
+  try {
+    const role = req.body.role_code || req.params.role_code;
+    const [ roleCode ] =  await RoleService.fetchRole([ role ]);
+    if (!roleCode) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${role}:::Info: 
+    successfully confirms that role code doesn't exist in the database. validateRoleCode.admin.middlewares.admin.js`);
+      return ApiResponse.error(res, enums.VALIDATE_ROLE_CODE_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.VALIDATE_ROLE_CODE_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
+    successfully confirms that role code exist in the database. validateRoleCode.admin.middlewares.admin.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_ADMIN_RESOURCES_MIDDLEWARE;
+    logger.error(`checking if role code exist failed:::${enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE}`, error.message);
+    next(error);
+  }
+};
+
+export const IsRoleActive = async(req, res, next) => {
+  try {
+    const role = req.body.role_code || req.params.role_code;
+    const [ roleCode ] =  await RoleService.fetchRole([ role ]);
+    if(roleCode.status !== 'active') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${role}:::Info: 
+       decoded that role ${role} is deactivated. IsRoleActive.admin.middlewares.admin.js`);
+      return ApiResponse.error(res, enums.IS_ROLE_ACTIVE, enums.HTTP_BAD_REQUEST, enums.IS_ROLE_ACTIVE_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_ROLE_ACTIVE;
+    logger.error(`checking if role code is active failed:::${enums.IS_ROLE_ACTIVE}`, error.message);
+    next(error);
+  }
+};

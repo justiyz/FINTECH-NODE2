@@ -56,7 +56,11 @@ export default {
   SELECT role_type
     FROM admins 
   WHERE role_type = $1
-  LIMIT 1
+  LIMIT 1`,
+  
+  fetchRoleByCode: `
+      SELECT * 
+      FROM admin_roles
+      WHERE code = $1 or
   `
-
 };
