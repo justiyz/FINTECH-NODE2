@@ -16,6 +16,7 @@ router.post(
   RolesMiddleware.adminAccess('administrators', 'create'),
   AdminMiddleware.checkIfAdminEmailAlreadyExist,
   RolesMiddleware.validateRoleCode,
+  RolesMiddleware.IsRoleActive,
   AdminController.inviteAdmin
 );
 

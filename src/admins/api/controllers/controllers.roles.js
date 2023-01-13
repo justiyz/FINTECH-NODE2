@@ -77,13 +77,13 @@ export const nonSuperAdminRoles = async(req, res, next) => {
 };
 
 /**
- * delete a role
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @memberof AdminRoleController
- */
-
+   * delete a role
+   * @param {Request} req - The request from the endpoint.
+   * @param {Response} res - The response returned by the method.
+   * @param {Next} next - Call the next operation.
+   * @memberof AdminRoleController
+   */
+  
 export const deleteRole = async (req, res, next) => {
   try {
     const { params: { role_code }, admin } = req;

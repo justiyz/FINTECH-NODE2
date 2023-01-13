@@ -67,3 +67,4 @@ export const CHECK_IF_ROLE_EXIST_MIDDLEWARE = 'AdminRoleMiddleware::checkIfRoleE
 export const INVITE_ADMIN_CONTROLLER = 'AdminController::inviteAdmin';
 export const VALIDATE_ROLE_CODE_MIDDLEWARE = 'AdminRoleMiddleware::validateRoleCode';
 export const CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AuthMiddleware::checkIfAminEmailAlreadyExist';
+export const IS_ROLE_ACTIVE_MIDDLEWARE = 'AdminRoleMiddleware::isRoleActive';
