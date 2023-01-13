@@ -18,7 +18,7 @@ const inviteAdmin = Joi.object().keys({
   first_name: Joi.string().required(), 
   last_name: Joi.string().required(), 
   email: Joi.string().email().required(),
-  role_type: Joi.string().required()
+  role_code: Joi.string().required()
 });
 
 export default {

@@ -46,11 +46,11 @@ export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
     const [ adminEmail ] = await AdminService.getAdminByEmail(req.body.email.trim().toLowerCase());
     if (!adminEmail) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
-      successfully confirms that user's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.auth.js`);
+      successfully confirms that admin's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.auth.js`);
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
-    successfully confirms that user's email is existing in the database checkIfAminEmailAlreadyExist.middlewares.auth.js`);
+    successfully confirms that admin's email is existing in the database checkIfAminEmailAlreadyExist.middlewares.auth.js`);
     return ApiResponse.error(res, enums.ADMIN_EMAIL_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE;

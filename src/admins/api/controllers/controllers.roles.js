@@ -83,7 +83,7 @@ export const nonSuperAdminRoles = async(req, res, next) => {
    * @param {Next} next - Call the next operation.
    * @memberof AdminRoleController
    */
-  
+
 export const deleteRole = async (req, res, next) => {
   try {
     const { params: { role_code }, admin } = req;
@@ -98,5 +98,4 @@ export const deleteRole = async (req, res, next) => {
     logger.error(`deleting role in the DB failed:::${enums.DELETE_ROLE_CONTROLLER}`, error.message);
     return next(error);
   }
-  
 };

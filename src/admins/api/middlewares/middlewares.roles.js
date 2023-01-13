@@ -156,7 +156,7 @@ export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
  */
 export const validateRoleCode = async(req, res, next) => {
   try {
-    const role = req.body.role_type || req.params.role_code;
+    const role = req.body.role_code || req.params.role_code;
     const [ roleCode ] =  await RoleService.fetchRole([ role ]);
     if (!roleCode) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${role}:::Info: 
@@ -175,7 +175,7 @@ export const validateRoleCode = async(req, res, next) => {
 
 export const IsRoleActive = async(req, res, next) => {
   try {
-    const role = req.body.role_type || req.params.role_code;
+    const role = req.body.role_code || req.params.role_code;
     const [ roleCode ] =  await RoleService.fetchRole([ role ]);
     if(roleCode.status !== 'active') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${role}:::Info: 
