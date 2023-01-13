@@ -16,15 +16,15 @@ const { SEEDFI_NODE_ENV } = config;
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns admin details.
- * @memberof AdminController
+ * @memberof AdminAdminController
  */
 export const inviteAdmin = async(req, res, next) => {
   try {
-    const password = Hash.generateRandomString(3);
+    const password = Hash.generateRandomString(4);
     const hash = Hash.hashData(password);
     const payload = AdminPayload.addAdmin(req.body, hash);
     const [ newAdmin ] = await AdminService.inviteAdmin(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully created inviteAdmin.admin.controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully created inviteAdmin.controllers.admin.admin.js`);
     const data = {
       firstName: newAdmin.first_name,
       email: newAdmin.email,
@@ -34,7 +34,7 @@ export const inviteAdmin = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  { newAdmin });
     }
     MailService('Admin Invite', 'adminInviteMail', { ...data });
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: invite admin mail successfully sent. inviteAdmin.admin.controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: invite admin mail successfully sent. inviteAdmin.controllers.admin.admin.js`);
     adminActivityTracking(req.admin.admin_id, 6, 'success');
     return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  newAdmin);
   } catch (error) {

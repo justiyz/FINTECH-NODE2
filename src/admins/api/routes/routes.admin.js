@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.role';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
+import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as AdminController from '../controllers/controllers.admin';
 
@@ -12,8 +13,9 @@ router.post(
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.inviteAdmin, 'payload'),
-  RolesMiddleware.validateRoleCode,
   RolesMiddleware.adminAccess('administrators', 'create'),
+  AdminMiddleware.checkIfAdminEmailAlreadyExist,
+  RolesMiddleware.validateRoleCode,
   AdminController.inviteAdmin
 );
 

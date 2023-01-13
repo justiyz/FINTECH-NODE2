@@ -61,6 +61,6 @@ export default {
   fetchRoleByCode: `
       SELECT * 
       FROM admin_roles
-      WHERE code = $1
+      WHERE code = $1 or
   `
 };
