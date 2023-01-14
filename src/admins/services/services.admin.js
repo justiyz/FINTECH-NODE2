@@ -1,16 +1,6 @@
 import DB from '../services/services.db';
 import enums from '../../users/lib/enums';
-import adminAuthQuery from '../api/queries/queries.auth';
-import adminAdminQuery from '../api/queries/queries.admin';
-import adminRoleQuery from '../api/queries/queries.role';
-import adminLogQuery from '../api/queries/queries.log';
 
-export const queries = {
-  adminAuthQuery,
-  adminAdminQuery,
-  adminRoleQuery,
-  adminLogQuery
-};
 
 export const fetchAllAdmins = async(query, filter) => {
   const {
