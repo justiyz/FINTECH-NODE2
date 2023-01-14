@@ -27,5 +27,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call inviteAdmin', async() => {
+      const req = { token: '', params: '' };
+      const data = await AdminController.fetchAllAdmins(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call editAdminStatus', async() => {
+      const req = { token:'', params: '', body: '' };
+      const data = await AdminController.editAdminStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
