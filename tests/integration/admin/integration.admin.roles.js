@@ -356,7 +356,6 @@ describe('Fetch roles', () => {
         Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(200);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -394,7 +393,6 @@ describe('Fetch roles', () => {
         search: 'head socials'
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(200);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -436,7 +434,6 @@ describe('Fetch roles', () => {
         status: 'active'
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(200);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -479,7 +476,6 @@ describe('Fetch roles', () => {
         to_date: '2023-01-14 23:03:09.875717'
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(200);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -524,7 +520,6 @@ describe('Fetch roles', () => {
         status: 'active'
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(200);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
