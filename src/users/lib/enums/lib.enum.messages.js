@@ -68,3 +68,6 @@ export const VALIDATE_ROLE_CODE_NOT_EXIST = 'Role code does not exist';
 export const ADMIN_SUCCESSFULLY_INVITED = 'Admin invited successfully.';
 export const ADMIN_EMAIL_EXIST = 'Account with this email address already exist';
 export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
+export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
+export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
+export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';

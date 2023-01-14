@@ -46,15 +46,34 @@ export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
     const [ adminEmail ] = await AdminService.getAdminByEmail(req.body.email.trim().toLowerCase());
     if (!adminEmail) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
-      successfully confirms that admin's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.auth.js`);
+      successfully confirms that admin's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.admin.js`);
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
-    successfully confirms that admin's email is existing in the database checkIfAminEmailAlreadyExist.middlewares.auth.js`);
+    successfully confirms that admin's email is existing in the database checkIfAminEmailAlreadyExist.middlewares.admin.js`);
     return ApiResponse.error(res, enums.ADMIN_EMAIL_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE;
     logger.error(`checking if user email is not already existing failed::${enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const checkIfAdminIdExist = async(req, res, next) => {
+  try {
+    const adminId = req.body.adminId || req.params.adminId;
+    const [ admin ] = await AdminService.getAdminByAdminId(adminId);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
+    successfully check if admin id exist and fetched the admin details using the id checkIfAdminIdExist.admin.middlewares.admin.js`);
+    if (!admin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: 
+      successfully decoded that the admin with the decoded id does not exist in the DB checkIfAdminIdExist.admin.middlewares.admin.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('admin'), enums.HTTP_NOT_FOUND, enums.CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE;
+    logger.error(`checking if user email is not already existing failed::${enums.CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

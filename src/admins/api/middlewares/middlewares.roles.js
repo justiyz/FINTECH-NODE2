@@ -122,20 +122,28 @@ export const checkAdminResources = async(req, res, next) => {
   }
 };
 
+
 /**
- * check if role has been assigned
+ * check if role name is unique
+ * @param {String} type - The type to know which of the conditions to run.
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminRoleMiddleware
  */
-export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
+export const checkIfRoleHasBeenAssigned = (type = '') => async (req, res, next) => {
   try {
-    const { params:{ role_code }, admin } = req;
+    const { body, params, admin } = req;
+    const role = params.role_code ||  body.role_code;
     const admins = await RoleService.fetchAdminByRoleType(admin.role_type);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his role type checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
-    if (admins.role_type === role_code) {
+    if (type === 'validate' && role === 'SADM') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      decoded that role assigned is supper admin role and cannot be assigned to any other admin. checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
+      return ApiResponse.error(res, enums.CHECK_IF_ROLE_IS_SUPER_ADMIN, enums.HTTP_CONFLICT);
+    }
+    if (admins.role_type === role) {
       return ApiResponse.error(res, enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN, enums.HTTP_BAD_REQUEST);
     }
     return next();

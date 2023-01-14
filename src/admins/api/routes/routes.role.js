@@ -40,7 +40,7 @@ router.delete(
   RoleMiddleware.adminAccess('role management', 'delete'),
   Model(Schema.deleteRole, 'param'),
   RoleMiddleware.validateRoleCode,
-  RoleMiddleware.checkIfRoleHasBeenAssigned,
+  RoleMiddleware.checkIfRoleHasBeenAssigned(''),
   RolesController.deleteRole
 );
 

@@ -21,8 +21,13 @@ const inviteAdmin = Joi.object().keys({
   role_code: Joi.string().required()
 });
 
+const editAdminStatus = Joi.object().keys({
+  status: Joi.string().max(1).valid('active', 'suspended', 'inactive', 'deactivated').required()
+});
+
 export default {
   createRole,
   deleteRole,
-  inviteAdmin
+  inviteAdmin,
+  editAdminStatus
 };

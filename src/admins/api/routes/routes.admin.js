@@ -20,4 +20,22 @@ router.post(
   AdminController.inviteAdmin
 );
 
+router.get(
+  '/',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('administrators', 'view'),
+  AdminController.fetchAllAdmins
+);
+
+router.patch(
+  '/:adminId',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.editAdminStatus, 'payload'),
+  RolesMiddleware.adminAccess('administrators', 'update'),
+  AdminMiddleware.checkIfAdminIdExist,
+  AdminController.editAdminStatus
+);
+
 export default router;
