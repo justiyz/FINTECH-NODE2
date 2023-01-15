@@ -97,7 +97,6 @@ export const checkIfAdminIdExist = async(req, res, next) => {
  */
 export const checkAdminCurrentStatus = async(req, res, next) => {
   try {
-    console.log(req.adminStatus, '=======', req.body.status);
     if (req.adminStatus === req.body.status) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
       decoded that the admin is already ${req.body.status} in the DB. checkIfAdminIdExist.admin.middlewares.admin.js`);
