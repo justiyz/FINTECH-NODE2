@@ -22,12 +22,22 @@ const inviteAdmin = Joi.object().keys({
 });
 
 const editAdminStatus = Joi.object().keys({
-  status: Joi.string().max(1).valid('active', 'suspended', 'inactive', 'deactivated').required()
+  status: Joi.string().valid('active', 'deactivated').required()
+});
+
+const fetchAdmins = Joi.object().keys({
+  page: Joi.number().positive(),
+  per_page: Joi.number().positive(),
+  start_date: Joi.string(),
+  end_date: Joi.string(),
+  status: Joi.string().valid('active', 'deactivated'),
+  search: Joi.string()
 });
 
 export default {
   createRole,
   deleteRole,
   inviteAdmin,
-  editAdminStatus
+  editAdminStatus,
+  fetchAdmins
 };

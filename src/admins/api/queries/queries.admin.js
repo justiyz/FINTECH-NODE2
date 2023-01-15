@@ -17,8 +17,9 @@ export default {
       last_name, 
       email,
       role_type,
-      password
-  )VALUES($1, $2, $3, $4, $5)
+      password,
+      status
+  )VALUES($1, $2, $3, $4, $5, 'inactive')
   RETURNING admin_id,  first_name, 
   last_name, 
   email`,

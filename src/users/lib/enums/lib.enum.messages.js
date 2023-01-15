@@ -71,3 +71,4 @@ export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
 export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
+export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;

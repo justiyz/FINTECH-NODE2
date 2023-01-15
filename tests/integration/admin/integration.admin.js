@@ -196,6 +196,25 @@ describe('Admin', () => {
           done();
         });
     });
+    it('Should flag if try edit updating status with the same status in the DB', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_CURRENT_STATUS('active'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should flag when pass wrong admin id.', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}0p`)
@@ -229,7 +248,7 @@ describe('Admin', () => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('status must be one of [active, suspended, inactive, deactivated]');
+          expect(res.body.message).to.equal('status must be one of [active, deactivated]');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

@@ -133,11 +133,10 @@ export const checkAdminResources = async(req, res, next) => {
  */
 export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
   try {
-    const { body, params, admin } = req;
-    const role = params.role_code ||  body.role_code;
+    const { params:{ role_code }, admin } = req;
     const admins = await RoleService.fetchAdminByRoleType(admin.role_type);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his role type checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
-    if (admins.role_type === role) {
+    if (admins.role_type === role_code) {
       return ApiResponse.error(res, enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN, enums.HTTP_BAD_REQUEST);
     }
     return next();

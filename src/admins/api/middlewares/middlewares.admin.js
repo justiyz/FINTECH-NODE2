@@ -59,9 +59,17 @@ export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
   }
 };
 
+/**
+ * check if admin id exist in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
 export const checkIfAdminIdExist = async(req, res, next) => {
   try {
-    const adminId = req.body.adminId || req.params.adminId;
+    const adminId = req.body.admin_id || req.params.admin_id;
     const [ admin ] = await AdminService.getAdminByAdminId(adminId);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     successfully check if admin id exist and fetched the admin details using the id checkIfAdminIdExist.admin.middlewares.admin.js`);
@@ -70,10 +78,35 @@ export const checkIfAdminIdExist = async(req, res, next) => {
       successfully decoded that the admin with the decoded id does not exist in the DB checkIfAdminIdExist.admin.middlewares.admin.js`);
       return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('admin'), enums.HTTP_NOT_FOUND, enums.CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE);
     }
+    req.adminStatus = admin.status;
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE;
     logger.error(`checking if user email is not already existing failed::${enums.CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check admin current status in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const checkAdminCurrentStatus = async(req, res, next) => {
+  try {
+    console.log(req.adminStatus, '=======', req.body.status);
+    if (req.adminStatus === req.body.status) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      decoded that the admin is already ${req.body.status} in the DB. checkIfAdminIdExist.admin.middlewares.admin.js`);
+      return ApiResponse.error(res, enums.ADMIN_CURRENT_STATUS(req.body.status), enums.HTTP_BAD_REQUEST, enums.CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE;
+    logger.error(`checking if user email is not already existing failed::${enums.CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

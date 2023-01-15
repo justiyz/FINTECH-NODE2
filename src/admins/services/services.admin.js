@@ -1,5 +1,6 @@
 import DB from '../services/services.db';
 import enums from '../../users/lib/enums';
+import { calculatePages } from '../lib/paginate';
 
 
 export const fetchAllAdmins = async(query, filter) => {
@@ -8,8 +9,9 @@ export const fetchAllAdmins = async(query, filter) => {
   } = query;
   
   const { start_date, end_date, status } = filter;
-  
-  const fetch = per_page * page - per_page;
+  const pageType = !page ? 1 : page;
+  const returnPerPage = !per_page ? 10 : per_page;
+  const fetch = returnPerPage * pageType - returnPerPage;
   const condition = search ? `${search.toLowerCase()}%` : null;
   let result;
   const getAndSearchPayload = [ condition, fetch, per_page ];
@@ -25,8 +27,9 @@ export const fetchAllAdmins = async(query, filter) => {
     result.forEach((item) => delete item.total);
   }
   return {
-    result: { ...result },
-    total: count,
-    page
+    total: Number(count),
+    page: pageType,
+    total_page: calculatePages(Number(count), Number(returnPerPage)),
+    admins: result 
   };
 };

@@ -87,7 +87,7 @@ export const editAdminStatus = async(req, res, next) => {
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     decoded that admin status is about to be edited editAdminStatus.admin.controllers.admin.js`);
-    await AdminService.editAdminStatus([ req.params.adminId, req.body.status ]);
+    await AdminService.editAdminStatus([ req.params.admin_id, req.body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     successfully confirm that admin status has been edited. editAdminStatus.admin.controllers.admin.js`);
     return  ApiResponse.success(res, enums.EDIT_ADMIN_STATUS, enums.HTTP_OK);

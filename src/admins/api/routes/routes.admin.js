@@ -24,17 +24,19 @@ router.get(
   '/',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.fetchAdmins, 'query'),
   RolesMiddleware.adminAccess('administrators', 'view'),
   AdminController.fetchAllAdmins
 );
 
 router.patch(
-  '/:adminId',
+  '/:admin_id',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.editAdminStatus, 'payload'),
   RolesMiddleware.adminAccess('administrators', 'update'),
   AdminMiddleware.checkIfAdminIdExist,
+  AdminMiddleware.checkAdminCurrentStatus,
   AdminController.editAdminStatus
 );
 
