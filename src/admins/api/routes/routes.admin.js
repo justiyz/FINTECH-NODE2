@@ -20,4 +20,11 @@ router.post(
   AdminController.inviteAdmin
 );
 
+router.get(
+  '/profile',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  AdminController.getProfile
+);
+
 export default router;

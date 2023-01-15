@@ -114,4 +114,24 @@ describe('Admin', () => {
         });
     });
   });
+  describe('Get Admin Profile', () => {
+    it('Should get admin profile.', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.FETCH_ADMIN_PROFILE);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.role_type).to.equal('SADM');
+          done();
+        });
+    });
+  });
 });

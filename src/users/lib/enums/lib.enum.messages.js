@@ -68,3 +68,4 @@ export const VALIDATE_ROLE_CODE_NOT_EXIST = 'Role code does not exist';
 export const ADMIN_SUCCESSFULLY_INVITED = 'Admin invited successfully.';
 export const ADMIN_EMAIL_EXIST = 'Account with this email address already exist';
 export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
+export const FETCH_ADMIN_PROFILE = 'Admin profile fetched successfully';
