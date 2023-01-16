@@ -117,6 +117,7 @@ describe('Admin Auth', () => {
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_verified_email).to.equal(true);
           process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_SUPER_ADMIN_ID = res.body.data.admin_id;
           done();
         });
     });
@@ -191,6 +192,29 @@ describe('Admin Auth', () => {
         .post('/api/v1/admin/auth/forgot-password')
         .send({
           email: 'dayor@enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_NOT_SET_NEW_PASSWORD);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if admin has not set password and wants to do complete profile', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/complete-profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'Samaila',
+          last_name: 'Isa',
+          phone_number: '+23490877777',
+          gender: 'male'       
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -280,6 +304,125 @@ describe('Admin Auth', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.ADMIN_ALREADY_SET_NEW_PASSWORD);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Admin complete profile', () => {
+    it('Should complete super admin profile successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/complete-profile')
+        .send({
+          first_name: 'Samaila',
+          last_name: 'Isa',
+          phone_number: '+23490877777',
+          gender: 'male'  
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_COMPLETE_PROFILE_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(true);
+          expect(res.body.data.is_verified_email).to.equal(true);
+          done();
+        });
+    });
+    it('Should return error if first name field missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/complete-profile')
+        .send({
+          last_name: 'Isa',
+          phone_number: '+23490877777',
+          gender: 'male'  
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('first_name is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if not accepted gender option is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/complete-profile')
+        .send({
+          first_name: 'Samaila',
+          last_name: 'Isa',
+          phone_number: '+23490877777',
+          gender: 'rather not tell'  
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('gender must be one of [male, female]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid phone number format is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/complete-profile')
+        .send({
+          first_name: 'Samaila',
+          last_name: 'Isa',
+          phone_number: '09034900000',
+          gender: 'female'  
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Phone number must contain +countryCode and extra required digits');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if admin has previously completed profile and wants to again', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/complete-profile')
+        .send({
+          first_name: 'Samaila',
+          last_name: 'Isa',
+          phone_number: '+23490877777',
+          gender: 'male'  
+        })
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_ALREADY_COMPLETED_PROFILE);
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -495,7 +638,7 @@ describe('Admin Auth', () => {
           expect(res.body.message).to.equal(enums.PASSWORD_SET_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.is_completed_profile).to.equal(false);
+          expect(res.body.data.is_completed_profile).to.equal(true);
           expect(res.body.data.is_created_password).to.equal(true);
           done();
         });
@@ -802,7 +945,7 @@ describe('Admin Auth', () => {
           expect(res.body.message).to.equal(enums.ROLE_CREATION_SUCCESSFUL);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.name).to.equal('Head ops');
-          process.env.SEEDFI_ADMIN_ROLE_Head_OPS = res.body.data.roleCode;
+          process.env.SEEDFI_ADMIN_ROLE_HEAD_OPS = res.body.data.roleCode;
           done();
         });
     });

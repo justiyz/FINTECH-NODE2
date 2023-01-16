@@ -21,6 +21,24 @@ describe('', () => {
   });
 
   describe('Auth controller catch block unit testings', () => {
+    it('should call completeAdminProfile', async() => {
+      const req = { body: '', admin: '' };
+      const data = await AdminController.completeAdminProfile(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call adminPermissions', async() => {
+      const req = { adminUser: '', admin: '' };
+      const data = await AdminController.adminPermissions(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call editAdminPermissions', async() => {
+      const req = { body: '', admin: '', params: '' };
+      const data = await AdminController.editAdminPermissions(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call inviteAdmin', async() => {
       const req = { token: '', admin: '' };
       const data = await AdminController.inviteAdmin(req, res, next);

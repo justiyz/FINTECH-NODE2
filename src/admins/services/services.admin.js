@@ -26,7 +26,7 @@ export const fetchAllAdmins = async(query, filter) => {
     result.forEach((item) => delete item.total);
   }
   return {
-    page: pageType,
+    page: parseFloat(pageType),
     total_count: Number(count),
     total_pages: Helpers.calculatePages(Number(count), Number(returnPerPage)),
     admins: result 

@@ -21,6 +21,27 @@ describe('', () => {
   });
 
   describe('Auth middleware catch block unit testings', () => {
+    it('should call rolePermissions', async() => {
+      const req = { admin: '', params: '' };
+      const data = await AdminRolesController.rolePermissions(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+
+    it('should call editRoleWithPermissions', async() => {
+      const req = { admin: '', body: '', params: '' };
+      const data = await AdminRolesController.editRoleWithPermissions(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+
+    it('should call activateDeactivateRole', async() => {
+      const req = { query: '', params: '' };
+      const data = await AdminRolesController.activateDeactivateRole(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+
     it('should call createRole', async() => {
       const req = { body: '', admin: '', roleCode: '' };
       const data = await AdminRolesController.createRole(req, res, next);
