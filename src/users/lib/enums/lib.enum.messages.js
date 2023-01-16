@@ -46,6 +46,8 @@ export const REQUEST_EMAIL_VERIFICATION = 'Email verification link sent Successf
 export const VERIFY_EMAIL = 'Email verified successfully.';
 export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
 export const EMAIL_NOT_VERIFIED = 'User email not verified';
+export const ID_VERIFICATION = 'User id successfully verified';
+export const CHECK_USER_ID_VERIFICATION = 'User Id already verified';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

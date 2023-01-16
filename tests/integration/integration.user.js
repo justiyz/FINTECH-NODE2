@@ -567,4 +567,73 @@ describe('User', () => {
         });
     });
   });
+  describe('verify email', () => {
+    it('should verify user two id successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/id-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          id_type: 'ninm',
+          card_number: '3e344e5rtft7tfgfuu',
+          image_url: 'https:local:3r45dfghjiuytfb',
+          verification_url: 'https:local:3r45dfghjiuytfb',
+          issued_date: '2023-12-4',
+          expiry_date: '2021-1-4'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ID_VERIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should flag if user id already verified.', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/id-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          id_type: 'ninm',
+          card_number: '3e344e5rtft7tfgfuu',
+          image_url: 'https:local:3r45dfghjiuytfb',
+          verification_url: 'https:local:3r45dfghjiuytfb',
+          issued_date: '2023-12-4',
+          expiry_date: '2021-1-4'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CHECK_USER_ID_VERIFICATION);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should flag when nothing is sent.', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/id-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('id_type is required');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
 });

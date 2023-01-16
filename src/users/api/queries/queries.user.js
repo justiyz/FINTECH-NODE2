@@ -79,5 +79,24 @@ export default {
         verification_token_expires = NULL,
         updated_at = NOW()
       WHERE user_id = $1
-      `
+      `,
+  userIdVerification: `
+     INSERT INTO user_national_id_details(
+      user_id,
+      id_type,
+      card_number,
+      image_url,
+      verification_url,
+      issued_date,
+      expiry_date
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
+     
+     `,
+  updateIdVerification: `
+    UPDATE users
+    SET
+    is_uploaded_identity_card = true,
+    tier = 1
+    WHERE user_id = $1
+    `
 };
