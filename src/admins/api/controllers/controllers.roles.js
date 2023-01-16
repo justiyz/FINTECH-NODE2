@@ -1,9 +1,9 @@
 import * as RoleService from '../services/services.role';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
+import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import { adminActivityTracking } from '../../lib/monitor';
 import RolePayload from '../../lib/payloads/lib.payload.roles.js';
-import * as Helpers from '../../lib/utils/lib.util.helpers';
 
 /**
  * create role for admin users
@@ -57,6 +57,104 @@ export const adminPermissionResources = async(req, res, next) => {
 };
 
 /**
+ * fetch role details and permissions
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns non-super admin roles .
+ * @memberof AdminRoleController
+ */
+
+export const rolePermissions = async(req, res, next) => {
+  try {
+    const { admin, params: { role_code } } = req;
+    const [ roleDetails ] = await RoleService.fetchRole([ role_code ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: role details fetched from DB rolePermissions.admin.controllers.roles.js`);
+    const adminResources = await RoleService.fetchAdminResources();
+    const permissions = await RoleService.fetchRolePermissions([ role_code ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: role permissions with system resources fetched from DB rolePermissions.admin.controllers.roles.js`);
+    const fullRoleBasedResources = await Helpers.processRoleBasedPermissions(role_code, adminResources, permissions);
+    const data = {
+      ...roleDetails,
+      fullRoleBasedResources
+    };
+    return ApiResponse.success(res, enums.ROLE_PERMISSIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.ROLE_PERMISSIONS_CONTROLLER;
+    logger.error(`fetching role details with permissions from the DB failed:::${enums.ROLE_PERMISSIONS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * edit role with permission
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns non-super admin roles .
+ * @memberof AdminRoleController
+ */
+
+export const editRoleWithPermissions = async(req, res, next) => {
+  try {
+    const { admin, body, params: { role_code } } = req;
+    if (body.name) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role name is being edited editRoleWithPermissions.admin.middlewares.roles.js`);
+      const [ roleName ] = await RoleService.fetchRole([ body.name.trim().toLowerCase() ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin role queried from DB using role name editRoleWithPermissions.admin.middlewares.roles.js`);
+      if (roleName) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin role with name already exists in the DB editRoleWithPermissions.admin.middlewares.roles.js`);
+        return ApiResponse.error(res, enums.ADMIN_ROLE_NAME_EXISTS(body.name), enums.HTTP_CONFLICT, enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin role name not existing in the DB editRoleWithPermissions.admin.middlewares.roles.js`);
+      await RoleService.updateRoleName([ role_code, body.name.trim().toLowerCase() ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role name edited successfully editRoleWithPermissions.admin.middlewares.roles.js`);
+    }
+    if (body.permissions) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role permissions is being edited editRoleWithPermissions.admin.middlewares.roles.js`);
+      const editRolesPermissions = await body.permissions.map(async(permission) => {
+        const [ resourcePermissionExists ] = await RoleService.checkIfResourcePermissionCreated([ role_code,  permission.resource_id ]);
+        !resourcePermissionExists ? await RoleService.createRolesPermissions([ role_code,  permission.resource_id, permission.user_permissions.join() ]) :
+          await RoleService.editRolePermissions([ role_code,  permission.resource_id, permission.user_permissions.join() ]);
+        return permission;
+      });
+      await Promise.all([ editRolesPermissions ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role permissions edited successfully editRoleWithPermissions.admin.middlewares.roles.js`);
+    }
+    adminActivityTracking(req.admin.admin_id, 15, 'success');
+    return ApiResponse.success(res, enums.EDIT_ROLE_DETAILS_SUCCESSFUL, enums.HTTP_OK, { role_code, ...body });
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 15, 'fail');
+    error.label = enums.ROLE_PERMISSIONS_CONTROLLER;
+    logger.error(`editing role and role permissions failed:::${enums.ROLE_PERMISSIONS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch role details and permissions
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of updated role .
+ * @memberof AdminRoleController
+ */
+
+export const activateDeactivateRole = async(req, res, next) => {
+  const { query: { action }, params: { role_code } } = req;
+  try {
+    const updatingStatus = action === 'activate' ? 'active' : 'deactivated';
+    const [ updatedStatus ] = await RoleService.updateRoleStatus([ role_code, updatingStatus ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id} Info: role details fetched from DB rolePermissions.admin.controllers.roles.js`);
+    return ApiResponse.success(res, enums.ACTIVATE_DEACTIVATE_ROLE_SUCCESSFULLY(updatingStatus), enums.HTTP_OK, updatedStatus);
+  } catch (error) {
+    error.label = enums.ACTIVATE_DEACTIVATE_ROLE_CONTROLLER;
+    logger.error(`updating role status in the DB failed:::${enums.ACTIVATE_DEACTIVATE_ROLE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * fetch all non-super admin roles
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -105,12 +203,16 @@ export const deleteRole = async (req, res, next) => {
 export const fetchRoles = async (req, res, next) => {
   try {
     const { query, admin } = req;
+    console.log(query);
     const  payload  = RolePayload.fetchRoles(query);
-    const [ roles, [ rolesCount ] ] = await RoleService.getRoles( [ ...payload ] );
+    console.log(payload);
+    const [ roles, [ rolesCount ] ] = await RoleService.getRoles(payload);
+    console.log('roles', roles);
+    console.log('rolesCount', rolesCount);
     const data = {
-      page: parseFloat(req.query.page),
+      page: parseFloat(req.query.page) || 1,
       total_count: Number(rolesCount.total_count),
-      total_pages: Helpers.calculatePages(Number(rolesCount.total_count), Number(req.query.per_page)),
+      total_pages: Helpers.calculatePages(Number(rolesCount.total_count), Number(req.query.per_page) || 10),
       roles
     };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched roles from the DB fetchRoles.admin.controllers.roles.js`);

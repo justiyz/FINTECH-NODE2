@@ -21,15 +21,21 @@ describe('', () => {
   });
 
   describe('Auth middleware catch block unit testings', () => {
-    it('should call validateUnAuthenticatedAdmin', async() => {
-      const req = { body: '' };
-      const data = await AdminAdminMiddleware.validateUnAuthenticatedAdmin('login')(req, res, next);
+    it('should call checkIfAdminExists', async() => {
+      const req = { params: '' };
+      const data = await AdminAdminMiddleware.checkIfAdminExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfSuperAdmin', async() => {
+      const req = { adminUser: '' };
+      const data = await AdminAdminMiddleware.checkIfSuperAdmin(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call validateUnAuthenticatedAdmin', async() => {
-      const req = { params: '' };
-      const data = await AdminAdminMiddleware.checkIfAdminIdExist(req, res, next);
+      const req = { body: '' };
+      const data = await AdminAdminMiddleware.validateUnAuthenticatedAdmin('login')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

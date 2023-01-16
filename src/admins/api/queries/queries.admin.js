@@ -1,4 +1,35 @@
 export default {
+  updateAdminProfile: `
+    UPDATE admins
+    SET 
+      updated_at = NOW(),
+      is_completed_profile = TRUE,
+      first_name = $2,
+      last_name = $3,
+      phone_number = $4,
+      gender = $5
+    WHERE admin_id = $1
+    RETURNING id, admin_id, first_name, last_name, gender, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
+
+  createAdminUserPermissions: `
+    INSERT INTO admin_user_permissions(
+      admin_id, resource_id, permissions
+    ) VALUES($1, $2, $3)`,
+
+  checkIfResourcePermissionCreated: `
+    SELECT permissions
+    FROM admin_user_permissions
+    WHERE admin_id = $1
+    AND resource_id = $2`,
+
+  editAdminUserPermissions: `
+    UPDATE admin_user_permissions
+    SET 
+    updated_at = NOW(),
+    permissions = $3
+    WHERE admin_id = $1
+    AND resource_id = $2`,
+    
   getAdminByEmail: `
     SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
       is_verified_email, is_created_password, is_completed_profile, status, refresh_token, is_deleted

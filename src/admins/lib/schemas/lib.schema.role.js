@@ -10,8 +10,22 @@ const createRole = Joi.object().keys({
   ).required()
 });
 
-const deleteRole = Joi.object().keys({
+const roleCodeParams = Joi.object().keys({
   role_code: Joi.string().required()
+});
+
+const editRole = Joi.object().keys({
+  name: Joi.string().optional(),
+  permissions: Joi.array().min(1).items(
+    Joi.object().keys({
+      resource_id: Joi.string().required(),
+      user_permissions: Joi.array().items(Joi.string().valid('create', 'read', 'update', 'delete', 'approve', 'reject')).required()
+    }).required()
+  ).optional()
+});
+
+const activateDeactivateRole = Joi.object().keys({
+  action: Joi.string().required().valid('activate', 'deactivate')
 });
 
 const inviteAdmin = Joi.object().keys({
@@ -45,9 +59,11 @@ const fetchRoles = Joi.object().keys({
 
 export default {
   createRole,
-  deleteRole,
   inviteAdmin,
   editAdminStatus,
   fetchAdmins,
-  fetchRoles
+  fetchRoles,
+  roleCodeParams,
+  editRole,
+  activateDeactivateRole
 };

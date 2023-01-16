@@ -32,7 +32,7 @@ const validateData = (schema, type) => async(req, res, next) => {
     const { message } = isValid.error.details[0];
     return Response.error(res, message.replace(/["]/gi, ''), HTTP_UNPROCESSABLE_ENTITY, VALIDATE_DATA_MIDDLEWARE);
   } catch (error) {
-    error.label = VALIDATE_DATA_MIDDLEWARE;
+    error.label = enums.VALIDATE_DATA_MIDDLEWARE;
     logger.error(`Joi validation for the incoming request failed:::${enums.VALIDATE_DATA_MIDDLEWARE}`, error.message);
     return next(error);
   }

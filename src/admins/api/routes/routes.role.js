@@ -33,12 +33,48 @@ router.get(
   RolesController.nonSuperAdminRoles
 );
 
+router.get(
+  '/:role_code/permissions',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.roleCodeParams, 'params'),
+  RoleMiddleware.adminAccess('role management ', 'read'),
+  RoleMiddleware.validateRoleCode,
+  RoleMiddleware.checkIfSuperAdminRole,
+  RolesController.rolePermissions
+);
+
+router.put(
+  '/:role_code',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.editRole, 'payload'),
+  RoleMiddleware.adminAccess('role management', 'update'),
+  RoleMiddleware.validateRoleCode,
+  RoleMiddleware.checkIfSuperAdminRole,
+  RoleMiddleware.checkAdminResources,
+  RolesController.editRoleWithPermissions
+);
+
+router.patch(
+  '/:role_code/status',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.activateDeactivateRole, 'query'),
+  Model(Schema.roleCodeParams, 'params'),
+  RoleMiddleware.adminAccess('role management', 'update'),
+  RoleMiddleware.validateRoleCode,
+  RoleMiddleware.checkIfSuperAdminRole,
+  RoleMiddleware.checkRoleCurrentStatus,
+  RolesController.activateDeactivateRole
+);
+
 router.delete(
   '/:role_code',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'delete'),
-  Model(Schema.deleteRole, 'params'),
+  Model(Schema.roleCodeParams, 'params'),
   RoleMiddleware.validateRoleCode,
   RoleMiddleware.checkIfRoleHasBeenAssigned,
   RolesController.deleteRole

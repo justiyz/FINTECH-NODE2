@@ -57,6 +57,7 @@ export default {
     UPDATE admins
     SET 
       updated_at = NOW(),
+      status = 'active',
       is_created_password = TRUE,
       password = $2
     WHERE admin_id = $1

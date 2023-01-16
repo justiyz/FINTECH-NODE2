@@ -21,6 +21,24 @@ describe('', () => {
   });
 
   describe('Role middleware catch block unit testings', () => {
+    it('should call validateRoleCode', async() => {
+      const req = '';
+      const data = await AdminRolesMiddleware.validateRoleCode(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfSuperAdminRole', async() => {
+      const req = '';
+      const data = await AdminRolesMiddleware.checkIfSuperAdminRole(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkRoleCurrentStatus', async() => {
+      const req = { roleDetails: '', query: '' };
+      const data = await AdminRolesMiddleware.checkRoleCurrentStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call adminAccess', async() => {
       const req = { admin: '' };
       const data = await AdminRolesMiddleware.adminAccess('users', 'read')(req, res, next);

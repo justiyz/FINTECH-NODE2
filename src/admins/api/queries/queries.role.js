@@ -1,6 +1,6 @@
 export default {
   fetchRole: `
-    SELECT id, code, name, status
+    SELECT id, code, name, status, created_at
     FROM admin_roles
     WHERE name = $1
     OR code = $1`,
@@ -29,6 +29,35 @@ export default {
       resource_id,
       name
     FROM admin_resources`,
+
+  updateRoleName: `
+    UPDATE admin_roles
+    SET 
+      updated_at = NOW(),
+      name = $2
+    WHERE code = $1`,
+
+  updateRoleStatus: `
+    UPDATE admin_roles
+    SET 
+      updated_at = NOW(),
+      status = $2
+    WHERE code = $1
+    RETURNING *`,
+
+  checkIfResourcePermissionCreated: `
+    SELECT permissions
+    FROM admin_role_permissions
+    WHERE role_type = $1
+    AND resource_id = $2`,
+
+  editRolePermissions: `
+    UPDATE admin_role_permissions
+    SET
+      updated_at = NOW(),
+      permissions = $3
+    WHERE role_type = $1
+    AND resource_id = $2`,
 
   fetchNonSuperAdminRoles:`
       SELECT
@@ -73,17 +102,17 @@ export default {
         status,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date
     FROM admin_roles
-    WHERE (name ILIKE TRIM($3) OR $3 IS NULL) AND (status = $4 OR $4 IS NULL) AND 
-    ((created_at::DATE BETWEEN $5::DATE AND $6::DATE) OR ($5 IS NULL AND $6 IS NULL))
-    OFFSET $1
-    LIMIT $2
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
+    ((created_at::DATE BETWEEN $3::DATE AND $3::DATE) OR ($4 IS NULL AND $4 IS NULL))
+    OFFSET $5
+    LIMIT $6
   `,
 
   getRoleCount:`
   SELECT
        COUNT(code) AS total_count
     FROM admin_roles
-    WHERE (name = LOWER(TRIM($3)) OR $3 IS NULL) OR (status = $4 OR $4 IS NULL) OR 
-    (created_at::DATE BETWEEN $5::DATE AND $6::DATE)
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
+    ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `
 };

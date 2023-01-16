@@ -1,8 +1,11 @@
 import * as AdminService from '../services/services.admin';
-import AdminPayload from '../../lib/payloads/lib.payload.roles.js';
+import * as AuthService from '../services/services.auth';
+import * as RoleService from '../services/services.role';
+import AdminPayload from '../../lib/payloads/lib.payload.admin';
 import MailService from '../services/services.email';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import config from '../../../users/config/index';
 import * as fetchAdminServices from '../../services/services.admin';
@@ -10,6 +13,101 @@ import { adminActivityTracking } from '../../lib/monitor';
 
 
 const { SEEDFI_NODE_ENV } = config;
+
+/** 
+*  admin completes their profile for the first time
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing admin profile
+ * @memberof AdminAdminController
+ */
+export const completeAdminProfile = async(req, res, next) => {
+  try {
+    const { admin, body } = req;
+    if (admin.is_completed_profile) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin has previously completed profile completeAdminProfile.admin.controllers.admin.js`);
+      return ApiResponse.error(res, enums.ADMIN_ALREADY_COMPLETED_PROFILE, enums.HTTP_BAD_REQUEST, enums.COMPLETE_ADMIN_PROFILE_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin has not previously completed profile completeAdminProfile.admin.controllers.amin.js`);
+    const payload = AdminPayload.completeAdminProfile(admin, body);
+    const [ updatedAdmin ] = await AdminService.updateAdminProfile(payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin profile completed successfully completeAdminProfile.admin.controllers.admin.js`);
+    adminActivityTracking(req.admin.admin_id, 7, 'success');
+    return ApiResponse.success(res, enums.ADMIN_COMPLETE_PROFILE_SUCCESSFUL, enums.HTTP_OK, updatedAdmin);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 7, 'fail');
+    error.label = enums.COMPLETE_ADMIN_PROFILE_CONTROLLER;
+    logger.error(`completing admin profile in the DB failed${enums.COMPLETE_ADMIN_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/** 
+*  fetch admin personal permissions
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing admin permissions details
+ * @memberof AdminAdminController
+ */
+export const adminPermissions = async(req, res, next) => {
+  try {
+    const { admin, adminUser } = req;
+    const [ adminRole ] = await RoleService.fetchRole([ adminUser.role_type ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched role type details adminPermissions.admin.controllers.amin.js`);
+    const adminResources = await RoleService.fetchAdminResources();
+    const [ rolePermissions, adminPermissions ] = await AuthService.fetchPermissions(adminUser.role_type, adminUser.admin_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched system resources and admin's role and personal permissions adminPermissions.admin.controllers.amin.js`);
+    const fullRoleBasedResources = await Helpers.processRoleBasedPermissions(adminUser.admin_id, adminResources, rolePermissions);
+    const fullAdminBasedResources = await Helpers.processAdminBasedPermissions(adminUser.role_type, adminResources, adminPermissions);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: admin role and personal permissions aggregated adminPermissions.admin.controllers.amin.js`);
+    const data = {
+      admin_id: admin.admin_id,
+      role_type: adminUser.role_type,
+      role_name: adminRole.name,
+      fullRoleBasedResources,
+      fullAdminBasedResources
+    };
+    return ApiResponse.success(res, enums.ADMIN_PERMISSIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.ADMIN_PERMISSIONS_CONTROLLER;
+    logger.error(`fetching admin personal permissions failed${enums.ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/** 
+*  edit admin personal permissions
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing admin permissions details
+ * @memberof AdminAdminController
+ */
+export const editAdminPermissions = async(req, res, next) => {
+  try {
+    const { admin, body, params: { admin_id } } = req;
+    if (body.permissions) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role permissions is being edited editAdminPermissions.admin.controllers.admin.js`);
+      const editAdminPermissions = await body.permissions.map(async(permission) => {
+        const [ resourcePermissionExists ] = await AdminService.checkIfResourcePermissionCreated([ admin_id,  permission.resource_id ]);
+        !resourcePermissionExists ? await AdminService.createAdminUserPermissions([ admin_id,  permission.resource_id, permission.user_permissions.join() ]) :
+          await AdminService.editAdminUserPermissions([ admin_id,  permission.resource_id, permission.user_permissions.join() ]);
+        return permission;
+      });
+      await Promise.all([ editAdminPermissions ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin permissions edited successfully editAdminPermissions.admin.controllers.admin.js`);
+    }
+    adminActivityTracking(req.admin.admin_id, 8, 'success');
+    return ApiResponse.success(res, enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL, enums.HTTP_OK, { admin_id, ...body });
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 8, 'fail');
+    error.label = enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER;
+    logger.error(`editing admin permissions failed:::${enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
 
 /**
  * add new admin request
