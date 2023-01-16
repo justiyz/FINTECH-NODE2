@@ -2,6 +2,8 @@ import * as RoleService from '../services/services.role';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { adminActivityTracking } from '../../lib/monitor';
+import RolePayload from '../../lib/payloads/lib.payload.roles.js';
+import * as Helpers from '../../lib/utils/lib.util.helpers';
 
 /**
  * create role for admin users
@@ -99,3 +101,24 @@ export const deleteRole = async (req, res, next) => {
     return next(error);
   }
 };
+
+export const fetchRoles = async (req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const  payload  = RolePayload.fetchRoles(query);
+    const [ roles, [ rolesCount ] ] = await RoleService.getRoles( [ ...payload ] );
+    const data = {
+      page: parseFloat(req.query.page),
+      total_count: Number(rolesCount.total_count),
+      total_pages: Helpers.calculatePages(Number(rolesCount.total_count), Number(req.query.per_page)),
+      roles
+    };
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched roles from the DB fetchRoles.admin.controllers.roles.js`);
+    return ApiResponse.success(res, enums.ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_ROLES;
+    logger.error(`fetching roles in the DB failed:::${enums.FETCH_ROLES}`, error.message);
+    return next(error);
+  }
+};
+

@@ -62,5 +62,28 @@ export default {
       SELECT * 
       FROM admin_roles
       WHERE code = $1 or
+  `,
+
+  getAllRoles:`
+    SELECT
+        id,
+        code,
+        name,
+        (SELECT COUNT(id) FROM admins WHERE role_type = code) AS number_of_admins,
+        status,
+        to_char(DATE (created_at)::date, 'Mon DD YYYY') As date
+    FROM admin_roles
+    WHERE (name ILIKE TRIM($3) OR $3 IS NULL) AND (status = $4 OR $4 IS NULL) AND 
+    ((created_at::DATE BETWEEN $5::DATE AND $6::DATE) OR ($5 IS NULL AND $6 IS NULL))
+    OFFSET $1
+    LIMIT $2
+  `,
+
+  getRoleCount:`
+  SELECT
+       COUNT(code) AS total_count
+    FROM admin_roles
+    WHERE (name = LOWER(TRIM($3)) OR $3 IS NULL) OR (status = $4 OR $4 IS NULL) OR 
+    (created_at::DATE BETWEEN $5::DATE AND $6::DATE)
   `
 };

@@ -1,5 +1,5 @@
 import * as AdminService from '../services/services.admin';
-import AdminPayload from '../../lib/payloads/lip.payload.admin';
+import AdminPayload from '../../lib/payloads/lib.payload.roles.js';
 import MailService from '../services/services.email';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Hash from '../../lib/utils/lib.util.hash';
