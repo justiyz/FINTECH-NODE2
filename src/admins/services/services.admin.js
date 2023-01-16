@@ -1,7 +1,6 @@
 import DB from '../services/services.db';
 import enums from '../../users/lib/enums';
-import { calculatePages } from '../lib/paginate';
-
+import * as Helpers from '../lib/utils/lib.util.helpers';
 
 export const fetchAllAdmins = async(query, filter) => {
   const {
@@ -27,9 +26,9 @@ export const fetchAllAdmins = async(query, filter) => {
     result.forEach((item) => delete item.total);
   }
   return {
-    total: Number(count),
     page: pageType,
-    total_page: calculatePages(Number(count), Number(returnPerPage)),
+    total_count: Number(count),
+    total_page: Helpers.calculatePages(Number(count), Number(returnPerPage)),
     admins: result 
   };
 };

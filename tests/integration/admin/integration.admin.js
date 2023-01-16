@@ -184,7 +184,7 @@ describe('Admin', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({ 
-          status: 'active'
+          status: 'deactivated'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -204,13 +204,13 @@ describe('Admin', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({ 
-          status: 'active'
+          status: 'deactivated'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ADMIN_CURRENT_STATUS('active'));
+          expect(res.body.message).to.equal(enums.ADMIN_CURRENT_STATUS('deactivated'));
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -223,7 +223,7 @@ describe('Admin', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({ 
-          status: 'active'
+          status: 'deactivated'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_NOT_FOUND);
