@@ -28,7 +28,7 @@ export const fetchAllAdmins = async(query, filter) => {
   return {
     page: pageType,
     total_count: Number(count),
-    total_page: Helpers.calculatePages(Number(count), Number(returnPerPage)),
+    total_pages: Helpers.calculatePages(Number(count), Number(returnPerPage)),
     admins: result 
   };
 };

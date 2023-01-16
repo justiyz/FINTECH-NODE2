@@ -40,4 +40,11 @@ router.patch(
   AdminController.editAdminStatus
 );
 
+router.get(
+  '/profile',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  AdminController.getProfile
+);
+
 export default router;

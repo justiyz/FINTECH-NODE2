@@ -45,7 +45,6 @@ export const inviteAdmin = async(req, res, next) => {
     return next(error);
   }
 };
-
 /**
  * fetch filter and search all admins with pagination
  * @param {Request} req - The request from the endpoint.
@@ -94,6 +93,27 @@ export const editAdminStatus = async(req, res, next) => {
   } catch (error) {
     error.label = enums.EDIT_ADMIN_STATUS_CONTROLLER;
     logger.error(`Editing admin status in the db failed:::${enums.EDIT_ADMIN_STATUS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * get admin profile
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns admin details.
+ * @memberof AdminAdminController
+ */
+export const getProfile = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: Admin data info fetched. getProfile.controllers.admin.admin.js`);
+    delete admin.refresh_token;
+    return ApiResponse.success(res, enums.FETCH_ADMIN_PROFILE, enums.HTTP_OK, admin);
+  } catch (error){
+    error.label = enums.GET_PROFILE_CONTROLLER;
+    logger.error(`Fetching admin profile failed:::${enums.GET_PROFILE_CONTROLLER}`, error.message);
     return next(error);
   }
 };

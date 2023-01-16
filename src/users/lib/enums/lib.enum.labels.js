@@ -72,3 +72,4 @@ export const FETCH_ALL_ADMINS_CONTROLLER = 'AdminController::fetchAllAdmins';
 export const EDIT_ADMIN_STATUS_CONTROLLER = 'AdminController::editAdminStatus';
 export const CHECK_IF_ADMIN_ID_EXIST_MIDDLEWARE = 'AdminAdminMiddleware::checkIfAdminIdExist';
 export const CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE = 'AdminAdminMiddleware::checkAdminCurrentStatus';
+export const GET_PROFILE_CONTROLLER = 'AdminController::getProfile';
