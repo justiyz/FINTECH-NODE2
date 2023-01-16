@@ -50,4 +50,11 @@ describe('', () => {
     });
   });
   
+  it('should call fetchRoles', async() => {
+    const req = { query: '', admin: '' };
+    const data = await AdminRolesController.fetchRoles(req, res, next);
+    expect(data.code).to.equal(500);
+    expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+  });
+
 });

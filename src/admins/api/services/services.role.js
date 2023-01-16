@@ -10,4 +10,11 @@ export const fetchNonSuperAdminRoles = (payload) => DB.transact('fetchNonSuperAd
 export const deleteRole = (payload) => DB.noReturnTransact('deleteRole', payload, enums.ADMIN_ROLE_QUERY);
 export const fetchAdminByRoleType = (payload) => DB.singleTransact('fetchAdminByRoleType', payload, enums.ADMIN_ROLE_QUERY);
 export const deleteRoleType = (payload) => DB.noReturnTransact('deleteRoleType', payload, enums.ADMIN_ROLE_QUERY);
+export const getRoles = async (payload) => {
+  const [ roles, [ { count } ]  ] = await Promise.all([
+    DB.transact('getAllRoles', [ ...payload ], enums.ADMIN_ROLE_QUERY),
+    DB.transact('getRoleCount', [ ...payload ], enums.ADMIN_ROLE_QUERY)
+  ]);
+  return { roles, count};
+};
 

@@ -33,11 +33,19 @@ const fetchAdmins = Joi.object().keys({
   status: Joi.string().valid('active', 'deactivated'),
   search: Joi.string()
 });
-
+const fetchRoles = Joi.object().keys({
+  page: Joi.number().optional(),
+  per_page: Joi.number().optional(),
+  search: Joi.string().optional(),
+  status: Joi.string().optional(),
+  from_date: Joi.date().optional(),
+  to_date: Joi.date().optional()
+});
 export default {
   createRole,
   deleteRole,
   inviteAdmin,
   editAdminStatus,
-  fetchAdmins
+  fetchAdmins,
+  fetchRoles
 };

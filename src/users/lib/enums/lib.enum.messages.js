@@ -73,3 +73,4 @@ export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not sup
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
 export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;
 export const FETCH_ADMIN_PROFILE = 'Admin profile fetched successfully';
+export const ROLES_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';

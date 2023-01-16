@@ -8,9 +8,9 @@ export default {
   ],
 
   fetchRoles: (query) => [
-    query.page && query.per_page ? (query.page - 1) * query.per_page : undefined,
-    query.per_page,
-    query.search ? `%${query.search}%` : undefined,
+    query.page && query.per_page ? (query.page - 1) * query.per_page : 1,
+    query.per_page ? query.per_page : 10,
+    query.search ? `%${query.search}%` : null,
     query.status,
     query.from_date,
     query.to_date
