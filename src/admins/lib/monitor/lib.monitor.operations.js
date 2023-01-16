@@ -15,7 +15,6 @@ export const operations = {
   14: 'DELRLE', // delete role type
   15: 'EDTRLE', // edit role type
   16: 'ACTADM', // activate admin user
-  17: 'DACTADM',  // deactivated admin user
-  18: 'FETRLE'  // fetch roles
+  17: 'DACTADM'  // deactivated admin user
 };
 
