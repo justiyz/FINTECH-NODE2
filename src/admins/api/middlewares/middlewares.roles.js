@@ -122,8 +122,9 @@ export const checkAdminResources = async(req, res, next) => {
   }
 };
 
+
 /**
- * check if role has been assigned
+ * check if role name is unique
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.

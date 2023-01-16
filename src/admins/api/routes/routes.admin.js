@@ -21,6 +21,26 @@ router.post(
 );
 
 router.get(
+  '/',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.fetchAdmins, 'query'),
+  RolesMiddleware.adminAccess('administrators', 'view'),
+  AdminController.fetchAllAdmins
+);
+
+router.patch(
+  '/:admin_id',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.editAdminStatus, 'payload'),
+  RolesMiddleware.adminAccess('administrators', 'update'),
+  AdminMiddleware.checkIfAdminIdExist,
+  AdminMiddleware.checkAdminCurrentStatus,
+  AdminController.editAdminStatus
+);
+
+router.get(
   '/profile',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,

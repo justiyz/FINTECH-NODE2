@@ -27,5 +27,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call validateUnAuthenticatedAdmin', async() => {
+      const req = { params: '' };
+      const data = await AdminAdminMiddleware.checkIfAdminIdExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
