@@ -129,8 +129,10 @@ export const sendAdminPasswordToken = async(req, res, next) => {
   try {
     const { admin, passwordToken} = req;
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: successfully generated password token sendAdminPasswordToken.admin.controllers.auth.js`);
+    adminActivityTracking(req.admin.admin_id, 18, 'success');
     return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {passwordToken});
   } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 18, 'fail');
     error.label = enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER;
     logger.error(`send password reset token failed${enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER}`, error.message);
     return next(error);

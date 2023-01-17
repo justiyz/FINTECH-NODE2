@@ -71,6 +71,7 @@ export default {
   ORDER BY admins.created_at DESC
   OFFSET $4 LIMIT $5
 `,
+
   fetchAndSearchAllAdmin: `
     SELECT
       count(*) OVER() AS total,
@@ -86,6 +87,7 @@ export default {
     ORDER BY admins.created_at DESC
     OFFSET $2 LIMIT $3
     `,
+
   editAdminStatus:`
       UPDATE admins
       SET
@@ -93,6 +95,13 @@ export default {
       status = $2
       WHERE admin_id = $1
       RETURNING *
-    `
+    `,
+
+  updateUserRoleType: `
+    UPDATE admins
+    SET 
+      updated_at = NOW(),
+      role_type = $2
+    WHERE admin_id = $1`
 };
     

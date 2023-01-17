@@ -268,6 +268,7 @@ export const generateAdminResetPasswordToken = async(req, res, next) => {
     req.passwordToken = token;
     return next();
   } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 18, 'fail');
     error.label = enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN_MIDDLEWARE;
     logger.error(`generating a temporary token to set new password failed:::${enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN_MIDDLEWARE}`, error.message);
     return next(error);
