@@ -24,11 +24,21 @@ const verifyOtp = Joi.object().keys({
   verifyValue: Joi.string().required()
 });
 
+const idVerification = Joi.object().keys({
+  id_type:  Joi.string().required(),
+  card_number:  Joi.string().required(),
+  image_url:  Joi.string().required(),
+  verification_url:  Joi.string().required(),
+  issued_date:  Joi.string().optional() ,
+  expiry_date:  Joi.string().optional()
+});
+
 export default  {
   updateFcmToken,
   updateRefreshToken,
   selfieUpload,
   bvnVerification,
   verifyEmail,
-  verifyOtp
+  verifyOtp,
+  idVerification
 };   

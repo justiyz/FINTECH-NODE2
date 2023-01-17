@@ -269,3 +269,26 @@ export const verifyEmailVerificationToken = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * check user id verification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const isUploadedVerifiedId = async(req, res, next) => {
+  try {
+    if (req.user.is_uploaded_identity_card) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      decoded that User Id is already verified in the DB. isUploadedVerifiedId.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CHECK_USER_ID_VERIFICATION, enums.HTTP_BAD_REQUEST, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE;
+    logger.error(`checking if user email is not already existing failed::${enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

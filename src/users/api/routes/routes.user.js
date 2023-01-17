@@ -59,7 +59,7 @@ router.post(
   AuthMiddleware.generateVerificationToken('token'),
   UserController.requestEmailVerification
 );
-
+  
 router.get(
   '/verify-email',
   Model(Schema.verifyOtp, 'query'),
@@ -67,5 +67,15 @@ router.get(
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   UserController.verifyEmail
 );
-
+    
+router.post(
+  '/id-verification',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.idVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isUploadedVerifiedId,
+  UserController.idUploadVerification
+);
 export default router;

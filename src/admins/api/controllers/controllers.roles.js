@@ -203,12 +203,8 @@ export const deleteRole = async (req, res, next) => {
 export const fetchRoles = async (req, res, next) => {
   try {
     const { query, admin } = req;
-    console.log(query);
     const  payload  = RolePayload.fetchRoles(query);
-    console.log(payload);
     const [ roles, [ rolesCount ] ] = await RoleService.getRoles(payload);
-    console.log('roles', roles);
-    console.log('rolesCount', rolesCount);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(rolesCount.total_count),

@@ -38,7 +38,8 @@ export const REQUEST_EMAIL_VERIFICATION_CONTROLLER = 'UserController::requestEma
 export const VERIFY_EMAIL_CONTROLLER = 'UserController::verifyEmail';
 export const IS_EMAIL_VERIFIED_MIDDLEWARE = 'UserMiddleware::isEmailVerified';
 export const IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE = 'UserMiddleware::isBvnPreviouslyExisting';
-
+export const ID_UPLOAD_VERIFICATION_CONTROLLER = 'UserMiddleware::idUploadVerification';
+export const IS_UPDATED_VERIFICATION_ID_MIDDLEWARE = 'UserMiddleware::checkUserIdVerification';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';

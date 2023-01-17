@@ -7,6 +7,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import MailService from '../services/services.email';
+import UserPayload from '../../lib/payloads/lib.payload.user';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -158,6 +159,32 @@ export const verifyEmail = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 4, 'fail');
     error.label = enums.VERIFY_EMAIL_CONTROLLER;
     logger.error(`verifying user email address in the DB failed:::${enums.VERIFY_EMAIL_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user id verification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response
+ * @memberof UserController
+ */
+export const idUploadVerification = async(req, res, next) => {
+  try {
+    const { user, body } = req; 
+    const payload = UserPayload.imgVerification(user, body);
+    await UserService.updateIdVerification(payload);
+    const data =  await UserService.userIdVerification(user.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    user id verification uploaded successfully DB idUploadVerification.admin.controller.user.js`);
+    userActivityTracking(req.user.user_id, 18, 'success');
+    return ApiResponse.success(res, enums.ID_UPLOAD_VERIFICATION, enums.HTTP_OK, data);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 18, 'fail');
+    error.label = enums.ID_UPLOAD_VERIFICATION_CONTROLLER;
+    logger.error(`Id verification failed:::${enums.ID_UPLOAD_VERIFICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };
