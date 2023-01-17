@@ -88,6 +88,9 @@ export const adminPermissions = async(req, res, next) => {
 export const editAdminPermissions = async(req, res, next) => {
   try {
     const { admin, body, params: { admin_id } } = req;
+    if(body.role_code) {
+      await AdminService.updateUserRoleType([ admin_id, body.role_code.trim().toUpperCase() ]);
+    }
     if (body.permissions) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role permissions is being edited editAdminPermissions.admin.controllers.admin.js`);
       const editAdminPermissions = await body.permissions.map(async(permission) => {

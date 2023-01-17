@@ -24,7 +24,7 @@ export const processRoleBasedPermissions = async(role_type, adminResources, role
       code: role_type,
       name: resource.name,
       resource_id: resource.resource_id,
-      permissions: ''
+      permissions: []
     });
     return resource;
   });
@@ -43,7 +43,7 @@ export const processAdminBasedPermissions = async(admin_id, adminResources, admi
       admin_id: admin_id,
       name: resource.name,
       resource_id: resource.resource_id,
-      permissions: ''
+      permissions: []
     });
     return resource;
   });

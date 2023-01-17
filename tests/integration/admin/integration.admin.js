@@ -9,6 +9,41 @@ const { expect } = chai;
 chai.use(chaiHttp);
 
 describe('Admin', () => {
+  describe('Create new admin role', () => {
+    it('Should create role for underwriter successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/role')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Underwriter',
+          permissions: [ 
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
+              user_permissions:  [ 'read' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          // console.log('=====>>>'. res.body);
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ROLE_CREATION_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.name).to.equal('Underwriter');
+          process.env.SEEDFI_UNDERWRITER_ROLE_TYPE = res.body.data.roleCode;
+          done();
+        });
+    });
+  });
   describe('Invite admin', () => {
     it('Should throw error if an empty object is sent.', (done) => {
       chai.request(app)
@@ -402,26 +437,6 @@ describe('Admin', () => {
           done();
         });
     });
-    it('Should return error if permissions array is not sent', (done) => {
-      chai.request(app)
-        .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}hfyi/permissions`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(422);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('permissions is required');
-          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
     it('Should return error if a resource id is sent more than once', (done) => {
       chai.request(app)
         .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
@@ -497,7 +512,7 @@ describe('Admin', () => {
         });
     });
 
-    it('Should edit admin permissions successfully', (done) => {
+    it('Should edit admin role and permissions successfully', (done) => {
       chai.request(app)
         .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
         .set({
@@ -505,6 +520,7 @@ describe('Admin', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
+          role_code: process.env.SEEDFI_UNDERWRITER_ROLE_TYPE,
           permissions: [ 
             {
               resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
@@ -523,6 +539,67 @@ describe('Admin', () => {
               user_permissions:  [ 'read' ]
             }
           ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.admin_id).to.equal(process.env.SEEDFI_ADMIN_TWO_ID);
+          done();
+        });
+    });
+    it('Should throw error if invalid role_code is sent', (done) => {
+      chai.request(app)
+        .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          role_code: `${process.env.SEEDFI_ADMIN_ROLE_HEAD_OPS}UI`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.VALIDATE_ROLE_CODE_NOT_EXIST);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if super admin role_code is sent', (done) => {
+      chai.request(app)
+        .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          role_code: 'SADM'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(403);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SUPER_ADMIN_ROLE_NONASSIGNABLE);
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should edit admin role type successfully', (done) => {
+      chai.request(app)
+        .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          role_code: process.env.SEEDFI_ADMIN_ROLE_HEAD_OPS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

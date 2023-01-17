@@ -83,6 +83,9 @@ export const checkRoleNameIsUnique = async(req, res, next) => {
 export const checkIfSuperAdminRole = async(req, res, next) => {
   try {
     const role = req.body.role_code || req.params.role_code;
+    if (!role) {
+      return next();
+    }
     if (role === 'SADM') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms that role is a super admin role checkIfSuperAdminRole.admin.middlewares.admin.js`);
       return ApiResponse.error(res, req.body.role_code ? enums.SUPER_ADMIN_ROLE_NONASSIGNABLE : enums.ACTION_NOT_ALLOWED_FOR_SUPER_ADMIN, 
@@ -211,6 +214,9 @@ export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
 export const validateRoleCode = async(req, res, next) => {
   try {
     const role = req.body.role_code || req.params.role_code;
+    if (!role) {
+      return next();
+    }
     const [ roleCode ] =  await RoleService.fetchRole([ role ]);
     if (!roleCode) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 

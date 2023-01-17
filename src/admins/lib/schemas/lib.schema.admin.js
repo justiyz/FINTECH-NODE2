@@ -13,12 +13,13 @@ const adminCompleteProfile = Joi.object().keys({
 });
 
 const editAdminPermissions = Joi.object().keys({
+  role_code: Joi.string().optional(),
   permissions: Joi.array().min(1).items(
     Joi.object().keys({
       resource_id: Joi.string().required(),
       user_permissions: Joi.array().items(Joi.string().valid('create', 'read', 'update', 'delete', 'approve', 'reject')).required()
     }).required()
-  ).required()
+  ).optional()
 });
 
 const adminIdParams = Joi.object().keys({
