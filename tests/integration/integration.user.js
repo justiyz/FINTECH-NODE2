@@ -588,7 +588,7 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.ID_VERIFICATION);
+          expect(res.body.message).to.equal(enums.ID_UPLOAD_VERIFICATION);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });

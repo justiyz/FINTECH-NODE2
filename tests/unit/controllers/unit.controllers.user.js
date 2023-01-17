@@ -87,7 +87,7 @@ describe('', () => {
     });
     it('should call idVerification', async() => {
       const req = { user: '', body: ''};
-      const data = await UserController.idVerification(req, res, next);
+      const data = await UserController.idUploadVerification(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

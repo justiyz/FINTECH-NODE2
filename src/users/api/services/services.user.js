@@ -11,5 +11,5 @@ export const updateUserBvn = (payload) => DB.transact('updateUserBvn', payload, 
 export const emailVerificationToken = (payload) => DB.transact('emailVerificationToken', payload, enums.USER_QUERY);
 export const verifyEmail = (payload) => DB.transact('verifyEmail', payload, enums.USER_QUERY);
 export const fetchAllExistingBvns = (payload) => DB.transact('fetchAllExistingBvns', payload, enums.USER_QUERY);
-export const userIdVerification = (payload) => DB.transact('userIdVerification', payload, enums.USER_QUERY);
 export const updateIdVerification = (payload) => DB.transact('updateIdVerification', payload, enums.USER_QUERY);
+export const userIdVerification = (payload) => DB.transact('userIdVerification', payload, enums.USER_QUERY);

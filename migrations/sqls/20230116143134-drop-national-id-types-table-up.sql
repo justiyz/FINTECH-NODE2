@@ -1,4 +1,3 @@
-/* Replace with your SQL commands */
 
 ALTER TABLE user_national_id_details DROP COLUMN IF EXISTS id_type;
 DROP TABLE IF EXISTS national_id_types CASCADE;

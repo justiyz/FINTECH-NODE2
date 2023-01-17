@@ -1,15 +1,15 @@
 import dayjs from 'dayjs';
-import AuthPayload from '../../lib/payloads/lib.payload.auth';
-import * as AuthService from '../services/services.auth';
-import * as UserService from '../services/services.user';
-import ApiResponse from '../../lib/http/lib.http.responses';
-import enums from '../../lib/enums';
-import config from '../../config';
-import sendSMS from '../../config/sms';
-import { signupSms, resendSignupOTPSms } from '../../lib/templates/sms';
-import { userActivityTracking } from '../../lib/monitor';
-import * as Hash from '../../lib/utils/lib.util.hash';
-import MailService from '../services/services.email';
+import AuthPayload from '../../../users/lib/payloads/lib.payload.auth';
+import * as AuthService from '../../../users/api/services/services.auth';
+import * as UserService from '../../../users/api/services/services.user';
+import ApiResponse from '../../../users/lib/http/lib.http.responses';
+import enums from '../../../users/lib/enums';
+import config from '../../../users/config';
+import sendSMS from '../../../users/config/sms';
+import { signupSms, resendSignupOTPSms } from '../../../users/lib/templates/sms';
+import { userActivityTracking } from '../../../users/lib/monitor';
+import * as Hash from '../../../users/lib/utils/lib.util.hash';
+import MailService from '../../../users/api/services/services.email';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -21,7 +21,7 @@ const { SEEDFI_NODE_ENV } = config;
  * @returns { JSON } - A JSON response with the users verification details
  * @memberof AuthController
  */
-export const signup = async(req, res, next) => {
+export const signup = async (req, res, next) => {
   try {
     const { body, otp } = req;
     const expireAt = dayjs().add(10, 'minutes');
@@ -30,7 +30,7 @@ export const signup = async(req, res, next) => {
     const [ registeredUser ] = await AuthService.registerUser(payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database signup.controllers.auth.js`);
     const data = { ...registeredUser, otp, otpExpire: expirationTime };
-    if(body.referral_code) {
+    if (body.referral_code) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload signup.controllers.auth.js`);
       req.registeredUser = registeredUser;
       req.expirationTime = expirationTime;
@@ -57,7 +57,7 @@ export const signup = async(req, res, next) => {
  * @returns { JSON } - A JSON response with the users verification details
  * @memberof AuthController
  */
-export const processReferral = async(req, res, next) => {
+export const processReferral = async (req, res, next) => {
   try {
     const { body, otp, expirationTime, registeredUser, referringUserDetails } = req;
     const [ referralPreviouslyRecorded ] = await AuthService.checkIfReferralPreviouslyRecorded([ referringUserDetails.user_id, registeredUser.user_id ]);
@@ -87,7 +87,7 @@ export const processReferral = async(req, res, next) => {
  * @returns { JSON } - A JSON response with the users verification details
  * @memberof AuthController
  */
-export const resendSignupOtp = async(req, res, next) => {
+export const resendSignupOtp = async (req, res, next) => {
   try {
     const { body, otp, user } = req;
     const expireAt = dayjs().add(30, 'minutes');
@@ -118,7 +118,7 @@ export const resendSignupOtp = async(req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof AuthController
  */
-export const verifyAccount = async(req, res, next) => {
+export const verifyAccount = async (req, res, next) => {
   try {
     const {
       body, user, tokenDetails: { token, refreshToken, tokenExpireAt }, referralCode
@@ -150,7 +150,7 @@ export const verifyAccount = async(req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof AuthController
  */
-export const login = async(req, res, next) => {
+export const login = async (req, res, next) => {
   try {
     const { user, tokenDetails: { token, refreshToken, tokenExpireAt } } = req;
     const [ loggedInUser ] = await AuthService.loginUserAccount([ user.user_id, refreshToken ]);
@@ -173,7 +173,7 @@ export const login = async(req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof AuthController
  */
-export const completeProfile = async(req, res, next) => {
+export const completeProfile = async (req, res, next) => {
   try {
     const { user, body } = req;
     const hash = await Hash.hashData(body.password.trim());
@@ -199,14 +199,14 @@ Forgot password
  * @returns { JSON } - A JSON response containing user details
  * @memberof AuthController
  */
-export const forgotPassword = async(req, res, next) => {
+export const forgotPassword = async (req, res, next) => {
   try {
     const { user, otp } = req;
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
     const payload = [ user.email, otp, expireAt ];
     await AuthService.forgotPassword(payload);
-    const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
+    const data = { user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email for user to reset password has been sent successfully to users mail successfully forgotPassword.controller.auth.js`);
     userActivityTracking(req.user.user_id, 8, 'success');
@@ -231,13 +231,13 @@ Reset password token
  * @returns { JSON } - A JSON response containing user details
  * @memberof AuthController
  */
-export const resetPasswordToken = async(req, res, next) => {
+export const resetPasswordToken = async (req, res, next) => {
   try {
-    const { user, passwordToken} = req;
+    const { user, passwordToken } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
     decoded that generated password token was successful resetPasswordToken.middlewares.auth.js`);
     userActivityTracking(req.user.user_id, 20, 'success');
-    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, {passwordToken});
+    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken });
   } catch (error) {
     userActivityTracking(req.user.user_id, 20, 'fail');
     error.label = enums.RESET_PASSWORD_TOKEN_CONTROLLER;
@@ -254,11 +254,11 @@ Reset user password
  * @returns { JSON } - A JSON response containing user details
  * @memberof AuthController
  */
-export const resetPassword = async(req, res, next) => {
+export const resetPassword = async (req, res, next) => {
   try {
     const { user, body } = req;
     const hash = Hash.hashData(body.password.trim());
-    if(!user.is_verified_email){
+    if (!user.is_verified_email) {
       await AuthService.verifyUserEmail(user.user_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       user email successfully verified. resetPassword.controllers.auth.js`);

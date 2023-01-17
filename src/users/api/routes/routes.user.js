@@ -75,7 +75,7 @@ router.post(
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.checkUserIdVerification,
-  UserController.idVerification
+  UserMiddleware.isUploadedVerifiedId,
+  UserController.idUploadVerification
 );
 export default router;

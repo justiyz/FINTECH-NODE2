@@ -171,20 +171,20 @@ export const verifyEmail = async(req, res, next) => {
  * @returns { JSON } - A JSON response
  * @memberof UserController
  */
-export const idVerification = async(req, res, next) => {
+export const idUploadVerification = async(req, res, next) => {
   try {
     const { user, body } = req; 
     const payload = UserPayload.imgVerification(user, body);
-    await UserService.userIdVerification(payload);
-    await UserService.updateIdVerification(user.user_id);
+    await UserService.updateIdVerification(payload);
+    const data =  await UserService.userIdVerification(user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    user id verification uploaded successfully DB userImageVerification.controller.user.js`);
+    user id verification uploaded successfully DB idUploadVerification.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
-    return ApiResponse.success(res, enums.ID_VERIFICATION, enums.HTTP_OK);
+    return ApiResponse.success(res, enums.ID_UPLOAD_VERIFICATION, enums.HTTP_OK, data);
   } catch (error) {
     userActivityTracking(req.user.user_id, 18, 'fail');
-    error.label = enums.ID_VERIFICATION_CONTROLLER;
-    logger.error(`Id verification failed:::${enums.ID_VERIFICATION_CONTROLLER}`, error.message);
+    error.label = enums.ID_UPLOAD_VERIFICATION_CONTROLLER;
+    logger.error(`Id verification failed:::${enums.ID_UPLOAD_VERIFICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };

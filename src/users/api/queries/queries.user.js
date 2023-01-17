@@ -80,7 +80,7 @@ export default {
         updated_at = NOW()
       WHERE user_id = $1
       `,
-  userIdVerification: `
+  updateIdVerification: `
      INSERT INTO user_national_id_details(
       user_id,
       id_type,
@@ -89,14 +89,15 @@ export default {
       verification_url,
       issued_date,
       expiry_date
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
-     
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
      `,
-  updateIdVerification: `
+  userIdVerification: `
     UPDATE users
     SET
     is_uploaded_identity_card = true,
     tier = 1
     WHERE user_id = $1
+    RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
+    is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `
 };
