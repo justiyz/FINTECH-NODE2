@@ -3,7 +3,7 @@ import Model from '../middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
-import * as AuthController from '../../../admins/api/queries/controllers.auth';
+import * as AuthController from '../controllers/controllers.auth';
 
 const router = Router();
 
