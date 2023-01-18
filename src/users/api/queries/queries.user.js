@@ -51,7 +51,7 @@ export default {
       SET
         updated_at = NOW(),
         is_verified_bvn = TRUE,
-        tier = '2',
+        tier = '1',
         bvn = $2
       WHERE user_id = $1
       RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
@@ -95,7 +95,7 @@ export default {
     UPDATE users
     SET
     is_uploaded_identity_card = true,
-    tier = 1
+    tier = '2'
     WHERE user_id = $1
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
