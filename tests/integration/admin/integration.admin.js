@@ -31,7 +31,6 @@ describe('Admin', () => {
           ]
         })
         .end((err, res) => {
-          // console.log('=====>>>'. res.body);
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');

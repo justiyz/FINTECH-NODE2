@@ -316,7 +316,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(2);
+          expect(res.body.data.tier).to.equal(1);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -340,7 +340,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(2);
+          expect(res.body.data.tier).to.equal(1);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -453,7 +453,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(2);
+          expect(res.body.data.tier).to.equal(1);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
