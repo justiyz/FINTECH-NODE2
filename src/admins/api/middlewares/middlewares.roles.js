@@ -20,15 +20,20 @@ export const adminAccess = (resource, action) => async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms this is not a super admin initiated action adminAccess.admin.middlewares.roles.js`);
-    const allowedRolePermissions = permissions.role_permissions[resource];
-    const allowedAdminPermissions = permissions.admin_permissions[resource];
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: check if admin have resource permissions adminAccess.admin.middlewares.roles.js`);
-    if (allowedRolePermissions.includes(action) || allowedAdminPermissions.includes(action)) {
+    const allowedRoleResource = Object.keys(permissions.role_permissions);
+    const allowedAdminResource = Object.keys(permissions.admin_permissions);
+    if (allowedRoleResource.includes(resource) || allowedAdminResource.includes(resource)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}::: Info: admin have access to perform action adminAccess.admin.middlewares.roles.js`);
-      return next();
+      const allowedRolePermissions = permissions.role_permissions[`${resource}`] || [];
+      const allowedAdminPermissions = permissions.admin_permissions[`${resource}`] || [];
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: check if admin have resource permissions adminAccess.admin.middlewares.roles.js`);
+      if (allowedRolePermissions.includes(action) || allowedAdminPermissions.includes(action)) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}::: Info: admin have access to perform action adminAccess.admin.middlewares.roles.js`);
+        return next();
+      }
+      return  ApiResponse.error(res, enums.ADMIN_CANNOT_PERFORM_ACTION(action, resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin does not have access to perform action adminAccess.admin.middlewares.roles.js`);
-    return ApiResponse.error(res, enums.ADMIN_CANNOT_PERFORM_ACTION(action, resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
+    return  ApiResponse.error(res, enums.ADMIN_RESOURCE_ACTION(resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.ADMIN_ACCESS_MIDDLEWARE;
     logger.error(`Validating if admin has resource access failed:::${enums.ADMIN_ACCESS_MIDDLEWARE}`, error.message);

@@ -24,7 +24,7 @@ export default {
         admin_roles.code,
         admin_resources.name,
         admin_role_permissions.resource_id,
-        string_to_array(admin_role_permissions.permissions, ',')
+        string_to_array(admin_role_permissions.permissions, ',') AS permissions
       FROM admin_role_permissions
       LEFT JOIN admin_resources
       ON admin_role_permissions.resource_id = admin_resources.resource_id
@@ -38,7 +38,7 @@ export default {
         admin_user_permissions.admin_id,
         admin_resources.name,
         admin_user_permissions.resource_id,
-        string_to_array(admin_user_permissions.permissions, ',')
+        string_to_array(admin_user_permissions.permissions, ',') AS permissions
       FROM admin_user_permissions
       LEFT JOIN admin_resources
       ON admin_user_permissions.resource_id = admin_resources.resource_id

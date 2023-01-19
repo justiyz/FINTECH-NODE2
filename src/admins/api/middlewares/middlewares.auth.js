@@ -126,12 +126,12 @@ export const adminPermissions = async(req, res, next) => {
       rolePermissions.forEach((permission) => {
         role_permissions[
           permission.name
-        ] = permission.permissions.split(',');
+        ] = permission.permissions;
       });
       adminPermissions.forEach((permission) => {
         admin_permissions[
           permission.name
-        ] = permission.permissions.split(',');
+        ] = permission.permissions;
       });
       req.permissions = {
         role_permissions,

@@ -133,7 +133,7 @@ export const inviteAdmin = async(req, res, next) => {
       password
     };
     if (SEEDFI_NODE_ENV === 'test') {
-      return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  { newAdmin });
+      return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  { newAdmin, password });
     }
     MailService('Admin Invite', 'adminInviteMail', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: invite admin mail successfully sent. inviteAdmin.controllers.admin.admin.js`);

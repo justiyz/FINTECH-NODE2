@@ -146,6 +146,8 @@ describe('Admin', () => {
           expect(res.body.message).to.equal(enums.ADMIN_SUCCESSFULLY_INVITED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_ADMIN_TWO_ID = res.body.data.newAdmin.admin_id;
+          process.env.SEEDFI_INVITED_ADMIN_EMAIL = res.body.data.newAdmin.email;
+          process.env.SEEDFI_INVITED_ADMIN_PASSWORD = res.body.data.password;
           done();
         });
     });
@@ -167,6 +169,48 @@ describe('Admin', () => {
           expect(res).to.have.property('body');
           expect(res.body.message).to.equal(enums.ADMIN_EMAIL_EXIST);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should log invited admin in successfully for the first time', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/login')
+        .send({
+          email: process.env.SEEDFI_INVITED_ADMIN_EMAIL,
+          password: process.env.SEEDFI_INVITED_ADMIN_PASSWORD
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOGIN_REQUEST_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          process.env.SEEDFI_INVITED_ADMIN_LOGIN_OTP = res.body.data.token;
+          done();
+        });
+    });
+    it('Should verify invited admin login request in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-login')
+        .send({
+          otp: process.env.SEEDFI_INVITED_ADMIN_LOGIN_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_verified_email).to.equal(true);
           done();
         });
     });
