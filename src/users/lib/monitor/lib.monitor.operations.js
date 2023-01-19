@@ -29,6 +29,8 @@ export const operations = {
   28: 'RMSVDDC', // remove saved debit card
   29: 'RMSVDBA', // remove saved bank account
   30: 'CFMPWD', // confirm user password
-  31: 'CFMPIN' // confirm user pin
+  31: 'CFMPIN', // confirm user pin
+  32: 'INTCDPYT', // initialize card payment
+  33: 'PYTRFDD' // payment refunded
 };
   
