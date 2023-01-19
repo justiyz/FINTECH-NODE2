@@ -31,6 +31,8 @@ export const operations = {
   30: 'CFMPWD', // confirm user password
   31: 'CFMPIN', // confirm user pin
   32: 'INTCDPYT', // initialize card payment
-  33: 'PYTRFDD' // payment refunded
+  33: 'PYTRFDD', // payment refunded
+  34: 'STDBTCDDF', // set debit card as default
+  35: 'STACTNMDF' // set account number as default
 };
   

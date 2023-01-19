@@ -29,6 +29,8 @@ VALUES
     ('RMSVDBA', 'remove saved bank account', 'user remove saved bank account details'),
     ('CFMPWD', 'confirm password', 'user confirms password'),
     ('CFMPIN', 'confirm pin', 'user confirms transaction pin'),
+    ('STDBTCDDF', 'set debit card as default', 'user set debit card as default'),
+    ('STACTNMDF', 'set account number as default', 'user set account number as default'),
     ('INTCDPYT', 'initialize card payment', 'user initializes card payment'),
     ('PYTRFDD', 'payment refunded', 'user gets refunded');
 
