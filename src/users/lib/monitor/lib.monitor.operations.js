@@ -22,6 +22,13 @@ export const operations = {
   21: 'CRTARLE', // create admin role type
   22: 'EDTARLE', // edit admin role type
   23: 'IVTADM', // invite other admin types
-  24: 'ADMCPPR' // admin completes profile
+  24: 'ADMCPPR', // admin completes profile
+  25: 'EDONPRF', // user edits own profile
+  26: 'SVDCDTS', // save debit card details
+  27: 'SVDBADTS', // save bank account details
+  28: 'RMSVDDC', // remove saved debit card
+  29: 'RMSVDBA', // remove saved bank account
+  30: 'CFMPWD', // confirm user password
+  31: 'CFMPIN' // confirm user pin
 };
   
