@@ -48,6 +48,9 @@ export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
 export const EMAIL_NOT_VERIFIED = 'User email not verified';
 export const  ID_UPLOAD_VERIFICATION = 'User id successfully verified';
 export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly contact support team if you want to update id.';
+export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
+export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
+
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

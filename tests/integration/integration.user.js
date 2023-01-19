@@ -6,7 +6,6 @@ import enums from '../../src/users/lib/enums';
 import * as Helpers from '../../src/users/lib/utils/lib.util.helpers';
 import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 
-
 const { expect } = chai;
 chai.use(chaiHttp);
 
@@ -635,5 +634,81 @@ describe('User', () => {
           done();
         });
     });
+  });
+});
+
+describe('update user profile', () => {
+  it('should update user one profile successfully', (done) => {
+    chai.request(app)
+      .put('/api/v1/user/update-profile')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+      })
+      .send({
+        first_name: 'Rashidat',
+        last_name: 'sikiru'
+      })
+      .end((err, res) => {
+        console.log(res.body);
+        expect(res.statusCode).to.equal(enums.HTTP_OK);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body).to.have.property('data');
+        expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        expect(res.body.data).to.have.property('first_name');
+        expect(res.body.data).to.have.property('last_name');
+        done();
+      });
+  });
+  it('should throw error if invalid token is set', (done) => {
+    chai.request(app)
+      .put('/api/v1/user/update-profile')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}gdhhejey`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if token is malformed', (done) => {
+    chai.request(app)
+      .put('/api/v1/user/update-profile')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('jwt malformed');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if token is not set', (done) => {
+    chai.request(app)
+      .put('/api/v1/user/update-profile')
+      .set({
+        'Content-Type': 'application/json'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('Please provide a token');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
   });
 });

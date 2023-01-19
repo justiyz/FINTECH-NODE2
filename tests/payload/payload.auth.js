@@ -26,6 +26,14 @@ export const userThreeProfile = {
   gender: 'female'
 };
 
+export const userFourProfile = {
+  first_name: 'Azizat',
+  last_name: 'Alausa',
+  email: 'azizat@enyata.com',
+  date_of_birth: '1954-12-08',
+  gender: 'female'
+};
+
 export const userThreeInvalidDateProfile = {
   first_name: 'Elizabeth',
   middle_name: 'Kuye',

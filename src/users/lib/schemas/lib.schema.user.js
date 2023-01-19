@@ -33,6 +33,18 @@ const idVerification = Joi.object().keys({
   expiry_date:  Joi.string().optional()
 });
 
+const updateUsersProfile = Joi.object().keys({
+  first_name: Joi.string().optional(), 
+  middle_name: Joi.string().optional(), 
+  last_name: Joi.string().optional(),
+  date_of_birth: Joi.date().optional(),
+  gender: Joi.string().optional(), 
+  address: Joi.string().optional(), 
+  income_range: Joi.string().optional(), 
+  number_of_dependants: Joi.number().optional(),
+  marital_status: Joi.string().optional() 
+});
+
 export default  {
   updateFcmToken,
   updateRefreshToken,
@@ -40,5 +52,6 @@ export default  {
   bvnVerification,
   verifyEmail,
   verifyOtp,
-  idVerification
+  idVerification,
+  updateUsersProfile
 };   
