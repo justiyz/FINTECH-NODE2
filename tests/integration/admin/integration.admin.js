@@ -3,7 +3,7 @@ import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../../src/app';
 import enums from '../../../src/users/lib/enums';
-import { inviteAdmin } from '../../payload/payload.admin';
+import { inviteAdmin, inviteAdminTwo } from '../../payload/payload.admin';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -146,6 +146,8 @@ describe('Admin', () => {
           expect(res.body.message).to.equal(enums.ADMIN_SUCCESSFULLY_INVITED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_ADMIN_TWO_ID = res.body.data.newAdmin.admin_id;
+          process.env.SEEDFI_INVITED_ADMIN_EMAIL = res.body.data.newAdmin.email;
+          process.env.SEEDFI_INVITED_ADMIN_PASSWORD = res.body.data.password;
           done();
         });
     });
@@ -166,6 +168,230 @@ describe('Admin', () => {
           expect(res.body).to.have.property('status');
           expect(res).to.have.property('body');
           expect(res.body.message).to.equal(enums.ADMIN_EMAIL_EXIST);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should log invited admin in successfully for the first time', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/login')
+        .send({
+          email: process.env.SEEDFI_INVITED_ADMIN_EMAIL,
+          password: process.env.SEEDFI_INVITED_ADMIN_PASSWORD
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOGIN_REQUEST_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          process.env.SEEDFI_INVITED_ADMIN_LOGIN_OTP = res.body.data.token;
+          done();
+        });
+    });
+    it('Should verify invited admin login request in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-login')
+        .send({
+          otp: process.env.SEEDFI_INVITED_ADMIN_LOGIN_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_verified_email).to.equal(true);
+          done();
+        });
+    });
+    it('Should invite admin with underwriting role code successfully.', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/invite-admin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          ...inviteAdminTwo,
+          role_code:  process.env.SEEDFI_UNDERWRITER_ROLE_TYPE
+        })
+        .end((err, res) => {
+          process.env.SEEDFI_UNDERWRITER_ROLE_TYPE,
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.ADMIN_SUCCESSFULLY_INVITED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_ADMIN_THREE_ID = res.body.data.newAdmin.admin_id;
+          process.env.SEEDFI_INVITED_ADMIN_THREE_EMAIL = res.body.data.newAdmin.email;
+          process.env.SEEDFI_INVITED_ADMIN_THREE_PASSWORD = res.body.data.password;
+          done();
+        });
+    });
+    it('Should log invited admin with underwriting role code in successfully for the first time', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/login')
+        .send({
+          email: process.env.SEEDFI_INVITED_ADMIN_THREE_EMAIL,
+          password: process.env.SEEDFI_INVITED_ADMIN_THREE_PASSWORD
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOGIN_REQUEST_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
+          done();
+        });
+    });
+    it('Should verify invited admin three login request in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-login')
+        .send({
+          otp: process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_verified_email).to.equal(true);
+          process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_ADMIN_THREE_ID = res.body.data.admin_id;
+          done();
+        });
+    });
+    it('Should flag when trying to fetch admin resource with underwriter role code resources', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/admin-resources')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Admin dose not have resource action role management.');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should edit admin underwriter role permissions successfully', (done) => {
+      chai.request(app)
+        .put(`/api/v1/admin/role/${process.env.SEEDFI_UNDERWRITER_ROLE_TYPE}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          permissions: [ 
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID}`,
+              user_permissions:  [ 'read', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_ROLE_MANAGEMENT_RESOURCE_ID}`,
+              user_permissions:  [  'approve', 'reject' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.EDIT_ROLE_DETAILS_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should log invited admin with underwriting role code again', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/login')
+        .send({
+          email: process.env.SEEDFI_INVITED_ADMIN_THREE_EMAIL,
+          password: process.env.SEEDFI_INVITED_ADMIN_THREE_PASSWORD
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOGIN_REQUEST_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
+          done();
+        });
+    });
+    it('Should verify invited admin three login again successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-login')
+        .send({
+          otp: process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_verified_email).to.equal(true);
+          process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_ADMIN_THREE_ID = res.body.data.admin_id;
+          done();
+        });
+    });
+    it('Should flag when trying to fetch admin resource with underwriter role code resources', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/admin-resources')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Admin cannot perform "read" action on role management module');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
