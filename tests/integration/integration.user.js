@@ -745,7 +745,6 @@ describe('update user profile', () => {
         first_name: 'Oreoluwa'
       })
       .end((err, res) => {
-        console.log(res.body);
         expect(res.statusCode).to.equal(400);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
