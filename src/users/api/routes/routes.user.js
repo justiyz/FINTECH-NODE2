@@ -136,7 +136,7 @@ router.post(
 );
 
 router.put(
-  '/update-profile',
+  '/profile',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateUsersProfile, 'payload'),

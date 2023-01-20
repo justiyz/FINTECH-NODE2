@@ -281,7 +281,8 @@ export const checkAccountPreviouslySaved = async(req, res, next) => {
 export const checkAccountOwnership = async(req, res, next) => {
   try {
     const { user, accountNumberDetails } = req;
-    const accountDetailsName = accountNumberDetails.data.account_name.trim().toLowerCase().replaceAll(',', '').split(' ');
+    const accountDetailsNameToLowerCase = accountNumberDetails.data.account_name.trim().toLowerCase();
+    const accountDetailsName = accountDetailsNameToLowerCase.replaceAll(',', '').split(' ');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
     if (user.middle_name !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);

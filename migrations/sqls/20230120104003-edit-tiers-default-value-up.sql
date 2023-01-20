@@ -6,6 +6,10 @@ UPDATE tiers
 SET description = 'Both BVN verification and valid Id verification has not been done'
 WHERE tier = '1';
 
+UPDATE users
+SET tier = '1'
+WHERE tier = '0';
+
 DELETE FROM tiers
 WHERE tier = '0';
 

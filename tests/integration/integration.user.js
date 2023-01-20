@@ -1032,7 +1032,7 @@ describe('User', () => {
         });
     });
   });
-  describe('delete bank account details default and disbursement', () => {
+  describe('update bank account details default and disbursement', () => {
     it('should set user one bank account one as default account', (done) => {
       chai.request(app)
         .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_BANK_ACCOUNT_ID_ONE}/account-details`)
@@ -1198,7 +1198,7 @@ describe('User', () => {
         });
     });
   });
-  describe('update bank account details default and disbursement', () => {
+  describe('delete bank account details default and disbursement', () => {
     it('should delete user one bank account three', (done) => {
       chai.request(app)
         .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_BANK_ACCOUNT_ID_THREE}/account-details`)
@@ -1262,7 +1262,7 @@ describe('User', () => {
   describe('update user profile', () => {
     it('should update user one profile successfully', (done) => {
       chai.request(app)
-        .put('/api/v1/user/update-profile')
+        .put('/api/v1/user/profile')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
@@ -1285,7 +1285,7 @@ describe('User', () => {
     });
     it('should throw error if invalid token is set', (done) => {
       chai.request(app)
-        .put('/api/v1/user/update-profile')
+        .put('/api/v1/user/profile')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}gdhhejey`
@@ -1301,7 +1301,7 @@ describe('User', () => {
     });
     it('Should throw error if token is malformed', (done) => {
       chai.request(app)
-        .put('/api/v1/user/update-profile')
+        .put('/api/v1/user/profile')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
@@ -1318,7 +1318,7 @@ describe('User', () => {
     });
     it('Should throw error if token is not set', (done) => {
       chai.request(app)
-        .put('/api/v1/user/update-profile')
+        .put('/api/v1/user/profile')
         .set({
           'Content-Type': 'application/json'
         })
@@ -1334,7 +1334,7 @@ describe('User', () => {
     });
     it('Should throw error if bvn has been verified and first name is inserted', (done) => {
       chai.request(app)
-        .put('/api/v1/user/update-profile')
+        .put('/api/v1/user/profile')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
