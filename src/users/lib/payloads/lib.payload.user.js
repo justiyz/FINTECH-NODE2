@@ -5,7 +5,7 @@ export default {
     body.bank_name.toLowerCase(),
     body.bank_code,
     body.account_number,
-    accountNumberDetails.data.account_name.trim().toLowerCase().replaceAll(',', '')
+    accountNumberDetails.data.account_name.trim().toLowerCase().split(',').join('')
   ],
 
   imgVerification: (user, body) => [ 
