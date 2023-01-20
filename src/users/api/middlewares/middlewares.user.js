@@ -330,8 +330,8 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
 
 export const checkIfLoanStatusIsActive = async (req, res, next) => {
   try {
-    const { user, body } = req;
-    if ( (user.loan_status === 'active') && (body.address ||  body.number_of_dependants || body.marital_status || body.income_range) ) {
+    const { user } = req;
+    if ( (user.loan_status === 'active') ) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
       successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
       return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, 400);
