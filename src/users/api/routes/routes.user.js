@@ -67,6 +67,62 @@ router.get(
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   UserController.verifyEmail
 );
+
+router.get(
+  '/settings/list-banks',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchAvailableBankLists
+);
+
+router.get(
+  '/settings/resolve-account-number',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.resolveAccountNumber, 'query'),
+  UserMiddleware.resolveBankAccountNumberName,
+  UserController.returnAccountDetails
+);
+
+router.post(
+  '/settings/account-details',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.saveAccountDetails, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.checkAccountPreviouslySaved,
+  UserMiddleware.resolveBankAccountNumberName,
+  UserMiddleware.checkAccountOwnership,
+  UserController.saveAccountDetails
+);
+
+router.get(
+  '/settings/account-details',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserAccountDetails
+);
+
+router.delete(
+  '/settings/:id/account-details',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.idParams, 'params'),
+  UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkUserLoanStatus,
+  UserController.deleteUserAccountDetails
+);
+
+router.patch(
+  '/settings/:id/account-details',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.idParams, 'params'),
+  Model(Schema.accountChoiceType, 'query'),
+  UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkAccountCurrentChoicesAndTypeSent,
+  UserController.updateAccountDetailsChoice
+);
     
 router.post(
   '/id-verification',
@@ -75,7 +131,6 @@ router.post(
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId,
   UserController.idUploadVerification
 );
