@@ -85,7 +85,8 @@ router.put(
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateUsersProfile, 'payload'),
-  UserMiddleware.checkIfBvnIsVerifiedOrLoanIsActive,
+  UserMiddleware.checkIfBvnIsVerified,
+  UserMiddleware.checkIfLoanStatusIsActive,
   UserController.updateUserProfile
 );
 export default router;

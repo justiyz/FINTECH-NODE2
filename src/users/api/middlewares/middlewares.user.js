@@ -295,7 +295,7 @@ export const isUploadedVerifiedId = async(req, res, next) => {
 
 
 /**
- * check if user has verified his BVN or has an active loan
+ * check if user has verified his BVN
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
@@ -303,18 +303,45 @@ export const isUploadedVerifiedId = async(req, res, next) => {
  * @memberof UserMiddleware
  */
 
-export const checkIfBvnIsVerifiedOrLoanIsActive = async (req, res, next) => {
+export const checkIfBvnIsVerified = async (req, res, next) => {
   try {
-    const { user } = req;
-    if (user.is_verified_bvn || user.loan_status === 'active' ) {
+    const { user, body } = req;
+    if ( (user.is_verified_bvn) && (body.first_name ||  body.last_name || body.middle_name || body.date_of_birth || body.gender) ) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      successfully checked if BVN is verified or if loan status is active checkIfBvnIsVerifiedOrLoanIsActive.admin.middlewares.user.js`);
+      successfully checked if BVN is verified checkIfBvnIsVerified.admin.middlewares.user.js`);
       return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, 400);
     }
     return next();
   } catch (error) {
-    error.label = enums.CHECK_IF_BVN_IS_VERIFIED_OR_LOAN_STATUS_IS_ACTIVE_CONTROLLER;
-    logger.error(`checking if BVN is verified or loan status is active failed::${enums.CHECK_IF_BVN_IS_VERIFIED_OR_LOAN_STATUS_IS_ACTIVE_CONTROLLER}`, error.message);
+    error.label = enums.CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE;
+    logger.error(`checking if BVN is verified failed::${enums.CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
+
+/**
+ * check if user has has an active loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+
+export const checkIfLoanStatusIsActive = async (req, res, next) => {
+  try {
+    const { user, body } = req;
+    if ( (user.loan_status === 'active') && (body.address ||  body.number_of_dependants || body.marital_status || body.income_range) ) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, 400);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE;
+    logger.error(`checking if loan status is active failed::${enums.CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
