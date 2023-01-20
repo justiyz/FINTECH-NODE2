@@ -9,7 +9,8 @@ export default {
   getUserByUserId: `
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, password, pin, refresh_token
+        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, password, pin, refresh_token, address, income_range,
+        number_of_dependants, marital_status, loan_status
       FROM users
       WHERE user_id = $1`,
 
@@ -99,5 +100,23 @@ export default {
     WHERE user_id = $1
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
-    `
+    `,
+
+  updateUserProfile: `
+     UPDATE users
+     SET 
+     updated_at = NOW(),
+     first_name = $2,
+     middle_name = $3,
+     last_name = $4,
+     date_of_birth = $5,
+     gender = $6,
+     address = $7,
+     income_range = $8,
+     number_of_dependants = $9,
+     marital_status = $10
+     WHERE user_id = $1
+     RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, address,
+              income_range, number_of_dependants, marital_status
+  `
 };

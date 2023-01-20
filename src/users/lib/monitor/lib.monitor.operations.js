@@ -34,5 +34,6 @@ export const operations = {
   33: 'PYTRFDD', // payment refunded
   34: 'STDBTCDDF', // set debit card as default
   35: 'STACTNMDF' // set account number as default
+  
 };
   

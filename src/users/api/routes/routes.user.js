@@ -79,4 +79,14 @@ router.post(
   UserMiddleware.isUploadedVerifiedId,
   UserController.idUploadVerification
 );
+
+router.put(
+  '/update-profile',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.updateUsersProfile, 'payload'),
+  UserMiddleware.checkIfBvnIsVerified,
+  UserMiddleware.checkIfLoanStatusIsActive,
+  UserController.updateUserProfile
+);
 export default router;

@@ -188,3 +188,20 @@ export const idUploadVerification = async(req, res, next) => {
     return next(error);
   }
 };
+
+export const updateUserProfile = async(req, res, next) => {
+  try {
+    const { body, user } = req;
+    const payload = UserPayload.updateUserProfile(body, user);
+    const updatedUser = await UserService.updateUserProfile(payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully updated user profile in the DB updateUserProfile.admin.controller.user.js`);
+    userActivityTracking(req.user.user_id, 19, 'success');
+    return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 19, 'fail');
+    error.label = enums.UPDATE_USER_PROFILE_CONTROLLER;
+    logger.error(`updating user's profile failed:::${enums.UPDATE_USER_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
