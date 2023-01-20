@@ -20,7 +20,7 @@ export const paystackResolveAccountNumberTestResponse = () => {
     message: 'Account number resolved',
     data: {
       'account_number': '0030878578',
-      'account_name': 'VICTORY RASHIDAT BABATUNDE',
+      'account_name': 'VICTORY, RASHIDAT BABATUNDE',
       'bank_id': 9
     }
   };
