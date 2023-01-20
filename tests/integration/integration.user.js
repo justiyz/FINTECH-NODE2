@@ -271,7 +271,7 @@ describe('User', () => {
     });
     it('should verify bvn for user three successfully', (done) => {
       chai.request(app)
-        .post('/api/v1/user/upload-selfie')
+        .post('/api/v1/user/upload-selfie') 
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
@@ -439,6 +439,30 @@ describe('User', () => {
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          bvn: Helpers.generateElevenDigits()
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_BVN_VERIFIED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.is_verified_bvn).to.equal(true);
+          done();
+        });
+    });
+    it('should verify bvn for user SIX successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/verify-bvn')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
           bvn: Helpers.generateElevenDigits()
@@ -706,6 +730,27 @@ describe('update user profile', () => {
         expect(res.body).to.have.property('status');
         expect(res.body.message).to.equal('Please provide a token');
         expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if bvn has been verified and first name is inserted', (done) => {
+    chai.request(app)
+      .put('/api/v1/user/update-profile')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+      })
+      .send({
+        first_name: 'Oreoluwa'
+      })
+      .end((err, res) => {
+        console.log(res.body);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('Details can not be updated');
+        expect(res.body.error).to.equal('BAD_REQUEST');
         expect(res.body.status).to.equal(enums.ERROR_STATUS);
         done();
       });

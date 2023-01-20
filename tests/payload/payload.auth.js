@@ -33,6 +33,13 @@ export const userFourProfile = {
   date_of_birth: '1954-12-08',
   gender: 'female'
 };
+export const userSixProfile = {
+  first_name: 'Yemisi',
+  last_name: 'Ojo',
+  email: 'yemisi@enyata.com',
+  date_of_birth: '1954-12-08',
+  gender: 'female'
+};
 
 export const userThreeInvalidDateProfile = {
   first_name: 'Elizabeth',
