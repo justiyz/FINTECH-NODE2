@@ -12,6 +12,25 @@ const selfieUpload = Joi.object().keys({
   image_url: Joi.string().required()
 });
 
+const resolveAccountNumber = Joi.object().keys({
+  account_number: Joi.string().required(),
+  bank_code: Joi.string().required()
+});
+
+const saveAccountDetails = Joi.object().keys({
+  bank_name: Joi.string().required(),
+  account_number: Joi.string().required(),
+  bank_code: Joi.string().required()
+});
+
+const idParams = Joi.object().keys({
+  id: Joi.string().required()
+});
+
+const accountChoiceType = Joi.object().keys({
+  type: Joi.string().required().valid('disbursement', 'default')
+});
+
 const bvnVerification = Joi.object().keys({
   bvn: Joi.string().required()
 });
@@ -49,6 +68,10 @@ export default  {
   updateFcmToken,
   updateRefreshToken,
   selfieUpload,
+  resolveAccountNumber,
+  idParams,
+  accountChoiceType,
+  saveAccountDetails,
   bvnVerification,
   verifyEmail,
   verifyOtp,

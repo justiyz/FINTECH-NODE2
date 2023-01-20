@@ -2,6 +2,7 @@ import * as UserService from '../services/services.user';
 import * as AuthService from '../services/services.auth';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
+import { resolveAccount } from '../../services/service.paystack';
 import { bvnVerificationCheck } from '../../services/service.sterling';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
@@ -243,6 +244,187 @@ export const isEmailVerified = (type = 'authenticate') => async(req, res, next) 
 };
 
 /**
+ * check if bank account saved previously
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkAccountPreviouslySaved = async(req, res, next) => {
+  try {
+    const { user, body: { account_number, bank_code } } = req;
+    const [ existingAccount ] = await UserService.checkIfAccountExisting([ user.user_id, account_number.trim(), bank_code.trim() ]);
+    if (existingAccount) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: account has already been saved by user in the DB checkAccountPreviouslySaved.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 27, 'fail');
+      return ApiResponse.error(res, enums.ACCOUNT_DETAILS_PREVIOUSLY_SAVED, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account has not been saved previously by user in the DB checkAccountPreviouslySaved.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 27, 'fail');
+    error.label = enums.CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE;
+    logger.error(`checking if user previously saved account details failed::${enums.CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if bank account details belong to user
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkAccountOwnership = async(req, res, next) => {
+  try {
+    const { user, accountNumberDetails } = req;
+    const accountDetailsName = accountNumberDetails.data.account_name.trim().toLowerCase().split(',').join('').split(' ');
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
+    if (user.middle_name !== null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);
+      if(accountDetailsName.includes(user.first_name.toLowerCase()) && accountDetailsName.includes(user.middle_name.toLowerCase()) && accountDetailsName.includes(user.last_name.toLowerCase())) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
+        return next();
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names don't match account details names checkAccountOwnership.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 27, 'fail');
+      return ApiResponse.error(res, enums.ACCOUNT_USER_NOT_OWNED_BY_USER, enums.HTTP_FORBIDDEN, enums.CHECK_ACCOUNT_OWNERSHIP_MIDDLEWARE);
+    }
+    if(accountDetailsName.includes(user.first_name.toLowerCase()) && accountDetailsName.includes(user.last_name.toLowerCase())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names don't match account details names checkAccountOwnership.middlewares.user.js`);
+    userActivityTracking(req.user.user_id, 27, 'fail');
+    return ApiResponse.error(res, enums.ACCOUNT_USER_NOT_OWNED_BY_USER, enums.HTTP_FORBIDDEN, enums.CHECK_ACCOUNT_OWNERSHIP_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 27, 'fail');
+    error.label = enums.CHECK_ACCOUNT_OWNERSHIP_MIDDLEWARE;
+    logger.error(`checking if user owns the account to be saved failed::${enums.CHECK_ACCOUNT_OWNERSHIP_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch name attached to a bank account number
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const resolveBankAccountNumberName = async(req, res, next) => {
+  try {
+    const { user, query, body } = req;
+    const accountNumberChoice = query.account_number || body.account_number;
+    const bankCodeChoice = query.bank_code || body.bank_code;
+    const data = await resolveAccount(accountNumberChoice.trim(), bankCodeChoice.trim());
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolve response returned from paystack resolveBankAccountNumberName.middleware.user.js`);
+    if (data.status === true && data.message.trim().toLowerCase() === 'account number resolved') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolve successfully by paystack resolveBankAccountNumberName.middleware.user.js`);
+      req.accountNumberDetails = data;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number not resolve successfully by paystack resolveBankAccountNumberName.middleware.user.js`);
+    return ApiResponse.error(res, data.message, enums.HTTP_UNPROCESSABLE_ENTITY, enums.RESOLVE_BANK_ACCOUNT_NUMBER_NAME_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.RESOLVE_BANK_ACCOUNT_NUMBER_NAME_MIDDLEWARE;
+    logger.error(`Resolving bank account name from paystack failed::${enums.RESOLVE_BANK_ACCOUNT_NUMBER_NAME_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user is on active loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkUserLoanStatus = async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (user.loan_status === 'active') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is currently on an active loan checkUserLoanStatus.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_IS_ON_AN_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_STATUS_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is not on an active loan checkUserLoanStatus.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_USER_LOAN_STATUS_MIDDLEWARE;
+    logger.error(`checking if user is on an active loan failed::${enums.CHECK_USER_LOAN_STATUS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user is on active loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfAccountDetailsExists = async(req, res, next) => {
+  try {
+    const { user, params: { id } } = req;
+    const [ accountIdExists ] = await UserService.fetchBankAccountDetailsById([ id ]);
+    if (!accountIdExists) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details exists in the DB checkIfAccountDetailsExists.middlewares.user.js`);
+    if (accountIdExists.user_id !== user.user_id) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not belong to user checkIfAccountDetailsExists.middlewares.user.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_USERS, enums.HTTP_FORBIDDEN, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details belong to user checkIfAccountDetailsExists.middlewares.user.js`);
+    req.accountDetails = accountIdExists;
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE;
+    logger.error(`checking if account details exists and belong to user failed::${enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if an account current choice values against type sent
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkAccountCurrentChoicesAndTypeSent = async(req, res, next) => {
+  const { user, query: { type }, accountDetails } = req;
+  try {
+    if (accountDetails.is_default && type === 'default') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already default checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 35, 'fail');
+      return ApiResponse.error(res, enums.ACCOUNT_ALREADY_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE);
+    }
+    if (accountDetails.is_disbursement_account && type === 'disbursement') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already set to disbursement account checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 36, 'fail');
+      return ApiResponse.error(res, enums.ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account and type sent match checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    const operationType = type === 'default' ? 35 : 36;
+    userActivityTracking(req.user.user_id, operationType, 'fail');
+    error.label = enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE;
+    logger.error(`checking if to be set account choice is already the account choice failed::${enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * verify email verification
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -282,7 +464,7 @@ export const isUploadedVerifiedId = async(req, res, next) => {
   try {
     if (req.user.is_uploaded_identity_card) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      decoded that User Id is already verified in the DB. isUploadedVerifiedId.admin.middlewares.user.js`);
+      decoded that User Id is already verified in the DB. isUploadedVerifiedId.middlewares.user.js`);
       return ApiResponse.error(res, enums.CHECK_USER_ID_VERIFICATION, enums.HTTP_BAD_REQUEST, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
     }
     return next();
