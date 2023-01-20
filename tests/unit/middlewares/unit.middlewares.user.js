@@ -69,9 +69,15 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfBvnIsVerifiedOrLoanIsActive', async() => {
+    it('should call checkIfBvnIsVerified', async() => {
       const req = { user: '' };
-      const data = await UserMiddleware.checkIfBvnIsVerifiedOrLoanIsActive(req, res, next);
+      const data = await UserMiddleware.checkIfBvnIsVerified(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfLoanStatusIsActive', async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.checkIfLoanStatusIsActive(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
