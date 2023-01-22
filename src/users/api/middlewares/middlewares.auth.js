@@ -418,8 +418,8 @@ export const checkIfCredentialsIsValid = (type = '') => async(req, res, next) =>
   try {
     const { 
       body: { newPassword, pin }, user } = req;
-    const [ userPasswordDetails ] = type === 'pin' ?  await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
-    const isValidCredentials = type === 'pin' ? Hash.compareData(pin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
+    const [ userPasswordDetails ] = type == 'pin' ?  await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
+    const isValidCredentials = type == 'pin' ? Hash.compareData(pin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfCredentialsIsValid.middlewares.auth.js`);
     if(isValidCredentials){   
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that new password/pin matches with old password/pin. checkIfCredentialsIsValid.middlewares.auth.js`);
