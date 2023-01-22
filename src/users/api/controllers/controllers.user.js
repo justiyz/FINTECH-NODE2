@@ -349,3 +349,29 @@ export const updateUserProfile = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * get user profile
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+
+export const getProfile = async(req, res, next) => {
+  try {
+    const {user} = req;
+    console.log(user);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User data Info fetched. getProfile.controllers.user.js`);
+    delete user.pin, 
+    delete user.password, 
+    delete user.fcm_token,
+    delete user.refresh_token;
+    return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
+  } catch (error){
+    error.label = enums.GET_USER_PROFILE_CONTROLLER;
+    logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

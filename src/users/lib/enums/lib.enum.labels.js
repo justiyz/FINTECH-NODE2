@@ -57,6 +57,7 @@ export const IS_UPDATED_VERIFICATION_ID_MIDDLEWARE = 'UserMiddleware::checkUserI
 export const CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE = 'UserMiddleware::checkIfBvnIsVerified';
 export const CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE = 'UserMiddleware::checkIfLoanStatusIsActive';
 export const UPDATE_USER_PROFILE_CONTROLLER = 'UserController::updateUserProfile';
+export const GET_USER_PROFILE_CONTROLLER = 'UserController::getProfile';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
