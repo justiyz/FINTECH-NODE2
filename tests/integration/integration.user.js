@@ -753,5 +753,24 @@ describe('update user profile', () => {
         expect(res.body.status).to.equal(enums.ERROR_STATUS);
         done();
       });
+   }); 
+   it('Should get user profile.', (done) => {
+    chai.request(app)
+      .get('/api/v1/user/profile')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(enums.HTTP_OK);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res).to.have.property('body');
+        expect(res.body.message).to.equal(enums.FETCH_USER_PROFILE);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
   });
 });
+
+

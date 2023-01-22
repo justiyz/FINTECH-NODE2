@@ -50,6 +50,7 @@ export const  ID_UPLOAD_VERIFICATION = 'User id successfully verified';
 export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly contact support team if you want to update id.';
 export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
+export const FETCH_USER_PROFILE = 'User profile fetched successfully';
 
 
 // admin module related messages

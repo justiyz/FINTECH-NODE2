@@ -89,4 +89,11 @@ router.put(
   UserMiddleware.checkIfLoanStatusIsActive,
   UserController.updateUserProfile
 );
+
+router.get(
+  '/profile',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  UserController.getProfile
+);
 export default router;
