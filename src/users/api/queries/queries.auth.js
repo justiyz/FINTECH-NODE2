@@ -6,8 +6,8 @@ export default {
 
   registerUser: `
     INSERT INTO users(
-        phone_number, verification_token, verification_token_expires
-    ) VALUES ($1, $2, $3)
+        phone_number, verification_token, verification_token_expires, tier
+    ) VALUES ($1, $2, $3, '1')
     ON CONFLICT(phone_number)
     DO UPDATE SET
     referral_code = EXCLUDED.referral_code,

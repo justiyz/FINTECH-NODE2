@@ -6,6 +6,7 @@ import enums from '../../lib/enums';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
+import { fetchBanks } from '../../services/service.paystack';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 
@@ -96,7 +97,8 @@ export const updateBvn = async (req, res, next) => {
   try {
     const { body: { bvn }, user } = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-    const [ updateBvn ] = await UserService.updateUserBvn([ user.user_id, hashedBvn ]);
+    const tierOption = user.is_uploaded_identity_card ? '2' : '1';
+    const [ updateBvn ] = await UserService.updateUserBvn([ user.user_id, hashedBvn, tierOption ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
     return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, updateBvn);
@@ -140,6 +142,147 @@ export const requestEmailVerification = async(req, res, next) => {
 };
 
 /**
+ * fetch available bank lists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response of the details of the list of available banks
+ * @memberof UserController
+ */
+export const fetchAvailableBankLists = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const data = await fetchBanks();
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: bank lists returned from paystack fetchAvailableBankLists.controller.user.js`);
+    return ApiResponse.success(res, data.message, enums.HTTP_OK, data.data);
+  } catch (error) {
+    error.label = enums.FETCH_BANKS_CONTROLLER;
+    logger.error(`fetching list of banks from paystack failed:::${enums.FETCH_BANKS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch name attached to a bank account number
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response of the details of the bank account number
+ * @memberof UserController
+ */
+export const returnAccountDetails = async(req, res, next) => {
+  try {
+    const { user, accountNumberDetails } = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolved successfully returnAccountDetails.controller.user.js`);
+    return ApiResponse.success(res, accountNumberDetails.message, enums.HTTP_OK, accountNumberDetails.data);
+  } catch (error) {
+    error.label = enums.RETURN_ACCOUNT_DETAILS_CONTROLLER;
+    logger.error(`resolving bank account name enquiry failed:::${enums.RETURN_ACCOUNT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * save bank account details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response of the added bank account details
+ * @memberof UserController
+ */
+export const saveAccountDetails = async(req, res, next) => {
+  try {
+    const { user, body, accountNumberDetails } = req;
+    const payload = UserPayload.bankAccountPayload(user, body, accountNumberDetails);
+    const [ accountDetails ] = await UserService.saveBankAccountDetails(payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolved successfully returnAccountDetails.controller.user.js`);
+    userActivityTracking(user.user_id, 27, 'success');
+    return ApiResponse.success(res, enums.BANK_ACCOUNT_SAVED_SUCCESSFULLY, enums.HTTP_OK, accountDetails);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 27, 'fail');
+    error.label = enums.SAVE_ACCOUNT_DETAILS_CONTROLLER;
+    logger.error(`save bank account details in the DB failed:::${enums.SAVE_ACCOUNT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch user saved bank account details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response of all users added bank account details
+ * @memberof UserController
+ */
+export const fetchUserAccountDetails = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const accountDetails = await UserService.fetchBankAccountDetails([ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved account details fetched successfully fetchUserAccountDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.BANK_ACCOUNTS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, accountDetails);
+  } catch (error) {
+    error.label = enums.FETCH_USERS_ACCOUNT_DETAILS_CONTROLLER;
+    logger.error(`fetching all user's bank account details from the DB failed:::${enums.FETCH_USERS_ACCOUNT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * delete user saved bank account details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response with a message of account deleted
+ * @memberof UserController
+ */
+export const deleteUserAccountDetails = async(req, res, next) => {
+  try {
+    const { user, params: { id } } = req;
+    await UserService.deleteBankAccountDetails([ user.user_id, id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved account details deleted successfully deleteUserAccountDetails.controller.user.js`);
+    userActivityTracking(req.user.user_id, 29, 'success');
+    return ApiResponse.success(res, enums.BANK_ACCOUNT_DELETED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 29, 'fail');
+    error.label = enums.DELETE_USER_ACCOUNT_DETAILS_CONTROLLER;
+    logger.error(`delete users saved account details in the DB failed:::${enums.DELETE_USER_ACCOUNT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update account details choice sent
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response with a message of account deleted
+ * @memberof UserController
+ */
+export const updateAccountDetailsChoice = async(req, res, next) => {
+  const { user, params: { id }, query: { type } } = req;
+  try {
+    if (type === 'default') {
+      const [ , [ updatedAccount ] ] = await UserService.updateAccountDefaultChoice(user.user_id, id);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: saved account default choice updated successfully updateAccountDetailsChoice.controller.user.js`);
+      userActivityTracking(req.user.user_id, 35, 'success');
+      return ApiResponse.success(res, enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY(type), enums.HTTP_OK, updatedAccount);
+    }
+    if (type === 'disbursement') {
+      const [ , [ updatedAccount ] ] = await UserService.updateAccountDisbursementChoice(user.user_id, id);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: saved account disbursement choice updated successfully updateAccountDetailsChoice.controller.user.js`);
+      userActivityTracking(req.user.user_id, 36, 'success');
+      return ApiResponse.success(res, enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY(type), enums.HTTP_OK, updatedAccount);
+    }
+  } catch (error) {
+    const operationType = type === 'default' ? 35 : 36;
+    userActivityTracking(req.user.user_id, operationType, 'fail');
+    error.label = enums.UPDATE_USER_ACCOUNT_DETAILS_CHOICE_CONTROLLER;
+    logger.error(`update account details default or disbursement choice in the DB failed:::${enums.UPDATE_USER_ACCOUNT_DETAILS_CHOICE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * Verify user email address
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -176,7 +319,8 @@ export const idUploadVerification = async(req, res, next) => {
     const { user, body } = req; 
     const payload = UserPayload.imgVerification(user, body);
     await UserService.updateIdVerification(payload);
-    const data =  await UserService.userIdVerification(user.user_id);
+    const tierOption = user.is_verified_bvn ? '2' : '1';
+    const data =  await UserService.userIdVerification([ user.user_id, tierOption ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     user id verification uploaded successfully DB idUploadVerification.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');

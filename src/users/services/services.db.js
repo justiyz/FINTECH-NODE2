@@ -12,5 +12,9 @@ export const queries = {
 export default {
   transact: (query, data, type) => db.any(queries[type][query], data),
   singleTransact: (query, data, type) => db.oneOrNone(queries[type][query], data),
-  noReturnTransact: (query, data, type) => db.none(queries[type][query], data)
+  noReturnTransact: (query, data, type) => db.none(queries[type][query], data),
+  multipleTransaction: transactions => {
+    const result = db.tx(t => t.batch(transactions));
+    return result;
+  }
 };

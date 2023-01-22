@@ -52,7 +52,7 @@ export default {
       SET
         updated_at = NOW(),
         is_verified_bvn = TRUE,
-        tier = '1',
+        tier = $3,
         bvn = $2
       WHERE user_id = $1
       RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
@@ -66,6 +66,90 @@ export default {
         updated_at = NOW()
       WHERE email = $1
       `,
+
+  saveBankAccountDetails: `
+      INSERT INTO user_bank_accounts(
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name
+      ) VALUES ($1, $2, $3, $4, $5)
+      RETURNING *`,
+
+  checkIfAccountExisting: `
+      SELECT 
+        account_number,
+        bank_code
+      FROM user_bank_accounts
+      WHERE user_id = $1
+      AND account_number = $2
+      AND bank_code = $3`,
+
+  fetchBankAccountDetails: `
+      SELECT 
+        id,
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name,
+        is_default,
+        is_disbursement_account,
+        created_at
+      FROM user_bank_accounts
+      WHERE user_id = $1`,
+
+  fetchBankAccountDetailsById: `
+      SELECT 
+        id,
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name,
+        is_default,
+        is_disbursement_account,
+        created_at
+      FROM user_bank_accounts
+      WHERE id =$1`,
+
+  deleteBankAccountDetails: `
+      DELETE FROM user_bank_accounts
+      WHERE user_id = $1
+      AND id = $2`,
+
+  setExistingAccountDefaultFalse: `
+      UPDATE user_bank_accounts
+      SET 
+        updated_at = NOW(),
+        is_default = 'false'
+      WHERE user_id = $1`,
+
+  SetNewAccountDefaultTrue: `
+      UPDATE user_bank_accounts
+      SET 
+        updated_at = NOW(),
+        is_default = 'true'
+      WHERE user_id = $1
+      AND id = $2
+      RETURNING id, user_id, account_number, account_name,is_default, is_disbursement_account`,
+
+  setExistingAccountDisbursementFalse: `
+      UPDATE user_bank_accounts
+      SET 
+        updated_at = NOW(),
+        is_disbursement_account = 'false'
+      WHERE user_id = $1`,
+
+  SetNewAccountDisbursementTrue: `
+      UPDATE user_bank_accounts
+      SET 
+        updated_at = NOW(),
+        is_disbursement_account = 'true'
+      WHERE user_id = $1
+      AND id = $2
+      RETURNING id, user_id, account_number, account_name,is_default, is_disbursement_account`,
 
   fetchAllExistingBvns: `
   SELECT bvn 
@@ -96,7 +180,7 @@ export default {
     UPDATE users
     SET
     is_uploaded_identity_card = true,
-    tier = '2'
+    tier = $2
     WHERE user_id = $1
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status

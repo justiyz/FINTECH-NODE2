@@ -91,6 +91,42 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchAvailableBankLists', async() => {
+      const req = { user: '' };
+      const data = await UserController.fetchAvailableBankLists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call returnAccountDetails', async() => {
+      const req = { user: '', accountNumberDetails: '' };
+      const data = await UserController.returnAccountDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call saveAccountDetails', async() => {
+      const req = { user: '', body: '', accountNumberDetails: '' };
+      const data = await UserController.saveAccountDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchUserAccountDetails', async() => {
+      const req = { user: '' };
+      const data = await UserController.fetchUserAccountDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call deleteUserAccountDetails', async() => {
+      const req = { user: '', params: '' };
+      const data = await UserController.deleteUserAccountDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateAccountDetailsChoice', async() => {
+      const req = { user: '', params: '', query: { type: 'default' } };
+      const data = await UserController.updateAccountDetailsChoice(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call updateUserProfile', async() => {
       const req = { user: '', body: ''};
       const data = await UserController.updateUserProfile(req, res, next);

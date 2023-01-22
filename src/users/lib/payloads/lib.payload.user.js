@@ -1,5 +1,13 @@
 
 export default {
+  bankAccountPayload: (user, body, accountNumberDetails) => [ 
+    user.user_id, 
+    body.bank_name.toLowerCase(),
+    body.bank_code,
+    body.account_number,
+    accountNumberDetails.data.account_name.trim().toLowerCase().split(',').join('')
+  ],
+
   imgVerification: (user, body) => [ 
     user.user_id, 
     body.id_type.toLowerCase(),

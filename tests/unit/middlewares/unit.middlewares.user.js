@@ -75,6 +75,36 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call resolveBankAccountNumberName', async() => {
+      const req = { user: '', query: '', body: '' };
+      const data = await UserMiddleware.resolveBankAccountNumberName(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkAccountOwnership', async() => {
+      const req = { user: '', accountNumberDetails: '' };
+      const data = await UserMiddleware.checkAccountOwnership(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfAccountDetailsExists', async() => {
+      const req = { user: '', params: '' };
+      const data = await UserMiddleware.checkIfAccountDetailsExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkUserLoanStatus', async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.checkUserLoanStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkAccountCurrentChoicesAndTypeSent', async() => {
+      const req = { user: '', query: '', accountDetails: '' };
+      const data = await UserMiddleware.checkAccountCurrentChoicesAndTypeSent(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call checkIfLoanStatusIsActive', async() => {
       const req = { user: '' };
       const data = await UserMiddleware.checkIfLoanStatusIsActive(req, res, next);
