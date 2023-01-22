@@ -41,7 +41,7 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.completeProfile, 'payload'),
   AuthMiddleware.isCompletedKyc('complete'),
-  AuthMiddleware.isPasswordCreated,
+  AuthMiddleware.isPasswordCreated(),
   AuthMiddleware.checkIfEmailAlreadyExist,
   AuthController.completeProfile
 );
@@ -73,9 +73,58 @@ router.post(
 
 router.post(
   '/reset-password',
-  Model(Schema.resetPassword, 'payload'),
+  Model(Schema.password, 'payload'),
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateForgotPasswordToken,
   AuthController.resetPassword
 );
+
+router.patch(
+  '/change-password',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.changePassword, 'payload'),
+  AuthMiddleware.isPasswordCreated('confirm'),
+  AuthMiddleware.checkIfCredentialsIsValid(),
+  AuthController.changePassword
+);
+
+router.post(
+  '/pin',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.pin, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  AuthController.createPin
+);
+
+router.patch(
+  '/pin',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.pin, 'payload'),
+  AuthMiddleware.isPasswordCreated('confirm'),
+  AuthMiddleware.checkIfCredentialsIsValid('pin'),
+  AuthController.changePin
+);
+
+router.get(
+  '/confirm-pin',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.pin, 'payload'),
+  AuthMiddleware.comparePin,
+  AuthController.confirmPin
+);
+
+router.get(
+  '/confirm-password',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.password, 'payload'),
+  AuthMiddleware.comparePassword,
+  AuthController.confirmPassword
+);
+
 export default router;

@@ -73,6 +73,11 @@ export default {
     FROM users 
     WHERE user_id = $1`,
 
+  fetchUserPin: `
+    SELECT id, user_id, pin
+    FROM users 
+    WHERE user_id = $1`,
+
   loginUserAccount: `
     UPDATE users
     SET 
@@ -107,5 +112,27 @@ export default {
       is_verified_email = TRUE,
       updated_at = NOW()
     WHERE user_id = $1
+    `,
+  changePassword: `
+  UPDATE users
+  SET
+    updated_at = NOW(),
+    password = $2
+  WHERE user_id = $1
+    `,
+  createPin: `
+  UPDATE users
+  SET
+    updated_at = NOW(),
+    is_created_pin = TRUE,
+    pin = $2
+  WHERE user_id = $1
+  `,
+  changePin: `
+  UPDATE users
+  SET
+    updated_at = NOW(),
+    pin = $2
+  WHERE user_id = $1
     `
 };

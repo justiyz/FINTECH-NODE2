@@ -275,3 +275,122 @@ export const resetPassword = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+Change user password
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const changePassword = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const hash = Hash.hashData(body.newPassword.trim());
+    await AuthService.changePassword([ user.user_id, hash ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully changed user password in the db. changePassword.controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 10, 'success');
+    return ApiResponse.success(res, enums.CHANGE_PASSWORD, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 10, 'fail');
+    error.label = enums.CHANGE_PASSWORD_CONTROLLER;
+    logger.error(`changing password failed:::${enums.CHANGE_PASSWORD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+Create transaction pin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response 
+ * @memberof AuthController
+ */
+export const createPin = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const hash = Hash.hashData(body.pin.trim());
+    await AuthService.createPin([ user.user_id, hash ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully created user user pin in the db. createPin.controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 11, 'success');
+    return ApiResponse.success(res, enums.CREATE_PIN, enums.HTTP_CREATED);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 11, 'fail');
+    error.label = enums.CREATE_PIN_CONTROLLER;
+    logger.error(`creating pin failed:::${enums.CREATE_PIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+Change transaction pin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const changePin = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const hash = Hash.hashData(body.pin.trim());
+    await AuthService.changePin([ user.user_id, hash ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully changed user pin in the db. changePin.controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 14, 'success');
+    return ApiResponse.success(res, enums.CHANGE_PIN, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 14, 'fail');
+    error.label = enums.CHANGE_PIN_CONTROLLER;
+    logger.error(`changing pin failed:::${enums.CHANGE_PIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+Confirm user password
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const confirmPassword = (req, res, next) => {
+  try {
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    successfully confirm user password in the db. confirmPassword.controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 30, 'success');
+    return ApiResponse.success(res, enums.CONFIRM_CREDENTIALS('password'), enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 30, 'fail');
+    error.label = enums.CONFIRM_PASSWORD_CONTROLLER;
+    logger.error(`Confirm password failed:::${enums.CONFIRM_PASSWORD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+Confirm user pin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing user details
+ * @memberof AuthController
+ */
+export const confirmPin = async(req, res, next) => {
+  try {
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    successfully confirm user pin in the db. confirmPin.controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 31, 'success');
+    return ApiResponse.success(res, enums.CONFIRM_CREDENTIALS('pin'), enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 31, 'fail');
+    error.label = enums.CONFIRM_PIN_CONTROLLER;
+    logger.error(`Confirm pin failed:::${enums.CONFIRM_PIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

@@ -35,6 +35,8 @@ export const USER_EMAIL_EXIST = 'Account with this email address already exist';
 export const USER_FCM_TOKEN_UPDATED = 'User fcm token updated';
 export const INVALID_EMAIL_ADDRESS = 'Invalid email/password'; // mobile listens for this error message to perform an action be careful when changing
 export const INVALID_PASSWORD = 'Invalid email or password';
+export const INVALID_PIN = 'Invalid pin';
+export const IS_VALID_CREDENTIALS = 'User Credentials matches with the old Credentials';
 export const PASSWORD_RESET = 'Password reset successful';
 export const USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY = 'User selfie image updated successfully';
 export const USER_BVN_VERIFIED_SUCCESSFULLY = 'User bvn verified successfully';
@@ -62,6 +64,10 @@ export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly con
 export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 
+export const CHANGE_PASSWORD = 'Password changed successful';
+export const CREATE_PIN = 'Successfully create pin for user';
+export const CHANGE_PIN = 'Pin changed successfully.';
+export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfully.`;
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

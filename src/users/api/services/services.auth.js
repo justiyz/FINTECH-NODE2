@@ -4,6 +4,7 @@ import enums from '../../lib/enums';
 export const getUserByVerificationToken = (payload) => DB.transact('getUserByVerificationToken', payload, enums.AUTH_QUERY);
 export const registerUser = (payload) => DB.transact('registerUser', payload, enums.AUTH_QUERY);
 export const fetchUserPassword = (payload) => DB.transact('fetchUserPassword', payload, enums.AUTH_QUERY);
+export const fetchUserPin = (payload) => DB.transact('fetchUserPin', payload, enums.AUTH_QUERY);
 export const checkIfExistingReferralCode = (payload) => DB.transact('checkIfExistingReferralCode', payload, enums.AUTH_QUERY);
 export const updateReferralTrail = (payload) => DB.transact('updateReferralTrail', payload, enums.AUTH_QUERY);
 export const checkIfReferralPreviouslyRecorded = (payload) => DB.transact('checkIfReferralPreviouslyRecorded', payload, enums.AUTH_QUERY);
@@ -14,3 +15,6 @@ export const completeUserProfile = (payload) => DB.transact('completeUserProfile
 export const resetPassword = (payload) => DB.transact('resetPassword', payload, enums.AUTH_QUERY);
 export const forgotPassword = (payload) => DB.transact('forgotPassword', payload, enums.AUTH_QUERY);
 export const verifyUserEmail = (payload) => DB.transact('verifyUserEmail', payload, enums.AUTH_QUERY);
+export const changePassword = (payload) => DB.transact('changePassword', payload, enums.AUTH_QUERY);
+export const createPin = (payload) => DB.transact('createPin', payload, enums.AUTH_QUERY);
+export const changePin = (payload) => DB.transact('changePin', payload, enums.AUTH_QUERY);
