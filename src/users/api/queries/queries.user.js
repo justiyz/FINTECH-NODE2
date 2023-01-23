@@ -98,7 +98,26 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id = $1`,
+      WHERE user_id = $1
+      ORDER BY is_default DESC`,
+
+  fetchUserDebitCards: `
+      SELECT
+        id,
+        user_id,
+        tokenising_platform,
+        first_6_digits,
+        last_4_digits,
+        card_type,
+        expiry_month,
+        expiry_year,
+        card_holder_name,
+        card_attached_bank,
+        is_default,
+        created_at
+      FROM user_debit_cards
+      WHERE user_id = $1
+      ORDER BY is_default DESC`,
 
   fetchBankAccountDetailsById: `
       SELECT 

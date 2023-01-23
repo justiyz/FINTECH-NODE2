@@ -59,6 +59,7 @@
     "joi": "^17.7.0",
     "jsonwebtoken": "^8.5.1",
     "pg-promise": "^10.15.4",
+    "uuid": "^9.0.0",
     "winston": "^3.8.2"
   },
   "devDependencies": {

@@ -115,6 +115,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchUserDebitCards', async() => {
+      const req = { user: '' };
+      const data = await UserController.fetchUserDebitCards(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call deleteUserAccountDetails', async() => {
       const req = { user: '', params: '' };
       const data = await UserController.deleteUserAccountDetails(req, res, next);
