@@ -10,6 +10,7 @@ export const updateUserSelfieImage = (payload) => DB.transact('updateUserSelfieI
 export const updateUserBvn = (payload) => DB.transact('updateUserBvn', payload, enums.USER_QUERY);
 export const saveBankAccountDetails = (payload) => DB.transact('saveBankAccountDetails', payload, enums.USER_QUERY);
 export const fetchBankAccountDetails = (payload) => DB.transact('fetchBankAccountDetails', payload, enums.USER_QUERY);
+export const fetchUserDebitCards = (payload) => DB.transact('fetchUserDebitCards', payload, enums.USER_QUERY);
 export const fetchBankAccountDetailsById = (payload) => DB.transact('fetchBankAccountDetailsById', payload, enums.USER_QUERY);
 export const deleteBankAccountDetails = (payload) => DB.transact('deleteBankAccountDetails', payload, enums.USER_QUERY);
 export const updateAccountDefaultChoice = async(user_id, id) => DB.multipleTransaction([

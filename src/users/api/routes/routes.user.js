@@ -123,6 +123,13 @@ router.patch(
   UserMiddleware.checkAccountCurrentChoicesAndTypeSent,
   UserController.updateAccountDetailsChoice
 );
+
+router.get(
+  '/settings/debit-cards',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserDebitCards
+);
     
 router.post(
   '/id-verification',

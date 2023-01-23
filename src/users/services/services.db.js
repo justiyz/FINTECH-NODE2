@@ -2,11 +2,13 @@ import { db } from '../config/db';
 import authQuery from '../api/queries/queries.auth';
 import userQuery from '../api/queries/queries.user';
 import logQueries from '../api/queries/queries.log';
+import paymentQuery from '../api/queries/queries.payment';
 
 export const queries = {
   authQuery,
   userQuery,
-  logQueries
+  logQueries,
+  paymentQuery
 };
 
 export default {
