@@ -46,6 +46,8 @@ jobs:
           SEEDFI_TEST_AFRICASTALKING_SMS_SENDER_ID : 'seedfi'
           SEEDFI_TEST_ENCODING_AUTHENTICATION_SECRET : 'anyrandomstringforencodingjwtlevels'
           SEEDFI_TEST_BCRYPT_SALT_ROUND : '10'
+          SEEDFI_TEST_PAYSTACK_SECRET_KEY: 'sk_test_db3c7dc6fdfba13511d5ff95c068ce798066341b'
+          SEEDFI_TEST_CARD_TOKENIZING_AMOUNT: '500'
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
