@@ -259,9 +259,6 @@ export const isCompletedKyc = (type = '') => async(req, res, next) => {
 /**
  * check if user has previously created password
 *  @param {String} type - The type request from the endpoint.
-*  @param {String} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
