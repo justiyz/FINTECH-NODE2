@@ -1782,6 +1782,24 @@ describe('set user default card', () => {
         done();
       });
   });
+  it('Should throw error if user does not exist', (done) => {
+    chai.request(app)
+      .patch('/api/v1/user/settings/1/default-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        console.log(res.body);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('User does not exist on the DB');
+        expect(res.body.error).to.equal('BAD_REQUEST');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
 
 });
 
@@ -1866,6 +1884,24 @@ describe('remove saved debit card', () => {
         expect(res.body).to.have.property('status');
         expect(res.body.message).to.equal('Please provide a token');
         expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if user does not exist', (done) => {
+    chai.request(app)
+      .delete('/api/v1/user/settings/1/remove-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        console.log(res.body);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('User does not exist on the DB');
+        expect(res.body.error).to.equal('BAD_REQUEST');
         expect(res.body.status).to.equal(enums.ERROR_STATUS);
         done();
       });

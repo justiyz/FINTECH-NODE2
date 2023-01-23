@@ -547,8 +547,8 @@ export const checkIfLoanStatusIsActive = (type = '' ) => async (req, res, next) 
  */
 export const checkIfCardExist = async (req, res, next) => {
   try {
-    const { user: { user_id }, params: { id } } = req;
-    const userCard = await UserService.checkIfCardexists([ user_id, id ]);
+    const {  params: { id } } = req;
+    const userCard = await UserService.checkIfCardexists([ id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
       successfully fetched a user's card checkIfCardExist.admin.middlewares.user.js`);
     if (!userCard) {

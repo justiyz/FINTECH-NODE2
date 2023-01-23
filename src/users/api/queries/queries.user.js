@@ -231,7 +231,7 @@ export default {
   checkIfCardExists:`
       SELECT id
       FROM user_debit_cards
-      WHERE user_id = $1 AND id = $2
+      WHERE  id = $1
   `,
 
   setExistingCardDefaultFalse: `
