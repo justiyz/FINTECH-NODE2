@@ -417,9 +417,9 @@ export const validateForgotPasswordToken = async(req, res, next) => {
 export const checkIfCredentialsIsValid = (type = '') => async(req, res, next) => {
   try {
     const { 
-      body: { newPassword, pin }, user } = req;
+      body: { newPassword, newPin }, user } = req;
     const [ userPasswordDetails ] = type == 'pin' ?  await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
-    const isValidCredentials = type == 'pin' ? Hash.compareData(pin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
+    const isValidCredentials = type == 'pin' ? Hash.compareData(newPin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfCredentialsIsValid.middlewares.auth.js`);
     if(isValidCredentials){   
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that new password/pin matches with old password/pin. checkIfCredentialsIsValid.middlewares.auth.js`);
@@ -489,6 +489,36 @@ export const isPinCreated = (type = '') => async(req, res, next) => {
     userActivityTracking(req.user.user_id, 7, 'fail');
     error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
     logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * validate password/pin pin in the DB
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
+  try {
+    const { 
+      body, user } = req;
+    const condition = body.oldPin || body.oldPassword;
+    const [ credentials ] = type == 'pin' ? await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
+    const isValidCredentials = type == 'pin' ? Hash.compareData(condition, credentials.pin) : Hash.compareData(condition, credentials.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
+    if (isValidCredentials) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully validate password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: password/pin does not match in the DB validatePasswordOrPin.middlewares.auth.js`);
+    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN, enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
+    logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

@@ -228,6 +228,40 @@ export const fetchUserAccountDetails = async(req, res, next) => {
 };
 
 /**
+ * fetch user saved debit cards
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response of all users added debit cards details
+ * @memberof UserController
+ */
+export const fetchUserDebitCards = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const debitCards = await UserService.fetchUserDebitCards([ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved debit cards fetched successfully fetchUserDebitCards.controller.user.js`);
+    await Promise.all(
+      debitCards.map(async(card) => {
+        const decryptedFirst6Digits = await Hash.decrypt(decodeURIComponent(card.first_6_digits));
+        card.first_6_digits = decryptedFirst6Digits;
+        const decryptedLast4Digits = await Hash.decrypt(decodeURIComponent(card.last_4_digits));
+        card.last_4_digits = decryptedLast4Digits;
+        card.card_expiry = `${card.expiry_month}/${card.expiry_year.slice(-2)}`;
+        delete card.expiry_month;
+        delete card.expiry_year;
+        return card;
+      })
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved debit cards formatted successfully fetchUserDebitCards.controller.user.js`);
+    return ApiResponse.success(res, enums.DEBIT_CARDS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, debitCards);
+  } catch (error) {
+    error.label = enums.FETCH_USER_DEBIT_CARDS_CONTROLLER;
+    logger.error(`fetching all user's saved debit cards from the DB failed:::${enums.FETCH_USER_DEBIT_CARDS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * delete user saved bank account details
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -346,6 +380,31 @@ export const updateUserProfile = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 19, 'fail');
     error.label = enums.UPDATE_USER_PROFILE_CONTROLLER;
     logger.error(`updating user's profile failed:::${enums.UPDATE_USER_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * get user profile
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+
+export const getProfile = async(req, res, next) => {
+  try {
+    const {user} = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User data Info fetched. getProfile.controllers.user.js`);
+    delete user.pin; 
+    delete user.password;
+    delete user.fcm_token;
+    delete user.refresh_token;
+    return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
+  } catch (error){
+    error.label = enums.GET_USER_PROFILE_CONTROLLER;
+    logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
     return next(error);
   }
 };

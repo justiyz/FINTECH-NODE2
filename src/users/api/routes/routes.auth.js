@@ -80,11 +80,12 @@ router.post(
 );
 
 router.patch(
-  '/change-password',
+  '/password',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.changePassword, 'payload'),
   AuthMiddleware.isPasswordCreated('confirm'),
+  AuthMiddleware.validatePasswordOrPin(),
   AuthMiddleware.checkIfCredentialsIsValid(),
   AuthController.changePassword
 );
@@ -102,13 +103,14 @@ router.patch(
   '/pin',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
-  Model(Schema.pin, 'payload'),
+  Model(Schema.changePin, 'payload'),
   AuthMiddleware.isPinCreated('confirm'),
+  AuthMiddleware.validatePasswordOrPin('pin'),
   AuthMiddleware.checkIfCredentialsIsValid('pin'),
   AuthController.changePin
 );
 
-router.get(
+router.post(
   '/confirm-pin',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
@@ -117,7 +119,7 @@ router.get(
   AuthController.confirmPin
 );
 
-router.get(
+router.post(
   '/confirm-password',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,

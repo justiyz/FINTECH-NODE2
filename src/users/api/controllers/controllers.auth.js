@@ -337,7 +337,7 @@ Change transaction pin
 export const changePin = async(req, res, next) => {
   try {
     const { user, body } = req;
-    const hash = Hash.hashData(body.pin.trim());
+    const hash = Hash.hashData(body.newPin.trim());
     await AuthService.changePin([ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully changed user pin in the db. changePin.controllers.auth.js`);
@@ -364,7 +364,11 @@ export const confirmPassword = (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
     successfully confirm user password in the db. confirmPassword.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 30, 'success');
-    return ApiResponse.success(res, enums.CONFIRM_CREDENTIALS('password'), enums.HTTP_OK);
+    const data = {
+      user_id: req.user.user_id,
+      passwordCorrect: true
+    };
+    return ApiResponse.success(res, enums.CONFIRM_CREDENTIALS('password'), enums.HTTP_OK, data);
   } catch (error) {
     userActivityTracking(req.user.user_id, 30, 'fail');
     error.label = enums.CONFIRM_PASSWORD_CONTROLLER;
@@ -386,7 +390,11 @@ export const confirmPin = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
     successfully confirm user pin in the db. confirmPin.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 31, 'success');
-    return ApiResponse.success(res, enums.CONFIRM_CREDENTIALS('pin'), enums.HTTP_OK);
+    const data = {
+      user_id: req.user.user_id,
+      pinCorrect: true
+    };
+    return ApiResponse.success(res, enums.CONFIRM_CREDENTIALS('pin'), enums.HTTP_OK, data);
   } catch (error) {
     userActivityTracking(req.user.user_id, 31, 'fail');
     error.label = enums.CONFIRM_PIN_CONTROLLER;

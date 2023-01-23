@@ -47,4 +47,83 @@ const resolveAccount = async(account_number, bank_code) => {
   }
 };
 
-export { fetchBanks, resolveAccount };
+const initializeCardPayment = async(user, paystackAmountFormatting, reference) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        email: user.email,
+        amount: parseFloat(paystackAmountFormatting),
+        currency: 'NGN',
+        reference,
+        channels: [ 'card' ]
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to initialize card payment failed::${enums.PAYSTACK_INITIATE_CARD_PAYMENT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const confirmPaystackPaymentStatusByReference = async(reference) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackVerifyTransactionStatusTestResponse(reference);
+    }
+    const options = {
+      method: 'get',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/verify/${reference}`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`verifying paystack transaction status failed::${enums.CONFIRM_PAYSTACK_PAYMENT_STATUS_BY_REFERENCE_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const raiseARefundTickedForCardTokenizationTransaction = async(transaction_id) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackInitiateRefundTestResponse(transaction_id);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/refund`,
+      data: {
+        transaction: transaction_id
+      },
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`calling paystack refund API failed::${enums.CONFIRM_PAYSTACK_PAYMENT_STATUS_BY_REFERENCE_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+export { 
+  fetchBanks, 
+  resolveAccount, 
+  initializeCardPayment,
+  confirmPaystackPaymentStatusByReference,
+  raiseARefundTickedForCardTokenizationTransaction
+};

@@ -123,6 +123,13 @@ router.patch(
   UserMiddleware.checkAccountCurrentChoicesAndTypeSent,
   UserController.updateAccountDetailsChoice
 );
+
+router.get(
+  '/settings/debit-cards',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserDebitCards
+);
     
 router.post(
   '/id-verification',
@@ -143,5 +150,12 @@ router.put(
   UserMiddleware.checkIfBvnIsVerified,
   UserMiddleware.checkIfLoanStatusIsActive,
   UserController.updateUserProfile
+);
+
+router.get(
+  '/profile',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  UserController.getProfile
 );
 export default router;

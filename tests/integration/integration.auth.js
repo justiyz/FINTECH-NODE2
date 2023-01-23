@@ -1266,31 +1266,33 @@ describe('Auth', () => {
   describe('Change password', () => {
     it('Should return error if try sent with wrong field', (done) => {
       chai.request(app)
-        .patch('/api/v1/auth/change-password')
+        .patch('/api/v1/auth/password')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          password: 'hshsuw8uwhw'
+          password: password,
+          newPassword: 'hshsuw8uwhw'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('newPassword is required');
+          expect(res.body.message).to.equal('oldPassword is required');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
     it('Should return error if field is empty', (done) => {
       chai.request(app)
-        .patch('/api/v1/auth/change-password')
+        .patch('/api/v1/auth/password')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
+          oldPassword: 'hshsrrwhw',
           newPassword: ''
         })
         .end((err, res) => {
@@ -1304,12 +1306,13 @@ describe('Auth', () => {
     });
     it('Should successfully change password', (done) => {
       chai.request(app)
-        .patch('/api/v1/auth/change-password')
+        .patch('/api/v1/auth/password')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
+          oldPassword: password,
           newPassword: 'balablue'
         })
         .end((err, res) => {
@@ -1321,14 +1324,35 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should flag if user try changing password to already existing password.', (done) => {
+    it('Should successfully change password', (done) => {
       chai.request(app)
-        .patch('/api/v1/auth/change-password')
+        .patch('/api/v1/auth/password')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
+          oldPassword: `${password}0`,
+          newPassword: 'balablue'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.VALIDATE_PASSWORD_OR_PIN);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user try changing password to already existing password.', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPassword: 'balablue',
           newPassword: 'balablue'
         })
         .end((err, res) => {
@@ -1341,10 +1365,10 @@ describe('Auth', () => {
         });
     });
   });
-  describe('Confirm Pin and password', () => {
+  describe('Confirm password', () => {
     it('Should successfully confirm password', (done) => {
       chai.request(app)
-        .get('/api/v1/auth/confirm-password')
+        .post('/api/v1/auth/confirm-password')
         .set({
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
@@ -1360,14 +1384,14 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should successfully confirm password', (done) => {
+    it('Should flag wrong password', (done) => {
       chai.request(app)
-        .get('/api/v1/auth/confirm-password')
+        .post('/api/v1/auth/confirm-password')
         .set({
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          password: 'balablu1e'
+          password: password
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
