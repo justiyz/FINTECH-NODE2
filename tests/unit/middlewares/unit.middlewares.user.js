@@ -124,7 +124,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call checkIfCardBelongsToAuser',  async() => {
-      const req = { user: '', params: '' };
+      const req = {  params: '' };
       const data = await UserMiddleware.checkIfCardBelongsToAuser(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

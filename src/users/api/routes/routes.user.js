@@ -166,6 +166,7 @@ router.patch(
   Model(Schema.defaultCardChoice, 'params'),
   UserMiddleware.checkIfLoanStatusIsActive('default'),
   UserMiddleware.checkIfCardExist,
+  UserMiddleware.checkIfCardBelongsToAuser,
   UserController.setDefaultCard
 );
 
