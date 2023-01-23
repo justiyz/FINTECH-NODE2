@@ -474,7 +474,7 @@ export const comparePin = async(req, res, next) => {
 export const isPinCreated = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
-    if(user.is_created_pin && type === 'confirm'){
+    if(user.is_created_pin && type == 'confirm'){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin and can set change to new pin. isPinCreated.middlewares.auth.js`);
       return next();
     }
