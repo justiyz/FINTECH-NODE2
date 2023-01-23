@@ -28,3 +28,10 @@ export const fetchAllExistingBvns = (payload) => DB.transact('fetchAllExistingBv
 export const updateIdVerification = (payload) => DB.transact('updateIdVerification', payload, enums.USER_QUERY);
 export const userIdVerification = (payload) => DB.transact('userIdVerification', payload, enums.USER_QUERY);
 export const updateUserProfile = (payload) => DB.singleTransact('updateUserProfile', payload, enums.USER_QUERY);
+export const setdefaultCard = async(user_id, id) => DB.multipleTransaction([
+  await DB.transact('setExistingCardDefaultFalse', user_id, enums.USER_QUERY),
+  await DB.transact('SetNewCardDefaultTrue', [ user_id, id ], enums.USER_QUERY)
+]);
+export const fetchCardsById = (payload) => DB.singleTransact('fetchCardsById', payload, enums.USER_QUERY);
+export const checkIfCardexists = (payload) => DB.singleTransact('checkIfCardExists', payload, enums.USER_QUERY);
+export const removeCard = (payload) => DB.transact('removeCard', payload, enums.USER_QUERY);

@@ -148,7 +148,7 @@ router.put(
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateUsersProfile, 'payload'),
   UserMiddleware.checkIfBvnIsVerified,
-  UserMiddleware.checkIfLoanStatusIsActive,
+  UserMiddleware.checkIfLoanStatusIsActive('profile'),
   UserController.updateUserProfile
 );
 
@@ -157,5 +157,26 @@ router.get(
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   UserController.getProfile
+);
+
+router.patch(
+  '/settings/:id/default-card',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.defaultCardChoice, 'params'),
+  UserMiddleware.checkIfLoanStatusIsActive('default'),
+  UserMiddleware.checkIfCardExist,
+  UserController.setDefaultCard
+);
+
+router.delete(
+  '/settings/:id/remove-card',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.removeCard, 'params'),
+  UserMiddleware.checkIfLoanStatusIsActive('delete'),
+  UserMiddleware.checkIfCardExist,
+  UserMiddleware.checkIfCardBelongsToAuser,
+  UserController.removeCard
 );
 export default router;

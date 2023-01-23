@@ -69,6 +69,10 @@ export const CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE = 'UserMiddleware::checkIfBvnIs
 export const CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE = 'UserMiddleware::checkIfLoanStatusIsActive';
 export const UPDATE_USER_PROFILE_CONTROLLER = 'UserController::updateUserProfile';
 export const GET_USER_PROFILE_CONTROLLER = 'UserController::getProfile';
+export const CHECK_IF_CARD_EXISTS_MIDDLEWARE = 'UserMiddleware::checkIfCardExist';
+export const SET_DEFAULT_CARD_CONTROLLER = 'UserController::setDefaultCard';
+export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
+export const CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE = 'UserMiddleware::checkIfCardBelongsToTheUser';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';

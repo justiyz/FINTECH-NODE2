@@ -221,5 +221,37 @@ export default {
      WHERE user_id = $1
      RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, address,
               income_range, number_of_dependants, marital_status
+  `,
+  fetchCardsById:`
+      SELECT id, user_id, card_type
+      FROM user_debit_cards
+      WHERE id = $1
+  `,
+
+  checkIfCardExists:`
+      SELECT id
+      FROM user_debit_cards
+      WHERE user_id = $1 AND id = $2
+  `,
+
+  setExistingCardDefaultFalse: `
+      UPDATE user_debit_cards
+      SET 
+        updated_at = NOW(),
+        is_default = 'false'
+      WHERE user_id = $1`,
+
+  SetNewCardDefaultTrue: `
+      UPDATE user_debit_cards
+      SET 
+        updated_at = NOW(),
+        is_default = 'true'
+      WHERE user_id = $1
+      AND id = $2
+      RETURNING id, user_id, is_default, card_type`,
+
+  removeCard:`
+      DELETE FROM user_debit_cards
+      WHERE user_id = $1 AND id = $2
   `
 };

@@ -1,5 +1,6 @@
 import * as UserService from '../services/services.user';
 import * as AuthService from '../services/services.auth';
+// import * as PaymentService from '../services/services.payment';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { resolveAccount } from '../../services/service.paystack';
@@ -510,13 +511,23 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
  * @memberof UserMiddleware
  */
 
-export const checkIfLoanStatusIsActive = async (req, res, next) => {
+export const checkIfLoanStatusIsActive = (type = '' ) => async (req, res, next) => {
   try {
     const { user } = req;
-    if ( (user.loan_status === 'active') ) {
+    if ( (user.loan_status === 'active') && type === ' profile' ) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
       successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
       return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, 400);
+    }
+    if ( (user.loan_status === 'active') && type === 'default' ) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CARD_CAN_NOT_BE_SET_AS_DEFAULT, 400);
+    }
+    if ( (user.loan_status === 'active') && type === 'delete' ) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CARD_CAN_NOT_BE_DELETED, 400);
     }
     return next();
   } catch (error) {
@@ -524,6 +535,62 @@ export const checkIfLoanStatusIsActive = async (req, res, next) => {
     logger.error(`checking if loan status is active failed::${enums.CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE}`, error.message);
     return next(error);
   }
+};
+
+/**
+ * check if card exists in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfCardExist = async (req, res, next) => {
+  try {
+    const { user: { user_id }, params: { id } } = req;
+    const userCard = await UserService.checkIfCardexists([ user_id, id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully fetched a user's card checkIfCardExist.admin.middlewares.user.js`);
+    if (!userCard) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully checked if the card exists checkIfCardExist.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CARD_DOES_NOT_EXIST, 400);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE;
+    logger.error(`checking if card exists failed::${enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if card belongs to a user in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+
+export const checkIfCardBelongsToAuser = async (req, res, next) => {
+  try {
+    const { user, params: { id } } = req;
+    const userCard = await UserService.fetchCardsById(id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully fetched cards by id checkIfCardBelongsToTheUser.admin.middlewares.user.js`);
+    if ( user.user_id !== userCard.user_id ) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully confirmed the user does not exist checkIfCardBelongsToTheUser.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_DOES_NOT_EXIST, 400);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE;
+    logger.error(`checking if card exists failed::${enums.CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+
 };
 
 
