@@ -397,9 +397,9 @@ export const getProfile = async(req, res, next) => {
   try {
     const {user} = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User data Info fetched. getProfile.controllers.user.js`);
-    delete user.pin, 
-    delete user.password, 
-    delete user.fcm_token,
+    delete user.pin; 
+    delete user.password;
+    delete user.fcm_token;
     delete user.refresh_token;
     return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
   } catch (error){
