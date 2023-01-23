@@ -94,8 +94,7 @@ router.post(
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.pin, 'payload'),
-  AuthMiddleware.isCompletedKyc('confirm'),
-  UserMiddleware.isVerifiedBvn('confirm'),
+  AuthMiddleware.isPinCreated(),
   AuthController.createPin
 );
 
@@ -104,7 +103,7 @@ router.patch(
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.pin, 'payload'),
-  AuthMiddleware.isPasswordCreated('confirm'),
+  AuthMiddleware.isPinCreated('confirm'),
   AuthMiddleware.checkIfCredentialsIsValid('pin'),
   AuthController.changePin
 );

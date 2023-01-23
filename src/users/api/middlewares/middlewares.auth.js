@@ -275,7 +275,7 @@ export const isPasswordCreated = (type = '') => async(req, res, next) => {
     if (user.is_created_password) {
       userActivityTracking(user.user_id, 7, 'fail');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password isPasswordCreated.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_OR_PIN_CREATED_MIDDLEWARE);
+      return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created password isPasswordCreated.middlewares.auth.js`);
     return next();
@@ -458,6 +458,37 @@ export const comparePin = async(req, res, next) => {
   } catch (error) {
     error.label = enums.COMPARE_PIN_MIDDLEWARE;
     logger.error(`comparing incoming and already set pin in the DB failed:::${enums.COMPARE_PIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if pin sent matches user's pin in the DB
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const isPinCreated = (type = '') => async(req, res, next) => {
+  try {
+    const { user } = req;
+    if(user.is_created_pin && type === 'confirm'){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin and can set change to new pin. isPinCreated.middlewares.auth.js`);
+      return next();
+    }
+    if (user.is_created_pin) {
+      userActivityTracking(user.user_id, 7, 'fail');
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin isPinCreated.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.ALREADY_CREATED('pin'), enums.HTTP_FORBIDDEN, enums.IS_PIN_CREATED_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created pin isPinCreated.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 7, 'fail');
+    error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
+    logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

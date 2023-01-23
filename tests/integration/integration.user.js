@@ -1354,25 +1354,6 @@ describe('User', () => {
     });
   });
   describe('create pin', () => {
-    it('Should flag if kyc have not been completed.', (done) => {
-      chai.request(app)
-        .post('/api/v1/auth/pin')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
-        })
-        .send({
-          pin: '0908'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.KYC_NOT_PREVIOUSLY_COMPLETED);
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
     it('Should create user two pin.', (done) => {
       chai.request(app)
         .post('/api/v1/auth/pin')
@@ -1389,6 +1370,26 @@ describe('User', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.CREATE_PIN);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+
+    it('Should flag if user two already created pin.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '0908'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ALREADY_CREATED('pin'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
