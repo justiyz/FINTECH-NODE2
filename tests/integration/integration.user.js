@@ -1794,7 +1794,7 @@ describe('User', () => {
           done();
         });
     });
-    it('Should successfully change pin', (done) => {
+    it('Should flag if pin is invalid', (done) => {
       chai.request(app)
         .patch('/api/v1/auth/pin')
         .set({
@@ -1809,7 +1809,7 @@ describe('User', () => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.VALIDATE_PASSWORD_OR_PIN);
+          expect(res.body.message).to.equal(enums.VALIDATE_PASSWORD_OR_PIN('pin'));
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

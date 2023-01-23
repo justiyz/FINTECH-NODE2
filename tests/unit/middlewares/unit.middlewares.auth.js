@@ -105,9 +105,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfCredentialsIsValid', async() => {
+    it('should call checkIfNewCredentialsSameAsOld', async() => {
       const req = { user: '', body: '' };
-      const data = await AuthMiddleware.checkIfCredentialsIsValid('')(req, res, next);
+      const data = await AuthMiddleware.checkIfNewCredentialsSameAsOld('')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

@@ -411,18 +411,20 @@ export const validateForgotPasswordToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfCredentialsIsValid = (type = '') => async(req, res, next) => {
+export const checkIfNewCredentialsSameAsOld = (type = '') => async(req, res, next) => {
   try {
     const { 
       body: { newPassword, newPin }, user } = req;
     const [ userPasswordDetails ] = type == 'pin' ?  await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
     const isValidCredentials = type == 'pin' ? Hash.compareData(newPin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfCredentialsIsValid.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
     if(isValidCredentials){   
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that new password/pin matches with old password/pin. checkIfCredentialsIsValid.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      decoded that new ${type == 'pin' ? 'pin matches with old pin.' : 'password matches with old password.'}  checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
       return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CREDENTIAL_IS_VALID);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that user credential does not match checkIfCredentialsIsValid.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    confirms that users new ${type == 'pin' ? 'pin is not the same as the currently set pin' : 'password is not the same as the currently set password' } checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_CREDENTIAL_IS_VALID;
@@ -512,7 +514,7 @@ export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: password/pin does not match in the DB validatePasswordOrPin.middlewares.auth.js`);
-    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN, enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
+    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN(`${type == 'pin' ? 'pin' : 'password'}`), enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
   } catch (error) {
     error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
     logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);

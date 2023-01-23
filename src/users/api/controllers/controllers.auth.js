@@ -306,7 +306,7 @@ Create transaction pin
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON response 
+ * @returns { JSON } - A JSON response containing success message
  * @memberof AuthController
  */
 export const createPin = async(req, res, next) => {
@@ -331,7 +331,7 @@ Change transaction pin
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON response containing user details
+ * @returns { JSON } - A JSON response containing success message
  * @memberof AuthController
  */
 export const changePin = async(req, res, next) => {
@@ -356,7 +356,7 @@ Confirm user password
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON response containing user details
+ * @returns { JSON } - A JSON response containing success message
  * @memberof AuthController
  */
 export const confirmPassword = (req, res, next) => {

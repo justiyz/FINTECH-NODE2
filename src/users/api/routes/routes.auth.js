@@ -86,7 +86,7 @@ router.patch(
   Model(Schema.changePassword, 'payload'),
   AuthMiddleware.isPasswordCreated('confirm'),
   AuthMiddleware.validatePasswordOrPin(),
-  AuthMiddleware.checkIfCredentialsIsValid(),
+  AuthMiddleware.checkIfNewCredentialsSameAsOld(),
   AuthController.changePassword
 );
 
@@ -106,7 +106,7 @@ router.patch(
   Model(Schema.changePin, 'payload'),
   AuthMiddleware.isPinCreated('confirm'),
   AuthMiddleware.validatePasswordOrPin('pin'),
-  AuthMiddleware.checkIfCredentialsIsValid('pin'),
+  AuthMiddleware.checkIfNewCredentialsSameAsOld('pin'),
   AuthController.changePin
 );
 

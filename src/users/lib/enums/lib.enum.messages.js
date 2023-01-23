@@ -76,7 +76,7 @@ export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 export const FETCH_USER_PROFILE = 'User profile fetched successfully';
 
-export const VALIDATE_PASSWORD_OR_PIN = 'Invalid password/pin';
+export const VALIDATE_PASSWORD_OR_PIN = (type) => `Invalid ${type}`;
 export const CHANGE_PASSWORD = 'Password changed successful';
 export const CREATE_PIN = 'Successfully create pin for user';
 export const CHANGE_PIN = 'Pin changed successfully.';
