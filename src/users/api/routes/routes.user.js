@@ -160,7 +160,7 @@ router.get(
 );
 
 router.patch(
-  '/settings/:id/default-card',
+  '/settings/:id/default-debit-card',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
@@ -170,7 +170,7 @@ router.patch(
 );
 
 router.delete(
-  '/settings/:id/remove-card',
+  '/settings/:id/debit-card',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
