@@ -1698,7 +1698,7 @@ describe('User', () => {
 describe('set user default card', () => {
   it('Should set user default card.', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/settings/1/default-card')
+      .patch('/api/v1/user/settings/1/default-debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1718,7 +1718,7 @@ describe('set user default card', () => {
   });
   it('Should throw error if invalid token is set.', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/settings/1/default-card')
+      .patch('/api/v1/user/settings/1/default-debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
@@ -1734,7 +1734,7 @@ describe('set user default card', () => {
   });
   it('Should throw error if token is malformed', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/settings/1/default-card')
+      .patch('/api/v1/user/settings/1/default-debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
@@ -1751,7 +1751,7 @@ describe('set user default card', () => {
   });
   it('Should throw error if token is not sent', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/settings/1/default-card')
+      .patch('/api/v1/user/settings/1/default-debit-card')
       .set({
         'Content-Type': 'application/json'
       })
@@ -1767,7 +1767,7 @@ describe('set user default card', () => {
   });
   it('Should throw error if card does not exist', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/settings/5/default-card')
+      .patch('/api/v1/user/settings/5/default-debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1784,7 +1784,7 @@ describe('set user default card', () => {
   });
   it('Should throw error if card does not belong to user', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/1/remove-card')
+      .patch('/api/v1/user/settings/1/default-debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
@@ -1805,7 +1805,7 @@ describe('set user default card', () => {
 describe('remove saved debit card', () => {
   it('Should remove a saved debit card.', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/2/remove-card')
+      .delete('/api/v1/user/settings/2/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1823,7 +1823,7 @@ describe('remove saved debit card', () => {
   });
   it('Should throw error if invalid token is set.', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/2/remove-card')
+      .delete('/api/v1/user/settings/2/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
@@ -1839,7 +1839,7 @@ describe('remove saved debit card', () => {
   });
   it('Should throw error if card does not exist', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/2/remove-card')
+      .delete('/api/v1/user/settings/2/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1856,7 +1856,7 @@ describe('remove saved debit card', () => {
   });
   it('Should throw error if token is malformed', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/2/remove-card')
+      .delete('/api/v1/user/settings/2/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
@@ -1873,7 +1873,7 @@ describe('remove saved debit card', () => {
   });
   it('Should throw error if token is not sent', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/2/remove-card')
+      .delete('/api/v1/user/settings/2/debit-card')
       .set({
         'Content-Type': 'application/json'
       })
@@ -1889,7 +1889,7 @@ describe('remove saved debit card', () => {
   });
   it('Should throw error if card does not belong to user', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/1/remove-card')
+      .delete('/api/v1/user/settings/1/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
