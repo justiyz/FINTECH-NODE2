@@ -2196,13 +2196,12 @@ describe('set user default card', () => {
 describe('remove saved debit card', () => {
   it('Should remove a saved debit card.', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/2/debit-card')
+      .delete('/api/v1/user/settings/1/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
       })
       .end((err, res) => {
-
         expect(res.statusCode).to.equal(enums.HTTP_OK);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
@@ -2280,7 +2279,7 @@ describe('remove saved debit card', () => {
   });
   it('Should throw error if card does not belong to user', (done) => {
     chai.request(app)
-      .delete('/api/v1/user/settings/1/debit-card')
+      .delete('/api/v1/user/settings/3/debit-card')
       .set({
         'Content-Type': 'application/json',
         Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
