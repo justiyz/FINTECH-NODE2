@@ -107,27 +107,16 @@ describe('', () => {
     });
     it('should call checkIfLoanStatusIsActive',  async() => {
       const req = { user: '' };
-      const data = await UserMiddleware.checkIfLoanStatusIsActive('profile')(req, res, next);
+      const data = await UserMiddleware.checkIfLoanStatusIsActive(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfLoanStatusIsActive',  async() => {
+    it('should call checkIfCardOrUserExist',  async() => {
       const req = { user: '', params: '' };
-      const data = await UserMiddleware.checkIfLoanStatusIsActive('default')(req, res, next);
+      const data = await UserMiddleware.checkIfCardOrUserExist(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfLoanStatusIsActive',  async() => {
-      const req = { user: '', params: '' };
-      const data = await UserMiddleware.checkIfLoanStatusIsActive('delete')(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call checkIfCardBelongsToAuser',  async() => {
-      const req = {  params: '' };
-      const data = await UserMiddleware.checkIfCardBelongsToAuser(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
+    
   });
 });

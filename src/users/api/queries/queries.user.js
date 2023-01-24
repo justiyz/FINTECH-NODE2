@@ -228,12 +228,6 @@ export default {
       WHERE id = $1
   `,
 
-  checkIfCardExists:`
-      SELECT id
-      FROM user_debit_cards
-      WHERE  id = $1
-  `,
-
   setExistingCardDefaultFalse: `
       UPDATE user_debit_cards
       SET 
