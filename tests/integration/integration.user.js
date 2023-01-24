@@ -1875,3 +1875,180 @@ describe('User', () => {
   });
 });
 
+describe('set user default card', () => {
+  it('Should set user default card.', (done) => {
+    chai.request(app)
+      .patch('/api/v1/user/settings/1/default-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(enums.HTTP_OK);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res).to.have.property('body');
+        expect(res.body.message).to.equal('Successfully sets card as default');
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        expect(res.body.data.id).to.equal(1);
+        expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
+        expect(res.body.data.is_default).to.equal(true);
+        done();
+      });
+  });
+  it('Should throw error if invalid token is set.', (done) => {
+    chai.request(app)
+      .patch('/api/v1/user/settings/1/default-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if token is malformed', (done) => {
+    chai.request(app)
+      .patch('/api/v1/user/settings/1/default-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('jwt malformed');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if token is not sent', (done) => {
+    chai.request(app)
+      .patch('/api/v1/user/settings/1/default-card')
+      .set({
+        'Content-Type': 'application/json'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('Please provide a token');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if card does not exist', (done) => {
+    chai.request(app)
+      .patch('/api/v1/user/settings/5/default-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal(enums.CARD_DOES_NOT_EXIST);
+        expect(res.body.error).to.equal('BAD_REQUEST');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+
+});
+
+describe('remove saved debit card', () => {
+  it('Should remove a saved debit card.', (done) => {
+    chai.request(app)
+      .delete('/api/v1/user/settings/2/remove-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+
+        expect(res.statusCode).to.equal(enums.HTTP_OK);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res).to.have.property('body');
+        expect(res.body.message).to.equal(enums.CARD_REMOVED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if invalid token is set.', (done) => {
+    chai.request(app)
+      .delete('/api/v1/user/settings/2/remove-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if card does not exist', (done) => {
+    chai.request(app)
+      .delete('/api/v1/user/settings/2/remove-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(400);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal(enums.CARD_DOES_NOT_EXIST);
+        expect(res.body.error).to.equal('BAD_REQUEST');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if token is malformed', (done) => {
+    chai.request(app)
+      .delete('/api/v1/user/settings/2/remove-card')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('jwt malformed');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should throw error if token is not sent', (done) => {
+    chai.request(app)
+      .delete('/api/v1/user/settings/2/remove-card')
+      .set({
+        'Content-Type': 'application/json'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('Please provide a token');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+});
+

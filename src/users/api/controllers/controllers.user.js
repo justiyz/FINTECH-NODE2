@@ -367,6 +367,15 @@ export const idUploadVerification = async(req, res, next) => {
   }
 };
 
+/**
+ * update user profile
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+
 export const updateUserProfile = async(req, res, next) => {
   try {
     const { body, user } = req;
@@ -405,6 +414,55 @@ export const getProfile = async(req, res, next) => {
   } catch (error){
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
     logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * sets a card as default
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+export const setDefaultCard = async(req, res, next) => {
+  const { user, params: { id } } = req;
+  try {
+    const [ , [ defaultCard ] ] = await UserService.setdefaultCard(user.user_id, id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully set user's default card setDefaultCard.admin.controller.user.js`);
+    userActivityTracking(req.user.user_id, 34, 'success');
+    return ApiResponse.success(res, enums.CARD_SET_AS_DEFAULT_SUCCESSFULLY, 200, defaultCard);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 34, 'fail');
+    error.label = enums.SET_DEFAULT_CARD_CONTROLLER;
+    logger.error(`setting card as default in the DB failed:::${enums.SET_DEFAULT_CARD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * removes a saved debit card 
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+
+export const removeCard = async(req, res, next) => {
+  try {
+    const { user, params: { id } } = req;
+    await UserService.removeCard([ user.user_id, id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully removed a user's saved card.admin.controller.user.js`);
+    userActivityTracking(req.user.user_id, 28, 'success');
+    return ApiResponse.success(res, enums.CARD_REMOVED_SUCCESSFULLY, 200);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 28, 'fail');
+    error.label = enums.REMOVE_SAVED_CARD_CONTROLLER;
+    logger.error(`setting card as default in the DB failed:::${enums.REMOVE_SAVED_CARD_CONTROLLER}`, error.message);
     return next(error);
   }
 };
