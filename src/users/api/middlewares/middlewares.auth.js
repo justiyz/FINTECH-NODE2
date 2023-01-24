@@ -420,11 +420,11 @@ export const checkIfNewCredentialsSameAsOld = (type = '') => async(req, res, nex
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
     if(isValidCredentials){   
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-      decoded that new ${type == 'pin' ? 'pin matches with old pin.' : 'password matches with old password.'}  checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type == 'pin' ? 'pin' : 'password'}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+      decoded that new ${type} matches with old ${type}. checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    confirms that users new ${type == 'pin' ? 'pin is not the same as the currently set pin' : 'password is not the same as the currently set password' } checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
+    confirms that users new ${type} pin is not the same as the currently set ${type} checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
@@ -514,7 +514,7 @@ export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: password/pin does not match in the DB validatePasswordOrPin.middlewares.auth.js`);
-    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN(`${type == 'pin' ? 'pin' : 'password'}`), enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
+    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN(`${type}`), enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
   } catch (error) {
     error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
     logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);

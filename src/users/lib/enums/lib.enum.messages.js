@@ -46,7 +46,7 @@ export const TRANSACTION_REFUND_INITIATED_FAILED = 'Transaction refund initiatio
 export const INVALID_EMAIL_ADDRESS = 'Invalid email/password'; // mobile listens for this error message to perform an action be careful when changing
 export const INVALID_PASSWORD = 'Invalid email or password';
 export const INVALID_PIN = 'Invalid pin';
-export const IS_VALID_CREDENTIALS = (type) => `Nwe ${type} cannot be the same as old ${type}`;
+export const IS_VALID_CREDENTIALS = (type) => `New ${type} cannot be the same as old ${type}`;
 export const PASSWORD_RESET = 'Password reset successful';
 export const USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY = 'User selfie image updated successfully';
 export const USER_BVN_VERIFIED_SUCCESSFULLY = 'User bvn verified successfully';

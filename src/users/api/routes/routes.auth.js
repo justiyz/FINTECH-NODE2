@@ -85,8 +85,8 @@ router.patch(
   AuthMiddleware.validateAuthToken,
   Model(Schema.changePassword, 'payload'),
   AuthMiddleware.isPasswordCreated('confirm'),
-  AuthMiddleware.validatePasswordOrPin(),
-  AuthMiddleware.checkIfNewCredentialsSameAsOld(),
+  AuthMiddleware.validatePasswordOrPin('password'),
+  AuthMiddleware.checkIfNewCredentialsSameAsOld('password'),
   AuthController.changePassword
 );
 
