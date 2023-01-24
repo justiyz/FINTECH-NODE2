@@ -78,6 +78,10 @@ export const UPDATE_USER_PROFILE_CONTROLLER = 'UserController::updateUserProfile
 export const IS_PIN_CREATED_MIDDLEWARE = 'AuthMiddleware::isPinCreated';
 export const GET_USER_PROFILE_CONTROLLER = 'UserController::getProfile';
 export const VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE = 'AuthMiddleware::validatePasswordOrPin';
+export const CHECK_IF_CARD_EXISTS_MIDDLEWARE = 'UserMiddleware::checkIfCardExist';
+export const SET_DEFAULT_CARD_CONTROLLER = 'UserController::setDefaultCard';
+export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
+export const CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE = 'UserMiddleware::checkIfCardBelongsToTheUser';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';

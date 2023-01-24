@@ -64,6 +64,7 @@ const updateUsersProfile = Joi.object().keys({
   marital_status: Joi.string().optional() 
 });
 
+
 export default  {
   updateFcmToken,
   updateRefreshToken,

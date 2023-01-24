@@ -158,4 +158,24 @@ router.get(
   AuthMiddleware.validateAuthToken,
   UserController.getProfile
 );
+
+router.patch(
+  '/settings/:id/default-debit-card',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.idParams, 'params'),
+  UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.checkIfCardOrUserExist,
+  UserController.setDefaultCard
+);
+
+router.delete(
+  '/settings/:id/debit-card',
+  AuthMiddleware.getAuthToken,
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.idParams, 'params'),
+  UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.checkIfCardOrUserExist,
+  UserController.removeCard
+);
 export default router;

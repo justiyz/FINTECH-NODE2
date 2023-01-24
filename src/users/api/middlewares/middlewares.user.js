@@ -516,7 +516,7 @@ export const checkIfLoanStatusIsActive = async (req, res, next) => {
     if ( (user.loan_status === 'active') ) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
       successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
-      return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, 400);
+      return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, enums.HTTP_BAD_REQUEST);
     }
     return next();
   } catch (error) {
@@ -525,5 +525,39 @@ export const checkIfLoanStatusIsActive = async (req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * check if card exists in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfCardOrUserExist = async (req, res, next) => {
+  try {
+    const { user, params: { id } } = req;
+    const userCard = await UserService.fetchCardsById([ id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully fetched a user's card checkIfCardExist.admin.middlewares.user.js`);
+    if (userCard === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully confirmed card does not exist in the DB checkIfCardExist.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CARD_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
+    }
+    if ( user.user_id !== userCard.user_id ) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      successfully confirmed the card does not belong to user checkIfCardBelongsToTheUser.admin.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CARD_DOES_NOT_BELONG_TO_USER, enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE;
+    logger.error(`checking if card exists failed::${enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
 
 

@@ -75,6 +75,12 @@ export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly con
 export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 export const FETCH_USER_PROFILE = 'User profile fetched successfully';
+export const CARD_CAN_NOT_BE_SET_AS_DEFAULT = 'Card can not be set as default';
+export const CARD_DOES_NOT_EXIST = 'Card does not exist';
+export const CARD_SET_AS_DEFAULT_SUCCESSFULLY = 'Successfully sets card as default';
+export const CARD_CAN_NOT_BE_DELETED = 'Card can not be deleted';
+export const CARD_DOES_NOT_BELONG_TO_USER = 'Card does not belong to user';
+export const CARD_REMOVED_SUCCESSFULLY = 'Card removed successfully';
 
 export const VALIDATE_PASSWORD_OR_PIN = (type) => `Invalid ${type}`;
 export const CHANGE_PASSWORD = 'Password changed successful';
