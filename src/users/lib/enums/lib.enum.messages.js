@@ -77,7 +77,7 @@ export const CARD_CAN_NOT_BE_SET_AS_DEFAULT = 'Card can not be set as default';
 export const CARD_DOES_NOT_EXIST = 'Card does not exist in the DB';
 export const CARD_SET_AS_DEFAULT_SUCCESSFULLY = 'Successfully sets card as default';
 export const CARD_CAN_NOT_BE_DELETED = 'Card can not be deleted';
-export const USER_DOES_NOT_EXIST = 'User does not exist on the DB';
+export const CARD_DOES_NOT_BELONG_TO_USER = 'Card does not belong to user';
 export const CARD_REMOVED_SUCCESSFULLY = 'Card removed successfully';
 
 

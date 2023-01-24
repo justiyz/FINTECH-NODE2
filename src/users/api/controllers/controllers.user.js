@@ -423,7 +423,7 @@ export const getProfile = async(req, res, next) => {
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns {object} - Returns user details.
+ * @returns {object} - Returns the set default card
  * @memberof UserController
  */
 export const setDefaultCard = async(req, res, next) => {
@@ -433,7 +433,7 @@ export const setDefaultCard = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully set user's default card setDefaultCard.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 34, 'success');
-    return ApiResponse.success(res, enums.CARD_SET_AS_DEFAULT_SUCCESSFULLY, 200, defaultCard);
+    return ApiResponse.success(res, enums.CARD_SET_AS_DEFAULT_SUCCESSFULLY, enums.HTTP_OK, defaultCard);
   } catch (error) {
     userActivityTracking(req.user.user_id, 34, 'fail');
     error.label = enums.SET_DEFAULT_CARD_CONTROLLER;
@@ -447,7 +447,7 @@ export const setDefaultCard = async(req, res, next) => {
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns {object} - Returns user details.
+ * @returns {object} - Returns saved card is deleted
  * @memberof UserController
  */
 
@@ -458,7 +458,7 @@ export const removeCard = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully removed a user's saved card.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 28, 'success');
-    return ApiResponse.success(res, enums.CARD_REMOVED_SUCCESSFULLY, 200);
+    return ApiResponse.success(res, enums.CARD_REMOVED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     userActivityTracking(req.user.user_id, 28, 'fail');
     error.label = enums.REMOVE_SAVED_CARD_CONTROLLER;

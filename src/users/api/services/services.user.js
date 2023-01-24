@@ -33,5 +33,4 @@ export const setdefaultCard = async(user_id, id) => DB.multipleTransaction([
   await DB.transact('SetNewCardDefaultTrue', [ user_id, id ], enums.USER_QUERY)
 ]);
 export const fetchCardsById = (payload) => DB.singleTransact('fetchCardsById', payload, enums.USER_QUERY);
-export const checkIfCardexists = (payload) => DB.singleTransact('checkIfCardExists', payload, enums.USER_QUERY);
 export const removeCard = (payload) => DB.transact('removeCard', payload, enums.USER_QUERY);

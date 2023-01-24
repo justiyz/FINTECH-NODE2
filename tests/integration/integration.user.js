@@ -1782,20 +1782,19 @@ describe('set user default card', () => {
         done();
       });
   });
-  it('Should throw error if user does not exist', (done) => {
+  it('Should throw error if card does not belong to user', (done) => {
     chai.request(app)
-      .patch('/api/v1/user/settings/1/default-card')
+      .delete('/api/v1/user/settings/1/remove-card')
       .set({
         'Content-Type': 'application/json',
         Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
       })
       .end((err, res) => {
-        console.log(res.body);
-        expect(res.statusCode).to.equal(400);
+        expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
-        expect(res.body.message).to.equal('User does not exist on the DB');
-        expect(res.body.error).to.equal('BAD_REQUEST');
+        expect(res.body.message).to.equal(enums.CARD_DOES_NOT_BELONG_TO_USER);
+        expect(res.body.error).to.equal('FORBIDDEN');
         expect(res.body.status).to.equal(enums.ERROR_STATUS);
         done();
       });
@@ -1888,7 +1887,7 @@ describe('remove saved debit card', () => {
         done();
       });
   });
-  it('Should throw error if user does not exist', (done) => {
+  it('Should throw error if card does not belong to user', (done) => {
     chai.request(app)
       .delete('/api/v1/user/settings/1/remove-card')
       .set({
@@ -1896,12 +1895,11 @@ describe('remove saved debit card', () => {
         Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
       })
       .end((err, res) => {
-        console.log(res.body);
-        expect(res.statusCode).to.equal(400);
+        expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
         expect(res.body).to.have.property('message');
         expect(res.body).to.have.property('status');
-        expect(res.body.message).to.equal('User does not exist on the DB');
-        expect(res.body.error).to.equal('BAD_REQUEST');
+        expect(res.body.message).to.equal(enums.CARD_DOES_NOT_BELONG_TO_USER);
+        expect(res.body.error).to.equal('FORBIDDEN');
         expect(res.body.status).to.equal(enums.ERROR_STATUS);
         done();
       });

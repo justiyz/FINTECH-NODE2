@@ -64,13 +64,6 @@ const updateUsersProfile = Joi.object().keys({
   marital_status: Joi.string().optional() 
 });
 
-const defaultCardChoice = Joi.object().keys({
-  id: Joi.string().required()
-});
-
-const removeCard = Joi.object().keys({
-  id: Joi.string().required()
-});
 
 export default  {
   updateFcmToken,
@@ -84,7 +77,5 @@ export default  {
   verifyEmail,
   verifyOtp,
   idVerification,
-  updateUsersProfile,
-  defaultCardChoice,
-  removeCard
+  updateUsersProfile
 };   
