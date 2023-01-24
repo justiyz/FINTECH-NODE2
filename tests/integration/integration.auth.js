@@ -1359,7 +1359,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.IS_VALID_CREDENTIALS);
+          expect(res.body.message).to.equal(enums.IS_VALID_CREDENTIALS('password'));
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
