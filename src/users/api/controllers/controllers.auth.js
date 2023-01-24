@@ -251,7 +251,7 @@ Reset user password
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON response containing user details
+ * @returns { JSON } - A JSON response
  * @memberof AuthController
  */
 export const resetPassword = async(req, res, next) => {
@@ -281,7 +281,7 @@ Change user password
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON response containing user details
+ * @returns { JSON } - A JSON response
  * @memberof AuthController
  */
 export const changePassword = async(req, res, next) => {
