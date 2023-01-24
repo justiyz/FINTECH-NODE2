@@ -258,19 +258,21 @@ export const isCompletedKyc = (type = '') => async(req, res, next) => {
 
 /**
  * check if user has previously created password
-*  @param {String} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
+*  @param {String} type - The type request from the endpoint.
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const isPasswordCreated = async(req, res, next) => {
+export const isPasswordCreated = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
+    if(user.is_created_password && type === 'confirm'){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password and can set change to new password. isPasswordCreated.middlewares.auth.js`);
+      return next();
+    }
     if (user.is_created_password) {
       userActivityTracking(user.user_id, 7, 'fail');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password isPasswordCreated.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_OR_PIN_CREATED_MIDDLEWARE);
+      return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created password isPasswordCreated.middlewares.auth.js`);
     return next();
@@ -396,6 +398,126 @@ export const validateForgotPasswordToken = async(req, res, next) => {
   } catch (error) {
     error.label = enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE;
     logger.error(`validating authentication token failed:::${enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Check if new password/pin is same as current
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const checkIfNewCredentialsSameAsOld = (type = '') => async(req, res, next) => {
+  try {
+    const { 
+      body: { newPassword, newPin }, user } = req;
+    const [ userPasswordDetails ] = type == 'pin' ?  await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
+    const isValidCredentials = type == 'pin' ? Hash.compareData(newPin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
+    if(isValidCredentials){   
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      decoded that new ${type} matches with old ${type}. checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    confirms that users new ${type} pin is not the same as the currently set ${type} checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
+    logger.error(`Checking if password/pin sent matches in the DB failed:::${enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if pin sent matches user's pin in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const comparePin = async(req, res, next) => {
+  try {
+    const { 
+      body: { pin }, user } = req;
+    const [ userPin ] = await AuthService.fetchUserPin([ user.user_id ]);
+    const isPinValid = Hash.compareData(pin, userPin.pin);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared pin response comparePin.middlewares.auth.js`);
+    if (isPinValid) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user pin matches comparePin.middlewares.auth.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: pin does not match comparePin.middlewares.auth.js`);
+    return ApiResponse.error(res, enums.INVALID_PIN, enums.HTTP_BAD_REQUEST, enums.COMPARE_PIN_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.COMPARE_PIN_MIDDLEWARE;
+    logger.error(`comparing incoming and already set pin in the DB failed:::${enums.COMPARE_PIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if pin sent matches user's pin in the DB
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const isPinCreated = (type = '') => async(req, res, next) => {
+  try {
+    const { user } = req;
+    if(user.is_created_pin && type == 'confirm'){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin and can set change to new pin. isPinCreated.middlewares.auth.js`);
+      return next();
+    }
+    if (user.is_created_pin) {
+      userActivityTracking(user.user_id, 7, 'fail');
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin isPinCreated.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.ALREADY_CREATED('pin'), enums.HTTP_FORBIDDEN, enums.IS_PIN_CREATED_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created pin isPinCreated.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 7, 'fail');
+    error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
+    logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * validate password/pin pin in the DB
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
+  try {
+    const { 
+      body, user } = req;
+    const condition = body.oldPin || body.oldPassword;
+    const [ credentials ] = type == 'pin' ? await AuthService.fetchUserPin([ user.user_id ]) : await AuthService.fetchUserPassword([ user.user_id ]);
+    const isValidCredentials = type == 'pin' ? Hash.compareData(condition, credentials.pin) : Hash.compareData(condition, credentials.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
+    if (isValidCredentials) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully validate password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: password/pin does not match in the DB validatePasswordOrPin.middlewares.auth.js`);
+    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN(`${type}`), enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
+    logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

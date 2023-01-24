@@ -826,59 +826,59 @@ describe('Auth', () => {
           expect(res.body.data.gender).to.equal('female');
           done();
         });
-    });
-    it('Should return error if user already completed profile', (done) => {
-      chai.request(app)
-        .post('/api/v1/auth/complete-profile')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .send({
-          ...userThreeProfile,
-          password
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(403);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.KYC_PREVIOUSLY_COMPLETED);
-          expect(res.body.error).to.equal('FORBIDDEN');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should return error if activated existing user account tries to signup again', (done) => {
-      chai.request(app)
-        .post('/api/v1/auth/signup')
-        .send({
-          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(400);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ACCOUNT_EXIST);
-          expect(res.body.error).to.equal('BAD_REQUEST');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should return error if activated existing user account tries to request resend signup OTP', (done) => {
-      chai.request(app)
-        .post('/api/v1/auth/resend-signup-otp')
-        .send({
-          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(400);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ACCOUNT_ALREADY_VERIFIED);
-          expect(res.body.error).to.equal('BAD_REQUEST');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
+      it('Should return error if user already completed profile', (done) => {
+        chai.request(app)
+          .post('/api/v1/auth/complete-profile')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+          })
+          .send({
+            ...userThreeProfile,
+            password
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(403);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.KYC_PREVIOUSLY_COMPLETED);
+            expect(res.body.error).to.equal('FORBIDDEN');
+            expect(res.body.status).to.equal(enums.ERROR_STATUS);
+            done();
+          });
+      });
+      it('Should return error if activated existing user account tries to signup again', (done) => {
+        chai.request(app)
+          .post('/api/v1/auth/signup')
+          .send({
+            phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.ACCOUNT_EXIST);
+            expect(res.body.error).to.equal('BAD_REQUEST');
+            expect(res.body.status).to.equal(enums.ERROR_STATUS);
+            done();
+          });
+      });
+      it('Should return error if activated existing user account tries to request resend signup OTP', (done) => {
+        chai.request(app)
+          .post('/api/v1/auth/resend-signup-otp')
+          .send({
+            phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.ACCOUNT_ALREADY_VERIFIED);
+            expect(res.body.error).to.equal('BAD_REQUEST');
+            expect(res.body.status).to.equal(enums.ERROR_STATUS);
+            done();
+          });
+      });
     });
   });
   describe('Login', () => {
@@ -1259,6 +1259,146 @@ describe('Auth', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('Password reset successful');
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Change password', () => {
+    it('Should return error if try sent with wrong field', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          password: password,
+          newPassword: 'hshsuw8uwhw'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('oldPassword is required');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if field is empty', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPassword: 'hshsrrwhw',
+          newPassword: ''
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('newPassword is not allowed to be empty');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully change password', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPassword: password,
+          newPassword: 'balablue'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CHANGE_PASSWORD);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag if password is invalid.', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPassword: `${password}0`,
+          newPassword: 'balablue'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.VALIDATE_PASSWORD_OR_PIN('password'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user try changing password to already existing password.', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/password')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPassword: 'balablue',
+          newPassword: 'balablue'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.IS_VALID_CREDENTIALS('password'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Confirm password', () => {
+    it('Should successfully confirm password', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/confirm-password')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          password: 'balablue'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('User password confirmed successfully.');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag wrong password', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/confirm-password')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          password: password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Invalid email or password');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });

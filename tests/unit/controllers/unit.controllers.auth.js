@@ -75,5 +75,35 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call changePassword', async() => {
+      const req = { user: '', body: '', hashed: null };
+      const data = await AuthController.changePassword(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call createPin', async() => {
+      const req = { user: '', body: '', hashed: null };
+      const data = await AuthController.createPin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call changePin', async() => {
+      const req = { user: '', body: '', hashed: null };
+      const data = await AuthController.changePin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call confirmPassword', async() => {
+      const req = { user: '', body: '' };
+      const data = await AuthController.confirmPassword(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call confirmPin', async() => {
+      const req = { user: '', body: '' };
+      const data = await AuthController.confirmPin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -1693,5 +1693,185 @@ describe('User', () => {
         });
     });
   });
+  describe('create pin', () => {
+    it('Should create user two pin.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '0908'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CREATE_PIN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+
+    it('Should flag if user two already created pin.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '0908'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ALREADY_CREATED('pin'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should create user one pin.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '0908'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CREATE_PIN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Change pin', () => {
+    it('Should return error if sent string', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPin: 'popo',
+          newPin: 'popo'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('oldPin must be a number');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully change pin', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPin: '0908',
+          newPin: '2020'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CHANGE_PIN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag if pin is invalid', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPin: '0918',
+          newPin: '2020'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.VALIDATE_PASSWORD_OR_PIN('pin'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user try changing pin to already existing pin.', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          oldPin: '2020',
+          newPin: '2020'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.IS_VALID_CREDENTIALS('pin'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    describe('Confirm pin', () => {
+      it('Should successfully confirm pin', (done) => {
+        chai.request(app)
+          .post('/api/v1/auth/confirm-pin')
+          .set({
+            Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          })
+          .send({
+            pin: '2020'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal('User pin confirmed successfully.');
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should flag when set wrong pin', (done) => {
+        chai.request(app)
+          .post('/api/v1/auth/confirm-pin')
+          .set({
+            Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          })
+          .send({
+            pin: '2090'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.INVALID_PIN);
+            expect(res.body.status).to.equal(enums.ERROR_STATUS);
+            done();
+          });
+      });
+    });
+  });
 });
 

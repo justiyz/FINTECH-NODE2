@@ -47,8 +47,22 @@ const verifyOtp = Joi.object().keys({
   otp: Joi.string().required().length(6)
 });
  
-const resetPassword = Joi.object().keys({
+const password = Joi.object().keys({
   password: Joi.string().required().min(8)
+});
+
+const changePassword = Joi.object().keys({
+  oldPassword: Joi.string().required().min(8),
+  newPassword: Joi.string().required().min(8)
+});
+
+const pin = Joi.object().keys({
+  pin: Joi.number().integer().min(4).required()
+});
+
+const changePin = Joi.object().keys({
+  oldPin: Joi.number().integer().min(4).required(),
+  newPin: Joi.number().integer().min(4).required()
 });
  
 export default {
@@ -59,5 +73,8 @@ export default {
   completeProfile,
   forgotPassword,
   verifyOtp,
-  resetPassword
+  password,
+  changePassword,
+  pin,
+  changePin
 };
