@@ -129,3 +129,5 @@ export const EDIT_ADMIN_STATUS_CONTROLLER = 'AdminAdminController::editAdminStat
 export const CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE = 'AdminAdminMiddleware::checkAdminCurrentStatus';
 export const FETCH_ROLES = 'AdminRoleController::fetchRoles';
 export const GET_PROFILE_CONTROLLER = 'AdminAdminController::getProfile';
+export const USER_LOAN_STATUS_MIDDLEWARE = 'AdminUserMiddleware::userLoanStatus';
+export const EDIT_USER_STATUS_CONTROLLER = 'AdminUserController::editUserStatus';
