@@ -86,6 +86,30 @@ export const checkIfSuperAdmin = async(req, res, next) => {
 };
 
 /**
+ * check queried admin is the same as authenticated non super admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const checkIfAuthenticatedAdmin = async(req, res, next) => {
+  try {
+    const { admin, adminUser } = req;
+    if ((adminUser.admin_id === admin.admin_id) && (admin.role_type !== 'SADM')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is same as authenticated non super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.ACTION_NOT_ALLOWED_FOR_SELF_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is not the same as authenticated non super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE;
+    logger.error(`checking if queried admin is authenticated non super admin failed::${enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check if admin email being sent previously exists in the DB
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

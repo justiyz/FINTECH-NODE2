@@ -106,9 +106,12 @@ export const RESOURCE_REPEATING_IN_PAYLOAD = (resource_name) => `resource "${res
 export const CANNOT_PERFORM_ACTION_BASED_ON_CURRENT_STATUS = (action, status) => `cannot ${action} a role with ${status} status`;
 export const ACTIVATE_DEACTIVATE_ROLE_SUCCESSFULLY = (status) => `Role status set to ${status} successfully`;
 export const ROLE_CREATION_SUCCESSFUL = 'Role with permissions created successfully';
+export const USER_DETAILS_FETCHED_SUCCESSFULLY = 'User details fetched successfully';
+export const USER_ACCOUNT_INFORMATION_FETCHED_SUCCESSFULLY = 'User account information fetched successfully';
 export const EDIT_ROLE_DETAILS_SUCCESSFUL = 'Role details edited successfully';
 export const EDIT_ADMIN_PERMISSIONS_SUCCESSFUL = 'Admin permissions edited successfully';
 export const ACTION_NOT_ALLOWED_FOR_SUPER_ADMIN = 'action cannot be performed on super admin';
+export const ACTION_NOT_ALLOWED_FOR_SELF_ADMIN = 'action cannot be performed on self';
 export const ADMIN_RESOURCES_FETCHED_SUCCESSFULLY = 'Admin resources fetched successfully';
 export const ROLE_PERMISSIONS_FETCHED_SUCCESSFULLY = 'Role details with permissions fetched successfully';
 export const NON_SUPER_ADMINS_FETCHED_SUCCESSFULLY = 'Non-super admin roles fetched successfully';
