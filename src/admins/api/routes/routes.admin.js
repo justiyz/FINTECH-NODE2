@@ -60,7 +60,7 @@ router.get(
   '/',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('administrators', 'view'),
+  RolesMiddleware.adminAccess('administrators', 'read'),
   Model(RoleSchema.fetchAdmins, 'query'),
   AdminController.fetchAllAdmins
 );
