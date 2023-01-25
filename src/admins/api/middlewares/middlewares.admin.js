@@ -97,10 +97,10 @@ export const checkIfAuthenticatedAdmin = async(req, res, next) => {
   try {
     const { admin, adminUser } = req;
     if ((adminUser.admin_id === admin.admin_id) && (admin.role_type !== 'SADM')) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is same as authenticated non super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is same as authenticated non super admin checkIfAuthenticatedAdmin.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ACTION_NOT_ALLOWED_FOR_SELF_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is not the same as authenticated non super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is not the same as authenticated non super admin checkIfAuthenticatedAdmin.admin.middlewares.auth.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE;
