@@ -190,7 +190,7 @@ describe('Admin Users management', () => {
   describe('Activate and deactivate user', () => {
     it('Should flag when user id dose not exist ', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0/`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -206,7 +206,7 @@ describe('Admin Users management', () => {
     });
     it('Should flag when user id dose not exist ', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0/`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -234,7 +234,6 @@ describe('Admin Users management', () => {
           status: 'deactivated'
         })
         .end((err, res) => {
-          console.log(res.body);
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
@@ -245,7 +244,7 @@ describe('Admin Users management', () => {
     });
     it('Should deactivate user successfully', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
