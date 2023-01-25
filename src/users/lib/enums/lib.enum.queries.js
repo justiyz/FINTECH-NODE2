@@ -6,3 +6,4 @@ export const PAYMENT_QUERY = 'paymentQuery';
 export const ADMIN_AUTH_QUERY = 'adminAuthQuery';
 export const ADMIN_ADMIN_QUERY = 'adminAdminQuery';
 export const ADMIN_ROLE_QUERY = 'adminRoleQuery';
+export const ADMIN_USER_QUERY = 'adminUserQuery';

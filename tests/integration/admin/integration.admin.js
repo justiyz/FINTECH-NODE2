@@ -21,10 +21,6 @@ describe('Admin', () => {
           name: 'Underwriter',
           permissions: [ 
             {
-              resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
-              user_permissions:  [ 'read' ]
-            },
-            {
               resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
               user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             }
@@ -146,8 +142,8 @@ describe('Admin', () => {
           expect(res.body.message).to.equal(enums.ADMIN_SUCCESSFULLY_INVITED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_ADMIN_TWO_ID = res.body.data.newAdmin.admin_id;
-          process.env.SEEDFI_INVITED_ADMIN_EMAIL = res.body.data.newAdmin.email;
-          process.env.SEEDFI_INVITED_ADMIN_PASSWORD = res.body.data.password;
+          process.env.SEEDFI_ADMIN_TWO_EMAIL = res.body.data.newAdmin.email;
+          process.env.SEEDFI_ADMIN_TWO_PASSWORD = res.body.data.password;
           done();
         });
     });
@@ -176,8 +172,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/login')
         .send({
-          email: process.env.SEEDFI_INVITED_ADMIN_EMAIL,
-          password: process.env.SEEDFI_INVITED_ADMIN_PASSWORD
+          email: process.env.SEEDFI_ADMIN_TWO_EMAIL,
+          password: process.env.SEEDFI_ADMIN_TWO_PASSWORD
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -190,7 +186,7 @@ describe('Admin', () => {
           expect(res.body.data).to.have.property('first_name');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_completed_profile).to.equal(false);
-          process.env.SEEDFI_INVITED_ADMIN_LOGIN_OTP = res.body.data.token;
+          process.env.SEEDFI_ADMIN_TWO_LOGIN_OTP = res.body.data.token;
           done();
         });
     });
@@ -198,7 +194,7 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_INVITED_ADMIN_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_TWO_LOGIN_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -211,6 +207,7 @@ describe('Admin', () => {
           expect(res.body.data).to.have.property('first_name');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_verified_email).to.equal(true);
+          process.env.SEEDFI_ADMIN_TWO_ACCESS_TOKEN = res.body.data.token;
           done();
         });
     });
@@ -234,8 +231,8 @@ describe('Admin', () => {
           expect(res.body.message).to.equal(enums.ADMIN_SUCCESSFULLY_INVITED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_ADMIN_THREE_ID = res.body.data.newAdmin.admin_id;
-          process.env.SEEDFI_INVITED_ADMIN_THREE_EMAIL = res.body.data.newAdmin.email;
-          process.env.SEEDFI_INVITED_ADMIN_THREE_PASSWORD = res.body.data.password;
+          process.env.SEEDFI_ADMIN_THREE_EMAIL = res.body.data.newAdmin.email;
+          process.env.SEEDFI_ADMIN_THREE_PASSWORD = res.body.data.password;
           done();
         });
     });
@@ -243,8 +240,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/login')
         .send({
-          email: process.env.SEEDFI_INVITED_ADMIN_THREE_EMAIL,
-          password: process.env.SEEDFI_INVITED_ADMIN_THREE_PASSWORD
+          email: process.env.SEEDFI_ADMIN_THREE_EMAIL,
+          password: process.env.SEEDFI_ADMIN_THREE_PASSWORD
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -257,7 +254,7 @@ describe('Admin', () => {
           expect(res.body.data).to.have.property('first_name');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_completed_profile).to.equal(false);
-          process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
+          process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
           done();
         });
     });
@@ -265,7 +262,7 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -310,7 +307,7 @@ describe('Admin', () => {
           permissions: [ 
             {
               resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'approve', 'reject' ]
+              user_permissions:  [  ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID}`,
@@ -340,8 +337,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/login')
         .send({
-          email: process.env.SEEDFI_INVITED_ADMIN_THREE_EMAIL,
-          password: process.env.SEEDFI_INVITED_ADMIN_THREE_PASSWORD
+          email: process.env.SEEDFI_ADMIN_THREE_EMAIL,
+          password: process.env.SEEDFI_ADMIN_THREE_PASSWORD
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -354,7 +351,7 @@ describe('Admin', () => {
           expect(res.body.data).to.have.property('first_name');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_completed_profile).to.equal(false);
-          process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
+          process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
           done();
         });
     });
@@ -362,7 +359,7 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_INVITED_ADMIN_THREE_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -535,6 +532,26 @@ describe('Admin', () => {
           done();
         });
     });
+    it('Should edit admin status successfully.', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.EDIT_ADMIN_STATUS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
   });
   describe('Fetch admin permissions', () => {
     it('Should return error if token is not set', (done) => {
@@ -699,7 +716,7 @@ describe('Admin', () => {
           done();
         });
     });
-    it('Should return error if super admin code is sent', (done) => {
+    it('Should return error if super admin id is sent', (done) => {
       chai.request(app)
         .put(`/api/v1/admin/${process.env.SEEDFI_SUPER_ADMIN_ID}/permissions`)
         .set({
@@ -736,7 +753,43 @@ describe('Admin', () => {
           done();
         });
     });
-
+    it('Should return error if authenticated non super admin id is sent', (done) => {
+      chai.request(app)
+        .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          permissions: [ 
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID}`,
+              user_permissions:  [ 'read', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
+              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_ROLE_MANAGEMENT_RESOURCE_ID}`,
+              user_permissions:  [ 'read' ]
+            }
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(403);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACTION_NOT_ALLOWED_FOR_SELF_ADMIN);
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should edit admin role and permissions successfully', (done) => {
       chai.request(app)
         .put(`/api/v1/admin/${process.env.SEEDFI_ADMIN_TWO_ID}/permissions`)
@@ -871,6 +924,50 @@ describe('Admin', () => {
           expect(res.body.message).to.equal(enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN);
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should log invited admin with underwriting role code again', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/login')
+        .send({
+          email: process.env.SEEDFI_ADMIN_THREE_EMAIL,
+          password: process.env.SEEDFI_ADMIN_THREE_PASSWORD
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOGIN_REQUEST_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_profile).to.equal(false);
+          process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP = res.body.data.token;
+          done();
+        });
+    });
+    it('Should verify invited admin three login again successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/auth/verify-login')
+        .send({
+          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('role_type');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_verified_email).to.equal(true);
+          process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_ADMIN_THREE_ID = res.body.data.admin_id;
           done();
         });
     });

@@ -17,7 +17,7 @@ export default {
         verification_token = $2,
         verification_token_expires = $3
       WHERE admin_id = $1
-      RETURNING id, admin_id, first_name, last_name, role_type, image_url email, is_created_password, is_verified_email, is_completed_profile, status`,
+      RETURNING id, admin_id, first_name, last_name, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
 
   fetchRolePermissions: `
       SELECT 

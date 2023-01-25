@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import * as AuthService from '../services/services.auth';
+import * as RoleService from '../services/services.role';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
@@ -53,8 +54,9 @@ export const login = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: auth token generated login.admin.controllers.auth.js`);
     const [ updatedAdmin ] = await AuthService.updateLoginToken([ admin.admin_id, null, null ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set to null in the DB login.admin.controllers.auth.js`);
+    const [ adminRoleDetails ] = await RoleService.fetchRole([ admin.role_type ]);
     adminActivityTracking(req.admin.admin_id, 10, 'success');
-    return ApiResponse.success(res, enums.ADMIN_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...updatedAdmin, token });
+    return ApiResponse.success(res, enums.ADMIN_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...updatedAdmin, role_name: adminRoleDetails.name, token });
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 10, 'fail');
     error.label = enums.ADMIN_LOGIN_CONTROLLER;

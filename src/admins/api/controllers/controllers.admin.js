@@ -211,7 +211,8 @@ export const getProfile = async(req, res, next) => {
     const { admin } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: Admin data info fetched. getProfile.controllers.admin.admin.js`);
     delete admin.refresh_token;
-    return ApiResponse.success(res, enums.FETCH_ADMIN_PROFILE, enums.HTTP_OK, admin);
+    const [ adminRoleDetails ] = await RoleService.fetchRole([ admin.role_type ]);
+    return ApiResponse.success(res, enums.FETCH_ADMIN_PROFILE, enums.HTTP_OK, { ...admin, role_name: adminRoleDetails.name });
   } catch (error){
     error.label = enums.GET_PROFILE_CONTROLLER;
     logger.error(`Fetching admin profile failed:::${enums.GET_PROFILE_CONTROLLER}`, error.message);

@@ -37,6 +37,7 @@ router.put(
   RolesMiddleware.adminAccess('administrators', 'update'),
   AdminMiddleware.checkIfAdminExists,
   AdminMiddleware.checkIfSuperAdmin,
+  AdminMiddleware.checkIfAuthenticatedAdmin,
   RolesMiddleware.validateRoleCode,
   RolesMiddleware.checkIfSuperAdminRole,
   RolesMiddleware.checkAdminResources,

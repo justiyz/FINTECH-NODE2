@@ -3,12 +3,14 @@ import adminAuthQuery from '../api/queries/queries.auth';
 import adminAdminQuery from '../api/queries/queries.admin';
 import adminRoleQuery from '../api/queries/queries.role';
 import adminLogQuery from '../api/queries/queries.log';
+import adminUserQuery from '../api/queries/queries.user';
 
 export const queries = {
   adminAuthQuery,
   adminAdminQuery,
   adminRoleQuery,
-  adminLogQuery
+  adminLogQuery,
+  adminUserQuery
 };
 
 export default {
