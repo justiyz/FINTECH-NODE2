@@ -14,10 +14,10 @@ import enums from '../../../users/lib/enums';
 export const userLoanStatus = async(req, res, next) => {
   try {
     if (req.userDetails.loan_status !== 'inactive') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.userDetails.user_id}:::Info: user is currently on an active loan checkUserLoanStatus.admin.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.userDetails.user_id}:::Info: user is currently on an active loan userLoanStatus.admin.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_IS_ON_AN_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.USER_LOAN_STATUS_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.userDetails.user_id}:::Info: user is not on an active loan checkUserLoanStatus.admin.middlewares.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.userDetails.user_id}:::Info: user is not on an active loan userLoanStatus.admin.middlewares.user.js`);
     return next();
   } catch (error) {
     error.label = enums.USER_LOAN_STATUS_MIDDLEWARE;
