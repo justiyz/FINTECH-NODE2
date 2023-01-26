@@ -27,7 +27,7 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfAdminExists', async() => {
+    it('should call userLoanStatus', async() => {
       const req = { userDetails: '' };
       const data = await AdminUserMiddleware.userLoanStatus(req, res, next);
       expect(data.code).to.equal(500);
