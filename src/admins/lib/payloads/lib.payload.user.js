@@ -1,5 +1,5 @@
 export default {
-  fetchRoles: (query) => [
+  fetchUsers: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,
     query.from_date,
@@ -8,4 +8,4 @@ export default {
     query.per_page ? query.per_page : '10'
   ]
 };
-  
+    

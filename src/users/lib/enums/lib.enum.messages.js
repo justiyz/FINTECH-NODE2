@@ -130,3 +130,4 @@ export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${statu
 export const FETCH_ADMIN_PROFILE = 'Admin profile fetched successfully';
 export const ROLES_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
 export const EDIT_USER_STATUS = 'User status successfully updated.';
+export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';

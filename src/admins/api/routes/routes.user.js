@@ -40,4 +40,13 @@ router.get(
   UserController.userAccountInformation
 );
 
+router.get(
+  '/all',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.fetchUsers, 'query'),
+  UserController.fetchUsers
+);
+
 export default router;

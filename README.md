@@ -85,38 +85,6 @@ run this script in your code terminal
 
 ---
 
-## Project Structure
-The folder structure of this app is explained below:
-
-| Name | Description |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| **migrations**           | Contains the migration files  |
-| **node_modules**         | Contains all  npm dependencies     |
-| **src**                  | Contains all source code                          |
-| **src/admins**           | Contains all admin related source code                          |
-| **src/admins/api**       | Contains queries, services, middlewares, controllers and routes for all admin related endpoints |
-| **src/admins/lib**       | Contains common helpers functions and libraries specific to the admin module of the app |
-| **src/admins/services**  | Contains functions connecting to external services being used via the admin side |
-| **src/users**            | Contains all users related source code                          |
-| **src/users/api**        | Contains queries, services, middlewares, controllers and routes for all user related endpoints |
-| **src/users/config**     | Contains application configurations including environment-specific configurations |
-| **src/users/lib**        | Contains common helpers functions and libraries to be used across the app |
-| **src/users/services**   | Contains functions connecting to external services being used |
-| **src/app.js**           | Entry point to express app      |
-| **tests**                | Contains all integration and unit test codes                         |
-| **.babelrc**             | Config settings for babel compiler    |
-| **eslintrc.json**        | Config settings for eslint code style checking and enforcing    |
-| **database.json**        | Contains databases url            |
-| **package.json**         | Contains npm dependencies as well as needed scripts  |  
-| **README.md**            | Contains details on how to setup the project locally and the codebase overview  | 
-| **.env.example**         | Contains keys of the necessary environment variables needed in the .env file  |
-| **.gitignore**           | Contains files and folders that github should ignore when pushing code to github  |
-| **.eslintignore**        | Contains files and folders that eslint should ignore when `npm run lint` is invoked  |
-| **.nycrc**               | Contains configuration and settings for the nyc reporter format  |
-| **.editorconfig**        | Contains settings to help text editors conform to the set rules for this project irrespective of editor rule |
-
----
-
 ## Running the scripts
 All the different build steps are arranged via npm scripts.
 Npm scripts basically allow us to call (and chain) terminal commands via npm.
