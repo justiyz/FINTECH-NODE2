@@ -274,30 +274,17 @@ describe('Admin Users management', () => {
             expect(res.statusCode).to.equal(200);
             expect(res.body).to.have.property('message');
             expect(res.body).to.have.property('status');
+            expect(res.body.data).to.have.property('total_count');
+            expect(res.body.data).to.have.property('page');
+            expect(res.body.data).to.have.property('total_pages');
+            expect(res.body.data).to.have.property('users');
             expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
             expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
             done();
           });
       });
     });
-    it('Should return error if invalid token is set', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should fetch users by the user name', (done) => {
+    it('Should fetch all users with pages', (done) => {
       chai.request(app)
         .get('/api/v1/admin/user/all')
         .set({
@@ -305,176 +292,336 @@ describe('Admin Users management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          search: 'rashidat sikiru'
+          page: '1',
+          per_page: '2'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('users');
           expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-    it('Should return error if invalid token is set', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
-        })
-        .query({
-          search: 'rashidat sikiru'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should filter users by the user status ', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .query({
-          status: 'active'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-    it('Should return error if invalid token is set', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
-        })
-        .query({
-          status: 'active'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should filter users by the date they were created ', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .query({
-          from_date: '2023-01-13',
-          to_date: '2023-01-14'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-    it('Should return error if invalid token is set', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
-        })
-        .query({
-          from_date: '2023-01-13',
-          to_date: '2023-01-14'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should filter users by the date they were created and status ', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .query({
-          from_date: '2023-01-13',
-          to_date: '2023-01-14',
-          status: 'active'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-    it('Should return error if invalid token is set', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
-        })
-        .query({
-          from_date: '2023-01-13',
-          to_date: '2023-01-14',
-          status: 'active'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should return error if admin without users module read permission tries to access information', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/user/all')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(403);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ADMIN_CANNOT_PERFORM_ACTION('read', 'users'));
-          expect(res.body.error).to.equal('FORBIDDEN');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
   });
+  it('Should return error if invalid token is set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should fetch users by the user name', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        search: 'rashidat sikiru'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should fetch users by the user name with pages', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        search: 'rashidat sikiru',
+        page: '1',
+        per_page: '2'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should return error if invalid token is set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+      })
+      .query({
+        search: 'rashidat sikiru'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should filter users by the user status', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        status: 'active'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body).to.have.property('data');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should filter users by the user status with pages', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        status: 'active',
+        page: '1',
+        per_page: '2'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should return error if invalid token is set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+      })
+      .query({
+        status: 'active'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should filter users by the date they were created ', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        from_date: '2023-01-13',
+        to_date: '2023-01-14'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body).to.have.property('data');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should filter users by the date they were created with pages ', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        from_date: '2023-01-13',
+        to_date: '2023-01-14',
+        page: '1',
+        per_page: '2'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body).to.have.property('data');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should return error if invalid token is set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+      })
+      .query({
+        from_date: '2023-01-13',
+        to_date: '2023-01-14'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should filter users by the date they were created and status ', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        from_date: '2023-01-13',
+        to_date: '2023-01-14',
+        status: 'active'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should return error if invalid token is set', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+      })
+      .query({
+        from_date: '2023-01-13',
+        to_date: '2023-01-14',
+        status: 'active'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(401);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal('invalid signature');
+        expect(res.body.error).to.equal('UNAUTHORIZED');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
+  it('Should filter users by the date they were created and status in pages ', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        from_date: '2023-01-13',
+        to_date: '2023-01-14',
+        status: 'active',
+        page: '1',
+        per_page: '2'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('page');
+        expect(res.body.data).to.have.property('total_pages');
+        expect(res.body.data).to.have.property('users');
+        expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
+  it('Should return error if admin without users module read permission tries to access information', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/user/all')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(403);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.message).to.equal(enums.ADMIN_CANNOT_PERFORM_ACTION('read', 'users'));
+        expect(res.body.error).to.equal('FORBIDDEN');
+        expect(res.body.status).to.equal(enums.ERROR_STATUS);
+        done();
+      });
+  });
 });
+
