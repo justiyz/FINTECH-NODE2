@@ -8,12 +8,24 @@ import * as UserController from '../controllers/controllers.user';
 
 const router = Router();
 
+router.patch(
+  '/:user_id',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.editStatus, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserMiddleware.userLoanStatus,
+  UserController.editUserStatus
+);
+
 router.get(
   '/:user_id/profile',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.userIdParams, 'params'),
   RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserController.userProfileDetails
 );
@@ -22,8 +34,8 @@ router.get(
   '/:user_id/account-information',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.userIdParams, 'params'),
   RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserController.userAccountInformation
 );

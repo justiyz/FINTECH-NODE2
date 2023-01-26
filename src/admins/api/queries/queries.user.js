@@ -1,4 +1,11 @@
 export default {
+  editUserStatus: `
+  UPDATE users
+  SET 
+    updated_at = NOW(),
+    status = $2
+  WHERE user_id = $1
+  `,
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url,

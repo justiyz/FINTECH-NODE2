@@ -187,4 +187,80 @@ describe('Admin Users management', () => {
         });
     });
   });
+  describe('Activate and deactivate user', () => {
+    it('Should flag when user id dose not exist ', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('status is required');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when user id dose not exist ', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('user'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if admin dose not have user role update permission', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Admin cannot perform "update" action on users module');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should deactivate user successfully', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EDIT_USER_STATUS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+  });
 });

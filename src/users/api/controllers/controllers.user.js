@@ -429,7 +429,7 @@ export const getProfile = async(req, res, next) => {
 export const setDefaultCard = async(req, res, next) => {
   const { user, params: { id } } = req;
   try {
-    const [ , [ defaultCard ] ] = await UserService.setdefaultCard(user.user_id, id);
+    const [ , [ defaultCard ] ] = await UserService.setDefaultCard(user.user_id, id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully set user's default card setDefaultCard.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 34, 'success');
