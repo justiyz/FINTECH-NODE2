@@ -348,7 +348,7 @@ export const resolveBankAccountNumberName = async(req, res, next) => {
 export const checkUserLoanStatus = async(req, res, next) => {
   try {
     const { user } = req;
-    if (user.loan_status === 'active') {
+    if (user.loan_status !== 'inactive') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is currently on an active loan checkUserLoanStatus.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_IS_ON_AN_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_STATUS_MIDDLEWARE);
     }
@@ -501,30 +501,6 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
   }
 };
 
-/**
- * check if user has has an active loan
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof UserMiddleware
- */
-
-export const checkIfLoanStatusIsActive = async (req, res, next) => {
-  try {
-    const { user } = req;
-    if ( (user.loan_status === 'active') ) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      successfully checked if loan status is active checkIfLoanStatusIsActive.admin.middlewares.user.js`);
-      return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, enums.HTTP_BAD_REQUEST);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE;
-    logger.error(`checking if loan status is active failed::${enums.CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
 
 /**
  * check if card exists in the DB

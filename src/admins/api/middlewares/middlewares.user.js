@@ -9,11 +9,11 @@ import enums from '../../../users/lib/enums';
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
- * @memberof UserMiddleware
+ * @memberof AdminUserMiddleware
  */
 export const userLoanStatus = async(req, res, next) => {
   try {
-    if (req.userDetails.loan_status === 'active') {
+    if (req.userDetails.loan_status !== 'inactive') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.userDetails.user_id}:::Info: user is currently on an active loan checkUserLoanStatus.admin.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_IS_ON_AN_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.USER_LOAN_STATUS_MIDDLEWARE);
     }

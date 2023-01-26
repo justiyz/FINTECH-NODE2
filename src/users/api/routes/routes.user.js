@@ -148,7 +148,7 @@ router.put(
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateUsersProfile, 'payload'),
   UserMiddleware.checkIfBvnIsVerified,
-  UserMiddleware.checkIfLoanStatusIsActive,
+  UserMiddleware.checkUserLoanStatus,
   UserController.updateUserProfile
 );
 

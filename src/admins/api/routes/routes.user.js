@@ -12,9 +12,9 @@ router.patch(
   '/:user_id',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
   Model(Schema.userIdParams, 'params'),
   Model(Schema.editStatus, 'payload'),
-  RoleMiddleware.adminAccess('users', 'update'),
   UserMiddleware.checkIfUserExists,
   UserMiddleware.userLoanStatus,
   UserController.editUserStatus
@@ -24,8 +24,8 @@ router.get(
   '/:user_id/profile',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.userIdParams, 'params'),
   RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserController.userProfileDetails
 );
@@ -34,8 +34,8 @@ router.get(
   '/:user_id/account-information',
   AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.userIdParams, 'params'),
   RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserController.userAccountInformation
 );

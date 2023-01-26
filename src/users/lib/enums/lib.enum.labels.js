@@ -73,7 +73,6 @@ export const IS_BVN_PREVIOUSLY_EXISTING_MIDDLEWARE = 'UserMiddleware::isBvnPrevi
 export const ID_UPLOAD_VERIFICATION_CONTROLLER = 'AuthController::idUploadVerification';
 export const IS_UPDATED_VERIFICATION_ID_MIDDLEWARE = 'UserMiddleware::checkUserIdVerification';
 export const CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE = 'UserMiddleware::checkIfBvnIsVerified';
-export const CHECK_IF_LOAN_STATUS_IS_ACTIVE_MIDDLEWARE = 'UserMiddleware::checkIfLoanStatusIsActive';
 export const UPDATE_USER_PROFILE_CONTROLLER = 'UserController::updateUserProfile';
 export const IS_PIN_CREATED_MIDDLEWARE = 'AuthMiddleware::isPinCreated';
 export const GET_USER_PROFILE_CONTROLLER = 'UserController::getProfile';
