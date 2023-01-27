@@ -1,4 +1,4 @@
-import DB from '../../services/services.db';
+import DB from '../../externalServices/services.db';
 import enums from '../../lib/enums';
 
 export const getUserByPhoneNumber = (payload) => DB.transact('getUserByPhoneNumber', payload, enums.USER_QUERY);

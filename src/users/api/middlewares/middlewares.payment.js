@@ -3,7 +3,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import config from '../../config';
 import enums from '../../lib/enums';
 import * as  PaymentService from '../services/services.payment';
-import { confirmPaystackPaymentStatusByReference, raiseARefundTickedForCardTokenizationTransaction } from '../../services/service.paystack';
+import { confirmPaystackPaymentStatusByReference, raiseARefundTickedForCardTokenizationTransaction } from '../../externalServices/service.paystack';
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';

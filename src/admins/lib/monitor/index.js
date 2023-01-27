@@ -1,5 +1,5 @@
 import { db } from '../../../users/config/db';
-import { queries } from '../../services/services.db';
+import { queries } from '../../externalServices/services.db';
 import { operations } from './lib.monitor.operations';
 
 const { adminLogQuery } = queries;

@@ -127,6 +127,7 @@ export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
 export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;
+export const USER_CURRENT_STATUS = (status) => `User status is already ${status} in the DB.`;
 export const FETCH_ADMIN_PROFILE = 'Admin profile fetched successfully';
 export const ROLES_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
 export const EDIT_USER_STATUS = 'User status successfully updated.';

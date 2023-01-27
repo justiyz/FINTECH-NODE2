@@ -16,6 +16,8 @@ export const operations = {
   15: 'EDTRLE', // edit role type
   16: 'ACTADM', // activate admin user
   17: 'DACTADM',  // deactivated admin user
-  18: 'VRYRPDOP' // verify reset password otp
+  18: 'VRYRPDOP', // verify reset password otp
+  19: 'ACTUSR', // admin activate user
+  20: 'DCTUSR' // admin deactivate user
 };
 

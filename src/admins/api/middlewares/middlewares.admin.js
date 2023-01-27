@@ -146,7 +146,7 @@ export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
 export const checkAdminCurrentStatus = async(req, res, next) => {
   try {
     if (req.adminUser.status === req.body.status) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
       decoded that the admin is already ${req.body.status} in the DB. checkAdminCurrentStatus.admin.middlewares.admin.js`);
       return ApiResponse.error(res, enums.ADMIN_CURRENT_STATUS(req.body.status), enums.HTTP_BAD_REQUEST, enums.CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE);
     }

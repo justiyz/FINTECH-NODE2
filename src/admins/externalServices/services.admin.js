@@ -1,4 +1,4 @@
-import DB from '../services/services.db';
+import DB from '../externalServices/services.db';
 import enums from '../../users/lib/enums';
 import * as Helpers from '../lib/utils/lib.util.helpers';
 

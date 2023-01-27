@@ -6,7 +6,7 @@ import enums from '../../lib/enums';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
-import { fetchBanks } from '../../services/service.paystack';
+import { fetchBanks } from '../../externalServices/service.paystack';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 

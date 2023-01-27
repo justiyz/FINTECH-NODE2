@@ -16,6 +16,7 @@ router.patch(
   Model(Schema.userIdParams, 'params'),
   Model(Schema.editStatus, 'payload'),
   UserMiddleware.checkIfUserExists,
+  UserMiddleware.checkUserCurrentStatus,
   UserMiddleware.userLoanStatus,
   UserController.editUserStatus
 );
