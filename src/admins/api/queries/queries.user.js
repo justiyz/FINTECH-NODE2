@@ -11,7 +11,7 @@ export default {
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-      number_of_dependants, marital_status, loan_status
+      number_of_dependents, marital_status, loan_status, employment_type
     FROM users
     WHERE user_id = $1`,
 

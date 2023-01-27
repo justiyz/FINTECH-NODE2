@@ -1,5 +1,5 @@
 import { db } from '../../config/db';
-import { queries } from '../../services/services.db';
+import { queries } from '../../externalServices/services.db';
 import { operations } from './lib.monitor.operations';
 
 const { logQueries } = queries;

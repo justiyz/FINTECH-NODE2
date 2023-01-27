@@ -1,4 +1,4 @@
-import DB from '../../services/services.db';
+import DB from '../../externalServices/services.db';
 import enums from '../../../users/lib/enums';
 
 export const fetchRole = (payload) => DB.transact('fetchRole', payload, enums.ADMIN_ROLE_QUERY);

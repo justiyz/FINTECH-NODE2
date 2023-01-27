@@ -34,7 +34,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call editUserStatus', async() => {
-      const req = { admin: '', params: '' };
+      const req = { body: '', admin: '', params: '' };
       const data = await AdminUserController.editUserStatus(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

@@ -126,6 +126,7 @@ export const IS_ROLE_ACTIVE_MIDDLEWARE = 'AdminRoleMiddleware::isRoleActive';
 export const FETCH_ALL_ADMINS_CONTROLLER = 'AdminAdminController::fetchAllAdmins';
 export const EDIT_ADMIN_STATUS_CONTROLLER = 'AdminAdminController::editAdminStatus';
 export const CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE = 'AdminAdminMiddleware::checkAdminCurrentStatus';
+export const CHECK_USER_CURRENT_STATUS_MIDDLEWARE = 'AdminUserMiddleware::checkUserCurrentStatus';
 export const FETCH_ROLES = 'AdminRoleController::fetchRoles';
 export const GET_PROFILE_CONTROLLER = 'AdminAdminController::getProfile';
 export const USER_LOAN_STATUS_MIDDLEWARE = 'AdminUserMiddleware::userLoanStatus';

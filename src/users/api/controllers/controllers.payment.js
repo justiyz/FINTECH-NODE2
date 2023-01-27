@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as  PaymentService from '../services/services.payment';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import { initializeCardPayment } from '../../services/service.paystack';
+import { initializeCardPayment } from '../../externalServices/service.paystack';
 import enums from '../../lib/enums';
 import config from '../../config';
 import { userActivityTracking } from '../../lib/monitor';

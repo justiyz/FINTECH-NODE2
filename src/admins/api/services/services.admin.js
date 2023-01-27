@@ -1,4 +1,4 @@
-import DB from '../../services/services.db';
+import DB from '../../externalServices/services.db';
 import enums from '../../../users/lib/enums';
 
 export const updateAdminProfile = (payload) => DB.transact('updateAdminProfile', payload, enums.ADMIN_ADMIN_QUERY);

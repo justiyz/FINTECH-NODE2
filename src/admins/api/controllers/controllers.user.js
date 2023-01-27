@@ -4,6 +4,7 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
+import { adminActivityTracking } from '../../lib/monitor';
 
 
 /**
@@ -15,14 +16,18 @@ import * as UserHash from '../../../users/lib/utils/lib.util.hash';
  * @memberof AdminUserController
  */
 export const editUserStatus = async(req, res, next) => {
+  const { body: { status } } = req;
+  const activityType = status === 'active' ? 19 : 20;
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     decoded that admin is about to user status. activateAndDeactivateUser.admin.controllers.user.js`);
     await UserService.editUserStatus([ req.params.user_id, req.body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     confirm that user status has been edited and updated in the DB. activateAndDeactivateUser.admin.controllers.user.js`);
+    adminActivityTracking(req.admin.admin_id, activityType, 'success');
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
+    adminActivityTracking(req.admin.admin_id, activityType, 'fail');
     error.label = enums.EDIT_USER_STATUS_CONTROLLER;
     logger.error(`activate and deactivate user failed:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message);
     return next(error);

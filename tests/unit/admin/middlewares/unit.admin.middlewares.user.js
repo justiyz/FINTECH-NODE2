@@ -33,5 +33,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkUserCurrentStatus', async() => {
+      const req = { userDetails: '', body: '', admin: '' };
+      const data = await AdminUserMiddleware.checkUserCurrentStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

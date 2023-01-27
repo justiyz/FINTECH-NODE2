@@ -27,8 +27,9 @@ export default {
     body.gender || user.gender,
     body.address || user.address,
     body.income_range || user.income_range,
-    body.number_of_dependants || user.number_of_dependants,
-    body.marital_status || user.marital_status
+    body.number_of_dependents || user.number_of_dependents,
+    body.marital_status || user.marital_status,
+    body.employment_type || user.employment_type
   ]
 };
   

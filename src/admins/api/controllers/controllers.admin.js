@@ -8,7 +8,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import config from '../../../users/config/index';
-import * as fetchAdminServices from '../../services/services.admin';
+import * as fetchAdminServices from '../../externalServices/services.admin';
 import { adminActivityTracking } from '../../lib/monitor';
 
 
