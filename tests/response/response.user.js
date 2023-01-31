@@ -14,6 +14,43 @@ export const sterlingVerifyBvnTestResponse = (user) => {
   return data;
 };
 
+export const dojahVerifyBvnTestResponse = (user, bvn) => {
+  const data = {
+    status: 200,
+    data: {
+      entity: {
+        bvn: bvn,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        middle_name: user.middle_name !== null ? user.middle_name : '',
+        gender: user.gender,
+        date_of_birth: user.date_of_birth,
+        phone_number1: user.phone_number,
+        image: 'ygguygujhgjghy8tw67tyuhjikhnkjghuo',
+        email: '',
+        enrollment_bank: '033',
+        enrollment_branch: 'Badagry',
+        level_of_account: 'Level 1 - Low Level Accounts',
+        lga_of_origin: 'Katsina-Ala',
+        lga_of_residence: 'Badagry',
+        marital_status: 'Married',
+        name_on_card: '242 c compound badagry',
+        nationality: 'Nigeria',
+        nin: '',
+        phone_number2: '',
+        registration_date: '',
+        residential_address: '242 c compound badaGRY ',
+        state_of_origin: 'Benue State',
+        state_of_residence: 'Lagos State',
+        title: 'Mrs',
+        watch_listed: '',
+        customer: '38e0e1c0-2318-4292-8180-b35345f6dd99'
+      }
+    }
+  };
+  return data;
+};
+
 export const paystackResolveAccountNumberTestResponse = () => {
   const data = {
     status: true,

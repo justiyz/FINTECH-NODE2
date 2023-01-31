@@ -111,6 +111,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    
+    it('should call checkIfMaximumBankAccountsSaved',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.checkIfMaximumBankAccountsSaved(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfMaximumDebitCardsSaved',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.checkIfMaximumDebitCardsSaved(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

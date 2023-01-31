@@ -5,7 +5,7 @@ import * as userMockedTestResponses from '../../../tests/response/response.user'
 
 const { SEEDFI_NODE_ENV } = config;
 
-const bvnVerificationCheck = async(bvn, user) => {
+const sterlingBvnVerificationCheck = async(bvn, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.sterlingVerifyBvnTestResponse(user);
@@ -26,4 +26,4 @@ const bvnVerificationCheck = async(bvn, user) => {
   }
 };
 
-export { bvnVerificationCheck };
+export { sterlingBvnVerificationCheck };

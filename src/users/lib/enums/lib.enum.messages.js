@@ -33,6 +33,7 @@ export const USER_FIRST_NAME_NOT_MATCHING_BVN_NAME = 'User\'s first name does no
 export const USER_LAST_NAME_NOT_MATCHING_BVN_NAME = 'User\'s last name does not match bvn last name';
 export const USER_MIDDLE_NAME_NOT_MATCHING_BVN_NAME = 'User\'s middle name does not match bvn middle name';
 export const USER_GENDER_NOT_MATCHING_BVN_GENDER = 'User\'s gender does not match bvn gender';
+export const USER_DOB_NOT_MATCHING_BVN_DOB = 'User\'s date of birth does not match bvn date of birth';
 export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
 export const USER_LOGIN_SUCCESSFULLY = 'User logged in successfully';
@@ -53,6 +54,8 @@ export const USER_BVN_VERIFIED_SUCCESSFULLY = 'User bvn verified successfully';
 export const USER_REFRESH_TOKEN_UPDATED = 'User refresh token updated successfully';
 export const INVALID_USER_REFRESH_TOKEN = 'Invalid refresh token';
 export const ACCOUNT_DETAILS_PREVIOUSLY_SAVED = 'Account details previously saved by user';
+export const BANK_ACCOUNTS_LIMITS_REACHED = 'User cannot save more than 3 bank accounts';
+export const DEBIT_CARDS_LIMITS_REACHED = 'User cannot save more than 2 debit cards';
 export const USER_IS_ON_AN_ACTIVE_LOAN = 'User is on an active loan, action cannot be performed';
 export const ACCOUNT_DETAILS_NOT_EXISTING = 'Account details does not exist';
 export const ACCOUNT_ALREADY_DEFAULT_ACCOUNT = 'Account is already default account';

@@ -91,6 +91,7 @@ router.post(
   Model(Schema.saveAccountDetails, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.checkAccountPreviouslySaved,
+  UserMiddleware.checkIfMaximumBankAccountsSaved,
   UserMiddleware.resolveBankAccountNumberName,
   UserMiddleware.checkAccountOwnership,
   UserController.saveAccountDetails

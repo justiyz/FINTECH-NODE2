@@ -32,7 +32,7 @@ const accountChoiceType = Joi.object().keys({
 });
 
 const bvnVerification = Joi.object().keys({
-  bvn: Joi.string().required()
+  bvn: Joi.string().required().length(11)
 });
 
 const verifyEmail = Joi.object().keys({
