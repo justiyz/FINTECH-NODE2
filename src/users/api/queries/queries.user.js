@@ -88,6 +88,16 @@ export default {
       AND account_number = $2
       AND bank_code = $3`,
 
+  checkMaximumExistingAccountCounts: `
+      SELECT COUNT(id)
+      FROM user_bank_accounts
+      WHERE user_id = $1`,
+
+  checkMaximumExistingCardsCounts: `
+      SELECT COUNT(id)
+      FROM user_debit_cards
+      WHERE user_id = $1`,
+
   fetchBankAccountDetails: `
       SELECT 
         id,

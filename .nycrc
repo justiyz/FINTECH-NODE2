@@ -6,10 +6,10 @@
     "src/users/config/express",
     "src/users/config/logger",
     "src/users/config/sms",
-    "src/users/services",
+    "src/users/externalServices",
     "src/users/lib/templates/**/*.js",
     "src/users/api/services/services.email.js",
-    "src/admins/services",
+    "src/admins/externalServices",
     "src/admins/lib/templates/**/*.js",
     "src/admins/api/services/services.email.js"
   ],

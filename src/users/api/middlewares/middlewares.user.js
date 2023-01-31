@@ -3,7 +3,7 @@ import * as AuthService from '../services/services.auth';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { resolveAccount } from '../../externalServices/service.paystack';
-import { bvnVerificationCheck } from '../../externalServices/service.sterling';
+import { dojahBvnVerificationCheck } from '../../externalServices/service.dojah';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
@@ -180,32 +180,37 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
 export const verifyBvn = async (req, res, next) => {
   try {
     const { body: { bvn },  user } = req;
-    const data = await bvnVerificationCheck(bvn.trim(), user);
+    const data = await dojahBvnVerificationCheck(bvn.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
-    if (data.responseCode !== '00') {
+    if (data.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, data.responseDesc, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, data.response.data.error, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.first_name.toLowerCase() !== data.firstName.toLowerCase()) {
+    if (user.first_name.toLowerCase() !== data.data.entity.first_name.toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_FIRST_NAME_NOT_MATCHING_BVN_NAME, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.last_name.toLowerCase() !== data.lastName.toLowerCase()) {
+    if (user.last_name.toLowerCase() !== data.data.entity.last_name.toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's last name don't match bvn last name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_LAST_NAME_NOT_MATCHING_BVN_NAME, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.middle_name !== null && user.middle_name.toLowerCase() !== data.middleName.toLowerCase()) {
+    if (user.middle_name !== null && user.middle_name.toLowerCase() !== data.data.entity.middle_name.toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's middle name don't match bvn middle name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_MIDDLE_NAME_NOT_MATCHING_BVN_NAME, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.gender.toLowerCase() !== data.gender.toLowerCase()) {
+    if (user.gender.toLowerCase() !== data.data.entity.gender.toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's gender does not match bvn returned gender verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_GENDER_NOT_MATCHING_BVN_GENDER, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+    }
+    if (user.date_of_birth !== data.data.entity.date_of_birth) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's date of birth does not match bvn returned date of birth verifyBvn.middlewares.user.js`);
+      userActivityTracking(user.user_id, 5, 'fail');
+      return ApiResponse.error(res, enums.USER_DOB_NOT_MATCHING_BVN_DOB, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification successful verifyBvn.middlewares.user.js`);
     return next();
@@ -239,6 +244,60 @@ export const isEmailVerified = (type = 'authenticate') => async(req, res, next) 
   } catch (error) {
     error.label = enums.IS_EMAIL_VERIFIED_MIDDLEWARE;
     logger.error(`checking user is verified failed:::${enums.IS_EMAIL_VERIFIED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if more than two cards already saved
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfMaximumDebitCardsSaved = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ existingCardsCount ] = await UserService.checkMaximumExistingCardsCounts([ user.user_id ]);
+    if (Number(existingCardsCount.count) >= 2) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to two debit cards saved checkIfMaximumDebitCardsSaved.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 26, 'fail');
+      return ApiResponse.error(res, enums.DEBIT_CARDS_LIMITS_REACHED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_MAXIMUM_DEBIT_CARDS_SAVED_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to save up to two debit cards saved checkIfMaximumDebitCardsSaved.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 26, 'fail');
+    error.label = enums.CHECK_IF_MAXIMUM_DEBIT_CARDS_SAVED_MIDDLEWARE;
+    logger.error(`checking if user has saved up to two debit cards failed::${enums.CHECK_IF_MAXIMUM_DEBIT_CARDS_SAVED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if more than three bank account already saved
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ existingAccountsCount ] = await UserService.checkMaximumExistingAccountCounts([ user.user_id ]);
+    if (Number(existingAccountsCount.count) >= 3) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved checkIfMaximumBankAccountsSaved.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 27, 'fail');
+      return ApiResponse.error(res, enums.BANK_ACCOUNTS_LIMITS_REACHED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to save up to three bank accounts checkIfMaximumBankAccountsSaved.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 27, 'fail');
+    error.label = enums.CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE;
+    logger.error(`checking if user has saved more up to three bank accounts failed::${enums.CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

@@ -23,6 +23,8 @@ export const updateAccountDisbursementChoice = async(user_id, id) => DB.multiple
 ]);
 export const emailVerificationToken = (payload) => DB.transact('emailVerificationToken', payload, enums.USER_QUERY);
 export const checkIfAccountExisting = (payload) => DB.transact('checkIfAccountExisting', payload, enums.USER_QUERY);
+export const checkMaximumExistingAccountCounts = (payload) => DB.transact('checkMaximumExistingAccountCounts', payload, enums.USER_QUERY);
+export const checkMaximumExistingCardsCounts = (payload) => DB.transact('checkMaximumExistingCardsCounts', payload, enums.USER_QUERY);
 export const verifyEmail = (payload) => DB.transact('verifyEmail', payload, enums.USER_QUERY);
 export const fetchAllExistingBvns = (payload) => DB.transact('fetchAllExistingBvns', payload, enums.USER_QUERY);
 export const updateIdVerification = (payload) => DB.transact('updateIdVerification', payload, enums.USER_QUERY);

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as PaymentController from '../controllers/controllers.payment';
 import * as PaymentMiddleware from '../middlewares/middlewares.payment';
+import * as UserMiddleware from '../middlewares/middlewares.user';
 
 const router = Router();
 
@@ -9,6 +10,7 @@ router.get(
   '/initiate-card-tokenization',
   AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
+  UserMiddleware.checkIfMaximumDebitCardsSaved,
   PaymentController.initializeCardTokenizationPayment
 );
 

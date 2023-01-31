@@ -47,6 +47,7 @@ export const userProfileDetails = async(req, res, next) => {
     const { admin, userDetails, params: { user_id } } = req;
     const userReferrals = await UserService.fetchUserReferrals([ user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
+    userDetails.bvn = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
     const data = {
       personalInformation: userDetails,
       referralCount: userReferrals.length,

@@ -8,10 +8,10 @@ export default {
   `,
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
-      to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url,
+      to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-      number_of_dependents, marital_status, loan_status, employment_type
+      number_of_dependents, marital_status, loan_status, employment_type, to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
     WHERE user_id = $1`,
 
@@ -68,6 +68,7 @@ export default {
           tier,
           to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
           loan_status,
+          employment_type,
           status
         FROM users
         WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
