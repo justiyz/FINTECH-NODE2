@@ -126,3 +126,25 @@ export const fetchUsers = async (req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * fetch user kyc details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminUserController
+ */
+export const fetchUserKycDetails = async(req, res, next) => {
+  try {
+    const { admin, userDetails } = req;
+    const userKycDetail = await UserService.fetchUserKycDetails([ userDetails.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
+     user kyc details fetched from the DB userKycDetails.admin.controllers.user.js`);
+    return ApiResponse.success(res, enums.FETCH_USER_KYC_DETAILS, enums.HTTP_OK, userKycDetail);
+  } catch (error) {
+    error.label = enums.USER_KYC_DETAILS_CONTROLLER;
+    logger.error(`fetching user kyc details failed:::${enums.USER_KYC_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

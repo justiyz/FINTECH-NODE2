@@ -45,5 +45,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchUserKycDetails', async() => {
+      const req = { admin: '', params: '' };
+      const data = await AdminUserController.fetchUserKycDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
