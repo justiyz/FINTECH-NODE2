@@ -140,7 +140,7 @@ export const fetchUserKycDetails = async(req, res, next) => {
     const { admin, userDetails } = req;
     const userKycDetail = await UserService.fetchUserKycDetails([ userDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
-     user kyc details fetched from the DB userKycDetails.admin.controllers.user.js`);
+     user kyc details fetched from the DB fetchUserKycDetails.admin.controllers.user.js`);
     return ApiResponse.success(res, enums.FETCH_USER_KYC_DETAILS, enums.HTTP_OK, userKycDetail);
   } catch (error) {
     error.label = enums.USER_KYC_DETAILS_CONTROLLER;
