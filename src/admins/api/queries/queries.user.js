@@ -89,6 +89,7 @@ export default {
       users.user_id, 
       tier,
       is_verified_bvn,
+      is_completed_kyc,
       is_uploaded_identity_card,
       user_national_id_details.image_url
     FROM users
