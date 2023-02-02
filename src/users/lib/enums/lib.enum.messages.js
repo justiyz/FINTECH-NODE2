@@ -63,7 +63,7 @@ export const ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT = 'Account is already disburse
 export const ACCOUNT_DETAILS_NOT_USERS = 'Account details does not belong to user';
 export const ACCOUNT_USER_NOT_OWNED_BY_USER = 'Account details does not belong to user';
 export const BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY = (type) => `Account details ${type} status updated successfully`;
-export const GENERATE_RESET_PASSWORD_TOKEN = 'Password token Successfully generate';
+export const GENERATE_RESET_PASSWORD_TOKEN = 'Password token Successfully generated';
 export const PASSWORD_TOKEN = 'Password reset token sent';
 export const BANK_ACCOUNT_SAVED_SUCCESSFULLY = 'Bank account added successfully';
 export const BANK_ACCOUNTS_FETCHED_SUCCESSFULLY = 'Bank accounts fetched successfully';
@@ -129,6 +129,9 @@ export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
 export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
+export const USER_PROFILE_PREVIOUSLY_COMPLETED = 'User profile already completed';
+export const ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE = 'Kindly login to SeedFi app to complete profile and enjoy great benefits';
+export const NOTIFICATION_SENT_TO_USER_SUCCESSFULLY = 'Notification sent to user successfully';
 export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;
 export const USER_CURRENT_STATUS = (status) => `User status is already ${status} in the DB.`;
 export const FETCH_ADMIN_PROFILE = 'Admin profile fetched successfully';

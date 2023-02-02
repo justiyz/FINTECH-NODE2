@@ -6,7 +6,7 @@
 
 ## Requirements
 
-For development, you will only need Node.js (version 12 and above) and a node global package (npm) installed in your environment.
+For development, you will only need Node.js (version 16 and above) and a node global package (npm) installed in your environment.
 
 ### Node
 

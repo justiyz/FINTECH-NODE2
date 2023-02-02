@@ -41,6 +41,17 @@ router.get(
   UserController.userAccountInformation
 );
 
+router.post(
+  '/:user_id/notification',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'create'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.notificationTypeQuery, 'query'),
+  UserMiddleware.checkIfUserExists,
+  UserController.sendNotifications
+);
+
 router.get(
   '/all',
   AuthMiddleware.getAdminAuthToken,

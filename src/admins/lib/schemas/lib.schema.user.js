@@ -4,6 +4,10 @@ const userIdParams = Joi.object().keys({
   user_id: Joi.string().required()
 });
 
+const notificationTypeQuery = Joi.object().keys({
+  type: Joi.string().required().valid('incomplete-profile')
+});
+
 const fetchUsers = Joi.object().keys({
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
@@ -19,6 +23,7 @@ const editStatus = Joi.object().keys({
 
 export default {
   userIdParams,
+  notificationTypeQuery,
   editStatus,
   fetchUsers
 };

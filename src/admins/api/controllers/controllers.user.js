@@ -4,6 +4,7 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
+import { sendPushNotification } from '../../externalServices/services.firebase';
 import { adminActivityTracking } from '../../lib/monitor';
 
 
@@ -57,6 +58,35 @@ export const userProfileDetails = async(req, res, next) => {
   } catch (error) {
     error.label = enums.USER_PROFILE_DETAILS_CONTROLLER;
     logger.error(`fetching user details and referral details from the DB failed:::${enums.USER_PROFILE_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * send notification to user
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns response of notification sent.
+ * @memberof AdminRoleController
+ */
+export const sendNotifications = async (req, res, next) => {
+  try {
+    const { admin, userDetails, query: { type } } = req;
+    if (type === 'incomplete-profile') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: type ${type} is decoded sendNotifications.admin.controllers.user.js`);
+      if (userDetails.is_completed_kyc) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile previously completed sendNotifications.admin.controllers.user.js`);
+        return ApiResponse.error(res, enums.USER_PROFILE_PREVIOUSLY_COMPLETED, enums.HTTP_BAD_REQUEST, enums.SEND_NOTIFICATIONS_CONTROLLER);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile not  previously completed sendNotifications.admin.controllers.user.js`);
+      await sendPushNotification(userDetails.user_id, enums.ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE, userDetails.fcm_token);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: push notification sent to user successfully sendNotifications.admin.controllers.user.js`);
+    }
+    return ApiResponse.success(res, enums.NOTIFICATION_SENT_TO_USER_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.SEND_NOTIFICATIONS_CONTROLLER;
+    logger.error(`sending notifications to user failed:::${enums.SEND_NOTIFICATIONS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
@@ -118,7 +148,7 @@ export const fetchUsers = async (req, res, next) => {
       total_pages: Helpers.calculatePages(Number(usersCount.total_count), Number(req.query.per_page) || 10),
       users
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched users from the DB fetchUsers.admin.controllers.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched users from the DB fetchUsers.admin.controllers.user.js`);
     return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_USERS_CONTROLLER;

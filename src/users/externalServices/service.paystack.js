@@ -64,7 +64,10 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
         amount: parseFloat(paystackAmountFormatting),
         currency: 'NGN',
         reference,
-        channels: [ 'card' ]
+        channels: [ 'card' ],
+        metadata: { 
+          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is provided by the mobile app developer
+        }
       }
     };
     const { data } = await axios(options);

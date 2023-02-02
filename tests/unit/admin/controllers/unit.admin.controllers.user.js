@@ -51,5 +51,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call sendNotifications', async() => {
+      const req = { admin: '', userDetails: '', query: '' };
+      const data = await AdminUserController.sendNotifications(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

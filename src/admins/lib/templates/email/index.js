@@ -1,4 +1,4 @@
-import * as authEmail from './template';
+import * as authEmail from './authTemplates';
 
 const getTemplate = (type, data) => {
   switch (type) {
