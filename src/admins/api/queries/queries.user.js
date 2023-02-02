@@ -19,7 +19,8 @@ export default {
     SELECT 
         referral_trail.id AS referral_id,
         referral_trail.referred_user_id,
-        (SELECT CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name) FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_name,
+        (SELECT CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)
+        FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_name,
         (SELECT users.email FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_email,
         (SELECT users.created_at FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_signup_date
     FROM referral_trail
@@ -82,5 +83,16 @@ export default {
     FROM users
     WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
     ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-  `
+  `,
+  fetchUserKycDetails: `
+    SELECT 
+      users.user_id, 
+      tier,
+      is_verified_bvn,
+      is_completed_kyc,
+      is_uploaded_identity_card,
+      user_national_id_details.image_url
+    FROM users
+    LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
+    WHERE users.user_id = $1`
 };

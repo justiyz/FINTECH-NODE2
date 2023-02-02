@@ -50,4 +50,14 @@ router.get(
   UserController.fetchUsers
 );
 
+router.get(
+  '/:user_id/kyc',
+  AuthMiddleware.getAdminAuthToken,
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.fetchUserKycDetails
+);
+
 export default router;
