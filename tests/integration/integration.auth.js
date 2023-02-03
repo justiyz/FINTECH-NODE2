@@ -1138,7 +1138,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Password token Successfully generate');
+          expect(res.body.message).to.equal(enums.GENERATE_RESET_PASSWORD_TOKEN);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN = res.body.data.passwordToken;
           done();

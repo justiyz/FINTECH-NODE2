@@ -730,5 +730,123 @@ describe('Admin Users management', () => {
         });
     });
   });
+  describe('Send user incomplete profile notification', () => {
+    it('Should throw error if non existing user id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}po/notification`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'incomplete-profile'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('user'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if admin dose not have create permission', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/notification`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'incomplete-profile'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Admin cannot perform "create" action on users module');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if type is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/notification`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type is required');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid type is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/notification`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'debt'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be [incomplete-profile]');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if user already completed profile', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/notification`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'incomplete-profile'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_PREVIOUSLY_COMPLETED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should send complete profile notification to user successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_FIVE_USER_ID}/notification`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'incomplete-profile'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.NOTIFICATION_SENT_TO_USER_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          done();
+        });
+    });
+  });
 });
 
