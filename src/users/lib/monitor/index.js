@@ -1,12 +1,10 @@
-import { db } from '../../config/db';
-import { queries } from '../../externalServices/services.db';
+import logQueries from '../../api/queries/queries.log';
+import { processNoneData } from '../../api/services/services.db';
 import { operations } from './lib.monitor.operations';
 
-const { logQueries } = queries;
-
-const monitor = (query, param, type, operation, user_id) => {
+const monitor = async(query, param, type, operation, user_id) => {
   try {
-    db.none(query, param);
+    await processNoneData(query, param);
     return logger.info(`${type}: activity ${operation} for ${user_id} tracked`);
   } catch (error) {
     logger.error(error);

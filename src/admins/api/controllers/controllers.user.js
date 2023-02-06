@@ -1,11 +1,12 @@
-import * as UserService from '../services/services.user';
+import userQueries from '../queries/queries.user';
 import UserPayload from '../../../admins/lib/payloads/lib.payload.user';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
-import { sendPushNotification } from '../../externalServices/services.firebase';
+import { sendPushNotification } from '../services/services.firebase';
 import { adminActivityTracking } from '../../lib/monitor';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 
 
 /**
@@ -22,7 +23,7 @@ export const editUserStatus = async(req, res, next) => {
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     decoded that admin is about to user status. activateAndDeactivateUser.admin.controllers.user.js`);
-    await UserService.editUserStatus([ req.params.user_id, req.body.status ]);
+    await processAnyData(userQueries.editUserStatus, [ req.params.user_id, req.body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     confirm that user status has been edited and updated in the DB. activateAndDeactivateUser.admin.controllers.user.js`);
     adminActivityTracking(req.admin.admin_id, activityType, 'success');
@@ -46,7 +47,7 @@ export const editUserStatus = async(req, res, next) => {
 export const userProfileDetails = async(req, res, next) => {
   try {
     const { admin, userDetails, params: { user_id } } = req;
-    const userReferrals = await UserService.fetchUserReferrals([ user_id ]);
+    const userReferrals = await processAnyData(userQueries.fetchUserReferrals, [ user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
     userDetails.bvn = userDetails.bvn === null ? null : await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
     const data = {
@@ -102,7 +103,10 @@ export const sendNotifications = async (req, res, next) => {
 export const userAccountInformation = async(req, res, next) => {
   try {
     const { admin, params: { user_id } } = req;
-    const [ userDebitCards, userBankAccount ] = await UserService.fetchUserAccountDetails([ user_id ]);
+    const [ userDebitCards, userBankAccount ] = await Promise.all([
+      processAnyData(userQueries.fetchUserDebitCards, [ user_id ]),
+      processAnyData(userQueries.fetchUserBankAccounts, [ user_id ])
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user debit cards and bank accounts fetched from the DB userAccountInformation.admin.controllers.user.js`);
     await Promise.all(
       userDebitCards.map(async(card) => {
@@ -141,7 +145,10 @@ export const fetchUsers = async (req, res, next) => {
   try {
     const { query, admin } = req;
     const  payload  = UserPayload.fetchUsers(query);
-    const [ users, [ usersCount ] ] = await UserService.fetchUsers(payload);
+    const [ users, [ usersCount ] ] = await Promise.all([
+      processAnyData(userQueries.fetchUsers, payload),
+      processAnyData(userQueries.fetchUsersCount, payload)
+    ]);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(usersCount.total_count),
@@ -168,7 +175,7 @@ export const fetchUsers = async (req, res, next) => {
 export const fetchUserKycDetails = async(req, res, next) => {
   try {
     const { admin, userDetails } = req;
-    const userKycDetail = await UserService.fetchUserKycDetails([ userDetails.user_id ]);
+    const userKycDetail = await processOneOrNoneData(userQueries.fetchUserKycDetails, [ userDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
      user kyc details fetched from the DB fetchUserKycDetails.admin.controllers.user.js`);
     return ApiResponse.success(res, enums.FETCH_USER_KYC_DETAILS, enums.HTTP_OK, userKycDetail);

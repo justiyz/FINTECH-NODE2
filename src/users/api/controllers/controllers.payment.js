@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import * as  PaymentService from '../services/services.payment';
+import paymentQueries from '../queries/queries.payment';
+import { processAnyData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import { initializeCardPayment } from '../../externalServices/service.paystack';
+import { initializeCardPayment } from '../services/service.paystack';
 import enums from '../../lib/enums';
 import config from '../../config';
 import { userActivityTracking } from '../../lib/monitor';
@@ -20,7 +21,7 @@ export const initializeCardTokenizationPayment = async (req, res, next) => {
     const reference = uuidv4();
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference generated initializeCardTokenizationPayment.controllers.payment.js`);
     const tokenizingAmount = parseFloat(config.SEEDFI_CARD_TOKENIZING_AMOUNT);
-    await PaymentService.initializeCardPayment([ user.user_id, tokenizingAmount, 'paystack', reference, 'card_tokenization'  ]);
+    await processAnyData(paymentQueries.initializeCardPayment, [ user.user_id, tokenizingAmount, 'paystack', reference, 'card_tokenization'  ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initializeCardTokenizationPayment.controllers.payment.js`);
     const paystackAmountFormatting = parseFloat(tokenizingAmount) * 100; // Paystack requires amount to be in kobo for naira payment
     const result = await initializeCardPayment(user, paystackAmountFormatting, reference);

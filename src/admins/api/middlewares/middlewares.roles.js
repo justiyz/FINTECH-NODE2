@@ -1,9 +1,10 @@
 
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import * as RoleService from '../../api/services/services.role';
+import roleQueries from '../queries/queries.role';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import { adminActivityTracking } from '../../lib/monitor';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 
 /**
  * check if admin user has valid access to resource
@@ -54,12 +55,12 @@ export const checkRoleNameIsUnique = async(req, res, next) => {
     const { body: { name } } = req;
     const roleCode = Helpers.generateRandomAlphabets(5);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: random role code generated for the role checkRoleNameIsUnique.admin.middlewares.roles.js`);
-    const [ codeExists ] = await RoleService.fetchRole([ roleCode.trim().toUpperCase() ]);
+    const [ codeExists ] = await processAnyData(roleQueries.fetchRole, [ roleCode.trim().toUpperCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: fetch result on if role code exists already in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
     if (codeExists) {
       checkRoleNameIsUnique(req, res, next);
     }
-    const [ roleName ] = await RoleService.fetchRole([ name.trim().toLowerCase() ]);
+    const [ roleName ] = await processAnyData(roleQueries.fetchRole, [ name.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role queried from DB using role name checkRoleNameIsUnique.admin.middlewares.roles.js`);
     if (roleName) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role already exists in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
@@ -152,7 +153,7 @@ export const checkAdminResources = async(req, res, next) => {
     const duplicateResources = [];
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admins permissions resources about to be aggregated based on existence and uniqueness checkAdminResources.admin.middlewares.roles.js`);
     const processPermissions = await permissions.map(async(permission) => {
-      const [ resource ] = await RoleService.fetchAdminResourceById([ permission.resource_id ]);
+      const [ resource ] = await processAnyData(roleQueries.fetchAdminResourceById, [ permission.resource_id ]);
       if(!resource) {
         nonexistingResources.push(permission.resource_id);
         return permission;
@@ -195,7 +196,7 @@ export const checkAdminResources = async(req, res, next) => {
 export const checkIfRoleHasBeenAssigned = async (req, res, next) => {
   try {
     const { params:{ role_code } } = req;
-    const admins = await RoleService.fetchAdminByRoleType(role_code);
+    const admins = await processOneOrNoneData(roleQueries.fetchAdminByRoleType, [ role_code ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his role type checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
     if (admins) {
       return ApiResponse.error(res, enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN, enums.HTTP_FORBIDDEN);
@@ -222,7 +223,7 @@ export const validateRoleCode = async(req, res, next) => {
     if (!role) {
       return next();
     }
-    const [ roleCode ] =  await RoleService.fetchRole([ role ]);
+    const [ roleCode ] =  await processAnyData(roleQueries.fetchRole, [ role ]);
     if (!roleCode) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
     successfully confirms that role code doesn't exist in the database. validateRoleCode.admin.middlewares.roles.js`);

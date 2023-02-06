@@ -1,12 +1,13 @@
 import dayjs from 'dayjs';
-import * as  UserService from '../services/services.user';
-import * as AuthService from '../services/services.auth';
+import authQueries from '../queries/queries.auth';
+import userQueries from '../queries/queries.user';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
-import { fetchBanks } from '../../externalServices/service.paystack';
+import { fetchBanks } from '../services/service.paystack';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 
@@ -23,7 +24,7 @@ const { SEEDFI_NODE_ENV } = config;
 export const updateFcmToken = async (req, res, next) => {
   try {
     const {user, body} = req;
-    await UserService.updateUserFcmToken([ user.user_id, body.fcm_token ]);
+    await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user fcm token to the database updateFcmToken.controllers.user.js`);
     const data = {
       user_id: user.user_id,
@@ -47,8 +48,12 @@ export const updateFcmToken = async (req, res, next) => {
  */
 export const updateUserRefreshToken = async (req, res, next) => {
   try {
-    const { tokenDetails: { token, refreshToken}, user } = req;
-    const [ updatedUser ] = await AuthService.loginUserAccount([ user.user_id, refreshToken ]);
+    const { user } = req;
+    const token = await Hash.generateAuthToken(user);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: successfully generated access token updateUserRefreshToken.controllers.user.js`);
+    const refreshToken = await Hash.generateRandomString(50);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully generated refresh token updateUserRefreshToken.controllers.user.js`);
+    const [ updatedUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new refresh token to the database updateUserRefreshToken.controllers.user.js`);
     const data = {
       ...updatedUser,
@@ -72,10 +77,17 @@ export const updateUserRefreshToken = async (req, res, next) => {
  */
 export const updateSelfieImage = async (req, res, next) => {
   try {
-    const { user, body, otp } = req;
-    const [ updateUserSelfie ] = await UserService.updateUserSelfieImage([ user.user_id, body.image_url.trim(), otp ]);
+    const { user, body } = req;
+    const token =  Hash.generateRandomString(50);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated updateSelfieImage.controllers.user.j`);
+    const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database updateSelfieImage.controllers.user.j`);
+    if (existingToken) {
+      updateSelfieImage(req, res, next);
+    }
+    const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, body.image_url.trim(), token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database updateSelfieImage.controllers.user.js`);
-    MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp, ...user });
+    MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp: token, ...user });
     userActivityTracking(user.user_id, 17, 'success');
     return ApiResponse.success(res, enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updateUserSelfie);
   } catch (error) {
@@ -98,7 +110,7 @@ export const updateBvn = async (req, res, next) => {
     const { body: { bvn }, user } = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     const tierOption = user.is_uploaded_identity_card ? '2' : '1';
-    const [ updateBvn ] = await UserService.updateUserBvn([ user.user_id, hashedBvn, tierOption ]);
+    const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn, tierOption ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
     return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, updateBvn);
@@ -121,16 +133,23 @@ export const updateBvn = async (req, res, next) => {
  */
 export const requestEmailVerification = async(req, res, next) => {
   try {
-    const { user, otp } = req;
+    const { user } = req;
+    const token =  Hash.generateRandomString(50);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated requestEmailVerification.controller.auth.js`);
+    const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database requestEmailVerification.controller.auth.js`);
+    if (existingToken) {
+      requestEmailVerification(req, res, next);
+    }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = [ user.email, otp, expireAt ];
-    await UserService.emailVerificationToken(payload);
-    const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
+    const payload = [ user.email, token, expireAt ];
+    await processAnyData(userQueries.emailVerificationToken, payload);
+    const data ={ user_id: user.user_id, otp: token, otpExpire: expirationTime };
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK, data);
     }
-    MailService('Verify your email', 'requestVerifyEmail', { otp, ...user });
+    MailService('Verify your email', 'requestVerifyEmail', { otp: token, ...user });
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email verification has been sent successfully to user mail. requestEmailVerification.controller.auth.js`);
     return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK);
@@ -194,7 +213,7 @@ export const saveAccountDetails = async(req, res, next) => {
   try {
     const { user, body, accountNumberDetails } = req;
     const payload = UserPayload.bankAccountPayload(user, body, accountNumberDetails);
-    const [ accountDetails ] = await UserService.saveBankAccountDetails(payload);
+    const [ accountDetails ] = await processAnyData(userQueries.saveBankAccountDetails, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolved successfully returnAccountDetails.controller.user.js`);
     userActivityTracking(user.user_id, 27, 'success');
     return ApiResponse.success(res, enums.BANK_ACCOUNT_SAVED_SUCCESSFULLY, enums.HTTP_OK, accountDetails);
@@ -217,7 +236,7 @@ export const saveAccountDetails = async(req, res, next) => {
 export const fetchUserAccountDetails = async(req, res, next) => {
   try {
     const { user } = req;
-    const accountDetails = await UserService.fetchBankAccountDetails([ user.user_id ]);
+    const accountDetails = await processAnyData(userQueries.fetchBankAccountDetails, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved account details fetched successfully fetchUserAccountDetails.controller.user.js`);
     return ApiResponse.success(res, enums.BANK_ACCOUNTS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, accountDetails);
   } catch (error) {
@@ -238,7 +257,7 @@ export const fetchUserAccountDetails = async(req, res, next) => {
 export const fetchUserDebitCards = async(req, res, next) => {
   try {
     const { user } = req;
-    const debitCards = await UserService.fetchUserDebitCards([ user.user_id ]);
+    const debitCards = await processAnyData(userQueries.fetchUserDebitCards, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved debit cards fetched successfully fetchUserDebitCards.controller.user.js`);
     await Promise.all(
       debitCards.map(async(card) => {
@@ -272,7 +291,7 @@ export const fetchUserDebitCards = async(req, res, next) => {
 export const deleteUserAccountDetails = async(req, res, next) => {
   try {
     const { user, params: { id } } = req;
-    await UserService.deleteBankAccountDetails([ user.user_id, id ]);
+    await processAnyData(userQueries.deleteBankAccountDetails, [ user.user_id, id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's saved account details deleted successfully deleteUserAccountDetails.controller.user.js`);
     userActivityTracking(req.user.user_id, 29, 'success');
     return ApiResponse.success(res, enums.BANK_ACCOUNT_DELETED_SUCCESSFULLY, enums.HTTP_OK);
@@ -296,13 +315,19 @@ export const updateAccountDetailsChoice = async(req, res, next) => {
   const { user, params: { id }, query: { type } } = req;
   try {
     if (type === 'default') {
-      const [ , [ updatedAccount ] ] = await UserService.updateAccountDefaultChoice(user.user_id, id);
+      const [ , [ updatedAccount ] ] = await Promise.all([
+        processAnyData(userQueries.setExistingAccountDefaultFalse, [ user.user_id ]),
+        processAnyData(userQueries.SetNewAccountDefaultTrue, [ user.user_id, id ])
+      ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: saved account default choice updated successfully updateAccountDetailsChoice.controller.user.js`);
       userActivityTracking(req.user.user_id, 35, 'success');
       return ApiResponse.success(res, enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY(type), enums.HTTP_OK, updatedAccount);
     }
     if (type === 'disbursement') {
-      const [ , [ updatedAccount ] ] = await UserService.updateAccountDisbursementChoice(user.user_id, id);
+      const [ , [ updatedAccount ] ] = await Promise.all([
+        processAnyData(userQueries.setExistingAccountDisbursementFalse, [ user.user_id ]),
+        processAnyData(userQueries.SetNewAccountDisbursementTrue, [ user.user_id, id ])
+      ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: saved account disbursement choice updated successfully updateAccountDetailsChoice.controller.user.js`);
       userActivityTracking(req.user.user_id, 36, 'success');
       return ApiResponse.success(res, enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY(type), enums.HTTP_OK, updatedAccount);
@@ -327,7 +352,7 @@ export const updateAccountDetailsChoice = async(req, res, next) => {
 export const verifyEmail = async(req, res, next) => {
   try {
     const { user } = req;
-    await UserService.verifyEmail([ user.user_id ]);
+    await processAnyData(userQueries.verifyEmail, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     User email address verified in the DB verifyEmail.controller.user.js`);
     userActivityTracking(req.user.user_id, 4, 'success');
@@ -352,9 +377,9 @@ export const idUploadVerification = async(req, res, next) => {
   try {
     const { user, body } = req; 
     const payload = UserPayload.imgVerification(user, body);
-    await UserService.updateIdVerification(payload);
+    await processAnyData(userQueries.updateIdVerification, payload);
     const tierOption = user.is_verified_bvn ? '2' : '1';
-    const data =  await UserService.userIdVerification([ user.user_id, tierOption ]);
+    const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierOption ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     user id verification uploaded successfully DB idUploadVerification.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
@@ -380,7 +405,7 @@ export const updateUserProfile = async(req, res, next) => {
   try {
     const { body, user } = req;
     const payload = UserPayload.updateUserProfile(body, user);
-    const updatedUser = await UserService.updateUserProfile(payload);
+    const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully updated user profile in the DB updateUserProfile.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 19, 'success');
@@ -429,7 +454,10 @@ export const getProfile = async(req, res, next) => {
 export const setDefaultCard = async(req, res, next) => {
   const { user, params: { id } } = req;
   try {
-    const [ , [ defaultCard ] ] = await UserService.setDefaultCard(user.user_id, id);
+    const [ , [ defaultCard ] ] = await Promise.all([
+      processAnyData(userQueries.setExistingCardDefaultFalse, [ user.user_id ]),
+      processAnyData(userQueries.SetNewCardDefaultTrue, [ user.user_id, id ])
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully set user's default card setDefaultCard.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 34, 'success');
@@ -454,7 +482,7 @@ export const setDefaultCard = async(req, res, next) => {
 export const removeCard = async(req, res, next) => {
   try {
     const { user, params: { id } } = req;
-    await UserService.removeCard([ user.user_id, id ]);
+    await processAnyData(userQueries.removeCard, [ user.user_id, id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully removed a user's saved card.admin.controller.user.js`);
     userActivityTracking(req.user.user_id, 28, 'success');

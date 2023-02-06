@@ -1,12 +1,10 @@
-import { db } from '../../../users/config/db';
-import { queries } from '../../externalServices/services.db';
+import adminLogQueries from '../../api/queries/queries.log';
+import { processNoneData } from '../../api/services/services.db';
 import { operations } from './lib.monitor.operations';
 
-const { adminLogQuery } = queries;
-
-const monitor = (query, param, type, operation, admin_id) => {
+const monitor = async(query, param, type, operation, admin_id) => {
   try {
-    db.none(query, param);
+    await processNoneData(query, param);
     return logger.info(`${type}: activity ${operation} for ${admin_id} tracked`);
   } catch (error) {
     logger.error(error);
@@ -17,7 +15,7 @@ const monitor = (query, param, type, operation, admin_id) => {
 export const adminActivityTracking = (admin_id, op_code, activity_status) => {
   if (admin_id) {
     const operation = operations[op_code];
-    return monitor(adminLogQuery.createAdminActivityLogs, [
+    return monitor(adminLogQueries.createAdminActivityLogs, [
       admin_id,
       operation,
       activity_status

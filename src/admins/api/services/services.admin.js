@@ -1,12 +1,34 @@
-import DB from '../../externalServices/services.db';
-import enums from '../../../users/lib/enums';
+import adminQueries from '../queries/queries.admin';
+import { processAnyData } from './services.db';
+import * as Helpers from '../../lib/utils/lib.util.helpers';
 
-export const updateAdminProfile = (payload) => DB.transact('updateAdminProfile', payload, enums.ADMIN_ADMIN_QUERY);
-export const getAdminByEmail = (payload) => DB.transact('getAdminByEmail', payload, enums.ADMIN_ADMIN_QUERY);
-export const createAdminUserPermissions = (payload) => DB.transact('createAdminUserPermissions', payload, enums.ADMIN_ADMIN_QUERY);
-export const updateUserRoleType = (payload) => DB.transact('updateUserRoleType', payload, enums.ADMIN_ADMIN_QUERY);
-export const checkIfResourcePermissionCreated = (payload) => DB.transact('checkIfResourcePermissionCreated', payload, enums.ADMIN_ADMIN_QUERY);
-export const editAdminUserPermissions = (payload) => DB.transact('editAdminUserPermissions', payload, enums.ADMIN_ADMIN_QUERY);
-export const getAdminByAdminId = (payload) => DB.transact('getAdminByAdminId', payload, enums.ADMIN_ADMIN_QUERY);
-export const inviteAdmin = (payload) => DB.transact('addAdmin', payload, enums.ADMIN_ADMIN_QUERY);
-export const editAdminStatus = (payload) => DB.transact('editAdminStatus', payload, enums.ADMIN_ADMIN_QUERY);
+export const fetchAllAdmins = async(query, filter) => {
+  const {
+    page, per_page, search
+  } = query;
+  
+  const { start_date, end_date, status } = filter;
+  const pageType = !page ? 1 : page;
+  const returnPerPage = !per_page ? 10 : per_page;
+  const fetch = returnPerPage * pageType - returnPerPage;
+  const condition = search ? `${search.toLowerCase()}%` : null;
+  let result;
+  const getAndSearchPayload = [ condition, fetch, per_page ];
+  const getAndFilterPayload = [ status, start_date, end_date, fetch, per_page ];
+
+  if ((start_date && end_date) || status)  {
+    result = await processAnyData(adminQueries.fetchAllAdmin, getAndFilterPayload);
+  } else {
+    result = await processAnyData(adminQueries.fetchAndSearchAllAdmin, getAndSearchPayload);
+  }
+  const count = result.length !== 0 ? result[0].total : 0;
+  if (Array.isArray(result)) {
+    result.forEach((item) => delete item.total);
+  }
+  return {
+    page: parseFloat(pageType),
+    total_count: Number(count),
+    total_pages: Helpers.calculatePages(Number(count), Number(returnPerPage)),
+    admins: result 
+  };
+};

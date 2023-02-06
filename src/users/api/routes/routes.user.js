@@ -9,7 +9,6 @@ const router = Router();
 
 router.patch(
   '/fcm-token',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateFcmToken, 'payload'),
   UserController.updateFcmToken
@@ -17,28 +16,23 @@ router.patch(
 
 router.get(
   '/refresh-token',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateRefreshToken, 'query'),
   UserMiddleware.validateRefreshToken,
-  AuthMiddleware.generateTokens,
   UserController.updateUserRefreshToken
 );
 
 router.post(
   '/upload-selfie',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.selfieUpload, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('complete'),
-  AuthMiddleware.generateVerificationToken('token'),
   UserController.updateSelfieImage
 );
 
 router.post(
   '/verify-bvn',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.bvnVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
@@ -51,12 +45,10 @@ router.post(
 
 router.post(
   '/request-email-verification',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.verifyEmail, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   UserMiddleware.isEmailVerified('validate'),
-  AuthMiddleware.generateVerificationToken('token'),
   UserController.requestEmailVerification
 );
   
@@ -70,14 +62,12 @@ router.get(
 
 router.get(
   '/settings/list-banks',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   UserController.fetchAvailableBankLists
 );
 
 router.get(
   '/settings/resolve-account-number',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.resolveAccountNumber, 'query'),
   UserMiddleware.resolveBankAccountNumberName,
@@ -86,7 +76,6 @@ router.get(
 
 router.post(
   '/settings/account-details',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.saveAccountDetails, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
@@ -99,14 +88,12 @@ router.post(
 
 router.get(
   '/settings/account-details',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   UserController.fetchUserAccountDetails
 );
 
 router.delete(
   '/settings/:id/account-details',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkIfAccountDetailsExists,
@@ -116,7 +103,6 @@ router.delete(
 
 router.patch(
   '/settings/:id/account-details',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   Model(Schema.accountChoiceType, 'query'),
@@ -127,14 +113,12 @@ router.patch(
 
 router.get(
   '/settings/debit-cards',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   UserController.fetchUserDebitCards
 );
     
 router.post(
   '/id-verification',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
@@ -145,7 +129,6 @@ router.post(
 
 router.put(
   '/profile',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateUsersProfile, 'payload'),
   UserMiddleware.checkIfBvnIsVerified,
@@ -155,14 +138,12 @@ router.put(
 
 router.get(
   '/profile',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   UserController.getProfile
 );
 
 router.patch(
   '/settings/:id/default-debit-card',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkUserLoanStatus,
@@ -172,7 +153,6 @@ router.patch(
 
 router.delete(
   '/settings/:id/debit-card',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkUserLoanStatus,

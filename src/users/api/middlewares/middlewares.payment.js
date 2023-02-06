@@ -2,8 +2,9 @@ import crypto from 'crypto';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import config from '../../config';
 import enums from '../../lib/enums';
-import * as  PaymentService from '../services/services.payment';
-import { confirmPaystackPaymentStatusByReference, raiseARefundTickedForCardTokenizationTransaction } from '../../externalServices/service.paystack';
+import paymentQueries from '../queries/queries.payment';
+import { processAnyData } from '../services/services.db';
+import { confirmPaystackPaymentStatusByReference, raiseARefundTickedForCardTokenizationTransaction } from '../services/service.paystack';
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
@@ -62,7 +63,7 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: verify transaction status response returned verifyPaystackPaymentStatus.middlewares.payment.js`);
       if (result.data.status !== 'success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was not successful verifyPaystackPaymentStatus.middlewares.payment.js`);
-        await PaymentService.updateTransactionPaymentStatus([ body.data.reference, body.data.id, 'fail' ]);
+        await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
         return ApiResponse.error(res, enums.NOT_SUCCESSFUL_TRANSACTION, enums.HTTP_OK, enums.VERIFY_PAYSTACK_PAYMENT_STATUS_MIDDLEWARE);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was successful verifyPaystackPaymentStatus.middlewares.payment.js`);
@@ -90,7 +91,7 @@ export const verifyTransactionPaymentRecord = async(req, res, next) => {
     const { body } = req;
     if (body.event === 'charge.success' || body.event.includes('refund')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} verifyTransactionPaymentRecord.middlewares.payment.js`);
-      const [ paymentRecord ] = await PaymentService.fetchTransactionByReference([ body.data.reference || body.data.transaction_reference ]);
+      const [ paymentRecord ] = await processAnyData(paymentQueries.fetchTransactionByReference, [ body.data.reference || body.data.transaction_reference ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record fetched from DB using reference verifyTransactionPaymentRecord.middlewares.payment.js`);
       if (!paymentRecord) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record not existing in the DB verifyTransactionPaymentRecord.middlewares.payment.js`);
@@ -135,18 +136,18 @@ export const handleTransactionRefundResponse = async(req, res, next) => {
     if (body.event === 'refund.failed' || body.event === 'refund.pending' || body.event === 'refund.processed' || body.event === 'refund.processing') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} handleTransactionRefundResponse.middlewares.payment.js`);
       if (body.data.status === 'processed') {
-        await PaymentService.updateTransactionRefundStatus([ body.data.transaction_reference, 'success', body.data.refund_reference, true ]);
+        await processAnyData(paymentQueries.updateTransactionRefundStatus, [ body.data.transaction_reference, 'success', body.data.refund_reference, true ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment refund success status updated in the DB using reference handleTransactionRefundResponse.middlewares.payment.js`);
         userActivityTracking(paymentRecord.user_id, 33, 'success');
         return ApiResponse.success(res, enums.REFUND_STATUS_SAVED('processed'), enums.HTTP_OK);
       }
       if (body.data.status === 'failed') {
-        await PaymentService.updateTransactionRefundStatus([ body.data.transaction_reference, 'fail', body.data.refund_reference, false ]);
+        await processAnyData(paymentQueries.updateTransactionRefundStatus, [ body.data.transaction_reference, 'fail', body.data.refund_reference, false ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment refund failed status updated in the DB using reference handleTransactionRefundResponse.middlewares.payment.js`);
         userActivityTracking(paymentRecord.user_id, 33, 'fail');
         return ApiResponse.success(res, enums.REFUND_STATUS_SAVED('failed'), enums.HTTP_OK);
       }
-      await PaymentService.updateTransactionRefundStatus([ body.data.transaction_reference, 'pending', null, false ]);
+      await processAnyData(paymentQueries.updateTransactionRefundStatus, [ body.data.transaction_reference, 'pending', null, false ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment refund pending status updated in the DB using reference handleTransactionRefundResponse.middlewares.payment.js`);
       return ApiResponse.success(res, enums.REFUND_STATUS_SAVED('pending'), enums.HTTP_OK);
     }
@@ -173,7 +174,7 @@ export const updatePaymentHistoryStatus = async(req, res, next) => {
     const { body, paymentRecord } = req;
     if (body.event === 'charge.success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} updatePaymentHistoryStatus.middlewares.payment.js`);
-      await PaymentService.updateTransactionPaymentStatus([ body.data.reference, body.data.id, 'success' ]);
+      await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment status updated successfully updatePaymentHistoryStatus.middlewares.payment.js`);
       return next();
     }
@@ -200,19 +201,19 @@ export const saveCardAuth = async(req, res, next) => {
     if (body.event === 'charge.success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} saveCardAuth.middlewares.payment.js`);
       const checkIfCardPreviouslyUsedPayload = PaymentPayload.checkCardSavedPayload(paymentRecord, body);
-      const [ cardPreviouslySaved ] = await PaymentService.checkIfCardPreviouslySaved(checkIfCardPreviouslyUsedPayload);
+      const [ cardPreviouslySaved ] = await processAnyData(paymentQueries.checkIfCardPreviouslySaved, checkIfCardPreviouslyUsedPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if card previously saved saveCardAuth.middlewares.payment.js`);
       if (cardPreviouslySaved) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: card previously saved about to update card auth token saveCardAuth.middlewares.payment.js`);
-        await PaymentService.updateUserCardAuthToken([ ...checkIfCardPreviouslyUsedPayload, encodeURIComponent(await Hash.encrypt(body.data.authorization.authorization_code.trim())) ]);
+        await processAnyData(paymentQueries.updateUserCardAuthToken, [ ...checkIfCardPreviouslyUsedPayload, encodeURIComponent(await Hash.encrypt(body.data.authorization.authorization_code.trim())) ]);
         return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: card not previously saved saveCardAuth.middlewares.payment.js`);
-      const [ userCardExists ] = await PaymentService.fetchUserSavedCard([ paymentRecord.user_id ]);
+      const [ userCardExists ] = await processAnyData(paymentQueries.fetchUserSavedCard, [ paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has previously tokenized any card saveCardAuth.middlewares.payment.js`);
       const isDefaultCardChoice =  !userCardExists ? true : false;
       const saveCardPayload = await PaymentPayload.saveDebitCardPayload(paymentRecord, body, isDefaultCardChoice);
-      await PaymentService.saveCardDetails(saveCardPayload);
+      await processAnyData(paymentQueries.saveCardDetails, saveCardPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: tokenized card details saved successfully saveCardAuth.middlewares.payment.js`);
       if (paymentRecord.payment_type === 'card_tokenization') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment record is of card tokenization type and should ne refunded saveCardAuth.middlewares.payment.js`);
@@ -247,7 +248,7 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: raiding refund request via paystack returned response raiseRefundForCardTokenization.middlewares.payment.js`);
       if (result.message.toLowerCase() === 'refund has been queued for processing') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: refund successfully initiated raiseRefundForCardTokenization.middlewares.payment.js`);
-        await PaymentService.updateTransactionIsInitiatedRefund([ body.data.reference ]);
+        await processAnyData(paymentQueries.updateTransactionIsInitiatedRefund, [ body.data.reference ]);
         return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: refund could not be initiated raiseRefundForCardTokenization.middlewares.payment.js`);

@@ -1,9 +1,10 @@
-import * as UserService from '../services/services.user';
-import * as AuthService from '../services/services.auth';
+import AuthQueries from '../queries/queries.auth';
+import userQueries from '../queries/queries.user';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
-import { resolveAccount } from '../../externalServices/service.paystack';
-import { dojahBvnVerificationCheck } from '../../externalServices/service.dojah';
+import { resolveAccount } from '../services/service.paystack';
+import { dojahBvnVerificationCheck } from '../services/service.dojah';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
@@ -20,7 +21,7 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
   try {
     const { body } = req;
     const payload = body.phone_number || body.email || req.user.phone_number;
-    const [ user ] = payload.startsWith('+') ? await UserService.getUserByPhoneNumber([ payload.trim() ]) : await UserService.getUserByEmail([ payload.trim().toLowerCase() ]);
+    const [ user ] = payload.startsWith('+') ? await processAnyData(userQueries.getUserByPhoneNumber, [ payload.trim() ]) : await processAnyData(userQueries.getUserByEmail, [ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched users details from the database validateUnAuthenticatedUser.middlewares.user.js`);
     if (user && user.is_verified_phone_number && user.is_created_password && type === 'validate') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account already exists in
@@ -70,7 +71,8 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
 export const validateRefreshToken = async (req, res, next) => {
   try {
     const { query: { refreshToken },  user } = req;
-    if (refreshToken !== user.refresh_token) {
+    const [ userRefreshToken ] = await processAnyData(userQueries.fetchUserRefreshToken, [ user.user_id ]);
+    if (refreshToken !== userRefreshToken.refresh_token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database validateRefreshToken.middlewares.user.js`);
       return ApiResponse.error(res, enums.INVALID_USER_REFRESH_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE);
     }
@@ -145,7 +147,7 @@ export const isVerifiedBvn = (type = '') => async(req, res, next) => {
 export const isBvnPreviouslyExisting = async(req, res, next) => {
   try {
     const { body, user } = req;
-    const allExistingBvns = await UserService.fetchAllExistingBvns();
+    const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvns, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing bvns isBvnPreviouslyExisting.middlewares.user.js`);
     const plainBvns = [];
     const decryptBvns = allExistingBvns.forEach(async(data) => {
@@ -259,7 +261,7 @@ export const isEmailVerified = (type = 'authenticate') => async(req, res, next) 
 export const checkIfMaximumDebitCardsSaved = async(req, res, next) => {
   try {
     const { user } = req;
-    const [ existingCardsCount ] = await UserService.checkMaximumExistingCardsCounts([ user.user_id ]);
+    const [ existingCardsCount ] = await processAnyData(userQueries.checkMaximumExistingCardsCounts, [ user.user_id ]);
     if (Number(existingCardsCount.count) >= 2) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to two debit cards saved checkIfMaximumDebitCardsSaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 26, 'fail');
@@ -286,7 +288,7 @@ export const checkIfMaximumDebitCardsSaved = async(req, res, next) => {
 export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
   try {
     const { user } = req;
-    const [ existingAccountsCount ] = await UserService.checkMaximumExistingAccountCounts([ user.user_id ]);
+    const [ existingAccountsCount ] = await processAnyData(userQueries.checkMaximumExistingAccountCounts, [ user.user_id ]);
     if (Number(existingAccountsCount.count) >= 3) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved checkIfMaximumBankAccountsSaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 27, 'fail');
@@ -313,7 +315,7 @@ export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
 export const checkAccountPreviouslySaved = async(req, res, next) => {
   try {
     const { user, body: { account_number, bank_code } } = req;
-    const [ existingAccount ] = await UserService.checkIfAccountExisting([ user.user_id, account_number.trim(), bank_code.trim() ]);
+    const [ existingAccount ] = await processAnyData(userQueries.checkIfAccountExisting, [ user.user_id, account_number.trim(), bank_code.trim() ]);
     if (existingAccount) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: account has already been saved by user in the DB checkAccountPreviouslySaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 27, 'fail');
@@ -431,7 +433,7 @@ export const checkUserLoanStatus = async(req, res, next) => {
 export const checkIfAccountDetailsExists = async(req, res, next) => {
   try {
     const { user, params: { id } } = req;
-    const [ accountIdExists ] = await UserService.fetchBankAccountDetailsById([ id ]);
+    const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id ]);
     if (!accountIdExists) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
       return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
@@ -494,7 +496,7 @@ export const checkAccountCurrentChoicesAndTypeSent = async(req, res, next) => {
 export const verifyEmailVerificationToken = async(req, res, next) => {
   try {
     const { query: { verifyValue } } = req;
-    const [ tokenUser ] = await AuthService.getUserByVerificationToken(verifyValue);
+    const [ tokenUser ] = await processAnyData(AuthQueries.getUserByVerificationToken, [ verifyValue ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct verification token is sent verifyEmailVerificationToken.middlewares.user.js`);
     if (!tokenUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: sent token is invalid verifyEmailVerificationToken.middlewares.user.js`);
@@ -572,7 +574,7 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
 export const checkIfCardOrUserExist = async (req, res, next) => {
   try {
     const { user, params: { id } } = req;
-    const userCard = await UserService.fetchCardsById([ id ]);
+    const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
       successfully fetched a user's card checkIfCardExist.admin.middlewares.user.js`);
     if (userCard === null) {

@@ -27,12 +27,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call processReferral', async() => {
-      const req = { body: '', registeredUser: '', referringUserDetails: '', otp: null };
-      const data = await AuthController.processReferral(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call resendSignupOtp', async() => {
       const req = { user: '', body: '', otp: null };
       const data = await AuthController.resendSignupOtp(req, res, next);

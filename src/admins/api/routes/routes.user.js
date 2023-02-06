@@ -10,7 +10,6 @@ const router = Router();
 
 router.patch(
   '/:user_id',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'update'),
   Model(Schema.userIdParams, 'params'),
@@ -23,7 +22,6 @@ router.patch(
 
 router.get(
   '/:user_id/profile',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.userIdParams, 'params'),
@@ -33,7 +31,6 @@ router.get(
 
 router.get(
   '/:user_id/account-information',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.userIdParams, 'params'),
@@ -43,7 +40,6 @@ router.get(
 
 router.post(
   '/:user_id/notification',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'create'),
   Model(Schema.userIdParams, 'params'),
@@ -54,7 +50,6 @@ router.post(
 
 router.get(
   '/all',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.fetchUsers, 'query'),
@@ -63,7 +58,6 @@ router.get(
 
 router.get(
   '/:user_id/kyc',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.userIdParams, 'params'),

@@ -6,6 +6,7 @@ export default {
     status = $2
   WHERE user_id = $1
   `,
+
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
@@ -78,12 +79,14 @@ export default {
         LIMIT $6
           
       `,
+
   fetchUsersCount: `
     SELECT COUNT(user_id) AS total_count
     FROM users
     WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
     ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `,
+  
   fetchUserKycDetails: `
     SELECT 
       users.user_id, 
