@@ -132,7 +132,7 @@ export const verifyAccount = async(req, res, next) => {
       password, pin, ...userData
     } = newUserDetails;
     userActivityTracking(user.user_id, 2, 'success');
-    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, { ...userData, token, tokenExpireAt });
+    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, { ...userData, refreshToken, token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 2, 'fail');
     error.label = enums.VERIFY_ACCOUNT_CONTROLLER;
