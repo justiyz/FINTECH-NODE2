@@ -202,6 +202,14 @@ export const deleteRole = async (req, res, next) => {
   }
 };
 
+/**
+   * fetch admin roles
+   * @param {Request} req - The request from the endpoint.
+   * @param {Response} res - The response returned by the method.
+   * @param {Next} next - Call the next operation.
+   * @memberof AdminRoleController
+   */
+
 export const fetchRoles = async (req, res, next) => {
   try {
     const { query, admin } = req;
@@ -221,6 +229,37 @@ export const fetchRoles = async (req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_ROLES;
     logger.error(`fetching roles in the DB failed:::${enums.FETCH_ROLES}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+   * fetch admins per role
+   * @param {Request} req - The request from the endpoint.
+   * @param {Response} res - The response returned by the method.
+   * @param {Next} next - Call the next operation.
+   * @memberof AdminRoleController
+   */
+
+export const fetchAdminsPerRole = async (req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const payload = RolePayload.fetchAdminsPerRole(query);
+    const [ admins, [ adminRoleCount ] ] = await Promise.all([
+      processAnyData(roleQueries.getAdminsPerRole, payload),
+      processAnyData(roleQueries.getAdminsPerRoleCount, payload)
+    ]);
+    const data = {
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(adminRoleCount.total_count),
+      total_pages: Helpers.calculatePages(Number(adminRoleCount.total_count), Number(req.query.per_page) || 10),
+      admins
+    };
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched admins per role from the DB fetchAdminsPerRole.admin.controllers.roles.js`);
+    return ApiResponse.success(res, enums.ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_ADMINS_PER_ROLE_CONTROLLER;
+    logger.error(`fetching admin per role in the DB failed:::${enums.FETCH_ADMINS_PER_ROLE_CONTROLLER}`, error.message);
     return next(error);
   }
 };

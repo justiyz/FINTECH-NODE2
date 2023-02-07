@@ -77,5 +77,11 @@ describe('', () => {
     expect(data.code).to.equal(500);
     expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
   });
+  it('should call fetchAdminsPerRole', async() => {
+    const req = { query: '', admin: '' };
+    const data = await AdminRolesController.fetchAdminsPerRole(req, res, next);
+    expect(data.code).to.equal(500);
+    expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+  });
 
 });

@@ -81,4 +81,12 @@ router.get(
   RolesController.fetchRoles
 );
 
+router.get(
+  '/fetch-admins',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('role management', 'read'),
+  Model(Schema.fetchAdminsPerRole, 'query'),
+  RolesController.fetchAdminsPerRole
+);
+
 export default router;
