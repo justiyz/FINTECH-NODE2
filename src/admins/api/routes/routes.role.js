@@ -34,7 +34,7 @@ router.get(
   '/:role_code/permissions',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.roleCodeParams, 'params'),
-  RoleMiddleware.adminAccess('role management ', 'read'),
+  RoleMiddleware.adminAccess('role management', 'read'),
   RoleMiddleware.validateRoleCode,
   RoleMiddleware.checkIfSuperAdminRole,
   RolesController.rolePermissions
