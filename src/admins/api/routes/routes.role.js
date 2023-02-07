@@ -9,7 +9,6 @@ const router = Router();
 
 router.post(
   '/',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.createRole, 'payload'),
   RoleMiddleware.adminAccess('role management', 'create'),
@@ -20,7 +19,6 @@ router.post(
 
 router.get(
   '/admin-resources',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'read'),
   RolesController.adminPermissionResources
@@ -28,14 +26,12 @@ router.get(
 
 router.get(
   '/regular-admins',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RolesController.nonSuperAdminRoles
 );
 
 router.get(
   '/:role_code/permissions',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.roleCodeParams, 'params'),
   RoleMiddleware.adminAccess('role management ', 'read'),
@@ -46,7 +42,6 @@ router.get(
 
 router.put(
   '/:role_code',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.editRole, 'payload'),
   RoleMiddleware.adminAccess('role management', 'update'),
@@ -58,7 +53,6 @@ router.put(
 
 router.patch(
   '/:role_code/status',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.activateDeactivateRole, 'query'),
   Model(Schema.roleCodeParams, 'params'),
@@ -71,7 +65,6 @@ router.patch(
 
 router.delete(
   '/:role_code',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'delete'),
   Model(Schema.roleCodeParams, 'params'),
@@ -82,7 +75,6 @@ router.delete(
 
 router.get(
   '/fetch-roles',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'read'),
   Model(Schema.fetchRoles, 'query'),

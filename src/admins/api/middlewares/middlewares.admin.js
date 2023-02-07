@@ -1,4 +1,5 @@
-import * as AdminService from '../services/services.admin';
+import adminQueries from '../queries/queries.admin';
+import { processAnyData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 
@@ -12,7 +13,7 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
   try {
     const { body } = req;
     const payload = body.email || req.admin.email;
-    const [ admin ] = await AdminService.getAdminByEmail([ payload.trim().toLowerCase() ]);
+    const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched admin details from the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
     if (!admin && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that admin's email is not existing in the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
@@ -44,7 +45,7 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
 export const checkIfAdminExists = async(req, res, next) => {
   try {
     const { params: { admin_id } } = req;
-    const [ adminUser ] = await AdminService.getAdminByAdminId([ admin_id ]);
+    const [ adminUser ] = await processAnyData(adminQueries.getAdminByAdminId, [ admin_id ]);
     if (adminUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
       successfully confirms that admin being queries exists in the DB checkIfAdminExists.admin.middlewares.auth.js`);
@@ -119,7 +120,7 @@ export const checkIfAuthenticatedAdmin = async(req, res, next) => {
  */
 export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
   try {
-    const [ adminEmail ] = await AdminService.getAdminByEmail(req.body.email.trim().toLowerCase());
+    const [ adminEmail ] = await processAnyData(adminQueries.getAdminByEmail, [ req.body.email.trim().toLowerCase() ]);
     if (!adminEmail) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
       successfully confirms that admin's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.admin.js`);

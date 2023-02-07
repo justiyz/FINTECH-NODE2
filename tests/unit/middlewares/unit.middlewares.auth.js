@@ -21,12 +21,6 @@ describe('', () => {
   });
 
   describe('Auth middleware catch block unit testings', () => {
-    it('should call generateVerificationToken', async() => {
-      const req = null;
-      const data = await AuthMiddleware.generateVerificationToken('otp')(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call generateReferralCode', async() => {
       const req = {};
       const data = await AuthMiddleware.generateReferralCode(req, res, next);
@@ -42,18 +36,6 @@ describe('', () => {
     it('should call verifyVerificationToken', async() => {
       const req = { body: '' };
       const data = await AuthMiddleware.verifyVerificationToken(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call generateTokens', async() => {
-      const req = { user: null };
-      const data = await AuthMiddleware.generateTokens(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call getAuthToken', async() => {
-      const req = { headers: '' };
-      const data = await AuthMiddleware.getAuthToken(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
@@ -84,18 +66,6 @@ describe('', () => {
     it('should call checkIfEmailAlreadyExist', async() => {
       const req = { user: '', body: '' };
       const data = await AuthMiddleware.checkIfEmailAlreadyExist(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call generateResetPasswordToken', async() => {
-      const req = { user: '' };
-      const data = await AuthMiddleware.generateResetPasswordToken(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call generateResetPasswordToken', async() => {
-      const req = { user: '', body: '' };
-      const data = await AuthMiddleware.generateResetPasswordToken(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

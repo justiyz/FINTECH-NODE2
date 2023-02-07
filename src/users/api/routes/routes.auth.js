@@ -12,16 +12,13 @@ router.post(
   Model(Schema.signup, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('validate'),
   AuthMiddleware.checkIfReferralCodeExists,
-  AuthMiddleware.generateVerificationToken('otp'),
-  AuthController.signup,
-  AuthController.processReferral
+  AuthController.signup
 );
 
 router.post(
   '/resend-signup-otp',
   Model(Schema.resendPhoneNumberVerificationOTP, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('authenticate'),
-  AuthMiddleware.generateVerificationToken('otp'),
   AuthController.resendSignupOtp
 );
 
@@ -31,13 +28,11 @@ router.post(
   AuthMiddleware.verifyVerificationToken,
   UserMiddleware.validateUnAuthenticatedUser('authenticate'),
   AuthMiddleware.generateReferralCode,
-  AuthMiddleware.generateTokens,
   AuthController.verifyAccount
 );
 
 router.post(
   '/complete-profile',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.completeProfile, 'payload'),
   AuthMiddleware.isCompletedKyc('complete'),
@@ -51,7 +46,6 @@ router.post(
   Model(Schema.login, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('login'),
   AuthMiddleware.comparePassword,
-  AuthMiddleware.generateTokens,
   AuthController.login
 );
 
@@ -59,7 +53,6 @@ router.post(
   '/forgot-password',
   Model(Schema.forgotPassword, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
-  AuthMiddleware.generateVerificationToken('otp'),
   AuthController.forgotPassword
 );
 
@@ -67,21 +60,18 @@ router.post(
   '/verify-reset-token',
   Model(Schema.verifyOtp, 'payload'),
   AuthMiddleware.verifyVerificationToken,
-  AuthMiddleware.generateResetPasswordToken,
   AuthController.resetPasswordToken
 );
 
 router.post(
   '/reset-password',
   Model(Schema.password, 'payload'),
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateForgotPasswordToken,
   AuthController.resetPassword
 );
 
 router.patch(
   '/password',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.changePassword, 'payload'),
   AuthMiddleware.isPasswordCreated('confirm'),
@@ -92,7 +82,6 @@ router.patch(
 
 router.post(
   '/pin',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.pin, 'payload'),
   AuthMiddleware.isPinCreated(),
@@ -101,7 +90,6 @@ router.post(
 
 router.patch(
   '/pin',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.changePin, 'payload'),
   AuthMiddleware.isPinCreated('confirm'),
@@ -112,7 +100,6 @@ router.patch(
 
 router.post(
   '/confirm-pin',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.pin, 'payload'),
   AuthMiddleware.comparePin,
@@ -121,7 +108,6 @@ router.post(
 
 router.post(
   '/confirm-password',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   Model(Schema.password, 'payload'),
   AuthMiddleware.comparePassword,

@@ -63,14 +63,3 @@ describe('Enum messages Tests', () => {
     expect(data).to.equal('Oooops! Something broke, kindly try later');
   });
 });
-
-describe('Enum queries Tests', () => {
-  it('AUTH_QUERY', () => {
-    const data = enums.AUTH_QUERY;
-    expect(data).to.equal('authQuery');
-  });
-  it('USER_QUERY', () => {
-    const data = enums.USER_QUERY;
-    expect(data).to.equal('userQuery');
-  });
-});

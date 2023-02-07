@@ -1,7 +1,7 @@
 import axios from 'axios';
-import config from '../config';
-import enums from '../lib/enums';
-import * as userMockedTestResponses from '../../../tests/response/response.user';
+import config from '../../config';
+import enums from '../../lib/enums';
+import * as userMockedTestResponses from '../../../../tests/response/response.user';
 
 const { SEEDFI_NODE_ENV } = config;
 

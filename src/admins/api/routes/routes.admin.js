@@ -11,7 +11,6 @@ const router = Router();
 
 router.post(
   '/complete-profile',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.adminCompleteProfile, 'payload'),
   AuthMiddleware.checkIfChangedDefaultPassword('verify'),
@@ -20,7 +19,6 @@ router.post(
 
 router.get(
   '/:admin_id/permissions',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.adminIdParams, 'params'),
   RolesMiddleware.adminAccess('administrators', 'read'),
@@ -31,7 +29,6 @@ router.get(
 
 router.put(
   '/:admin_id/permissions',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.editAdminPermissions, 'payload'),
   RolesMiddleware.adminAccess('administrators', 'update'),
@@ -46,7 +43,6 @@ router.put(
 
 router.post(
   '/invite-admin',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(RoleSchema.inviteAdmin, 'payload'),
   RolesMiddleware.adminAccess('administrators', 'create'),
@@ -59,7 +55,6 @@ router.post(
 
 router.get(
   '/',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('administrators', 'read'),
   Model(RoleSchema.fetchAdmins, 'query'),
@@ -68,7 +63,6 @@ router.get(
 
 router.patch(
   '/:admin_id',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   Model(RoleSchema.editAdminStatus, 'payload'),
   RolesMiddleware.adminAccess('administrators', 'update'),
@@ -79,7 +73,6 @@ router.patch(
 
 router.get(
   '/profile',
-  AuthMiddleware.getAdminAuthToken,
   AuthMiddleware.validateAdminAuthToken,
   AdminController.getProfile
 );

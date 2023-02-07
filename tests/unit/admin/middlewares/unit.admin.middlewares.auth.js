@@ -39,18 +39,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call generateAdminVerificationToken', async() => {
-      const req = null;
-      const data = await AdminAuthMiddleware.generateAdminVerificationToken(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call getAdminAuthToken', async() => {
-      const req = { headers: '' };
-      const data = await AdminAuthMiddleware.getAdminAuthToken(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call validateAdminAuthToken', async() => {
       const req = { token: '' };
       const data = await AdminAuthMiddleware.validateAdminAuthToken(req, res, next);
@@ -60,12 +48,6 @@ describe('', () => {
     it('should call checkIfChangedDefaultPassword', async() => {
       const req = { admin: '' };
       const data = await AdminAuthMiddleware.checkIfChangedDefaultPassword('validate')(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call generateAdminResetPasswordToken', async() => {
-      const req = { admin: '' };
-      const data = await AdminAuthMiddleware.generateAdminResetPasswordToken(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

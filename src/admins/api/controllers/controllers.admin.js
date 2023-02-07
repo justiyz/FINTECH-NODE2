@@ -1,6 +1,7 @@
-import * as AdminService from '../services/services.admin';
-import * as AuthService from '../services/services.auth';
-import * as RoleService from '../services/services.role';
+import adminQueries from '../queries/queries.admin';
+import authQueries from '../queries/queries.auth';
+import roleQueries from '../queries/queries.role';
+import { processAnyData } from '../services/services.db';
 import AdminPayload from '../../lib/payloads/lib.payload.admin';
 import MailService from '../services/services.email';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
@@ -8,7 +9,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import config from '../../../users/config/index';
-import * as fetchAdminServices from '../../externalServices/services.admin';
+import * as fetchAdminServices from '../services/services.admin';
 import { adminActivityTracking } from '../../lib/monitor';
 
 
@@ -31,7 +32,7 @@ export const completeAdminProfile = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin has not previously completed profile completeAdminProfile.admin.controllers.amin.js`);
     const payload = AdminPayload.completeAdminProfile(admin, body);
-    const [ updatedAdmin ] = await AdminService.updateAdminProfile(payload);
+    const [ updatedAdmin ] = await processAnyData(adminQueries.updateAdminProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin profile completed successfully completeAdminProfile.admin.controllers.admin.js`);
     adminActivityTracking(req.admin.admin_id, 7, 'success');
     return ApiResponse.success(res, enums.ADMIN_COMPLETE_PROFILE_SUCCESSFUL, enums.HTTP_OK, updatedAdmin);
@@ -54,10 +55,13 @@ export const completeAdminProfile = async(req, res, next) => {
 export const adminPermissions = async(req, res, next) => {
   try {
     const { admin, adminUser } = req;
-    const [ adminRole ] = await RoleService.fetchRole([ adminUser.role_type ]);
+    const [ adminRole ] = await processAnyData(roleQueries.fetchRole, [ adminUser.role_type ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched role type details adminPermissions.admin.controllers.amin.js`);
-    const adminResources = await RoleService.fetchAdminResources();
-    const [ rolePermissions, adminPermissions ] = await AuthService.fetchPermissions(adminUser.role_type, adminUser.admin_id);
+    const adminResources = await processAnyData(roleQueries.fetchAdminResources, [  ]);
+    const [ rolePermissions, adminPermissions ] = await Promise.all([
+      processAnyData(authQueries.fetchRolePermissions, adminUser.role_type),
+      processAnyData(authQueries.fetchAdminPermissions, adminUser.admin_id)
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched system resources and admin's role and personal permissions adminPermissions.admin.controllers.amin.js`);
     const fullRoleBasedResources = await Helpers.processRoleBasedPermissions(adminUser.admin_id, adminResources, rolePermissions);
     const fullAdminBasedResources = await Helpers.processAdminBasedPermissions(adminUser.role_type, adminResources, adminPermissions);
@@ -89,14 +93,14 @@ export const editAdminPermissions = async(req, res, next) => {
   try {
     const { admin, body, params: { admin_id } } = req;
     if(body.role_code) {
-      await AdminService.updateUserRoleType([ admin_id, body.role_code.trim().toUpperCase() ]);
+      await processAnyData(adminQueries.updateUserRoleType, [ admin_id, body.role_code.trim().toUpperCase() ]);
     }
     if (body.permissions) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role permissions is being edited editAdminPermissions.admin.controllers.admin.js`);
       const editAdminPermissions = await body.permissions.map(async(permission) => {
-        const [ resourcePermissionExists ] = await AdminService.checkIfResourcePermissionCreated([ admin_id,  permission.resource_id ]);
-        !resourcePermissionExists ? await AdminService.createAdminUserPermissions([ admin_id,  permission.resource_id, permission.user_permissions.join() ]) :
-          await AdminService.editAdminUserPermissions([ admin_id,  permission.resource_id, permission.user_permissions.join() ]);
+        const [ resourcePermissionExists ] = await processAnyData(adminQueries.checkIfResourcePermissionCreated, [ admin_id,  permission.resource_id ]);
+        !resourcePermissionExists ? await processAnyData(adminQueries.createAdminUserPermissions, [ admin_id,  permission.resource_id, permission.user_permissions.join() ]) :
+          await processAnyData(adminQueries.editAdminUserPermissions, [ admin_id,  permission.resource_id, permission.user_permissions.join() ]);
         return permission;
       });
       await Promise.all([ editAdminPermissions ]);
@@ -125,7 +129,7 @@ export const inviteAdmin = async(req, res, next) => {
     const password = Hash.generateRandomString(4);
     const hash = Hash.hashData(password);
     const payload = AdminPayload.addAdmin(req.body, hash);
-    const [ newAdmin ] = await AdminService.inviteAdmin(payload);
+    const [ newAdmin ] = await processAnyData(adminQueries.inviteAdmin, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully created inviteAdmin.controllers.admin.admin.js`);
     const data = {
       firstName: newAdmin.first_name,
@@ -187,7 +191,7 @@ export const editAdminStatus = async(req, res, next) => {
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     decoded that admin status is about to be edited editAdminStatus.admin.controllers.admin.js`);
-    await AdminService.editAdminStatus([ req.params.admin_id, req.body.status ]);
+    await processAnyData(adminQueries.editAdminStatus, [ req.params.admin_id, req.body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     successfully confirm that admin status has been edited. editAdminStatus.admin.controllers.admin.js`);
     return  ApiResponse.success(res, enums.EDIT_ADMIN_STATUS, enums.HTTP_OK);
@@ -211,7 +215,7 @@ export const getProfile = async(req, res, next) => {
     const { admin } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: Admin data info fetched. getProfile.controllers.admin.admin.js`);
     delete admin.refresh_token;
-    const [ adminRoleDetails ] = await RoleService.fetchRole([ admin.role_type ]);
+    const [ adminRoleDetails ] = await processAnyData(roleQueries.fetchRole, [ admin.role_type ]);
     return ApiResponse.success(res, enums.FETCH_ADMIN_PROFILE, enums.HTTP_OK, { ...admin, role_name: adminRoleDetails.name });
   } catch (error){
     error.label = enums.GET_PROFILE_CONTROLLER;

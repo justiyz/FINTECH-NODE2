@@ -6,12 +6,10 @@
     "src/users/config/express",
     "src/users/config/logger",
     "src/users/config/sms",
-    "src/users/externalServices",
+    "src/users/api/services",
     "src/users/lib/templates/**/*.js",
-    "src/users/api/services/services.email.js",
-    "src/admins/externalServices",
-    "src/admins/lib/templates/**/*.js",
-    "src/admins/api/services/services.email.js"
+    "src/admins/api/services",
+    "src/admins/lib/templates/**/*.js"
   ],
   "reporter": [
     "lcov",

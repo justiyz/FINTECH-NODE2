@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { admin } from '../../users/config/firebase/index';
-import config from '../../users/config';
+import { admin } from '../../../users/config/firebase/index';
+import config from '../../../users/config';
 
 export const sendPushNotification = async(user_id, content, fcm_token) => {
   try {

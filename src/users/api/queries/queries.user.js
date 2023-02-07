@@ -2,7 +2,7 @@ export default {
   getUserByPhoneNumber: `
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, password, pin, refresh_token, address, income_range,
+        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
         number_of_dependents, marital_status, loan_status, employment_type
       FROM users
       WHERE phone_number = $1`,
@@ -10,7 +10,7 @@ export default {
   getUserByUserId: `
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, password, pin, refresh_token, address, income_range,
+        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
         number_of_dependents, marital_status, loan_status, employment_type
       FROM users
       WHERE user_id = $1`,
@@ -18,7 +18,7 @@ export default {
   getUserByEmail: `
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, password, pin, refresh_token, address, income_range,
+        is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
         number_of_dependents, marital_status, loan_status, employment_type
       FROM users
       WHERE email = $1`,
@@ -28,6 +28,11 @@ export default {
       SET 
         updated_at = NOW(),
         fcm_token = $2
+      WHERE user_id = $1`,
+
+  fetchUserRefreshToken: `
+      SELECT refresh_token 
+      FROM users
       WHERE user_id = $1`,
 
   updateUserRefreshToken:`
@@ -183,9 +188,9 @@ export default {
       RETURNING id, user_id, account_number, account_name,is_default, is_disbursement_account`,
 
   fetchAllExistingBvns: `
-  SELECT bvn 
-  FROM users
-  WHERE bvn IS NOT NULL`,
+      SELECT bvn 
+      FROM users
+      WHERE bvn IS NOT NULL`,
 
   verifyEmail: `
       UPDATE users
@@ -196,6 +201,7 @@ export default {
         updated_at = NOW()
       WHERE user_id = $1
       `,
+
   updateIdVerification: `
      INSERT INTO user_national_id_details(
       user_id,
@@ -207,6 +213,7 @@ export default {
       expiry_date
     ) VALUES ($1, $2, $3, $4, $5, $6, $7)
      `,
+
   userIdVerification: `
     UPDATE users
     SET
@@ -235,6 +242,7 @@ export default {
      RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, address,
               income_range, number_of_dependents, marital_status, employment_type
   `,
+
   fetchCardsById:`
       SELECT id, user_id, card_type
       FROM user_debit_cards

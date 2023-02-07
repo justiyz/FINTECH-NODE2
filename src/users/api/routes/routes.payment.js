@@ -8,7 +8,6 @@ const router = Router();
 
 router.get(
   '/initiate-card-tokenization',
-  AuthMiddleware.getAuthToken,
   AuthMiddleware.validateAuthToken,
   UserMiddleware.checkIfMaximumDebitCardsSaved,
   PaymentController.initializeCardTokenizationPayment
