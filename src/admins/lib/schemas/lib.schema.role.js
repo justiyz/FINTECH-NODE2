@@ -62,7 +62,7 @@ const fetchAdminsPerRole = Joi.object().keys({
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
   status: Joi.string().optional().valid('active', 'deactivated'),
-  role_type: Joi.string().optional(),
+  role_type: Joi.string().required(),
   from_date: Joi.date().optional(),
   to_date: Joi.date().optional()
 });

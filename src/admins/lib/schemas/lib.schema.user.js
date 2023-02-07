@@ -13,7 +13,7 @@ const fetchUsers = Joi.object().keys({
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
   status: Joi.string().optional().valid('active', 'deactivated'),
-  loan_status: Joi.string().optional().valid('active', 'inactive', 'overdue'),
+  loan_status: Joi.string().optional().valid('active', 'inactive', 'over due'),
   from_date: Joi.date().optional(),
   to_date: Joi.date().optional()
 });
