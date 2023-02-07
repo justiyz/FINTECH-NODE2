@@ -1720,7 +1720,7 @@ describe('User', () => {
     });
   });
   describe('Change pin', () => {
-    it('Should return error if sent string', (done) => {
+    it('Should flag if character is greater or less than four', (done) => {
       chai.request(app)
         .patch('/api/v1/auth/pin')
         .set({
@@ -1728,14 +1728,14 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          oldPin: 'popo',
-          newPin: 'popo'
+          oldPin: '0908',
+          newPin: '09554'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('oldPin must be a number');
+          expect(res.body.message).to.equal('newPin length must be 4 characters long');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

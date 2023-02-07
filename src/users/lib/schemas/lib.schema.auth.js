@@ -57,12 +57,12 @@ const changePassword = Joi.object().keys({
 });
 
 const pin = Joi.object().keys({
-  pin: Joi.number().integer().min(4).required()
+  pin: Joi.string().length(4).required()
 });
 
 const changePin = Joi.object().keys({
-  oldPin: Joi.number().integer().min(4).required(),
-  newPin: Joi.number().integer().min(4).required()
+  oldPin: Joi.string().length(4).required(),
+  newPin: Joi.string().length(4).required()
 });
  
 export default {

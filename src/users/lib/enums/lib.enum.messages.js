@@ -35,6 +35,7 @@ export const USER_MIDDLE_NAME_NOT_MATCHING_BVN_NAME = 'User\'s middle name does 
 export const USER_GENDER_NOT_MATCHING_BVN_GENDER = 'User\'s gender does not match bvn gender';
 export const USER_DOB_NOT_MATCHING_BVN_DOB = 'User\'s date of birth does not match bvn date of birth';
 export const ALREADY_CREATED = (type) => `${type} already created`;
+export const USER_CREDENTIALS = (type) => `User ${type} have not been created.`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
 export const USER_LOGIN_SUCCESSFULLY = 'User logged in successfully';
 export const USER_PROFILE_COMPLETED = 'User profile completed successfully';

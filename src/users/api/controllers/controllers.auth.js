@@ -127,12 +127,8 @@ export const verifyAccount = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully verified users account in the database verifyAccount.controllers.auth.js`);
     const [ newUserDetails ] = await processAnyData(userQueries.getUserByPhoneNumber, [ user.phone_number ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database verifyAccount.controllers.auth.js`);
-    const {
-      // eslint-disable-next-line no-unused-vars
-      password, pin, ...userData
-    } = newUserDetails;
     userActivityTracking(user.user_id, 2, 'success');
-    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, { ...userData, token, tokenExpireAt });
+    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, { ...newUserDetails, refreshToken, token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 2, 'fail');
     error.label = enums.VERIFY_ACCOUNT_CONTROLLER;

@@ -36,7 +36,7 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.completeProfile, 'payload'),
   AuthMiddleware.isCompletedKyc('complete'),
-  AuthMiddleware.isPasswordCreated(),
+  AuthMiddleware.isPasswordCreated('validate'),
   AuthMiddleware.checkIfEmailAlreadyExist,
   AuthController.completeProfile
 );
@@ -84,7 +84,7 @@ router.post(
   '/pin',
   AuthMiddleware.validateAuthToken,
   Model(Schema.pin, 'payload'),
-  AuthMiddleware.isPinCreated(),
+  AuthMiddleware.isPinCreated('validate'),
   AuthController.createPin
 );
 
