@@ -118,6 +118,7 @@ export default {
 
   getAdminsPerRole: `
   SELECT 
+    admin_id,
     CONCAT(first_name, ' ', last_name) AS name,
     email,
     status,
