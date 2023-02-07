@@ -954,6 +954,9 @@ describe('Admin roles', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
+        .query({
+          role_type: 'SADM'
+        })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
@@ -988,6 +991,7 @@ describe('Admin roles', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
+          role_type:'SADM',
           search: 'janet okoro'
         })
         .end((err, res) => {
@@ -1007,6 +1011,7 @@ describe('Admin roles', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
+          role_type:'SADM',
           status: 'active'
         })
         .end((err, res) => {
@@ -1026,6 +1031,7 @@ describe('Admin roles', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
+          role_type:'SADM',
           from_date: '2023-01-13 23:03:09.875717',
           to_date: '2023-01-14 23:03:09.875717'
         })
@@ -1046,6 +1052,7 @@ describe('Admin roles', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
+          role_type:'SADM',
           from_date: '2023-01-13 23:03:09.875717',
           to_date: '2023-01-14 23:03:09.875717',
           status: 'active'
