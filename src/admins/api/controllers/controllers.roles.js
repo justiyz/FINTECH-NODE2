@@ -218,13 +218,13 @@ export const fetchRoles = async (req, res, next) => {
       processAnyData(roleQueries.getAllRoles, payload),
       processAnyData(roleQueries.getRoleCount, payload)
     ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched roles from the DB fetchRoles.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(rolesCount.total_count),
       total_pages: Helpers.calculatePages(Number(rolesCount.total_count), Number(req.query.per_page) || 10),
       roles
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched roles from the DB fetchRoles.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_ROLES;
@@ -249,13 +249,15 @@ export const fetchAdminsPerRole = async (req, res, next) => {
       processAnyData(roleQueries.getAdminsPerRole, payload),
       processAnyData(roleQueries.getAdminsPerRoleCount, payload)
     ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info:
+     successfully fetched admins per role from the DB fetchAdminsPerRole.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(adminRoleCount.total_count),
       total_pages: Helpers.calculatePages(Number(adminRoleCount.total_count), Number(req.query.per_page) || 10),
       admins
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched admins per role from the DB fetchAdminsPerRole.admin.controllers.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully return admins per role from the DB fetchAdminsPerRole.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_ADMINS_PER_ROLE_CONTROLLER;
