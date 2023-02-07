@@ -50,6 +50,7 @@ export const userProfileDetails = async(req, res, next) => {
     const userReferrals = await processAnyData(userQueries.fetchUserReferrals, [ user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
     userDetails.bvn = userDetails.bvn === null ? null : await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
+    userDetails.bvn = userDetails.bvn.substr(0, userDetails.bvn.length - 4).padEnd(userDetails.bvn.length, '*');
     const data = {
       personalInformation: userDetails,
       referralCount: userReferrals.length,
