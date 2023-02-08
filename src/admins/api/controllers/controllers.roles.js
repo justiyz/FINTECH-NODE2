@@ -243,8 +243,8 @@ export const fetchRoles = async (req, res, next) => {
 
 export const fetchAdminsPerRole = async (req, res, next) => {
   try {
-    const { query, admin } = req;
-    const payload = RolePayload.fetchAdminsPerRole(query);
+    const { query, params, admin } = req;
+    const payload = RolePayload.fetchAdminsPerRole(query, params);
     const [ admins, [ adminRoleCount ] ] = await Promise.all([
       processAnyData(roleQueries.getAdminsPerRole, payload),
       processAnyData(roleQueries.getAdminsPerRoleCount, payload)

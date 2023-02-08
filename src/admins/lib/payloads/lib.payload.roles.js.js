@@ -8,8 +8,8 @@ export default {
     query.per_page ? query.per_page : '10'
   ],
 
-  fetchAdminsPerRole: (query) => [
-    query.role_type,
+  fetchAdminsPerRole: (query, params) => [
+    params.role_type,
     query.status,
     query.from_date,
     query.to_date,

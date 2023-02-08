@@ -82,7 +82,7 @@ router.get(
 );
 
 router.get(
-  '/fetch-admins',
+  '/fetch-admins/:role_type',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'read'),
   Model(Schema.fetchAdminsPerRole, 'query'),
