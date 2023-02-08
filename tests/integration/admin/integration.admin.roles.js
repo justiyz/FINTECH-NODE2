@@ -949,7 +949,7 @@ describe('Admin roles', () => {
   describe('Fetch admins per role', () => {
     it('Should fetch all admins per role', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/role/fetch-admins/SADM')
+        .get('/api/v1/admin/role/SADM/admins')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -965,7 +965,7 @@ describe('Admin roles', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/role/fetch-admins/SADM')
+        .get('/api/v1/admin/role/SADM/admins')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -982,7 +982,7 @@ describe('Admin roles', () => {
     });
     it('Should fetch admins per role by the admin name', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/role/fetch-admins/SADM')
+        .get('/api/v1/admin/role/SADM/admins')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1001,7 +1001,7 @@ describe('Admin roles', () => {
     });
     it('Should filter admins by the role status ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/role/fetch-admins/SADM')
+        .get('/api/v1/admin/role/SADM/admins')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1020,7 +1020,7 @@ describe('Admin roles', () => {
     });
     it('Should filter admins by the date their roles were created ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/role/fetch-admins/SADM')
+        .get('/api/v1/admin/role/SADM/admins')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1040,7 +1040,7 @@ describe('Admin roles', () => {
     });
     it('Should filter admins by the date the roles were created and status ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/role/fetch-admins/SADM')
+        .get('/api/v1/admin/role/SADM/admins')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
