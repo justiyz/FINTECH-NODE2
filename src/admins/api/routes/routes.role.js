@@ -85,6 +85,7 @@ router.get(
   '/:role_type/admins',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('role management', 'read'),
+  Model(Schema.roleType, 'params'),
   Model(Schema.fetchAdminsPerRole, 'query'),
   RolesController.fetchAdminsPerRole
 );

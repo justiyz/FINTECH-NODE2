@@ -66,6 +66,10 @@ const fetchAdminsPerRole = Joi.object().keys({
   to_date: Joi.date().optional()
 });
 
+const roleType = Joi.object().keys({
+  role_type: Joi.string().required()
+});
+
 export default {
   createRole,
   inviteAdmin,
@@ -75,5 +79,6 @@ export default {
   roleCodeParams,
   editRole,
   activateDeactivateRole,
-  fetchAdminsPerRole
+  fetchAdminsPerRole,
+  roleType
 };
