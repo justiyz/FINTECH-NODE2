@@ -51,7 +51,7 @@ export const userProfileDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
     if(userDetails?.bvn){
       const result = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
-      userDetails.bvn =  result?.slice(0, userDetails?.bvn.length - 4) + '****';
+      userDetails.bvn =  result?.slice(0, 7) + '****'; // return first 7 digits of the bvn
     }
     const data = {
       personalInformation: userDetails,
