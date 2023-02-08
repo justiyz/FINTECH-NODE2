@@ -34,7 +34,7 @@ router.get(
   '/:role_code/permissions',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.roleCodeParams, 'params'),
-  RoleMiddleware.adminAccess('role management ', 'read'),
+  RoleMiddleware.adminAccess('role management', 'read'),
   RoleMiddleware.validateRoleCode,
   RoleMiddleware.checkIfSuperAdminRole,
   RolesController.rolePermissions
@@ -79,6 +79,15 @@ router.get(
   RoleMiddleware.adminAccess('role management', 'read'),
   Model(Schema.fetchRoles, 'query'),
   RolesController.fetchRoles
+);
+
+router.get(
+  '/:role_type/admins',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('role management', 'read'),
+  Model(Schema.roleType, 'params'),
+  Model(Schema.fetchAdminsPerRole, 'query'),
+  RolesController.fetchAdminsPerRole
 );
 
 export default router;

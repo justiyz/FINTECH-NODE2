@@ -137,6 +137,7 @@ export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${statu
 export const USER_CURRENT_STATUS = (status) => `User status is already ${status} in the DB.`;
 export const FETCH_ADMIN_PROFILE = 'Admin profile fetched successfully';
 export const ROLES_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
+export const ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY = 'Admins per role fetched successfully';
 export const EDIT_USER_STATUS = 'User status successfully updated.';
 export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
 export const FETCH_USER_KYC_DETAILS = 'User kyc details fetched successfully';

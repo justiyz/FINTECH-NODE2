@@ -497,6 +497,71 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should filter users by the loan status', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          loan_status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('users');
+          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter users by the loan status with pages', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          loan_status: 'active',
+          page: '1',
+          per_page: '2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .query({
+          loan_status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should filter users by the date they were created ', (done) => {
       chai.request(app)
         .get('/api/v1/admin/user/all')
