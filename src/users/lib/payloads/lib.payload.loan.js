@@ -30,25 +30,26 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
   'User has bad credit bureaus record' // to be changed to what underwriting service returns
 ];
 
-const processManualLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount) => [
+const processLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount, status) => [
   data.loan_application_id,
-  parseFloat(totalRepaymentAmount),
-  parseFloat(totalInterestAmount),
+  parseFloat(totalRepaymentAmount).toFixed(2),
+  parseFloat(totalInterestAmount).toFixed(2),
   data.orr_score,
   data.pricing_band,
-  data.processing_fee_percentage * 100,
-  data.insurance_fee_percentage * 100,
-  data.advisory_fee_percentage * 100,
-  parseFloat(data.monthly_interest),
-  parseFloat(data.fees.processing_fee),
-  parseFloat(data.fees.insurance_fee),
-  parseFloat(data.fees.advisory_fee),
-  parseFloat(data.monthly_repayment),
-  'pending',
+  data.fees.processing_fee_percentage * 100,
+  data.fees.insurance_fee_percentage * 100,
+  data.fees.advisory_fee_percentage * 100,
+  parseFloat(data.monthly_interest).toFixed(2),
+  parseFloat(data.fees.processing_fee).toFixed(2),
+  parseFloat(data.fees.insurance_fee).toFixed(2),
+  parseFloat(data.fees.advisory_fee).toFixed(2),
+  parseFloat(data.monthly_repayment).toFixed(2),
+  status,
   data.final_decision
 ];
 
-const loanApplicationManualDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount) => ({
+const loanApplicationApprovalDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount, user, loan_status, loan_decision) => ({
+  user_id: user.user_id,
   loan_id: data.loan_application_id,
   loan_amount: `₦${parseFloat(data.loan_amount)}`,
   loan_duration_in_months: `${Number(data.loan_duration_in_month)}`,
@@ -61,50 +62,13 @@ const loanApplicationManualDecisionResponse = async(data, totalRepaymentAmount, 
   total_repayment: `₦${parseFloat(totalRepaymentAmount).toFixed(2)}`,
   monthly_payment: `₦${parseFloat(data.monthly_repayment)}`,
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
-  loan_status: 'pending',
-  loan_decision: 'MANUAL'
-});
-
-const processApprovedLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount) => [
-  data.loan_application_id,
-  parseFloat(totalRepaymentAmount),
-  parseFloat(totalInterestAmount),
-  data.orr_score,
-  data.pricing_band,
-  data.processing_fee_percentage * 100,
-  data.insurance_fee_percentage * 100,
-  data.advisory_fee_percentage * 100,
-  parseFloat(data.monthly_interest),
-  parseFloat(data.fees.processing_fee),
-  parseFloat(data.fees.insurance_fee),
-  parseFloat(data.fees.advisory_fee),
-  parseFloat(data.monthly_repayment),
-  'approved',
-  data.final_decision
-];
-
-const loanApplicationApprovedDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount) => ({
-  loan_id: data.loan_application_id,
-  loan_amount: `₦${parseFloat(data.loan_amount)}`,
-  loan_duration_in_months: `${Number(data.loan_duration_in_month)}`,
-  total_interest: `₦${parseFloat(totalInterestAmount).toFixed(2)}`,
-  fees: {
-    processing_fee: `₦${parseFloat(data.fees.processing_fee)}`,
-    insurance_fee: `₦${parseFloat(data.fees.insurance_fee)}`,
-    advisory_fee: `₦${parseFloat(data.fees.advisory_fee)}`
-  },
-  total_repayment: `₦${parseFloat(totalRepaymentAmount).toFixed(2)}`,
-  monthly_payment: `₦${parseFloat(data.monthly_repayment)}`,
-  next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
-  loan_status: 'approved',
-  loan_decision: 'APPROVED'
+  loan_status,
+  loan_decision
 });
 
 export default { 
   checkUserEligibility, 
   processDeclinedLoanDecisionUpdatePayload,
-  processManualLoanDecisionUpdatePayload,
-  loanApplicationManualDecisionResponse,
-  processApprovedLoanDecisionUpdatePayload,
-  loanApplicationApprovedDecisionResponse
+  processLoanDecisionUpdatePayload,
+  loanApplicationApprovalDecisionResponse
 };

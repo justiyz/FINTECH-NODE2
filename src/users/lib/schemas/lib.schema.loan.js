@@ -6,6 +6,16 @@ const loanApplication = Joi.object().keys({
   loan_reason: Joi.string().required()
 });
 
+const loanIdParams = Joi.object().keys({
+  loan_id: Joi.string().required()
+});
+
+const loanDisbursementPayload = Joi.object().keys({
+  pin: Joi.string().length(4).required()
+});
+
 export default  {
-  loanApplication
+  loanApplication,
+  loanIdParams,
+  loanDisbursementPayload
 }; 

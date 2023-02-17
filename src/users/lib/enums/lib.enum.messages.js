@@ -92,9 +92,16 @@ export const CHANGE_PASSWORD = 'Password changed successful';
 export const CREATE_PIN = 'Successfully create pin for user';
 export const CHANGE_PIN = 'Pin changed successfully.';
 export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfully.`;
+export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account to default to proceed';
+export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const LOAN_APPLICATION_DECLINED_DECISION = 'User loan application decline due to ineligibility, kindly try again some other time';
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
+export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still awaits approval, disbursement cannot be made';
+export const LOAN_APPLICATION_REJECTED = 'loan application rejected, disbursement cannot be made';
+export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application status is ${type}, disbursement cannot be made again`;
+export const LOAN_APPLICATION_DISBURSEMENT_SUCCESSFUL = 'User loan application disbursement successful';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
@@ -134,8 +141,8 @@ export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
 export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
-export const USER_PROFILE_PREVIOUSLY_COMPLETED = 'User profile already completed';
-export const ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE = 'Kindly login to SeedFi app to complete profile and enjoy great benefits';
+export const USER_PROFILE_PREVIOUSLY_COMPLETED = 'User profile all completed';
+export const ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE = 'Kindly login to SeedFi app to complete your profile, verify your bvn and upload valid id to enjoy great benefits, you can ignore this if you have done all of this';
 export const NOTIFICATION_SENT_TO_USER_SUCCESSFULLY = 'Notification sent to user successfully';
 export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;
 export const USER_CURRENT_STATUS = (status) => `User status is already ${status} in the DB.`;

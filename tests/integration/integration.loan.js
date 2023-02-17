@@ -8,6 +8,8 @@ import enums from '../../src/users/lib/enums';
 const { expect } = chai;
 chai.use(chaiHttp);
 
+const pin = '0908';
+
 describe('User', () => {
   describe('user apply for loan', () => {
     it('should throw error when loan duration is not sent', (done) => {
@@ -244,6 +246,70 @@ describe('User', () => {
           expect(res.body.data).to.have.property('fees');
           expect(res.body.data.loan_duration_in_months).to.equal('3');
           expect(res.body.message).to.equal(res.body.data.loan_decision === 'MANUAL' ? enums.LOAN_APPLICATION_MANUAL_DECISION : enums.LOAN_APPLICATION_APPROVED_DECISION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID = res.body.data.loan_id;
+          done();
+        });
+    });
+  });
+  describe('user request for disbursement of loan', () => {
+    it('should throw error when invalid loan id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}90ij/disbursement`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          pin
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if invalid pin is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/disbursement`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '1234'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.INVALID_PIN);
+          done();
+        });
+    });
+    it('should disburse loan for user two successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/disbursement`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          pin
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loan_decision');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.data.status).to.equal('ongoing');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_DISBURSEMENT_SUCCESSFUL);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
