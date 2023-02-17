@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import enums from '../../../src/users/lib/enums';
-import * as LoanController from '../../../src/users/api/controllers/controllers.loan';
+import * as LoanMiddleware from '../../../src/users/api/middlewares/middlewares.loan';
 
 describe('', () => {
   let status,
@@ -20,18 +20,19 @@ describe('', () => {
     next.returns(res);
   });
 
-  describe('Auth controller catch block unit testings', () => {
-    it('should call initializeCardTokenizationPayment', async() => {
-      const req = { user: '', body: '' };
-      const data = await LoanController.checkUserLoanEligibility(req, res, next);
+  describe('User middleware catch block unit testings', () => {
+    it('should call checkUserLoanApplicationExists', async() => {
+      const req = { params: '', user: '' };
+      const data = await LoanMiddleware.checkUserLoanApplicationExists(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call updateActivatedLoanApplicationDetails', async() => {
-      const req = { user: '', params: '', existingLoanApplication: '' };
-      const data = await LoanController.updateActivatedLoanApplicationDetails(req, res, next);
+    it('should call checkIfLoanApplicationStatusIsCurrentlyApproved', async() => {
+      const req = { user: '', existingLoanApplication: '' };
+      const data = await LoanMiddleware.checkIfLoanApplicationStatusIsCurrentlyApproved(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
   });
 });
+

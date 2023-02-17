@@ -6,6 +6,7 @@ import './unit/middlewares/unit.middlewares.auth';
 import './unit/middlewares/unit.middlewares.model';
 import './unit/middlewares/unit.middlewares.user';
 import './unit/middlewares/unit.middlewares.payment';
+import './unit/middlewares/unit.middlewares.loan';
 import './unit/controllers/unit.controllers.auth';
 import './unit/controllers/unit.controllers.user';
 import './unit/controllers/unit.controllers.payment';

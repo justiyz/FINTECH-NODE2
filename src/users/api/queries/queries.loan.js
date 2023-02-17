@@ -53,5 +53,54 @@ export default {
         monthly_repayment = $13,
         status = $14,
         loan_decision = $15
-    WHERE loan_id = $1`
+    WHERE loan_id = $1`,
+
+  fetchUserLoanDetailsByLoanId: `
+    SELECT 
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_reason,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      total_interest_amount,
+      percentage_orr_score,
+      percentage_pricing_band,
+      monthly_interest,
+      processing_fee,
+      insurance_fee,
+      advisory_fee,
+      monthly_repayment,
+      status,
+      loan_decision,
+      is_loan_disbursed,
+      loan_disbursed_at
+    FROM personal_loans
+    WHERE loan_id = $1
+    AND user_id = $2`,
+
+  updateDisbursedLoanRepaymentSchedule: `
+    INSERT INTO personal_loan_payment_schedules(
+      loan_id, user_id, repayment_order, principal_payment, interest_payment, fees, 
+      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount, 
+      proposed_payment_date, payment_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+
+  updateActivatedLoanDetails: `
+    UPDATE personal_loans
+    SET
+      updated_at = NOW(),
+      status = 'ongoing',
+      is_loan_disbursed = true,
+      loan_disbursed_at = NOW()
+    WHERE loan_id = $1
+    RETURNING id, user_id, loan_id, status, loan_decision`,
+
+  updateUserLoanStatus: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      loan_status = 'active'
+    WHERE user_id = $1`
 };

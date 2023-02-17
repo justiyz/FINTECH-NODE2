@@ -1954,6 +1954,26 @@ describe('User', () => {
         });
     });
 
+    it('Should create user six pin.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '0908'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CREATE_PIN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+
     it('Should flag if user two already created pin.', (done) => {
       chai.request(app)
         .post('/api/v1/auth/pin')

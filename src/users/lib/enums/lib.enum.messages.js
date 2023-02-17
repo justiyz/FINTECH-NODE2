@@ -92,9 +92,16 @@ export const CHANGE_PASSWORD = 'Password changed successful';
 export const CREATE_PIN = 'Successfully create pin for user';
 export const CHANGE_PIN = 'Pin changed successfully.';
 export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfully.`;
+export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account to default to proceed';
+export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const LOAN_APPLICATION_DECLINED_DECISION = 'User loan application decline due to ineligibility, kindly try again some other time';
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
+export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still awaits approval, disbursement cannot be made';
+export const LOAN_APPLICATION_REJECTED = 'loan application rejected, disbursement cannot be made';
+export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application status is ${type}, disbursement cannot be made again`;
+export const LOAN_APPLICATION_DISBURSEMENT_SUCCESSFUL = 'User loan application disbursement successful';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
