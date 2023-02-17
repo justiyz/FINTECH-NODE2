@@ -83,3 +83,31 @@ export const requestVerifyEmail = (data) => `
       </td>
     </tr>`;
 
+export const rejectedDebitCard = (data) => `
+    <tr>
+        <td style="padding-bottom: 20px">
+          <span>
+            <span>Hi ${data.first_name},</span> <br />
+          </span>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding-bottom: 20px">
+           <span>
+              Thanks for inserting your card details on SeedFi.<br />
+              The card will expire in three months time, hence, it has been rejected. Kindly insert a card that will not 
+              expire in three months time. </span>  
+        </td>
+    </tr>
+  
+    <tr>
+      <td>
+        <span style="line-height: 40px">Thanks</span> <br />
+        <span style="line-height: 40px">Yours Credibly</span> <br />
+        <span style="font-weight: 600; display: block;">SeedFi</span>
+        <span style="display: block;">Email: ask@seedfi.com</span>
+        <span style="display: block;">Call: +234 814 650 7035</span>
+      </td>
+    </tr>`;
+

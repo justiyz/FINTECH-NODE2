@@ -5,6 +5,7 @@ const getTemplate = (type, data) => {
   case 'forgotPassword': return authEmail.forgotPassword(data);
   case 'verifyEmail': return authEmail.verifyEmail(data);
   case 'requestVerifyEmail': return authEmail.requestVerifyEmail(data);
+  case 'rejectedDebitCard': return authEmail.rejectedDebitCard(data);
   default: return '';
   }
 };
