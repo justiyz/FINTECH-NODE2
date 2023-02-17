@@ -3,6 +3,7 @@ import UserPayload from '../../../admins/lib/payloads/lib.payload.user';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
+import MailService from '../services/services.email';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { sendPushNotification } from '../services/services.firebase';
 import { adminActivityTracking } from '../../lib/monitor';
@@ -79,12 +80,15 @@ export const sendNotifications = async (req, res, next) => {
     const { admin, userDetails, query: { type } } = req;
     if (type === 'incomplete-profile') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: type ${type} is decoded sendNotifications.admin.controllers.user.js`);
-      if (userDetails.is_completed_kyc) {
+      if (userDetails.is_completed_kyc && userDetails.is_verified_bvn && userDetails.is_uploaded_identity_card && userDetails?.address && userDetails?.income_range && userDetails?.number_of_dependents && userDetails?.marital_status && userDetails?.employment_type) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile previously completed sendNotifications.admin.controllers.user.js`);
         return ApiResponse.error(res, enums.USER_PROFILE_PREVIOUSLY_COMPLETED, enums.HTTP_BAD_REQUEST, enums.SEND_NOTIFICATIONS_CONTROLLER);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile not  previously completed sendNotifications.admin.controllers.user.js`);
       await sendPushNotification(userDetails.user_id, enums.ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE, userDetails.fcm_token);
+      if (userDetails.email !== null) {
+        MailService('Kindly complete your kyc', 'completeKyc', { email: userDetails.email });
+      }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: push notification sent to user successfully sendNotifications.admin.controllers.user.js`);
     }
     return ApiResponse.success(res, enums.NOTIFICATION_SENT_TO_USER_SUCCESSFULLY, enums.HTTP_OK);

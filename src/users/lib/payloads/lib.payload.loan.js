@@ -48,24 +48,6 @@ const processManualLoanDecisionUpdatePayload = (data, totalRepaymentAmount, tota
   data.final_decision
 ];
 
-const loanApplicationManualDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount, user) => ({
-  user_id: user.user_id,
-  loan_id: data.loan_application_id,
-  loan_amount: `₦${parseFloat(data.loan_amount)}`,
-  loan_duration_in_months: `${Number(data.loan_duration_in_month)}`,
-  total_interest: `₦${parseFloat(totalInterestAmount).toFixed(2)}`,
-  fees: {
-    processing_fee: `₦${parseFloat(data.fees.processing_fee)}`,
-    insurance_fee: `₦${parseFloat(data.fees.insurance_fee)}`,
-    advisory_fee: `₦${parseFloat(data.fees.advisory_fee)}`
-  },
-  total_repayment: `₦${parseFloat(totalRepaymentAmount).toFixed(2)}`,
-  monthly_payment: `₦${parseFloat(data.monthly_repayment)}`,
-  next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
-  loan_status: 'pending',
-  loan_decision: 'MANUAL'
-});
-
 const processApprovedLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount) => [
   data.loan_application_id,
   parseFloat(totalRepaymentAmount).toFixed(2),
@@ -84,7 +66,7 @@ const processApprovedLoanDecisionUpdatePayload = (data, totalRepaymentAmount, to
   data.final_decision
 ];
 
-const loanApplicationApprovedDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount, user) => ({
+const loanApplicationApprovalDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount, user, loan_status, loan_decision) => ({
   user_id: user.user_id,
   loan_id: data.loan_application_id,
   loan_amount: `₦${parseFloat(data.loan_amount)}`,
@@ -98,15 +80,14 @@ const loanApplicationApprovedDecisionResponse = async(data, totalRepaymentAmount
   total_repayment: `₦${parseFloat(totalRepaymentAmount).toFixed(2)}`,
   monthly_payment: `₦${parseFloat(data.monthly_repayment)}`,
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
-  loan_status: 'approved',
-  loan_decision: 'APPROVED'
+  loan_status,
+  loan_decision
 });
 
 export default { 
   checkUserEligibility, 
   processDeclinedLoanDecisionUpdatePayload,
   processManualLoanDecisionUpdatePayload,
-  loanApplicationManualDecisionResponse,
   processApprovedLoanDecisionUpdatePayload,
-  loanApplicationApprovedDecisionResponse
+  loanApplicationApprovalDecisionResponse
 };

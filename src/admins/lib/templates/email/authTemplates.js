@@ -71,6 +71,7 @@ export const forgotPassword = (data) => `
           <span style="display: block;">Call: +234 814 650 7035</span>
         </td>
     </tr>`;
+    
 export const  adminInviteMail = (data) => `<tr>
     <td style="padding: 10px 0;">
       <p style="font-weight: 500; font-size: 14px; line-height: 160%; color: #4F4F4F;">

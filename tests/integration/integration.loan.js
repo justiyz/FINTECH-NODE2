@@ -291,7 +291,7 @@ describe('User', () => {
           done();
         });
     });
-    it('should disburse loan for user twosuccessfully', (done) => {
+    it('should disburse loan for user two successfully', (done) => {
       chai.request(app)
         .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/disbursement`)
         .set({

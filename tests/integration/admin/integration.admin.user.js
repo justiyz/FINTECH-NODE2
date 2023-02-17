@@ -874,7 +874,7 @@ describe('Admin Users management', () => {
     });
     it('Should throw error if user already completed profile', (done) => {
       chai.request(app)
-        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/notification`)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}/notification`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

@@ -44,7 +44,7 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
     let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(postOutstandingLoanAmount))).toFixed(2);
     let nextPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(nextInterestPayment)).toFixed(2);
     let nextTotalPaymentAmount = parseFloat(parseFloat(nextPrincipalPayment) + parseFloat(nextInterestPayment) + parseFloat(subsequentFee)).toFixed(2);
-    preOutstandingLoanAmount = parseFloat(postOutstandingLoanAmount).toFixed(2),
+    preOutstandingLoanAmount = parseFloat(postOutstandingLoanAmount).toFixed(2);
     postOutstandingLoanAmount = parseFloat(parseFloat(preOutstandingLoanAmount) - parseFloat(nextPrincipalPayment)).toFixed(2);
     const nextRepaymentDetails = {
       loan_id: existingLoanApplication.loan_id,

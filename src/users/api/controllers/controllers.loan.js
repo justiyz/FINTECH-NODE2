@@ -50,14 +50,14 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval checkUserLoanEligibility.controllers.loan.js`);
       const manualDecisionPayload = LoanPayload.processManualLoanDecisionUpdatePayload(data, totalRepaymentAmount, totalInterestAmount);
       await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, manualDecisionPayload);
-      const returnData = await LoanPayload.loanApplicationManualDecisionResponse(data, totalRepaymentAmount, totalInterestAmount, user);
+      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalRepaymentAmount, totalInterestAmount, user, 'pending', 'MANUAL');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
     }
     if (data.final_decision === 'APPROVED') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
       const approvedDecisionPayload = LoanPayload.processApprovedLoanDecisionUpdatePayload(data, totalRepaymentAmount, totalInterestAmount);
       await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
-      const returnData = await LoanPayload.loanApplicationApprovedDecisionResponse(data, totalRepaymentAmount, totalInterestAmount, user);
+      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalRepaymentAmount, totalInterestAmount, user, 'approved', 'APPROVED');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
     }
   } catch (error) {
@@ -79,7 +79,7 @@ export const updateActivatedLoanApplicationDetails = async(req, res, next) => {
   try {
     const { user, params: { loan_id }, existingLoanApplication } = req;
     const repaymentSchedule = await generateLoanRepaymentSchedule(existingLoanApplication, user);
-    repaymentSchedule.map(async(schedule) => {
+    repaymentSchedule.forEach(async(schedule) => {
       await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule, [
         schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
         schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount, 
