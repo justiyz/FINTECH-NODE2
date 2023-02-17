@@ -87,6 +87,7 @@ export const CARD_SET_AS_DEFAULT_SUCCESSFULLY = 'Successfully sets card as defau
 export const CARD_CAN_NOT_BE_DELETED = 'Card can not be deleted';
 export const CARD_DOES_NOT_BELONG_TO_USER = 'Card does not belong to user';
 export const CARD_REMOVED_SUCCESSFULLY = 'Card removed successfully';
+export const DEBIT_CARD_REJECTED = 'Card has been rejected';
 export const VALIDATE_PASSWORD_OR_PIN = (type) => `Invalid ${type}`;
 export const CHANGE_PASSWORD = 'Password changed successful';
 export const CREATE_PIN = 'Successfully create pin for user';
@@ -145,3 +146,4 @@ export const ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY = 'Admins per role fetched su
 export const EDIT_USER_STATUS = 'User status successfully updated.';
 export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
 export const FETCH_USER_KYC_DETAILS = 'User kyc details fetched successfully';
+export const SEND_REJECTED_DEBIT_CARD_MESSAGE_SUCCESSFULLY = 'The debit card you inserted has been rejected, kindly insert a debit card that will not expire in 3 months time';
