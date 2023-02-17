@@ -30,7 +30,7 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
   'User has bad credit bureaus record' // to be changed to what underwriting service returns
 ];
 
-const processManualLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount) => [
+const processLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount, status) => [
   data.loan_application_id,
   parseFloat(totalRepaymentAmount).toFixed(2),
   parseFloat(totalInterestAmount).toFixed(2),
@@ -44,25 +44,7 @@ const processManualLoanDecisionUpdatePayload = (data, totalRepaymentAmount, tota
   parseFloat(data.fees.insurance_fee).toFixed(2),
   parseFloat(data.fees.advisory_fee).toFixed(2),
   parseFloat(data.monthly_repayment).toFixed(2),
-  'pending',
-  data.final_decision
-];
-
-const processApprovedLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount) => [
-  data.loan_application_id,
-  parseFloat(totalRepaymentAmount).toFixed(2),
-  parseFloat(totalInterestAmount).toFixed(2),
-  data.orr_score,
-  data.pricing_band,
-  data.fees.processing_fee_percentage * 100,
-  data.fees.insurance_fee_percentage * 100,
-  data.fees.advisory_fee_percentage * 100,
-  parseFloat(data.monthly_interest).toFixed(2),
-  parseFloat(data.fees.processing_fee).toFixed(2),
-  parseFloat(data.fees.insurance_fee).toFixed(2),
-  parseFloat(data.fees.advisory_fee).toFixed(2),
-  parseFloat(data.monthly_repayment).toFixed(2),
-  'approved',
+  status,
   data.final_decision
 ];
 
@@ -87,7 +69,6 @@ const loanApplicationApprovalDecisionResponse = async(data, totalRepaymentAmount
 export default { 
   checkUserEligibility, 
   processDeclinedLoanDecisionUpdatePayload,
-  processManualLoanDecisionUpdatePayload,
-  processApprovedLoanDecisionUpdatePayload,
+  processLoanDecisionUpdatePayload,
   loanApplicationApprovalDecisionResponse
 };

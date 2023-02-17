@@ -48,14 +48,14 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount);
     if (data.final_decision === 'MANUAL') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval checkUserLoanEligibility.controllers.loan.js`);
-      const manualDecisionPayload = LoanPayload.processManualLoanDecisionUpdatePayload(data, totalRepaymentAmount, totalInterestAmount);
+      const manualDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalRepaymentAmount, totalInterestAmount, 'pending');
       await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, manualDecisionPayload);
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalRepaymentAmount, totalInterestAmount, user, 'pending', 'MANUAL');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
     }
     if (data.final_decision === 'APPROVED') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
-      const approvedDecisionPayload = LoanPayload.processApprovedLoanDecisionUpdatePayload(data, totalRepaymentAmount, totalInterestAmount);
+      const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalRepaymentAmount, totalInterestAmount, 'approved');
       await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalRepaymentAmount, totalInterestAmount, user, 'approved', 'APPROVED');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
