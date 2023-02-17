@@ -58,6 +58,7 @@ export const ACCOUNT_DETAILS_PREVIOUSLY_SAVED = 'Account details previously save
 export const BANK_ACCOUNTS_LIMITS_REACHED = 'User cannot save more than 3 bank accounts';
 export const DEBIT_CARDS_LIMITS_REACHED = 'User cannot save more than 2 debit cards';
 export const USER_IS_ON_AN_ACTIVE_LOAN = 'User is on an active loan, action cannot be performed';
+export const USER_ADVANCED_KYC_NOT_COMPLETED = (type) => `kindly update you ${type} in profile to continue application`;
 export const ACCOUNT_DETAILS_NOT_EXISTING = 'Account details does not exist';
 export const ACCOUNT_ALREADY_DEFAULT_ACCOUNT = 'Account is already default account';
 export const ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT = 'Account is already disbursement account';
@@ -73,9 +74,10 @@ export const BANK_ACCOUNT_DELETED_SUCCESSFULLY = 'Bank account deleted successfu
 export const REQUEST_EMAIL_VERIFICATION = 'Email verification link sent Successfully to user email.';
 export const VERIFY_EMAIL = 'Email verified successfully.';
 export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
-export const EMAIL_NOT_VERIFIED = 'User email not verified';
+export const EMAIL_NOT_VERIFIED = 'User email not verified, kindly verify email to continue';
 export const  ID_UPLOAD_VERIFICATION = 'User id successfully verified';
 export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly contact support team if you want to update id.';
+export const USER_VALID_ID_NOT_UPLOADED = 'User valid id not uploaded yet, kindly do this to continue.';
 export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 export const FETCH_USER_PROFILE = 'User profile fetched successfully';
@@ -85,12 +87,14 @@ export const CARD_SET_AS_DEFAULT_SUCCESSFULLY = 'Successfully sets card as defau
 export const CARD_CAN_NOT_BE_DELETED = 'Card can not be deleted';
 export const CARD_DOES_NOT_BELONG_TO_USER = 'Card does not belong to user';
 export const CARD_REMOVED_SUCCESSFULLY = 'Card removed successfully';
-
 export const VALIDATE_PASSWORD_OR_PIN = (type) => `Invalid ${type}`;
 export const CHANGE_PASSWORD = 'Password changed successful';
 export const CREATE_PIN = 'Successfully create pin for user';
 export const CHANGE_PIN = 'Pin changed successfully.';
 export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfully.`;
+export const LOAN_APPLICATION_DECLINED_DECISION = 'User loan application decline due to ineligibility, kindly try again some other time';
+export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
+export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

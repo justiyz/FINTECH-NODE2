@@ -382,7 +382,7 @@ export const resolveBankAccountNumberName = async(req, res, next) => {
     const { user, query, body } = req;
     const accountNumberChoice = query.account_number || body.account_number;
     const bankCodeChoice = query.bank_code || body.bank_code;
-    const data = await resolveAccount(accountNumberChoice.trim(), bankCodeChoice.trim());
+    const data = await resolveAccount(accountNumberChoice.trim(), bankCodeChoice.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolve response returned from paystack resolveBankAccountNumberName.middleware.user.js`);
     if (data.status === true && data.message.trim().toLowerCase() === 'account number resolved') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account number resolve successfully by paystack resolveBankAccountNumberName.middleware.user.js`);
@@ -515,23 +515,26 @@ export const verifyEmailVerificationToken = async(req, res, next) => {
 
 /**
  * check user id verification
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
+ * @param {string} type - a type to know which of the response to return
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isUploadedVerifiedId = async(req, res, next) => {
+export const isUploadedVerifiedId  = (type = '') => async(req, res, next) => {
   try {
-    if (req.user.is_uploaded_identity_card) {
+    if (req.user.is_uploaded_identity_card && type === 'complete') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      decoded that User Id is already verified in the DB. isUploadedVerifiedId.middlewares.user.js`);
-      return ApiResponse.error(res, enums.CHECK_USER_ID_VERIFICATION, enums.HTTP_BAD_REQUEST, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
+      decoded that User valid id has been uploaded to the DB. isUploadedVerifiedId.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CHECK_USER_ID_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
+    }
+    if (!req.user.is_uploaded_identity_card && type === 'confirm') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
+      decoded that User valid id ha not been uploaded yet to the DB. isUploadedVerifiedId.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_VALID_ID_NOT_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
     }
     return next();
   } catch (error) {
     error.label = enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE;
-    logger.error(`checking if user email is not already existing failed::${enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE}`, error.message);
+    logger.error(`checking if user valid id upload is or is not already existing failed::${enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
@@ -551,7 +554,7 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
     const { user, body } = req;
     if ( (user.is_verified_bvn) && (body.first_name ||  body.last_name || body.middle_name || body.date_of_birth || body.gender) ) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      successfully checked if BVN is verified checkIfBvnIsVerified.admin.middlewares.user.js`);
+      successfully checked if BVN is verified checkIfBvnIsVerified.middlewares.user.js`);
       return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, 400);
     }
     return next();
@@ -576,21 +579,61 @@ export const checkIfCardOrUserExist = async (req, res, next) => {
     const { user, params: { id } } = req;
     const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      successfully fetched a user's card checkIfCardExist.admin.middlewares.user.js`);
+      successfully fetched a user's card checkIfCardOrUserExist.middlewares.user.js`);
     if (userCard === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      successfully confirmed card does not exist in the DB checkIfCardExist.admin.middlewares.user.js`);
+      successfully confirmed card does not exist in the DB checkIfCardOrUserExist.middlewares.user.js`);
       return ApiResponse.error(res, enums.CARD_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
     }
     if ( user.user_id !== userCard.user_id ) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info:
-      successfully confirmed the card does not belong to user checkIfCardBelongsToTheUser.admin.middlewares.user.js`);
+      successfully confirmed the card does not belong to user checkIfCardOrUserExist.middlewares.user.js`);
       return ApiResponse.error(res, enums.CARD_DOES_NOT_BELONG_TO_USER, enums.HTTP_FORBIDDEN);
     }
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE;
     logger.error(`checking if card exists failed::${enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user has updated advanced kyc
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkUserAdvancedKycUpdate = async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (user.address === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: user has not updated address in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('address'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+    }
+    if (user.income_range === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: user has not updated income range in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('income range'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+    }
+    if (user.number_of_dependents === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: user has not updated number of dependents in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of dependents'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+    }
+    if (user.marital_status === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: user has not updated marital status in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('marital status'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+    }
+    if (user.employment_type === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: user has not updated employment type in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('employment type'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: user has update all advanced kyc in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE;
+    logger.error(`checking if user has done advanced kyc in the DB failed::${enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

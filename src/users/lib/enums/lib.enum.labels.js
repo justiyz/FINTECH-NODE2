@@ -53,6 +53,7 @@ export const CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE = 'UserMiddleware::checkA
 export const CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE = 'UserMiddleware::checkIfMaximumBankAccountsSaved';
 export const CHECK_IF_MAXIMUM_DEBIT_CARDS_SAVED_MIDDLEWARE = 'UserMiddleware::checkIfMaximumDebitCardsSaved';
 export const CHECK_USER_LOAN_STATUS_MIDDLEWARE = 'UserMiddleware::checkUserLoanStatus';
+export const CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE = 'UserMiddleware::checkUserAdvancedKycUpdate';
 export const CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE = 'UserMiddleware::checkIfAccountDetailsExists';
 export const CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE = 'UserMiddleware::checkAccountCurrentChoicesAndTypeSent';
 export const CHECK_ACCOUNT_OWNERSHIP_MIDDLEWARE = 'UserMiddleware::checkAccountOwnership';
@@ -78,6 +79,7 @@ export const VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE = 'AuthMiddleware::validatePass
 export const CHECK_IF_CARD_EXISTS_MIDDLEWARE = 'UserMiddleware::checkIfCardExist';
 export const SET_DEFAULT_CARD_CONTROLLER = 'UserController::setDefaultCard';
 export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
+export const CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER = 'LoanController::checkUserLoanEligibility';
 export const CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE = 'UserMiddleware::checkIfCardBelongsToTheUser';
 
 // Admin related labels

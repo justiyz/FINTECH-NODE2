@@ -34,6 +34,12 @@ export const operations = {
   33: 'PYTRFDD', // payment refunded
   34: 'STDBTCDDF', // set debit card as default
   35: 'STACTNMDF', // set account number as default
-  36: 'STACTNMDS' // set account number as disbursement account
+  36: 'STACTNMDS', // set account number as disbursement account
+  37: 'APLYLOAN', // apply for personal loan
+  38: 'PLONMNAPP', // personal loan subjected to manual approval
+  39: 'PLONAPAUT', // personal loan approved automatically
+  40: 'PLONDCLND', // personal loan declined
+  41: 'RNGPSLOAN', // renegotiate personal loan
+  42: 'PSLOANDBSD' // personal loan disbursed
 };
   

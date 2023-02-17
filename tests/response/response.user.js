@@ -51,13 +51,13 @@ export const dojahVerifyBvnTestResponse = (user, bvn) => {
   return data;
 };
 
-export const paystackResolveAccountNumberTestResponse = () => {
+export const paystackResolveAccountNumberTestResponse = (account_number, user) => {
   const data = {
     status: true,
     message: 'Account number resolved',
     data: {
-      'account_number': '0030878578',
-      'account_name': 'VICTORY, RASHIDAT BABATUNDE', // This name matches with USER_ONE in the test environment
+      'account_number': account_number,
+      'account_name': `${user.first_name.toUpperCase()} ${user.middle_name.toUpperCase()} ${user.last_name.toUpperCase()}`, // This will only pass for users with middle name and won't pass for users without middle name
       'bank_id': 9
     }
   };
@@ -250,4 +250,23 @@ export const paystackInitiateRefundTestResponse = (transaction_id) => {
     }
   };
   return result;
+};
+
+export const seedfiUnderwritingLoanEligibilityCheckTestResponse = (payload) => {
+  const data = {
+    loan_application_id: payload.loan_application_id,
+    loan_duration_in_month: payload.loan_duration_in_month,
+    loan_amount: parseFloat(payload.loan_amount),
+    orr_score: 93.16,
+    final_decision: 'APPROVED',
+    pricing_band: 35,
+    monthly_interest: 2.92,
+    fees: {
+      processing_fee: 1000.0,
+      insurance_fee: 1000.0,
+      advisory_fee: 1000.0
+    },
+    monthly_repayment: 14000.0
+  };
+  return data;
 };
