@@ -123,7 +123,7 @@ router.post(
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.isUploadedVerifiedId,
+  UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.idUploadVerification
 );
 

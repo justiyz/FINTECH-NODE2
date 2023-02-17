@@ -65,7 +65,7 @@ describe('', () => {
     });
     it('should call checkUserIdVerification', async() => {
       const req = { user: '' };
-      const data = await UserMiddleware.isUploadedVerifiedId(req, res, next);
+      const data = await UserMiddleware.isUploadedVerifiedId('complete')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
@@ -120,6 +120,12 @@ describe('', () => {
     it('should call checkIfMaximumDebitCardsSaved',  async() => {
       const req = { user: '' };
       const data = await UserMiddleware.checkIfMaximumDebitCardsSaved(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkUserAdvancedKycUpdate',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.checkUserAdvancedKycUpdate(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

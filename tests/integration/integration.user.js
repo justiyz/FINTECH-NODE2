@@ -177,6 +177,31 @@ describe('User', () => {
           done();
         });
     });
+    it('should upload selfie for user SIX successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://seedfi.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.is_verified_bvn).to.equal(false);
+          expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
+          done();
+        });
+    });
     it('should upload selfie for user one successfully', (done) => {
       chai.request(app)
         .post('/api/v1/user/upload-selfie')
@@ -479,30 +504,6 @@ describe('User', () => {
           done();
         });
     });
-    it('should verify bvn for user SIX successfully', (done) => {
-      chai.request(app)
-        .post('/api/v1/user/verify-bvn')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
-        })
-        .send({
-          bvn: Helpers.generateElevenDigits()
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.USER_BVN_VERIFIED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('is_verified_bvn');
-          expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
-          expect(res.body.data.is_verified_bvn).to.equal(true);
-          done();
-        });
-    });
   });
   describe('Request email verification', () => {
     it('Should send a verify otp email', (done) => {
@@ -522,6 +523,46 @@ describe('User', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.message).to.equal(enums.REQUEST_EMAIL_VERIFICATION);
           process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should send a verify otp email', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_FOUR_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_EMAIL_VERIFICATION);
+          process.env.SEEDFI_USER_FOUR_VERIFY_EMAIL_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should send a verify otp email', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_SIX_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_EMAIL_VERIFICATION);
+          process.env.SEEDFI_USER_SIX_VERIFY_EMAIL_OTP = res.body.data.otp;
           done();
         });
     });
@@ -567,6 +608,36 @@ describe('User', () => {
         .get('/api/v1/user/verify-email')
         .query({
           verifyValue: process.env.SEEDFI_USER_TWO_VERIFY_EMAIL_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Email verified successfully.');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully verify user email', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/verify-email')
+        .query({
+          verifyValue: process.env.SEEDFI_USER_FOUR_VERIFY_EMAIL_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Email verified successfully.');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully verify user email', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/verify-email')
+        .query({
+          verifyValue: process.env.SEEDFI_USER_SIX_VERIFY_EMAIL_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -654,7 +725,7 @@ describe('User', () => {
           expiry_date: '2021-1-4'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.CHECK_USER_ID_VERIFICATION);
@@ -873,6 +944,58 @@ describe('User', () => {
           done();
         });
     });
+    it('should save account details for user two successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/settings/account-details')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          bank_name: 'GT Bank',
+          account_number: '4030873978',
+          bank_code: '058'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_ACCOUNT_SAVED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('account_number');
+          expect(res.body.data).to.have.property('is_default');
+          expect(res.body.data.is_default).to.equal(false);
+          process.env.SEEDFI_USER_TWO_BANK_ACCOUNT_ID_ONE = res.body.data.id;
+          done();
+        });
+    });
+    it('should save another account details for user two successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/settings/account-details')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          bank_name: 'Access Bank',
+          account_number: '1909232000',
+          bank_code: '044'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_ACCOUNT_SAVED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('account_number');
+          expect(res.body.data).to.have.property('is_default');
+          expect(res.body.data.is_default).to.equal(false);
+          process.env.SEEDFI_USER_TWO_BANK_ACCOUNT_ID_TWO = res.body.data.id;
+          done();
+        });
+    });
     it('Should return error if user one tries to save more than three account numbers', (done) => {
       chai.request(app)
         .post('/api/v1/user/settings/account-details')
@@ -1020,28 +1143,6 @@ describe('User', () => {
           done();
         });
     });
-    it('Should return error if user does not own account', (done) => {
-      chai.request(app)
-        .post('/api/v1/user/settings/account-details')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .send({
-          bank_name: 'GT Bank',
-          account_number: '0030878578',
-          bank_code: '058'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(403);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ACCOUNT_USER_NOT_OWNED_BY_USER);
-          expect(res.body.error).to.equal('FORBIDDEN');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
   });
   describe('fetch list of users saved account details', () => {
     it('should fetch list of users saved account details successfully', (done) => {
@@ -1158,6 +1259,52 @@ describe('User', () => {
           expect(res.body.message).to.equal('type must be one of [disbursement, default]');
           expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should set user two bank account one as default account', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_TWO_BANK_ACCOUNT_ID_ONE}/account-details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'default'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY('default'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('account_number');
+          expect(res.body.data).to.have.property('is_default');
+          expect(res.body.data.is_default).to.equal(true);
+          done();
+        });
+    });
+    it('should set user two bank account two as disbursement account', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_TWO_BANK_ACCOUNT_ID_TWO}/account-details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'disbursement'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY('disbursement'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('account_number');
+          expect(res.body.data).to.have.property('is_disbursement_account');
+          expect(res.body.data.is_disbursement_account).to.equal(true);
           done();
         });
     });
@@ -1575,7 +1722,134 @@ describe('User', () => {
           employment_type: 'employed',
           marital_status: 'married',
           number_of_dependents: '3',
-          income_range: '20000 - 100000'
+          income_range: '20,000 - 100,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('should update user one profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          marital_status: 'single',
+          income_range: '100,000.01 - 300,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('should update user two profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          address: 'Lagos Mushin',
+          employment_type: 'employed',
+          marital_status: 'single',
+          number_of_dependents: '4',
+          income_range: '100,000.01 - 300,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('should update user five profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          address: 'Lagos Mushin',
+          employment_type: 'employed',
+          marital_status: 'married',
+          number_of_dependents: '2',
+          income_range: '100,000.01 - 300,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('should update user four profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          address: 'Lagos Mushin',
+          employment_type: 'employed',
+          marital_status: 'married',
+          number_of_dependents: '1',
+          income_range: '100,000.01 - 300,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('should update user six profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          address: 'Lagos Mushin',
+          employment_type: 'employed',
+          marital_status: 'married',
+          number_of_dependents: '4',
+          income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1643,7 +1917,7 @@ describe('User', () => {
         .put('/api/v1/user/profile')
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
         })
         .send({
           first_name: 'Oreoluwa'

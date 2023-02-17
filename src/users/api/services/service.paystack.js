@@ -26,10 +26,10 @@ const fetchBanks = async() => {
   }
 };
 
-const resolveAccount = async(account_number, bank_code) => {
+const resolveAccount = async(account_number, bank_code, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
-      return userMockedTestResponses.paystackResolveAccountNumberTestResponse();
+      return userMockedTestResponses.paystackResolveAccountNumberTestResponse(account_number, user);
     }
     const options = {
       method: 'get',
