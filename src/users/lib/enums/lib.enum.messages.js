@@ -136,7 +136,6 @@ export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
 export const USER_PROFILE_PREVIOUSLY_COMPLETED = 'User profile already completed';
-export const ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE = 'Kindly login to SeedFi app to complete profile and enjoy great benefits';
 export const NOTIFICATION_SENT_TO_USER_SUCCESSFULLY = 'Notification sent to user successfully';
 export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;
 export const USER_CURRENT_STATUS = (status) => `User status is already ${status} in the DB.`;
@@ -146,4 +145,3 @@ export const ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY = 'Admins per role fetched su
 export const EDIT_USER_STATUS = 'User status successfully updated.';
 export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
 export const FETCH_USER_KYC_DETAILS = 'User kyc details fetched successfully';
-export const SEND_REJECTED_DEBIT_CARD_MESSAGE_SUCCESSFULLY = 'The debit card you inserted has been rejected, kindly insert a debit card that will not expire in 3 months time';
