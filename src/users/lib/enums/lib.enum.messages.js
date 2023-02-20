@@ -87,6 +87,7 @@ export const CARD_SET_AS_DEFAULT_SUCCESSFULLY = 'Successfully sets card as defau
 export const CARD_CAN_NOT_BE_DELETED = 'Card can not be deleted';
 export const CARD_DOES_NOT_BELONG_TO_USER = 'Card does not belong to user';
 export const CARD_REMOVED_SUCCESSFULLY = 'Card removed successfully';
+export const DEBIT_CARD_REJECTED = 'Card has been rejected';
 export const VALIDATE_PASSWORD_OR_PIN = (type) => `Invalid ${type}`;
 export const CHANGE_PASSWORD = 'Password changed successful';
 export const CREATE_PIN = 'Successfully create pin for user';
@@ -141,8 +142,7 @@ export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
 export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
 export const EDIT_ADMIN_STATUS = 'Admin status successfully updated.';
-export const USER_PROFILE_PREVIOUSLY_COMPLETED = 'User profile all completed';
-export const ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE = 'Kindly login to SeedFi app to complete your profile, verify your bvn and upload valid id to enjoy great benefits, you can ignore this if you have done all of this';
+export const USER_PROFILE_PREVIOUSLY_COMPLETED = 'User profile already completed';
 export const NOTIFICATION_SENT_TO_USER_SUCCESSFULLY = 'Notification sent to user successfully';
 export const ADMIN_CURRENT_STATUS = (status) => `Admin status is already ${status} in the DB.`;
 export const USER_CURRENT_STATUS = (status) => `User status is already ${status} in the DB.`;
