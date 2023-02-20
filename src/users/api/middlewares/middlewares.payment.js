@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import dayjs from 'dayjs';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import config from '../../config';
 import enums from '../../lib/enums';
@@ -8,7 +9,6 @@ import { processAnyData, processOneOrNoneData} from '../services/services.db';
 import { confirmPaystackPaymentStatusByReference, raiseARefundTickedForCardTokenizationTransaction } from '../services/service.paystack';
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
-import dayjs from 'dayjs';
 import MailService from '../services/services.email';
 import { sendPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
@@ -215,7 +215,9 @@ export const saveCardAuth = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully fetched user from the DB saveCardAuth.middlewares.payment.js`);
         const data = {
           firstName: user.first_name,
-          email: user.email
+          email: user.email,
+          last4Digits: body.data.authorization.last4,
+          cardType: body.data.authorization.card_type
         };
         MailService('Rejected Debit Card', 'rejectedDebitCard', { ...data });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);

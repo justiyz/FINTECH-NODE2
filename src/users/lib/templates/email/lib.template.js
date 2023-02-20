@@ -95,9 +95,19 @@ export const rejectedDebitCard = (data) => `
     <tr>
         <td style="padding-bottom: 20px">
            <span>
-              Thanks for inserting your card details on SeedFi.<br />
-              The card will expire in three months time, hence, it has been rejected. Kindly insert a card that will not 
-              expire in three months time. </span>  
+              Thanks for adding your card details on SeedFi.<br />
+              however, it has been rejected because the card will expire soon.<br /> 
+              Kindly add a card that will not expire in about three months time. </span>  
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding-bottom: 20px">
+          <p>card details</p><br />
+          <span>
+            Last 4 digits: ${data.last4Digits}, <br />
+            Card Type: ${data.cardType}
+          </span>  
         </td>
     </tr>
   
