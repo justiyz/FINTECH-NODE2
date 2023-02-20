@@ -1543,10 +1543,19 @@ describe('User', () => {
           done();
         });
     });
-    it('should successfully process card payment using paystack webhook', () => {
+    it('should successfully process card payment using paystack webhook', (done) => {
       chai.request(app)
         .post('/api/v1/payment/paystack-webhook')
-        .send(receiveChargeSuccessWebHookThree(process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_ONE));
+        .send(receiveChargeSuccessWebHookThree(process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_THREE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
     });
     it('should successfully process card payment using paystack webhook', (done) => {
       chai.request(app)
