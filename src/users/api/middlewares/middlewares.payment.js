@@ -10,7 +10,8 @@ import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import dayjs from 'dayjs';
 import MailService from '../services/services.email';
-import { sendPushNotification } from '../../../admins/api/services/services.firebase';
+import { sendPushNotification } from '../services/services.firebase';
+import * as PushNotifications from '../../lib/templates/pushNotification';
 import { userActivityTracking } from '../../lib/monitor';
 
 /**
@@ -21,8 +22,6 @@ import { userActivityTracking } from '../../lib/monitor';
  * @returns {object} - Returns an object (error or response).
  * @memberof PaymentMiddleware
  */
-
-const { SEEDFI_NODE_ENV } = config;
 
 export const paystackWebhookVerification = async(req, res, next) => {
   try {
@@ -210,7 +209,7 @@ export const saveCardAuth = async(req, res, next) => {
       const checkIfCardPreviouslyUsedPayload = PaymentPayload.checkCardSavedPayload(paymentRecord, body);
       const [ cardPreviouslySaved ] = await processAnyData(paymentQueries.checkIfCardPreviouslySaved, checkIfCardPreviouslyUsedPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if card previously saved saveCardAuth.middlewares.payment.js`);
-      if(dayjs().month(`${body.data.authorization.exp_month}`).format('MM') <= dayjs().add(3, 'Month').format('MM')){
+      if(paymentRecord.payment_type === 'card_tokenization' && dayjs().format(`${body.data.authorization.exp_year}-${body.data.authorization.exp_month}-01`) <= dayjs().add(3, 'Month').format('YYYY-MM-01')){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms card will expire in 3 months time saveCardAuth.middlewares.payment.js`);
         const user = await processOneOrNoneData(userQueries.getUserByUserId, paymentRecord.user_id);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully fetched user from the DB saveCardAuth.middlewares.payment.js`);
@@ -218,14 +217,11 @@ export const saveCardAuth = async(req, res, next) => {
           firstName: user.first_name,
           email: user.email
         };
-        if (SEEDFI_NODE_ENV === 'test') {
-          return ApiResponse.success(res, enums.DEBIT_CARD_REJECTED, enums.HTTP_BAD_REQUEST);
-        }
         MailService('Rejected Debit Card', 'rejectedDebitCard', { ...data });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);
-        await sendPushNotification(user.user_id, enums.SEND_REJECTED_DEBIT_CARD_MESSAGE_SUCCESSFULLY, user.fcm_token);
+        await sendPushNotification(user.user_id, PushNotifications.rejectDebitCard, user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push notification to the user saveCardAuth.middlewares.payment.js`);
-        return ApiResponse.success(res, enums.DEBIT_CARD_REJECTED, enums.HTTP_BAD_REQUEST);
+        return next();
       }
       if (cardPreviouslySaved) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: card previously saved about to update card auth token saveCardAuth.middlewares.payment.js`);

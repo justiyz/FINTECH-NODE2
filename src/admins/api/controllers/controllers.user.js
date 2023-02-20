@@ -6,6 +6,7 @@ import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { sendPushNotification } from '../services/services.firebase';
+import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 
@@ -85,7 +86,7 @@ export const sendNotifications = async (req, res, next) => {
         return ApiResponse.error(res, enums.USER_PROFILE_PREVIOUSLY_COMPLETED, enums.HTTP_BAD_REQUEST, enums.SEND_NOTIFICATIONS_CONTROLLER);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile not  previously completed sendNotifications.admin.controllers.user.js`);
-      await sendPushNotification(userDetails.user_id, enums.ADMIN_SEND_USER_COMPLETE_PROFILE_MESSAGE, userDetails.fcm_token);
+      await sendPushNotification(userDetails.user_id, PushNotifications.userCompleteProfile, userDetails.fcm_token);
       if (userDetails.email !== null) {
         MailService('Kindly complete your kyc', 'completeKyc', { email: userDetails.email });
       }
