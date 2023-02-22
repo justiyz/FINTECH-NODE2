@@ -40,6 +40,7 @@ export const operations = {
   39: 'PLONAPAUT', // personal loan approved automatically
   40: 'PLONDCLND', // personal loan declined
   41: 'RNGPSLOAN', // renegotiate personal loan
-  42: 'PSLOANDBSD' // personal loan disbursed
+  42: 'PSLOANDBSD', // personal loan disbursed
+  43: 'CNCPLNAP' // user cancels loan application process
 };
   

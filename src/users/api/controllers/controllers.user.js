@@ -381,7 +381,7 @@ export const idUploadVerification = async(req, res, next) => {
     const tierOption = user.is_verified_bvn ? '2' : '1';
     const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierOption ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    user id verification uploaded successfully DB idUploadVerification.admin.controller.user.js`);
+    user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
     return ApiResponse.success(res, enums.ID_UPLOAD_VERIFICATION, enums.HTTP_OK, data);
   } catch (error) {
@@ -407,7 +407,7 @@ export const updateUserProfile = async(req, res, next) => {
     const payload = UserPayload.updateUserProfile(body, user);
     const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    successfully updated user profile in the DB updateUserProfile.admin.controller.user.js`);
+    successfully updated user profile in the DB updateUserProfile.controller.user.js`);
     userActivityTracking(req.user.user_id, 19, 'success');
     return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
   } catch (error) {
@@ -459,7 +459,7 @@ export const setDefaultCard = async(req, res, next) => {
       processAnyData(userQueries.SetNewCardDefaultTrue, [ user.user_id, id ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    successfully set user's default card setDefaultCard.admin.controller.user.js`);
+    successfully set user's default card setDefaultCard.controller.user.js`);
     userActivityTracking(req.user.user_id, 34, 'success');
     return ApiResponse.success(res, enums.CARD_SET_AS_DEFAULT_SUCCESSFULLY, enums.HTTP_OK, defaultCard);
   } catch (error) {
@@ -484,13 +484,65 @@ export const removeCard = async(req, res, next) => {
     const { user, params: { id } } = req;
     await processAnyData(userQueries.removeCard, [ user.user_id, id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-    successfully removed a user's saved card.admin.controller.user.js`);
+    successfully removed a user's saved card.controller.user.js`);
     userActivityTracking(req.user.user_id, 28, 'success');
     return ApiResponse.success(res, enums.CARD_REMOVED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     userActivityTracking(req.user.user_id, 28, 'fail');
     error.label = enums.REMOVE_SAVED_CARD_CONTROLLER;
     logger.error(`setting card as default in the DB failed:::${enums.REMOVE_SAVED_CARD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user's homepage details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const homepageDetails = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ userOutstandingPersonalLoanRepayment ] = await processAnyData(userQueries.userOutstandingPersonalLoan, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan outstanding fetched homepageDetails.controller.user.js`);
+    const outstandingPersonalLoanAmount = !userOutstandingPersonalLoanRepayment ? 0 : parseFloat(userOutstandingPersonalLoanRepayment.total_outstanding_amount);
+    let userOutstandingClusterLoanRepayment; // to implement the query when cluster loan is implement
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan outstanding fetched homepageDetails.controller.user.js`);
+    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount + (userOutstandingClusterLoanRepayment || 0)).toFixed(2));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's total loan obligation calculated homepageDetails.controller.user.js`);
+    const repaidPersonalLoans = []; // to later implement the query when personal loan repayment is implemented
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan repayment transactions fetched homepageDetails.controller.user.js`);
+    const underProcessingPersonalLoans = await processAnyData(userQueries.userExistingProcessingLoans, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process personal loans fetched from the DB homepageDetails.controller.user.jss`);
+    const repaidClusterLoans = []; // to later implement the query when cluster loan repayment is implemented
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan repayment transactions fetched homepageDetails.controller.user.js`);
+    const underProcessingClusterLoans = []; // to implement the query when cluster loan is implemented
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process cluster loans fetched from the DB homepageDetails.controller.user.js`);
+    const data = {
+      user_id: user.user_id,
+      first_name: user.first_name,
+      user_loan_status: user.loan_status,
+      loan_amounts: {
+        total_personal_outstanding_loan: parseFloat(parseFloat(outstandingPersonalLoanAmount).toFixed(2)),
+        total_cluster_loan_outstanding_loan: userOutstandingClusterLoanRepayment || 0,
+        total_loan_obligation: totalLoanObligation
+      },
+      personal_loan_transaction_history: {
+        underProcessingPersonalLoans,
+        repaidPersonalLoans
+      },
+      cluster_loan_transaction_history: {
+        underProcessingClusterLoans,
+        repaidClusterLoans
+      }
+    };
+    return ApiResponse.success(res, enums.HOMEPAGE_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.HOMEPAGE_DETAILS_CONTROLLER;
+    logger.error(`fetching user homepage details failed:::${enums.HOMEPAGE_DETAILS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

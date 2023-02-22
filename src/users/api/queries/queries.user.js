@@ -267,6 +267,32 @@ export default {
 
   removeCard:`
       DELETE FROM user_debit_cards
-      WHERE user_id = $1 AND id = $2
-  `
+      WHERE user_id = $1 AND id = $2`,
+
+  userOutstandingPersonalLoan:`
+      SELECT 
+        id,
+        user_id,
+        loan_id,
+        TRUNC(total_outstanding_amount::numeric, 2) AS total_outstanding_amount
+      FROM personal_loans
+      WHERE user_id = $1
+      AND (status = 'ongoing' OR status = 'over due')`,
+
+  userExistingProcessingLoans:`
+      SELECT 
+        id,
+        loan_id,
+        user_id,
+        TRUNC(amount_requested::numeric, 2) AS amount_requested,
+        loan_reason,
+        loan_tenor_in_months,
+        status,
+        loan_decision,
+        created_at,
+        to_char(DATE (created_at)::date, 'Mon DD YYYY') AS requested_date
+      FROM personal_loans
+      WHERE user_id = $1
+      AND (status = 'pending' OR status = 'approved')
+      ORDER BY created_at DESC`
 };

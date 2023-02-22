@@ -27,9 +27,21 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call cancelLoanApplication', async() => {
+      const req = { user: '', params: '' };
+      const data = await LoanController.cancelLoanApplication(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call updateActivatedLoanApplicationDetails', async() => {
       const req = { user: '', params: '', existingLoanApplication: '' };
       const data = await LoanController.updateActivatedLoanApplicationDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchPersonalLoanDetails', async() => {
+      const req = { user: '', params: '' };
+      const data = await LoanController.fetchPersonalLoanDetails(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

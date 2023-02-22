@@ -79,9 +79,15 @@ export const VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE = 'AuthMiddleware::validatePass
 export const CHECK_IF_CARD_EXISTS_MIDDLEWARE = 'UserMiddleware::checkIfCardExist';
 export const SET_DEFAULT_CARD_CONTROLLER = 'UserController::setDefaultCard';
 export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
+export const HOMEPAGE_DETAILS_CONTROLLER = 'UserController::homepageDetails';
 export const CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
+export const CHECK_IF_USER_HAS_ACTIVE_PERSONAL_LOAN_MIDDLEWARE = 'LoanMiddleware::checkIfUserHasActivePersonalLoan';
+export const CHECK_LOAN_APPLICATION_STATUS_IS_STILL_PENDING_MIDDLEWARE = 'LoanMiddleware::checkIfLoanApplicationStatusIsStillPending';
+export const VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE = 'LoanMiddleware::validateLoanAmountAndTenor';
 export const CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE = 'LoanMiddleware::checkIfLoanApplicationStatusIsCurrentlyApproved';
 export const CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER = 'LoanController::checkUserLoanEligibility';
+export const CANCEL_LOAN_APPLICATION_CONTROLLER = 'LoanController::cancelLoanApplication';
+export const FETCH_PERSONAL_LOAN_DETAILS_CONTROLLER = 'LoanController::fetchPersonalLoanDetails';
 export const UPDATE_ACTIVATED_LOAN_APPLICATION_DETAILS_CONTROLLER = 'LoanController::updateActivatedLoanApplicationDetails';
 export const CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE = 'UserMiddleware::checkIfCardBelongsToTheUser';
 

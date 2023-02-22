@@ -87,6 +87,7 @@ export const CARD_SET_AS_DEFAULT_SUCCESSFULLY = 'Successfully sets card as defau
 export const CARD_CAN_NOT_BE_DELETED = 'Card can not be deleted';
 export const CARD_DOES_NOT_BELONG_TO_USER = 'Card does not belong to user';
 export const CARD_REMOVED_SUCCESSFULLY = 'Card removed successfully';
+export const HOMEPAGE_FETCHED_SUCCESSFULLY = 'User homepage details fetched successfully';
 export const DEBIT_CARD_REJECTED = 'Card has been rejected';
 export const VALIDATE_PASSWORD_OR_PIN = (type) => `Invalid ${type}`;
 export const CHANGE_PASSWORD = 'Password changed successful';
@@ -94,15 +95,23 @@ export const CREATE_PIN = 'Successfully create pin for user';
 export const CHANGE_PIN = 'Pin changed successfully.';
 export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfully.`;
 export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account to default to proceed';
+export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan greater than maximum allowable amount';
+export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration greater than maximum allowable tenor';
+export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const LOAN_APPLICATION_DECLINED_DECISION = 'User loan application decline due to ineligibility, kindly try again some other time';
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
 export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still awaits approval, disbursement cannot be made';
-export const LOAN_APPLICATION_REJECTED = 'loan application rejected, disbursement cannot be made';
+export const LOAN_APPLICATION_DECLINED = 'loan application declined, disbursement cannot be made';
 export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application status is ${type}, disbursement cannot be made again`;
+export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `User currently have ${type}, thus cannot apply for another`;
+export const LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS = (type) => `Loan application is already ${type}, thus cannot be cancelled`;
+export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON = 'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_DISBURSEMENT_SUCCESSFUL = 'User loan application disbursement successful';
+export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application cancelled successful';
+export const USER_LOAN_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan details fetched successful`;
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

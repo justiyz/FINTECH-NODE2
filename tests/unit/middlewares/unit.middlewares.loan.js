@@ -33,6 +33,24 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfUserHasActivePersonalLoan', async() => {
+      const req = { user: '' };
+      const data = await LoanMiddleware.checkIfUserHasActivePersonalLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfLoanApplicationStatusIsStillPending', async() => {
+      const req = { user: '', existingLoanApplication: '' };
+      const data = await LoanMiddleware.checkIfLoanApplicationStatusIsStillPending(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call validateLoanAmountAndTenor', async() => {
+      const req = { user: '', body: '' };
+      const data = await LoanMiddleware.validateLoanAmountAndTenor(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
 
