@@ -46,7 +46,8 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication, declinedDecisionPayload);
       userActivityTracking(req.user.user_id, 37, 'fail');
       userActivityTracking(req.user.user_id, 40, 'success');
-      return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, { user_id: user.user_id, loan_id: data.loan_application_id, decline_reason: 'User has bad credit bureaus records' }); // decline reason to be changed to what underwriting service returns
+      const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, 'declined', 'DECLINED');
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));

@@ -36,8 +36,7 @@ export default {
         updated_at = NOW(),
         percentage_orr_score = $2,
         status = $3,
-        loan_decision = $4,
-        loan_application_declined_reason = $5
+        loan_decision = $4
     WHERE loan_id = $1`,
 
   updateUserManualOrApprovedDecisionLoanApplication: `
