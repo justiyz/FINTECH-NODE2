@@ -26,9 +26,15 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
   data.loan_application_id,
   data.orr_score,
   'declined',
-  data.final_decision,
-  'User has bad credit bureaus record' // to be changed to what underwriting service returns
+  data.final_decision
 ];
+
+const loanApplicationDeclinedDecisionResponse = async(user, data, loan_status, loan_decision) => ({
+  user_id: user.user_id, 
+  loan_id: data.loan_application_id, 
+  loan_status,
+  loan_decision
+});
 
 const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInterestAmount, status) => [
   data.loan_application_id,
@@ -70,6 +76,7 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
 export default { 
   checkUserEligibility, 
   processDeclinedLoanDecisionUpdatePayload,
+  loanApplicationDeclinedDecisionResponse,
   processLoanDecisionUpdatePayload,
   loanApplicationApprovalDecisionResponse
 };
