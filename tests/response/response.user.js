@@ -270,3 +270,29 @@ export const seedfiUnderwritingLoanEligibilityCheckTestResponse = (payload) => {
   };
   return data;
 };
+
+export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) => {
+  const data = {
+    status: 200,
+    statusText: 'OK',
+    data: {
+      loan_application_id: payload.loan_application_id,
+      loan_duration_in_month: payload.loan_duration_in_month,
+      loan_amount: payload.loan_amount,
+      orr_score: 81.99,
+      final_decision: 'APPROVED',
+      pricing_band: 45,
+      monthly_interest: 3.75,
+      fees: {
+        processing_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
+        insurance_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
+        advisory_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
+        processing_fee_percentage: 0.01,
+        insurance_fee_percentage: 0.01,
+        advisory_fee_percentage: 0.01
+      },
+      monthly_repayment: parseFloat(parseFloat((((3.75 / 100) * parseFloat(payload.loan_amount)) / (1 - ((1 + (3.75 / 100))**(-Number(payload.loan_duration_in_month)))))).toFixed(2))
+    }
+  };
+  return data;
+};

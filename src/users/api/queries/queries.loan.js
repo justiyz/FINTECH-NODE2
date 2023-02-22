@@ -20,6 +20,11 @@ export default {
     ) VALUES ($1, $2, $3, $4)
     RETURNING id, loan_id, status`,
 
+  deleteInitiatedLoanApplication: `
+    DELETE FROM personal_loans
+    WHERE loan_id = $1
+    AND user_id = $2`,
+
   fetchUserBvn: `
     SELECT bvn
     FROM users
@@ -52,7 +57,8 @@ export default {
         advisory_fee = $12,
         monthly_repayment = $13,
         status = $14,
-        loan_decision = $15
+        loan_decision = $15,
+        total_outstanding_amount = $16
     WHERE loan_id = $1`,
 
   fetchUserLoanDetailsByLoanId: `
@@ -72,6 +78,8 @@ export default {
       insurance_fee,
       advisory_fee,
       monthly_repayment,
+      total_outstanding_amount,
+      extra_interests,
       status,
       loan_decision,
       is_loan_disbursed,
@@ -84,8 +92,22 @@ export default {
     INSERT INTO personal_loan_payment_schedules(
       loan_id, user_id, repayment_order, principal_payment, interest_payment, fees, 
       total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount, 
-      proposed_payment_date, payment_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+      proposed_payment_date
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+
+  fetchLoanRepaymentSchedule: `
+    SELECT 
+      id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      status
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    ORDER BY repayment_order ASC`,
 
   updateActivatedLoanDetails: `
     UPDATE personal_loans
@@ -102,5 +124,38 @@ export default {
     SET 
       updated_at = NOW(),
       loan_status = 'active'
-    WHERE user_id = $1`
+    WHERE user_id = $1`,
+
+  cancelUserLoanApplication: `
+    UPDATE personal_loans
+    SET
+      updated_at = NOW(),
+      status = 'cancelled'
+    WHERE loan_id = $1
+    AND user_id = $2
+    RETURNING id, user_id, loan_id, status, loan_decision`,
+
+  fetchUserActivePersonalLoans: `
+    SELECT 
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_reason,
+      loan_tenor_in_months,
+      status,
+      loan_decision
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'approved' OR status = 'pending')
+    LIMIT 1`,
+
+  fetchAdminSetEnvDetails: `
+    SELECT 
+      id,
+      env_id,
+      name,
+      value
+    FROM admin_env_values_settings
+    WHERE name = $1`
 };

@@ -30,9 +30,9 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
   'User has bad credit bureaus record' // to be changed to what underwriting service returns
 ];
 
-const processLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInterestAmount, status) => [
+const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInterestAmount, status) => [
   data.loan_application_id,
-  parseFloat(totalRepaymentAmount).toFixed(2),
+  parseFloat(totalAmountRepayable).toFixed(2),
   parseFloat(totalInterestAmount).toFixed(2),
   data.orr_score,
   data.pricing_band,
@@ -45,22 +45,23 @@ const processLoanDecisionUpdatePayload = (data, totalRepaymentAmount, totalInter
   parseFloat(data.fees.advisory_fee).toFixed(2),
   parseFloat(data.monthly_repayment).toFixed(2),
   status,
-  data.final_decision
+  data.final_decision,
+  parseFloat(totalAmountRepayable).toFixed(2)
 ];
 
-const loanApplicationApprovalDecisionResponse = async(data, totalRepaymentAmount, totalInterestAmount, user, loan_status, loan_decision) => ({
+const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision) => ({
   user_id: user.user_id,
   loan_id: data.loan_application_id,
-  loan_amount: `₦${parseFloat(data.loan_amount)}`,
+  loan_amount: `${parseFloat(data.loan_amount)}`,
   loan_duration_in_months: `${Number(data.loan_duration_in_month)}`,
-  total_interest: `₦${parseFloat(totalInterestAmount).toFixed(2)}`,
+  total_interest: `${parseFloat(totalInterestAmount).toFixed(2)}`,
   fees: {
-    processing_fee: `₦${parseFloat(data.fees.processing_fee)}`,
-    insurance_fee: `₦${parseFloat(data.fees.insurance_fee)}`,
-    advisory_fee: `₦${parseFloat(data.fees.advisory_fee)}`
+    processing_fee: `${parseFloat(data.fees.processing_fee)}`,
+    insurance_fee: `${parseFloat(data.fees.insurance_fee)}`,
+    advisory_fee: `${parseFloat(data.fees.advisory_fee)}`
   },
-  total_repayment: `₦${parseFloat(totalRepaymentAmount).toFixed(2)}`,
-  monthly_payment: `₦${parseFloat(data.monthly_repayment)}`,
+  total_repayment: `${parseFloat(totalAmountRepayable).toFixed(2)}`,
+  monthly_payment: `${parseFloat(data.monthly_repayment)}`,
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
   loan_status,
   loan_decision

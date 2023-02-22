@@ -228,6 +228,9 @@ export const saveCardAuth = async(req, res, next) => {
       if (cardPreviouslySaved) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: card previously saved about to update card auth token saveCardAuth.middlewares.payment.js`);
         await processAnyData(paymentQueries.updateUserCardAuthToken, [ ...checkIfCardPreviouslyUsedPayload, encodeURIComponent(await Hash.encrypt(body.data.authorization.authorization_code.trim())) ]);
+        if (paymentRecord.payment_type === 'card_tokenization') {
+          return next();
+        }
         return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: card not previously saved saveCardAuth.middlewares.payment.js`);

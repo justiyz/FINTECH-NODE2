@@ -159,4 +159,11 @@ router.delete(
   UserMiddleware.checkIfCardOrUserExist,
   UserController.removeCard
 );
+
+router.get(
+  '/homepage',
+  AuthMiddleware.validateAuthToken,
+  UserController.homepageDetails
+);
+
 export default router;

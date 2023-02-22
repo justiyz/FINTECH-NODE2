@@ -14,8 +14,13 @@ const loanDisbursementPayload = Joi.object().keys({
   pin: Joi.string().length(4).required()
 });
 
+const loanType = Joi.object().keys({
+  type: Joi.string().required().valid('personal', 'cluster')
+});
+
 export default  {
   loanApplication,
   loanIdParams,
-  loanDisbursementPayload
+  loanDisbursementPayload,
+  loanType
 }; 

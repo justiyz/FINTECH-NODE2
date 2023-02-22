@@ -13,12 +13,23 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.loanApplication, 'payload'),
   UserMiddleware.checkUserAdvancedKycUpdate,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.checkIfUserHasActivePersonalLoan,
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('confirm'),
   LoanController.checkUserLoanEligibility
+);
+
+router.post(
+  '/:loan_id/cancel-application',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfLoanApplicationStatusIsStillPending,
+  LoanController.cancelLoanApplication
 );
 
 router.post(
@@ -31,6 +42,14 @@ router.post(
   LoanMiddleware.checkIfLoanApplicationStatusIsCurrentlyApproved,
   // add middleware to call sterling API for disbursement
   LoanController.updateActivatedLoanApplicationDetails
+);
+
+router.get(
+  '/:loan_id/personal/details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanController.fetchPersonalLoanDetails
 );
 
 export default router;

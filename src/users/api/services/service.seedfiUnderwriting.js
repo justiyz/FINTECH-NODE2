@@ -1,9 +1,15 @@
 import axios from 'axios';
 import config from '../../config';
 import enums from '../../lib/enums';
+import * as userMockedTestResponses from '../../../../tests/response/response.user';
+
+const { SEEDFI_NODE_ENV } = config;
 
 const personalLoanApplicationEligibilityCheck = async(payload) => {
   try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
+    }
     const options = {
       method: 'post',
       url: `${config.SEEDFI_UNDERWRITING_SERVICE_BASE_URL}/v1/loan_processing_engine/`,
