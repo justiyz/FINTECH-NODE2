@@ -91,7 +91,7 @@ export const cancelLoanApplication = async(req, res, next) => {
   try {
     const { user, params: { loan_id } } = req;
     const cancelLoanProcess = await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [ loan_id, user.user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 43, 'success');
     return ApiResponse.success(res, enums.LOAN_APPLICATION_CANCELLING_SUCCESSFUL, enums.HTTP_OK, cancelLoanProcess);
   } catch (error) {
@@ -122,11 +122,12 @@ export const updateActivatedLoanApplicationDetails = async(req, res, next) => {
       ]);
       return schedule;
     });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment schedule update successfully in the DB updateActivatedLoanApplicationDetails.controllers.loan.js`);
     const [ updatedLoanDetails  ] = await Promise.all([
       processOneOrNoneData(loanQueries.updateActivatedLoanDetails, [ loan_id ]),
       processOneOrNoneData(loanQueries.updateUserLoanStatus, [ user.user_id ])
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details and user loan details updated in the DB updateActivatedLoanApplicationDetails.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 42, 'success');
     return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_SUCCESSFUL, enums.HTTP_OK, updatedLoanDetails);
   } catch (error) {
