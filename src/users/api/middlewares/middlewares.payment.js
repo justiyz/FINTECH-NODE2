@@ -8,14 +8,13 @@ import paymentQueries from '../queries/queries.payment';
 import userQueries from '../queries/queries.user';
 import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData} from '../services/services.db';
-import { confirmPaystackPaymentStatusByReference, raiseARefundTickedForCardTokenizationTransaction } from '../services/service.paystack';
+import { confirmPaystackPaymentStatusByReference, initiateTransfer, raiseARefundTickedForCardTokenizationTransaction } from '../services/service.paystack';
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import MailService from '../services/services.email';
 import { sendPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import { userActivityTracking } from '../../lib/monitor';
-import { initiateTransfer } from '../services/service.paystack';
 import { generateLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 
 /**
@@ -356,8 +355,10 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
       }
       if(body.event === 'transfer.reversed') {
         const loanDisbursementTrackingPayload = await PaymentPayload.trackLoanDisbursement(body, paymentRecord, loanDetails, 'reversed');
-        processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
-        processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
+        await Promise.all([
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ])
+        ]);
       }
       userActivityTracking(paymentRecord.user_id, 46, 'success');
       return ApiResponse.success(res, enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED, enums.HTTP_OK);
