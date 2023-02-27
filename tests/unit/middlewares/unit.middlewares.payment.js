@@ -63,5 +63,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call processPersonalLoanTransferPayments', async() => {
+      const req = { body: '', paymentRecord: '' };
+      const data = await PaymentMiddleware.processPersonalLoanTransferPayments(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

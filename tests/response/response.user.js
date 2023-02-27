@@ -296,3 +296,71 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
   };
   return data;
 };
+
+export const paystackPlatformBalanceCheckerTestResponse = () => {
+  const result =  {
+    status: true,
+    message: 'Balances retrieved',
+    data: [ { currency: 'NGN', balance: 10000000000 } ]
+  };
+  return result;
+};
+
+export const paystackUserRecipientCodeCreationTestResponse = (userDisbursementAccountDetails) => {
+  const result =  {
+    status: true,
+    message: 'Transfer recipient created successfully',
+    data: {
+      active: true,
+      createdAt: '2023-02-23T14:56:37.020Z',
+      currency: 'NGN',
+      domain: 'test',
+      id: 48946220,
+      integration: 894264,
+      name: userDisbursementAccountDetails.account_name,
+      recipient_code: 'RCP_lwdid9q9ebzg20oldismmd39',
+      type: 'nuban',
+      updatedAt: '2023-02-23T14:56:37.020Z',
+      is_deleted: false,
+      isDeleted: false,
+      details: {
+        authorization_code: null,
+        account_number: userDisbursementAccountDetails.account_number,
+        account_name: userDisbursementAccountDetails.account_name.toUpperCase(),
+        bank_code: userDisbursementAccountDetails.bank_code,
+        bank_name: userDisbursementAccountDetails.bank_name
+      }
+    }
+  };
+  return result;
+};
+
+export const initiatePaystackBankTransferTestResponse = (userTransferRecipient, existingLoanApplication, reference) => {
+  const result =  {
+    status: true,
+    message: 'Transfer has been queued',
+    data: {
+      transfersessionid: [],
+      domain: 'test',
+      amount: parseFloat(existingLoanApplication.amount_requested) * 100,
+      currency: 'NGN',
+      reference: reference,
+      source: 'balance',
+      source_details: null,
+      reason: 'Loan facility disbursement',
+      status: 'success',
+      failures: null,
+      transfer_code: userTransferRecipient,
+      titan_code: null,
+      transferred_at: null,
+      id: 249017035,
+      integration: 894264,
+      request: 224392831,
+      recipient: 48945403,
+      createdAt: '2023-02-23T16:33:42.000Z',
+      updatedAt: '2023-02-23T16:33:42.000Z'
+    }
+
+  };
+  return result;
+};

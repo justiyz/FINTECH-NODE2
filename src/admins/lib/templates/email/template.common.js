@@ -5,7 +5,8 @@ const heading = {
   login: 'Complete Login with OTP',
   forgotPassword: 'Reset your password',
   adminInviteMail: 'Admin Invite',
-  completeKyc: 'Kindly complete your kyc'
+  completeKyc: 'Kindly complete your kyc',
+  insufficientBalance: 'Insufficient Paystack Balance'
 };
 
 export const commonTemplate = (messageType, data) => {

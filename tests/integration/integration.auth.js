@@ -5,7 +5,7 @@ import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
 import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 import { userOneProfile, userTwoProfile, userThreeProfile, userFourProfile, userSixProfile, userThreeInvalidEmailProfile, userThreeExistingEmailProfile,
-  userThreeInvalidDateProfile
+  userThreeInvalidDateProfile, userSevenProfile
 } from '../payload/payload.auth';
 
 const { expect } = chai;
@@ -29,7 +29,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2349058702551');
           process.env.SEEDFI_USER_ONE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_ONE_PHONE_NUMBER = res.body.data.phone_number;
@@ -51,7 +51,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+23480290833');
           process.env.SEEDFI_USER_TWO_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_TWO_PHONE_NUMBER = res.body.data.phone_number;
@@ -73,7 +73,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2349058702000');
           process.env.SEEDFI_USER_THREE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_THREE_PHONE_NUMBER = res.body.data.phone_number;
@@ -95,7 +95,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2349076354536');
           process.env.SEEDFI_USER_FOUR_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_FOUR_PHONE_NUMBER = res.body.data.phone_number;
@@ -117,7 +117,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2347058703094');
           process.env.SEEDFI_USER_FIVE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_FIVE_PHONE_NUMBER = res.body.data.phone_number;
@@ -139,11 +139,33 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal( '+2347058703647');
           process.env.SEEDFI_USER_SIX_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_SIX_PHONE_NUMBER = res.body.data.phone_number;
           process.env.SEEDFI_USER_SIX_VERIFICATION_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should create user seven successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signup')
+        .send({
+          phone_number: '+2347029703927'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.phone_number).to.equal( '+2347029703927');
+          process.env.SEEDFI_USER_SEVEN_USER_ID = res.body.data.user_id;
+          process.env.SEEDFI_USER_SEVEN_PHONE_NUMBER = res.body.data.phone_number;
+          process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP = res.body.data.otp;
           done();
         });
     });
@@ -262,7 +284,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2349058702000');
           process.env.SEEDFI_USER_THREE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_THREE_PHONE_NUMBER = res.body.data.phone_number;
@@ -289,7 +311,7 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_ONE_PHONE_NUMBER);
           process.env.SEEDFI_USER_ONE_ACCESS_TOKEN = res.body.data.token;
@@ -315,7 +337,7 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_TWO_PHONE_NUMBER);
           process.env.SEEDFI_USER_TWO_ACCESS_TOKEN = res.body.data.token;
@@ -341,7 +363,7 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_THREE_PHONE_NUMBER);
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
@@ -367,7 +389,7 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_FOUR_PHONE_NUMBER);
           process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN = res.body.data.token;
@@ -393,7 +415,7 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_FIVE_PHONE_NUMBER);
           process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN = res.body.data.token;
@@ -419,12 +441,38 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_SIX_PHONE_NUMBER);
           process.env.SEEDFI_USER_SIX_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_SIX_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_SIX_REFERRAL_CODE = res.body.data.referral_code;
+          done();
+        });
+    });
+    it('Should verify user seven phone number successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-phone-number')
+        .send({
+          otp: process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP,
+          fcm_token: Hash.generateRandomString(20)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_ACCOUNT_VERIFIED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_phone_number).to.equal(true);
+          expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_SEVEN_PHONE_NUMBER);
+          process.env.SEEDFI_USER_SEVEN_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_SEVEN_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_SEVEN_REFERRAL_CODE = res.body.data.referral_code;
           done();
         });
     });
@@ -508,7 +556,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2349058702000');
           process.env.SEEDFI_USER_THREE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_THREE_PHONE_NUMBER = res.body.data.phone_number;
@@ -551,7 +599,7 @@ describe('Auth', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('tokenExpireAt');
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_phone_number).to.equal(true);
           expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_THREE_PHONE_NUMBER);
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
@@ -575,7 +623,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.phone_number).to.equal('+2349076354536');
           process.env.SEEDFI_USER_FOUR_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_FOUR_PHONE_NUMBER = res.body.data.phone_number;
@@ -604,7 +652,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.gender).to.equal('female');
           done();
         });
@@ -628,7 +676,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.gender).to.equal('male');
           done();
         });
@@ -653,7 +701,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.gender).to.equal('female');
           done();
         });
@@ -677,8 +725,32 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.gender).to.equal('female');
+          done();
+        });
+    });
+    it('Should complete user seven profile successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/complete-profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SEVEN_ACCESS_TOKEN}`
+        })
+        .send({
+          ...userSevenProfile,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.gender).to.equal('male');
           done();
         });
     });
@@ -822,7 +894,7 @@ describe('Auth', () => {
           expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.gender).to.equal('female');
           done();
         });

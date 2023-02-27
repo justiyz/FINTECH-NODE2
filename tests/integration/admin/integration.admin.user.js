@@ -242,9 +242,28 @@ describe('Admin Users management', () => {
           done();
         });
     });
-    it('Should deactivate user successfully', (done) => {
+    it('Should flag an error if user is already on an active loan', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('User is on an active loan, action cannot be performed');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should deactivate user successfully', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -264,7 +283,7 @@ describe('Admin Users management', () => {
     });
     it('Should flag when user to be deactivated is already deactivated', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -283,7 +302,7 @@ describe('Admin Users management', () => {
     });
     it('Should activate user successfully', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

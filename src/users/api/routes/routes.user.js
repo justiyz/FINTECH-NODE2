@@ -148,6 +148,7 @@ router.patch(
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkUserLoanStatus,
   UserMiddleware.checkIfCardOrUserExist,
+  UserMiddleware.checkIfCardAlreadyDefaultCard,
   UserController.setDefaultCard
 );
 

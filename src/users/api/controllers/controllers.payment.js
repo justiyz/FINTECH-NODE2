@@ -23,7 +23,7 @@ export const initializeCardTokenizationPayment = async (req, res, next) => {
     const cardTokenizationChargeDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'card_tokenization_charge' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: default card tokenization amount fetched initializeCardTokenizationPayment.controllers.payment.js`);
     const tokenizingAmount = parseFloat(cardTokenizationChargeDetails.value);
-    await processAnyData(paymentQueries.initializeCardPayment, [ user.user_id, tokenizingAmount, 'paystack', reference, 'card_tokenization'  ]);
+    await processAnyData(paymentQueries.initializeCardPayment, [ user.user_id, tokenizingAmount, 'paystack', reference, 'card_tokenization', 'for addition of debit card'  ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initializeCardTokenizationPayment.controllers.payment.js`);
     const paystackAmountFormatting = parseFloat(tokenizingAmount) * 100; // Paystack requires amount to be in kobo for naira payment
     const result = await initializeCardPayment(user, paystackAmountFormatting, reference);
@@ -54,8 +54,7 @@ export const initializeCardTokenizationPayment = async (req, res, next) => {
  */
 export const finalWebhookResponse = async (req, res, next) => {
   try {
-    const { user } = req;
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: webhook event type not catered for finalWebhookResponse.controllers.payment.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: webhook event type not catered for finalWebhookResponse.controllers.payment.js`);
     return ApiResponse.success(res, enums.PAYSTACK_WEBHOOK_EVENT_TYPE_NOT_CATERED_FOR, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.FINAL_WEBHOOK_RESPONSE_CONTROLLER;

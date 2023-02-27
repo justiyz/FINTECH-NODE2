@@ -1,14 +1,16 @@
 export default {
   initializeCardPayment: `
-    INSERT INTO card_payment_histories (
+    INSERT INTO paystack_payment_histories (
         user_id, 
         amount, 
         payment_platform,
         transaction_reference,
         payment_type,
         payment_status,
-        refund_status
-    ) VALUES ($1, $2, $3, $4, $5, 'pending', 'pending')`,
+        refund_status,
+        transaction_type,
+        payment_reason
+    ) VALUES ($1, $2, $3, $4, $5, 'pending', 'pending', 'credit', $6)`,
 
   fetchTransactionByReference: `
     SELECT 
@@ -23,8 +25,11 @@ export default {
         is_initiated_refund,
         is_refunded,
         refund_status,
-        refund_reference
-    FROM card_payment_histories
+        refund_reference,
+        transaction_type,
+        payment_reason,
+        loan_id
+    FROM paystack_payment_histories
     WHERE transaction_reference = $1`,
 
   fetchUserSavedCard: `
@@ -62,7 +67,7 @@ export default {
     AND tokenising_platform = $6`,
 
   updateTransactionPaymentStatus: `
-    UPDATE card_payment_histories
+    UPDATE paystack_payment_histories
     SET
         updated_at = NOW(),
         transaction_id = $2,
@@ -85,14 +90,14 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 
   updateTransactionIsInitiatedRefund: `
-    UPDATE card_payment_histories
+    UPDATE paystack_payment_histories
     SET
         updated_at = NOW(),
         is_initiated_refund = 'true'
     WHERE transaction_reference = $1`,
  
   updateTransactionRefundStatus: `
-    UPDATE card_payment_histories
+    UPDATE paystack_payment_histories
     SET
         updated_at = NOW(),
         refund_status = $2,

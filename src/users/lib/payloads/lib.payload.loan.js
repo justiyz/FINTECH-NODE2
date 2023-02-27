@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
-const checkUserEligibility = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn) => ({
+const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
   loan_duration_in_month: `${body.duration_in_months}`,
@@ -74,7 +74,7 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
 });
 
 export default { 
-  checkUserEligibility, 
+  checkUserEligibilityPayload, 
   processDeclinedLoanDecisionUpdatePayload,
   loanApplicationDeclinedDecisionResponse,
   processLoanDecisionUpdatePayload,

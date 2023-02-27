@@ -6,7 +6,7 @@ import enums from '../../src/users/lib/enums';
 import * as Helpers from '../../src/users/lib/utils/lib.util.helpers';
 import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 import { receiveChargeSuccessWebHookOne, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookThree,
-  receiveRefundSuccessWebHook, receiveRefundProcessingWebHook, receiveRefundPendingWebHook
+  receiveRefundSuccessWebHook, receiveRefundProcessingWebHook, receiveRefundPendingWebHook, receiveChargeSuccessWebHookOneUserTwo
 } from '../payload/payload.payment';
 
 const { expect } = chai;
@@ -171,7 +171,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(false);
           expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
           done();
@@ -196,7 +196,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(false);
           expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
           done();
@@ -221,7 +221,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(false);
           expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
           done();
@@ -316,7 +316,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(false);
           expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
           done();
@@ -1527,11 +1527,43 @@ describe('User', () => {
           done();
         });
     });
-
+    it('should initiate card tokenization successfully for user 2', (done) => {
+      chai.request(app)
+        .get('/api/v1/payment/initiate-card-tokenization')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal('Authorization URL created');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_CARD_TOKENIZATION_PAYMENT_REFERENCE_ONE = res.body.data.reference;
+          done();
+        });
+    });
     it('should successfully process card payment using paystack webhook', (done) => {
       chai.request(app)
         .post('/api/v1/payment/paystack-webhook')
         .send(receiveChargeSuccessWebHookOne(process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_ONE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should successfully process card payment using paystack webhook', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookOneUserTwo(process.env.SEEDFI_USER_TWO_CARD_TOKENIZATION_PAYMENT_REFERENCE_ONE))
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
@@ -2169,7 +2201,7 @@ describe('User', () => {
   describe('set user default card', () => {
     it('Should set user default card.', (done) => {
       chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/default-debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -2181,7 +2213,7 @@ describe('User', () => {
           expect(res).to.have.property('body');
           expect(res.body.message).to.equal('Successfully sets card as default');
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data.id).to.equal(1);
+          expect(res.body.data.id).to.equal(3);
           expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
           expect(res.body.data.is_default).to.equal(true);
           done();
@@ -2189,7 +2221,7 @@ describe('User', () => {
     });
     it('Should throw error if invalid token is set.', (done) => {
       chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/default-debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
@@ -2205,7 +2237,7 @@ describe('User', () => {
     });
     it('Should throw error if token is malformed', (done) => {
       chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/default-debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
@@ -2222,7 +2254,7 @@ describe('User', () => {
     });
     it('Should throw error if token is not sent', (done) => {
       chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/default-debit-card`)
         .set({
           'Content-Type': 'application/json'
         })
@@ -2238,7 +2270,7 @@ describe('User', () => {
     });
     it('Should throw error if card does not exist', (done) => {
       chai.request(app)
-        .patch('/api/v1/user/settings/5/default-debit-card')
+        .patch('/api/v1/user/settings/5000/default-debit-card')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -2255,7 +2287,7 @@ describe('User', () => {
     });
     it('Should throw error if card does not belong to user', (done) => {
       chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
+        .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/default-debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
@@ -2275,13 +2307,12 @@ describe('User', () => {
   describe('remove saved debit card', () => {
     it('Should remove a saved debit card.', (done) => {
       chai.request(app)
-        .delete('/api/v1/user/settings/2/debit-card')
+        .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .end((err, res) => {
-  
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
@@ -2293,7 +2324,7 @@ describe('User', () => {
     });
     it('Should throw error if invalid token is set.', (done) => {
       chai.request(app)
-        .delete('/api/v1/user/settings/2/debit-card')
+        .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
@@ -2309,7 +2340,7 @@ describe('User', () => {
     });
     it('Should throw error if card does not exist', (done) => {
       chai.request(app)
-        .delete('/api/v1/user/settings/2/debit-card')
+        .delete('/api/v1/user/settings/1000/debit-card')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -2326,7 +2357,7 @@ describe('User', () => {
     });
     it('Should throw error if token is malformed', (done) => {
       chai.request(app)
-        .delete('/api/v1/user/settings/2/debit-card')
+        .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
@@ -2343,7 +2374,7 @@ describe('User', () => {
     });
     it('Should throw error if token is not sent', (done) => {
       chai.request(app)
-        .delete('/api/v1/user/settings/2/debit-card')
+        .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/debit-card`)
         .set({
           'Content-Type': 'application/json'
         })
@@ -2359,7 +2390,7 @@ describe('User', () => {
     });
     it('Should throw error if card does not belong to user', (done) => {
       chai.request(app)
-        .delete('/api/v1/user/settings/1/debit-card')
+        .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_ONE_ID}/debit-card`)
         .set({
           'Content-Type': 'application/json',
           Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
@@ -2374,112 +2405,6 @@ describe('User', () => {
           done();
         });
     });
-  });
-  describe('set user default card', () => {
-    it('Should set user default card.', (done) => {
-      chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res).to.have.property('body');
-          expect(res.body.message).to.equal('Successfully sets card as default');
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data.id).to.equal(1);
-          expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
-          expect(res.body.data.is_default).to.equal(true);
-          done();
-        });
-    });
-    it('Should throw error if invalid token is set.', (done) => {
-      chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}hgjhfjhf`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should throw error if token is malformed', (done) => {
-      chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('jwt malformed');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should throw error if token is not sent', (done) => {
-      chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
-        .set({
-          'Content-Type': 'application/json'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Please provide a token');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should throw error if card does not exist', (done) => {
-      chai.request(app)
-        .patch('/api/v1/user/settings/5/default-debit-card')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(400);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.CARD_DOES_NOT_EXIST);
-          expect(res.body.error).to.equal('BAD_REQUEST');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should throw error if card does not belong to user', (done) => {
-      chai.request(app)
-        .patch('/api/v1/user/settings/1/default-debit-card')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.CARD_DOES_NOT_BELONG_TO_USER);
-          expect(res.body.error).to.equal('FORBIDDEN');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-  
   });
 });
 

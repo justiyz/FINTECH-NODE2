@@ -7,6 +7,7 @@ const getTemplate = (type, data) => {
   case 'forgotPassword': return authEmail.forgotPassword(data);
   case 'adminInviteMail': return authEmail.adminInviteMail(data);
   case 'completeKyc': return userEmail.completeKyc(data);
+  case 'insufficientBalance': return authEmail.insufficientBalance(data);
   default: return '';
   }
 };

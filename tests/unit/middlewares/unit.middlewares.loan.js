@@ -51,6 +51,24 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkSeedfiPaystackBalance', async() => {
+      const req = { user: '', existingLoanApplication: '' };
+      const data = await LoanMiddleware.checkSeedfiPaystackBalance(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call generateLoanDisbursementRecipient', async() => {
+      const req = { user: '' };
+      const data = await LoanMiddleware.generateLoanDisbursementRecipient(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkUserLoanPaymentExists', async() => {
+      const req = { user: '', params: '' };
+      const data = await LoanMiddleware.checkUserLoanPaymentExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
 

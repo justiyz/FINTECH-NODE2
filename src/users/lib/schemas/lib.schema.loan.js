@@ -10,6 +10,10 @@ const loanIdParams = Joi.object().keys({
   loan_id: Joi.string().required()
 });
 
+const loanPaymentIdParams = Joi.object().keys({
+  loan_payment_id: Joi.string().required()
+});
+
 const loanDisbursementPayload = Joi.object().keys({
   pin: Joi.string().length(4).required()
 });
@@ -21,6 +25,7 @@ const loanType = Joi.object().keys({
 export default  {
   loanApplication,
   loanIdParams,
+  loanPaymentIdParams,
   loanDisbursementPayload,
   loanType
 }; 

@@ -2,7 +2,10 @@ import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
+import config from '../../config';
+import AdminMailService from '../../../admins/api/services/services.email';
 import { userActivityTracking } from '../../lib/monitor';
+import { fetchSeedfiPaystackBalance, createTransferRecipient } from '../services/service.paystack';
 
 /**
  * check loan exists by id
@@ -32,6 +35,104 @@ export const checkUserLoanApplicationExists = async(req, res, next) => {
 };
 
 /**
+ * check loan payment exists by id
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkUserLoanPaymentExists = async(req, res, next) => {
+  try {
+    const { params: { loan_payment_id }, user } = req;
+    const [ existingLoanPayment ] = await processAnyData(loanQueries.fetchUserPersonalLoanPaymentDetails, [ loan_payment_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan payment exists in the db checkUserLoanPaymentExists.middlewares.loan.js`);
+    if (existingLoanPayment) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment exists and belongs to authenticated user checkUserLoanPaymentExists.middlewares.loan.js`);
+      req.existingLoanPayment = existingLoanPayment;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment does not exist for authenticated user checkUserLoanPaymentExists.middlewares.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_PAYMENT_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_PAYMENT_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_USER_LOAN_PAYMENT_EXISTS_MIDDLEWARE;
+    logger.error(`checking if loan payment exists failed::${enums.CHECK_USER_LOAN_PAYMENT_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check paystack balance before disbursement
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkSeedfiPaystackBalance = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication } = req;
+    const result = await fetchSeedfiPaystackBalance();
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: response gotten from calling paystack balance check checkSeedfiPaystackBalance.middlewares.loan.js`);
+    if (result.status === true && result.message === 'Balances retrieved') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: seedfi balance retrieved successfully checkSeedfiPaystackBalance.middlewares.loan.js`);
+      const balance = parseFloat(result.data[0].balance / 100); // paystack returns balance in kobo
+      const amountRequestingType = config.SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested); // paystack will not process any amount greater than 1 million in test environment
+      if (amountRequestingType > balance) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user requested amount is greater than seedfi balance with paystack checkSeedfiPaystackBalance.middlewares.loan.js`);
+        const data = {
+          email: config.SEEDFI_ADMIN_EMAIL_ADDRESS,
+          currentBalance: `₦${balance}`
+        };
+        await AdminMailService('Insufficient Paystack Balance', 'insufficientBalance', { ...data });
+        userActivityTracking(req.user.user_id, 44, 'fail');
+        return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user requested amount is less than seedfi balance with paystack checkSeedfiPaystackBalance.middlewares.loan.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: seedfi balance  could not be retrieved successfully checkSeedfiPaystackBalance.middlewares.loan.js`);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    error.label = enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE;
+    logger.error(`checking seedfi paystack account balance failed::${enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * generate paystack recipient for user to be credited
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const generateLoanDisbursementRecipient = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ userDisbursementAccountDetails ] = await processAnyData(loanQueries.fetchUserDisbursementAccount, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user disbursement account fetched successfully generateLoanDisbursementRecipient.middlewares.loan.js`);
+    const result = await createTransferRecipient(userDisbursementAccountDetails);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: response gotten from calling paystack to generate user transfer recipient code generateLoanDisbursementRecipient.middlewares.loan.js`);
+    if (result.status === true && result.message === 'Transfer recipient created successfully') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code generated successfully generateLoanDisbursementRecipient.middlewares.loan.js`);
+      const userPaystackTransferRecipient = result.data.recipient_code;
+      req.userTransferRecipient = userPaystackTransferRecipient;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated generateLoanDisbursementRecipient.middlewares.loan.js`);
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    error.label = enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE;
+    logger.error(`generating user paystack transfer recipient failed::${enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check loan application status is currently approved so as to proceed with disbursement
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -42,25 +143,25 @@ export const checkUserLoanApplicationExists = async(req, res, next) => {
 export const checkIfLoanApplicationStatusIsCurrentlyApproved = async(req, res, next) => {
   try {
     const { existingLoanApplication, user } = req;
-    if (existingLoanApplication.status === 'pending') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
-      userActivityTracking(req.user.user_id, 42, 'fail');
-      return ApiResponse.error(res, enums.LOAN_APPLICATION_STILL_AWAITS_APPROVAL, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
-    }
-    if (existingLoanApplication.status === 'declined') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is declined checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
-      userActivityTracking(req.user.user_id, 42, 'fail');
-      return ApiResponse.error(res, enums.LOAN_APPLICATION_DECLINED, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
-    }
     if (existingLoanApplication.status === 'approved') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is currently approved checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
       return next();
     }
+    if (existingLoanApplication.status === 'in review') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
+      userActivityTracking(req.user.user_id, 44, 'fail');
+      return ApiResponse.error(res, enums.LOAN_APPLICATION_STILL_AWAITS_APPROVAL, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
+    }
+    if (existingLoanApplication.status === 'declined') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is declined checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
+      userActivityTracking(req.user.user_id, 44, 'fail');
+      return ApiResponse.error(res, enums.LOAN_APPLICATION_DECLINED, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application status is ${existingLoanApplication.status} checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
-    userActivityTracking(req.user.user_id, 42, 'fail');
+    userActivityTracking(req.user.user_id, 44, 'fail');
     return ApiResponse.error(res, enums.LOAN_APPLICATION_PREVIOUSLY_DISBURSED(existingLoanApplication.status), enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
   } catch (error) {
-    userActivityTracking(req.user.user_id, 42, 'fail');
+    userActivityTracking(req.user.user_id, 44, 'fail');
     error.label = enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE;
     logger.error(`checking if loan application status is currently approved failed::${enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE}`, error.message);
     return next(error);
@@ -114,7 +215,7 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
         return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_HAS_ACTIVE_PERSONAL_LOAN_MIDDLEWARE);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingActiveLoanApplication.status} existing personal loan checkIfUserHasActivePersonalLoan.middlewares.loan.js`);
-      const statusType = existingActiveLoanApplication.status === 'pending' ? `a ${existingActiveLoanApplication.status} personal loan application` : `an ${existingActiveLoanApplication.status} personal loan`;
+      const statusType = existingActiveLoanApplication.status === 'processing' || existingActiveLoanApplication.status === 'pending' ? `a ${existingActiveLoanApplication.status} personal loan application` : `an ${existingActiveLoanApplication.status} personal loan`;
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN(statusType), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_HAS_ACTIVE_PERSONAL_LOAN_MIDDLEWARE);
     }

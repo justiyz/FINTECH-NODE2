@@ -19,7 +19,6 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
-  UserMiddleware.isUploadedVerifiedId('confirm'),
   LoanController.checkUserLoanEligibility
 );
 
@@ -40,8 +39,15 @@ router.post(
   AuthMiddleware.comparePin,
   LoanMiddleware.checkUserLoanApplicationExists,
   LoanMiddleware.checkIfLoanApplicationStatusIsCurrentlyApproved,
-  // add middleware to call sterling API for disbursement
-  LoanController.updateActivatedLoanApplicationDetails
+  LoanMiddleware.checkSeedfiPaystackBalance,
+  LoanMiddleware.generateLoanDisbursementRecipient,
+  LoanController.initiateLoanDisbursement
+);
+
+router.get(
+  '/current-loans',
+  AuthMiddleware.validateAuthToken,
+  LoanController.fetchUserCurrentLoans
 );
 
 router.get(
@@ -50,6 +56,21 @@ router.get(
   Model(Schema.loanIdParams, 'params'),
   LoanMiddleware.checkUserLoanApplicationExists,
   LoanController.fetchPersonalLoanDetails
+);
+
+router.get(
+  '/loan-payments',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanType, 'query'),
+  LoanController.fetchUserLoanPaymentTransactions
+);
+
+router.get(
+  '/:loan_payment_id/personal/payment-details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanPaymentIdParams, 'params'),
+  LoanMiddleware.checkUserLoanPaymentExists,
+  LoanController.fetchPersonalLoanPaymentDetails
 );
 
 export default router;
