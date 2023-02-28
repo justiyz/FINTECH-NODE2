@@ -63,3 +63,10 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
   await Promise.all([ repaymentArray ]);
   return repaymentArray;
 };
+
+export const formatUserIncomeRange = (incomeRange) => {
+  const formattedIncomeRange = incomeRange.replaceAll(',', '').split('-');
+  const lowerBoundIncome = formattedIncomeRange[0].trim();
+  const upperBoundIncome = formattedIncomeRange[1].trim();
+  return { lowerBoundIncome, upperBoundIncome };
+};

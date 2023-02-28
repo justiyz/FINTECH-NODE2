@@ -102,6 +102,10 @@ export const FETCH_USER_CURRENT_LOANS_CONTROLLER = 'LoanController::fetchUserCur
 export const FETCH_USER_LOAN_PAYMENT_TRANSACTIONS_CONTROLLER = 'LoanController::fetchUserLoanPaymentTransactions';
 export const INITIATE_LOAN_DISBURSEMENT_CONTROLLER = 'LoanController::initiateLoanDisbursement';
 export const CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE = 'UserMiddleware::checkIfCardBelongsToTheUser';
+export const CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterNameUnique';
+export const COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE = 'ClusterMiddleware::compareUserIncomeRange';
+export const GENERATE_CLUSTER_UNIQUE_CODE_MIDDLEWARE = 'ClusterMiddleware::generateClusterUniqueCode';
+export const CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
