@@ -12,6 +12,8 @@ router.post(
   '/create',
   AuthMiddleware.validateAuthToken,
   Model(Schema.createCluster, 'payload'),
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   ClusterMiddleware.checkIfClusterNameUnique,
   ClusterMiddleware.compareUserIncomeRange,

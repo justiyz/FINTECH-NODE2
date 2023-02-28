@@ -80,12 +80,60 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should throw error if user has not verified email', (done) => {
+      chai.request(app)
+        .post('/api/v1/cluster/create')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Seedfi movers',
+          description: 'group borrowing of money for small projects',
+          type: 'public',
+          maximum_members: 3,
+          loan_goal_target: 500000,
+          minimum_monthly_income: 45000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.EMAIL_NOT_VERIFIED);
+          done();
+        });
+    });
+    it('should throw error if user has not uploaded selfie image', (done) => {
+      chai.request(app)
+        .post('/api/v1/cluster/create')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Seedfi movers',
+          description: 'group borrowing of money for small projects',
+          type: 'public',
+          maximum_members: 3,
+          loan_goal_target: 500000,
+          minimum_monthly_income: 45000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED);
+          done();
+        });
+    });
     it('should throw error if user has not verified BVN', (done) => {
       chai.request(app)
         .post('/api/v1/cluster/create')
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_SEVEN_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
           name: 'Seedfi movers',
