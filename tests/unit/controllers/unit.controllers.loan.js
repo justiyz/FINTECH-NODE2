@@ -33,15 +33,33 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call updateActivatedLoanApplicationDetails', async() => {
+    it('should call initiateLoanDisbursement', async() => {
       const req = { user: '', params: '', existingLoanApplication: '' };
-      const data = await LoanController.updateActivatedLoanApplicationDetails(req, res, next);
+      const data = await LoanController.initiateLoanDisbursement(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call fetchPersonalLoanDetails', async() => {
       const req = { user: '', params: '' };
       const data = await LoanController.fetchPersonalLoanDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchUserCurrentLoans', async() => {
+      const req = { user: '' };
+      const data = await LoanController.fetchUserCurrentLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchUserLoanPaymentTransactions', async() => {
+      const req = { user: '', query: '' };
+      const data = await LoanController.fetchUserLoanPaymentTransactions(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchPersonalLoanPaymentDetails', async() => {
+      const req = { user: '', existingLoanPayment: '' };
+      const data = await LoanController.fetchPersonalLoanPaymentDetails(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

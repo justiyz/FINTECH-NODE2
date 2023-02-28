@@ -118,7 +118,85 @@ const raiseARefundTickedForCardTokenizationTransaction = async(transaction_id) =
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`calling paystack refund API failed::${enums.CONFIRM_PAYSTACK_PAYMENT_STATUS_BY_REFERENCE_SERVICE}`, error.message);
+    logger.error(`calling paystack refund API failed::${enums.RAISE_A_REFUND_TICKED_FOR_CARD_TOKENIZATION_TRANSACTION_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const fetchSeedfiPaystackBalance = async() => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackPlatformBalanceCheckerTestResponse();
+    }
+    const options = {
+      method: 'get',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/balance`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`checking seedfi paystack balance failed::${enums.FETCH_SEEDFI_PAYSTACK_BALANCE_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const createTransferRecipient = async(userDisbursementAccountDetails) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackUserRecipientCodeCreationTestResponse(userDisbursementAccountDetails);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transferrecipient`,
+      data: {
+        type: 'nuban',
+        name: userDisbursementAccountDetails.account_name,
+        account_number: userDisbursementAccountDetails.account_number,
+        bank_code: userDisbursementAccountDetails.bank_code,
+        currency: 'NGN'
+      },
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`calling paystack create transfer recipient failed::${enums.CREATE_TRANSFER_RECEIPT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const initiateTransfer = async(userTransferRecipient, existingLoanApplication, reference) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.initiatePaystackBankTransferTestResponse(userTransferRecipient, existingLoanApplication, reference);
+    }
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested); // this is because paystack will not process transaction greater than 1 Million
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transfer`,
+      data: {
+        source: 'balance', 
+        amount: amountRequestedType * 100, // Paystack requires amount to be in kobo for naira payment 
+        reference,
+        recipient: userTransferRecipient,
+        reason: 'Loan facility disbursement'
+      },
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`calling paystack initiate transfer failed::${enums.INITIATE_TRANSFER_SERVICE}`, error.message);
     return error;
   }
 };
@@ -128,5 +206,8 @@ export {
   resolveAccount, 
   initializeCardPayment,
   confirmPaystackPaymentStatusByReference,
-  raiseARefundTickedForCardTokenizationTransaction
+  raiseARefundTickedForCardTokenizationTransaction,
+  fetchSeedfiPaystackBalance,
+  createTransferRecipient,
+  initiateTransfer
 };

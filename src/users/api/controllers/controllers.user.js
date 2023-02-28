@@ -55,8 +55,10 @@ export const updateUserRefreshToken = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully generated refresh token updateUserRefreshToken.controllers.user.js`);
     const [ updatedUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new refresh token to the database updateUserRefreshToken.controllers.user.js`);
+    const is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
     const data = {
       ...updatedUser,
+      is_updated_advanced_kyc,
       token
     };
     return ApiResponse.success(res, enums.USER_REFRESH_TOKEN_UPDATED, enums.HTTP_OK, data);
@@ -109,8 +111,7 @@ export const updateBvn = async (req, res, next) => {
   try {
     const { body: { bvn }, user } = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-    const tierOption = user.is_uploaded_identity_card ? '2' : '1';
-    const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn, tierOption ]);
+    const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn, '1' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
     return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, updateBvn);
@@ -378,8 +379,7 @@ export const idUploadVerification = async(req, res, next) => {
     const { user, body } = req; 
     const payload = UserPayload.imgVerification(user, body);
     await processAnyData(userQueries.updateIdVerification, payload);
-    const tierOption = user.is_verified_bvn ? '2' : '1';
-    const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierOption ]);
+    const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, '2' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
@@ -435,6 +435,7 @@ export const getProfile = async(req, res, next) => {
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
+    user.is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
     return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
   } catch (error){
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
@@ -456,7 +457,7 @@ export const setDefaultCard = async(req, res, next) => {
   try {
     const [ , [ defaultCard ] ] = await Promise.all([
       processAnyData(userQueries.setExistingCardDefaultFalse, [ user.user_id ]),
-      processAnyData(userQueries.SetNewCardDefaultTrue, [ user.user_id, id ])
+      processAnyData(userQueries.setNewCardDefaultTrue, [ user.user_id, id ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully set user's default card setDefaultCard.controller.user.js`);
@@ -481,10 +482,15 @@ export const setDefaultCard = async(req, res, next) => {
 
 export const removeCard = async(req, res, next) => {
   try {
-    const { user, params: { id } } = req;
+    const { user, params: { id }, userDebitCard } = req;
     await processAnyData(userQueries.removeCard, [ user.user_id, id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully removed a user's saved card.controller.user.js`);
+    if (userDebitCard.is_default) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: to be deleted debit card is default card removeCard.controller.user.js`);
+      await processAnyData(userQueries.updateSecondaryCardDefault, [ user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: a new default card set automatically removeCard.controller.user.js`);
+    }
     userActivityTracking(req.user.user_id, 28, 'success');
     return ApiResponse.success(res, enums.CARD_REMOVED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
@@ -513,11 +519,11 @@ export const homepageDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan outstanding fetched homepageDetails.controller.user.js`);
     const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount + (userOutstandingClusterLoanRepayment || 0)).toFixed(2));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's total loan obligation calculated homepageDetails.controller.user.js`);
-    const repaidPersonalLoans = []; // to later implement the query when personal loan repayment is implemented
+    const personalLoanTransactions =  await processAnyData(userQueries.userPersonalLoanTransactions, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan repayment transactions fetched homepageDetails.controller.user.js`);
     const underProcessingPersonalLoans = await processAnyData(userQueries.userExistingProcessingLoans, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process personal loans fetched from the DB homepageDetails.controller.user.jss`);
-    const repaidClusterLoans = []; // to later implement the query when cluster loan repayment is implemented
+    const clusterLoanTransactions = []; // to later implement the query when cluster loan repayment is implemented
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan repayment transactions fetched homepageDetails.controller.user.js`);
     const underProcessingClusterLoans = []; // to implement the query when cluster loan is implemented
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process cluster loans fetched from the DB homepageDetails.controller.user.js`);
@@ -532,11 +538,11 @@ export const homepageDetails = async(req, res, next) => {
       },
       personal_loan_transaction_history: {
         underProcessingPersonalLoans,
-        repaidPersonalLoans
+        personalLoanTransactions
       },
       cluster_loan_transaction_history: {
         underProcessingClusterLoans,
-        repaidClusterLoans
+        clusterLoanTransactions
       }
     };
     return ApiResponse.success(res, enums.HOMEPAGE_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);

@@ -244,7 +244,7 @@ export default {
   `,
 
   fetchCardsById:`
-      SELECT id, user_id, card_type
+      SELECT id, user_id, card_type, is_default
       FROM user_debit_cards
       WHERE id = $1
   `,
@@ -256,7 +256,7 @@ export default {
         is_default = 'false'
       WHERE user_id = $1`,
 
-  SetNewCardDefaultTrue: `
+  setNewCardDefaultTrue: `
       UPDATE user_debit_cards
       SET 
         updated_at = NOW(),
@@ -268,6 +268,14 @@ export default {
   removeCard:`
       DELETE FROM user_debit_cards
       WHERE user_id = $1 AND id = $2`,
+
+  updateSecondaryCardDefault: `
+      UPDATE user_debit_cards
+      SET 
+        updated_at = NOW(),
+        is_default = 'true'
+      WHERE user_id = $1
+      RETURNING id, user_id, is_default, card_type`,
 
   userOutstandingPersonalLoan:`
       SELECT 
@@ -293,6 +301,24 @@ export default {
         to_char(DATE (created_at)::date, 'Mon DD YYYY') AS requested_date
       FROM personal_loans
       WHERE user_id = $1
-      AND (status = 'pending' OR status = 'approved')
+      AND status = 'in review'
+      ORDER BY created_at DESC`,
+
+  userPersonalLoanTransactions:`
+      SELECT 
+        id,
+        payment_id,
+        loan_id,
+        user_id,
+        TRUNC(amount::numeric, 2) AS amount_payed,
+        transaction_type,
+        loan_purpose,
+        status,
+        payment_description,
+        payment_means
+        created_at,
+        to_char(DATE (created_at)::date, 'DDth Mon, YYYY') AS payment_date
+      FROM personal_loan_payments
+      WHERE user_id = $1
       ORDER BY created_at DESC`
 };

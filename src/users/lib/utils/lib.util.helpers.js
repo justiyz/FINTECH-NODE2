@@ -12,7 +12,7 @@ export const generateReferralCode = (size) => {
 
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
-export const generateLoanRepaymentSchedule = async(existingLoanApplication, user) => {
+export const generateLoanRepaymentSchedule = async(existingLoanApplication, user_id) => {
   const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
   let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   let subsequentFee = 0;
@@ -26,7 +26,7 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
   let repaymentArray = [
     {
       loan_id: existingLoanApplication.loan_id,
-      user_id: user.user_id,
+      user_id,
       repayment_order: 1,
       principal_payment: parseFloat(parseFloat(firstPrincipalPayment).toFixed(1)),
       interest_payment: parseFloat(parseFloat(firstRepaymentInterest).toFixed(1)),
@@ -48,7 +48,7 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
     postOutstandingLoanAmount = parseFloat(parseFloat(preOutstandingLoanAmount) - parseFloat(nextPrincipalPayment));
     const nextRepaymentDetails = {
       loan_id: existingLoanApplication.loan_id,
-      user_id: user.user_id,
+      user_id,
       repayment_order: parseFloat(parseFloat(repaymentOrder).toFixed(1)),
       principal_payment: parseFloat(parseFloat(nextPrincipalPayment).toFixed(1)),
       interest_payment: parseFloat(parseFloat(nextInterestPayment).toFixed(1)),

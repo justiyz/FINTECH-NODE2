@@ -40,7 +40,10 @@ export const operations = {
   39: 'PLONAPAUT', // personal loan approved automatically
   40: 'PLONDCLND', // personal loan declined
   41: 'RNGPSLOAN', // renegotiate personal loan
-  42: 'PSLOANDBSD', // personal loan disbursed
-  43: 'CNCPLNAP' // user cancels loan application process
+  42: 'PSLOANDBSD', // personal loan disbursed to user successfully
+  43: 'CNCPLNAP', // user cancels loan application process
+  44: 'INPSLNDSBT', // user initiates loan disbursement by authorizing loan with pin
+  45: 'PSLNDBSFLD', // loan disbursement payment to user failed
+  46: 'PSLNDBSRVD' // loan disbursement payment to user failed and amount reversed back to seedfi account
 };
   

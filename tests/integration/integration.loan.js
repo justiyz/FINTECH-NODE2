@@ -3,12 +3,13 @@ import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
-
+import { receiveTransferSuccessWebHookOne, receiveTransferFailedWebHookOne, receiveTransferReversedWebHookOne, receiveTransferSuccessWebHookTwo } from '../payload/payload.payment';
 
 const { expect } = chai;
 chai.use(chaiHttp);
 
 const pin = '0908';
+const userOnePin = '2020';
 
 describe('User', () => {
   describe('user apply for loan', () => {
@@ -204,7 +205,7 @@ describe('User', () => {
           done();
         });
     });
-    it('should throw error if user has not uploaded valid id', (done) => {
+    it('should throw error if user tries to apply for a loan greater than tier 1 user loan', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')
         .set({
@@ -212,16 +213,16 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          amount: 200000,
-          duration_in_months: 3,
+          amount: 1500000,
+          duration_in_months: 6,
           loan_reason: 'camera fixing loan'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_VALID_ID_NOT_UPLOADED);
+          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE);
           done();
         });
     });
@@ -288,7 +289,7 @@ describe('User', () => {
           done();
         });
     });
-    it('should apply for loan successfully', (done) => {
+    it('should apply for loan for user 2 successfully', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')
         .set({
@@ -308,9 +309,35 @@ describe('User', () => {
           expect(res.body.data).to.have.property('loan_id');
           expect(res.body.data).to.have.property('fees');
           expect(res.body.data.loan_duration_in_months).to.equal('3');
-          expect(res.body.message).to.equal(res.body.data.loan_decision === 'MANUAL' ? enums.LOAN_APPLICATION_MANUAL_DECISION : enums.LOAN_APPLICATION_APPROVED_DECISION);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_APPROVED_DECISION);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID = res.body.data.loan_id;
+          done();
+        });
+    });
+    it('should apply for loan for user 1 successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/loan/application')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          amount: 200000,
+          duration_in_months: 2,
+          loan_reason: 'holiday flexing loan'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loan_id');
+          expect(res.body.data).to.have.property('fees');
+          expect(res.body.data.loan_duration_in_months).to.equal('2');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_APPROVED_DECISION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_LOAN_ID = res.body.data.loan_id;
           done();
         });
     });
@@ -411,7 +438,7 @@ describe('User', () => {
           done();
         });
     });
-    it('should apply for loan successfully', (done) => {
+    it('should apply for another loan for user 2 successfully', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')
         .set({
@@ -454,9 +481,34 @@ describe('User', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.have.property('loan_decision');
           expect(res.body.data).to.have.property('status');
-          expect(res.body.data.status).to.equal('ongoing');
-          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_DISBURSEMENT_SUCCESSFUL);
+          expect(res.body.data.status).to.equal('processing');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_DISBURSEMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should disburse loan for user one successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_LOAN_ID}/disbursement`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: userOnePin
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loan_decision');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.data.status).to.equal('processing');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_DISBURSEMENT_REFERENCE = res.body.data.reference;
           done();
         });
     });
@@ -477,7 +529,7 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN('an ongoing personal loan'));
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN('a processing personal loan application'));
           done();
         });
     });
@@ -493,13 +545,76 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS('ongoing'));
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS('processing'));
+          done();
+        });
+    });
+  });
+  describe('simulate paystack webhook response for loan disbursement', () => {
+    it('should receive user 2 loan 2 webhook transfer success response successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveTransferSuccessWebHookTwo(process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_DISBURSEMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should receive user 1 loan 1 webhook transfer failed response successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveTransferFailedWebHookOne(process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_DISBURSEMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('object');
+          process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_RE_DISBURSEMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should receive user 1 loan 1 webhook transfer reversed response successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveTransferReversedWebHookOne(process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_DISBURSEMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should receive user 2 loan 2 webhook transfer success response successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveTransferSuccessWebHookOne(process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_RE_DISBURSEMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
           done();
         });
     });
   });
   describe('user homepage', () => {
-    it('should cancel loan application for user two successfully', (done) => {
+    it('should fetch user two homepage details successfully', (done) => {
       chai.request(app)
         .get('/api/v1/user/homepage')
         .set({
@@ -522,6 +637,65 @@ describe('User', () => {
         });
     });
   });
+  describe('user current loans', () => {
+    it('should fetch user two current loans successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/current-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data.currentPersonalLoans.length).to.equal(1);
+          expect(res.body.data.currentClusterLoans.length).to.equal(0);
+          expect(res.body.message).to.equal(enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch user one current loans successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/current-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data.currentPersonalLoans.length).to.equal(1);
+          expect(res.body.data.currentClusterLoans.length).to.equal(0);
+          expect(res.body.message).to.equal(enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch user three current loans successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/current-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data.currentPersonalLoans.length).to.equal(0);
+          expect(res.body.data.currentClusterLoans.length).to.equal(0);
+          expect(res.body.message).to.equal(enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
   describe('user fetches details of one loan', () => {
     it('should throw error when invalid loan id is sent', (done) => {
       chai.request(app)
@@ -539,7 +713,7 @@ describe('User', () => {
           done();
         });
     });
-    it('should cancel loan application for user two successfully', (done) => {
+    it('should fetch loan details for user two loan two successfully', (done) => {
       chai.request(app)
         .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/personal/details`)
         .set({
@@ -553,9 +727,183 @@ describe('User', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.have.property('loanRepaymentDetails');
           expect(res.body.data).to.have.property('loanDetails');
+          expect(res.body.data).to.have.property('nextLoanRepaymentDetails');
           expect(res.body.data.loanDetails.status).to.equal('ongoing');
           expect(res.body.data.loanRepaymentDetails.length).to.equal(6);
           expect(res.body.message).to.equal(enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch loan details for user one loan one successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_LOAN_ID}/personal/details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loanRepaymentDetails');
+          expect(res.body.data).to.have.property('loanDetails');
+          expect(res.body.data).to.have.property('nextLoanRepaymentDetails');
+          expect(res.body.data.loanDetails.status).to.equal('ongoing');
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(2);
+          expect(res.body.message).to.equal(enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('user loan payments', () => {
+    it('should throw error when invalid type is sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/loan-payments')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'group'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('type must be one of [personal, cluster]');
+          done();
+        });
+    });
+    it('should fetch user two personal loan payments successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/loan-payments')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'personal'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.data.length).to.equal(1);
+          expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_PAYMENT_ONE_PAYMENT_ID = res.body.data[0].payment_id;
+          done();
+        });
+    });
+    it('should fetch user two cluster loan payments successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/loan-payments')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'cluster'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.data.length).to.equal(0);
+          expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('cluster'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch user one personal loan payments successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/loan-payments')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'personal'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.data.length).to.equal(1);
+          expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_ONE_LOAN_PAYMENT_ONE_PAYMENT_ID = res.body.data[0].payment_id;
+          done();
+        });
+    });
+  });
+  describe('user fetches details of one loan payment', () => {
+    it('should throw error when invalid loan payment id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_PAYMENT_ONE_PAYMENT_ID}90ij/personal/payment-details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_PAYMENT_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should fetch loan details for user two loan payment one successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_PAYMENT_ONE_PAYMENT_ID}/personal/payment-details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loanPaymentDetails');
+          expect(res.body.data).to.have.property('loanDetails');
+          expect(res.body.data).to.have.property('loanRepaymentDetails');
+          expect(res.body.data.loanDetails.status).to.equal('ongoing');
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(6);
+          expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch loan details for user one loan payment one successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_ONE_LOAN_PAYMENT_ONE_PAYMENT_ID}/personal/payment-details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loanPaymentDetails');
+          expect(res.body.data).to.have.property('loanDetails');
+          expect(res.body.data).to.have.property('loanRepaymentDetails');
+          expect(res.body.data.loanDetails.status).to.equal('ongoing');
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(2);
+          expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });

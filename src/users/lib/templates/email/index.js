@@ -1,11 +1,12 @@
-import * as authEmail from './lib.template';
+import * as email from './lib.template';
 
 const getTemplate = (type, data) => {
   switch (type) {
-  case 'forgotPassword': return authEmail.forgotPassword(data);
-  case 'verifyEmail': return authEmail.verifyEmail(data);
-  case 'requestVerifyEmail': return authEmail.requestVerifyEmail(data);
-  case 'rejectedDebitCard': return authEmail.rejectedDebitCard(data);
+  case 'forgotPassword': return email.forgotPassword(data);
+  case 'verifyEmail': return email.verifyEmail(data);
+  case 'requestVerifyEmail': return email.requestVerifyEmail(data);
+  case 'rejectedDebitCard': return email.rejectedDebitCard(data);
+  case 'loanDisbursement': return email.loanDisbursement(data);
   default: return '';
   }
 };

@@ -93,3 +93,34 @@ export const  adminInviteMail = (data) => `<tr>
       Login <a style="color: #1ECAAB" href='${config.SEEDFI_ADMIN_WEB_BASE_URL}/auth/login'>here</a>.
       </p>
     </td>`;
+
+export const  insufficientBalance = (data) => `<tr>
+    <tr>
+        <td style="padding-bottom: 30px;">
+            Hi SeedFi Admin,
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+            <p>Kindly fund your paystack wallet balance for loan disbursement</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+            <p>current balance: ${data.currentBalance}</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+          Kindly login to your paystack dashboard to fund balance
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <span style="line-height: 40px">Thanks</span> <br />
+            <span style="line-height: 40px">Yours Credibly</span> <br />
+            <span style="font-weight: 600; display: block;">SeedFi</span>
+            <span style="display: block;">Email: ask@seedfi.com</span>
+            <span style="display: block;">Call: +234 814 650 7035</span>
+        </td>
+    </tr>`;
