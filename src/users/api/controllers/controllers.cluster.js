@@ -31,7 +31,7 @@ export const createCluster = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin member created successfully successfully createCluster.controllers.cluster.js`);
     createClusterNotification(user, body, newClusterDetails, clusterMemberDetails, `${user.first_name} ${user.last_name} created ${body.type} cluster ${body.name}`, 'create-cluster', {});
     userActivityTracking(req.user.user_id, activityType, 'success');
-    return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, newClusterDetails );
+    return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, { ...newClusterDetails, user_referral_code: user.referral_code } );
   } catch (error) {
     userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.CREATE_CLUSTER_CONTROLLER;
