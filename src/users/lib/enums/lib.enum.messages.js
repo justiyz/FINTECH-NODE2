@@ -123,6 +123,10 @@ export const USER_CURRENT_LOANS_FETCHED_SUCCESSFUL = 'User current loans fetched
 export const USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payments fetched successful`;
 export const FORGOT_PIN_TOKEN = 'Pin reset token sent';
 export const PIN_RESET = 'Pin reset successful';
+export const CLUSTER_NAME_ALREADY_EXISTING = (name) => `A cluster with this name "${name}" already exists`;
+export const UPDATE_INCOME_RANGE_FOR_CLUSTER_CREATION = 'kindly update income range in profile to create cluster';
+export const CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING = 'Cluster minimum income is greater than user maximum monthly income';
+export const CLUSTER_CREATED_SUCCESSFULLY = 'Cluster created successfully';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

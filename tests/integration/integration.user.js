@@ -551,6 +551,26 @@ describe('User', () => {
         .post('/api/v1/user/request-email-verification')
         .set({
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_THREE_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_EMAIL_VERIFICATION);
+          process.env.SEEDFI_USER_THREE_VERIFY_EMAIL_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should send a verify otp email', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
@@ -623,6 +643,21 @@ describe('User', () => {
         .get('/api/v1/user/verify-email')
         .query({
           verifyValue: process.env.SEEDFI_USER_FOUR_VERIFY_EMAIL_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Email verified successfully.');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully verify user email', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/verify-email')
+        .query({
+          verifyValue: process.env.SEEDFI_USER_THREE_VERIFY_EMAIL_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);

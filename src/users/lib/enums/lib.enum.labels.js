@@ -104,6 +104,10 @@ export const INITIATE_LOAN_DISBURSEMENT_CONTROLLER = 'LoanController::initiateLo
 export const CHECK_IF_CARD_BELONGS_TO_A_USER_MIDDLEWARE = 'UserMiddleware::checkIfCardBelongsToTheUser';
 export const FORGOT_PIN_CONTROLLER = 'AuthMiddleware::forgotPin';
 export const RESET_PIN_CONTROLLER = 'AuthMiddleware::resetPin';
+export const CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterNameUnique';
+export const COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE = 'ClusterMiddleware::compareUserIncomeRange';
+export const GENERATE_CLUSTER_UNIQUE_CODE_MIDDLEWARE = 'ClusterMiddleware::generateClusterUniqueCode';
+export const CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';

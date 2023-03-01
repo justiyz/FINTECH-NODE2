@@ -44,6 +44,36 @@ export const operations = {
   43: 'CNCPLNAP', // user cancels loan application process
   44: 'INPSLNDSBT', // user initiates loan disbursement by authorizing loan with pin
   45: 'PSLNDBSFLD', // loan disbursement payment to user failed
-  46: 'PSLNDBSRVD' // loan disbursement payment to user failed and amount reversed back to seedfi account
+  46: 'PSLNDBSRVD', // loan disbursement payment to user failed and amount reversed back to seedfi account
+  47: 'CRTPBCLST', // user creates a public cluster
+  48: 'CRTPVCLST', // user creates a private cluster
+  49: 'RQTJNCLST', // user requests to join cluste
+  50: 'APRQJNCLST', // existing cluster user accepts request to join cluster
+  51: 'DCRQJNCLST', // existing cluster user declines request to join cluster
+  52: 'JNCLST', // join cluster', 'user joins cluster
+  53: 'RJTJNCLST', // user rejected from joining cluster
+  54: 'IVCLMBYEM', // cluster admin invites cluster member by email
+  55: 'IVCLMBYPN', // cluster admin invite cluster member by phone number
+  56: 'INCLSTLNAP', // cluster admin initiates cluster loan application
+  57: 'APCLTLNAPT', // cluster member accepts cluster loan application terms
+  58: 'DCCLTLNAPT', // cluster member declines cluster loan application terms
+  59: 'INDELCLTRQ', // cluster admin initiate delete cluster
+  60: 'APDELCLTRQ', // cluster member accepts delete cluster request
+  61: 'DCDELCLTRQ', // cluster member declines delete cluster request
+  62: 'CLSTDELTD', // cluster deleted upon agreement by cluster members
+  63: 'LVCLST', // cluster member leaves cluster
+  64: 'SGNCLTADM', // cluster admin suggests new cluster admin
+  65: 'ACNCLTADM', // suggested admin cluster member accepts new cluster admin role
+  66: 'DCNCLTADM', // suggested admin cluster member declines new cluster admin role
+  67: 'BNWCLTADM', // cluster member becomes new cluster admin
+  68: 'EDTCLST', // cluster admin edits cluster
+  69: 'APLNAPOFLT', // user accepts loan application offer letter
+  70: 'AUTPLONRP', // users partial loan obligation is repaid automatically
+  71: 'MANPLONRP', // users partial loan obligation is repaid manually by user
+  72: 'AUTFLONRP', // users full loan obligation is repaid automatically
+  73: 'MANFLONRP', // users full loan obligation is repaid manually by user
+  74: 'RNGLONTRM', // user renegotiates loan terms during application
+  75: 'RSHDLONTN', // user reschedules loan tenor
+  76: 'RSHDLONRA' // user reschedules loan repayment amount
 };
   
