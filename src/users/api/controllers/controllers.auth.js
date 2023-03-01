@@ -247,8 +247,7 @@ Reset password token
 export const generateResetToken = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
-    const token = type === 'pin' ? await Hash.generateResetToken(user, '2m') :
-      await Hash.generateResetToken(user, '5m');
+    const token = Hash.generateResetToken(user);
     logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
     successfully generated password token generateResetToken.middlewares.auth.js`);
     const tokenExpiration = await JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp;
@@ -439,7 +438,7 @@ export const forgotPin = async(req, res, next) => {
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database forgotPin.controller.auth.js`);
     if (existingOtp) {
-      forgotPassword(req, res, next);
+      forgotPin(req, res, next);
     }
     const expireAt = dayjs().add(5, 'minutes');
     const expirationTime = dayjs(expireAt);
@@ -451,7 +450,7 @@ export const forgotPin = async(req, res, next) => {
       return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, data);
     }
     await sendSMS(user.phone_number, resetPinOTPSms(data));
-    return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK);
+    return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, data); // otp will be removed before going live
   } catch (error) {
     userActivityTracking(req.user.user_id, 12, 'fail');
     error.label = enums.FORGOT_PIN_CONTROLLER;

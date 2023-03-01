@@ -15,10 +15,10 @@ export const generateAuthToken = (user) => {
   }
 };
 
-export const generateResetToken = (user, minutes) => {
+export const generateResetToken = (user) => {
   try {
     const { email } = user;
-    return jwt.sign({ email }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: minutes });
+    return jwt.sign({ email }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '5m' });
   } catch (error) {
     return error;
   }

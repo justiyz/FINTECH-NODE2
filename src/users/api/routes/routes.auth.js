@@ -117,12 +117,11 @@ router.post(
 router.post(
   '/forgot-pin',
   AuthMiddleware.validateAuthToken,
-  UserMiddleware.validateUnAuthenticatedUser('verify'),
   AuthController.forgotPin
 );
 
 router.post(
-  '/verify-pin-token',
+  '/verify-reset-pin-token',
   Model(Schema.verifyOtp, 'payload'),
   AuthMiddleware.verifyVerificationToken,
   AuthController.generateResetToken('pin')

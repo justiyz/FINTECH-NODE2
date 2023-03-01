@@ -2479,7 +2479,7 @@ describe('User', () => {
   describe('Verify reset pin token', () => {
     it('Should return error if otp is wrong', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/verify-pin-token')
+        .post('/api/v1/auth/verify-reset-pin-token')
         .send({
           otp: '162611'
         })
@@ -2494,7 +2494,7 @@ describe('User', () => {
     });
     it('Should return error if otp is wrong', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/verify-pin-token')
+        .post('/api/v1/auth/verify-reset-pin-token')
         .send({
           otp: ''
         })
@@ -2509,7 +2509,7 @@ describe('User', () => {
     });
     it('Should successfully verify and generate reset pin token', (done) => {
       chai.request(app)
-        .post('/api/v1/auth/verify-pin-token')
+        .post('/api/v1/auth/verify-reset-pin-token')
         .send({
           otp: process.env.SEEDFI_USER_SIX_FORGOT_PIN_OTP
         })
