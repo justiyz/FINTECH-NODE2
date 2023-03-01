@@ -67,7 +67,7 @@ export const ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT = 'Account is already disburse
 export const ACCOUNT_DETAILS_NOT_USERS = 'Account details does not belong to user';
 export const ACCOUNT_USER_NOT_OWNED_BY_USER = 'Account details does not belong to user';
 export const BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY = (type) => `Account details ${type} status updated successfully`;
-export const GENERATE_RESET_PASSWORD_TOKEN = 'Password token Successfully generated';
+export const GENERATE_RESET_PASSWORD_TOKEN = (type) => `${type} token Successfully generated`;
 export const PASSWORD_TOKEN = 'Password reset token sent';
 export const BANK_ACCOUNT_SAVED_SUCCESSFULLY = 'Bank account added successfully';
 export const BANK_ACCOUNTS_FETCHED_SUCCESSFULLY = 'Bank accounts fetched successfully';
@@ -121,6 +121,8 @@ export const USER_LOAN_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan
 export const USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payment details fetched successful`;
 export const USER_CURRENT_LOANS_FETCHED_SUCCESSFUL = 'User current loans fetched successful';
 export const USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payments fetched successful`;
+export const FORGOT_PIN_TOKEN = 'Pin reset token sent';
+export const PIN_RESET = 'Pin reset successful';
 export const CLUSTER_NAME_ALREADY_EXISTING = (name) => `A cluster with this name "${name}" already exists`;
 export const UPDATE_INCOME_RANGE_FOR_CLUSTER_CREATION = 'kindly update income range in profile to create cluster';
 export const CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING = 'Cluster minimum income is greater than user maximum monthly income';
@@ -174,3 +176,4 @@ export const ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY = 'Admins per role fetched su
 export const EDIT_USER_STATUS = 'User status successfully updated.';
 export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
 export const FETCH_USER_KYC_DETAILS = 'User kyc details fetched successfully';
+export const GENERATE_ADMIN_RESET_PASSWORD_TOKEN =  'Password token Successfully generated';

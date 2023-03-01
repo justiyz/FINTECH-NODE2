@@ -276,12 +276,12 @@ export const comparePassword = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const validateForgotPasswordToken = async(req, res, next) => {
+export const validateForgotPasswordAndPinToken = async(req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that no authentication token was sent with the headers
-      validateForgotPasswordToken.middlewares.auth.js`);
+      validateForgotPasswordAndPinToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.NO_TOKEN, enums.HTTP_UNAUTHORIZED, enums.GET_AUTH_TOKEN_MIDDLEWARE);
     }
     if (!token.startsWith('Bearer ')) {
@@ -290,21 +290,21 @@ export const validateForgotPasswordToken = async(req, res, next) => {
     if (token.startsWith('Bearer ')) {
       token = token.slice(7, token.length);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully extracts token validateForgotPasswordToken.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully extracts token validateForgotPasswordAndPinToken.middlewares.auth.js`);
     const decoded = Hash.decodeToken(token);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded authentication token sent using the authentication secret
-    validateForgotPasswordToken.middlewares.auth.js`);
+    validateForgotPasswordAndPinToken.middlewares.auth.js`);
     if (decoded.message) {
       if (decoded.message === 'jwt expired') {
         return ApiResponse.error(res, enums.SESSION_EXPIRED, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded authentication token has a message which is an 
-      error message validateForgotPasswordToken.middlewares.auth.js`);
+      error message validateForgotPasswordAndPinToken.middlewares.auth.js`);
       return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
     if(decoded.email){
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded authentication token sent using the authentication secret
-      validateForgotPasswordToken.middlewares.auth.js`);
+      validateForgotPasswordAndPinToken.middlewares.auth.js`);
       const [ user ] = await processAnyData(userQueries.getUserByEmail, [ decoded.email ]);
       req.user = user;
       return next();
