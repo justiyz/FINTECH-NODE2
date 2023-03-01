@@ -576,7 +576,7 @@ describe('Admin Auth', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.GENERATE_RESET_PASSWORD_TOKEN);
+          expect(res.body.message).to.equal(enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_TOKEN = res.body.data.passwordToken;
           done();

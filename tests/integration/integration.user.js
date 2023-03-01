@@ -2406,5 +2406,202 @@ describe('User', () => {
         });
     });
   });
+  describe('Forgot pin', () => {
+    it('Should send a reset password sms', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forgot-pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.FORGOT_PIN_TOKEN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_SIX_FORGOT_PIN_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should flag when user sent invalid signature', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/forgot-pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}0`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Verify reset pin token', () => {
+    it('Should return error if otp is wrong', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-pin-token')
+        .send({
+          otp: '162611'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Invalid OTP code');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if otp is wrong', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-pin-token')
+        .send({
+          otp: ''
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('otp is not allowed to be empty');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully verify and generate reset pin token', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-pin-token')
+        .send({
+          otp: process.env.SEEDFI_USER_SIX_FORGOT_PIN_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.GENERATE_RESET_PASSWORD_TOKEN('pin'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_SIX_RESET_PIN_TOKEN = res.body.data.token;
+          done();
+        });
+    });
+  });
+  describe('Reset pin', () => {
+    it('Should throw error if any of the fields are empty', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/reset-pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_RESET_PIN_TOKEN}`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('pin is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid otp is sent', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/reset-pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_RESET_PIN_TOKEN}0op`
+        })
+        .send({
+          pin: '0986'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if token is malformed', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/reset-pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}0op`
+        })
+        .send({
+          pin: '0909'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('jwt malformed');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if length of otp is less than six', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/reset-pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_RESET_PIN_TOKEN}`
+        })
+        .send({
+          pin: '989'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('pin length must be 4 characters long');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if no token is sent.', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/reset-pin')
+        .send({
+          pin: '0987'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Please provide a token');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully reset user pin', (done) => {
+      chai.request(app)
+        .patch('/api/v1/auth/reset-pin')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_RESET_PIN_TOKEN}`
+        })
+        .send({
+          pin: '0909'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Pin reset successful');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
 });
 

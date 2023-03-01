@@ -93,7 +93,7 @@ export default {
     UPDATE paystack_payment_histories
     SET
         updated_at = NOW(),
-        is_initiated_refund = 'true'
+        is_initiated_refund = TRUE
     WHERE transaction_reference = $1`,
  
   updateTransactionRefundStatus: `

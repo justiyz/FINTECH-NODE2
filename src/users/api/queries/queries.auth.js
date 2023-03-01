@@ -134,5 +134,22 @@ export default {
     updated_at = NOW(),
     pin = $2
   WHERE user_id = $1
+    `,
+  forgotPin: `
+    UPDATE users
+    SET
+      verification_token = $2,
+      verification_token_expires = $3,
+      updated_at = NOW()
+    WHERE user_id = $1
+    RETURNING user_id, first_name, middle_name, last_name, status`,
+  resetPin: `
+    UPDATE users
+    SET
+      updated_at = NOW(),
+      verification_token = NULL,
+      verification_token_expires = NULL,
+      pin = $2
+    WHERE user_id = $1
     `
 };

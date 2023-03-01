@@ -155,7 +155,7 @@ export const sendAdminPasswordToken = async(req, res, next) => {
     const tokenExpireAt = dayjs(myDate);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched token expiration time and converted it sendAdminPasswordToken.admin.controllers.auth.js`);
     adminActivityTracking(req.admin.admin_id, 18, 'success');
-    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken, tokenExpireAt });
+    return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken, tokenExpireAt });
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 18, 'fail');
     error.label = enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER;

@@ -7,7 +7,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
 import sendSMS from '../../config/sms';
-import { signupSms, resendSignupOTPSms } from '../../lib/templates/sms';
+import { signupSms, resendSignupOTPSms, resetPinOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -237,27 +237,31 @@ export const forgotPassword = async(req, res, next) => {
 
 /**
 Reset password token
+ * @param {String} type - The type request from the endpoint.
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns { JSON } - A JSON response containing user details
  * @memberof AuthController
  */
-export const resetPasswordToken = async(req, res, next) => {
+export const generateResetToken = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
-    const passwordToken = await Hash.generateResetPasswordToken(user);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: successfully generated password token resetPasswordToken.middlewares.auth.js`);
-    const tokenExpiration = await JSON.parse(Buffer.from(passwordToken.split('.')[1], 'base64').toString()).exp;
+    const token = type === 'pin' ? await Hash.generateResetToken(user, '2m') :
+      await Hash.generateResetToken(user, '5m');
+    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
+    successfully generated password token generateResetToken.middlewares.auth.js`);
+    const tokenExpiration = await JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp;
     const myDate = new Date(tokenExpiration * 1000);
     const tokenExpireAt = dayjs(myDate);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched token expiration time and converted it resetPasswordToken.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully fetched token expiration time and converted it generateResetToken.middlewares.auth.js`);
     userActivityTracking(req.user.user_id, 20, 'success');
-    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken, tokenExpireAt });
+    return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN(`${type}`), enums.HTTP_OK, { token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 20, 'fail');
-    error.label = enums.RESET_PASSWORD_TOKEN_CONTROLLER;
-    logger.error(`generating reset password token failed::${enums.RESET_PASSWORD_TOKEN_CONTROLLER}`, error.message);
+    error.label = enums.GENERATE_RESET_TOKEN_CONTROLLER;
+    logger.error(`generating reset password token failed::${enums.GENERATE_RESET_TOKEN_CONTROLLER}`, error.message);
     return next(error);
   }
 };
@@ -415,6 +419,68 @@ export const confirmPin = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 31, 'fail');
     error.label = enums.CONFIRM_PIN_CONTROLLER;
     logger.error(`Confirm pin failed:::${enums.CONFIRM_PIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ Request forgot Pin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing success message
+ * @memberof AuthController
+ */
+export const forgotPin = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const otp = Helpers.generateOtp();
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated forgotPin.controller.auth.js`);
+    const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database forgotPin.controller.auth.js`);
+    if (existingOtp) {
+      forgotPassword(req, res, next);
+    }
+    const expireAt = dayjs().add(5, 'minutes');
+    const expirationTime = dayjs(expireAt);
+    await processAnyData(authQueries.forgotPin,  [ user.user_id, otp, expireAt ]);
+    const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
+    logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},Info: sms for user to reset pin has been sent successfully forgotPin.controller.auth.js`);
+    userActivityTracking(req.user.user_id, 12, 'success');
+    if (SEEDFI_NODE_ENV === 'test') {
+      return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, data);
+    }
+    await sendSMS(user.phone_number, resetPinOTPSms(data));
+    return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 12, 'fail');
+    error.label = enums.FORGOT_PIN_CONTROLLER;
+    logger.error(`user forgot pin request failed:::${enums.FORGOT_PIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ User reset pin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response containing success message
+ * @memberof AuthController
+ */
+export const resetPin = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const hash = Hash.hashData(body.pin.trim());
+    await processAnyData(authQueries.resetPin, [ user.user_id, hash ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully reset user pin in the resetPin.controllers.auth.js`);
+    userActivityTracking(req.user.user_id, 13, 'success');
+    return ApiResponse.success(res, enums.PIN_RESET, enums.HTTP_OK);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 13, 'fail');
+    error.label = enums.RESET_PIN_CONTROLLER;
+    logger.error(`resetting pin failed:::${enums.RESET_PIN_CONTROLLER}`, error.message);
     return next(error);
   }
 };

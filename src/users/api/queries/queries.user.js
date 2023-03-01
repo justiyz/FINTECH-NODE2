@@ -159,14 +159,14 @@ export default {
       UPDATE user_bank_accounts
       SET 
         updated_at = NOW(),
-        is_default = 'false'
+        is_default = FALSE
       WHERE user_id = $1`,
 
   SetNewAccountDefaultTrue: `
       UPDATE user_bank_accounts
       SET 
         updated_at = NOW(),
-        is_default = 'true'
+        is_default = TRUE
       WHERE user_id = $1
       AND id = $2
       RETURNING id, user_id, account_number, account_name,is_default, is_disbursement_account`,
@@ -175,14 +175,14 @@ export default {
       UPDATE user_bank_accounts
       SET 
         updated_at = NOW(),
-        is_disbursement_account = 'false'
+        is_disbursement_account = FALSE
       WHERE user_id = $1`,
 
   SetNewAccountDisbursementTrue: `
       UPDATE user_bank_accounts
       SET 
         updated_at = NOW(),
-        is_disbursement_account = 'true'
+        is_disbursement_account = TRUE
       WHERE user_id = $1
       AND id = $2
       RETURNING id, user_id, account_number, account_name,is_default, is_disbursement_account`,
@@ -253,14 +253,14 @@ export default {
       UPDATE user_debit_cards
       SET 
         updated_at = NOW(),
-        is_default = 'false'
+        is_default = FALSE
       WHERE user_id = $1`,
 
   setNewCardDefaultTrue: `
       UPDATE user_debit_cards
       SET 
         updated_at = NOW(),
-        is_default = 'true'
+        is_default = TRUE
       WHERE user_id = $1
       AND id = $2
       RETURNING id, user_id, is_default, card_type`,
@@ -273,7 +273,7 @@ export default {
       UPDATE user_debit_cards
       SET 
         updated_at = NOW(),
-        is_default = 'true'
+        is_default = TRUE
       WHERE user_id = $1
       RETURNING id, user_id, is_default, card_type`,
 

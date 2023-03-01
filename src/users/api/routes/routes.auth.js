@@ -60,13 +60,13 @@ router.post(
   '/verify-reset-token',
   Model(Schema.verifyOtp, 'payload'),
   AuthMiddleware.verifyVerificationToken,
-  AuthController.resetPasswordToken
+  AuthController.generateResetToken('password')
 );
 
 router.post(
   '/reset-password',
   Model(Schema.password, 'payload'),
-  AuthMiddleware.validateForgotPasswordToken,
+  AuthMiddleware.validateForgotPasswordAndPinToken,
   AuthController.resetPassword
 );
 
@@ -112,6 +112,27 @@ router.post(
   Model(Schema.password, 'payload'),
   AuthMiddleware.comparePassword,
   AuthController.confirmPassword
+);
+
+router.post(
+  '/forgot-pin',
+  AuthMiddleware.validateAuthToken,
+  UserMiddleware.validateUnAuthenticatedUser('verify'),
+  AuthController.forgotPin
+);
+
+router.post(
+  '/verify-pin-token',
+  Model(Schema.verifyOtp, 'payload'),
+  AuthMiddleware.verifyVerificationToken,
+  AuthController.generateResetToken('pin')
+);
+
+router.patch(
+  '/reset-pin',
+  Model(Schema.pin, 'payload'),
+  AuthMiddleware.validateForgotPasswordAndPinToken,
+  AuthController.resetPin
 );
 
 export default router;

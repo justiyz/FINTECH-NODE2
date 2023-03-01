@@ -59,7 +59,7 @@ describe('', () => {
     });
     it('should call resetPasswordToken', async() => {
       const req = { user: '', passwordToken: '' };
-      const data = await AuthController.resetPasswordToken(req, res, next);
+      const data = await AuthController.generateResetToken()(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
@@ -96,6 +96,18 @@ describe('', () => {
     it('should call confirmPin', async() => {
       const req = { user: '', body: '' };
       const data = await AuthController.confirmPin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call forgotPin', async() => {
+      const req = { user: ''};
+      const data = await AuthController.forgotPin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call resetPin', async() => {
+      const req = { user: '', body: ''};
+      const data = await AuthController.resetPin(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
