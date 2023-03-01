@@ -1069,6 +1069,7 @@ describe('Auth', () => {
           expect(res.body.data.is_completed_kyc).to.equal(true);
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_THREE_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_THREE_EMAIL = res.body.data.email;
           done();
         });
     });
