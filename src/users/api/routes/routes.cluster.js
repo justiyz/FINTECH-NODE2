@@ -21,4 +21,25 @@ router.post(
   ClusterController.createCluster
 );
 
+router.get(
+  '/fetch-clusters',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.fetchClusters, 'query'),
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  ClusterController.fetchClusters
+
+);
+
+router.get(
+  '/:cluster_id/details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterId, 'params'),
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  ClusterController.fetchClusterDetails
+);
+
 export default router;
