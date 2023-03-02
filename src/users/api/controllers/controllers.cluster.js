@@ -34,7 +34,7 @@ export const createCluster = async (req, res, next) => {
     return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, { ...newClusterDetails, user_referral_code: user.referral_code } );
   } catch (error) {
     userActivityTracking(req.user.user_id, activityType, 'fail');
-    error.label = enums.FETCH_CLUSTERS_CONTROLLER;
+    error.label = enums.CREATE_CLUSTER_CONTROLLER;
     logger.error(`creating cluster failed::${enums.CREATE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);
   }
@@ -55,19 +55,45 @@ export const fetchClusters = async (req, res, next) => {
     if(type === 'explore') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
       const clusters = await processAnyData(clusterQueries.fetchClusters);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched all available clusters in the DB fetchClusters.users.controllers.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched all available clusters in the DB fetchClusters.users.controllers.user.js`); 
+      await Promise.all(
+        clusters.map(async(cluster)=> {
+          const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
+          if(userClusters){
+            cluster.is_member = true;
+            return cluster;
+          }
+          cluster.is_member = false;
+          return cluster;
+        })
+      );
+      
       return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusters);
     }
     if(type === 'my cluster') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
       const userClusters = await processAnyData(clusterQueries.fetchUserClusters, user.user_id );
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched all user clusters in the DB fetchClusters.users.controllers.user.js`);
+      for(let cluster of userClusters){
+        cluster.is_member = true;
+      }
       return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, userClusters);
     }
     if(type === 'created') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
       const createdClusters = await processAnyData(clusterQueries.fetchUserCreatedClusters, user.user_id );
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched clusters created by user in the DB fetchClusters.users.controllers.user.js`);
+      await Promise.all(
+        createdClusters.map(async(cluster)=> {
+          const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
+          if(userClusters){
+            cluster.is_member = true;
+            return cluster;
+          }
+          cluster.is_member = false;
+          return cluster;
+        })
+      );
       return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, createdClusters);
     }
   } catch (error) {
@@ -91,7 +117,7 @@ export const fetchClusterDetails = async (req, res, next) => {
     const { params:{ cluster_id }, user } = req;
     const clusterDetails = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusters.users.controllers.user.js`);
-    return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterDetails);
+    return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, {...clusterDetails, user_referral_code: user.referral_code});
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_DETAILS_CONTROLLER;
     logger.error(`fetching cluster details failed::${enums.FETCH_CLUSTER_DETAILS_CONTROLLER}`, error.message);
