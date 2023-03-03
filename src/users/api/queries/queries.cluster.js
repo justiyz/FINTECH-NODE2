@@ -39,6 +39,220 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *`,
 
+  checkIfClusterExists: `
+    SELECT 
+        id,
+        cluster_id,
+        name,
+        description, 
+        type,
+        maximum_members,
+        current_members,
+        loan_goal_target,
+        minimum_monthly_income,
+        admin,
+        image_url,
+        unique_code,
+        status,
+        loan_status,
+        total_loan_obligation,
+        join_cluster_closes_at,
+        is_deleted
+    FROM clusters
+    WHERE cluster_id = $1`,
+
+  fetchActiveClusterMembers: `
+    SELECT 
+      id,
+      cluster_id,
+      user_id,
+      status,
+      loan_status,
+      loan_obligation,
+      is_admin,
+      is_left
+    FROM cluster_members
+    WHERE cluster_id = $1
+    AND is_left = FALSE`,
+
+  fetchActiveClusterMemberDetails: `
+    SELECT 
+      id,
+      cluster_id,
+      user_id,
+      status,
+      loan_status,
+      loan_obligation,
+      is_admin,
+      is_left
+    FROM cluster_members
+    WHERE cluster_id = $1
+    AND user_id = $2
+    AND is_left = FALSE`,
+
+  fetchDeactivatedClusterMemberDetails: `
+    SELECT 
+      id,
+      cluster_id,
+      user_id,
+      status,
+      loan_status,
+      loan_obligation,
+      is_admin,
+      is_left
+    FROM cluster_members
+    WHERE cluster_id = $1
+    AND user_id = $2
+    AND is_left = TRUE`,
+
+  fetchClusterDecisionType: `
+    SELECT 
+      id,
+      name,
+      description
+    FROM cluster_decision_types
+    WHERE name = $1`,
+
+  raiseClusterDecisionTicket: `
+    INSERT INTO cluster_decision_tickets(
+      cluster_id,
+      type,
+      message,
+      ticket_raised_by,
+      current_cluster_members
+    ) VALUES ($1, $2, $3, $4, $5)
+    RETURNING ticket_id`,
+
+  fetchClusterDecisionTicketByTicketId: `
+    SELECT 
+      id,
+      ticket_id,
+      cluster_id,
+      type,
+      message,
+      ticket_raised_by,
+      current_cluster_members,
+      is_concluded
+    FROM cluster_decision_tickets
+    WHERE ticket_id = $1`,
+
+  checkIfDecisionTicketPreviouslyRaisedAndStillOpened: `
+    SELECT 
+      id,
+      ticket_id,
+      cluster_id,
+      type,
+      message,
+      ticket_raised_by,
+      current_cluster_members,
+      is_concluded
+    FROM cluster_decision_tickets
+    WHERE ticket_raised_by = $1
+    AND cluster_id = $2
+    AND type = $3
+    AND is_concluded = FALSE`,
+
+  checkIfUserPreviouslyVoted: `
+    SELECT 
+      id,
+      decision_ticket,
+      cluster_id,
+      is_cluster_admin,
+      voter_id,
+      vote
+    FROM cluster_decision_votes
+    WHERE decision_ticket = $1
+    AND voter_id = $2`,
+
+  incrementClusterMembersCount: `
+    UPDATE clusters
+    SET 
+      updated_at = NOW(),
+      current_members = current_members::int + 1
+    WHERE cluster_id = $1`,
+
+  fetchCurrentTicketVotes: `
+    SELECT 
+      COUNT(id)
+    FROM cluster_decision_votes
+    WHERE decision_ticket = $1`,
+
+  fetchUserClusterInvitation: `
+    SELECT
+      id,
+      cluster_id,
+      inviter_id,
+      invitee,
+      invitation_mode,
+      invitee_id,
+      is_joined,
+      is_declined
+    FROM cluster_invitees
+    WHERE invitee_id = $1
+    AND cluster_id = $2
+    AND is_joined = FALSE
+    AND is_declined = FALSE`,
+
+  updateClusterInvitationStatus: `
+    UPDATE cluster_invitees
+    SET 
+      updated_at = NOW(),
+      is_joined = $3,
+      is_declined = $4
+    WHERE invitee_id = $1
+    AND cluster_id = $2
+    AND is_joined = FALSE
+    AND is_declined = FALSE`,
+
+  fetchCurrentTicketYesVotesByNonAdmins: `
+    SELECT 
+      COUNT(id)
+    FROM cluster_decision_votes
+    WHERE decision_ticket = $1
+    AND vote = 'yes'
+    AND is_cluster_admin = FALSE`,
+
+  checkIfAdminHasVotedYes: `
+    SELECT 
+      id,
+      decision_ticket,
+      cluster_id,
+      is_cluster_admin,
+      voter_id,
+      vote
+    FROM cluster_decision_votes
+    WHERE decision_ticket = $1
+    AND is_cluster_admin = TRUE
+    AND vote = 'yes'`,
+
+  recordUserVoteDecision: `
+    INSERT INTO cluster_decision_votes(
+      decision_ticket,
+      cluster_id,
+      voter_id,
+      is_cluster_admin,
+      vote
+    ) VALUES($1, $2, $3, $4, $5)`,
+
+  updateDecisionTicketFulfillment: `
+    UPDATE cluster_decision_tickets
+    SET 
+      updated_at = NOW(),
+      is_concluded = TRUE
+    WHERE ticket_id = $1`,
+
+  reinstateClusterMember: `
+    UPDATE cluster_members
+    SET 
+      updated_at = NOW(),
+      status = 'active',
+      loan_status = 'inactive',
+      loan_obligation = 0,
+      is_admin = FALSE,
+      is_left = FALSE
+    WHERE cluster_id = $1
+    AND user_id = $2`,
+
   createClusterMember: `
     INSERT INTO cluster_members(
         cluster_id,
@@ -48,43 +262,9 @@ export default {
     RETURNING *`,
 
   fetchClusters: `
-    SELECT 
-        cluster_id,
-        name,
-        type,
-        loan_goal_target,
-        maximum_members,
-        current_members,
-        description,
-        image_url
-    FROM clusters
-    ORDER BY join_cluster_closes_at DESC`,
-
-  fetchUserClusters: `
-      SELECT 
-        clusters.cluster_id,
-        name,
-        type,
-        loan_goal_target,
-        maximum_members,
-        current_members,
-        description,
-        image_url
-      FROM clusters
-      WHERE created_by = $1 AND clusters.is_deleted = false 
-      ORDER BY clusters.loan_status DESC`,
-
-  fetchActiveClusterUser:`
     SELECT
+      id,
       cluster_id,
-      user_id,
-      is_left
-  FROM cluster_members
-  WHERE user_id = $1 AND cluster_id = $2  AND is_left = false`,
-
-  fetchUserCreatedClusters:`
-   SELECT 
-      clusters.cluster_id,
       name,
       type,
       loan_goal_target,
@@ -92,15 +272,58 @@ export default {
       current_members,
       description,
       image_url
-   FROM clusters
-   LEFT JOIN cluster_members
-   ON  clusters.created_by = cluster_members.user_id
-   WHERE clusters.created_by = $1 AND clusters.is_deleted = 'false' 
-   GROUP BY clusters.cluster_id, name, type, loan_goal_target
-   ORDER BY clusters.created_at DESC `,
+    FROM clusters
+    WHERE is_deleted = FALSE
+    ORDER BY join_cluster_closes_at DESC`,
+
+  fetchUserClusters: `
+    SELECT 
+      clusters.id,
+      clusters.cluster_id,
+      clusters.name,
+      clusters.type,
+      clusters.loan_goal_target,
+      clusters.maximum_members,
+      clusters.current_members,
+      clusters.description,
+      clusters.image_url
+    FROM clusters
+    LEFT JOIN cluster_members
+    ON clusters.cluster_id = cluster_members.cluster_id
+    WHERE cluster_members.user_id = $1 
+    AND clusters.is_deleted = FALSE
+    AND cluster_members.is_left = FALSE
+    ORDER BY clusters.loan_status DESC`,
+
+  fetchActiveClusterUser:`
+    SELECT
+      cluster_id,
+      user_id,
+      is_left
+    FROM cluster_members
+    WHERE user_id = $1 
+    AND cluster_id = $2  
+    AND is_left = FALSE`,
+
+  fetchUserCreatedClusters:`
+    SELECT 
+      id,
+      cluster_id,
+      name,
+      type,
+      loan_goal_target,
+      maximum_members,
+      current_members,
+      description,
+      image_url
+    FROM clusters
+    WHERE created_by = $1 
+    AND is_deleted = FALSE
+    ORDER BY created_at DESC `,
 
   fetchClusterDetails:`
     SELECT 
+      id,
       cluster_id,
       name,
       type,
@@ -109,9 +332,10 @@ export default {
       current_members,
       minimum_monthly_income,
       description,
-      image_url
-   FROM clusters
-   WHERE cluster_id = $1 AND is_deleted = 'false'
-  `
+      image_url,
+      unique_code
+    FROM clusters
+    WHERE cluster_id = $1 
+    AND is_deleted = FALSE`
 };
 

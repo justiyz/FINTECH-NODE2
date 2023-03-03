@@ -47,7 +47,7 @@ export const operations = {
   46: 'PSLNDBSRVD', // loan disbursement payment to user failed and amount reversed back to seedfi account
   47: 'CRTPBCLST', // user creates a public cluster
   48: 'CRTPVCLST', // user creates a private cluster
-  49: 'RQTJNCLST', // user requests to join cluste
+  49: 'RQTJNCLST', // user requests to join cluster
   50: 'APRQJNCLST', // existing cluster user accepts request to join cluster
   51: 'DCRQJNCLST', // existing cluster user declines request to join cluster
   52: 'JNCLST', // join cluster', 'user joins cluster

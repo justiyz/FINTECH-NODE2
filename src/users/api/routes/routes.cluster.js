@@ -22,7 +22,7 @@ router.post(
 );
 
 router.get(
-  '/fetch-clusters',
+  '/',
   AuthMiddleware.validateAuthToken,
   Model(Schema.fetchClusters, 'query'),
   ClusterController.fetchClusters
@@ -31,8 +31,53 @@ router.get(
 router.get(
   '/:cluster_id/details',
   AuthMiddleware.validateAuthToken,
-  Model(Schema.clusterId, 'params'),
+  Model(Schema.clusterIdParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
   ClusterController.fetchClusterDetails
+);
+
+router.post(
+  '/:cluster_id/request-to-join',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
+  ClusterMiddleware.confirmClusterIsStillOpenForJoining('request'),
+  ClusterMiddleware.checkIfPublicOrPrivateCluster('public'),
+  ClusterMiddleware.compareUserIncomeRange,
+  ClusterController.requestToJoinCluster
+);
+
+router.post(
+  '/:ticket_id/voting-decision',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.votingTicketIdParams, 'params'),
+  Model(Schema.votingDecision, 'payload'),
+  ClusterMiddleware.checkIfClusterDecisionTicketExists,
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIClusterDecisionHasBeenConcluded,
+  ClusterMiddleware.checkIfUserHasPreviouslyDecided,
+  ClusterMiddleware.userTakesRequestToJoinClusterDecision,
+  ClusterController.finalClusterDecision
+);
+
+router.post(
+  '/:cluster_id/join',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  Model(Schema.votingDecision, 'payload'),
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
+  ClusterMiddleware.confirmUserClusterInvitation,
+  ClusterMiddleware.confirmClusterIsStillOpenForJoining('join'),
+  ClusterMiddleware.compareUserIncomeRange,
+  ClusterController.joinClusterOnInvitation
 );
 
 export default router;

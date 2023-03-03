@@ -7,7 +7,7 @@ import { db } from '../../config/db';
  * @returns { Promise<JSON> } - A Promise response with the queried data or no data
  * @memberof UserPostgresDbService
  */
-export const processAnyData = (query, payload) => db.any(query, payload);
+export const processAnyData = (query, payload) =>  db.any(query, payload);
 
 /**
  * Process db.oneOrNone calls to the database

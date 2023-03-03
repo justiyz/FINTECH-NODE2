@@ -21,6 +21,24 @@ describe('', () => {
   });
 
   describe('Cluster controller catch block unit testings', () => {
+    it('should call requestToJoinCluster', async() => {
+      const req = { user: '', params: '', cluster: '' };
+      const data = await ClusterController.requestToJoinCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call finalClusterDecision', async() => {
+      const req = { user: '', votingTicketDetails: '' };
+      const data = await ClusterController.finalClusterDecision(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call joinClusterOnInvitation', async() => {
+      const req = { user: '', body: '', params: '', cluster: '' };
+      const data = await ClusterController.joinClusterOnInvitation(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call createCluster', async() => {
       const req = { user: '', body: '' };
       const data = await ClusterController.createCluster(req, res, next);
