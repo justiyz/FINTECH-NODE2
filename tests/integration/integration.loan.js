@@ -11,7 +11,7 @@ chai.use(chaiHttp);
 const pin = '0908';
 const userOnePin = '2020';
 
-describe('User', () => {
+describe('Individual loan', () => {
   describe('user apply for loan', () => {
     it('should throw error when loan duration is not sent', (done) => {
       chai.request(app)

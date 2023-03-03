@@ -4,7 +4,7 @@ const createCluster = Joi.object().keys({
   name: Joi.string().required(),
   description: Joi.string().required(),
   type: Joi.string().required().valid('public', 'private'),
-  maximum_members: Joi.number().positive().required(),
+  maximum_members: Joi.number().positive().required().min(2),
   loan_goal_target: Joi.number().positive().required(),
   minimum_monthly_income: Joi.number().positive().required()
 });
@@ -16,8 +16,23 @@ const clusterId = Joi.object().keys({
   cluster_id: Joi.string().required()
 });
 
+const clusterIdParams = Joi.object().keys({
+  cluster_id: Joi.string().required()
+});
+
+const votingTicketIdParams = Joi.object().keys({
+  ticket_id: Joi.string().required()
+});
+
+const votingDecision = Joi.object().keys({
+  decision: Joi.string().required().valid('yes', 'no')
+});
+
 export default  {
   createCluster,
   fetchClusters,
-  clusterId
+  clusterId,
+  clusterIdParams,
+  votingTicketIdParams,
+  votingDecision
 }; 

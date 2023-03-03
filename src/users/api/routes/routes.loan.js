@@ -12,6 +12,7 @@ router.post(
   '/application',
   AuthMiddleware.validateAuthToken,
   Model(Schema.loanApplication, 'payload'),
+  UserMiddleware.checkUserLoanStatus,
   UserMiddleware.checkUserAdvancedKycUpdate,
   LoanMiddleware.validateLoanAmountAndTenor,
   LoanMiddleware.checkIfUserHasActivePersonalLoan,

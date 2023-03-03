@@ -37,7 +37,7 @@ export const sendPushNotification = async(user_id, content, fcm_token) => {
  * Send multiple users push notification
  * @param {String} content - the message content of the push notification
  * @param {Array} fcm_tokens - the unique tokens to deliver notification to all users
- * @param {String} type - the type of multicast push notification
+ * @param {String} type - the type of multicast push notification // types should not be changed without informing mobile
  * @param {String} cluster_id - an optional unique id of the cluster the push notification is for
  * @returns { JSON } - a response based on if the notifications were sent or not
  * @memberof FirebaseService
@@ -45,7 +45,7 @@ export const sendPushNotification = async(user_id, content, fcm_token) => {
 export const sendMulticastPushNotification = async (content, fcm_tokens, type, cluster_id) => {
   const clusterId = cluster_id ? cluster_id.toString() : '';
   try {
-    if (config.SEEDFI_NODE_ENV === 'test') {
+    if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
       return;
     }
     const payload = {
@@ -72,7 +72,7 @@ export const sendMulticastPushNotification = async (content, fcm_tokens, type, c
  * @param {Object} newClusterDetails - details of the just created cluster on postgresDB
  * @param {Object} clusterMemberDetails - details of the admin cluster user
  * @param {String} content - the message content of the cluster notification
- * @param {String} type - the type of cluster notification
+ * @param {String} type - the type of cluster notification // types should not be changed without informing mobile
  * @param {Object} extra_data - an optional object containing extra needed data
  * @returns { JSON } - a response based on if the notification was sent or not
  * @memberof FirebaseService
@@ -107,7 +107,7 @@ export const createClusterNotification = async (user, body, newClusterDetails, c
  * @param {Object} cluster - the details of the cluster in question
  * @param {Object} clusterMemberDetails - details of the admin cluster user
  * @param {String} content - the message content of the cluster notification
- * @param {String} type - the type of cluster notification
+ * @param {String} type - the type of cluster notification // types should not be changed without informing mobile
  * @param {Object} extra_data - an optional object containing extra needed data
  * @returns { JSON } - a response based on if the notification was sent or not
  * @memberof FirebaseService
@@ -139,13 +139,14 @@ export const sendClusterNotification = async (user, cluster, clusterMemberDetail
 /**
  * send notification to user
  * @param {Object} user - the user object receiving the notification
+ * @param {String} title - the title of the personal notification
  * @param {String} content - the message content of the personal notification
- * @param {String} type - the type of personal notification
+ * @param {String} type - the type of personal notification // types should not be changed without informing mobile
  * @param {Object} extra_data - an optional object containing extra needed data
  * @returns { JSON } - a response based on if the notification was sent or not
  * @memberof FirebaseService
  */
-export const sendUserPersonalNotification = async (user, content, type, extra_data) => {
+export const sendUserPersonalNotification = async (user, title, content, type, extra_data) => {
   if (config.SEEDFI_NODE_ENV === 'test') {
     return;
   }
@@ -158,8 +159,10 @@ export const sendUserPersonalNotification = async (user, content, type, extra_da
   await sendChat.set({
     chatId,
     user_id: user.user_id,
+    title,
     content,
     chat_type: type,
+    is_read: false,
     extra_data: JSON.stringify(extra_data),
     created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
   });

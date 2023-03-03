@@ -1,5 +1,7 @@
 import Crypto from 'crypto';
 import dayjs from 'dayjs';
+import { processOneOrNoneData } from '../../api/services/services.db';
+import userQueries from '../../api/queries/queries.user';
 
 export const generateOtp = () => Crypto.randomInt(0, 1000000).toString().padStart(6, '0');
 export const generateReferralCode = (size) => {
@@ -69,4 +71,18 @@ export const formatUserIncomeRange = (incomeRange) => {
   const lowerBoundIncome = formattedIncomeRange[0].trim();
   const upperBoundIncome = formattedIncomeRange[1].trim();
   return { lowerBoundIncome, upperBoundIncome };
+};
+
+export const collateUsersFcmTokens = async(users) => {
+  const tokens = [];
+  await Promise.all(users.map(async(user) => {
+    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [ user.user_id ]);
+    if (userFcmToken?.fcm_token) {
+      tokens.push(userFcmToken.fcm_token);
+      return user;
+    }
+    return user;
+  }));
+  await Promise.all([ tokens ]);
+  return tokens;
 };

@@ -30,6 +30,11 @@ export default {
         fcm_token = $2
       WHERE user_id = $1`,
 
+  fetchUserFcmTOken: `
+      SELECT fcm_token
+      FROM users
+      WHERE user_id = $1`,
+
   fetchUserRefreshToken: `
       SELECT refresh_token 
       FROM users
