@@ -11,6 +11,7 @@ import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
 
+
 /**
  * request to join cluster
  * @param {Request} req - The request from the endpoint.
@@ -235,3 +236,63 @@ export const fetchClusterDetails = async (req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * fetch a cluster's members
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the cluster members
+ * @memberof ClusterController
+ */
+
+export const fetchClusterMembers = async (req, res, next) => {
+  try {
+    const { params:{ cluster_id }, user } = req;
+    const clusterMembers = await processAnyData(clusterQueries.fetchClusterMembers, cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster members in the DB fetchClusterMembers.users.controllers.user.js`);
+    return ApiResponse.success(res, enums.CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterMembers);
+  } catch (error) {
+    error.label = enums.FETCH_CLUSTER_MEMBERS_CONTROLLER;
+    logger.error(`fetching cluster details failed::${enums.FETCH_CLUSTER_MEMBERS_CONTROLLER}`, error.message);
+    return next(error);
+  }  
+};
+
+/**
+ * member leaves a cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with no data
+ * @memberof ClusterController
+ */
+
+export const leaveCluster = async (req, res, next) => {
+  try {
+    const { params: { cluster_id }, user } = req;
+    await processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves cluster leaveCluster.controllers.cluster.js`);
+    const cluster = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully fetched cluster from DB leaveCluster.controllers.cluster.js`);
+    const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB leaveCluster.controllers.cluster.js`);
+    const clusterMembersToken = await collateUsersFcmTokens(clusterMembers);
+    sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});
+    sendMulticastPushNotification(PushNotifications.userLeftYourCluster(user, cluster), clusterMembersToken, 'leave-cluster', cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all notifications sent successfully leaveCluster.controllers.cluster.js`);
+    const users = await processAnyData(clusterQueries.checkIfUserIsLast, cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster leaveCluster.controllers.cluster.js`);
+    if (users.length < 1){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is the last person on the cluster leaveCluster.controllers.cluster.js`);
+      await processOneOrNoneData(clusterQueries.deleteAcluster, cluster_id);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully deletes the cluster leaveCluster.controllers.cluster.js`);
+    }
+    return ApiResponse.success(res, enums.USER_LEFT_CLUSTER_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.LEAVE_CLUSTER_CONTROLLER;
+    logger.error(`leaving cluster failed::${enums.LEAVE_CLUSTER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+

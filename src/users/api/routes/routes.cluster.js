@@ -80,4 +80,21 @@ router.post(
   ClusterController.joinClusterOnInvitation
 );
 
+router.get(
+  '/:cluster_id/members',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  ClusterController.fetchClusterMembers
+);
+
+router.patch(
+  '/:cluster_id/leave',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  ClusterMiddleware.checkIfUserIsOnActiveLoan,
+  ClusterMiddleware.checkIfUserHasPreviouslyLeft,
+  ClusterMiddleware.checkIfUserIsAnAdmin,
+  ClusterController.leaveCluster
+);
+
 export default router;

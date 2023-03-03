@@ -336,6 +336,61 @@ export default {
       unique_code
     FROM clusters
     WHERE cluster_id = $1 
-    AND is_deleted = FALSE`
+    AND is_deleted = FALSE`,
+
+  fetchClusterMembers:`
+    SELECT 
+      cluster_members.user_id,
+      CONCAT(users.first_name, ' ', users.last_name) AS name,
+      to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined
+	  FROM cluster_members
+    LEFT JOIN users
+	  ON cluster_members.user_id = users.user_id
+	  LEFT JOIN clusters
+	  ON cluster_members.cluster_id = clusters.cluster_id
+	  WHERE cluster_members.cluster_id = $1
+    AND clusters.is_deleted = false
+	  AND cluster_members.is_left = false`,
+
+  leaveCluster:`
+      UPDATE 
+         cluster_members
+      SET 
+      updated_at = NOW(),
+      is_left = true
+      WHERE user_id = $1 AND cluster_id = $2`,
+
+  checkIfUserPreviouslyLeft:`
+      SELECT 
+          is_left
+      FROM cluster_members
+      WHERE user_id = $1 AND cluster_id = $2 AND is_left = true`,
+
+  checkIfUserIsAdmin:`
+     SELECT 
+        id,
+        user_id,
+        cluster_id,
+        is_admin
+     FROM cluster_members
+     WHERE user_id = $1 AND cluster_id = $2 AND is_admin = true`,
+
+  checkIfUserIsLast:`
+     SELECT 
+        id, 
+        cluster_id,
+        user_id
+     FROM cluster_members
+     WHERE cluster_id = $1 AND is_left = false  `,
+
+  deleteAcluster: `
+      UPDATE clusters
+      SET 
+        updated_at = NOW(),
+        is_deleted = true,
+        status = 'inactive'
+      WHERE cluster_id = $1
+  `
 };
+
 

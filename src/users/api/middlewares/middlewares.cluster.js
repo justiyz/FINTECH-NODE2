@@ -405,3 +405,79 @@ export const generateClusterUniqueCode = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * checks if user is on an active loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+
+export const checkIfUserIsOnActiveLoan = async (req, res, next) => {
+  try {
+    const { user } = req;
+    if(user.loan_status === 'active'){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE;
+    logger.error(`checking if user is on an active loan failed::${enums.CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * checks if user is an admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+
+export const checkIfUserIsAnAdmin = async (req, res, next) => {
+  try {
+    const { params: { cluster_id }, user } = req;
+    const isAdmin = await processOneOrNoneData(clusterQueries.checkIfUserIsAdmin, [ user.user_id, cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully checks if user is an admin in the DB checkIfUserIsAnAdmin.middlewares.cluster.js`);
+    if(isAdmin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin checkIfUserIsAnAdmin.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_IS_AN_ADMIN, enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_IS_AN_ADMIN_MIDDLEWARE;
+    logger.error(`checking if user is an admin failed::${enums.CHECK_IF_USER_IS_AN_ADMIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * checks if user has previously left the cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+
+export const checkIfUserHasPreviouslyLeft = async (req, res, next) => {
+  try {
+    const { params:{ cluster_id }, user } = req;
+    const isLeft = await processOneOrNoneData(clusterQueries.checkIfUserPreviouslyLeft, [ user.user_id, cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully checks if user has previously left the cluster checkIfUserHasPreviouslyLeft.middlewares.cluster.js`);
+    if(isLeft) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user has previously left the cluster checkIfUserHasPreviouslyLeft.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_LEFT_PREVIOUSLY, enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE;
+    logger.error(`checking if user is an admin failed::${enums.CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
