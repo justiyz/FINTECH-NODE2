@@ -79,7 +79,6 @@ export const collateUsersFcmTokens = async(users) => {
     const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [ user.user_id ]);
     if (userFcmToken?.fcm_token) {
       tokens.push(userFcmToken.fcm_token);
-      return user;
     }
     return user;
   }));

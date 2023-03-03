@@ -340,8 +340,9 @@ export const userTakesRequestToJoinClusterDecision = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes by non cluster admin counted from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const [ formerClusterMember ] = await processAnyData(clusterQueries.fetchDeactivatedClusterMemberDetails, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a one time cluster member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      if (Number(votingTicketDetails.current_cluster_members) === 1 && clusterMember.is_admin && body.decision === 'yes') { // since admin is the only current team member, only admin can accept join request
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin is the only current cluster member and has accepted requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      if ((Number(votingTicketDetails.current_cluster_members) === 1 && clusterMember.is_admin && body.decision === 'yes')  || // since admin is the only current team member, only admin can accept join request
+          ((Number(votingTicketDetails.current_cluster_members) > 1) && (hasAdminVotedYes) && (Number(currentNonAdminYesVoteCount.count) >= 1))) {  // for a cluster of more than one member, the admin and another cluster member should accept request
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin and or another cluster member has accepted requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await Promise.all([
           formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]) : processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
           processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ votingTicketDetails.cluster_id ]),
@@ -354,31 +355,8 @@ export const userTakesRequestToJoinClusterDecision = async (req, res, next) => {
         userActivityTracking(req.user.user_id, 52, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);
       }
-      if (clusterMember.is_admin && body.decision === 'no') { // since admin must accept for requesting member to be accepted
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin has rejected requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
-        sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestRejected(cluster.name), requestingNMemberDetails.fcm_token);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-        userActivityTracking(req.user.user_id, activityType, 'success');
-        userActivityTracking(req.user.user_id, 53, 'success');
-        return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);
-      }
-      if ((Number(votingTicketDetails.current_cluster_members) > 1) && (hasAdminVotedYes) && (Number(currentNonAdminYesVoteCount.count) >= 1)) { // for a cluster of more than one member, the admin and another cluster member should accept request
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin and one or more cluster member has accepted requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-        await Promise.all([
-          formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]) : processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
-          processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ votingTicketDetails.cluster_id ]),
-          processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
-        ]);
-        sendClusterNotification(requestingNMemberDetails, cluster, { is_admin: false }, `${requestingNMemberDetails.first_name} ${requestingNMemberDetails.last_name} joined your cluster`, 'join-cluster', {});
-        sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestAccepted(cluster.name), requestingNMemberDetails.fcm_token);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-        userActivityTracking(req.user.user_id, activityType, 'success');
-        userActivityTracking(req.user.user_id, 52, 'success');
-        return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);
-      }
-      if (Number(currentVoteCount.count) === Number(votingTicketDetails.current_cluster_members)) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all current cluster members voted and user does not meetup with acceptance requirement userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      if ((clusterMember.is_admin && body.decision === 'no') || (Number(currentVoteCount.count) === Number(votingTicketDetails.current_cluster_members))) { // since admin must accept for requesting member to be accepted
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin has either rejected requesting member or the request does not meet with the acceptance criteria of one member and admin userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestRejected(cluster.name), requestingNMemberDetails.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);

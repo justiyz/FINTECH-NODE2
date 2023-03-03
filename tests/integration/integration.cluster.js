@@ -338,6 +338,36 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should create another public cluster for user two successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/cluster/create')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Unique lenders',
+          description: 'group borrowing of money for large projects',
+          type: 'public',
+          maximum_members: 2,
+          loan_goal_target: 1000000,
+          minimum_monthly_income: 30000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CLUSTER_CREATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('cluster_id');
+          expect(res.body.data).to.have.property('join_cluster_closes_at');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.maximum_members).to.equal(2);
+          process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_ID = res.body.data.cluster_id;
+          done();
+        });
+    });
   });
   describe('user fetches clusters', () => {
     it('should throw error if token is not sent', (done) => {
@@ -855,6 +885,27 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should request to join user two public cluster two', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_ID}/request-to-join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_TO_JOIN_CLUSTER_SENT_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('ticket_id');
+          expect(res.body.data).to.have.property('decision_type');
+          expect(res.body.data.decision_type).to.equal('join cluster');
+          process.env.SEEDFI_USER_ONE_JOIN_USER_TWO_PUBLIC_CLUSTER_TWO_TICKET_ID = res.body.data.ticket_id;
+          done();
+        });
+    });
     it('should throw error if request to join cluster has been raised and not concluded', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
@@ -946,6 +997,26 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
           expect(res.body.message).to.equal(enums.REQUEST_TO_JOIN_CLUSTER_DECISION('accepted'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should reject request to join user two public cluster two', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_JOIN_USER_TWO_PUBLIC_CLUSTER_TWO_TICKET_ID}/voting-decision`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'no'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_TO_JOIN_CLUSTER_DECISION('declined'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });

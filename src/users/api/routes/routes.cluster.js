@@ -34,7 +34,7 @@ router.get(
   Model(Schema.clusterIdParams, 'params'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterController.fetchClusterDetails
-),
+);
 
 router.post(
   '/:cluster_id/request-to-join',
