@@ -21,4 +21,18 @@ router.post(
   ClusterController.createCluster
 );
 
+router.get(
+  '/fetch-clusters',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.fetchClusters, 'query'),
+  ClusterController.fetchClusters
+);
+
+router.get(
+  '/:cluster_id/details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterId, 'params'),
+  ClusterController.fetchClusterDetails
+);
+
 export default router;

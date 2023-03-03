@@ -127,6 +127,8 @@ export const CLUSTER_NAME_ALREADY_EXISTING = (name) => `A cluster with this name
 export const UPDATE_INCOME_RANGE_FOR_CLUSTER_CREATION = 'kindly update income range in profile to create cluster';
 export const CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING = 'Cluster minimum income is greater than user maximum monthly income';
 export const CLUSTER_CREATED_SUCCESSFULLY = 'Cluster created successfully';
+export const CLUSTER_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
+export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

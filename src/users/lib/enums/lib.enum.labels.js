@@ -108,6 +108,8 @@ export const CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'ClusterMiddleware::check
 export const COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE = 'ClusterMiddleware::compareUserIncomeRange';
 export const GENERATE_CLUSTER_UNIQUE_CODE_MIDDLEWARE = 'ClusterMiddleware::generateClusterUniqueCode';
 export const CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
+export const FETCH_CLUSTERS_CONTROLLER = 'ClusterController::fetchClusters';
+export const FETCH_CLUSTER_DETAILS_CONTROLLER = 'ClusterController::fetchClusterDetails';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
