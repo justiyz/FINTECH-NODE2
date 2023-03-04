@@ -270,18 +270,18 @@ export const fetchClusterMembers = async (req, res, next) => {
 
 export const leaveCluster = async (req, res, next) => {
   try {
-    const { params: { cluster_id }, user } = req;
+    const { params: { cluster_id }, user, cluster } = req;
     await processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves cluster leaveCluster.controllers.cluster.js`);
-    const cluster = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully fetched cluster from DB leaveCluster.controllers.cluster.js`);
-    const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB leaveCluster.controllers.cluster.js`);
-    const clusterMembersToken = await collateUsersFcmTokens(clusterMembers);
+    // const cluster = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully fetched cluster from DB leaveCluster.controllers.cluster.js`);
+    // const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB leaveCluster.controllers.cluster.js`);
+    const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});
     sendMulticastPushNotification(PushNotifications.userLeftYourCluster(user, cluster), clusterMembersToken, 'leave-cluster', cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all notifications sent successfully leaveCluster.controllers.cluster.js`);
-    const users = await processAnyData(clusterQueries.checkIfUserIsLast, cluster_id);
+    const users = await processAnyData(clusterQueries.checkIfUserIsLastMember, cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster leaveCluster.controllers.cluster.js`);
     if (users.length < 1){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is the last person on the cluster leaveCluster.controllers.cluster.js`);

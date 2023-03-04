@@ -99,15 +99,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfUserHasPreviouslyLeft', async() => {
-      const req = { params: '', user: '' };
-      const data = await ClusterMiddlewares.checkIfUserHasPreviouslyLeft(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call checkIfUserIsAnAdmin', async() => {
       const req = { params: '', user: '' };
-      const data = await ClusterMiddlewares.checkIfUserIsAnAdmin(req, res, next);
+      const data = await ClusterMiddlewares.checkIfUserIsClusterAdmin(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

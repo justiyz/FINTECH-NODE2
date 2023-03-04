@@ -124,7 +124,6 @@ export const FETCH_CLUSTER_DETAILS_CONTROLLER = 'ClusterController::fetchCluster
 export const FETCH_CLUSTER_MEMBERS_CONTROLLER = 'ClusterController::fetchClusterMembers';
 export const CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
 export const CHECK_IF_USER_IS_AN_ADMIN_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
-export const CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE = 'ClusterMiddleware::checkIfUserHasPreviouslyLeft';
 export const LEAVE_CLUSTER_CONTROLLER = 'ClusterController::leaveCluster';
 
 // Admin related labels

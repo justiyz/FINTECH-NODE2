@@ -342,7 +342,10 @@ export default {
     SELECT 
       cluster_members.user_id,
       CONCAT(users.first_name, ' ', users.last_name) AS name,
-      to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined
+      to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined,
+      cluster_members.is_admin,
+      cluster_members.loan_status,
+      clusters.status
 	  FROM cluster_members
     LEFT JOIN users
 	  ON cluster_members.user_id = users.user_id
@@ -352,19 +355,22 @@ export default {
     AND clusters.is_deleted = false
 	  AND cluster_members.is_left = false`,
 
+  checkIfUserIsOnAnActiveLoan:`
+      SELECT
+        user_id,
+        loan_status
+      FROM cluster_members
+      WHERE user_id = $1 AND loan_status = 'active'
+    `,
+
   leaveCluster:`
       UPDATE 
          cluster_members
       SET 
       updated_at = NOW(),
-      is_left = true
+      is_left = true,
+      status = 'inactive'
       WHERE user_id = $1 AND cluster_id = $2`,
-
-  checkIfUserPreviouslyLeft:`
-      SELECT 
-          is_left
-      FROM cluster_members
-      WHERE user_id = $1 AND cluster_id = $2 AND is_left = true`,
 
   checkIfUserIsAdmin:`
      SELECT 
@@ -375,7 +381,7 @@ export default {
      FROM cluster_members
      WHERE user_id = $1 AND cluster_id = $2 AND is_admin = true`,
 
-  checkIfUserIsLast:`
+  checkIfUserIsLastMember:`
      SELECT 
         id, 
         cluster_id,

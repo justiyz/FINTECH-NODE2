@@ -84,6 +84,8 @@ router.get(
   '/:cluster_id/members',
   AuthMiddleware.validateAuthToken,
   Model(Schema.clusterIdParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
   ClusterController.fetchClusterMembers
 );
 
@@ -91,9 +93,10 @@ router.patch(
   '/:cluster_id/leave',
   AuthMiddleware.validateAuthToken,
   Model(Schema.clusterIdParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfUserIsOnActiveLoan,
-  ClusterMiddleware.checkIfUserHasPreviouslyLeft,
-  ClusterMiddleware.checkIfUserIsAnAdmin,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfUserIsClusterAdmin,
   ClusterController.leaveCluster
 );
 

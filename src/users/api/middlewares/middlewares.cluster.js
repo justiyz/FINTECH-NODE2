@@ -418,8 +418,9 @@ export const generateClusterUniqueCode = async(req, res, next) => {
 export const checkIfUserIsOnActiveLoan = async (req, res, next) => {
   try {
     const { user } = req;
-    if(user.loan_status === 'active'){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
+    const userActiveLoan = await processOneOrNoneData(clusterQueries.checkIfUserIsOnAnActiveLoan, user.user_id);
+    if(userActiveLoan){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan in the cluster checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN);
     }
     return next();
@@ -439,13 +440,15 @@ export const checkIfUserIsOnActiveLoan = async (req, res, next) => {
  * @memberof ClusterMiddleware
  */
 
-export const checkIfUserIsAnAdmin = async (req, res, next) => {
+export const checkIfUserIsClusterAdmin = async (req, res, next) => {
   try {
     const { params: { cluster_id }, user } = req;
     const isAdmin = await processOneOrNoneData(clusterQueries.checkIfUserIsAdmin, [ user.user_id, cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully checks if user is an admin in the DB checkIfUserIsAnAdmin.middlewares.cluster.js`);
-    if(isAdmin) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin checkIfUserIsAnAdmin.middlewares.cluster.js`);
+    const users = await processAnyData(clusterQueries.checkIfUserIsLastMember, cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster leaveCluster.controllers.cluster.js`);
+    if(isAdmin && users.length > 1) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin and not the last member checkIfUserIsAnAdmin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_IS_AN_ADMIN, enums.HTTP_FORBIDDEN);
     }
     return next();
@@ -465,19 +468,19 @@ export const checkIfUserIsAnAdmin = async (req, res, next) => {
  * @memberof ClusterMiddleware
  */
 
-export const checkIfUserHasPreviouslyLeft = async (req, res, next) => {
-  try {
-    const { params:{ cluster_id }, user } = req;
-    const isLeft = await processOneOrNoneData(clusterQueries.checkIfUserPreviouslyLeft, [ user.user_id, cluster_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully checks if user has previously left the cluster checkIfUserHasPreviouslyLeft.middlewares.cluster.js`);
-    if(isLeft) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user has previously left the cluster checkIfUserHasPreviouslyLeft.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.USER_LEFT_PREVIOUSLY, enums.HTTP_FORBIDDEN);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE;
-    logger.error(`checking if user is an admin failed::${enums.CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+// export const checkIfUserHasPreviouslyLeft = async (req, res, next) => {
+//   try {
+//     const { params:{ cluster_id }, user } = req;
+//     const isLeft = await processOneOrNoneData(clusterQueries.checkIfUserPreviouslyLeft, [ user.user_id, cluster_id ]);
+//     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully checks if user has previously left the cluster checkIfUserHasPreviouslyLeft.middlewares.cluster.js`);
+//     if(isLeft) {
+//       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user has previously left the cluster checkIfUserHasPreviouslyLeft.middlewares.cluster.js`);
+//       return ApiResponse.error(res, enums.USER_LEFT_PREVIOUSLY, enums.HTTP_FORBIDDEN);
+//     }
+//     return next();
+//   } catch (error) {
+//     error.label = enums.CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE;
+//     logger.error(`checking if user is an admin failed::${enums.CHECK_IF_USER_PREVIOUSLY_LEFT_MIDDLEWARE}`, error.message);
+//     return next(error);
+//   }
+// };
