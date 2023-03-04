@@ -273,10 +273,6 @@ export const leaveCluster = async (req, res, next) => {
     const { params: { cluster_id }, user, cluster } = req;
     await processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves cluster leaveCluster.controllers.cluster.js`);
-    // const cluster = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
-    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully fetched cluster from DB leaveCluster.controllers.cluster.js`);
-    // const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
-    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB leaveCluster.controllers.cluster.js`);
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});
     sendMulticastPushNotification(PushNotifications.userLeftYourCluster(user, cluster), clusterMembersToken, 'leave-cluster', cluster_id);
