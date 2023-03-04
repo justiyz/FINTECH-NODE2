@@ -28,11 +28,24 @@ const votingDecision = Joi.object().keys({
   decision: Joi.string().required().valid('yes', 'no')
 });
 
+const inviteClusterMember = Joi.object().keys({
+  email: Joi.string().optional(),
+  phone_number: Joi.string().optional(),
+  link_url: Joi.string().optional()
+});
+
+const inviteClusterMemberParam = Joi.object().keys({
+  cluster_id:  Joi.string().required(),
+  type: Joi.string().required().valid('email', 'phone_number')
+});
+
 export default  {
   createCluster,
   fetchClusters,
   clusterId,
   clusterIdParams,
   votingTicketIdParams,
-  votingDecision
+  votingDecision,
+  inviteClusterMember,
+  inviteClusterMemberParam
 }; 

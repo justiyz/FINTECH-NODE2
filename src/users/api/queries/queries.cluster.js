@@ -336,6 +336,35 @@ export default {
       unique_code
     FROM clusters
     WHERE cluster_id = $1 
-    AND is_deleted = FALSE`
+    AND is_deleted = FALSE`,
+  selectClusterById: `
+    SELECT 
+        cluster_id,
+        name,
+        description, 
+        type,
+        unique_code,
+        status,
+        loan_status
+    FROM clusters
+    WHERE cluster_id = $1`,
+  inviteClusterMember: `
+    INSERT INTO cluster_invitees(
+          cluster_id,
+          inviter_id,
+         invitee,
+         invitation_mode,
+         invitee_id
+       ) VALUES ($1, $2, $3, $4, $5)
+       RETURNING *
+    `,
+  checkIfClusterMemberExist: `
+    SELECT 
+      cluster_id,
+      invitee,
+      invitation_mode,
+      invitee_id
+    FROM cluster_invitees
+    WHERE invitee = $1
+    AND cluster_id = $2`
 };
-

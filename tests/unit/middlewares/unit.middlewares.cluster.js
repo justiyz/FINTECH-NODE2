@@ -93,5 +93,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfInviteeAlreadyExist', async() => {
+      const req = { params: null,  body: '', user: '' };
+      const data = await ClusterMiddlewares.checkIfInviteeAlreadyExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

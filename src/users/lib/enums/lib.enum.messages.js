@@ -143,8 +143,10 @@ export const CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING = 
 export const CLUSTER_CREATED_SUCCESSFULLY = 'Cluster created successfully';
 export const CLUSTER_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
 export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
-
+export const INVITE_CLUSTER_MEMBER = 'Cluster member invited successfully';
+export const CLUSTER_MEMBER_INVITATION = (type) => `Successfully invite cluster member through ${type}`;
 // admin module related messages
+
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
 export const ADMIN_HAS_NO_PERMISSIONS = 'Admin has no active permissions';
 export const ADMIN_LOGIN_SUCCESSFULLY = 'Admin logged in successfully';

@@ -5,7 +5,8 @@ const heading = {
   forgotPassword: 'Password Reset Request',
   verifyEmail: 'Welcome to SeedFi 🎉',
   requestVerifyEmail: 'Verify your email',
-  loanDisbursement: 'Loan Application Successful'
+  loanDisbursement: 'Loan Application Successful',
+  loanClusterInvite: 'Loan cluster invite'
 };
 
 export const commonTemplate = (messageType, data) => {

@@ -164,3 +164,23 @@ export const loanDisbursement = (data) => `
       </td>
     </tr>`;
 
+export const loanClusterInvite = (data) => `
+
+    <tr>
+        <td style="padding-bottom: 20px">
+           <span>You have been invited to join a cluster, <br />
+           ${data.inviter_first_name} ${data.inviter_last_name}  is inviting you to join ${data.cluster_name} Cluster loan group <br />r>
+           Kindly click on <a href="${data.join_url}">link</a> to join cluster.
+           </span>  
+        </td>
+    </tr>
+
+    <tr>
+      <td>
+        <span style="line-height: 40px">Thanks</span> <br />
+        <span style="line-height: 40px">Yours Credibly</span> <br />
+        <span style="font-weight: 600; display: block;">SeedFi</span>
+        <span style="display: block;">Email: ask@seedfi.com</span>
+        <span style="display: block;">Call: +234 814 650 7035</span>
+      </td>
+    </tr>`;

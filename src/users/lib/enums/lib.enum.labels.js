@@ -102,6 +102,7 @@ export const FETCH_USER_CURRENT_LOANS_CONTROLLER = 'LoanController::fetchUserCur
 export const FETCH_USER_LOAN_PAYMENT_TRANSACTIONS_CONTROLLER = 'LoanController::fetchUserLoanPaymentTransactions';
 export const INITIATE_LOAN_DISBURSEMENT_CONTROLLER = 'LoanController::initiateLoanDisbursement';
 export const CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE = 'ClusterMiddleware::checkIfAlreadyClusterMember';
+export const CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE = 'ClusterMiddleware::checkIfInviteeAlreadyExist';
 export const CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterExists';
 export const CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterDecisionTicketExists';
 export const CHECK_IF_USER_HAS_PREVIOUSLY_DECIDED_MIDDLEWARE = 'ClusterMiddleware::checkIfUserHasPreviouslyDecided';
@@ -119,6 +120,7 @@ export const REQUEST_TO_JOIN_CLUSTER_CONTROLLER = 'ClusterController::requestToJ
 export const JOIN_CLUSTER_ON_INVITATION_CONTROLLER = 'ClusterController::joinClusterOnInvitation';
 export const FINAL_CLUSTER_DECISION_CONTROLLER = 'ClusterController::finalClusterDecision';
 export const CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
+export const INVITE_CLUSTER_CONTROLLER = 'ClusterController::inviteClusterMember';
 export const FETCH_CLUSTERS_CONTROLLER = 'ClusterController::fetchClusters';
 export const FETCH_CLUSTER_DETAILS_CONTROLLER = 'ClusterController::fetchClusterDetails';
 
