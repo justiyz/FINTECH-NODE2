@@ -1258,7 +1258,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user is on an admin', (done) => {
+    it('should throw error if user is an admin', (done) => {
       chai.request(app)
         .delete(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({

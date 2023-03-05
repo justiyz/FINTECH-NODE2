@@ -449,18 +449,18 @@ export const checkIfUserIsClusterAdmin =  (type = '') => async (req, res, next) 
         return ApiResponse.error(res, enums.USER_IS_NOT_AN_ADMIN, enums.HTTP_FORBIDDEN);
       }
     }
-    if(type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster checkIfUserIsClusterAdmin.controllers.cluster.js`);
-      if(clusterMember.is_admin){
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin checkIfUserIsClusterAdmin.controllers.cluster.js`);
-        return ApiResponse.error(res, enums.USER_IS_AN_ADMIN(''), enums.HTTP_FORBIDDEN);
-      }
-    }
     if(type === 'confirm' && users) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster checkIfUserIsClusterAdmin.controllers.cluster.js`);
       if(clusterMember.is_admin && users.length > 1) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin and not the last member checkIfUserIsAnAdmin.middlewares.cluster.js`);
         return ApiResponse.error(res, enums.USER_IS_AN_ADMIN('leave the cluster, kindly assign someone as admin before leaving'), enums.HTTP_FORBIDDEN);
+      }
+    }
+    if(type === 'confirm') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster checkIfUserIsClusterAdmin.controllers.cluster.js`);
+      if(clusterMember.is_admin){
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin checkIfUserIsClusterAdmin.controllers.cluster.js`);
+        return ApiResponse.error(res, enums.USER_IS_AN_ADMIN(''), enums.HTTP_FORBIDDEN);
       }
     }
     return next();
