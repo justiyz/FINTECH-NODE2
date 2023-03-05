@@ -169,7 +169,7 @@ export const loanClusterInvite = (data) => `
     <tr>
         <td style="padding-bottom: 20px">
            <span>You have been invited to join a cluster, <br />
-           ${data.inviter_first_name} ${data.inviter_last_name}  is inviting you to join ${data.cluster_name} Cluster loan group <br />r>
+           ${data.inviter_first_name} ${data.inviter_last_name}  is inviting you to join ${data.cluster_name} Cluster loan group <br />
            Kindly click on <a href="${data.join_url}">link</a> to join cluster.
            </span>  
         </td>
