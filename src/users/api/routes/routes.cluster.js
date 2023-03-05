@@ -89,14 +89,14 @@ router.get(
   ClusterController.fetchClusterMembers
 );
 
-router.patch(
+router.delete(
   '/:cluster_id/leave',
   AuthMiddleware.validateAuthToken,
   Model(Schema.clusterIdParams, 'params'),
   ClusterMiddleware.checkIfClusterExists,
-  ClusterMiddleware.checkIfUserIsOnActiveLoan,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
-  ClusterMiddleware.checkIfUserIsClusterAdmin,
+  ClusterMiddleware.checkIfUserIsOnActiveLoan,
+  ClusterMiddleware.checkIfUserIsClusterAdmin('confirm'),
   ClusterController.leaveCluster
 );
 

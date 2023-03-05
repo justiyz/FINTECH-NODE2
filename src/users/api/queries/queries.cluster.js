@@ -355,14 +355,6 @@ export default {
     AND clusters.is_deleted = false
 	  AND cluster_members.is_left = false`,
 
-  checkIfUserIsOnAnActiveLoan:`
-      SELECT
-        user_id,
-        loan_status
-      FROM cluster_members
-      WHERE user_id = $1 AND loan_status = 'active'
-    `,
-
   leaveCluster:`
       UPDATE 
          cluster_members

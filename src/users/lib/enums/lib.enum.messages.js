@@ -144,8 +144,9 @@ export const CLUSTER_CREATED_SUCCESSFULLY = 'Cluster created successfully';
 export const CLUSTER_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
 export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
 export const CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY = 'Cluster members fetched successfully';
-export const USER_ON_ACTIVE_LOAN = 'You still have active cluster loan on this cluster, kindly pay all for you to leave';
-export const USER_IS_AN_ADMIN = 'You are currently the admin, assign someone as an admin before you can exit the cluster';
+export const USER_ON_ACTIVE_LOAN = 'You still have active loan on this cluster, kindly pay all for you to leave';
+export const USER_IS_AN_ADMIN = (action) => `You are currently the admin, you cannot ${action}`;
+export const USER_IS_NOT_AN_ADMIN = 'You can not perform this action because you are not an admin';
 export const USER_LEFT_CLUSTER_SUCCESSFULLY = 'User left cluster successfully';
 
 

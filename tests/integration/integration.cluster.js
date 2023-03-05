@@ -1227,7 +1227,7 @@ describe('Clusters', () => {
   describe('user leaves a cluster', () => {
     it('should throw error if id is not sent', (done) => {
       chai.request(app)
-        .patch('/api/v1/cluster/leave')
+        .delete('/api/v1/cluster/leave')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1243,7 +1243,7 @@ describe('Clusters', () => {
     });
     it('should throw error if invalid token is sent', (done) => {
       chai.request(app)
-        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/leave`)
+        .delete(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}yhghretruftg`
@@ -1258,9 +1258,9 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user is an admin', (done) => {
+    it('should throw error if user is on an admin', (done) => {
       chai.request(app)
-        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
+        .delete(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1269,7 +1269,7 @@ describe('Clusters', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_IS_AN_ADMIN);
+          expect(res.body.message).to.equal(enums.USER_IS_AN_ADMIN('leave the cluster, kindly assign someone as admin before leaving'));
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -1277,7 +1277,7 @@ describe('Clusters', () => {
     });
     it('user should leave the cluster successfully', (done) => {
       chai.request(app)
-        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
+        .delete(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -1293,7 +1293,7 @@ describe('Clusters', () => {
     });
     it('user throw error if user has previously left the cluster', (done) => {
       chai.request(app)
-        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
+        .delete(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
