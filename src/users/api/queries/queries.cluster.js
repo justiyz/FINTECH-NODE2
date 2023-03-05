@@ -358,13 +358,11 @@ export default {
        ) VALUES ($1, $2, $3, $4, $5)
        RETURNING *
     `,
-  checkIfClusterMemberExist: `
+  checkIfClusterMemberAlreadyExist: `
     SELECT 
-      cluster_id,
-      invitee,
-      invitation_mode,
-      invitee_id
-    FROM cluster_invitees
-    WHERE invitee = $1
-    AND cluster_id = $2`
+      *
+    FROM cluster_members
+    WHERE user_id = $1
+    AND cluster_id = $2
+    AND is_left = TRUE`
 };

@@ -12,11 +12,11 @@ export default {
     body.clusterCode,
     body.join_cluster_closes_at
   ],
-  inviteClusterMember: (body, cluster, user, invitee, type) => [
+  inviteClusterMember: (body, cluster, user, invitedUser, type) => [
     cluster.cluster_id,
     user.user_id,
-    body.email || body.phone_number,
+    body.type,
     type,
-    invitee?.user_id || null
+    invitedUser?.user_id || null
   ]
 };

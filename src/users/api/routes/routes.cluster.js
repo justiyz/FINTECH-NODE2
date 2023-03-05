@@ -81,13 +81,12 @@ router.post(
 );
 
 router.post(
-  '/:cluster_id/invite-member/:type',
+  '/:cluster_id/invite-member/',
   AuthMiddleware.validateAuthToken,
-  Model(Schema.inviteClusterMemberParam, 'params'),
   Model(Schema.inviteClusterMember, 'payload'),
-  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfClusterExists, // checkIfUserIsAdmin middle to be added later
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('join'),
-  ClusterMiddleware.checkIfInviteeAlreadyExist,
+  ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
   ClusterController.inviteClusterMember
 );
 export default router;

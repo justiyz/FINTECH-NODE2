@@ -407,18 +407,18 @@ export const generateClusterUniqueCode = async(req, res, next) => {
 };
 
 /**
- * check If invitee already exist
+ * check If invitee already cluster member
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof ClusterMiddleware
  */
-export const checkIfInviteeAlreadyExist = async(req, res, next) => {
+export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
   try {
-    const {body, user, params:{cluster_id}} = req;
-    const invitee = body.email ||  body.phone_number;
-    const [ clusterMember ] = await processAnyData(clusterQueries.checkIfClusterMemberExist, [ invitee, cluster_id  ]);
+    const {user, params:{cluster_id}, cluster:{ members}} = req;
+    const [ membersData ] = members;
+    const [ clusterMember ] = await processAnyData(clusterQueries.checkIfClusterMemberAlreadyExist, [ membersData.user_id, cluster_id  ]);
     if(clusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user is already a cluster member checkIfInviteeAlreadyExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE);

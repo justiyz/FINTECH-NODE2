@@ -599,13 +599,15 @@ describe('Clusters', () => {
   describe('invite cluster member', () => {
     it('Should successfully invite cluster member', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/email`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          email: process.env.SEEDFI_USER_SIX_EMAIL
+          type: 'email',
+          email: process.env.SEEDFI_USER_SIX_EMAIL,
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -618,13 +620,15 @@ describe('Clusters', () => {
     });
     it('Should successfully invite cluster member with phone', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/phone_number`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
-        .send({
-          phone_number: process.env.SEEDFI_USER_FOUR_PHONE_NUMBER
+        .send({ 
+          type: 'phone_number',
+          phone_number: process.env.SEEDFI_USER_FOUR_PHONE_NUMBER,
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -637,13 +641,15 @@ describe('Clusters', () => {
     });
     it('Should successfully invite none existing cluster member by email', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/email`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          email: 'test@gmail.com'
+          type: 'email',
+          email: 'test@gmail.com',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -656,15 +662,18 @@ describe('Clusters', () => {
     });
     it('Should successfully invite none existing cluster member by phone_number', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/phone_number`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          phone_number: '09075743312'
+          type: 'phone_number',
+          phone_number: '+2349075743312',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
         })
         .end((err, res) => {
+          console.log(res.body);
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
@@ -673,34 +682,17 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('Should flag when inviting an already existing cluster member', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/phone_number`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .send({
-          phone_number: '09075743312'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_ALREADY_CLUSTER_MEMBER);
-          done();
-        });
-    });
     it('Should flag when try to invite with wrong cluster id', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}0/invite-member/phone_number`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}0/invite-member/`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          phone_number: '09075743312'
+          type: 'phone_number',
+          phone_number: '+2349075743312',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);

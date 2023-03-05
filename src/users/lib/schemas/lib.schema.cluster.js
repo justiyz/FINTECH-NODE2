@@ -29,14 +29,15 @@ const votingDecision = Joi.object().keys({
 });
 
 const inviteClusterMember = Joi.object().keys({
+  type: Joi.string().required().valid('email', 'phone_number'),
   email: Joi.string().optional(),
-  phone_number: Joi.string().optional(),
-  link_url: Joi.string().optional()
-});
-
-const inviteClusterMemberParam = Joi.object().keys({
-  cluster_id:  Joi.string().required(),
-  type: Joi.string().required().valid('email', 'phone_number')
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).optional(),
+  link_url: Joi.string().required()
 });
 
 export default  {
@@ -46,6 +47,5 @@ export default  {
   clusterIdParams,
   votingTicketIdParams,
   votingDecision,
-  inviteClusterMember,
-  inviteClusterMemberParam
+  inviteClusterMember
 }; 
