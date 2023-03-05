@@ -262,7 +262,6 @@ export const inviteClusterMember = async (req, res, next) => {
       inviter_last_name: user.last_name,
       join_url: body.join_url
     };
-    console.log(data);
     if(body.type === 'email' && !invitedUser){
       MailService('Cluster Invite', 'loanClusterInvite', { ...data });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
