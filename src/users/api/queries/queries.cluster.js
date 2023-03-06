@@ -364,5 +364,14 @@ export default {
     FROM cluster_members
     WHERE user_id = $1
     AND cluster_id = $2
-    AND is_left = TRUE`
+    AND is_left = TRUE`,
+  checkIfClusterMemberIsAdmin: `
+      SELECT 
+        cluster_id,
+        loan_status,
+        is_admin,
+        status
+      FROM cluster_members
+      WHERE user_id = $1
+      AND cluster_id = $2`
 };

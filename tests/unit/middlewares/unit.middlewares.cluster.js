@@ -99,5 +99,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfClusterMemberIsAdmin', async() => {
+      const req = { params: null, user: '' };
+      const data = await ClusterMiddlewares.checkIfClusterMemberIsAdmin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

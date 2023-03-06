@@ -606,7 +606,7 @@ describe('Clusters', () => {
         })
         .send({
           type: 'email',
-          email: process.env.SEEDFI_USER_SIX_EMAIL,
+          email: process.env.SEEDFI_USER_TWO_EMAIL,
           link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
         })
         .end((err, res) => {
@@ -618,12 +618,12 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('Should successfully invite cluster member with phone', (done) => {
+    it('Should successfully invite cluster member with phone number', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({ 
           type: 'phone_number',
@@ -819,6 +819,62 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should throw error if cluster is a private cluster', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_TYPE_NOT_PUBLIC_OR_PRIVATE('private'));
+          done();
+        });
+    });
+    it('should successfully accept cluster invite', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.JOIN_CLUSTER_DECISION_CHOICE('accepted'));
+          done();
+        });
+    });
+    it('Should if flag if none admin try performing action', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'email',
+          email: 'balabluw@gmail.com',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_MEMBER_NOT_ADMIN);
+          done();
+        });
+    });
   });
   describe('user requests to join cluster', () => {
     it('should throw error if user has not verified email', (done) => {
@@ -953,22 +1009,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.CLUSTER_NOT_EXISTING);
-          done();
-        });
-    });
-    it('should throw error if cluster is a private cluster', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.CLUSTER_TYPE_NOT_PUBLIC_OR_PRIVATE('private'));
           done();
         });
     });

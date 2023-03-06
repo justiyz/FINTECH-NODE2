@@ -123,6 +123,7 @@ export const CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
 export const INVITE_CLUSTER_CONTROLLER = 'ClusterController::inviteClusterMember';
 export const FETCH_CLUSTERS_CONTROLLER = 'ClusterController::fetchClusters';
 export const FETCH_CLUSTER_DETAILS_CONTROLLER = 'ClusterController::fetchClusterDetails';
+export const CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE = 'ClusterController::CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';

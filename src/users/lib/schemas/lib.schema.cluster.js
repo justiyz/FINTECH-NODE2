@@ -28,11 +28,23 @@ const votingDecision = Joi.object().keys({
   decision: Joi.string().required().valid('yes', 'no')
 });
 
+
 const inviteClusterMember = Joi.object().keys({
-  type: Joi.string().required().valid('email', 'phone_number'),
-  email: Joi.string().optional(),
-  phone_number: Joi.string(),
-  link_url: Joi.string().required()
+  link_url: Joi.string().required(),
+  type: Joi.string().required().valid('email', 'phone_number')
+}).when(Joi.object({ type: Joi.string().valid('email') }).unknown(), {
+  then: Joi.object({
+    email: Joi.string().email().required()
+  })
+}).when(Joi.object({ type: Joi.string().valid('phone_number') }).unknown(), {
+  then: Joi.object({
+    phone_number: Joi.string()
+      .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+      .messages({
+        'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+        'string.empty': 'Phone Number is not allowed to be empty'
+      }).required()
+  })
 });
 
 export default  {

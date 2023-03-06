@@ -84,8 +84,9 @@ router.post(
   '/:cluster_id/invite-member/',
   AuthMiddleware.validateAuthToken,
   Model(Schema.inviteClusterMember, 'payload'),
-  ClusterMiddleware.checkIfClusterExists, // checkIfUserIsAdmin middle to be added later
-  ClusterMiddleware.confirmClusterIsStillOpenForJoining('join'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.confirmClusterIsStillOpenForJoining('invite'),
   ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
   ClusterController.inviteClusterMember
 );

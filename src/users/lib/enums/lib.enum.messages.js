@@ -145,6 +145,7 @@ export const CLUSTER_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
 export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
 export const INVITE_CLUSTER_MEMBER = 'Cluster member invited successfully';
 export const CLUSTER_MEMBER_INVITATION = (type) => `Successfully invite cluster member through ${type}`;
+export const CLUSTER_MEMBER_NOT_ADMIN = 'Cluster member is not an admin and can not perform this action';
 // admin module related messages
 
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
