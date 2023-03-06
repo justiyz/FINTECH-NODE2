@@ -285,6 +285,7 @@ export const leaveCluster = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is the last person on the cluster leaveCluster.controllers.cluster.js`);
       await processOneOrNoneData(clusterQueries.deleteAcluster, cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully deletes the cluster leaveCluster.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 62, 'success');
       sendClusterNotification( cluster, `${cluster.cluster_name} has been deleted`, 'delete-cluster', {});
     }
     return ApiResponse.success(res, enums.USER_LEFT_CLUSTER_SUCCESSFULLY, enums.HTTP_OK);
