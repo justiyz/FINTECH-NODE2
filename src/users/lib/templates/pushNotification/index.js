@@ -29,3 +29,7 @@ export const joinClusterRequestRejected = (clusterName) => {
 export const joinClusterRequestClusterJoiningClosed = (clusterName) => {
   return `You request to join ${clusterName} cluster cannot be completed as cluster can no longer accept new members`;
 };
+
+export const userLeftYourCluster = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} has left ${cluster.name} cluster.`;
+};

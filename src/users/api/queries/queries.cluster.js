@@ -171,6 +171,13 @@ export default {
       current_members = current_members::int + 1
     WHERE cluster_id = $1`,
 
+  decrementClusterMembersCount: `
+    UPDATE clusters
+    SET 
+      updated_at = NOW(),
+      current_members = current_members::int - 1
+    WHERE cluster_id = $1`,
+
   fetchCurrentTicketVotes: `
     SELECT 
       COUNT(id)
@@ -336,6 +343,42 @@ export default {
       unique_code
     FROM clusters
     WHERE cluster_id = $1 
-    AND is_deleted = FALSE`
+    AND is_deleted = FALSE`,
+
+  fetchClusterMembers:`
+    SELECT 
+      cluster_members.user_id,
+      CONCAT(users.first_name, ' ', users.last_name) AS name,
+      to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined,
+      cluster_members.is_admin,
+      cluster_members.loan_status,
+      clusters.status
+	  FROM cluster_members
+    LEFT JOIN users
+	  ON cluster_members.user_id = users.user_id
+	  LEFT JOIN clusters
+	  ON cluster_members.cluster_id = clusters.cluster_id
+	  WHERE cluster_members.cluster_id = $1
+    AND clusters.is_deleted = false
+	  AND cluster_members.is_left = false`,
+
+  leaveCluster:`
+      UPDATE 
+         cluster_members
+      SET 
+      updated_at = NOW(),
+      is_left = true,
+      status = 'inactive'
+      WHERE user_id = $1 AND cluster_id = $2`,
+
+  deleteAcluster: `
+      UPDATE clusters
+      SET 
+        updated_at = NOW(),
+        is_deleted = true,
+        status = 'inactive'
+      WHERE cluster_id = $1
+  `
 };
+
 
