@@ -272,10 +272,10 @@ export const leaveCluster = async (req, res, next) => {
   try {
     const { params: { cluster_id }, user, cluster } = req;
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
-    await Promise.all(
+    await Promise.all([
       processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]),
       processOneOrNoneData(clusterQueries.decrementClusterMembersCount, cluster_id)
-    );
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves a cluster and cluster member decreaments leaveCluster.controllers.cluster.js`);
     userActivityTracking(req.user.user_id, 63, 'success');
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});

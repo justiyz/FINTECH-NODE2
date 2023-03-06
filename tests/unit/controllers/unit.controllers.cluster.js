@@ -64,7 +64,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call leaveCluster', async() => {
-      const req = { params: null, user: null};
+      const req = { params: null, user: ''};
       const data = await ClusterController.leaveCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
