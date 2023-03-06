@@ -273,13 +273,13 @@ export const leaveCluster = async (req, res, next) => {
     const { params: { cluster_id }, user, cluster } = req;
     await processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves cluster leaveCluster.controllers.cluster.js`);
+    await processOneOrNoneData(clusterQueries.decrementClusterMembersCount, cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully decreaments current cluster member leaveCluster.controllers.cluster.js`);
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});
     sendMulticastPushNotification(PushNotifications.userLeftYourCluster(user, cluster), clusterMembersToken, 'leave-cluster', cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all notifications sent successfully leaveCluster.controllers.cluster.js`);
-    const users = await processAnyData(clusterQueries.checkIfUserIsLastMember, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster leaveCluster.controllers.cluster.js`);
-    if (users.length < 1){
+    if (cluster.current_member < 1){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is the last person on the cluster leaveCluster.controllers.cluster.js`);
       await processOneOrNoneData(clusterQueries.deleteAcluster, cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully deletes the cluster leaveCluster.controllers.cluster.js`);

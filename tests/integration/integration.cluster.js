@@ -1269,7 +1269,7 @@ describe('Clusters', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_IS_AN_ADMIN('leave the cluster, kindly assign someone as admin before leaving'));
+          expect(res.body.message).to.equal(enums.USER_IS_AN_ADMIN);
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();

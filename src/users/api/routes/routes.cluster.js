@@ -95,8 +95,7 @@ router.delete(
   Model(Schema.clusterIdParams, 'params'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
-  ClusterMiddleware.checkIfUserIsOnActiveLoan,
-  ClusterMiddleware.checkIfUserIsClusterAdmin('confirm'),
+  ClusterMiddleware.checkIfUserCanLeaveCluster,
   ClusterController.leaveCluster
 );
 

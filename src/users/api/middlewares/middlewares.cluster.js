@@ -406,8 +406,9 @@ export const generateClusterUniqueCode = async(req, res, next) => {
   }
 };
 
+
 /**
- * checks if user is on an active loan
+ * checks if user can leave a cluster
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
@@ -415,58 +416,21 @@ export const generateClusterUniqueCode = async(req, res, next) => {
  * @memberof ClusterMiddleware
  */
 
-export const checkIfUserIsOnActiveLoan = async (req, res, next) => {
+export const checkIfUserCanLeaveCluster =  async (req, res, next) => {
   try {
-    const { user, clusterMember } = req;
+    const { cluster, clusterMember, user } = req;
     if(clusterMember.loan_status === 'active'){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan in the cluster checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN);
     }
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE;
-    logger.error(`checking if user is on an active loan failed::${enums.CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
-
-/**
- * checks if user is an admin
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof ClusterMiddleware
- */
-
-export const checkIfUserIsClusterAdmin =  (type = '') => async (req, res, next) => {
-  try {
-    const { params: { cluster_id }, clusterMember, user } = req;
-    const users = await processAnyData(clusterQueries.checkIfUserIsLastMember, cluster_id);
-    if(type === 'authenticate') {
-      if(!clusterMember.is_admin){
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is not an admin checkIfUserIsClusterAdmin.controllers.cluster.js`);
-        return ApiResponse.error(res, enums.USER_IS_NOT_AN_ADMIN, enums.HTTP_FORBIDDEN);
-      }
-    }
-    if(type === 'confirm' && users) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster checkIfUserIsClusterAdmin.controllers.cluster.js`);
-      if(clusterMember.is_admin && users.length > 1) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin and not the last member checkIfUserIsAnAdmin.middlewares.cluster.js`);
-        return ApiResponse.error(res, enums.USER_IS_AN_ADMIN('leave the cluster, kindly assign someone as admin before leaving'), enums.HTTP_FORBIDDEN);
-      }
-    }
-    if(type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetches users who have not left the cluster checkIfUserIsClusterAdmin.controllers.cluster.js`);
-      if(clusterMember.is_admin){
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin checkIfUserIsClusterAdmin.controllers.cluster.js`);
-        return ApiResponse.error(res, enums.USER_IS_AN_ADMIN(''), enums.HTTP_FORBIDDEN);
-      }
+    if(clusterMember.is_admin && cluster.current_members > 1) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin and not the last member checkIfUserIsAnAdmin.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_IS_AN_ADMIN, enums.HTTP_FORBIDDEN);
     }
     return next();
   } catch (error) {
-    error.label = enums.CHECK_IF_USER_IS_AN_ADMIN_MIDDLEWARE;
-    logger.error(`checking if user is an admin failed::${enums.CHECK_IF_USER_IS_AN_ADMIN_MIDDLEWARE}`, error.message);
+    error.label = enums.CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE;
+    logger.error(`checking if user can leave a cluster failed::${enums.CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

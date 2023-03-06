@@ -171,6 +171,13 @@ export default {
       current_members = current_members::int + 1
     WHERE cluster_id = $1`,
 
+  decrementClusterMembersCount: `
+    UPDATE clusters
+    SET 
+      updated_at = NOW(),
+      current_members = current_members::int - 1
+    WHERE cluster_id = $1`,
+
   fetchCurrentTicketVotes: `
     SELECT 
       COUNT(id)

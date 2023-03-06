@@ -93,15 +93,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfUserIsOnActiveLoan', async() => {
-      const req = { params: '', user: '' };
-      const data = await ClusterMiddlewares.checkIfUserIsOnActiveLoan(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call checkIfUserIsAnAdmin', async() => {
-      const req = { params: '', user: '', clusterMember: '' };
-      const data = await ClusterMiddlewares.checkIfUserIsClusterAdmin('confirm')(req, res, next);
+      const req = { cluster: '', user: '', clusterMember: '' };
+      const data = await ClusterMiddlewares.checkIfUserCanLeaveCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
