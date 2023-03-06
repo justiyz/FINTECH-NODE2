@@ -112,6 +112,13 @@ export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res
       userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
     }
+    if(type === 'invite' && (Number(cluster.maximum_members) === Number(cluster.current_members))){
+      const activityType = req.body.type === 'email' ? 54 : 55;
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      cluster can no longer accept new member confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
+      userActivityTracking(req.user.user_id, activityType, 'fail');
+      return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is still open for members to join or added confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
     return next();
   } catch (error) {
@@ -406,16 +413,41 @@ export const generateClusterUniqueCode = async(req, res, next) => {
   }
 };
 
-
 /**
- * checks if user can leave a cluster
+ * check If invitee already cluster member
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof ClusterMiddleware
  */
+export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
+  try {
+    const {user, params:{cluster_id}, cluster:{ members}} = req;
+    const [ memberData ] = members;
+    const [ clusterMember ] = await processAnyData(clusterQueries.checkIfClusterMemberAlreadyExist, [ memberData.user_id, cluster_id  ]);
+    if(clusterMember) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      decoded that user is already a cluster member checkIfInviteeAlreadyExist.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join checkIfInviteeAlreadyExist.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE;
+    logger.error(`Check if invitee already exist failed::${enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
 
+/**
+ * check If user can leave cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
 export const checkIfUserCanLeaveCluster =  async (req, res, next) => {
   try {
     const { cluster, clusterMember, user } = req;
@@ -435,3 +467,28 @@ export const checkIfUserCanLeaveCluster =  async (req, res, next) => {
   }
 };
 
+/**
+ * check If cluster member Is Admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
+  try {
+    const {user} = req;
+    const  clusterAdmin  = await processOneOrNoneData(clusterQueries.checkIfClusterMemberIsAdmin, 
+      [ user.user_id, req.params.cluster_id  ]);
+    if(!clusterAdmin.is_admin){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      the decoded user is not a cluster member admin  checkIfClusterMemberIsAdmin.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_MEMBER_NOT_ADMIN, enums.HTTP_CONFLICT, enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE;
+    logger.error(`Check if cluster member is admin failed::${enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

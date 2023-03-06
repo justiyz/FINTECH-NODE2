@@ -93,6 +93,18 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfInviteeAlreadyExist', async() => {
+      const req = { params: null, user: null };
+      const data = await ClusterMiddlewares.checkIfInviteeAlreadyClusterMember(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfClusterMemberIsAdmin', async() => {
+      const req = { params: null, user: '' };
+      const data = await ClusterMiddlewares.checkIfClusterMemberIsAdmin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call checkIfUserCanLeaveCluster', async() => {
       const req = { cluster: '', user: '', clusterMember: '' };
       const data = await ClusterMiddlewares.checkIfUserCanLeaveCluster(req, res, next);

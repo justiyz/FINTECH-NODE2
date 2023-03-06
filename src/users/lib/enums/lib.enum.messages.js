@@ -143,6 +143,9 @@ export const CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING = 
 export const CLUSTER_CREATED_SUCCESSFULLY = 'Cluster created successfully';
 export const CLUSTER_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
 export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
+export const INVITE_CLUSTER_MEMBER = 'Cluster member invited successfully';
+export const CLUSTER_MEMBER_INVITATION = (type) => `Successfully invite cluster member through ${type}`;
+export const CLUSTER_MEMBER_NOT_ADMIN = 'Cluster member is not an admin and can not perform this action';
 export const CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY = 'Cluster members fetched successfully';
 export const USER_ON_ACTIVE_LOAN = 'You still have active loan on this cluster, kindly pay all for you to leave';
 export const USER_IS_AN_ADMIN = 'You are currently the admin, you cannot leave the cluster, kindly assign someone as admin before leaving';
@@ -151,6 +154,7 @@ export const USER_LEFT_CLUSTER_SUCCESSFULLY = 'User left cluster successfully';
 
 
 // admin module related messages
+
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
 export const ADMIN_HAS_NO_PERMISSIONS = 'Admin has no active permissions';
 export const ADMIN_LOGIN_SUCCESSFULLY = 'Admin logged in successfully';

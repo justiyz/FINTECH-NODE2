@@ -344,7 +344,44 @@ export default {
     FROM clusters
     WHERE cluster_id = $1 
     AND is_deleted = FALSE`,
-
+  selectClusterById: `
+    SELECT 
+        cluster_id,
+        name,
+        description, 
+        type,
+        unique_code,
+        status,
+        loan_status
+    FROM clusters
+    WHERE cluster_id = $1`,
+  inviteClusterMember: `
+    INSERT INTO cluster_invitees(
+          cluster_id,
+          inviter_id,
+         invitee,
+         invitation_mode,
+         invitee_id
+       ) VALUES ($1, $2, $3, $4, $5)
+       RETURNING *
+    `,
+  checkIfClusterMemberAlreadyExist: `
+    SELECT 
+      *
+    FROM cluster_members
+    WHERE user_id = $1
+    AND cluster_id = $2
+    AND is_left = TRUE`,
+  checkIfClusterMemberIsAdmin: `
+      SELECT 
+        cluster_id,
+        loan_status,
+        is_admin,
+        status
+      FROM cluster_members
+      WHERE user_id = $1
+      AND cluster_id = $2`,
+      
   fetchClusterMembers:`
     SELECT 
       cluster_members.user_id,

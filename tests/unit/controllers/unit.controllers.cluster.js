@@ -57,12 +57,20 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call inviteClusterMember', async() => {
+      const req = { params: null, body: null, user: null};
+      const data = await ClusterController.inviteClusterMember(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+
     it('should call fetchClusterMembers', async() => {
       const req = { params: null, user: null};
       const data = await ClusterController.fetchClusterMembers(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    
     it('should call leaveCluster', async() => {
       const req = { params: null, user: ''};
       const data = await ClusterController.leaveCluster(req, res, next);

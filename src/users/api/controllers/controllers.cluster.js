@@ -5,7 +5,9 @@ import { processOneOrNoneData, processAnyData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
-import { createClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification, sendClusterNotification } from '../services/services.firebase';
+import { createClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification,
+  sendClusterNotification, sendPushNotification } from '../services/services.firebase';
+import MailService from '../services/services.email';
 import { collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
@@ -237,6 +239,59 @@ export const fetchClusterDetails = async (req, res, next) => {
   }
 };
 
+
+
+/**
+ * invite cluster member
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} -  Returning a JSON with the invite details
+ * @memberof ClusterMiddleware
+ */
+export const inviteClusterMember = async (req, res, next) => {
+  try {
+    const {body, user, cluster } = req;
+    const [ invitedUser ]  = body.type === 'email' ? await processAnyData(userQueries.getUserByEmail, [ body.email.trim().toLowerCase() ])
+      : await processAnyData(userQueries.getUserByPhoneNumber, [ body.phone_number.trim() ]);
+    const payload = ClusterPayload.inviteClusterMember(body, cluster, user, invitedUser, body.type);
+    const inviteInfo = {inviter: user.first_name, name: cluster.name};
+    const data = {
+      email: body.email?.trim().toLowerCase(),
+      cluster_name: cluster.name,
+      inviter_first_name: user.first_name,
+      inviter_last_name: user.last_name,
+      join_url: body.join_url
+    };
+    if(body.type === 'email' && !invitedUser){
+      MailService('Cluster Invite', 'loanClusterInvite', { ...data });
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      decoded that invited user email is NOT a valid email in the DB. inviteClusterMember.controllers.cluster.js`);
+      const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
+      return ApiResponse.success(res, enums.CLUSTER_MEMBER_INVITATION(body.type), enums.HTTP_OK, clusterMember);
+    }
+    if(body.type === 'phone_number' && !invitedUser){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      decoded that invited user phone number is not a registered phone number in the DB. inviteClusterMember.controllers.cluster.js`);
+      const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
+      return ApiResponse.success(res, enums.CLUSTER_MEMBER_INVITATION(body.type), enums.HTTP_OK, clusterMember);
+    }
+    if((body.type === 'email' && body.email.trim().toLowerCase() === invitedUser.email) || 
+    (body.type === 'phone_number' && body.phone_number.trim() === invitedUser.phone_number)){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      decoded that invited user is a valid and active user in the DB. inviteClusterMember.controllers.cluster.js`);
+      sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
+      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      MailService('Cluster Invite', 'loanClusterInvite', { data });
+      const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
+      return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
+    }
+  } catch (error) {
+    error.label = enums.INVITE_CLUSTER_CONTROLLER;
+    logger.error(`Inviting cluster member failed::${enums.INVITE_CLUSTER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
 /**
  * fetch a cluster's members
  * @param {Request} req - The request from the endpoint.

@@ -80,6 +80,16 @@ router.post(
   ClusterController.joinClusterOnInvitation
 );
 
+router.post(
+  '/:cluster_id/invite-member/',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.inviteClusterMember, 'payload'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.confirmClusterIsStillOpenForJoining('invite'),
+  ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
+  ClusterController.inviteClusterMember
+);
 router.get(
   '/:cluster_id/members',
   AuthMiddleware.validateAuthToken,

@@ -7,6 +7,7 @@ const getTemplate = (type, data) => {
   case 'requestVerifyEmail': return email.requestVerifyEmail(data);
   case 'rejectedDebitCard': return email.rejectedDebitCard(data);
   case 'loanDisbursement': return email.loanDisbursement(data);
+  case 'loanClusterInvite': return email.loanClusterInvite(data);
   default: return '';
   }
 };
