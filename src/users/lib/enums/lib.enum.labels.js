@@ -124,6 +124,10 @@ export const INVITE_CLUSTER_CONTROLLER = 'ClusterController::inviteClusterMember
 export const FETCH_CLUSTERS_CONTROLLER = 'ClusterController::fetchClusters';
 export const FETCH_CLUSTER_DETAILS_CONTROLLER = 'ClusterController::fetchClusterDetails';
 export const CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE = 'ClusterController::CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE';
+export const FETCH_CLUSTER_MEMBERS_CONTROLLER = 'ClusterController::fetchClusterMembers';
+export const CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
+export const CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
+export const LEAVE_CLUSTER_CONTROLLER = 'ClusterController::leaveCluster';
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
