@@ -271,11 +271,13 @@ export const fetchClusterMembers = async (req, res, next) => {
 export const leaveCluster = async (req, res, next) => {
   try {
     const { params: { cluster_id }, user, cluster } = req;
-    await processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves cluster leaveCluster.controllers.cluster.js`);
-    await processOneOrNoneData(clusterQueries.decrementClusterMembersCount, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully decreaments current cluster member leaveCluster.controllers.cluster.js`);
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
+    await Promise.all(
+      processOneOrNoneData(clusterQueries.leaveCluster, [ user.user_id, cluster_id ]),
+      processOneOrNoneData(clusterQueries.decrementClusterMembersCount, cluster_id)
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user successfully leaves a cluster and cluster member decreaments leaveCluster.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, 63, 'success');
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});
     sendMulticastPushNotification(PushNotifications.userLeftYourCluster(user, cluster), clusterMembersToken, 'leave-cluster', cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all notifications sent successfully leaveCluster.controllers.cluster.js`);
@@ -283,9 +285,11 @@ export const leaveCluster = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is the last person on the cluster leaveCluster.controllers.cluster.js`);
       await processOneOrNoneData(clusterQueries.deleteAcluster, cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully deletes the cluster leaveCluster.controllers.cluster.js`);
+      sendClusterNotification( cluster, `${cluster.cluster_name} has been deleted`, 'delete-cluster', {});
     }
     return ApiResponse.success(res, enums.USER_LEFT_CLUSTER_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 63, 'fail');
     error.label = enums.LEAVE_CLUSTER_CONTROLLER;
     logger.error(`leaving cluster failed::${enums.LEAVE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);

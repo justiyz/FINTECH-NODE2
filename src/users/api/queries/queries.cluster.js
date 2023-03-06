@@ -371,23 +371,6 @@ export default {
       status = 'inactive'
       WHERE user_id = $1 AND cluster_id = $2`,
 
-  checkIfUserIsAdmin:`
-     SELECT 
-        id,
-        user_id,
-        cluster_id,
-        is_admin
-     FROM cluster_members
-     WHERE user_id = $1 AND cluster_id = $2 AND is_admin = true`,
-
-  checkIfUserIsLastMember:`
-     SELECT 
-        id, 
-        cluster_id,
-        user_id
-     FROM cluster_members
-     WHERE cluster_id = $1 AND is_left = false  `,
-
   deleteAcluster: `
       UPDATE clusters
       SET 
