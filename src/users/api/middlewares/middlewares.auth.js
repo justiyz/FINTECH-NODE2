@@ -21,7 +21,7 @@ export const generateReferralCode = async(req, res, next) => {
     const [ existingReferralCode ] = await processAnyData(authQueries.checkIfExistingReferralCode, [ referralCode ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if referral code previously existed in the db generateReferralCode.middlewares.auth.js`);
     if (existingReferralCode) {
-      generateReferralCode(req, res, next);
+      return generateReferralCode(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generated user referral code generateReferralCode.middlewares.auth.js`);
     req.referralCode = referralCode;

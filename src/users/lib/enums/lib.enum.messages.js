@@ -41,6 +41,8 @@ export const USER_LOGIN_SUCCESSFULLY = 'User logged in successfully';
 export const USER_PROFILE_COMPLETED = 'User profile completed successfully';
 export const USER_EMAIL_EXIST = 'Account with this email address already exist';
 export const USER_FCM_TOKEN_UPDATED = 'User fcm token updated';
+export const USER_LOAN_STATUS_OVERDUE = 'Certain Users loan status updated to overdue';
+export const DUE_FOR_PAYMENT_LOAN_REPAYMENT_INITIATED = 'Certain due for payments loan repayments initiated successfully';
 export const CARD_PAYMENT_SUCCESS_STATUS_RECORDED = 'Card payment success status recorded successfully';
 export const BANK_TRANSFER_SUCCESS_STATUS_RECORDED = 'Transfer payment recorded successfully';
 export const BANK_TRANSFER_REVERSED_PAYMENT_RECORDED = 'Transfer reversed payment recorded successfully';
@@ -104,6 +106,7 @@ export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot 
 export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const LOAN_APPLICATION_DECLINED_DECISION = 'User loan application decline due to ineligibility, kindly try again some other time';
+export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a status of ${status}, thus repayment cannot be processed`;
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
@@ -130,6 +133,8 @@ export const VOTING_DECISION_ALREADY_CONCLUDED = 'Voting decision for this ticke
 export const CLUSTER_TYPE_NOT_PUBLIC_OR_PRIVATE = (type) => `Action cannot be performed on a ${type} cluster`;
 export const USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payments fetched successful`;
 export const FORGOT_PIN_TOKEN = 'Pin reset token sent';
+export const PAYMENT_OTP_ACCEPTED = 'payment OTP is valid and transaction is successful';
+export const PAYMENT_OTP_REJECTED = 'payment OTP is invalid please check and input valid one';
 export const PIN_RESET = 'Pin reset successful';
 export const CLUSTER_NAME_ALREADY_EXISTING = (name) => `A cluster with this name "${name}" already exists`;
 export const UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE = 'kindly update income range in profile to perform action';

@@ -1198,6 +1198,24 @@ describe('User', () => {
           done();
         });
     });
+    it('should fetch list of users saved account details successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/settings/account-details')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.message).to.equal(enums.BANK_ACCOUNTS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should return error if token is not set', (done) => {
       chai.request(app)
         .get('/api/v1/user/settings/account-details')
@@ -1791,6 +1809,25 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_USER_ONE_DEBIT_CARD_ONE_ID = res.body.data[0].id;
           process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID = res.body.data[1].id;
+          done();
+        });
+    });
+    it('should fetch list of users saved debit cards successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/settings/debit-cards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.message).to.equal(enums.DEBIT_CARDS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_DEBIT_CARD_ONE_ID = res.body.data[0].id;
           done();
         });
     });

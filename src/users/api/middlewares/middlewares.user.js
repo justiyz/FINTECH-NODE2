@@ -432,19 +432,26 @@ export const checkUserLoanStatus = async(req, res, next) => {
  */
 export const checkIfAccountDetailsExists = async(req, res, next) => {
   try {
-    const { user, params: { id } } = req;
-    const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id ]);
-    if (!accountIdExists) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
+    const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
+    if(!payment_channel || payment_channel === 'bank') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
+      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id || payment_channel_id ]);
+      if (!accountIdExists) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
+        return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details exists in the DB checkIfAccountDetailsExists.middlewares.user.js`);
+      if (accountIdExists.user_id !== user.user_id) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not belong to user checkIfAccountDetailsExists.middlewares.user.js`);
+        return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_USERS, enums.HTTP_FORBIDDEN, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details belong to user checkIfAccountDetailsExists.middlewares.user.js`);
+      req.accountDetails = accountIdExists;
+      return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details exists in the DB checkIfAccountDetailsExists.middlewares.user.js`);
-    if (accountIdExists.user_id !== user.user_id) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not belong to user checkIfAccountDetailsExists.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_USERS, enums.HTTP_FORBIDDEN, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details belong to user checkIfAccountDetailsExists.middlewares.user.js`);
-    req.accountDetails = accountIdExists;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    query payment type is sent and payment query type sent is to check for card repayment checkIfAccountDetailsExists.middlewares.user.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE;
@@ -577,21 +584,30 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
  */
 export const checkIfCardOrUserExist = async (req, res, next) => {
   try {
-    const { user, params: { id } } = req;
-    const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+    const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
+    if(!payment_channel || payment_channel === 'card') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      no query payment type sent or query payment type sent is to check for card repayment checkIfCardOrUserExist.middlewares.user.js`);
+      const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id || payment_channel_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully fetched a user's card checkIfCardOrUserExist.middlewares.user.js`);
-    if (userCard === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      if (userCard === null) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully confirmed card does not exist in the DB checkIfCardOrUserExist.middlewares.user.js`);
-      return ApiResponse.error(res, enums.CARD_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE);
-    }
-    if ( user.user_id !== userCard.user_id ) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+        return ApiResponse.error(res, enums.CARD_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE);
+      }
+      if ( user.user_id !== userCard.user_id ) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully confirmed the card does not belong to user checkIfCardOrUserExist.middlewares.user.js`);
-      return ApiResponse.error(res, enums.CARD_DOES_NOT_BELONG_TO_USER, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE);
+        return ApiResponse.error(res, enums.CARD_DOES_NOT_BELONG_TO_USER, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      successfully confirmed the card exists and belongs to user checkIfCardOrUserExist.middlewares.user.js`);
+      req.userDebitCard = userCard;
+      return next();
     }
-    req.userDebitCard = userCard;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    query payment type is sent and query payment type sent is to check for bank repayment checkIfCardOrUserExist.middlewares.user.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE;

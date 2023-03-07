@@ -97,16 +97,17 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
  */
 export const verifyTransactionPaymentRecord = async(req, res, next) => {
   try {
-    const { body } = req;
-    if (body.event === 'charge.success' || body.event.includes('transfer') || body.event.includes('refund')) {
+    const { body, params } = req;
+    if ((body.event && (body.event === 'charge.success' || body.event.includes('transfer') || body.event.includes('refund'))) || body.otp) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} verifyTransactionPaymentRecord.middlewares.payment.js`);
-      const [ paymentRecord ] = await processAnyData(paymentQueries.fetchTransactionByReference, [ body.data.reference || body.data.transaction_reference ]);
+      const parameterTypes = body.otp ? params.reference_id : (body.data.reference || body.data.transaction_reference);
+      const [ paymentRecord ] = await processAnyData(paymentQueries.fetchTransactionByReference, [ parameterTypes ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record fetched from DB using reference verifyTransactionPaymentRecord.middlewares.payment.js`);
       if (!paymentRecord) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record not existing in the DB verifyTransactionPaymentRecord.middlewares.payment.js`);
-        return ApiResponse.error(res, enums.PAYMENT_RECORD_NOT_FOUND, enums.HTTP_OK, enums.VERIFY_TRANSACTION_PAYMENT_RECORD_MIDDLEWARE);
+        return ApiResponse.error(res, enums.PAYMENT_RECORD_NOT_FOUND, body.otp ? enums.HTTP_BAD_REQUEST : enums.HTTP_OK, enums.VERIFY_TRANSACTION_PAYMENT_RECORD_MIDDLEWARE);
       }
-      if (body.event.includes('refund')) {
+      if (body.event && body.event.includes('refund')) {
         if (!paymentRecord.is_initiated_refund) {
           logger.info(`${enums.CURRENT_TIME_STAMP}, Info: refund not initiated for payment record in the DB verifyTransactionPaymentRecord.middlewares.payment.js`);
           return ApiResponse.error(res, enums.REFUND_NOT_INITIATED_FOR_PAYMENT_TRANSACTION, enums.HTTP_OK, enums.VERIFY_TRANSACTION_PAYMENT_RECORD_MIDDLEWARE);
@@ -185,7 +186,12 @@ export const updatePaymentHistoryStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} updatePaymentHistoryStatus.middlewares.payment.js`);
       await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment status updated successfully updatePaymentHistoryStatus.middlewares.payment.js`);
-      return next();
+      if (body.data.channel === 'card') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment was made through debit card, so wants to proceed to save card auth details updatePaymentHistoryStatus.middlewares.payment.js`);
+        return next();
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment was made through ${body.data.channel} updatePaymentHistoryStatus.middlewares.payment.js`);
+      return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} updatePaymentHistoryStatus.middlewares.payment.js`);
     return next();
@@ -207,7 +213,7 @@ export const updatePaymentHistoryStatus = async(req, res, next) => {
 export const saveCardAuth = async(req, res, next) => {
   try {
     const { body, paymentRecord} = req;
-    if (body.event === 'charge.success') {
+    if (body.event === 'charge.success' && body.data.channel === 'card') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} saveCardAuth.middlewares.payment.js`);
       const checkIfCardPreviouslyUsedPayload = PaymentPayload.checkCardSavedPayload(paymentRecord, body);
       const [ cardPreviouslySaved ] = await processAnyData(paymentQueries.checkIfCardPreviouslySaved, checkIfCardPreviouslyUsedPayload);
@@ -248,6 +254,9 @@ export const saveCardAuth = async(req, res, next) => {
         return next();
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment record is not of card tokenization type saveCardAuth.middlewares.payment.js`);
+      return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
+    }
+    if (body.event === 'charge.success' && body.data.channel === 'bank') {
       return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} saveCardAuth.middlewares.payment.js`);
@@ -323,7 +332,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
           processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
           processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable, loanPaymentTrackingPayload),
           processOneOrNoneData(loanQueries.updateActivatedLoanDetails, [ paymentRecord.loan_id ]),
-          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id ]),
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, 'active' ]),
           processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ])
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB processPersonalLoanTransferPayments.middlewares.payment.js`);
@@ -368,6 +377,79 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
   } catch (error) {
     error.label = enums.PROCESS_PERSONAL_LOAN_TRANSFER_PAYMENTS_MIDDLEWARE;
     logger.error(`processing transfer webhook responses failed:::${enums.PROCESS_PERSONAL_LOAN_TRANSFER_PAYMENTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * process everything personal loan repayment webhook response
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof PaymentMiddleware
+ */
+export const processPersonalLoanRepayments = async(req, res, next) => {
+  try {
+    const { body, paymentRecord } = req;
+    if (body.event === 'charge.success' && (paymentRecord.payment_type === 'part_loan_repayment' || paymentRecord.payment_type === 'full_loan_repayment') || paymentRecord.payment_type === 'automatic_loan_repayment') {
+      const [ user ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} processPersonalLoanRepayments.middlewares.payment.js`);
+      const [ loanDetails ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ paymentRecord.loan_id, paymentRecord.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the loan details fetched successfully processPersonalLoanRepayments.middlewares.payment.js`);
+      const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ paymentRecord.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user is on an active cluster loan processPersonalLoanRepayments.middlewares.payment.js`);
+      if (paymentRecord.payment_type === 'part_loan_repayment' || paymentRecord.payment_type === 'automatic_loan_repayment') {
+        const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ paymentRecord.loan_id, paymentRecord.user_id ]);
+        const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ paymentRecord.loan_id, paymentRecord.user_id ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments processPersonalLoanRepayments.middlewares.payment.js`);
+        const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+        const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
+        const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
+        await Promise.all([
+          processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit', loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
+          processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]),
+          processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount) ])
+        ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully processPersonalLoanRepayments.middlewares.payment.js`);
+        if (checkIfUserOnClusterLoan) {
+          const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+        }
+        if (!checkIfUserOnClusterLoan) {
+          const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusOption ]);
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+        }
+        MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+        userActivityTracking(paymentRecord.user_id, activityType, 'success');
+        return next();
+      }
+      await Promise.all([
+        processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit', loanDetails.loan_reason, 'full loan repayment', `paystack ${body.data.channel}` ]),
+        processAnyData(loanQueries.updateAllLoanRepaymentOnFullPayment, [ paymentRecord.loan_id, paymentRecord.user_id ]),
+        processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, 'completed', parseFloat(paymentRecord.amount) ])
+      ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully processPersonalLoanRepayments.middlewares.payment.js`);
+      if (!checkIfUserOnClusterLoan) {
+        processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, 'inactive' ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to inactive processPersonalLoanRepayments.middlewares.payment.js`);
+      }
+      if (checkIfUserOnClusterLoan) {
+        const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
+        processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+      }
+      MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2)});
+      userActivityTracking(paymentRecord.user_id, 72, 'success');
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} processPersonalLoanRepayments.middlewares.payment.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.PROCESS_PERSONAL_LOAN_REPAYMENTS_MIDDLEWARE;
+    logger.error(`processing loan repayment webhook response failed:::${enums.PROCESS_PERSONAL_LOAN_REPAYMENTS_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

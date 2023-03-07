@@ -85,7 +85,7 @@ export const updateSelfieImage = async (req, res, next) => {
     const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database updateSelfieImage.controllers.user.j`);
     if (existingToken) {
-      updateSelfieImage(req, res, next);
+      return updateSelfieImage(req, res, next);
     }
     const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, body.image_url.trim(), token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database updateSelfieImage.controllers.user.js`);
@@ -140,7 +140,7 @@ export const requestEmailVerification = async(req, res, next) => {
     const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database requestEmailVerification.controller.auth.js`);
     if (existingToken) {
-      requestEmailVerification(req, res, next);
+      return requestEmailVerification(req, res, next);
     }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
@@ -515,9 +515,9 @@ export const homepageDetails = async(req, res, next) => {
     const [ userOutstandingPersonalLoanRepayment ] = await processAnyData(userQueries.userOutstandingPersonalLoan, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan outstanding fetched homepageDetails.controller.user.js`);
     const outstandingPersonalLoanAmount = !userOutstandingPersonalLoanRepayment ? 0 : parseFloat(userOutstandingPersonalLoanRepayment.total_outstanding_amount);
-    let userOutstandingClusterLoanRepayment; // to implement the query when cluster loan is implement
+    // to implement the query when cluster loan is implement
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan outstanding fetched homepageDetails.controller.user.js`);
-    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount + (userOutstandingClusterLoanRepayment || 0)).toFixed(2));
+    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount +  0).toFixed(2)); // to include for cluster loan when implemented
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's total loan obligation calculated homepageDetails.controller.user.js`);
     const personalLoanTransactions =  await processAnyData(userQueries.userPersonalLoanTransactions, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan repayment transactions fetched homepageDetails.controller.user.js`);
@@ -531,11 +531,15 @@ export const homepageDetails = async(req, res, next) => {
       user_id: user.user_id,
       first_name: user.first_name,
       user_loan_status: user.loan_status,
-      loan_amounts: {
-        total_personal_outstanding_loan: parseFloat(parseFloat(outstandingPersonalLoanAmount).toFixed(2)),
-        total_cluster_loan_outstanding_loan: userOutstandingClusterLoanRepayment || 0,
-        total_loan_obligation: totalLoanObligation
+      user_individual_loan: {
+        loan_id: !userOutstandingPersonalLoanRepayment ? '' : userOutstandingPersonalLoanRepayment.loan_id,
+        total_outstanding_loan: parseFloat(parseFloat(outstandingPersonalLoanAmount).toFixed(2))
       },
+      user_cluster_loan: {
+        loan_id: '',
+        total_outstanding_loan: 0 // to implement when cluster loan is worked on
+      },
+      total_loan_obligation: totalLoanObligation,
       personal_loan_transaction_history: {
         underProcessingPersonalLoans,
         personalLoanTransactions

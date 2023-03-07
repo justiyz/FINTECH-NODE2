@@ -127,6 +127,7 @@ export default {
   fetchLoanNextRepaymentDetails: `
     SELECT 
       id,
+      loan_repayment_id,
       loan_id,
       user_id,
       repayment_order,
@@ -139,6 +140,55 @@ export default {
     AND status != 'paid'
     AND payment_at IS NULL
     ORDER BY proposed_payment_date ASC
+    LIMIT 1`,
+
+  updateNextLoanRepayment: `
+    UPDATE personal_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      payment_at = Now(),
+      status = 'paid'
+    WHERE loan_repayment_id = $1`,
+
+  updateAllLoanRepaymentOnFullPayment: `
+    UPDATE personal_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      payment_at = Now(),
+      status = 'paid'
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL`,
+
+  existingUnpaidRepayments: `
+    SELECT 
+      COUNT(id)
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL`,
+
+  updateLoanWithRepayment: `
+    UPDATE personal_loans
+    SET
+      updated_at = NOW(),
+      status = $3,
+      total_outstanding_amount = total_outstanding_amount - $4::FLOAT
+    WHERE loan_id = $1
+    AND user_id = $2`,
+
+  checkUserOnClusterLoan: `
+    SELECT 
+      id,
+      user_id,
+      cluster_id,
+      loan_status
+    FROM cluster_members
+    WHERE user_id = $1
+    AND is_left = FALSE
+    AND loan_status != 'inactive'
     LIMIT 1`,
 
   updateProcessingLoanDetails: `
@@ -193,7 +243,7 @@ export default {
     UPDATE users
     SET 
       updated_at = NOW(),
-      loan_status = 'active'
+      loan_status = $2
     WHERE user_id = $1`,
 
   cancelUserLoanApplication: `
@@ -284,7 +334,8 @@ export default {
       payment_means,
       to_char(DATE (created_at)::date, 'Mon DDth, YYYY') AS payment_date
     FROM personal_loan_payments
-    WHERE user_id = $1`,
+    WHERE user_id = $1
+    ORDER BY created_at DESC`,
 
   fetchUserPersonalLoanPaymentDetails: `
     SELECT 

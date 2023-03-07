@@ -13,6 +13,7 @@
   "scripts": {
     "lint": "eslint --fix src/ --ext .js",
     "dev": "nodemon --exec babel-node src/app.js",
+    "cron": "babel-node  src/cron.js",
     "prestart": "npm run migrate:up && npm run seed:up",
     "start": "babel-node  src/app.js",
     "pretest": "cross-env SEEDFI_NODE_ENV=test npm run lint && cross-env SEEDFI_NODE_ENV=test npm run seed:reset:test && cross-env SEEDFI_NODE_ENV=test npm run migrate:reset:test && cross-env SEEDFI_NODE_ENV=test npm run migrate:up:test && cross-env SEEDFI_NODE_ENV=test npm run seed:up:test",
@@ -59,6 +60,7 @@
     "http-status": "^1.5.3",
     "joi": "^17.7.0",
     "jsonwebtoken": "^8.5.1",
+    "node-cron": "^3.0.2",
     "pg-promise": "^10.15.4",
     "uuid": "^9.0.0",
     "winston": "^3.8.2"

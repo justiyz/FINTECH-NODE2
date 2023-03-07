@@ -99,7 +99,7 @@ router.get(
   ClusterController.fetchClusterMembers
 );
 
-router.delete(
+router.post(
   '/:cluster_id/leave',
   AuthMiddleware.validateAuthToken,
   Model(Schema.clusterIdParams, 'params'),

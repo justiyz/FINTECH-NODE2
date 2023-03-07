@@ -3,6 +3,7 @@ import Model from '../middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.loan';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
+import * as PaymentMiddleware from '../middlewares/middlewares.payment';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as LoanController from '../controllers/controllers.loan';
 
@@ -72,6 +73,35 @@ router.get(
   Model(Schema.loanPaymentIdParams, 'params'),
   LoanMiddleware.checkUserLoanPaymentExists,
   LoanController.fetchPersonalLoanPaymentDetails
+);
+
+router.get(
+  '/:loan_id/initiate-repayment',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  Model(Schema.noCardOrBankLoanRepaymentType, 'query'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanController.initiateManualLoanRepayment
+);
+
+router.post(
+  '/:loan_id/:payment_channel_id/initiate-repayment',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanRepaymentParams, 'params'),
+  Model(Schema.loanRepaymentType, 'query'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkIfCardOrUserExist,
+  LoanController.initiateManualCardOrBankLoanRepayment
+);
+
+router.post(
+  '/:reference_id/submit-otp',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.referenceIdParams, 'params'),
+  Model(Schema.paymentOtp, 'payload'),
+  PaymentMiddleware.verifyTransactionPaymentRecord,
+  LoanController.submitPaymentOtp
 );
 
 export default router;

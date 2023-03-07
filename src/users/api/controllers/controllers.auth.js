@@ -31,7 +31,7 @@ export const signup = async(req, res, next) => {
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database signup.controllers.auth.js`);
     if (existingOtp) {
-      signup(req, res, next);
+      return signup(req, res, next);
     }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
@@ -78,7 +78,7 @@ export const resendSignupOtp = async(req, res, next) => {
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database resendSignupOtp.controllers.auth.js`);
     if (existingOtp) {
-      resendSignupOtp(req, res, next);
+      return resendSignupOtp(req, res, next);
     }
     const expireAt = dayjs().add(30, 'minutes');
     const expirationTime = dayjs(expireAt);
@@ -212,7 +212,7 @@ export const forgotPassword = async(req, res, next) => {
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database forgotPassword.controller.auth.js`);
     if (existingOtp) {
-      forgotPassword(req, res, next);
+      return forgotPassword(req, res, next);
     }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
@@ -438,7 +438,7 @@ export const forgotPin = async(req, res, next) => {
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database forgotPin.controller.auth.js`);
     if (existingOtp) {
-      forgotPin(req, res, next);
+      return forgotPin(req, res, next);
     }
     const expireAt = dayjs().add(5, 'minutes');
     const expirationTime = dayjs(expireAt);

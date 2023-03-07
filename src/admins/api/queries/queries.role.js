@@ -104,6 +104,7 @@ export default {
     FROM admin_roles
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
     ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    ORDER BY created_at DESC
     OFFSET $5
     LIMIT $6
   `,

@@ -364,3 +364,144 @@ export const initiatePaystackBankTransferTestResponse = (userTransferRecipient, 
   };
   return result;
 };
+
+export const initiateChargeViaCardAuthTokenPaystackTestResponse = (reference) => {
+  const result = {
+    status: true,
+    message: 'Charge attempted',
+    data: {
+      id: 2590405333,
+      domain: 'test',
+      status: 'success',
+      reference: reference,
+      amount: 21921220,
+      message: null,
+      gateway_response: 'Successful',
+      paid_at: '2023-03-03T22:38:26.000Z',
+      created_at: '2023-03-03T22:38:26.000Z',
+      channel: 'card',
+      currency: 'NGN',
+      ip_address: '172.31.68.32',
+      metadata: '',
+      log: null,
+      fees: 200000,
+      fees_split: null,
+      authorization: {
+        authorization_code: 'AUTH_opcf85n7x5',
+        bin: '408408',
+        last4: '4081',
+        exp_month: '12',
+        exp_year: '2030',
+        channel: 'card',
+        card_type: 'visa ',
+        bank: 'TEST BANK',
+        country_code: 'NG',
+        brand: 'visa',
+        reusable: true,
+        signature: 'SIG_LeKgBEBPtDuxJDRKCSsP',
+        account_name: null
+      },
+      customer: {
+        id: 114027951,
+        first_name: null,
+        last_name: null,
+        email: 'akinpelumi@enyata.com',
+        customer_code: 'CUS_hq6flu6mv1wy2e1',
+        phone: null,
+        metadata: null,
+        risk_action: 'default',
+        international_format_phone: null
+      },
+      plan: null,
+      split: {},
+      order_id: null,
+      paidAt: '2023-03-03T22:38:26.000Z',
+      createdAt: '2023-03-03T22:38:26.000Z',
+      requested_amount: 21921220,
+      pos_transaction_data: null,
+      source: null,
+      fees_breakdown: null,
+      transaction_date: '2023-03-03T22:38:26.000Z',
+      plan_object: {},
+      subaccount: {}
+    }
+  };
+  return result;
+};
+
+export const initiateChargeViaBankAccountPaystackTestResponse = (reference) => {
+  const result = {
+    status: true,
+    message: 'Charge attempted',
+    data: {
+      reference: reference,
+      status: 'send_otp',
+      display_text: 'To confirm that you own this account, kindly enter the OTP sent to your phone'
+    }
+  };
+  return result;
+};
+
+export const paystackSubmitOtpTestResponse = (reference) => {
+  const data = {
+    status: true,
+    message: 'Charge attempted',
+    data: {
+      id: 2598623413,
+      domain: 'test',
+      status: 'success',
+      reference: reference,
+      amount: 18921220,
+      message: 'madePayment',
+      gateway_response: 'Approved',
+      paid_at: '2023-03-06T12:01:55.000Z',
+      created_at: '2023-03-06T11:43:09.000Z',
+      channel: 'bank',
+      currency: 'NGN',
+      ip_address: '172.31.68.216',
+      metadata: '',
+      log: null,
+      fees: 200000,
+      fees_split: null,
+      authorization: {
+        authorization_code: 'AUTH_59uaygpua0',
+        bin: '000XXX',
+        last4: 'X000',
+        exp_month: '12',
+        exp_year: '9999',
+        channel: 'bank',
+        card_type: '',
+        bank: 'Zenith Bank',
+        country_code: 'NG',
+        brand: 'Zenith Emandate',
+        reusable: false,
+        signature: null,
+        account_name: null
+      },
+      customer: {
+        id: 114027951,
+        first_name: null,
+        last_name: null,
+        email: 'akinpelumi@enyata.com',
+        customer_code: 'CUS_hq6flu6mv1wy2e1',
+        phone: null,
+        metadata: null,
+        risk_action: 'default',
+        international_format_phone: null
+      },
+      plan: null,
+      split: {},
+      order_id: null,
+      paidAt: '2023-03-06T12:01:55.000Z',
+      createdAt: '2023-03-06T11:43:09.000Z',
+      requested_amount: 18921220,
+      pos_transaction_data: null,
+      source: null,
+      fees_breakdown: null,
+      transaction_date: '2023-03-06T11:43:09.000Z',
+      plan_object: {},
+      subaccount: {}
+    }
+  };
+  return data;
+};

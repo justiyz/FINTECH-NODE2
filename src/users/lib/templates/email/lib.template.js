@@ -1,4 +1,5 @@
 import config from '../../../config/index';
+import * as Hash from '../../utils/lib.util.hash';
 
 export const forgotPassword = (data) => `
     <tr>
@@ -165,7 +166,6 @@ export const loanDisbursement = (data) => `
     </tr>`;
 
 export const loanClusterInvite = (data) => `
-
     <tr>
         <td style="padding-bottom: 20px">
            <span>You have been invited to join a cluster, <br />
@@ -184,3 +184,86 @@ export const loanClusterInvite = (data) => `
         <span style="display: block;">Call: +234 814 650 7035</span>
       </td>
     </tr>`;
+
+
+export const failedCardDebit = async(data) => `
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>
+        <span>Hi ${data.first_name},</span> <br />
+      </span>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>Your card could not be debited for the loan repayment of ₦${parseFloat(data.total_payment_amount).toFixed(2)}</span>  
+    </td>
+  </tr>
+
+  <tr>
+        <td style="padding-bottom: 20px">
+          <p>card details</p><br />
+          <span>
+            Last 4 digits: ${await Hash.decrypt(decodeURIComponent(data.last_4_digits))}, <br />
+            Card Type: ${data.card_type}
+          </span>  
+        </td>
+    </tr>
+
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment</span>  
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <span style="line-height: 40px">Thanks</span> <br />
+      <span style="line-height: 40px">Yours Credibly</span> <br />
+      <span style="font-weight: 600; display: block;">SeedFi</span>
+      <span style="display: block;">Email: ask@seedfi.com</span>
+      <span style="display: block;">Call: +234 814 650 7035</span>
+    </td>
+  </tr>`;
+
+export const successfulRepayment = async(data) => `
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>
+        <span>Hi ${data.first_name},</span> <br />
+      </span>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>Seedfi received your payment of ${data.amount_paid} naira as a loan repayment of your existing loan facility</span>  
+    </td>
+  </tr>
+
+  <tr>
+        <td style="padding-bottom: 20px">
+          <p>payment details</p><br />
+          <span>
+            Total Loan amount: ₦${data.total_loan_amount} <br />
+            Amount repaid: ₦${data.amount_paid}
+          </span>  
+        </td>
+    </tr>
+
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>Thank you for being loyal and keeping to your promise of loan facility repayment</span>  
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <span style="line-height: 40px">Thanks</span> <br />
+      <span style="line-height: 40px">Yours Credibly</span> <br />
+      <span style="font-weight: 600; display: block;">SeedFi</span>
+      <span style="display: block;">Email: ask@seedfi.com</span>
+      <span style="display: block;">Call: +234 814 650 7035</span>
+    </td>
+  </tr>`;

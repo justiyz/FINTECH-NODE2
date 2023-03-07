@@ -249,7 +249,7 @@ export default {
   `,
 
   fetchCardsById:`
-      SELECT id, user_id, card_type, is_default
+      SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
       WHERE id = $1
   `,

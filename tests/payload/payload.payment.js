@@ -21,7 +21,7 @@ export const receiveChargeSuccessWebHookOne = (reference) => ({
     fees: 750,
     fees_split: null,
     authorization: {
-      authorization_code: 'AUTH_1xhn077tgs',
+      authorization_code: 'AUTH_opcf85n7x5',
       bin: '408408',
       last4: '0409',
       exp_month: '01',
@@ -83,7 +83,7 @@ export const receiveChargeSuccessWebHookTwo = (reference) => ({
     fees: 750,
     fees_split: null,
     authorization: {
-      authorization_code: 'AUTH_1xhn077tgs8u',
+      authorization_code: 'AUTH_opcf85n7x5',
       bin: '300401',
       last4: '9040',
       exp_month: '03',
@@ -145,7 +145,7 @@ export const receiveChargeSuccessWebHookThree = (reference) => ({
     fees: 750,
     fees_split: null,
     authorization: {
-      authorization_code: 'AUTH_1xhn077tgs8u',
+      authorization_code: 'AUTH_opcf85n7x5',
       bin: '300401',
       last4: '9040',
       exp_month: dayjs().add(2, 'Month').format('MM'),
@@ -207,7 +207,7 @@ export const receiveChargeSuccessWebHookOneUserTwo = (reference) => ({
     fees: 750,
     fees_split: null,
     authorization: {
-      authorization_code: 'AUTH_1xhn07gyryt7tgs',
+      authorization_code: 'AUTH_opcf85n7x5',
       bin: '218209',
       last4: '9087',
       exp_month: '07',

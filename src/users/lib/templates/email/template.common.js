@@ -6,7 +6,9 @@ const heading = {
   verifyEmail: 'Welcome to SeedFi 🎉',
   requestVerifyEmail: 'Verify your email',
   loanDisbursement: 'Loan Application Successful',
-  loanClusterInvite: 'Loan cluster invite'
+  loanClusterInvite: 'Loan cluster invite',
+  failedCardDebit: 'Failed card debiting',
+  successfulRepayment: 'Successful loan repayment'
 };
 
 export const commonTemplate = (messageType, data) => {

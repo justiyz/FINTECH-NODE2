@@ -400,7 +400,7 @@ export const generateClusterUniqueCode = async(req, res, next) => {
     const [ existingUniqueCode ] = await processAnyData(clusterQueries.checkIfClusterIsUnique, [ uniqueCode ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster unique code is existing generateClusterUniqueCode.middlewares.cluster.js`);
     if (existingUniqueCode) {
-      generateClusterUniqueCode(req, res, next);
+      return generateClusterUniqueCode(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully generates cluster unique code generateClusterUniqueCode.middlewares.cluster.js`);
     body.clusterCode = uniqueCode;
