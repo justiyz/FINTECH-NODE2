@@ -5,12 +5,12 @@ function CreateSchedule(time, task, zone) {
   return cron.schedule(time, task, zone);
 }
 
-const updateUsersPersonalLoanToOverdue = CreateSchedule('* 0,17 * * *', () => updateLoanStatusToOverdue(), {
+const updateUsersPersonalLoanToOverdue = CreateSchedule('0 0,17 * * *', () => updateLoanStatusToOverdue(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
 }); // runs every 12:00am and 05:00pm
 
-const automaticallyDebitUserForLoanRepayment = CreateSchedule('* 4,18 * * *', () => initiateLoanRepayment(), {
+const automaticallyDebitUserForLoanRepayment = CreateSchedule('0 4,18 * * *', () => initiateLoanRepayment(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
 }); // runs every 04:00am and 06:00pm
