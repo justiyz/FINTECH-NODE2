@@ -10,7 +10,7 @@ const updateUsersPersonalLoanToOverdue = CreateSchedule('* 0,17 * * *', () => up
   timezone: 'Africa/Lagos'
 }); // runs every 12:00am and 05:00pm
 
-const automaticallyDebitUserForLoanRepayment = CreateSchedule('*/1 * * * *', () => initiateLoanRepayment(), {
+const automaticallyDebitUserForLoanRepayment = CreateSchedule('* 4,18 * * *', () => initiateLoanRepayment(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
 }); // runs every 04:00am and 06:00pm
