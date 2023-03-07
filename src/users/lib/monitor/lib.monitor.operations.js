@@ -68,10 +68,10 @@ export const operations = {
   67: 'BNWCLTADM', // cluster member becomes new cluster admin
   68: 'EDTCLST', // cluster admin edits cluster
   69: 'APLNAPOFLT', // user accepts loan application offer letter
-  70: 'AUTPLONRP', // users partial loan obligation is repaid automatically
-  71: 'MANPLONRP', // users partial loan obligation is repaid manually by user
-  72: 'AUTFLONRP', // users full loan obligation is repaid automatically
-  73: 'MANFLONRP', // users full loan obligation is repaid manually by user
+  70: 'AUTPLONRP', // users loan obligation part payment is paid
+  // 71: 'MANPLONRP', // users partial loan obligation is repaid manually by user
+  72: 'AUTFLONRP', // users loan obligation full payment is paid
+  // 73: 'MANFLONRP', // users full loan obligation is repaid manually by user
   74: 'RNGLONTRM', // user renegotiates loan terms during application
   75: 'RSHDLONTN', // user reschedules loan tenor
   76: 'RSHDLONRA' // user reschedules loan repayment amount

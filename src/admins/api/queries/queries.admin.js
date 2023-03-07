@@ -83,9 +83,9 @@ export default {
       admins.status
       FROM admins
       LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-        WHERE (admins.first_name ILIKE $1 OR $1 is null) OR (admins.last_name ILIKE $1 OR $1 is null)
-        ORDER BY admins.created_at DESC
-        OFFSET $2 LIMIT $3
+      WHERE (admins.first_name ILIKE $1 OR $1 is null) OR (admins.last_name ILIKE $1 OR $1 is null)
+      ORDER BY admins.created_at DESC
+      OFFSET $2 LIMIT $3
   `,
 
 

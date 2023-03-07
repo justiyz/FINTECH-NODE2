@@ -63,5 +63,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call initiateManualLoanRepayment', async() => {
+      const req = { user: '', params: '', existingLoanApplication: '', query: '' };
+      const data = await LoanController.initiateManualLoanRepayment(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call initiateManualCardOrBankLoanRepayment', async() => {
+      const req = { user: '', params: '', query: '', existingLoanApplication: '', userDebitCard: '', accountDetails: '' };
+      const data = await LoanController.initiateManualCardOrBankLoanRepayment(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call submitPaymentOtp', async() => {
+      const req = { user: '', body: '', params: '' };
+      const data = await LoanController.submitPaymentOtp(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -2,6 +2,7 @@ import axios from 'axios';
 import config from '../../config';
 import enums from '../../lib/enums';
 import * as userMockedTestResponses from '../../../../tests/response/response.user';
+import * as Hash from '../../lib/utils/lib.util.hash';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -201,6 +202,92 @@ const initiateTransfer = async(userTransferRecipient, existingLoanApplication, r
   }
 };
 
+const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFormatting, reference, bankAccountDetails) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.initiateChargeViaBankAccountPaystackTestResponse(reference);
+    }
+    const bankCodeType = SEEDFI_NODE_ENV === 'development' ? '057' : bankAccountDetails.bank_code;
+    const bankAccountNumberChoice = SEEDFI_NODE_ENV === 'development' ? '0000000000' : bankAccountDetails.account_number;
+    const userBirthdayChoice = SEEDFI_NODE_ENV === 'development' ? '1995-12-23' : user.date_of_birth;
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        email: user.email,
+        amount: parseFloat(paystackAmountFormatting),
+        reference,
+        bank: {
+          code: bankCodeType,
+          account_number: bankAccountNumberChoice
+        },
+        birthday: userBirthdayChoice
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to initialize loan repayment charge via bank account failed::${enums.PAYSTACK_INITIATE_BANK_ACCOUNT_CHARGE_FOR_LOAN_REPAYMENT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountFormatting, reference, debitCardDetails) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        email: user.email,
+        amount: parseFloat(paystackAmountFormatting),
+        reference,
+        authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to initialize loan repayment charge via tokenized card failed::${enums.PAYSTACK_INITIATE_BANK_ACCOUNT_CHARGE_FOR_LOAN_REPAYMENT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const submitPaymentOtpWithReference = async(body, reference) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackSubmitOtpTestResponse(reference);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge/submit_otp`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        otp: body.otp.trim(),
+        reference
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to submit user payment otp failed::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
+    return error;
+  }
+};
+
 export { 
   fetchBanks, 
   resolveAccount, 
@@ -209,5 +296,8 @@ export {
   raiseARefundTickedForCardTokenizationTransaction,
   fetchSeedfiPaystackBalance,
   createTransferRecipient,
-  initiateTransfer
+  initiateTransfer,
+  initializeBankAccountChargeForLoanRepayment,
+  initializeDebitCarAuthChargeForLoanRepayment,
+  submitPaymentOtpWithReference
 };

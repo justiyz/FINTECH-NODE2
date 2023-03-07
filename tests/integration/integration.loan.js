@@ -3,7 +3,9 @@ import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
-import { receiveTransferSuccessWebHookOne, receiveTransferFailedWebHookOne, receiveTransferReversedWebHookOne, receiveTransferSuccessWebHookTwo } from '../payload/payload.payment';
+import { receiveTransferSuccessWebHookOne, receiveTransferFailedWebHookOne, receiveTransferReversedWebHookOne, 
+  receiveTransferSuccessWebHookTwo, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookOne 
+} from '../payload/payload.payment';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -628,9 +630,11 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.have.property('personal_loan_transaction_history');
           expect(res.body.data).to.have.property('cluster_loan_transaction_history');
+          expect(res.body.data).to.have.property('total_loan_obligation');
+          expect(res.body.data).to.have.property('user_individual_loan');
           expect(res.body.data).to.have.property('user_loan_status');
           expect(res.body.data.user_loan_status).to.equal('active');
-          expect(res.body.data.loan_amounts.total_cluster_loan_outstanding_loan).to.equal(0);
+          expect(res.body.data.user_cluster_loan.total_outstanding_loan).to.equal(0);
           expect(res.body.message).to.equal(enums.HOMEPAGE_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -758,6 +762,456 @@ describe('Individual loan', () => {
         });
     });
   });
+  describe('user two initiates partial loan repayments for loan two and pays', () => {
+    it('should throw error when invalid loan id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}uyiyreo/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error when invalid payment type  is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('payment_type must be one of [full, part]');
+          done();
+        });
+    });
+    it('should throw error when loan status is not ongoing or overdue', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT('cancelled'));
+          done();
+        });
+    });
+    it('should initiate part loan repayment with another card successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('authorization_url');
+          expect(res.body.data).to.have.property('access_code');
+          expect(res.body.data).to.have.property('reference');
+          expect(res.body.message).to.equal('Authorization URL created');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_ONE_PAYMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should successfully process card payment for loan repayment using paystack webhook', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookTwo(process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_ONE_PAYMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should throw error when invalid payment channel is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_DEBIT_CARD_ONE_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part',
+          payment_channel: 'ussd'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('payment_channel must be one of [card, bank]');
+          done();
+        });
+    });
+    it('should throw error payment channel is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_DEBIT_CARD_ONE_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('payment_channel is required');
+          done();
+        });
+    });
+    it('should throw error if debit card does not belong to user', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_ONE_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full',
+          payment_channel: 'card'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CARD_DOES_NOT_BELONG_TO_USER);
+          done();
+        });
+    });
+    it('should throw error if invalid debit card id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/9000/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part',
+          payment_channel: 'card'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CARD_DOES_NOT_EXIST);
+          done();
+        });
+    });
+    it('should initiate part loan repayment with an existing card successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_DEBIT_CARD_ONE_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part',
+          payment_channel: 'card'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('payment_type');
+          expect(res.body.data).to.have.property('payment_channel');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.message).to.equal('Charge attempted');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_TWO_PAYMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should successfully process card payment for loan repayment using paystack webhook', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookTwo(process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_TWO_PAYMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should throw error if saved account number does not belong to user', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_ONE_BANK_ACCOUNT_ID_ONE}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full',
+          payment_channel: 'bank'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ACCOUNT_DETAILS_NOT_USERS);
+          done();
+        });
+    });
+    it('should throw error if invalid account number id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/9000/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part',
+          payment_channel: 'bank'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ACCOUNT_DETAILS_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error when invalid loan id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}euyi/${process.env.SEEDFI_USER_TWO_BANK_ACCOUNT_ID_ONE}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full',
+          payment_channel: 'bank'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should initiate part loan repayment with an existing bank account successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_BANK_ACCOUNT_ID_ONE}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'part',
+          payment_channel: 'bank'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('payment_type');
+          expect(res.body.data).to.have.property('payment_channel');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.message).to.equal('Charge attempted');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should throw error when invalid reference id is sent for payment otp confirmation', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE}euyi/submit-otp`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          otp: '123456'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.PAYMENT_RECORD_NOT_FOUND);
+          done();
+        });
+    });
+    it('should throw error if otp is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE}/submit-otp`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({ })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('otp is required');
+          done();
+        });
+    });
+    it('should successfully verify payment by bank account otp', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE}/submit-otp`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          otp: '123456'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.PAYMENT_OTP_ACCEPTED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should successfully process card payment for loan repayment using paystack webhook', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookTwo(process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should throw error when payment has already been recorded previously', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookTwo(process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_PART_REPAYMENT_THREE_PAYMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('error');
+          expect(res.body.message).to.equal(enums.PAYMENT_EARLIER_RECORDED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('user one initiates full loan repayments for loan one and pays', () => {
+    it('should initiate full loan repayment with an existing tokenized debit card successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_LOAN_ID}/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_ONE_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full',
+          payment_channel: 'card'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('payment_type');
+          expect(res.body.data).to.have.property('payment_channel');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.message).to.equal('Charge attempted');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_PART_REPAYMENT_ONE_PAYMENT_REFERENCE = res.body.data.reference;
+          done();
+        });
+    });
+    it('should successfully process card payment for loan repayment using paystack webhook', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookOne(process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_PART_REPAYMENT_ONE_PAYMENT_REFERENCE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should throw error when loan status is not ongoing or overdue', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_LOAN_ID}/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_ONE_ID}/initiate-repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .query({
+          payment_type: 'full',
+          payment_channel: 'card'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT('completed'));
+          done();
+        });
+    });
+  });
   describe('user loan payments', () => {
     it('should throw error when invalid type is sent', (done) => {
       chai.request(app)
@@ -794,7 +1248,7 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.be.an('array');
-          expect(res.body.data.length).to.equal(1);
+          expect(res.body.data.length).to.equal(4);
           expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_USER_TWO_LOAN_PAYMENT_ONE_PAYMENT_ID = res.body.data[0].payment_id;
@@ -839,10 +1293,11 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.be.an('array');
-          expect(res.body.data.length).to.equal(1);
+          expect(res.body.data.length).to.equal(2);
           expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_USER_ONE_LOAN_PAYMENT_ONE_PAYMENT_ID = res.body.data[0].payment_id;
+          process.env.SEEDFI_USER_ONE_LOAN_PAYMENT_TWO_PAYMENT_ID = res.body.data[1].payment_id;
           done();
         });
     });
@@ -901,7 +1356,7 @@ describe('Individual loan', () => {
           expect(res.body.data).to.have.property('loanPaymentDetails');
           expect(res.body.data).to.have.property('loanDetails');
           expect(res.body.data).to.have.property('loanRepaymentDetails');
-          expect(res.body.data.loanDetails.status).to.equal('ongoing');
+          expect(res.body.data.loanDetails.status).to.equal('completed');
           expect(res.body.data.loanRepaymentDetails.length).to.equal(2);
           expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);

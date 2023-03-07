@@ -273,3 +273,30 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
     return next(error);
   }
 };
+
+// /**
+//  * check payment reference exists by reference if
+//  * @param {Request} req - The request from the endpoint.
+//  * @param {Response} res - The response returned by the method.
+//  * @param {Next} next - Call the next operation.
+//  * @returns {object} - Returns an object (error or response).
+//  * @memberof LoanMiddleware
+//  */
+// export const checkUserPaymentReferenceExists = async(req, res, next) => {
+//   try {
+//     const { params: { reference_id }, user } = req;
+//     const [ paymentRecord ] = await processAnyData(paymentQueries.fetchTransactionByReference, [ body.data.reference || body.data.transaction_reference ]);
+//     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan application exists in the db checkUserLoanApplicationExists.middlewares.loan.js`);
+//     if (existingLoanApplication) {
+//       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application exists and belongs to authenticated user checkUserLoanApplicationExists.middlewares.loan.js`);
+//       req.existingLoanApplication = existingLoanApplication;
+//       return next();
+//     }
+//     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user checkUserLoanApplicationExists.middlewares.loan.js`);
+//     return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
+//   } catch (error) {
+//     error.label = enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE;
+//     logger.error(`checking if loan application exists failed::${enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE}`, error.message);
+//     return next(error);
+//   }
+// };

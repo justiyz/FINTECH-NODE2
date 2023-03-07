@@ -35,7 +35,7 @@ export const initializeCardTokenizationPayment = async (req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack failed to be initialized initializeCardTokenizationPayment.controllers.payment.js`);
     userActivityTracking(user.user_id, 32, 'fail');
-    return ApiResponse.error(res, result.message, enums.HTTP_UNPROCESSABLE_ENTITY, enums.INITIALIZE_CARD_TOKENIZATION_PAYMENT_CONTROLLER);
+    return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIALIZE_CARD_TOKENIZATION_PAYMENT_CONTROLLER);
   } catch (error) {
     userActivityTracking(req.user.user_id, 32, 'fail');
     error.label = enums.INITIALIZE_CARD_TOKENIZATION_PAYMENT_CONTROLLER;

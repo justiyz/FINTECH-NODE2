@@ -8,6 +8,8 @@ const getTemplate = (type, data) => {
   case 'rejectedDebitCard': return email.rejectedDebitCard(data);
   case 'loanDisbursement': return email.loanDisbursement(data);
   case 'loanClusterInvite': return email.loanClusterInvite(data);
+  case 'failedCardDebit': return email.failedCardDebit(data);
+  case 'successfulRepayment': return email.successfulRepayment(data);
   default: return '';
   }
 };

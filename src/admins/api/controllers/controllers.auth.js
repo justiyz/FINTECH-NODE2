@@ -28,7 +28,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     const [ existingToken ] = await processAnyData(authQueries.fetchAdminByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if token is existing in the database completeAdminLoginRequest.admin.controllers.auth.js`);
     if (existingToken) {
-      completeAdminLoginRequest(req, res, next);
+      return completeAdminLoginRequest(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token completeAdminLoginRequest.admin.controllers.auth.js`);
     const expireAt = dayjs().add(3, 'minutes');
@@ -114,7 +114,7 @@ export const forgotPassword = async(req, res, next) => {
     const [ existingToken ] = await processAnyData(authQueries.fetchAdminByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if token is existing in the database forgotPassword.admin.controllers.auth.js`);
     if (existingToken) {
-      forgotPassword(req, res, next);
+      return forgotPassword(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token forgotPassword.admin.controllers.auth.js`);
     const expireAt = dayjs().add(5, 'minutes');

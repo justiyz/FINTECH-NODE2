@@ -58,7 +58,7 @@ export const checkRoleNameIsUnique = async(req, res, next) => {
     const [ codeExists ] = await processAnyData(roleQueries.fetchRole, [ roleCode.trim().toUpperCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: fetch result on if role code exists already in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
     if (codeExists) {
-      checkRoleNameIsUnique(req, res, next);
+      return checkRoleNameIsUnique(req, res, next);
     }
     const [ roleName ] = await processAnyData(roleQueries.fetchRole, [ name.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role queried from DB using role name checkRoleNameIsUnique.admin.middlewares.roles.js`);

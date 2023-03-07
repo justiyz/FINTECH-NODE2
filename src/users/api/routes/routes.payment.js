@@ -19,6 +19,7 @@ router.post(
   PaymentMiddleware.verifyPaystackPaymentStatus,
   PaymentMiddleware.verifyTransactionPaymentRecord,
   PaymentMiddleware.processPersonalLoanTransferPayments,
+  PaymentMiddleware.processPersonalLoanRepayments,
   PaymentMiddleware.handleTransactionRefundResponse,
   PaymentMiddleware.updatePaymentHistoryStatus,
   PaymentMiddleware.saveCardAuth,

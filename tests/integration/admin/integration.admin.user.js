@@ -244,7 +244,7 @@ describe('Admin Users management', () => {
     });
     it('Should flag an error if user is already on an active loan', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
