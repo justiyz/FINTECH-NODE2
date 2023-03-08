@@ -168,21 +168,16 @@ export const fetchClusters = async (req, res, next) => {
     const {query: { type }, user} = req;
     if(type === 'explore') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
-      const clusters = await processAnyData(clusterQueries.fetchClusters);
+      const  clusters  = await processAnyData(clusterQueries.fetchClusters);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched all available clusters in the DB fetchClusters.users.controllers.user.js`); 
-      await Promise.all(
-        clusters.map(async(cluster)=> {
-          const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
-          if(userClusters){
-            cluster.is_member = true;
-            return cluster;
-          }
-          cluster.is_member = false;
-          return cluster;
-        })
-      );
-      
-      return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusters);
+      const nonClusters = [];
+      for(let cluster of clusters){
+        const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
+        if(!userClusters){
+          nonClusters.push(cluster);
+        }
+      }     
+      return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, nonClusters);
     }
     if(type === 'my cluster') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
@@ -230,7 +225,16 @@ export const fetchClusterDetails = async (req, res, next) => {
   try {
     const { params:{ cluster_id }, user } = req;
     const clusterDetails = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusters.users.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusterDetails.users.controllers.user.js`);
+    const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster_id ]);
+    if(userClusters){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is a cluster member fetchClusterDetails.users.controllers.user.js`);
+      clusterDetails.is_member = true;
+    }
+    if(userClusters?.is_admin){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is the cluster admin fetchClusterDetails.users.controllers.user.js`);
+      clusterDetails.is_admin = true;
+    }
     return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, {...clusterDetails, user_referral_code: user.referral_code});
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_DETAILS_CONTROLLER;

@@ -306,7 +306,8 @@ export default {
     SELECT
       cluster_id,
       user_id,
-      is_left
+      is_left,
+      is_admin
     FROM cluster_members
     WHERE user_id = $1 
     AND cluster_id = $2  
