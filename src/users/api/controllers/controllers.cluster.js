@@ -168,21 +168,19 @@ export const fetchClusters = async (req, res, next) => {
     const {query: { type }, user} = req;
     if(type === 'explore') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
-      const clusters = await processAnyData(clusterQueries.fetchClusters);
+      const  clusters  = await processAnyData(clusterQueries.fetchClusters);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched all available clusters in the DB fetchClusters.users.controllers.user.js`); 
+      const nonClusters = [];
       await Promise.all(
         clusters.map(async(cluster)=> {
           const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
-          if(userClusters){
-            cluster.is_member = true;
+          if(!userClusters){
+            nonClusters.push(cluster);
             return cluster;
           }
-          cluster.is_member = false;
-          return cluster;
         })
       );
-      
-      return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusters);
+      return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, nonClusters);
     }
     if(type === 'my cluster') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
@@ -230,7 +228,18 @@ export const fetchClusterDetails = async (req, res, next) => {
   try {
     const { params:{ cluster_id }, user } = req;
     const clusterDetails = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusters.users.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusterDetails.users.controllers.user.js`);
+    const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster_id ]);
+    if(userClusters){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is a cluster member fetchClusterDetails.users.controllers.user.js`);
+      clusterDetails.is_member = true;
+    }
+    clusterDetails.is_member = false;
+    if(userClusters?.is_admin){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is the cluster admin fetchClusterDetails.users.controllers.user.js`);
+      clusterDetails.is_admin = true;
+    }
+    clusterDetails.is_admin = false;
     return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, {...clusterDetails, user_referral_code: user.referral_code});
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_DETAILS_CONTROLLER;
@@ -348,6 +357,29 @@ export const leaveCluster = async (req, res, next) => {
     userActivityTracking(req.user.user_id, 63, 'fail');
     error.label = enums.LEAVE_CLUSTER_CONTROLLER;
     logger.error(`leaving cluster failed::${enums.LEAVE_CLUSTER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * edit a cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with no data
+ * @memberof ClusterController
+ */
+
+export const editCluster = async (req, res, next) => {
+  try {
+    const { params, body, cluster, user  } = req;
+    const payload = ClusterPayload.editCluster(body, cluster, params);
+    const editedCluster = await processOneOrNoneData(clusterQueries.editCluster,  payload );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully edited the cluster editCluster.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.CLUSTER_EDITED_SUCCESSFULLY, enums.HTTP_OK, editedCluster);
+  } catch (error) {
+    error.label = enums.EDIT_CLUSTER_CONTROLLER;
+    logger.error(`editing cluster failed::${enums.EDIT_CLUSTER_CONTROLLER}`, error.message);
     return next(error);
   }
 };

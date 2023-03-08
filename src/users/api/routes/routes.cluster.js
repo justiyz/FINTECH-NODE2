@@ -109,4 +109,18 @@ router.post(
   ClusterController.leaveCluster
 );
 
+router.patch(
+  '/:cluster_id/edit',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  Model(Schema.editCluster, 'body'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterIsOnActiveLoan,
+  ClusterMiddleware.compareUserIncomeRange,
+  ClusterMiddleware.checkIfThereIsMoreThanOnePersonInTheCluster,
+  ClusterMiddleware.checkIfClusterNameUnique,
+  ClusterController.editCluster
+);
+
 export default router;

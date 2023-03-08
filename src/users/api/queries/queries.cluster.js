@@ -306,7 +306,8 @@ export default {
     SELECT
       cluster_id,
       user_id,
-      is_left
+      is_left,
+      is_admin
     FROM cluster_members
     WHERE user_id = $1 
     AND cluster_id = $2  
@@ -415,7 +416,19 @@ export default {
         is_deleted = true,
         status = 'inactive'
       WHERE cluster_id = $1
-  `
+  `,
+
+  editCluster:`
+      UPDATE clusters
+      SET
+        updated_at = NOW(),
+        name = $2,
+        description = $3,
+        maximum_members = $4,
+        loan_goal_target = $5,
+        minimum_monthly_income = $6
+      WHERE cluster_id = $1
+      RETURNING name, description, maximum_members, loan_goal_target, minimum_monthly_income`
 };
 
 

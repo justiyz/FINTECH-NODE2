@@ -47,6 +47,14 @@ const inviteClusterMember = Joi.object().keys({
   })
 });
 
+const editCluster = Joi.object().keys({
+  name: Joi.string().optional(),
+  description: Joi.string().optional(),
+  maximum_members: Joi.number().optional(),
+  loan_goal_target: Joi.number().optional(),
+  maximum_monthly_income: Joi.number().optional()
+});
+
 export default  {
   createCluster,
   fetchClusters,
@@ -54,5 +62,6 @@ export default  {
   clusterIdParams,
   votingTicketIdParams,
   votingDecision,
-  inviteClusterMember
+  inviteClusterMember,
+  editCluster
 }; 

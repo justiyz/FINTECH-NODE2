@@ -77,5 +77,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+
+    it('should call editCluster', async() => {
+      const req = { params: null, user: '', cluster: ''};
+      const data = await ClusterController.editCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
