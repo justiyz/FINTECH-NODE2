@@ -352,3 +352,26 @@ export const leaveCluster = async (req, res, next) => {
   }
 };
 
+/**
+ * edit a cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with no data
+ * @memberof ClusterController
+ */
+
+export const editCluster = async (req, res, next) => {
+  try {
+    const { params, body, cluster, user  } = req;
+    const payload = ClusterPayload.editCluster(body, cluster, params);
+    const editedCluster = await processOneOrNoneData(clusterQueries.editCluster,  payload );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully edited the cluster editCluster.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.CLUSTER_EDITED_SUCCESSFULLY, enums.HTTP_OK, editedCluster);
+  } catch (error) {
+    error.label = enums.EDIT_CLUSTER_CONTROLLER;
+    logger.error(`editing cluster failed::${enums.EDIT_CLUSTER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
