@@ -116,9 +116,10 @@ router.patch(
   Model(Schema.editCluster, 'body'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
-  ClusterMiddleware.checkIfClusterIsOnActiveLoan('confirm'),
+  ClusterMiddleware.checkIfClusterIsOnActiveLoan,
   ClusterMiddleware.compareUserIncomeRange,
   ClusterMiddleware.checkIfThereIsMoreThanOnePersonInTheCluster,
+  ClusterMiddleware.checkIfClusterNameUnique,
   ClusterController.editCluster
 );
 

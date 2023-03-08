@@ -8,7 +8,6 @@ import { formatUserIncomeRange, generateReferralCode } from '../../lib/utils/lib
 import { sendPushNotification, sendClusterNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import { userActivityTracking } from '../../lib/monitor';
-import { HTTP_FORBIDDEN } from '../../lib/enums/lib.enum.status';
 
 /**
  * check if cluster name is unique
@@ -503,16 +502,12 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
  * @memberof ClusterMiddleware
  */
 
-export const checkIfClusterIsOnActiveLoan = (type ='') => async (req, res, next) => {
+export const checkIfClusterIsOnActiveLoan = async (req, res, next) => {
   try {
     const { user, cluster } = req;
-    if(type === 'authenticate' && cluster.loan_status === 'inactive'){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster is not on an active loan in the cluster checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
-      return next();
-    }
-    if(type === 'confirm' && cluster.loan_status === 'active'){
+    if(cluster.loan_status === 'active'){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster on an active loan in the cluster checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.CLUSTER_IS_ON_ACTIVE_LOAN, HTTP_FORBIDDEN);
+      return ApiResponse.error(res, enums.CLUSTER_IS_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN);
     }
     return next();
   } catch (error) {
@@ -536,16 +531,15 @@ export const checkIfThereIsMoreThanOnePersonInTheCluster = async (req, res, next
     const { user, body, cluster } = req;
     if( (cluster.current_members > 1) && (body.maximum_members < cluster.current_members)){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('maximum numbers'), HTTP_FORBIDDEN);
+      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('maximum numbers'), enums.HTTP_FORBIDDEN);
     }
     if( (cluster.current_members > 1) && (body.loan_goal_target)){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('loan goal target'), HTTP_FORBIDDEN);
+      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('loan goal target'), enums.HTTP_FORBIDDEN);
     }
     if( (cluster.current_members > 1) && (body.minimum_monthly_income)){
-      console.log('I AM THE CURRENT MEMBER',cluster.current_members );
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('minimum monthly income'), HTTP_FORBIDDEN);
+      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('minimum monthly income'),enums.HTTP_FORBIDDEN);
     }
     return next();
   } catch (error) {
