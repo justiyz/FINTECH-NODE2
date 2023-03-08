@@ -61,6 +61,8 @@ router.post(
   ClusterMiddleware.checkIClusterDecisionHasBeenConcluded,
   ClusterMiddleware.checkIfUserHasPreviouslyDecided,
   ClusterMiddleware.userTakesRequestToJoinClusterDecision,
+  ClusterMiddleware.newAdminClusterAcceptance,
+  ClusterMiddleware.requestToDeleteCluster,
   ClusterController.finalClusterDecision
 );
 
@@ -108,5 +110,27 @@ router.post(
   ClusterMiddleware.checkIfUserCanLeaveCluster,
   ClusterController.leaveCluster
 );
+
+router.post(
+  '/:cluster_id/initiate-delete-cluster',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  Model(Schema.initiateDeleteCluster, 'payload'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterController.initiateDeleteCluster
+);
+
+router.post(
+  '/:cluster_id/admin/:user_id',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.selectNewAdminParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterController.suggestNewClusterAdmin
+);
+
 
 export default router;

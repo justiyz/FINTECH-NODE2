@@ -77,5 +77,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call initiateDeleteCluster', async() => {
+      const req = {  params: null, cluster: '', user: '', body: '' };
+      const data = await ClusterController.initiateDeleteCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call suggestNewClusterAdmin', async() => {
+      const req = { params: null, cluster: '', user: ''};
+      const data = await ClusterController.suggestNewClusterAdmin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

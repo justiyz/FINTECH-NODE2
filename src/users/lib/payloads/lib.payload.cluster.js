@@ -18,5 +18,12 @@ export default {
     body.type,
     type,
     invitedUser?.user_id || null
+  ],
+  requestToDeleteCluster: (body, cluster, user, ticket_id) => [
+    ticket_id,
+    cluster.cluster_id,
+    user.user_id,
+    cluster.members[0]?.is_admin || false,
+    body.decision
   ]
 };

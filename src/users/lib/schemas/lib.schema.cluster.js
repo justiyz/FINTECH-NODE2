@@ -47,6 +47,15 @@ const inviteClusterMember = Joi.object().keys({
   })
 });
 
+const initiateDeleteCluster = Joi.object().keys({
+  deletion_reason: Joi.string().required()
+});
+
+const selectNewAdminParams = Joi.object().keys({
+  cluster_id: Joi.string().required(),
+  user_id: Joi.string().required()
+});
+
 export default  {
   createCluster,
   fetchClusters,
@@ -54,5 +63,7 @@ export default  {
   clusterIdParams,
   votingTicketIdParams,
   votingDecision,
-  inviteClusterMember
+  inviteClusterMember,
+  initiateDeleteCluster,
+  selectNewAdminParams
 }; 

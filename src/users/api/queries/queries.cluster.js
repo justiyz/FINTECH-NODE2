@@ -415,7 +415,35 @@ export default {
         is_deleted = true,
         status = 'inactive'
       WHERE cluster_id = $1
-  `
+  `,
+  initiateDeleteCluster: `
+      UPDATE clusters
+      SET 
+        updated_at = NOW(),
+        deletion_reason = $2
+      WHERE cluster_id = $1
+  `,
+  newAdmin: `
+  UPDATE clusters
+  SET 
+    updated_at = NOW(),
+    admin = $2
+  WHERE cluster_id = $1
+`,
+  setAdmin: `
+  UPDATE cluster_members
+  SET 
+    updated_at = NOW(),
+    is_admin = TRUE
+  WHERE cluster_id = $1 AND user_id = $2
+`,
+  removeAdmin: `
+  UPDATE cluster_members
+  SET 
+    updated_at = NOW(),
+    is_admin = FALSE
+  WHERE cluster_id = $1 AND user_id = $2
+`
 };
 
 

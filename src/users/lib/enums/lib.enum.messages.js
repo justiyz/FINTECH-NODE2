@@ -127,7 +127,7 @@ export const CLUSTER_NOT_EXISTING = 'Cluster does not exist';
 export const CLUSTER_DECISION_TICKET_NOT_EXISTING = 'Cluster decision ticket does not exist';
 export const USER_NOT_CLUSTER_MEMBER = 'User does not belong to this cluster';
 export const USER_ALREADY_CLUSTER_MEMBER = 'User already belongs to this cluster';
-export const USER_PREVIOUSLY_RAISED_REQUEST_TO_JOIN_CLUSTER_TICKET = 'User still has an open request to join this cluster, kindly wait till a conclusion is reached';
+export const USER_HAS_PREVIOUSLY_RAISED_REQUEST_CLUSTER_TICKET = (type) => `User still has an open request to ${type} this cluster, kindly wait till a conclusion is reached`;
 export const USER_PREVIOUSLY_DECIDED = 'User has previously taken a decision on this ticket';
 export const VOTING_DECISION_ALREADY_CONCLUDED = 'Voting decision for this ticket has been concluded, therefore action cannot be performed anymore';
 export const CLUSTER_TYPE_NOT_PUBLIC_OR_PRIVATE = (type) => `Action cannot be performed on a ${type} cluster`;
@@ -156,7 +156,11 @@ export const USER_ON_ACTIVE_LOAN = 'You still have active loan on this cluster, 
 export const USER_IS_AN_ADMIN = 'You are currently the admin, you cannot leave the cluster, kindly assign someone as admin before leaving';
 export const USER_IS_NOT_AN_ADMIN = 'You can not perform this action because you are not an admin';
 export const USER_LEFT_CLUSTER_SUCCESSFULLY = 'User left cluster successfully';
-
+export const REQUEST_TO_DELETE_CLUSTER = (decision) => `User ${decision} request to delete cluster successfully`;
+export const SELECT_NEW_ADMIN = 'Successfully send request to select new admin';
+export const CLUSTER_ADMIN_ACCEPTANCE = (decision) => `User successfully ${decision} to become new cluster admin.`;
+export const INITIATE_DELETE_CLUSTER = 'Successfully initiate a delete cluster';
+export const CLUSTER_DELETED_SUCCESSFULLY = 'Clusters was deleted successfully';
 
 // admin module related messages
 

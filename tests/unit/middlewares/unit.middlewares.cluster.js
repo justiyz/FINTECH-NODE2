@@ -111,5 +111,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call requestToDeleteCluster', async() => {
+      const req = { params: null, body:'', cluster:'', user:'', votingTicketDetails:''  };
+      const data = await ClusterMiddlewares.requestToDeleteCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call newAdminClusterAcceptance', async() => {
+      const req = { params: null, body:'', cluster:'', user:'', votingTicketDetails:''  }; 
+      const data = await ClusterMiddlewares.newAdminClusterAcceptance(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
