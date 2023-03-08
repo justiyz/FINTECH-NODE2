@@ -527,7 +527,7 @@ export const requestToDeleteCluster = async(req, res, next) => {
         userActivityTracking(req.user.user_id, activityType, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id });
       }
-      if(votingTicketDetails.current_cluster_members === voteCount.count){
+      if(body.decision === 'yes' && votingTicketDetails.current_cluster_members === voteCount.count){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
         await processAnyData(clusterQueries.deleteAcluster, [ cluster_id ]);
         sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
