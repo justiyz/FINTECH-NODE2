@@ -617,8 +617,6 @@ export const requestToDeleteCluster = async(req, res, next) => {
 export const newAdminClusterAcceptance = async(req, res, next) => {
   try {
     const { params: { cluster_id }, body, cluster, user, votingTicketDetails } = req;
-
-    console.log(votingTicketDetails, '===>>>', user.user_id);
     if (votingTicketDetails.type === 'cluster admin') {
       const activityType = req.body.decision === 'yes' ? 65 : 66;
       const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';

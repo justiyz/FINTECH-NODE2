@@ -1863,7 +1863,6 @@ describe('Clusters', () => {
           decision: 'yes'
         })
         .end((err, res) => {
-          console.log(res.body, 'pppp>>>>>>');
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
