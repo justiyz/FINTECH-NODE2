@@ -151,9 +151,13 @@ export const fetchUsers = async (req, res, next) => {
     const { query, admin } = req;
     if (query.export){
       const payload = UserPayload.fetchAllUsers(query);
-      const [ users ] = await processAnyData(userQueries.fetchAllUsers, payload);
+      const users  = await processAnyData(userQueries.fetchAllUsers, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all users from the DB fetchUsers.admin.controllers.user.js`);
-      return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, users);
+      const data = {
+        total_count: users.length,
+        users
+      };
+      return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const  payload  = UserPayload.fetchUsers(query);
     const [ users, [ usersCount ] ] = await Promise.all([

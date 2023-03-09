@@ -217,7 +217,11 @@ export const fetchRoles = async (req, res, next) => {
       const payload = RolePayload.fetchAllRoles(query);
       const roles = await processAnyData(roleQueries.getAllRoles, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all roles from the DB fetchRoles.admin.controllers.roles.js`);
-      return ApiResponse.success(res, enums.ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, roles);
+      const data = {
+        total_count: roles.length,
+        roles 
+      };
+      return ApiResponse.success(res, enums.ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const  payload  = RolePayload.fetchRoles(query);
     const [ roles, [ rolesCount ] ] = await Promise.all([

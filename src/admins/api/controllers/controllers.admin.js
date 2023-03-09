@@ -167,8 +167,12 @@ export const fetchAllAdmins = async(req, res, next) => {
         end_date: req.query.end_date || null
       };
       const admins = await fetchAdminServices.fetchAdmins(req.query, filter, req.user);
+      const data = {
+        total_count: admins.admins.length,
+        ...admins                                           
+      };
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched admins from the DB fetchAllAdmins.controllers.admin.admin.js`);
-      return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, admins);
+      return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, data);
     }
     if (!req.query.per_page) req.query.per_page = '10'; 
     if (!req.query.page) req.query.page = '1';
