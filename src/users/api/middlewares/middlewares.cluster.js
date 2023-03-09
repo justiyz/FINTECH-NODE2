@@ -505,16 +505,15 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
  */
 export const requestToDeleteCluster = async(req, res, next) => {
   try {
-    const { params: { cluster_id, ticket_id }, body, cluster, user, votingTicketDetails } = req;
+    const { params: { cluster_id, ticket_id }, body, cluster, user, votingTicketDetails, clusterMember } = req;
     const activityType = req.body.decision === 'yes' ? 60 : 61;
     const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
     const payload = ClusterPayload.requestToDeleteCluster(body, cluster, user, ticket_id );
-    const [ voteCount ] = await processAnyData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
     if (votingTicketDetails.type === 'delete cluster') {
       if (body.decision === 'yes') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion request requestToDeleteCluster.middleware.cluster.js`);
         await processOneOrNoneData(clusterQueries.recordUserVoteDecision, payload);
-        sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} accept to delete cluster`, 'delete-cluster', {});
+        sendClusterNotification(user, cluster, { is_admin: clusterMember.is_admin }, `${user.first_name} ${user.last_name} accept to delete cluster`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member accept to delete cluster group and all notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id });
@@ -522,15 +521,19 @@ export const requestToDeleteCluster = async(req, res, next) => {
       if(body.decision === 'no'){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion requestToDeleteCluster.middleware.cluster.js`);
         await processAnyData(clusterQueries.recordUserVoteDecision, payload);
-        sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
+        sendClusterNotification(user, cluster, { is_admin: clusterMember.is_admin }, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member has declined request to delete cluster and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id });
       }
+      const [ voteCount ] = await processAnyData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
       if(body.decision === 'yes' && votingTicketDetails.current_cluster_members === voteCount.count){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
-        await processAnyData(clusterQueries.deleteAcluster, [ cluster_id ]);
-        sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
+        Promise.all([
+          await processAnyData(clusterQueries.removeClusterMembers, [ cluster_id ]),
+          await processAnyData(clusterQueries.deleteAcluster, [ cluster_id ])
+        ]);
+        sendClusterNotification(user, cluster, { is_admin: clusterMember.is_admin }, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster deleted and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, 62, 'success');
         return ApiResponse.success(res, enums.CLUSTER_DELETED_SUCCESSFULLY, enums.HTTP_OK, { cluster_id });

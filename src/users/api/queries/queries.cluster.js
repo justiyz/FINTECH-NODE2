@@ -404,7 +404,7 @@ export default {
          cluster_members
       SET 
       updated_at = NOW(),
-      is_left = true,
+      is_left = TRUE,
       status = 'inactive'
       WHERE user_id = $1 AND cluster_id = $2`,
 
@@ -443,7 +443,14 @@ export default {
     updated_at = NOW(),
     is_admin = FALSE
   WHERE cluster_id = $1 AND user_id = $2
-`
+`,
+  removeClusterMembers:`
+    UPDATE cluster_members
+    SET 
+    updated_at = NOW(),
+    is_left = TRUE,
+    status = 'inactive'
+    WHERE cluster_id = $1`
 };
 
 

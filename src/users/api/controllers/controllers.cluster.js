@@ -382,7 +382,7 @@ export const initiateDeleteCluster = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully initiateDeleteCluster.controllers.cluster.js`);
     await cluster.members.forEach(async(member) => {
       const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ member.user_id ]);
-      sendUserPersonalNotification(userDetails, `${cluster.name} delete cluster`, PersonalNotifications.initiateDeleteCluster(user, cluster), 'delete-cluster-request', { voting_ticket_id: initiateDeleteClusterTicket.ticket_id });
+      sendUserPersonalNotification(userDetails, `${cluster.name} delete cluster`, PersonalNotifications.initiateDeleteCluster(user, cluster), 'delete-cluster', { voting_ticket_id: initiateDeleteClusterTicket.ticket_id, deletion_reason: body.deletion_reason });
       return member;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully initiateDeleteCluster.controllers.cluster.js`);
@@ -417,7 +417,7 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     const initiateDeleteClusterTicket =  await processOneOrNoneData(clusterQueries.raiseClusterDecisionTicket, 
       [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members) ]);
     sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { ticket_id: initiateDeleteClusterTicket.ticket_id });
-    sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} suggest admin cluster`, 'suggest-admin-cluster', {});
+    sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} suggest admin cluster`, 'suggest-admin-cluster', {});
     userActivityTracking(req.user.user_id, 64, 'success');
     return ApiResponse.success(res, enums.SELECT_NEW_ADMIN, enums.HTTP_OK, {
       selected_admin: user_id,
