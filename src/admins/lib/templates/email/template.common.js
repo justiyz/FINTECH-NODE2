@@ -6,7 +6,9 @@ const heading = {
   forgotPassword: 'Reset your password',
   adminInviteMail: 'Admin Invite',
   completeKyc: 'Kindly complete your kyc',
-  insufficientBalance: 'Insufficient Paystack Balance'
+  insufficientBalance: 'Insufficient Paystack Balance',
+  approvedLoan: 'Loan application approved',
+  declinedLoan: 'Loan application declined'
 };
 
 export const commonTemplate = (messageType, data) => {

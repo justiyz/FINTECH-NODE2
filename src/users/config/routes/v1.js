@@ -8,6 +8,7 @@ import adminRoute from '../../../admins/api/routes/routes.admin';
 import adminAuthRoute from '../../../admins/api/routes/routes.auth';
 import adminRoleRoute from '../../../admins/api/routes/routes.role';
 import adminUserRoute from '../../../admins/api/routes/routes.user';
+import adminLoanRoute from '../../../admins/api/routes/routes.loan';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/admin', adminRoute);
 router.use('/admin/auth', adminAuthRoute);
 router.use('/admin/role', adminRoleRoute);
 router.use('/admin/user', adminUserRoute);
+router.use('/admin/loan', adminLoanRoute);
 
 export default router;

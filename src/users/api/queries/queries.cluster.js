@@ -283,7 +283,9 @@ export default {
       maximum_members,
       current_members,
       description,
-      image_url
+      image_url,
+      minimum_monthly_income,
+      created_at
     FROM clusters
     WHERE is_deleted = FALSE
     ORDER BY join_cluster_closes_at DESC`,
@@ -298,7 +300,9 @@ export default {
       clusters.maximum_members,
       clusters.current_members,
       clusters.description,
-      clusters.image_url
+      clusters.image_url,
+      clusters.minimum_monthly_income,
+      clusters.created_at
     FROM clusters
     LEFT JOIN cluster_members
     ON clusters.cluster_id = cluster_members.cluster_id
@@ -328,7 +332,9 @@ export default {
       maximum_members,
       current_members,
       description,
-      image_url
+      image_url,
+      minimum_monthly_income,
+      created_at
     FROM clusters
     WHERE created_by = $1 
     AND is_deleted = FALSE
