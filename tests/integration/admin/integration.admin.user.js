@@ -406,6 +406,51 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should throw error if export is not true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'false',
+          search: 'rashidat sikiru'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('export must be [true]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch users by the user name where the query type is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          search: 'rashidat sikiru'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.data).to.have.property('name');
+          expect(res.body.data).to.have.property('loan_status');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should fetch users by the user name with pages', (done) => {
       chai.request(app)
         .get('/api/v1/admin/user/all')
@@ -470,6 +515,30 @@ describe('Admin Users management', () => {
           expect(res.body.data).to.have.property('page');
           expect(res.body.data).to.have.property('total_pages');
           expect(res.body.data).to.have.property('users');
+          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter users by the user status if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.data).to.have.property('name');
+          expect(res.body.data).to.have.property('loan_status');
+          expect(res.body.data).to.have.property('status');
           expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -540,6 +609,30 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should filter users by the user loan status if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          loan_status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.data).to.have.property('name');
+          expect(res.body.data).to.have.property('loan_status');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should filter users by the loan status with pages', (done) => {
       chai.request(app)
         .get('/api/v1/admin/user/all')
@@ -601,6 +694,32 @@ describe('Admin Users management', () => {
           expect(res.body.data).to.have.property('page');
           expect(res.body.data).to.have.property('total_pages');
           expect(res.body.data).to.have.property('users');
+          expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter users by the date they were created if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          from_date: '2023-03-09',
+          to_date: '2023-03-10'
+        })
+        .end((err, res) => {
+          console.log('i am res', res.body);
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.data).to.have.property('name');
+          expect(res.body.data).to.have.property('loan_status');
+          expect(res.body.data).to.have.property('status');
           expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

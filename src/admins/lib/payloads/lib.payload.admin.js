@@ -14,5 +14,6 @@ export default {
     body.role_code.trim(),
     hash
   ]
+
 };
   

@@ -299,6 +299,25 @@ describe('Admin roles', () => {
           done();
         });
     });
+    it('Should fetch all roles if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/fetch-roles')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ROLES_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/role/fetch-roles')
@@ -336,7 +355,47 @@ describe('Admin roles', () => {
           done();
         });
     });
-  
+    it('Should fetch roles by the role name if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/fetch-roles')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          search: 'head socials'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ROLES_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if export is not true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/user/all')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'false',
+          search: 'head socials'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('export must be [true]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/role/fetch-roles')
@@ -377,7 +436,26 @@ describe('Admin roles', () => {
           done();
         });
     });
-  
+    it('Should filter roles by the role status if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/fetch-roles')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ROLES_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/role/fetch-roles')
@@ -419,7 +497,27 @@ describe('Admin roles', () => {
           done();
         });
     });
-  
+    it('Should filter roles by the date they were created if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/fetch-roles')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          from_date: '2023-01-13 23:03:09.875717',
+          to_date: '2023-01-14 23:03:09.875717'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ROLES_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/role/fetch-roles')
@@ -463,7 +561,28 @@ describe('Admin roles', () => {
           done();
         });
     });
-  
+    it('Should filter roles by the date they were created and status if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/role/fetch-roles')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          from_date: '2023-01-13 23:03:09.875717',
+          to_date: '2023-01-14 23:03:09.875717',
+          status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ROLES_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/role/fetch-roles')

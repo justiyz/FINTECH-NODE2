@@ -149,18 +149,24 @@ export const userAccountInformation = async(req, res, next) => {
 export const fetchUsers = async (req, res, next) => {
   try {
     const { query, admin } = req;
+    if (query.export){
+      const payload = UserPayload.fetchAllUsers(query);
+      const [ users ] = await processAnyData(userQueries.fetchAllUsers, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all users from the DB fetchUsers.admin.controllers.user.js`);
+      return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, users);
+    }
     const  payload  = UserPayload.fetchUsers(query);
     const [ users, [ usersCount ] ] = await Promise.all([
       processAnyData(userQueries.fetchUsers, payload),
       processAnyData(userQueries.fetchUsersCount, payload)
     ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched users from the DB fetchUsers.admin.controllers.user.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(usersCount.total_count),
       total_pages: Helpers.calculatePages(Number(usersCount.total_count), Number(req.query.per_page) || 10),
       users
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched users from the DB fetchUsers.admin.controllers.user.js`);
     return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_USERS_CONTROLLER;

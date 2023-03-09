@@ -32,3 +32,27 @@ export const fetchAllAdmins = async(query, filter) => {
     admins: result 
   };
 };
+
+export const fetchAdmins = async(query, filter) => {
+  const {
+    search
+  } = query;
+  
+  const { start_date, end_date, status } = filter;
+  const condition = search ? `${search.toLowerCase()}%` : null;
+  let result;
+  const getAndSearchPayload = [ condition ];
+  const getAndFilterPayload = [ status, start_date, end_date ];
+
+  if ((start_date && end_date) || status)  {
+    result = await processAnyData(adminQueries.fetchAdmins, getAndFilterPayload);
+  } else {
+    result = await processAnyData(adminQueries.fetchAndSearchAdmins, getAndSearchPayload);
+  }
+  if (Array.isArray(result)) {
+    result.forEach((item) => delete item.total);
+  }
+  return {
+    admins: result 
+  };
+};

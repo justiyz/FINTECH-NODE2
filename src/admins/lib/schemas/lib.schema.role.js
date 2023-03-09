@@ -44,6 +44,7 @@ const fetchAdmins = Joi.object().keys({
   per_page: Joi.number().positive(),
   start_date: Joi.string(),
   end_date: Joi.string(),
+  export: Joi.string().valid('true'),
   status: Joi.string().valid('active', 'deactivated'),
   search: Joi.string()
 });
@@ -53,6 +54,7 @@ const fetchRoles = Joi.object().keys({
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
   status: Joi.string().optional().valid('active', 'deactivated'),
+  export: Joi.string().optional().valid('true'),
   from_date: Joi.date().optional(),
   to_date: Joi.date().optional()
 });

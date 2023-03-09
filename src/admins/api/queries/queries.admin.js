@@ -72,6 +72,21 @@ export default {
     OFFSET $4 LIMIT $5
   `,
 
+  fetchAdmins:`
+    SELECT 
+    count(*) OVER() AS total,
+    admin_id,
+    admin_roles.name AS role, 
+    email, 
+    CONCAT(first_name, ' ', last_name) AS name,
+    to_char(DATE (admins.created_at)::date, 'Mon DD YYYY') AS date,
+    admins.status
+    FROM admins
+    LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
+    WHERE admins.status = $1 OR $1 is null
+    AND  admins.created_at::date BETWEEN $2 AND $3
+  `,
+
   fetchAndSearchAllAdmin: `
       SELECT 
       count(*) OVER() AS total,
@@ -86,6 +101,20 @@ export default {
       WHERE (admins.first_name ILIKE $1 OR $1 is null) OR (admins.last_name ILIKE $1 OR $1 is null)
       ORDER BY admins.created_at DESC
       OFFSET $2 LIMIT $3
+  `,
+  fetchAndSearchAdmins: `
+      SELECT 
+      count(*) OVER() AS total,
+      admin_id,
+      admin_roles.name AS role, 
+      email, 
+      CONCAT(first_name, ' ', last_name) AS name,
+      to_char(DATE (admins.created_at)::date, 'Mon DD YYYY') AS date,
+      admins.status
+      FROM admins
+      LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
+      WHERE (admins.first_name ILIKE $1 OR $1 is null) OR (admins.last_name ILIKE $1 OR $1 is null)
+      ORDER BY admins.created_at DESC
   `,
 
 
