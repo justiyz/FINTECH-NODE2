@@ -160,6 +160,20 @@ export const inviteAdmin = async(req, res, next) => {
  */
 export const fetchAllAdmins = async(req, res, next) => {
   try {
+    if(req.query.export){
+      const filter = {
+        status: req.query.status || null,
+        start_date: req.query.start_date || null,
+        end_date: req.query.end_date || null
+      };
+      const admins = await fetchAdminServices.fetchAdmins(req.query, filter, req.user);
+      const data = {
+        total_count: admins.admins.length,
+        ...admins                                           
+      };
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched admins from the DB fetchAllAdmins.controllers.admin.admin.js`);
+      return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, data);
+    }
     if (!req.query.per_page) req.query.per_page = '10'; 
     if (!req.query.page) req.query.page = '1';
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully assigned default values for page and per_page variables in the fetchAllAdmins.controllers.admin.admin.js`);
