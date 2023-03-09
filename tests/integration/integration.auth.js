@@ -1141,7 +1141,7 @@ describe('Auth', () => {
         });
     });
   });
-  describe(' Forgot password', () => {
+  describe('Forgot password', () => {
     it('Should send a reset password mail', (done) => {
       chai.request(app)
         .post('/api/v1/auth/forgot-password')

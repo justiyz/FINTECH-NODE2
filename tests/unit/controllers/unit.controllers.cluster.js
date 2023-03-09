@@ -22,7 +22,7 @@ describe('', () => {
 
   describe('Cluster controller catch block unit testings', () => {
     it('should call requestToJoinCluster', async() => {
-      const req = { user: '', params: '', cluster: '' };
+      const req = { user: '', cluster: '' };
       const data = await ClusterController.requestToJoinCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

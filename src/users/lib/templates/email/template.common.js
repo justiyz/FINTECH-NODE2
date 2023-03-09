@@ -8,7 +8,8 @@ const heading = {
   loanDisbursement: 'Loan Application Successful',
   loanClusterInvite: 'Loan cluster invite',
   failedCardDebit: 'Failed card debiting',
-  successfulRepayment: 'Successful loan repayment'
+  successfulRepayment: 'Successful loan repayment',
+  failedChargePayment: 'Failed Payment'
 };
 
 export const commonTemplate = (messageType, data) => {

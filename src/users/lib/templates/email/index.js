@@ -10,6 +10,7 @@ const getTemplate = (type, data) => {
   case 'loanClusterInvite': return email.loanClusterInvite(data);
   case 'failedCardDebit': return email.failedCardDebit(data);
   case 'successfulRepayment': return email.successfulRepayment(data);
+  case 'failedChargePayment': return email.failedChargePayment(data);
   default: return '';
   }
 };

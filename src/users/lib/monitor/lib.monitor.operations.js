@@ -69,11 +69,19 @@ export const operations = {
   68: 'EDTCLST', // cluster admin edits cluster
   69: 'APLNAPOFLT', // user accepts loan application offer letter
   70: 'AUTPLONRP', // users loan obligation part payment is paid
-  // 71: 'MANPLONRP', // users partial loan obligation is repaid manually by user
+  71: 'IMNLNRPVCD', // user initiates manual loan repayment via card
   72: 'AUTFLONRP', // users loan obligation full payment is paid
-  // 73: 'MANFLONRP', // users full loan obligation is repaid manually by user
+  73: 'IMNLNRPVBA', // user initiates manual loan repayment via bank account
   74: 'RNGLONTRM', // user renegotiates loan terms during application
   75: 'RSHDLONTN', // user reschedules loan tenor
-  76: 'RSHDLONRA' // user reschedules loan repayment amount
+  76: 'RSHDLONRA', // user reschedules loan repayment amount
+  77: 'SUMOTPVRTR', // user submits otp to verify initiated transaction
+  78: 'ODLNSETOD', // system sets over due loans set to over due owing to overdue repayment
+  79: 'LNRPTCDIN', // system invokes loan repayment via tokenised card initiated
+  80: 'STCLIVNVPN', // set new user cluster invite notification via phone number
+  81: 'STCLIVNVEM', // set new user cluster invite notification via email
+  82: 'APLNAPMN', // admin approves loan application manually
+  83: 'DCLNAPMN', // admin declines loan application manually
+  84: 'UPDOCFUSR' // admin uploads document for user
 };
   

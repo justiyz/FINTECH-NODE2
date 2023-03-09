@@ -1,7 +1,7 @@
 export default {
   createClusterPayload: (body, user) => [ 
     body.name.trim().toLowerCase(), 
-    body.description.trim().toLowerCase(), 
+    body.description.trim(), 
     body.type,
     body.maximum_members,
     1, // the cluster admin/creator
@@ -15,7 +15,7 @@ export default {
   inviteClusterMember: (body, cluster, user, invitedUser, type) => [
     cluster.cluster_id,
     user.user_id,
-    body.type,
+    body.email?.trim().toLowerCase() || body.phone_number?.trim(),
     type,
     invitedUser?.user_id || null
   ],

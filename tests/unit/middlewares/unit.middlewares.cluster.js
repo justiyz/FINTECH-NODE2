@@ -40,7 +40,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call checkIfAlreadyClusterMember', async() => {
-      const req = { user: '', params: '' };
+      const req = { user: '', cluster: '' };
       const data = await ClusterMiddlewares.checkIfAlreadyClusterMember('authenticate')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

@@ -93,8 +93,9 @@ Npm scripts basically allow us to call (and chain) terminal commands via npm.
 | ------------------------- | ------------------------------------------------------------------------------------------------- |
 | `lint`                    | Runs eslint on project files. Can be invoked with `npm run lint`      |
 | `dev`                     | starts the server in the local development environment. Can be invoked with `npm run dev` |
+| `cron`                    | starts the server for the cron job for all the environments. Can be invoked with `npm run cron` |
 | `prestart`                | Runs the up migration if any yet to be run when `npm run start` is invoked                  |
-| `start`                   | starts the server in the staging development environment. Can be invoked with `npm run start`                  |
+| `start`                   | starts the server in the staging or production environment. Can be invoked with `npm run start`                  |
 | `pretest`                 | Runs a series of scripts that prepared the test DB for the test about to run when `npm run test` is invoked     |
 | `test`                    | Runs tests using mocha. Can be invoked with `npm run test`      |
 | `migrate:create`          | Runs when new migration files are needed. Can be invoked with `npm run migrate:create`      |
@@ -128,6 +129,7 @@ ___
 - Chai
 - Postman
 - PostgreSQL
+- Google Firestore
 - Google Firebase
 
 ---

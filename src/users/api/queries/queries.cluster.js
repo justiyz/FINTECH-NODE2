@@ -59,7 +59,8 @@ export default {
         join_cluster_closes_at,
         is_deleted
     FROM clusters
-    WHERE cluster_id = $1`,
+    WHERE cluster_id = $1
+    OR unique_code = $1`,
 
   fetchActiveClusterMembers: `
     SELECT 
@@ -193,12 +194,15 @@ export default {
       invitation_mode,
       invitee_id,
       is_joined,
-      is_declined
+      is_declined,
+      created_at
     FROM cluster_invitees
     WHERE invitee_id = $1
     AND cluster_id = $2
     AND is_joined = FALSE
-    AND is_declined = FALSE`,
+    AND is_declined = FALSE
+    ORDER BY created_at DESC
+    LIMIT 1`,
 
   updateClusterInvitationStatus: `
     UPDATE cluster_invitees

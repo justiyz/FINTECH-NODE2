@@ -70,9 +70,16 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} verifyPaystackPaymentStatus.middlewares.payment.js`);
       const result = await confirmPaystackPaymentStatusByReference(body.data.reference);
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: verify transaction status response returned verifyPaystackPaymentStatus.middlewares.payment.js`);
+      const user = await processOneOrNoneData(userQueries.getUserByEmail, [ body.data.customer.email.trim() ]);
       if (result.data.status !== 'success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was not successful verifyPaystackPaymentStatus.middlewares.payment.js`);
         await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
+        MailService('Failed Payment', 'failedChargePayment', { 
+          ...user, 
+          last4Digits: body.data.channel === 'card' ? body.data.authorization.last4 : 'N/A', 
+          cardType: body.data.channel === 'card' ? body.data.authorization.card_type : 'N/A', 
+          bank: body.data.authorization.bank 
+        });
         return ApiResponse.error(res, enums.NOT_SUCCESSFUL_TRANSACTION, enums.HTTP_OK, enums.VERIFY_PAYSTACK_PAYMENT_STATUS_MIDDLEWARE);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was successful verifyPaystackPaymentStatus.middlewares.payment.js`);

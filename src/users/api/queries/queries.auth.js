@@ -143,6 +143,7 @@ export default {
       updated_at = NOW()
     WHERE user_id = $1
     RETURNING user_id, first_name, middle_name, last_name, status`,
+
   resetPin: `
     UPDATE users
     SET
@@ -150,6 +151,32 @@ export default {
       verification_token = NULL,
       verification_token_expires = NULL,
       pin = $2
-    WHERE user_id = $1
-    `
+    WHERE user_id = $1`,
+
+  checkIfUserHasClusterInvite: `
+    SELECT 
+      id,
+      cluster_id,
+      inviter_id,
+      invitee,
+      invitation_mode,
+      invitee_id,
+      is_joined,
+      is_declined,
+      created_at
+    FROM cluster_invitees
+    WHERE invitee = $1
+    AND invitation_mode = $2
+    AND invitee_id IS NULL
+    AND is_joined = FALSE
+    AND is_declined = FALSE
+    ORDER BY created_at DESC
+    LIMIT 1`,
+
+  updateInvitedUserUserId: `
+    UPDATE cluster_invitees
+    SET
+      updated_at = NOW(),
+      invitee_id = $2
+    WHERE id = $1`
 };
