@@ -2,7 +2,8 @@ import dayjs from 'dayjs';
 import AuthPayload from '../../lib/payloads/lib.payload.auth';
 import authQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
-import { processAnyData } from '../services/services.db';
+import clusterQueries from '../queries/queries.cluster';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
@@ -12,6 +13,9 @@ import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import MailService from '../services/services.email';
+import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import * as PushNotifications from '../../lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates//personalNotification';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -186,6 +190,35 @@ export const completeProfile = async(req, res, next) => {
     const payload = AuthPayload.completeProfile(user, body, hash);
     const [ data ] = await processAnyData(authQueries.completeUserProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved hashed password in the db completeProfile.controllers.auth.js`);
+    const [ checkIfUserHasEmailClusterInvite ] = await processAnyData(authQueries.checkIfUserHasClusterInvite, [ body.email.trim().toLowerCase(), 'email' ]);
+    const [ checkIfUserHasPhoneNumberClusterInvite ] = await processAnyData(authQueries.checkIfUserHasClusterInvite, [ user.phone_number, 'phone_number' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully checked if user signed up based on cluster invitation completeProfile.controllers.auth.js`);
+    if (!checkIfUserHasEmailClusterInvite && checkIfUserHasPhoneNumberClusterInvite) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user signed up based on cluster invitation via phone number completeProfile.controllers.auth.js`);
+      const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ checkIfUserHasPhoneNumberClusterInvite.cluster_id ]);
+      const [ clusterInviter ] = await processAnyData(userQueries.getUserByUserId, [ checkIfUserHasPhoneNumberClusterInvite.inviter_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster information and cluster inviter information fetched completeProfile.controllers.auth.js`);
+      const inviteInfo = {inviter: clusterInviter.first_name, name: cluster.name};
+      await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasPhoneNumberClusterInvite.id, user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
+      sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
+      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      userActivityTracking(req.user.user_id, 80, 'success');
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
+    }
+    if (!checkIfUserHasPhoneNumberClusterInvite && checkIfUserHasEmailClusterInvite) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user signed up based on cluster invitation via email completeProfile.controllers.auth.js`);
+      const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ checkIfUserHasEmailClusterInvite.cluster_id ]);
+      const [ clusterInviter ] = await processAnyData(userQueries.getUserByUserId, [ checkIfUserHasEmailClusterInvite.inviter_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster information and cluster inviter information fetched completeProfile.controllers.auth.js`);
+      const inviteInfo = {inviter: clusterInviter.first_name, name: cluster.name};
+      await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasEmailClusterInvite.id, user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
+      sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
+      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      userActivityTracking(req.user.user_id, 81, 'success');
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
+    }
     userActivityTracking(user.user_id, 7, 'success');
     return ApiResponse.success(res, enums.USER_PROFILE_COMPLETED, enums.HTTP_OK, data);
   } catch (error) {

@@ -139,12 +139,12 @@ export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res
  */
 export const checkIfClusterExists = async(req, res, next) => {
   try {
-    const { params: { cluster_id }, votingTicketDetails, user } = req;
-    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ cluster_id || votingTicketDetails.cluster_id ]);
+    const { params: { cluster_id, cluster_unique_id }, votingTicketDetails, user } = req;
+    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ cluster_id || cluster_unique_id || votingTicketDetails.cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
-      const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
+      const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB checkIfClusterExists.middlewares.cluster.js`);
       req.cluster = existingCluster;
       req.cluster.members = clusterMembers;
@@ -167,8 +167,8 @@ export const checkIfClusterExists = async(req, res, next) => {
  */
 export const checkIfAlreadyClusterMember = (type = '') => async(req, res, next) => {
   try {
-    const { params: { cluster_id }, user } = req;
-    const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ cluster_id, user.user_id ]);
+    const { cluster, user } = req;
+    const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ cluster.cluster_id, user.user_id ]);
     if (type === 'confirm' && clusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user already belongs to this cluster checkIfAlreadyClusterMember.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE);

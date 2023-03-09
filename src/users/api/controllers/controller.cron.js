@@ -5,6 +5,7 @@ import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
+import { userActivityTracking } from '../../lib/monitor';
 import { initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
 import MailService from '../services/services.email';
 
@@ -30,7 +31,8 @@ export const updateLoanStatusToOverdue = async (req, res, next) => {
         await processOneOrNoneData(cronQueries.updateNextLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
         await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus, [ application.loan_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue,  [ application.user_id ]);
-        // add updating cron trail table query when cron trail table is added
+        await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user loan repayment is past and loan status set to over due' ]);
+        userActivityTracking(application.user_id, 78, 'success');
         return application;
       })
     ]);
@@ -65,7 +67,8 @@ export const initiateLoanRepayment = async (req, res, next) => {
         const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails); // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
-          // add updating cron trail table query when cron trail table is added
+          await processOneOrNoneData(cronQueries.recordCronTrail, [ user.user_id, 'LNRPTCDIN', 'user next loan repayment initiated' ]);
+          userActivityTracking(user.user_id, 79, 'success');
           return repayment;
         }
         MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment });
