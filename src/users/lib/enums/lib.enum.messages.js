@@ -151,6 +151,8 @@ export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched suc
 export const INVITE_CLUSTER_MEMBER = 'Cluster member invited successfully';
 export const CLUSTER_MEMBER_INVITATION = (type) => `Successfully invite cluster member through ${type}`;
 export const CLUSTER_MEMBER_NOT_ADMIN = 'Cluster member is not an admin and can not perform this action';
+export const CLUSTER_IS_ON_ACTIVE_LOAN = 'Cluster is on an active loan, hence you can not edit this field';
+export const USER_CAN_NOT_EDIT = (type) => `you can not edit ${type}`;
 export const CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY = 'Cluster members fetched successfully';
 export const USER_ON_ACTIVE_LOAN = 'You still have active loan on this cluster, kindly pay all for you to leave';
 export const USER_IS_AN_ADMIN = 'You are currently the admin, you cannot leave the cluster, kindly assign someone as admin before leaving';
@@ -161,6 +163,8 @@ export const SELECT_NEW_ADMIN = 'Successfully send request to select new admin';
 export const CLUSTER_ADMIN_ACCEPTANCE = (decision) => `User successfully ${decision} to become new cluster admin.`;
 export const INITIATE_DELETE_CLUSTER = 'Successfully initiate a delete cluster';
 export const CLUSTER_DELETED_SUCCESSFULLY = 'Clusters was deleted successfully';
+export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
+
 
 // admin module related messages
 

@@ -22,7 +22,7 @@ describe('', () => {
 
   describe('Cluster controller catch block unit testings', () => {
     it('should call requestToJoinCluster', async() => {
-      const req = { user: '', params: '', cluster: '' };
+      const req = { user: '', cluster: '' };
       const data = await ClusterController.requestToJoinCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -74,6 +74,13 @@ describe('', () => {
     it('should call leaveCluster', async() => {
       const req = { params: null, user: ''};
       const data = await ClusterController.leaveCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+
+    it('should call editCluster', async() => {
+      const req = { params: null, user: '', cluster: ''};
+      const data = await ClusterController.editCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

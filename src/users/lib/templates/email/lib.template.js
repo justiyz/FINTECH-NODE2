@@ -227,6 +227,48 @@ export const failedCardDebit = async(data) => `
     </td>
   </tr>`;
 
+export const failedChargePayment = async(data) => `
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>
+        <span>Hi ${data.first_name},</span> <br />
+      </span>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>Your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} on seedfi was not successful</span>  
+    </td>
+  </tr>
+
+  <tr>
+        <td style="padding-bottom: 20px">
+          <p>card details</p><br />
+          <span>
+            Last 4 digits: ${data.last4Digits}, <br />
+            Card Type: ${data.cardType}, <br />
+            bank: ${data.bank}
+          </span>  
+        </td>
+  </tr>
+
+  <tr>
+    <td style="padding-bottom: 20px">
+      <span>Kindly try again or reach out to your bank if need be.</span>  
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <span style="line-height: 40px">Thanks</span> <br />
+      <span style="line-height: 40px">Yours Credibly</span> <br />
+      <span style="font-weight: 600; display: block;">SeedFi</span>
+      <span style="display: block;">Email: ask@seedfi.com</span>
+      <span style="display: block;">Call: +234 814 650 7035</span>
+    </td>
+  </tr>`;
+
 export const successfulRepayment = async(data) => `
   <tr>
     <td style="padding-bottom: 20px">
@@ -238,7 +280,7 @@ export const successfulRepayment = async(data) => `
 
   <tr>
     <td style="padding-bottom: 20px">
-      <span>Seedfi received your payment of ${data.amount_paid} naira as a loan repayment of your existing loan facility</span>  
+      <span>Seedfi received your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} as a loan repayment of your existing loan facility</span>  
     </td>
   </tr>
 
@@ -246,8 +288,8 @@ export const successfulRepayment = async(data) => `
         <td style="padding-bottom: 20px">
           <p>payment details</p><br />
           <span>
-            Total Loan amount: ₦${data.total_loan_amount} <br />
-            Amount repaid: ₦${data.amount_paid}
+            Total Loan amount: ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
+            Amount repaid: ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
           </span>  
         </td>
     </tr>

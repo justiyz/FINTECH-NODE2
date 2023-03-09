@@ -59,7 +59,8 @@ export default {
         join_cluster_closes_at,
         is_deleted
     FROM clusters
-    WHERE cluster_id = $1`,
+    WHERE cluster_id = $1
+    OR unique_code = $1`,
 
   fetchActiveClusterMembers: `
     SELECT 
@@ -132,7 +133,8 @@ export default {
       message,
       ticket_raised_by,
       current_cluster_members,
-      is_concluded
+      is_concluded,
+      suggested_cluster_admin
     FROM cluster_decision_tickets
     WHERE ticket_id = $1`,
 
@@ -193,12 +195,15 @@ export default {
       invitation_mode,
       invitee_id,
       is_joined,
-      is_declined
+      is_declined,
+      created_at
     FROM cluster_invitees
     WHERE invitee_id = $1
     AND cluster_id = $2
     AND is_joined = FALSE
-    AND is_declined = FALSE`,
+    AND is_declined = FALSE
+    ORDER BY created_at DESC
+    LIMIT 1`,
 
   updateClusterInvitationStatus: `
     UPDATE cluster_invitees
@@ -306,7 +311,8 @@ export default {
     SELECT
       cluster_id,
       user_id,
-      is_left
+      is_left,
+      is_admin
     FROM cluster_members
     WHERE user_id = $1 
     AND cluster_id = $2  
@@ -416,6 +422,18 @@ export default {
         status = 'inactive'
       WHERE cluster_id = $1
   `,
+
+  editCluster:`
+      UPDATE clusters
+      SET
+        updated_at = NOW(),
+        name = $2,
+        description = $3,
+        maximum_members = $4,
+        loan_goal_target = $5,
+        minimum_monthly_income = $6
+      WHERE cluster_id = $1
+      RETURNING name, description, maximum_members, loan_goal_target, minimum_monthly_income`,
   initiateDeleteCluster: `
       UPDATE clusters
       SET 
@@ -450,7 +468,18 @@ export default {
     updated_at = NOW(),
     is_left = TRUE,
     status = 'inactive'
-    WHERE cluster_id = $1`
+    WHERE cluster_id = $1`,
+  suggestedAdmin: `
+  INSERT INTO cluster_decision_tickets(
+    cluster_id,
+    type,
+    message,
+    ticket_raised_by,
+    current_cluster_members,
+    suggested_cluster_admin
+  ) VALUES ($1, $2, $3, $4, $5, $6)
+  RETURNING ticket_id
+  `
 };
 
 

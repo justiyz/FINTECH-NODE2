@@ -31,7 +31,7 @@ export const joinClusterRequestClusterJoiningClosed = (clusterName) => {
 };
 
 export const clusterMemberInvitation = () => {
-  'You have been invited to join a cluster';
+  return 'You have been invited to join a cluster';
 };
 
 export const userLeftYourCluster = (user, cluster) => {

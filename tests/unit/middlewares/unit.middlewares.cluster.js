@@ -40,7 +40,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call checkIfAlreadyClusterMember', async() => {
-      const req = { user: '', params: '' };
+      const req = { user: '', cluster: '' };
       const data = await ClusterMiddlewares.checkIfAlreadyClusterMember('authenticate')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -106,7 +106,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call checkIfUserCanLeaveCluster', async() => {
-      const req = { cluster: '', user: '', clusterMember: '' };
+      const req = { cluster: '', user: '' };
       const data = await ClusterMiddlewares.checkIfUserCanLeaveCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -120,6 +120,18 @@ describe('', () => {
     it('should call newAdminClusterAcceptance', async() => {
       const req = { params: null, body:'', cluster:'', user:'', votingTicketDetails:''  }; 
       const data = await ClusterMiddlewares.newAdminClusterAcceptance(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfClusterIsOnActiveLoan', async() => {
+      const req = { cluster: '', user: '' };
+      const data = await ClusterMiddlewares.checkIfClusterIsOnActiveLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfThereIsMoreThanOnePersonInTheCluster', async() => {
+      const req = { cluster: '', user: '', body: '' };
+      const data = await ClusterMiddlewares.checkIfThereIsMoreThanOnePersonInTheCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

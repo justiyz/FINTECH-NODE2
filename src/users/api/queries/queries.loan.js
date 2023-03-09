@@ -30,8 +30,8 @@ export default {
 
   initiatePersonalLoanApplication: `
     INSERT INTO personal_loans(
-        user_id, amount_requested, loan_reason, loan_tenor_in_months
-    ) VALUES ($1, $2, $3, $4)
+        user_id, amount_requested, loan_reason, loan_tenor_in_months, user_tier
+    ) VALUES ($1, $2, $3, $4, $5)
     RETURNING id, loan_id, status`,
 
   deleteInitiatedLoanApplication: `

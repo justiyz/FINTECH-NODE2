@@ -24,10 +24,10 @@ import { userActivityTracking } from '../../lib/monitor';
  */
 export const requestToJoinCluster = async (req, res, next) => {
   try {
-    const { params: { cluster_id }, cluster, user } = req;
+    const { cluster, user } = req;
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'join cluster' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision type fetched successfully requestToJoinCluster.controllers.cluster.js`);
-    const [ existingClusterDecisionTicket ] = await processAnyData(clusterQueries.checkIfDecisionTicketPreviouslyRaisedAndStillOpened, [ user.user_id, cluster_id, clusterDecisionType.name ]); 
+    const [ existingClusterDecisionTicket ] = await processAnyData(clusterQueries.checkIfDecisionTicketPreviouslyRaisedAndStillOpened, [ user.user_id, cluster.cluster_id, clusterDecisionType.name ]); 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user still has an inconclusive request to join cluster ticket with this same cluster requestToJoinCluster.controllers.cluster.js`);
     if (existingClusterDecisionTicket) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still has an inconclusive request to join cluster ticket with this same cluster requestToJoinCluster.controllers.cluster.js`);
@@ -36,7 +36,7 @@ export const requestToJoinCluster = async (req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have any inconclusive request to join cluster ticket with this same cluster requestToJoinCluster.controllers.cluster.js`);
     const clusterJoiningTicket = await processOneOrNoneData(clusterQueries.raiseClusterDecisionTicket, 
-      [ cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} wants to join "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members) ]);
+      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} wants to join "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: request to join cluster ticket raised successfully requestToJoinCluster.controllers.cluster.js`);
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully requestToJoinCluster.controllers.cluster.js`);
@@ -46,7 +46,7 @@ export const requestToJoinCluster = async (req, res, next) => {
       return member;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully requestToJoinCluster.controllers.cluster.js`);
-    sendMulticastPushNotification(PushNotifications.requestToJoinCluster(user, cluster), clusterMembersToken, 'request-join-cluster', cluster_id);
+    sendMulticastPushNotification(PushNotifications.requestToJoinCluster(user, cluster), clusterMembersToken, 'request-join-cluster', cluster.cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: multicast push notification sent to all cluster members successfully requestToJoinCluster.controllers.cluster.js`);
     userActivityTracking(req.user.user_id, 49, 'success');
     return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_SENT_SUCCESSFULLY, enums.HTTP_OK, { user_id: user.user_id, decision_type: clusterDecisionType.name, ticket_id: clusterJoiningTicket.ticket_id });
@@ -168,21 +168,19 @@ export const fetchClusters = async (req, res, next) => {
     const {query: { type }, user} = req;
     if(type === 'explore') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
-      const clusters = await processAnyData(clusterQueries.fetchClusters);
+      const  clusters  = await processAnyData(clusterQueries.fetchClusters);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched all available clusters in the DB fetchClusters.users.controllers.user.js`); 
+      const nonClusters = [];
       await Promise.all(
         clusters.map(async(cluster)=> {
           const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
-          if(userClusters){
-            cluster.is_member = true;
+          if(!userClusters){
+            nonClusters.push(cluster);
             return cluster;
           }
-          cluster.is_member = false;
-          return cluster;
         })
       );
-      
-      return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusters);
+      return ApiResponse.success(res, enums.CLUSTER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, nonClusters);
     }
     if(type === 'my cluster') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: type ${type} is decoded fetchClusters.users.controllers.user.js`);
@@ -230,7 +228,18 @@ export const fetchClusterDetails = async (req, res, next) => {
   try {
     const { params:{ cluster_id }, user } = req;
     const clusterDetails = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusters.users.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusterDetails.users.controllers.user.js`);
+    const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster_id ]);
+    if(userClusters){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is a cluster member fetchClusterDetails.users.controllers.user.js`);
+      clusterDetails.is_member = true;
+    }
+    clusterDetails.is_member = false;
+    if(userClusters?.is_admin){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is the cluster admin fetchClusterDetails.users.controllers.user.js`);
+      clusterDetails.is_admin = true;
+    }
+    clusterDetails.is_admin = false;
     return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, {...clusterDetails, user_referral_code: user.referral_code});
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_DETAILS_CONTROLLER;
@@ -238,8 +247,6 @@ export const fetchClusterDetails = async (req, res, next) => {
     return next(error);
   }
 };
-
-
 
 /**
  * invite cluster member
@@ -280,10 +287,10 @@ export const inviteClusterMember = async (req, res, next) => {
     (body.type === 'phone_number' && body.phone_number.trim() === invitedUser.phone_number)){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. inviteClusterMember.controllers.cluster.js`);
+      const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
       sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
       MailService('Cluster Invite', 'loanClusterInvite', { data });
-      const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
@@ -300,7 +307,6 @@ export const inviteClusterMember = async (req, res, next) => {
  * @returns { JSON } - A JSON with the cluster members
  * @memberof ClusterController
  */
-
 export const fetchClusterMembers = async (req, res, next) => {
   try {
     const { params:{ cluster_id }, user } = req;
@@ -351,6 +357,28 @@ export const leaveCluster = async (req, res, next) => {
   }
 };
 
+/**
+ * edit a cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with no data
+ * @memberof ClusterController
+ */
+
+export const editCluster = async (req, res, next) => {
+  try {
+    const { params, body, cluster, user  } = req;
+    const payload = ClusterPayload.editCluster(body, cluster, params);
+    const editedCluster = await processOneOrNoneData(clusterQueries.editCluster,  payload );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully edited the cluster editCluster.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.CLUSTER_EDITED_SUCCESSFULLY, enums.HTTP_OK, editedCluster);
+  } catch (error) {
+    error.label = enums.EDIT_CLUSTER_CONTROLLER;
+    logger.error(`editing cluster failed::${enums.EDIT_CLUSTER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
 
 
 /**
@@ -410,20 +438,20 @@ export const initiateDeleteCluster = async(req, res, next) => {
 */
 export const suggestNewClusterAdmin = async(req, res, next) => {
   try {
-    const { params: { user_id }, cluster, user } = req;
+    const { params, cluster, user } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully initiateDeleteCluster.controllers.cluster.js`);
-    const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ user_id ]);
+    const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ params.invitee_id ]);
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
-    const initiateDeleteClusterTicket =  await processOneOrNoneData(clusterQueries.raiseClusterDecisionTicket, 
-      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members) ]);
-    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { ticket_id: initiateDeleteClusterTicket.ticket_id });
+    const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin, 
+      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members), params.invitee_id ]);
+    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { ticket_id: suggestAdminClusterTicket.ticket_id });
     sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} suggest admin cluster`, 'suggest-admin-cluster', {});
     userActivityTracking(req.user.user_id, 64, 'success');
     return ApiResponse.success(res, enums.SELECT_NEW_ADMIN, enums.HTTP_OK, {
-      selected_admin: user_id,
+      selected_admin: params.invitee_id,
       cluster_admin: cluster.admin,
       cluster: cluster.cluster_id,
-      ticket_id: initiateDeleteClusterTicket.ticket_id
+      ticket_id: suggestAdminClusterTicket.ticket_id
     });
   } catch (error) {
     userActivityTracking(req.user.user_id, 64, 'fail');

@@ -140,12 +140,12 @@ export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res
  */
 export const checkIfClusterExists = async(req, res, next) => {
   try {
-    const { params: { cluster_id }, votingTicketDetails, user } = req;
-    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ cluster_id || votingTicketDetails.cluster_id ]);
+    const { params: { cluster_id, cluster_unique_id }, votingTicketDetails, user } = req;
+    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ cluster_id || cluster_unique_id || votingTicketDetails.cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
-      const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
+      const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB checkIfClusterExists.middlewares.cluster.js`);
       req.cluster = existingCluster;
       req.cluster.members = clusterMembers;
@@ -168,8 +168,9 @@ export const checkIfClusterExists = async(req, res, next) => {
  */
 export const checkIfAlreadyClusterMember = (type = '') => async(req, res, next) => {
   try {
-    const { params: { cluster_id, user_id }, user } = req;
-    const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ cluster_id, user_id || user.user_id ]);
+    const { params, cluster, user } = req;
+    const clusterMemberId = params.invitee_id || user.user_id;
+    const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ cluster.cluster_id, clusterMemberId ]);
     if (type === 'confirm' && clusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user already belongs to this cluster checkIfAlreadyClusterMember.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE);
@@ -494,6 +495,62 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
   }
 };
 
+/**
+ * check If cluster is on active loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+
+export const checkIfClusterIsOnActiveLoan = async (req, res, next) => {
+  try {
+    const { user, cluster } = req;
+    if(cluster.loan_status === 'active'){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster on an active loan in the cluster checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_IS_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE;
+    logger.error(`Check if cluster is on active loan failed::${enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
+    return next(error); 
+  }
+};
+
+/**
+ * check If there is more than one person in a cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+
+export const checkIfThereIsMoreThanOnePersonInTheCluster = async (req, res, next) => {
+  try {
+    const { user, body, cluster } = req;
+    if( (cluster.current_members > 1) && (body.maximum_members < cluster.current_members)){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('maximum numbers'), enums.HTTP_FORBIDDEN);
+    }
+    if( (cluster.current_members > 1) && (body.loan_goal_target)){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('loan goal target'), enums.HTTP_FORBIDDEN);
+    }
+    if( (cluster.current_members > 1) && (body.minimum_monthly_income)){
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('minimum monthly income'),enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE;
+    logger.error(`Checking if cluster has more than one member failed::${enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
 
 /**
  * request to delete cluster
@@ -562,7 +619,7 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
     const { params: { cluster_id }, body, cluster, user, votingTicketDetails } = req;
     const activityType = req.body.decision === 'yes' ? 65 : 66;
     const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
-    if (votingTicketDetails.type === 'cluster admin') {
+    if (votingTicketDetails.type === 'cluster admin' && (votingTicketDetails.suggested_cluster_admin === user.user_id)) {
       if (body.decision === 'yes') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} request to become new cluster admin newAdminClusterAcceptance.middleware.cluster.js`);
         await Promise.all([

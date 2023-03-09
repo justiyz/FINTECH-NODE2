@@ -39,7 +39,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     }
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months, user.tier ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn);
     const result = await personalLoanApplicationEligibilityCheck(payload);
@@ -287,14 +287,17 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response initiateManualLoanRepayment.controllers.loan.js`);
       if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualLoanRepayment.controllers.loan.js`);
+        userActivityTracking(req.user.user_id, 71, 'success');
         return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data );
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 71, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible initiateManualLoanRepayment.controllers.loan.js`);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 71, 'fail');
     error.label = enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating loan repayment failed::${enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -310,8 +313,9 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
  * @memberof LoanController
  */
 export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
+  const { user, params: { loan_id }, existingLoanApplication, query: { payment_type, payment_channel }, userDebitCard, accountDetails } = req;
+  const activityType = payment_channel === 'card' ? 71: 73;
   try {
-    const { user, params: { loan_id }, existingLoanApplication, query: { payment_type, payment_channel }, userDebitCard, accountDetails } = req;
     if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       const reference = uuidv4();
@@ -327,6 +331,7 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+        userActivityTracking(req.user.user_id, activityType, 'success');
         return ApiResponse.success(res, result.message, enums.HTTP_OK, { 
           user_id: user.user_id, 
           amount: parseFloat(paymentAmount).toFixed(2), 
@@ -338,14 +343,18 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
         });
       }
       if (result.response && result.response.status === 400) {
+        userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    userActivityTracking(req.user.user_id, activityType, 'fail');
     return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
   } catch (error) {
+    userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating loan repayment manually using saved card or bank account failed::${enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -371,15 +380,19 @@ export const submitPaymentOtp = async(req, res, next) => {
     }
     if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: otp verified, payment completed submitPaymentOtp.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 77, 'success');
       return ApiResponse.success(res, enums.PAYMENT_OTP_ACCEPTED, enums.HTTP_OK, { reference: reference_id });
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: an error occurred submitPaymentOtp.controllers.loan.js`);
+    userActivityTracking(req.user.user_id, 77, 'fail');
     if (result.response && result.response.status === 400) {
       return ApiResponse.error(res, enums.PAYMENT_OTP_REJECTED, enums.HTTP_BAD_REQUEST, enums.SUBMIT_PAYMENT_OTP_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    userActivityTracking(req.user.user_id, 77, 'fail');
     return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.SUBMIT_PAYMENT_OTP_CONTROLLER);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 77, 'fail');
     error.label = enums.SUBMIT_PAYMENT_OTP_CONTROLLER;
     logger.error(`submitting payment confirmation otp failed::${enums.SUBMIT_PAYMENT_OTP_CONTROLLER}`, error.message);
     return next(error);

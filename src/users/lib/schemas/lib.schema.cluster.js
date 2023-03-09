@@ -53,7 +53,15 @@ const initiateDeleteCluster = Joi.object().keys({
 
 const selectNewAdminParams = Joi.object().keys({
   cluster_id: Joi.string().required(),
-  user_id: Joi.string().required()
+  invitee_id: Joi.string().required()
+});
+
+const editCluster = Joi.object().keys({
+  name: Joi.string().optional(),
+  description: Joi.string().optional(),
+  maximum_members: Joi.number().optional(),
+  loan_goal_target: Joi.number().optional(),
+  maximum_monthly_income: Joi.number().optional()
 });
 
 export default  {
@@ -65,5 +73,6 @@ export default  {
   votingDecision,
   inviteClusterMember,
   initiateDeleteCluster,
-  selectNewAdminParams
+  selectNewAdminParams,
+  editCluster
 }; 

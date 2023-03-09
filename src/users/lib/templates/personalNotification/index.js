@@ -3,7 +3,7 @@ export const requestToJoinClusterNotification = (user, cluster) => {
 };
 
 export const inviteClusterMember = (data) => {
-  `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
+  return `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
 };
 
 export const initiateDeleteCluster = (user, cluster) => {

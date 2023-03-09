@@ -16,19 +16,6 @@ export default {
     FROM users
     WHERE user_id = $1`,
 
-  fetchUserReferrals: `
-    SELECT 
-        referral_trail.id AS referral_id,
-        referral_trail.referred_user_id,
-        (SELECT CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)
-        FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_name,
-        (SELECT users.email FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_email,
-        (SELECT users.created_at FROM users WHERE referral_trail.referred_user_id = user_id) AS referred_user_signup_date
-    FROM referral_trail
-    LEFT JOIN users
-    ON users.user_id = referral_trail.referrer_user_id
-    WHERE referral_trail.referrer_user_id = $1`,
-
   fetchUserBankAccounts: `
       SELECT 
         id,

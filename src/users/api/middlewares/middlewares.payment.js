@@ -70,9 +70,16 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} verifyPaystackPaymentStatus.middlewares.payment.js`);
       const result = await confirmPaystackPaymentStatusByReference(body.data.reference);
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: verify transaction status response returned verifyPaystackPaymentStatus.middlewares.payment.js`);
+      const user = await processOneOrNoneData(userQueries.getUserByEmail, [ body.data.customer.email.trim() ]);
       if (result.data.status !== 'success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was not successful verifyPaystackPaymentStatus.middlewares.payment.js`);
         await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
+        MailService('Failed Payment', 'failedChargePayment', { 
+          ...user, 
+          last4Digits: body.data.channel === 'card' ? body.data.authorization.last4 : 'N/A', 
+          cardType: body.data.channel === 'card' ? body.data.authorization.card_type : 'N/A', 
+          bank: body.data.authorization.bank 
+        });
         return ApiResponse.error(res, enums.NOT_SUCCESSFUL_TRANSACTION, enums.HTTP_OK, enums.VERIFY_PAYSTACK_PAYMENT_STATUS_MIDDLEWARE);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was successful verifyPaystackPaymentStatus.middlewares.payment.js`);
@@ -230,7 +237,7 @@ export const saveCardAuth = async(req, res, next) => {
         };
         MailService('Rejected Debit Card', 'rejectedDebitCard', { ...data });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);
-        await sendPushNotification(user.user_id, PushNotifications.rejectDebitCard, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.rejectDebitCard, user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push notification to the user saveCardAuth.middlewares.payment.js`);
         return next();
       }
@@ -339,7 +346,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
         const data = await PaymentPayload.loanDisbursementPayload(userDetails, loanDetails);
         await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
-        await sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
+        sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }

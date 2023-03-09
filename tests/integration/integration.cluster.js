@@ -1,11 +1,16 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import 'dotenv/config';
+import * as Helpers from '../../src/users/lib/utils/lib.util.helpers';
+import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
+import { userEightProfile, userNineProfile } from '../payload/payload.auth';
 
 const { expect } = chai;
 chai.use(chaiHttp);
+
+const password = 'initialPassword1%';
 
 describe('Clusters', () => {
   describe('user creates clusters', () => {
@@ -209,7 +214,7 @@ describe('Clusters', () => {
         })
         .send({
           name: 'Seedfi movers',
-          description: 'group borrowing of money for small projects',
+          description: 'Group borrowing of money for SMALL projects',
           type: 'public',
           maximum_members: 3,
           loan_goal_target: 500000,
@@ -227,6 +232,7 @@ describe('Clusters', () => {
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(3);
           process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
+          process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_UNIQUE_CODE = res.body.data.unique_code;
           done();
         });
     });
@@ -281,6 +287,7 @@ describe('Clusters', () => {
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(2);
           process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
+          process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_UNIQUE_CODE = res.body.data.unique_code;
           done();
         });
     });
@@ -319,7 +326,7 @@ describe('Clusters', () => {
           name: 'Highfliers Loaners',
           description: 'group borrowing of money for large projects',
           type: 'private',
-          maximum_members: 2,
+          maximum_members: 3,
           loan_goal_target: 1000000,
           minimum_monthly_income: 100000
         })
@@ -333,8 +340,9 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('cluster_id');
           expect(res.body.data).to.have.property('join_cluster_closes_at');
           expect(res.body.data.status).to.equal('active');
-          expect(res.body.data.maximum_members).to.equal(2);
+          expect(res.body.data.maximum_members).to.equal(3);
           process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
+          process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_UNIQUE_CODE = res.body.data.unique_code;
           done();
         });
     });
@@ -365,6 +373,7 @@ describe('Clusters', () => {
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(2);
           process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_ID = res.body.data.cluster_id;
+          process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_UNIQUE_CODE = res.body.data.unique_code;
           done();
         });
     });
@@ -503,7 +512,7 @@ describe('Clusters', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data[0]).to.have.property('cluster_id');
           expect(res.body.data[0]).to.have.property('type');
-          expect(res.body.data[0].maximum_members).to.equal(2);
+          expect(res.body.data[0].maximum_members).to.equal(3);
           done();
         });
     });
@@ -591,7 +600,7 @@ describe('Clusters', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('cluster_id');
           expect(res.body.data).to.have.property('type');
-          expect(res.body.data.maximum_members).to.equal(2);
+          expect(res.body.data.maximum_members).to.equal(3);
           done();
         });
     });
@@ -681,6 +690,27 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('Should successfully invite none existing cluster member by phone_number', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          phone_number: '+2348044332213',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_MEMBER_INVITATION('phone_number'));
+          done();
+        });
+    });
     it('Should flag when try to invite with wrong cluster id', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}0/invite-member/`)
@@ -703,7 +733,6 @@ describe('Clusters', () => {
         });
     });
   });
-  
   describe('user joins cluster based on invitation', () => {
     it('should throw error if user has not verified email', (done) => {
       chai.request(app)
@@ -911,7 +940,7 @@ describe('Clusters', () => {
     });
     it('should throw error if user has not verified BVN', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_UNIQUE_CODE}/request-to-join`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
@@ -966,7 +995,7 @@ describe('Clusters', () => {
     });
     it('should throw error if user is already a cluster member', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_UNIQUE_CODE}/request-to-join`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -998,7 +1027,7 @@ describe('Clusters', () => {
     });
     it('should throw error if cluster does not exist', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}tyt8uh/request-to-join`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_UNIQUE_CODE}tyt8uh/request-to-join`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1014,7 +1043,7 @@ describe('Clusters', () => {
     });
     it('should request to join user two public cluster', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_UNIQUE_CODE}/request-to-join`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -1372,6 +1401,421 @@ describe('Clusters', () => {
         });
     });
   });
+  describe('user eight and nine should sign up based on cluster invitation', () => {
+    it('Should create user eight successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signup')
+        .send({
+          phone_number: '+2349075743312'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.phone_number).to.equal( '+2349075743312');
+          process.env.SEEDFI_USER_EIGHT_USER_ID = res.body.data.user_id;
+          process.env.SEEDFI_USER_EIGHT_PHONE_NUMBER = res.body.data.phone_number;
+          process.env.SEEDFI_USER_EIGHT_VERIFICATION_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should create user nine successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/signup')
+        .send({
+          phone_number: '+2349067749313'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ACCOUNT_CREATED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.phone_number).to.equal( '+2349067749313');
+          process.env.SEEDFI_USER_NINE_USER_ID = res.body.data.user_id;
+          process.env.SEEDFI_USER_NINE_PHONE_NUMBER = res.body.data.phone_number;
+          process.env.SEEDFI_USER_NINE_VERIFICATION_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should verify user eight phone number successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-phone-number')
+        .send({
+          otp: process.env.SEEDFI_USER_EIGHT_VERIFICATION_OTP,
+          fcm_token: Hash.generateRandomString(20)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_ACCOUNT_VERIFIED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_phone_number).to.equal(true);
+          expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_EIGHT_PHONE_NUMBER);
+          process.env.SEEDFI_USER_EIGHT_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_EIGHT_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_EIGHT_REFERRAL_CODE = res.body.data.referral_code;
+          done();
+        });
+    });
+    it('Should verify user nine phone number successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-phone-number')
+        .send({
+          otp: process.env.SEEDFI_USER_NINE_VERIFICATION_OTP,
+          fcm_token: Hash.generateRandomString(20)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_ACCOUNT_VERIFIED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('inactive');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_phone_number).to.equal(true);
+          expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_NINE_PHONE_NUMBER);
+          process.env.SEEDFI_USER_NINE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_NINE_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_NINE_REFERRAL_CODE = res.body.data.referral_code;
+          done();
+        });
+    });
+    it('Should complete user eight profile successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/complete-profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_EIGHT_ACCESS_TOKEN}`
+        })
+        .send({
+          ...userEightProfile,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.gender).to.equal('female');
+          done();
+        });
+    });
+    it('Should complete user nine profile successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/complete-profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          ...userNineProfile,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_COMPLETED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.gender).to.equal('male');
+          done();
+        });
+    });
+    it('Should log user nine in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userNineProfile.email,
+          password
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_kyc).to.equal(true);
+          process.env.SEEDFI_USER_NINE_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_NINE_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_NINE_EMAIL = res.body.data.email;
+          done();
+        });
+    });
+    it('should upload selfie for user nine successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-selfie')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          image_url: 'https://enyata.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_bvn).to.equal(false);
+          expect(res.body.data.is_uploaded_selfie_image).to.equal(true);
+          done();
+        });
+    });
+    it('should throw error if user has not verified email', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.EMAIL_NOT_VERIFIED);
+          done();
+        });
+    });
+    it('Should send a verify otp email', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/request-email-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_NINE_EMAIL
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.REQUEST_EMAIL_VERIFICATION);
+          process.env.SEEDFI_USER_NINE_VERIFY_EMAIL_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should successfully verify user email', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/verify-email')
+        .query({
+          verifyValue: process.env.SEEDFI_USER_NINE_VERIFY_EMAIL_OTP
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Email verified successfully.');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should throw error if user has not verified BVN', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.BVN_NOT_PREVIOUSLY_VERIFIED);
+          done();
+        });
+    });
+    it('should verify bvn for user nine successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/verify-bvn')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          bvn: Helpers.generateElevenDigits()
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_BVN_VERIFIED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_bvn');
+          expect(res.body.data).to.have.property('is_completed_kyc');
+          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.is_verified_bvn).to.equal(true);
+          done();
+        });
+    });
+    it('should throw error if user income range has not been filled in profile', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE);
+          done();
+        });
+    });
+    it('should update user nine profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'employed',
+          marital_status: 'married',
+          number_of_dependents: '3',
+          income_range: '1,000 - 5,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('should throw error if user income range is lower than cluster minimum income', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
+          done();
+        });
+    });
+    it('should update user nine profile successfully', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          income_range: '100,000 - 500,000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('Should create user nine pin.', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/pin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          pin: '0908'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CREATE_PIN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should successfully accept cluster invite', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.JOIN_CLUSTER_DECISION_CHOICE('accepted'));
+          done();
+        });
+    });
+  });
   describe('suggest a new cluster admin and accept adminship', () => {
     it('should suggest new admin for cluster', (done) => {
       chai.request(app)
@@ -1388,16 +1832,16 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.SELECT_NEW_ADMIN);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('ticket_id');
-          process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_ONE_TICKET_ID = res.body.data.ticket_id;
+          process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_TWO_TICKET_ID = res.body.data.ticket_id;
           done();
         });
     });
     it('should flag if user is not a member of the cluster', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/admin/${process.env.SEEDFI_USER_THREE_USER_ID}`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/admin/${process.env.SEEDFI_USER_SIX_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1410,10 +1854,10 @@ describe('Clusters', () => {
     });
     it('user should vote to accept admin cluster', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_ONE_TICKET_ID}/voting-decision`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_TWO_TICKET_ID}/voting-decision`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
           decision: 'yes'
@@ -1430,10 +1874,10 @@ describe('Clusters', () => {
     });
     it('user should vote to decline admin cluster', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_ONE_TICKET_ID}/voting-decision`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_TWO_TICKET_ID}/voting-decision`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
           decision: 'no'
@@ -1719,6 +2163,174 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.USER_NOT_CLUSTER_MEMBER);
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('cluster admin edits cluster', () => {
+    it('should throw error if id is not sent', (done) => {
+      chai.request(app)
+        .patch('/api/v1/cluster/edit')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_NOT_FOUND);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('Resource Not Found');
+          done();
+        });
+    });
+    it('should throw error if invalid token is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}yhghretruftg`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if cluster does not exist', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_EIGHT_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Cluster does not exist');
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if user is not a cluster admin', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Cluster member is not an admin and can not perform this action');
+          expect(res.body.error).to.equal('CONFLICT');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if user cluster minimum income is greater than user maximum monthly income', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          maximum_members: 1
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('you can not edit maximum numbers');
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if there is more than one member on the cluster and you want to edit loan_goal_target', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          loan_goal_target: 50000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('you can not edit loan goal target');
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if there is more than one member on the cluster and you want to edit minimum monthly income', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          minimum_monthly_income: 35000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('you can not edit minimum monthly income');
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if the name sent is not unique in the DB', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'unique lenders'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('A cluster with this name "unique lenders" already exists');
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should edit a cluster', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/edit`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'jagaban cluster'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CLUSTER_EDITED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });

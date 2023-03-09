@@ -80,7 +80,14 @@ export default {
     FROM user_debit_cards
     WHERE user_id = $1
     ORDER BY is_default DESC
-    LIMIT 1`
+    LIMIT 1`,
+
+  recordCronTrail: `
+    INSERT INTO cron_job_trail(
+      user_id,
+      activity_type,
+      details
+    ) VALUES ($1, $2, $3)`
 };
   
   
