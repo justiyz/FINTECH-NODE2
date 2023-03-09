@@ -164,6 +164,7 @@ export const CLUSTER_ADMIN_ACCEPTANCE = (decision) => `User successfully ${decis
 export const INITIATE_DELETE_CLUSTER = 'Successfully initiate a delete cluster';
 export const CLUSTER_DELETED_SUCCESSFULLY = 'Clusters was deleted successfully';
 export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
+export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 
 
 // admin module related messages

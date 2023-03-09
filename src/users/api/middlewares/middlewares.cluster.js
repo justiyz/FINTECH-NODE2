@@ -570,30 +570,30 @@ export const requestToDeleteCluster = async(req, res, next) => {
       if (body.decision === 'yes') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion request requestToDeleteCluster.middleware.cluster.js`);
         await processOneOrNoneData(clusterQueries.recordUserVoteDecision, payload);
-        sendClusterNotification(user, cluster, { is_admin: clusterMember.is_admin }, `${user.first_name} ${user.last_name} accept to delete cluster`, 'delete-cluster', {});
+        sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accept to delete cluster`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member accept to delete cluster group and all notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
+        const [ voteCount ] = await processAnyData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
+        if(votingTicketDetails.current_cluster_members === voteCount.count){
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
+          Promise.all([
+            await processAnyData(clusterQueries.removeClusterMembers, [ cluster_id ]),
+            await processAnyData(clusterQueries.deleteAcluster, [ cluster_id ])
+          ]); 
+          sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster deleted and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
+          userActivityTracking(req.user.user_id, 62, 'success');
+          return ApiResponse.success(res, enums.CLUSTER_DELETED_SUCCESSFULLY, enums.HTTP_OK, { cluster_id });
+        }
         return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id });
       }
       if(body.decision === 'no'){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion requestToDeleteCluster.middleware.cluster.js`);
         await processAnyData(clusterQueries.recordUserVoteDecision, payload);
-        sendClusterNotification(user, cluster, { is_admin: clusterMember.is_admin }, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
+        sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member has declined request to delete cluster and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id });
-      }
-      const [ voteCount ] = await processAnyData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
-      if(body.decision === 'yes' && votingTicketDetails.current_cluster_members === voteCount.count){
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
-        Promise.all([
-          await processAnyData(clusterQueries.removeClusterMembers, [ cluster_id ]),
-          await processAnyData(clusterQueries.deleteAcluster, [ cluster_id ])
-        ]);
-        sendClusterNotification(user, cluster, { is_admin: clusterMember.is_admin }, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster deleted and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
-        userActivityTracking(req.user.user_id, 62, 'success');
-        return ApiResponse.success(res, enums.CLUSTER_DELETED_SUCCESSFULLY, enums.HTTP_OK, { cluster_id });
       }
     }
     return next();
@@ -617,9 +617,15 @@ export const requestToDeleteCluster = async(req, res, next) => {
 export const newAdminClusterAcceptance = async(req, res, next) => {
   try {
     const { params: { cluster_id }, body, cluster, user, votingTicketDetails } = req;
-    const activityType = req.body.decision === 'yes' ? 65 : 66;
-    const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
-    if (votingTicketDetails.type === 'cluster admin' && (votingTicketDetails.suggested_cluster_admin === user.user_id)) {
+
+    console.log(votingTicketDetails, '===>>>', user.user_id);
+    if (votingTicketDetails.type === 'cluster admin') {
+      const activityType = req.body.decision === 'yes' ? 65 : 66;
+      const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
+      if(votingTicketDetails.suggested_cluster_admin !== user.user_id){
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user id dose not equal suggested user id newAdminClusterAcceptance.middleware.cluster.js`);
+        return ApiResponse.error(res, enums.USER_CANNOT_PERFORM_ACTION, enums.HTTP_FORBIDDEN);
+      }
       if (body.decision === 'yes') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} request to become new cluster admin newAdminClusterAcceptance.middleware.cluster.js`);
         await Promise.all([
@@ -627,14 +633,14 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
           processAnyData(clusterQueries.removeAdmin, [ cluster_id, cluster.admin ]),
           processAnyData(clusterQueries.setAdmin, [ cluster_id, user.user_id ])
         ]);
-        sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} accept to become new cluster admin`, 'admin-cluster', {});
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user accept cluster admin role and all notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
+        sendClusterNotification(user, cluster, cluster, `${user.first_name} ${user.last_name} accept to become new cluster admin`, 'admin-cluster', {});
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user accepted cluster admin role and all notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, 67, 'success');
         return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id });
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} suggest to become an admin  newAdminClusterAcceptance.middleware.cluster.js`);
-      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} declined to become admin`, 'admin-cluster', {});
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user decline taking over as new admin cluster and notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
+      sendClusterNotification(user, cluster, cluster, `${user.first_name} ${user.last_name} declined to become admin`, 'admin-cluster', {});
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user declined taking over as new admin cluster and notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'success');
       return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id });
     }
