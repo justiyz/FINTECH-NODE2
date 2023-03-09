@@ -196,5 +196,6 @@ export const EDIT_USER_STATUS_CONTROLLER = 'AdminUserController::editUserStatus'
 export const FETCH_USERS_CONTROLLER = 'AdminUserController::fetchUsers';
 export const USER_KYC_DETAILS_CONTROLLER = 'AdminUserController::fetchUserKycDetails';
 export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfLoanExists';
-export const MANUAL_LOAN_DECISION_CONTROLLER = 'AdminLoanController::manualLoanDecision';
+export const APPROVE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::approveLoanApplication';
+export const DECLINE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::declineLoanApplication';
 export const LOAN_APPLICATION_DETAILS_CONTROLLER = 'AdminLoanController::loanApplicationDetails';

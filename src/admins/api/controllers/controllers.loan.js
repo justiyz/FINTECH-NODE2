@@ -31,8 +31,8 @@ export const approveLoanApplication = async(req, res, next) => {
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 21, 'fail');
-    error.label = enums.MANUAL_LOAN_DECISION_CONTROLLER;
-    logger.error(`approving a loan application manually failed:::${enums.MANUAL_LOAN_DECISION_CONTROLLER}`, error.message);
+    error.label = enums.APPROVE_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`approving a loan application manually failed:::${enums.APPROVE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };
@@ -60,8 +60,8 @@ export const declineLoanApplication = async(req, res, next) => {
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 22, 'fail');
-    error.label = enums.MANUAL_LOAN_DECISION_CONTROLLER;
-    logger.error(`declining a loan application manually failed:::${enums.MANUAL_LOAN_DECISION_CONTROLLER}`, error.message);
+    error.label = enums.DECLINE_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`declining a loan application manually failed:::${enums.DECLINE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };
