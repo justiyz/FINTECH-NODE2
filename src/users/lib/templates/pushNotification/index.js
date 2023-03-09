@@ -37,3 +37,7 @@ export const clusterMemberInvitation = () => {
 export const userLeftYourCluster = (user, cluster) => {
   return `${user.first_name} ${user.last_name} has left ${cluster.name} cluster.`;
 };
+
+export const initiateDeleteCluster = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} wants to delete ${cluster.name} cluster.`;
+};

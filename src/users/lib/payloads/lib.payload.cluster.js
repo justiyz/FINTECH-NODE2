@@ -26,5 +26,12 @@ export default {
     body.maximum_members || cluster.maximum_members,
     body.loan_goal_target || cluster.loan_goal_target,
     body.minimum_monthly_income || cluster.minimum_monthly_income
+  ],
+  requestToDeleteCluster: (body, cluster, user, ticket_id) => [
+    ticket_id,
+    cluster.cluster_id,
+    user.user_id,
+    cluster.members[0]?.is_admin || false,
+    body.decision
   ]
 };

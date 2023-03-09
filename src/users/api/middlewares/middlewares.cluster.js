@@ -8,6 +8,7 @@ import { formatUserIncomeRange, generateReferralCode } from '../../lib/utils/lib
 import { sendPushNotification, sendClusterNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import { userActivityTracking } from '../../lib/monitor';
+import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 
 /**
  * check if cluster name is unique
@@ -167,8 +168,9 @@ export const checkIfClusterExists = async(req, res, next) => {
  */
 export const checkIfAlreadyClusterMember = (type = '') => async(req, res, next) => {
   try {
-    const { cluster, user } = req;
-    const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ cluster.cluster_id, user.user_id ]);
+    const { params, cluster, user } = req;
+    const clusterMemberId = params.invitee_id || user.user_id;
+    const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ cluster.cluster_id, clusterMemberId ]);
     if (type === 'confirm' && clusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user already belongs to this cluster checkIfAlreadyClusterMember.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE);
@@ -545,6 +547,107 @@ export const checkIfThereIsMoreThanOnePersonInTheCluster = async (req, res, next
   } catch (error) {
     error.label = enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE;
     logger.error(`Checking if cluster has more than one member failed::${enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+ * request to delete cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with no data
+ * @memberof AuthMiddleware
+ */
+export const requestToDeleteCluster = async(req, res, next) => {
+  try {
+    const { params: { cluster_id, ticket_id }, body, cluster, user, votingTicketDetails, clusterMember } = req;
+    if (votingTicketDetails.type === 'delete cluster') {
+      const activityType = req.body.decision === 'yes' ? 60 : 61;
+      const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
+      const payload = ClusterPayload.requestToDeleteCluster(body, cluster, user, ticket_id );
+      if (body.decision === 'yes') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion request requestToDeleteCluster.middleware.cluster.js`);
+        await processOneOrNoneData(clusterQueries.recordUserVoteDecision, payload);
+        sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accepted to delete cluster`, 'delete-cluster', {});
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member accept to delete cluster group and all notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
+        userActivityTracking(req.user.user_id, activityType, 'success');
+        const [ voteCount ] = await processAnyData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
+        if(votingTicketDetails.current_cluster_members === voteCount.count){
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
+          Promise.all([
+            await processAnyData(clusterQueries.removeClusterMembers, [ cluster_id ]),
+            await processAnyData(clusterQueries.deleteAcluster, [ cluster_id ])
+          ]); 
+          sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster deleted and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
+          userActivityTracking(req.user.user_id, 62, 'success');
+          return ApiResponse.success(res, enums.CLUSTER_DELETED_SUCCESSFULLY, enums.HTTP_OK, { cluster_id });
+        }
+        return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id });
+      }
+      if(body.decision === 'no'){
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion requestToDeleteCluster.middleware.cluster.js`);
+        await processAnyData(clusterQueries.recordUserVoteDecision, payload);
+        sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member has declined request to delete cluster and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
+        userActivityTracking(req.user.user_id, activityType, 'success');
+        return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id });
+      }
+    }
+    return next();
+  } catch (error) {
+    const activityType = req.body.decision === 'yes' ? 60 : 61;
+    userActivityTracking(req.user.user_id, activityType, 'fail');
+    error.label = enums.REQUEST_TO_DELETE_CLUSTER_MIDDLEWARE;
+    logger.error(`Requesting to delete cluster failed::${enums.REQUEST_TO_DELETE_CLUSTER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+* new admin cluster acceptance
+* @param {Request} req - The request from the endpoint.
+* @param {Response} res - The response returned by the method.
+* @param {Next} next - Call the next operation.
+* @returns { JSON } - A JSON with no data
+* @memberof AuthMiddleware
+*/
+export const newAdminClusterAcceptance = async(req, res, next) => {
+  try {
+    const { params: { cluster_id }, body, cluster, user, votingTicketDetails } = req;
+    if (votingTicketDetails.type === 'cluster admin') {
+      const activityType = req.body.decision === 'yes' ? 65 : 66;
+      const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
+      if(votingTicketDetails.suggested_cluster_admin !== user.user_id){
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user id dose not equal suggested user id newAdminClusterAcceptance.middleware.cluster.js`);
+        return ApiResponse.error(res, enums.USER_CANNOT_PERFORM_ACTION, enums.HTTP_FORBIDDEN);
+      }
+      if (body.decision === 'yes') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} request to become new cluster admin newAdminClusterAcceptance.middleware.cluster.js`);
+        await Promise.all([
+          processAnyData(clusterQueries.newAdmin, [ cluster_id, user.user_id ]),
+          processAnyData(clusterQueries.removeAdmin, [ cluster_id, cluster.admin ]),
+          processAnyData(clusterQueries.setAdmin, [ cluster_id, user.user_id ])
+        ]);
+        sendClusterNotification(user, cluster, cluster, `${user.first_name} ${user.last_name} accepted to become new cluster admin`, 'admin-cluster', {});
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user accepted cluster admin role and all notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
+        userActivityTracking(req.user.user_id, 67, 'success');
+        return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id });
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} suggest to become an admin  newAdminClusterAcceptance.middleware.cluster.js`);
+      sendClusterNotification(user, cluster, cluster, `${user.first_name} ${user.last_name} declined to become admin`, 'admin-cluster', {});
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user declined taking over as new admin cluster and notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
+      userActivityTracking(req.user.user_id, activityType, 'success');
+      return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id });
+    }
+    return next();
+  } catch (error) {
+    const activityType = req.body.decision === 'yes' ? 65 : 66;
+    userActivityTracking(req.user.user_id, activityType, 'fail');
+    error.label = enums.REQUEST_TO_DELETE_CLUSTER_MIDDLE;
+    logger.error(`new admin cluster acceptance failed::${enums.REQUEST_TO_DELETE_CLUSTER_MIDDLE}`, error.message);
     return next(error);
   }
 };

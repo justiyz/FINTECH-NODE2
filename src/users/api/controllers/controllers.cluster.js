@@ -32,7 +32,7 @@ export const requestToJoinCluster = async (req, res, next) => {
     if (existingClusterDecisionTicket) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still has an inconclusive request to join cluster ticket with this same cluster requestToJoinCluster.controllers.cluster.js`);
       userActivityTracking(req.user.user_id, 49, 'fail');
-      return ApiResponse.error(res, enums.USER_PREVIOUSLY_RAISED_REQUEST_TO_JOIN_CLUSTER_TICKET, enums.HTTP_CONFLICT, enums.REQUEST_TO_JOIN_CLUSTER_CONTROLLER);
+      return ApiResponse.error(res, enums.USER_HAS_PREVIOUSLY_RAISED_REQUEST_CLUSTER_TICKET('join'), enums.HTTP_CONFLICT, enums.REQUEST_TO_JOIN_CLUSTER_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have any inconclusive request to join cluster ticket with this same cluster requestToJoinCluster.controllers.cluster.js`);
     const clusterJoiningTicket = await processOneOrNoneData(clusterQueries.raiseClusterDecisionTicket, 
@@ -307,7 +307,6 @@ export const inviteClusterMember = async (req, res, next) => {
  * @returns { JSON } - A JSON with the cluster members
  * @memberof ClusterController
  */
-
 export const fetchClusterMembers = async (req, res, next) => {
   try {
     const { params:{ cluster_id }, user } = req;
@@ -329,7 +328,6 @@ export const fetchClusterMembers = async (req, res, next) => {
  * @returns { JSON } - A JSON with no data
  * @memberof ClusterController
  */
-
 export const leaveCluster = async (req, res, next) => {
   try {
     const { params: { cluster_id }, user, cluster } = req;
@@ -382,3 +380,83 @@ export const editCluster = async (req, res, next) => {
   }
 };
 
+
+/**
+ * Initiate a delete cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with no data
+ * @memberof ClusterController
+ */
+export const initiateDeleteCluster = async(req, res, next) => {
+  try {
+    const { params: { cluster_id }, cluster, user, body } = req;
+    const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'delete cluster' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision type fetched successfully initiateDeleteCluster.controllers.cluster.js`);
+    const [ existingClusterDecisionTicket ] = await processAnyData(clusterQueries.checkIfDecisionTicketPreviouslyRaisedAndStillOpened, [ user.user_id, cluster_id, clusterDecisionType.name ]); 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user still has an inconclusive request to delete cluster ticket with this same cluster initiateDeleteCluster.controllers.cluster.js`);
+    if (existingClusterDecisionTicket) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still has an inconclusive request to delete cluster ticket with this same cluster initiateDeleteCluster.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 59, 'fail');
+      return ApiResponse.error(res, enums.USER_HAS_PREVIOUSLY_RAISED_REQUEST_CLUSTER_TICKET('delete'), enums.HTTP_CONFLICT, enums.REQUEST_TO_JOIN_CLUSTER_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have any inconclusive request to join cluster ticket with this same cluster initiateDeleteCluster.controllers.cluster.js`);
+    const initiateDeleteClusterTicket =  await processOneOrNoneData(clusterQueries.raiseClusterDecisionTicket, 
+      [ cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} wants to delete "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members) ]);
+    await processOneOrNoneData(clusterQueries.initiateDeleteCluster, [ cluster_id, body.deletion_reason ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: request to delete cluster ticket raised successfully initiateDeleteCluster.controllers.cluster.js`);
+    const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully initiateDeleteCluster.controllers.cluster.js`);
+    await cluster.members.forEach(async(member) => {
+      const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ member.user_id ]);
+      sendUserPersonalNotification(userDetails, `${cluster.name} delete cluster`, PersonalNotifications.initiateDeleteCluster(user, cluster), 'delete-cluster', { voting_ticket_id: initiateDeleteClusterTicket.ticket_id, deletion_reason: body.deletion_reason });
+      return member;
+    });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully initiateDeleteCluster.controllers.cluster.js`);
+    sendMulticastPushNotification(PushNotifications.initiateDeleteCluster(user, cluster), clusterMembersToken, 'request-join-cluster', cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: multicast push notification sent to all cluster members successfully initiateDeleteCluster.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, 59, 'success');
+    return ApiResponse.success(res, enums.INITIATE_DELETE_CLUSTER, enums.HTTP_OK, {
+      user_id: user.user_id, cluster: cluster_id, decision_type: 'delete cluster' , deletion_reason: req.body.deletion_reason, ticket_id: initiateDeleteClusterTicket.ticket_id 
+    });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 59, 'fail');
+    error.label = enums.INITIATE_DELETE_CLUSTER_CONTROLLER;
+    logger.error(`initiating delete cluster failed::${enums.INITIATE_DELETE_CLUSTER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+* suggest new cluster admin
+* @param {Request} req - The request from the endpoint.
+* @param {Response} res - The response returned by the method.
+* @param {Next} next - Call the next operation.
+* @returns { JSON } - A JSON with no data
+* @memberof ClusterController
+*/
+export const suggestNewClusterAdmin = async(req, res, next) => {
+  try {
+    const { params, cluster, clusterMember, user } = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully initiateDeleteCluster.controllers.cluster.js`);
+    const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ params.invitee_id ]);
+    const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
+    const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin, 
+      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members), params.invitee_id ]);
+    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { ticket_id: suggestAdminClusterTicket.ticket_id });
+    sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} suggest admin cluster`, 'suggest-admin-cluster', {});
+    userActivityTracking(req.user.user_id, 64, 'success');
+    return ApiResponse.success(res, enums.SELECT_NEW_ADMIN, enums.HTTP_OK, {
+      selected_admin: params.invitee_id,
+      cluster_admin: cluster.admin,
+      cluster: cluster.cluster_id,
+      ticket_id: suggestAdminClusterTicket.ticket_id
+    });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 64, 'fail');
+    error.label = enums.SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER;
+    logger.error(`selecting new cluster admin failed::${enums.SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

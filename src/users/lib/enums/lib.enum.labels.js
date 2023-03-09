@@ -139,6 +139,11 @@ export const CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE = 'ClusterMiddleware::ch
 export const CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
 export const LEAVE_CLUSTER_CONTROLLER = 'ClusterController::leaveCluster';
 export const EDIT_CLUSTER_CONTROLLER = 'ClusterController::editCluster';
+export const REQUEST_TO_DELETE_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::requestToDeleteCluster';
+export const REQUEST_TO_DELETE_CLUSTER_MIDDLE = 'ClusterMIddleware::newAdminClusterAcceptance';
+export const INITIATE_DELETE_CLUSTER_CONTROLLER = 'ClusterController::initiateDeleteCluster';
+export const SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER = 'ClusterController::suggestNewClusterAdmin';
+
 
 // Admin related labels
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';

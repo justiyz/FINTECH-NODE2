@@ -133,7 +133,8 @@ export default {
       message,
       ticket_raised_by,
       current_cluster_members,
-      is_concluded
+      is_concluded,
+      suggested_cluster_admin
     FROM cluster_decision_tickets
     WHERE ticket_id = $1`,
 
@@ -409,7 +410,7 @@ export default {
          cluster_members
       SET 
       updated_at = NOW(),
-      is_left = true,
+      is_left = TRUE,
       status = 'inactive'
       WHERE user_id = $1 AND cluster_id = $2`,
 
@@ -432,7 +433,53 @@ export default {
         loan_goal_target = $5,
         minimum_monthly_income = $6
       WHERE cluster_id = $1
-      RETURNING name, description, maximum_members, loan_goal_target, minimum_monthly_income`
+      RETURNING name, description, maximum_members, loan_goal_target, minimum_monthly_income`,
+  initiateDeleteCluster: `
+      UPDATE clusters
+      SET 
+        updated_at = NOW(),
+        deletion_reason = $2
+      WHERE cluster_id = $1
+  `,
+  newAdmin: `
+  UPDATE clusters
+  SET 
+    updated_at = NOW(),
+    admin = $2
+  WHERE cluster_id = $1
+`,
+  setAdmin: `
+  UPDATE cluster_members
+  SET 
+    updated_at = NOW(),
+    is_admin = TRUE
+  WHERE cluster_id = $1 AND user_id = $2
+`,
+  removeAdmin: `
+  UPDATE cluster_members
+  SET 
+    updated_at = NOW(),
+    is_admin = FALSE
+  WHERE cluster_id = $1 AND user_id = $2
+`,
+  removeClusterMembers:`
+    UPDATE cluster_members
+    SET 
+    updated_at = NOW(),
+    is_left = TRUE,
+    status = 'inactive'
+    WHERE cluster_id = $1`,
+  suggestedAdmin: `
+  INSERT INTO cluster_decision_tickets(
+    cluster_id,
+    type,
+    message,
+    ticket_raised_by,
+    current_cluster_members,
+    suggested_cluster_admin
+  ) VALUES ($1, $2, $3, $4, $5, $6)
+  RETURNING ticket_id
+  `
 };
 
 
