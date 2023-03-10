@@ -1,0 +1,105 @@
+import loanQueries from '../queries/queries.loan';
+import userQueries from '../queries/queries.user';
+import ApiResponse from '../../../users/lib/http/lib.http.responses';
+import enums from '../../../users/lib/enums';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import MailService from '../services/services.email';
+import { sendPushNotification } from '../services/services.firebase';
+import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
+import { adminActivityTracking } from '../../lib/monitor';
+
+/**
+ * approve loan applications manually by admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminUserController
+ */
+export const approveLoanApplication = async(req, res, next) => {
+  try {
+    const { admin, body: { decision }, params: { loan_id }, loanApplication } = req;
+    const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched approveLoanApplication.admin.controllers.loan.js`);
+    const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateLoanStatus, [ loan_id, 'approved', null ]);
+    await processOneOrNoneData(loanQueries.updateAdminLoanApprovalTrail, [ loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin approval recorded approveLoanApplication.admin.controllers.loan.js`);
+    MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
+    await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval(), loanApplicant.fcm_token);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveLoanApplication.admin.controllers.loan.js`);
+    adminActivityTracking(req.admin.admin_id, 21, 'success');
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 21, 'fail');
+    error.label = enums.APPROVE_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`approving a loan application manually failed:::${enums.APPROVE_LOAN_APPLICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * decline loan applications manually by admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminUserController
+ */
+export const declineLoanApplication = async(req, res, next) => {
+  try {
+    const { admin, body: { decision, rejection_reason }, params: { loan_id }, loanApplication } = req;
+    const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched declineLoanApplication.admin.controllers.loan.js`);
+    const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateLoanStatus, [ loan_id, 'declined', rejection_reason.trim().toLowerCase() ]);
+    await processOneOrNoneData(loanQueries.updateAdminLoanApprovalTrail, [ loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin rejection recorded declineLoanApplication.admin.controllers.loan.js`);
+    MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
+    await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval(), loanApplicant.fcm_token);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineLoanApplication.admin.controllers.loan.js`);
+    adminActivityTracking(req.admin.admin_id, 22, 'success');
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 22, 'fail');
+    error.label = enums.DECLINE_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`declining a loan application manually failed:::${enums.DECLINE_LOAN_APPLICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * details of a single loan Application
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminUserController
+ */
+export const loanApplicationDetails = async(req, res, next) => {
+  try {
+    const { admin, params: { loan_id }, loanApplication } = req;
+    const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched loanApplicationDetails.admin.controllers.loan.js`);
+    const orrScoreBreakdown = loanApplication.percentage_orr_score === null ? [  ] : [  ]; // implement the else by calling underwriting service when ready
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched loanApplicationDetails.admin.controllers.loan.js`);
+    const loanRepaymentBreakdown = (loanApplication.status === 'completed' || loanApplication.status === 'ongoing' || loanApplication.status === 'over due') ?
+      await processAnyData(loanQueries.fetchLoanRepaymentBreakdown, [ loan_id ]) : [  ];
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan repayment breakdown fetched loanApplicationDetails.admin.controllers.loan.js`);
+    const data = {
+      loan_id,
+      loan_applicant: { 
+        name: `${loanApplicant.first_name} ${loanApplicant.last_name}`,
+        status: loanApplicant.status,
+        tier: loanApplicant.tier,
+        image_url: loanApplicant.image_url 
+      },
+      loan_details: loanApplication,
+      orr_break_down: orrScoreBreakdown || [],
+      loan_repayments: loanRepaymentBreakdown || []
+    };
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.LOAN_APPLICATION_DETAILS_CONTROLLER;
+    logger.error(`fetching loan application details failed:::${enums.LOAN_APPLICATION_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

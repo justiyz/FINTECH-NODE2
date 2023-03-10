@@ -8,6 +8,8 @@ const getTemplate = (type, data) => {
   case 'adminInviteMail': return authEmail.adminInviteMail(data);
   case 'completeKyc': return userEmail.completeKyc(data);
   case 'insufficientBalance': return authEmail.insufficientBalance(data);
+  case 'approvedLoan': return userEmail.sendLoanApprovalMail(data);
+  case 'declinedLoan': return userEmail.sendLoanDisapprovalMail(data);
   default: return '';
   }
 };

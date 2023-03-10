@@ -1,0 +1,59 @@
+import loanQueries from '../queries/queries.loan';
+import { processAnyData } from '../services/services.db';
+import ApiResponse from '../../../users/lib/http/lib.http.responses';
+import enums from '../../../users/lib/enums';
+import { adminActivityTracking } from '../../lib/monitor';
+
+/**
+ * check if loan application is existing in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminLoanMiddleware
+ */
+export const checkIfLoanExists = async(req, res, next) => {
+  try {
+    const { params: { loan_id }, admin } = req;
+    const [ loanApplication ] = await processAnyData(loanQueries.fetchLoanDetailsById, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if loan application exists in the db checkIfLoanExists.admin.middlewares.loan.js`);
+    if (loanApplication) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application exists checkIfLoanExists.admin.middlewares.loan.js`);
+      req.loanApplication = loanApplication;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application does not exist checkIfLoanExists.admin.middlewares.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_IN_DB, enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_LOAN_EXISTS_MIDDLEWARE;
+    logger.error(`checking if loan application exists failed::${enums.CHECK_LOAN_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if loan application is of status in review in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminLoanMiddleware
+ */
+export const checkIfLoanStatusIsInReview = async(req, res, next) => {
+  const { loanApplication, admin, body: { decision } } = req;
+  const activityType = decision === 'approve' ? 21 : 22;
+  try {
+    if (loanApplication.status === 'in review') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
+    adminActivityTracking(req.admin.admin_id, activityType, 'fail');
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS(loanApplication.status), enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, activityType, 'fail');
+    error.label = enums.CHECK_LOAN_EXISTS_MIDDLEWARE;
+    logger.error(`checking if loan application status is still in review failed::${enums.CHECK_LOAN_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

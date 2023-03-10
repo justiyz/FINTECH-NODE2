@@ -39,7 +39,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     }
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months, user.tier ]);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn);
     const result = await personalLoanApplicationEligibilityCheck(payload);

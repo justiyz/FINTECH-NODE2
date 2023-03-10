@@ -23,3 +23,47 @@ export const completeKyc = () => `
           <span style="display: block;">Call: +234 814 650 7035</span>
         </td>
     </tr>`;
+
+export const sendLoanApprovalMail = (data) => `
+    <tr>
+        <td style="padding-bottom: 30px;">
+        Hello ${data.first_name},
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+        <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been approved.<br /> 
+            Kindly login to the application to complete loan disbursement.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+          <span style="line-height: 40px">Thanks</span> <br />
+          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="font-weight: 600; display: block;">SeedFi</span>
+          <span style="display: block;">Email: ask@seedfi.com</span>
+          <span style="display: block;">Call: +234 814 650 7035</span>
+        </td>
+    </tr>`;
+
+export const sendLoanDisapprovalMail = (data) => `
+    <tr>
+        <td style="padding-bottom: 30px;">
+        Hello ${data.first_name},
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+        <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been rejected.<br /> 
+            Kindly login to try again or reach out to our support team.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+          <span style="line-height: 40px">Thanks</span> <br />
+          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="font-weight: 600; display: block;">SeedFi</span>
+          <span style="display: block;">Email: ask@seedfi.com</span>
+          <span style="display: block;">Call: +234 814 650 7035</span>
+        </td>
+    </tr>`;

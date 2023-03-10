@@ -217,3 +217,7 @@ export const EDIT_USER_STATUS = 'User status successfully updated.';
 export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
 export const FETCH_USER_KYC_DETAILS = 'User kyc details fetched successfully';
 export const GENERATE_ADMIN_RESET_PASSWORD_TOKEN =  'Password token Successfully generated';
+export const LOAN_APPLICATION_NOT_EXISTING_IN_DB = 'loan application does not exist';
+export const LOAN_APPLICATION_STATUS = (status) => `loan application has status ${status}, thus action cannot be performed`;
+export const LOAN_APPLICATION_DECISION = (decision) => `Loan application ${decision} successfully`;
+export const LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY = 'loan application details fetched successfully';

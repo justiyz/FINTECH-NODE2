@@ -227,19 +227,12 @@ export const fetchClusters = async (req, res, next) => {
 export const fetchClusterDetails = async (req, res, next) => {
   try {
     const { params:{ cluster_id }, user } = req;
-    const clusterDetails = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
+    let clusterDetails = await processOneOrNoneData(clusterQueries.fetchClusterDetails, cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster details in the DB fetchClusterDetails.users.controllers.user.js`);
     const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster_id ]);
-    if(userClusters){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is a cluster member fetchClusterDetails.users.controllers.user.js`);
-      clusterDetails.is_member = true;
-    }
-    clusterDetails.is_member = false;
-    if(userClusters?.is_admin){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully confirms user is the cluster admin fetchClusterDetails.users.controllers.user.js`);
-      clusterDetails.is_admin = true;
-    }
-    clusterDetails.is_admin = false;
+    clusterDetails.is_member = userClusters ? true : false;
+    clusterDetails.is_admin = (userClusters && userClusters.is_admin) ? true : false;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully updates users cluster membership and adminship fetchClusterDetails.users.controllers.user.js`);
     return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, {...clusterDetails, user_referral_code: user.referral_code});
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_DETAILS_CONTROLLER;

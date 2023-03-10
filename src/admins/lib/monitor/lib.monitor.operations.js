@@ -18,6 +18,9 @@ export const operations = {
   17: 'DACTADM',  // deactivated admin user
   18: 'VRYRPDOP', // verify reset password otp
   19: 'ACTUSR', // admin activate user
-  20: 'DCTUSR' // admin deactivate user
+  20: 'DCTUSR', // admin deactivate user
+  21: 'APLNAPMN', // admin approves loan application manually
+  22: 'DCLNAPMN', // admin declines loan application manually
+  23: 'UPDOCFUSR' // admin uploads document for user
 };
 

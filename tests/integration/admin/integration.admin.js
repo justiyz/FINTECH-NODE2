@@ -22,7 +22,7 @@ describe('Admin', () => {
           permissions: [ 
             {
               resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions:  [ 'create', 'read', 'update', 'delete' ]
             }
           ]
         })
@@ -315,7 +315,7 @@ describe('Admin', () => {
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions:  [ 'create', 'read', 'update', 'delete' ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_ROLE_MANAGEMENT_RESOURCE_ID}`,

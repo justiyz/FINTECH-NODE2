@@ -80,8 +80,6 @@ export const operations = {
   79: 'LNRPTCDIN', // system invokes loan repayment via tokenised card initiated
   80: 'STCLIVNVPN', // set new user cluster invite notification via phone number
   81: 'STCLIVNVEM', // set new user cluster invite notification via email
-  82: 'APLNAPMN', // admin approves loan application manually
-  83: 'DCLNAPMN', // admin declines loan application manually
-  84: 'UPDOCFUSR' // admin uploads document for user
+  82: 'VRYADRS' // user verifies address
 };
   
