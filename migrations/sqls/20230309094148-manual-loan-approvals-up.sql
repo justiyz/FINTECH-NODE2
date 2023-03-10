@@ -15,3 +15,8 @@ CREATE TABLE IF NOT EXISTS manual_personal_loan_approval_trail(
 CREATE INDEX manual_personal_loan_approval_trail_id_index ON manual_personal_loan_approval_trail(id);
 CREATE INDEX manual_personal_loan_approval_trail_loan_id_index ON manual_personal_loan_approval_trail(loan_id);
 CREATE INDEX manual_personal_loan_approval_trail_decided_by_index ON manual_personal_loan_approval_trail(decided_by);
+
+INSERT INTO activity_types
+    (code, name, description) 
+VALUES
+    ('VRYADRS', 'verify address', 'user verifies address');
