@@ -1,4 +1,6 @@
+import dayjs from 'dayjs';
 import chai from 'chai';
+import path from 'path';
 import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../../src/app';
@@ -705,8 +707,8 @@ describe('Admin Users management', () => {
         })
         .query({
           export: 'true',
-          from_date: '2023-03-09',
-          to_date: '2023-03-10'
+          from_date: dayjs().subtract('2', 'minutes').format('YYYY-MM-DD'),
+          to_date: dayjs().format('YYYY-MM-DD')
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -923,6 +925,249 @@ describe('Admin Users management', () => {
           expect(res.body.message).to.equal(enums.FETCH_USER_KYC_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body).to.have.property('data');
+          done();
+        });
+    });
+  });
+  describe('Admin upload file for user', () => {
+    it('Should flag if no id found successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}po/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .field('type', 'image')
+        .field('title', 'Property ownership')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(('user account does not exist'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when document is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .field('type', 'file')
+        .field('title', 'Property ownership')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.UPLOAD_DOCUMENT_VALIDATION);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when title is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .field('type', 'image')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('title is required');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when invalid type is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .field('type', 'docs')
+        .field('title', 'Property ownership')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [image, file]');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should upload file for user successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .field('type', 'image')
+        .field('title', 'Property ownership')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('uploaded_by');
+          expect(res.body.data).to.have.property('document_title');
+          done();
+        });
+    });
+  });
+  describe('Fetch user admin uploaded documents', () => {
+    it('Should flag if no id found successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}hgiu/uploaded-documents`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(('user account does not exist'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if admin dose not have read permission', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/uploaded-documents`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Admin cannot perform "read" action on users module');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when token is invalid', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/uploaded-documents`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}op`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user admin uploaded documents successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/uploaded-documents`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_USER_UPLOADED_DOCUMENTS_FETCHED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.data[0]).to.have.property('uploaded_by');
+          expect(res.body.data[0]).to.have.property('document_url');
+          expect(res.body.data[0].document_extension).to.equal('.png');
+          done();
+        });
+    });
+  });
+  describe('Fetch user orr score breakdown', () => {
+    it('Should flag if no id found successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}hgiu/orr-breakdown`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(('user account does not exist'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if admin dose not have read permission', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/orr-breakdown`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Admin cannot perform "read" action on users module');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when token is invalid', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/orr-breakdown`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}op`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user orr score breakdown successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/orr-breakdown`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.FETCH_USER_ORR_BREAKDOWN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.be.an('object');
+          expect(res.body.data).to.have.property('customer_id');
+          expect(res.body.data).to.have.property('breakdown');
+          expect(res.body.data).to.have.property('decision_reasons');
+          expect(res.body.data.decision_reasons).to.be.an('array');
           done();
         });
     });

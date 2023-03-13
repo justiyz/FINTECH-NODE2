@@ -89,6 +89,26 @@ export default {
     WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
     ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `,
+
+  uploadUserDocument: `
+    INSERT INTO user_admin_uploaded_documents (
+      user_id, 
+      uploaded_by,
+      document_title,
+      image_url
+    ) VALUES ($1, $2, $3, $4)
+    RETURNING id, user_id, document_title, uploaded_by, created_at`,
+
+  fetchUploadedUserDocuments: `
+      SELECT 
+        id,
+        user_id,
+        uploaded_by,
+        document_title,
+        image_url,
+        created_at
+      FROM user_admin_uploaded_documents
+      WHERE user_id = $1`,
   
   fetchUserKycDetails: `
     SELECT 

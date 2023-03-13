@@ -9,6 +9,7 @@ import MailService from '../services/services.email';
 import { sendPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import { adminActivityTracking } from '../../lib/monitor';
+import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 
 /**
  * approve loan applications manually by admin
@@ -81,7 +82,8 @@ export const loanApplicationDetails = async(req, res, next) => {
     const { admin, params: { loan_id }, loanApplication } = req;
     const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched loanApplicationDetails.admin.controllers.loan.js`);
-    const orrScoreBreakdown = loanApplication.percentage_orr_score === null ? [  ] : [  ]; // implement the else by calling underwriting service when ready
+    const result = loanApplication.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanApplication.user_id, loan_id);
+    const orrScoreBreakdown = (result.status === 200) && (result.data.customer_id === loanApplication.user_id) ? result.data : {};
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched loanApplicationDetails.admin.controllers.loan.js`);
     const loanRepaymentBreakdown = (loanApplication.status === 'completed' || loanApplication.status === 'ongoing' || loanApplication.status === 'over due') ?
       await processAnyData(loanQueries.fetchLoanRepaymentBreakdown, [ loan_id ]) : [  ];
@@ -95,7 +97,7 @@ export const loanApplicationDetails = async(req, res, next) => {
         image_url: loanApplicant.image_url 
       },
       loan_details: loanApplication,
-      orr_break_down: orrScoreBreakdown || [],
+      orr_break_down: orrScoreBreakdown,
       loan_repayments: loanRepaymentBreakdown || []
     };
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);

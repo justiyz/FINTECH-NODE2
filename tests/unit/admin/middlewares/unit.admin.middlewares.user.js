@@ -27,6 +27,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call uploadDocument', async() => {
+      const req = { files: '', userDetails: '', body: '', admin: '' };
+      const data = await AdminUserMiddleware.uploadDocument(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call userLoanStatus', async() => {
       const req = { userDetails: '' };
       const data = await AdminUserMiddleware.userLoanStatus(req, res, next);
