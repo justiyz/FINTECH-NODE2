@@ -42,7 +42,7 @@ export const requestToJoinCluster = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully requestToJoinCluster.controllers.cluster.js`);
     await cluster.members.forEach(async(member) => {
       const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ member.user_id ]);
-      sendUserPersonalNotification(userDetails, `${cluster.name} cluster invite`, PersonalNotifications.requestToJoinClusterNotification(user, cluster), 'request-join-cluster', { voting_ticket_id: clusterJoiningTicket.ticket_id });
+      sendUserPersonalNotification(userDetails, `request to join ${cluster.name} cluster`, PersonalNotifications.requestToJoinClusterNotification(user, cluster), 'request-join-cluster', { voting_ticket_id: clusterJoiningTicket.ticket_id });
       return member;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully requestToJoinCluster.controllers.cluster.js`);
@@ -282,7 +282,7 @@ export const inviteClusterMember = async (req, res, next) => {
       decoded that invited user is a valid and active user in the DB. inviteClusterMember.controllers.cluster.js`);
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
-      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
       MailService('Cluster Invite', 'loanClusterInvite', { data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }

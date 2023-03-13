@@ -19,6 +19,11 @@ const fetchUsers = Joi.object().keys({
   to_date: Joi.date().optional()
 });
 
+const fileTitle = Joi.object().keys({
+  type: Joi.string().required().valid('image', 'file'),
+  title: Joi.string().required()
+});
+
 const editStatus = Joi.object().keys({
   status: Joi.string().valid('active', 'deactivated').required()
 });
@@ -27,5 +32,6 @@ export default {
   userIdParams,
   notificationTypeQuery,
   editStatus,
+  fileTitle,
   fetchUsers
 };

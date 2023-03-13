@@ -145,6 +145,10 @@ export const checkIfClusterExists = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
+      if (existingCluster.is_deleted) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster no longer exists in the DB checkIfClusterExists.middlewares.cluster.js`);
+        return ApiResponse.error(res, enums.CLUSTER_NO_LONGER_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE);
+      }
       const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster active members fetched from the DB checkIfClusterExists.middlewares.cluster.js`);
       req.cluster = existingCluster;

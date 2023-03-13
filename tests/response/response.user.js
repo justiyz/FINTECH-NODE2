@@ -297,6 +297,46 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
   return data;
 };
 
+export const seedfiUnderwritingUserAndLoanApplicationOrrBreakdownTestResponse = (user_id, loan_id) => {
+  const result ={
+    status: 200,
+    data: {
+      customer_id: user_id,
+      loan_id: loan_id,
+      breakdown: {
+        orr_score: 81.25,
+        date_of_birth_actual_score: 5.0,
+        marital_status_actual_score: 2.5,
+        monthly_income_actual_score: 3.5,
+        employment_type_actual_score: 10.0,
+        number_of_dependants_actual_actual: 1.75,
+        number_of_returned_cheques_actual_score: 5.0,
+        history_of_court_case_from_cr_actual_score: 5.0,
+        total_length_of_credit_history_actual_score: 9.0,
+        total_number_of_active_loans_availed_actual_score: 7.5,
+        total_number_of_closed_loans_availed_actual_score: 12.0,
+        history_of_written_off_account_from_cr_actual_score: 5.0,
+        total_number_of_returned_cheques_from_cr_report_actual_score: 15.0
+      },
+      decision_reasons: [
+        {
+          id: 1,
+          upper_limit: 74.99,
+          lower_limit: 65.0,
+          reason: 'MANUAL'
+        },
+        {
+          id: 2,
+          upper_limit: 100.0,
+          lower_limit: 75.0,
+          reason: 'APPROVED'
+        }
+      ]
+    }
+  };
+  return result;
+};
+
 export const paystackPlatformBalanceCheckerTestResponse = () => {
   const result =  {
     status: true,

@@ -6,6 +6,7 @@ import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { sendPushNotification } from '../services/services.firebase';
+import { userOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
@@ -175,6 +176,90 @@ export const fetchUsers = async (req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_USERS_CONTROLLER;
     logger.error(`fetching users in the DB failed:::${enums.FETCH_USERS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * save user uploaded document
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user uploaded document details.
+ * @memberof AdminUserController
+ */
+export const saveUserUploadedDocument = async(req, res, next) => {
+  try {
+    const { admin, userDetails, body, document } = req;
+    const uploadedDocument = await processOneOrNoneData(userQueries.uploadUserDocument, [ userDetails.user_id, admin.admin_id, body.title.trim(), document ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
+    document uploaded and saved for user successfully saveUserUploadedDocument.admin.controllers.user.js`);
+    adminActivityTracking(req.admin.admin_id, 23, 'success');
+    return ApiResponse.success(res, enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER, enums.HTTP_OK, uploadedDocument);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 23, 'fail');
+    error.label = enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER;
+    logger.error(`Saving uploaded document for user failed:::${enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetching admin uploaded documents of a user
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user uploaded document details.
+ * @memberof AdminUserController
+ */
+export const fetchAdminUploadedUserDocuments = async(req, res, next) => {
+  try {
+    const { admin, userDetails } = req;
+    const uploadedDocuments = await processAnyData(userQueries.fetchUploadedUserDocuments, [ userDetails.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents fetched successfully fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
+    await Promise.all([
+      uploadedDocuments.map(async(document) => {
+        const { document_url, document_extension } = await UserHash.decrypt(decodeURIComponent(document.image_url));
+        document.document_url = document_url;
+        document.document_extension = document_extension;
+        delete document.image_url;
+        return document;
+      })
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents sorted successfully fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
+    return ApiResponse.success(res, enums.ADMIN_USER_UPLOADED_DOCUMENTS_FETCHED, enums.HTTP_OK, uploadedDocuments);
+  } catch (error) {
+    error.label = enums.FETCH_ADMIN_UPLOADED_USER_DOCUMENTS_CONTROLLER;
+    logger.error(`Fetching uploaded document for user by admins failed:::${enums.FETCH_ADMIN_UPLOADED_USER_DOCUMENTS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch user orr breakdown
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user orr breakdown.
+ * @memberof AdminUserController
+ */
+export const fetchUserOrrBreakdown = async(req, res, next) => {
+  try {
+    const { admin, userDetails } = req;
+    const result = await userOrrScoreBreakdown(userDetails.user_id, '');
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
+     checked if user orr breakdown is available from the underwriting service fetchUserOrrBreakdown.admin.controllers.user.js`);
+    if (result.status === 200 && result.data.customer_id === userDetails.user_id) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
+      user has orr score breakdown in the underwriting service fetchUserOrrBreakdown.admin.controllers.user.js`);
+      return ApiResponse.success(res, enums.FETCH_USER_ORR_BREAKDOWN, enums.HTTP_OK, result.data);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
+      user does not have orr score breakdown in the underwriting service fetchUserOrrBreakdown.admin.controllers.user.js`);
+    return ApiResponse.success(res, enums.FETCH_USER_ORR_BREAKDOWN, enums.HTTP_OK, { });
+  } catch (error) {
+    error.label = enums.USER_ORR_BREAKDOWN_CONTROLLER;
+    logger.error(`fetching user orr breakdown failed:::${enums.USER_ORR_BREAKDOWN_CONTROLLER}`, error.message);
     return next(error);
   }
 };
