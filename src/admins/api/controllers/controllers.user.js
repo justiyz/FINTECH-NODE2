@@ -209,7 +209,7 @@ export const fetchUserKycDetails = async(req, res, next) => {
  * @returns {object} - Returns user kyc details.
  * @memberof AdminUserController
  */
-export const fetchUserCluster = async(req, res, next) => {
+export const userClusters = async(req, res, next) => {
   try {
     const { admin, params } = req;
     const [ clusterDetails ] = await processAnyData(userQueries.fetchClusterDetails, [ params.user_id ]);

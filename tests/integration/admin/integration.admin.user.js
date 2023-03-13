@@ -1048,7 +1048,7 @@ describe('Admin Users management', () => {
   describe('should fetch user cluster and cluster member details', () => {
     it('Should fetch user cluster details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/clusters`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1066,7 +1066,7 @@ describe('Admin Users management', () => {
     });
     it('Should throw error if user dose not exist', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0/cluster`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0/clusters`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1082,7 +1082,7 @@ describe('Admin Users management', () => {
     });
     it('Should throw when token is invalid', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/clusters`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}0p`
@@ -1098,7 +1098,7 @@ describe('Admin Users management', () => {
     });
     it('Should fetch user cluster details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/cluster-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1116,7 +1116,7 @@ describe('Admin Users management', () => {
     });
     it('Should throw error if cluster dose not exist', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}p`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}p/cluster-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

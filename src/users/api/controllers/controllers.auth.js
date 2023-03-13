@@ -201,8 +201,7 @@ export const completeProfile = async(req, res, next) => {
       const inviteInfo = {inviter: clusterInviter.first_name, name: cluster.name};
       await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasPhoneNumberClusterInvite.id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
-      sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
-      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {
+      const data = {
         cluster_id: cluster.cluster_id,
         cluster_name: cluster.name,
         loan_goal_target:cluster.loan_goal_target,
@@ -211,7 +210,9 @@ export const completeProfile = async(req, res, next) => {
         current_members: cluster.current_members,
         description:  cluster.description,
         image_url: cluster.image_url
-      });
+      };
+      sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
+      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {...data});
       userActivityTracking(req.user.user_id, 80, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }
@@ -223,8 +224,7 @@ export const completeProfile = async(req, res, next) => {
       const inviteInfo = {inviter: clusterInviter.first_name, name: cluster.name};
       await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasEmailClusterInvite.id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
-      sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
-      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {
+      const data = {
         cluster_id: cluster.cluster_id,
         cluster_name: cluster.name,
         loan_goal_target:cluster.loan_goal_target,
@@ -233,7 +233,9 @@ export const completeProfile = async(req, res, next) => {
         current_members: cluster.current_members,
         description:  cluster.description,
         image_url: cluster.image_url
-      });
+      };
+      sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
+      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {...data});
       userActivityTracking(req.user.user_id, 81, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }

@@ -103,29 +103,49 @@ export default {
     WHERE users.user_id = $1`,
 
   fetchClusterDetails: `
-  SELECT
-  cluster_members.cluster_id,
-  cluster_members.user_id,
-  cluster_members.status,
-  cluster_members.loan_status,
-  cluster_members.is_admin,
-  clusters.name,
-  clusters.type
-  FROM cluster_members
-  LEFT JOIN clusters ON clusters.cluster_id = cluster_members.cluster_id
-  WHERE cluster_members.user_id = $1
+    SELECT
+      name,
+      type,
+      minimum_monthly_income,
+      current_members,
+      created_by
+    FROM clusters
+    LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
+    WHERE cluster_members.user_id = $1
+    AND is_deleted = FALSE
     `,
   fetchClusterMemberDetails: `
     SELECT 
-      cluster_id,
-      user_id,
-      status,
-      loan_status,
-      loan_obligation,
-      is_admin,
-      is_left,
-      created_at
+      users.first_name,
+      users.last_name,
+      cluster_members.created_at,
+      cluster_members.status
     FROM cluster_members
-    WHERE  user_id = $1 OR (user_id = $1 AND cluster_id = $2)
-    `
+    LEFT JOIN users ON users.user_id = cluster_members.user_id 
+    WHERE is_left = FALSE
+    AND cluster_members.user_id = $1
+    OR (cluster_members.user_id = $1 AND cluster_members.cluster_id = $2)
+  `,
+  checkIfClusterExists: `
+    SELECT 
+        id,
+        cluster_id,
+        name,
+        description, 
+        type,
+        maximum_members,
+        current_members,
+        loan_goal_target,
+        minimum_monthly_income,
+        admin,
+        image_url,
+        unique_code,
+        status,
+        loan_status,
+        total_loan_obligation,
+        join_cluster_closes_at,
+        is_deleted
+    FROM clusters
+    WHERE cluster_id = $1
+    AND is_deleted = FALSE`
 };

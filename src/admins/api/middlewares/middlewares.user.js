@@ -1,5 +1,4 @@
 import userQueries from '../queries/queries.user';
-import clusterQueries from '../../../users/api/queries/queries.cluster';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { adminActivityTracking } from '../../lib/monitor';
@@ -95,7 +94,7 @@ export const checkIfUserExists = async(req, res, next) => {
 export const adminCheckClusterExists = async(req, res, next) => {
   try {
     const { params: { cluster_id } } = req;
-    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ cluster_id ]);
+    const [ existingCluster ] = await processAnyData(userQueries.checkIfClusterExists, [ cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (!existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: cluster does not exist in the DB checkIfClusterExists.middlewares.cluster.js`);
@@ -119,7 +118,7 @@ export const adminCheckClusterExists = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminUserMiddleware
  */
-export const adminCheckIfClusterMemberExist = async(req, res, next) => {
+export const checkIfUserBelongsToCluster = async(req, res, next) => {
   try {
     const { params, cluster } = req;
     const [ clusterMember ] = await processAnyData(userQueries.fetchClusterMemberDetails, [ params.user_id, cluster?.cluster_id ]);
@@ -128,7 +127,6 @@ export const adminCheckIfClusterMemberExist = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user belongs to this cluster and can proceed adminCheckIfClusterMemberExist.middlewares.cluster.js`);
-    req.clusterMember = clusterMember;
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE;

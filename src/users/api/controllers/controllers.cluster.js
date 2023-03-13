@@ -281,8 +281,7 @@ export const inviteClusterMember = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. inviteClusterMember.controllers.cluster.js`);
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
-      sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
-      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {
+      const userInfo = {
         cluster_id: cluster.cluster_id,
         cluster_name: cluster.name,
         loan_goal_target:cluster.loan_goal_target,
@@ -290,8 +289,11 @@ export const inviteClusterMember = async (req, res, next) => {
         maximum_members: cluster.maximum_members,
         current_members: cluster.current_members,
         description:  cluster.description,
-        image_url: cluster.image_url 
-      });
+        image_url: cluster.image_url
+      };
+      sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
+      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {
+        ...userInfo });
       MailService('Cluster Invite', 'loanClusterInvite', { data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }

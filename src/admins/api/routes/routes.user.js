@@ -66,19 +66,19 @@ router.get(
 );
 
 router.get(
-  '/:user_id/cluster',
+  '/:user_id/clusters',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.fetchClusterParams, 'params'),
-  UserMiddleware.adminCheckIfClusterMemberExist,
-  UserController.fetchUserCluster
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserBelongsToCluster,
+  UserController.userClusters
 );
 
 router.get(
-  '/:user_id/cluster/:cluster_id',
+  '/:user_id/:cluster_id/cluster-details', 
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.clusterDetailsParams, 'params'),
   UserMiddleware.adminCheckClusterExists,
-  UserMiddleware.adminCheckIfClusterMemberExist,
+  UserMiddleware.checkIfUserBelongsToCluster,
   UserController.fetchClusterMembersDetails
 );
 
