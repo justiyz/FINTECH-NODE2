@@ -1125,7 +1125,7 @@ describe('Admin Users management', () => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.CLUSTER_NOT_EXISTING);
+          expect(res.body.message).to.equal(enums.ADMIN_CHECK_IF_CLUSTER_EXIST);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

@@ -223,3 +223,5 @@ export const LOAN_APPLICATION_DECISION = (decision) => `Loan application ${decis
 export const LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY = 'loan application details fetched successfully';
 export const ADMIN_FETCH_CLUSTER_DETAILS = 'Admin fetched cluster details successfully';
 export const ADMIN_FETCH_MEMBER_CLUSTER_DETAILS = 'Admin fetched cluster member details successfully';
+export const ADMIN_CHECK_IF_CLUSTER_EXIST = 'User cluster does not exist';
+

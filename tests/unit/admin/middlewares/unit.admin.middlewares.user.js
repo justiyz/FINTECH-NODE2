@@ -39,9 +39,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call adminCheckClusterExists', async() => {
+    it('should call adminCheckIfClusterExists', async() => {
       const req = { params: null };
-      const data = await AdminUserMiddleware.adminCheckClusterExists(req, res, next);
+      const data = await AdminUserMiddleware.adminCheckIfClusterExists(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

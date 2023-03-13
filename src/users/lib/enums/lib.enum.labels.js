@@ -201,3 +201,5 @@ export const DECLINE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::decline
 export const LOAN_APPLICATION_DETAILS_CONTROLLER = 'AdminLoanController::loanApplicationDetails';
 export const FETCH_ADMIN_CLUSTER_DETAILS_CONTROLLER = 'AdminUserController::fetchClusterDetails';
 export const FETCH_ADMIN_CLUSTER_MEMBER_DETAILS_CONTROLLER = 'AdminUserController::fetchClusterMemberDetails';
+export const ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterExists';
+export const CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserBelongsToCluster';
