@@ -928,7 +928,6 @@ describe('Admin Loan management', () => {
           end_date: '2023-03-10'
         })
         .end((err, res) => {
-          console.log('i am res', res.body);
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
