@@ -464,9 +464,10 @@ export default {
   removeAdmin: `
   UPDATE cluster_members
   SET 
-    updated_at = NOW(),
-    is_admin = FALSE
-  WHERE cluster_id = $1 AND user_id = $2
+  is_admin = FALSE,
+    updated_at = NOW()
+  WHERE cluster_id = $1 
+  AND user_id = $2
 `,
   removeClusterMembers:`
     UPDATE cluster_members

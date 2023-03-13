@@ -12,7 +12,8 @@ export default {
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-      number_of_dependents, marital_status, loan_status, employment_type, to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
+      number_of_dependents, marital_status, loan_status, employment_type, address, address_image_url, is_verified_address,
+       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
     WHERE user_id = $1`,
 
@@ -99,5 +100,32 @@ export default {
       user_national_id_details.image_url
     FROM users
     LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
-    WHERE users.user_id = $1`
+    WHERE users.user_id = $1`,
+
+  fetchClusterDetails: `
+  SELECT
+  cluster_members.cluster_id,
+  cluster_members.user_id,
+  cluster_members.status,
+  cluster_members.loan_status,
+  cluster_members.is_admin,
+  clusters.name,
+  clusters.type
+  FROM cluster_members
+  LEFT JOIN clusters ON clusters.cluster_id = cluster_members.cluster_id
+  WHERE cluster_members.user_id = $1
+    `,
+  fetchClusterMemberDetails: `
+    SELECT 
+      cluster_id,
+      user_id,
+      status,
+      loan_status,
+      loan_obligation,
+      is_admin,
+      is_left,
+      created_at
+    FROM cluster_members
+    WHERE  user_id = $1 OR (user_id = $1 AND cluster_id = $2)
+    `
 };

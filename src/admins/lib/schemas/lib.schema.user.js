@@ -20,12 +20,22 @@ const fetchUsers = Joi.object().keys({
 });
 
 const editStatus = Joi.object().keys({
-  status: Joi.string().valid('active', 'deactivated').required()
+  status: Joi.string().valid('active', 'deactivated', 'suspended', 'watchlisted', 'blacklisted').required()
+});
+
+const fetchClusterParams = Joi.object().keys({
+  user_id: Joi.string().required()
+});
+const clusterDetailsParams = Joi.object().keys({
+  user_id: Joi.string().required(),
+  cluster_id: Joi.string().required()
 });
 
 export default {
   userIdParams,
   notificationTypeQuery,
   editStatus,
-  fetchUsers
+  fetchUsers,
+  fetchClusterParams,
+  clusterDetailsParams
 };

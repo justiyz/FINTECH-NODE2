@@ -709,14 +709,11 @@ describe('Admin Users management', () => {
           to_date: '2023-03-10'
         })
         .end((err, res) => {
-          console.log('i am res', res.body);
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.data.users[0]).to.have.property('user_id');
-          expect(res.body.data.users[0]).to.have.property('name');
-          expect(res.body.data.users[0]).to.have.property('loan_status');
-          expect(res.body.data.users[0]).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('users');
           expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -1044,6 +1041,92 @@ describe('Admin Users management', () => {
           expect(res.body.message).to.equal(enums.NOTIFICATION_SENT_TO_USER_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body).to.have.property('data');
+          done();
+        });
+    });
+  });
+  describe('should fetch user cluster and cluster member details', () => {
+    it('Should fetch user cluster details successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_FETCH_CLUSTER_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          done();
+        });
+    });
+    it('Should throw error if user dose not exist', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}0/cluster`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_NOT_CLUSTER_MEMBER);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw when token is invalid', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}0p`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user cluster details successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_FETCH_MEMBER_CLUSTER_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          done();
+        });
+    });
+    it('Should throw error if cluster dose not exist', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}p`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CLUSTER_NOT_EXISTING);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });

@@ -1899,7 +1899,7 @@ describe('Clusters', () => {
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/initiate-delete-cluster`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
           deletion_reason: 'wait for some action'
@@ -2053,7 +2053,7 @@ describe('Clusters', () => {
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -2070,7 +2070,7 @@ describe('Clusters', () => {
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -2086,7 +2086,7 @@ describe('Clusters', () => {
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -2138,7 +2138,7 @@ describe('Clusters', () => {
         .get(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/members`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -2154,7 +2154,7 @@ describe('Clusters', () => {
         .get(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/members`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -2223,7 +2223,7 @@ describe('Clusters', () => {
         .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/edit`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
@@ -2320,7 +2320,7 @@ describe('Clusters', () => {
         .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/edit`)
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
           name: 'jagaban cluster'
