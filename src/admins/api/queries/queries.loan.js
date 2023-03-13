@@ -102,54 +102,6 @@ export default {
    ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
    ORDER BY personal_loans.created_at DESC
    `,
-
-  fetchInReviewLoans: `
-   SELECT
-    personal_loans.loan_id,
-    personal_loans.user_id,
-    CONCAT(first_name, ' ', last_name) AS name,
-    users.tier,
-    personal_loans.amount_requested AS loan_amount,
-    loan_tenor_in_months AS duration,
-    to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As date,
-    personal_loans.status
-  FROM personal_loans
-  LEFT JOIN users
-  ON personal_loans.user_id = users.user_id
-  WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (personal_loans.status = 'in review' OR personal_loans.status IS NULL) AND 
-    ((personal_loans.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
-  ORDER BY personal_loans.created_at DESC
-  OFFSET $4
-  LIMIT $5
-   `,
-
-  getInReviewLoansCount:`
-    SELECT
-       COUNT(loan_id) AS total_count
-    FROM personal_loans
-    LEFT JOIN users
-  ON personal_loans.user_id = users.user_id
-    WHERE (CONCAT(users.first_name, ' ', users.last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (personal_loans.status = 'in review' OR personal_loans.status IS NULL) AND 
-    ((personal_loans.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
-  `,
-
-  fetchAllInReviewLoans: `
-     SELECT
-        personal_loans.loan_id,
-        personal_loans.user_id,
-        CONCAT(first_name, ' ', last_name) AS name,
-        users.tier,
-        personal_loans.amount_requested AS loan_amount,
-        loan_tenor_in_months AS duration,
-        to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As date,
-        personal_loans.status
-    FROM personal_loans
-    LEFT JOIN users
-    ON personal_loans.user_id = users.user_id
-    WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (personal_loans.status = 'in review' OR personal_loans.status IS NULL) AND 
-      ((personal_loans.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
-    ORDER BY personal_loans.created_at DESC 
-      `,
       
   fetchRepaidLoans: `
       SELECT 

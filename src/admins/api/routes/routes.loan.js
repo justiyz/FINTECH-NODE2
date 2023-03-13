@@ -40,7 +40,7 @@ router.get(
 );
 
 router.get(
-  '/fetch-loans',
+  '/personal-loans',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchLoans, 'query'),

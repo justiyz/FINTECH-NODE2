@@ -21,7 +21,7 @@ const fetchLoans = Joi.object().keys({
   end_date: Joi.date().optional(),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
-  type: Joi.string().optional().valid('export loan', 'in review', 'export in review')
+  export: Joi.string().optional().valid('true')
 
 });
 

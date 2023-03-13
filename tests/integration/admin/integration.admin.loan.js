@@ -287,7 +287,7 @@ describe('Admin Loan management', () => {
   describe('admin fetches loan applications on the platform', () => {
     it('Should fetch all loans', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -301,15 +301,16 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch all in review loans if query type is in review', (done) => {
+    it('Should fetch all in review loans without pagination if export is true and status is in review', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type:'in review'
+          export:'true',
+          status: 'in review'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -320,15 +321,15 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch all loan applications without pagination if query type is export loan', (done) => {
+    it('Should fetch all loan applications without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type: 'export loan'
+          export: 'true'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -339,15 +340,15 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch all loan applications without pagination if query type is export in review', (done) => {
+    it('Should fetch all loan applications without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type: 'export in review'
+          export: 'true'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -360,7 +361,7 @@ describe('Admin Loan management', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -377,7 +378,7 @@ describe('Admin Loan management', () => {
     });
     it('Should fetch loan applications by the name of applicant', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -394,15 +395,16 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch in review loan applications by the name of applicant if query type is in review ', (done) => {
+    it('Should fetch in review loan applications by the name of applicant if export is true ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type: 'in review',
+          export: 'true',
+          status: 'in review',
           search: 'victory babatunde'
         })
         .end((err, res) => {
@@ -414,15 +416,15 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch loan applications by the name of applicant without pagination if query type is export loan', (done) => {
+    it('Should fetch loan applications by the name of applicant without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type: 'export loan',
+          export: 'true',
           search: 'victory babatunde'
         })
         .end((err, res) => {
@@ -434,15 +436,15 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch loan applications by the name of applicant without pagination if query type is export in review', (done) => {
+    it('Should fetch loan applications by the name of applicant without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type: 'export in review',
+          export: 'true',
           search: 'victory babatunde'
         })
         .end((err, res) => {
@@ -455,22 +457,22 @@ describe('Admin Loan management', () => {
         });
     });
 
-    it('Should throw error if type is not in review, export loan or export in review', (done) => {
+    it('Should throw error if export is not true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          type: 'export loans',
+          export: 'false',
           search: 'victory babatunde'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('type must be one of [export loan, in review, export in review]');
+          expect(res.body.message).to.equal('export must be [true]');
           expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -479,7 +481,7 @@ describe('Admin Loan management', () => {
     
     it('Should filter loans by the loan status ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/fetch-loans')
+        .get('/api/v1/admin/loan/personal-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -496,9 +498,9 @@ describe('Admin Loan management', () => {
           done();
         });
 
-      it('Should filter loans by the loan status without pagination if type is export loan ', (done) => {
+      it('Should filter loans by the loan status with pagination ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -517,13 +519,13 @@ describe('Admin Loan management', () => {
 
         it('Should throw error if status is not pending, cancelled, in review, processing, declined, approved, ongoing, over due, completed', (done) => {
           chai.request(app)
-            .get('/api/v1/admin/loan/fetch-loans')
+            .get('/api/v1/admin/loan/personal-loans')
             .set({
               'Content-Type': 'application/json',
               Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
             })
             .query({
-              export: 'export loans',
+              export: 'true',
               status: 'laoan going'
             })
             .end((err, res) => {
@@ -537,15 +539,15 @@ describe('Admin Loan management', () => {
             });
         });
       });
-      it('Should filter loan applications by the loan status if type is in review', (done) => {
+      it('Should filter loan applications by the loan status if export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
           })
           .query({
-            type: 'in review',
+            export: 'true',
             status: 'approved'
           })
           .end((err, res) => {
@@ -560,7 +562,7 @@ describe('Admin Loan management', () => {
   
       it('Should filter loans by the date they were created ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -578,15 +580,15 @@ describe('Admin Loan management', () => {
             done();
           });
       });
-      it('Should filter loans by the date they were created if type is in review ', (done) => {
+      it('Should filter loans by the date they were created if export is true ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
           })
           .query({
-            type: 'in review',
+            export: 'true',
             start_date: '2023-01-13 23:03:09.875717',
             end_date: '2023-01-14 23:03:09.875717'
           })
@@ -599,15 +601,15 @@ describe('Admin Loan management', () => {
             done();
           });
       });
-      it('Should filter loans by the date they were created without pagination if type is export loan', (done) => {
+      it('Should filter loans by the date they were created without pagination export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
           })
           .query({
-            type: 'export loan',
+            export: 'true',
             start_date: '2023-01-13 23:03:09.875717',
             end_date: '2023-01-14 23:03:09.875717'
           })
@@ -620,15 +622,15 @@ describe('Admin Loan management', () => {
             done();
           });
       });
-      it('Should filter loans by the date they were created without pagination if type is export in review', (done) => {
+      it('Should filter loans by the date they were created without pagination if export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
           })
           .query({
-            type: 'export in review',
+            export: 'true',
             start_date: '2023-01-13 23:03:09.875717',
             end_date: '2023-01-14 23:03:09.875717'
           })
@@ -643,7 +645,7 @@ describe('Admin Loan management', () => {
       });
       it('Should throw error if in invalid loan application date is entered', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -664,7 +666,7 @@ describe('Admin Loan management', () => {
       });
       it('Should filter loans by the date they were created and status ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -683,15 +685,15 @@ describe('Admin Loan management', () => {
             done();
           });
       });
-      it('Should filter loans by the date they were created and status if type is in review', (done) => {
+      it('Should filter loans by the date they were created and status if export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
           })
           .query({
-            type: 'in review',
+            export: 'true',
             start_date: '2023-01-13 23:03:09.875717',
             end_date: '2023-01-14 23:03:09.875717',
             status: 'approved'
@@ -705,15 +707,15 @@ describe('Admin Loan management', () => {
             done();
           });
       });
-      it('Should filter loans by the date they were created and status if type is export in review', (done) => {
+      it('Should filter loans by the date they were created and status if export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/fetch-loans')
+          .get('/api/v1/admin/loan/personal-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
           })
           .query({
-            type: 'export in review',
+            export: 'true',
             start_date: '2023-01-13 23:03:09.875717',
             end_date: '2023-01-14 23:03:09.875717',
             status: 'approved'

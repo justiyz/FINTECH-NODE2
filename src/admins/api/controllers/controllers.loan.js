@@ -118,7 +118,7 @@ export const loanApplicationDetails = async(req, res, next) => {
 export const fetchLoans = async (req, res, next) => {
   try {
     const { query, admin } = req;
-    if (query.type === 'export loan'){
+    if (query.export){
       const payload = loanPayload.fetchAllLoans(query);
       const loans = await processAnyData(loanQueries.fetchAllLoans, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched loans from the DB
@@ -129,34 +129,6 @@ export const fetchLoans = async (req, res, next) => {
       };
       return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
       
-    }
-    if(query.type === 'in review'){
-      const payload = loanPayload.fetchInReviewLoans(query);
-      const [ reviewLoans, [ reviewLoanCount ] ] = await Promise.all([
-        processAnyData(loanQueries.fetchInReviewLoans, payload),
-        processAnyData(loanQueries.getInReviewLoansCount, payload)
-      ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info:
-       successfully fetched admins per role from the DB fetchAdminsPerRole.admin.controllers.roles.js`);
-      const data = {
-        page: parseFloat(req.query.page) || 1,
-        total_count: Number(reviewLoanCount.total_count),
-        total_pages: Helpers.calculatePages(Number(reviewLoanCount.total_count), Number(req.query.per_page) || 10),
-        reviewLoans
-      };
-      
-      return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
-    }
-    if(query.type === 'export in review'){
-      const payload = loanPayload.fetchAllInReviewLoans(query);
-      const loans = await processAnyData(loanQueries.fetchAllInReviewLoans, payload);
-      logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched loans from the DB 
-      fetchLoans.admin.controllers.loan.js`);
-      const data = {
-        total_count: loans.length,
-        loans
-      };
-      return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchLoans(query);
     const [ loans, [ loansCount ] ] = await Promise.all([
