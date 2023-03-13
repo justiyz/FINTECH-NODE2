@@ -1,4 +1,3 @@
-// import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import userQueries from '../queries/queries.user';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
