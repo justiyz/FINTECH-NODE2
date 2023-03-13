@@ -39,8 +39,6 @@
     }
   },
   "dependencies": {
-    "@aws-sdk/client-config-service": "^3.289.0",
-    "@aws-sdk/client-s3": "^3.289.0",
     "@joi/date": "^2.1.0",
     "@sendgrid/mail": "^7.7.0",
     "africastalking": "^0.5.7",

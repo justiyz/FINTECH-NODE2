@@ -1026,6 +1026,28 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should upload another file for user successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/BRD.docx'))
+        .field('type', 'file')
+        .field('title', 'Proof of loan indemnity')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('uploaded_by');
+          expect(res.body.data).to.have.property('document_title');
+          done();
+        });
+    });
   });
   describe('Fetch user admin uploaded documents', () => {
     it('Should flag if no id found successfully', (done) => {
@@ -1092,6 +1114,7 @@ describe('Admin Users management', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.be.an('array');
+          expect(res.body.data.length).to.equal(2);
           expect(res.body.data[0]).to.have.property('uploaded_by');
           expect(res.body.data[0]).to.have.property('document_url');
           expect(res.body.data[0].document_extension).to.equal('.png');
