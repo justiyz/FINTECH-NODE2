@@ -57,9 +57,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call fetchClusterMembersDetails', async() => {
+    it('should call fetchingUserClusterDetails', async() => {
       const req = { admin: '', params: null, cluster: '' };
-      const data = await AdminUserController.fetchClusterMembersDetails(req, res, next);
+      const data = await AdminUserController.fetchingUserClusterDetails(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

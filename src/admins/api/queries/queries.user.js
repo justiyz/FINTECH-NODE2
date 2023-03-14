@@ -102,29 +102,38 @@ export default {
     LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
     WHERE users.user_id = $1`,
 
-  fetchClusterDetails: `
+  fetchUserClusterDetails: `
     SELECT
       name,
-      type,
+      CONCAT(users.first_name, ' ', users.last_name) AS created_by,
       minimum_monthly_income,
       current_members,
-      created_by
+      type
     FROM clusters
     LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
-    WHERE cluster_members.user_id = $1
-    AND is_deleted = FALSE
+    LEFT JOIN users ON users.user_id = clusters.admin
+    WHERE cluster_members.user_id =$1
+    AND clusters.is_deleted = FALSE AND cluster_members.is_left = FALSE;
     `,
   fetchClusterMemberDetails: `
-    SELECT 
-      users.first_name,
-      users.last_name,
-      cluster_members.created_at,
-      cluster_members.status
-    FROM cluster_members
-    LEFT JOIN users ON users.user_id = cluster_members.user_id 
-    WHERE is_left = FALSE
-    AND cluster_members.user_id = $1
-    OR (cluster_members.user_id = $1 AND cluster_members.cluster_id = $2)
+  SELECT 
+    cluster_id,
+    user_id,
+    status
+  FROM cluster_members
+  WHERE is_left = FALSE
+  AND user_id = $1
+  OR (user_id = $1 AND cluster_id = $2)
+  `,
+  fetchUserClusterMembers: `
+  SELECT 
+  CONCAT(users.first_name, ' ', users.last_name) AS member_name,
+  cluster_members.created_at,
+  cluster_members.status
+FROM cluster_members
+LEFT JOIN users ON users.user_id = cluster_members.user_id 
+WHERE is_left = FALSE
+AND cluster_members.cluster_id = $1
   `,
   checkIfClusterExists: `
     SELECT 
@@ -147,5 +156,16 @@ export default {
         is_deleted
     FROM clusters
     WHERE cluster_id = $1
-    AND is_deleted = FALSE`
+`,
+  fetchClusterById: `
+  SELECT
+  name,
+  CONCAT(users.first_name, ' ', users.last_name) AS created_by,
+  minimum_monthly_income,
+  current_members,
+  type
+FROM clusters
+LEFT JOIN users ON users.user_id = clusters.admin
+WHERE clusters.cluster_id =$1
+  `
 };

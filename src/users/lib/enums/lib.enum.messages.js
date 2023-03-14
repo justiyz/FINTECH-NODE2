@@ -221,7 +221,7 @@ export const LOAN_APPLICATION_NOT_EXISTING_IN_DB = 'loan application does not ex
 export const LOAN_APPLICATION_STATUS = (status) => `loan application has status ${status}, thus action cannot be performed`;
 export const LOAN_APPLICATION_DECISION = (decision) => `Loan application ${decision} successfully`;
 export const LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY = 'loan application details fetched successfully';
-export const ADMIN_FETCH_CLUSTER_DETAILS = 'Admin fetched cluster details successfully';
+export const ADMIN_FETCH_CLUSTER_DETAILS = 'Admin fetched user clusters successfully';
 export const ADMIN_FETCH_MEMBER_CLUSTER_DETAILS = 'Admin fetched cluster member details successfully';
 export const ADMIN_CHECK_IF_CLUSTER_EXIST = 'User cluster does not exist';
 

@@ -79,7 +79,7 @@ router.get(
   Model(Schema.clusterDetailsParams, 'params'),
   UserMiddleware.adminCheckIfClusterExists,
   UserMiddleware.checkIfUserBelongsToCluster,
-  UserController.fetchClusterMembersDetails
+  UserController.fetchingUserClusterDetails
 );
 
 export default router;

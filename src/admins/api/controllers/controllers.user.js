@@ -212,10 +212,10 @@ export const fetchUserKycDetails = async(req, res, next) => {
 export const userClusters = async(req, res, next) => {
   try {
     const { admin, params } = req;
-    const [ clusterDetails ] = await processAnyData(userQueries.fetchClusterDetails, [ params.user_id ]);
+    const userClusterDetails = await processAnyData(userQueries.fetchUserClusterDetails, [ params.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
      cluster details fetched from the DB fetchCluster.admin.controllers.user.js`);
-    return ApiResponse.success(res, enums.ADMIN_FETCH_CLUSTER_DETAILS, enums.HTTP_OK, clusterDetails);
+    return ApiResponse.success(res, enums.ADMIN_FETCH_CLUSTER_DETAILS, enums.HTTP_OK, userClusterDetails);
   } catch (error) {
     error.label = enums.FETCH_ADMIN_CLUSTER_DETAILS_CONTROLLER;
     logger.error(`fetching cluster details failed:::${enums.FETCH_ADMIN_CLUSTER_DETAILS_CONTROLLER}`, error.message);
@@ -231,13 +231,16 @@ export const userClusters = async(req, res, next) => {
  * @returns {object} - Returns user kyc details.
  * @memberof AdminUserController
  */
-export const fetchClusterMembersDetails = async(req, res, next) => {
+export const fetchingUserClusterDetails = async(req, res, next) => {
   try {
-    const { admin, params, cluster } = req;
-    const [ clusterDetails ] = await processAnyData(userQueries.fetchClusterMemberDetails, [ params.user_id, cluster.cluster_id ]);
+    const { admin, cluster } = req;
+    const [ clusterMembers, [ userCluster ] ] = await Promise.all([
+      processAnyData(userQueries.fetchUserClusterMembers, [ cluster.cluster_id ]),
+      processAnyData(userQueries.fetchClusterById, [  cluster.cluster_id ])
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
      cluster member details fetched from the DB fetchClusterDetails.admin.controllers.user.js`);
-    return ApiResponse.success(res, enums.ADMIN_FETCH_MEMBER_CLUSTER_DETAILS, enums.HTTP_OK, clusterDetails);
+    return ApiResponse.success(res, enums.ADMIN_FETCH_MEMBER_CLUSTER_DETAILS, enums.HTTP_OK, { userCluster, clusterMembers });
   } catch (error) {
     error.label = enums.FETCH_ADMIN_CLUSTER_MEMBER_DETAILS_CONTROLLER;
     logger.error(`Admin fetching cluster member detail failed:::${enums.FETCH_ADMIN_CLUSTER_MEMBER_DETAILS_CONTROLLER}`, error.message);
