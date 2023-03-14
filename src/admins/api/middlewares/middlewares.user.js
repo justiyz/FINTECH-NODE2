@@ -167,7 +167,7 @@ export const adminCheckIfClusterExists = async(req, res, next) => {
 export const checkIfUserBelongsToCluster = async(req, res, next) => {
   try {
     const { params, cluster } = req;
-    const [ clusterMember ] = await processAnyData(userQueries.fetchClusterMemberDetails, [ params.user_id, cluster?.cluster_id ]);
+    const [ clusterMember ] = await processAnyData(userQueries.fetchClusterMemberDetails, [ params.user_id, cluster.cluster_id ]);
     if (!clusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user does not belong to this cluster adminCheckIfClusterMemberExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE);

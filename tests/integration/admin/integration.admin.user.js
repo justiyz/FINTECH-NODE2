@@ -1343,7 +1343,7 @@ describe('Admin Users management', () => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_NOT_CLUSTER_MEMBER);
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('user'));
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -1366,7 +1366,7 @@ describe('Admin Users management', () => {
     });
     it('Should fetch user cluster details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/cluster-details`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/cluster-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1379,6 +1379,22 @@ describe('Admin Users management', () => {
           expect(res.body.message).to.equal(enums.ADMIN_FETCH_MEMBER_CLUSTER_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body).to.have.property('data');
+          done();
+        });
+    });
+    it('Should throw error if user does not belong to cluster', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/cluster-details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_NOT_CLUSTER_MEMBER);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });

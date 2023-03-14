@@ -98,7 +98,7 @@ router.get(
   '/:user_id/clusters',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.userIdParams, 'params'),
-  UserMiddleware.checkIfUserBelongsToCluster,
+  UserMiddleware.checkIfUserExists,
   UserController.userClusters
 );
 
@@ -106,6 +106,7 @@ router.get(
   '/:user_id/:cluster_id/cluster-details', 
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.clusterDetailsParams, 'params'),
+  UserMiddleware.checkIfUserExists,
   UserMiddleware.adminCheckIfClusterExists,
   UserMiddleware.checkIfUserBelongsToCluster,
   UserController.fetchingUserClusterDetails
