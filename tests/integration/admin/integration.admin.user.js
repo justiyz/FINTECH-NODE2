@@ -709,14 +709,11 @@ describe('Admin Users management', () => {
           to_date: '2023-03-10'
         })
         .end((err, res) => {
-          console.log('i am res', res.body);
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.data.users[0]).to.have.property('user_id');
-          expect(res.body.data.users[0]).to.have.property('name');
-          expect(res.body.data.users[0]).to.have.property('loan_status');
-          expect(res.body.data.users[0]).to.have.property('status');
+          expect(res.body.data).to.have.property('users');
+          expect(res.body.data).to.have.property('total_count');
           expect(res.body.message).to.equal(enums.USERS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

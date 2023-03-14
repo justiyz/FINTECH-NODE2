@@ -39,5 +39,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetcLoans', async() => {
+      const req = { admin: '', query: ''};
+      const data = await AdminLoanController.fetchLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetcRepaidLoans', async() => {
+      const req = { admin: '', query: ''};
+      const data = await AdminLoanController.fetchRepaidLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -283,5 +283,689 @@ describe('Admin Loan management', () => {
           done();
         });
     });
+  });  
+  describe('admin fetches loan applications on the platform', () => {
+    it('Should fetch all loans', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch all in review loans without pagination if export is true and status is in review', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export:'true',
+          status: 'in review'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch all loan applications without pagination if export is true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch all loan applications without pagination if export is true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch loan applications by the name of applicant', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          search: 'victory babatunde'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch in review loan applications by the name of applicant if export is true ', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          status: 'in review',
+          search: 'victory babatunde'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch loan applications by the name of applicant without pagination if export is true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          search: 'victory babatunde'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch loan applications by the name of applicant without pagination if export is true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          search: 'victory babatunde'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+
+    it('Should throw error if export is not true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'false',
+          search: 'victory babatunde'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('export must be [true]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    
+    it('Should filter loans by the loan status ', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          status: 'approved'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+
+      it('Should filter loans by the loan status with pagination ', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            status: 'declined'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+
+        it('Should throw error if status is not pending, cancelled, in review, processing, declined, approved, ongoing, over due, completed', (done) => {
+          chai.request(app)
+            .get('/api/v1/admin/loan/personal-loans')
+            .set({
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+            })
+            .query({
+              export: 'true',
+              status: 'laoan going'
+            })
+            .end((err, res) => {
+              expect(res.statusCode).to.equal(422);
+              expect(res.body).to.have.property('message');
+              expect(res.body).to.have.property('status');
+              expect(res.body.message).to.equal('status must be one of [pending, cancelled, in review, processing, declined, approved, ongoing, over due, completed]');
+              expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+              expect(res.body.status).to.equal(enums.ERROR_STATUS);
+              done();
+            });
+        });
+      });
+      it('Should filter loan applications by the loan status if export is true', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            export: 'true',
+            status: 'approved'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+  
+      it('Should filter loans by the date they were created ', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            start_date: '2023-01-13 23:03:09.875717',
+            end_date: '2023-01-14 23:03:09.875717'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should filter loans by the date they were created if export is true ', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            export: 'true',
+            start_date: '2023-01-13 23:03:09.875717',
+            end_date: '2023-01-14 23:03:09.875717'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should filter loans by the date they were created without pagination export is true', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            export: 'true',
+            start_date: '2023-01-13 23:03:09.875717',
+            end_date: '2023-01-14 23:03:09.875717'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should filter loans by the date they were created without pagination if export is true', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            export: 'true',
+            start_date: '2023-01-13 23:03:09.875717',
+            end_date: '2023-01-14 23:03:09.875717'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should throw error if in invalid loan application date is entered', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            start_date: '2023-01',
+            end_date: '2023-01-14'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(422);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal('start_date must be a valid date');
+            expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+            expect(res.body.status).to.equal(enums.ERROR_STATUS);
+            done();
+          });
+      });
+      it('Should filter loans by the date they were created and status ', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            from_date: '2023-01-13 23:03:09.875717',
+            to_date: '2023-01-14 23:03:09.875717',
+            status: 'active'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should filter loans by the date they were created and status if export is true', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            export: 'true',
+            start_date: '2023-01-13 23:03:09.875717',
+            end_date: '2023-01-14 23:03:09.875717',
+            status: 'approved'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+      it('Should filter loans by the date they were created and status if export is true', (done) => {
+        chai.request(app)
+          .get('/api/v1/admin/loan/personal-loans')
+          .set({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+          })
+          .query({
+            export: 'true',
+            start_date: '2023-01-13 23:03:09.875717',
+            end_date: '2023-01-14 23:03:09.875717',
+            status: 'approved'
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            done();
+          });
+      });
+    });
+  });
+
+  describe('admin fetches repaid loans on the platform', () => {
+    it('Should fetch all repaid loans with pages', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          page: '1',
+          per_page: '2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch all repaid loans if query type is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export:'true'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.data.repaidLoans[0]).to.have.property('user_id');
+          expect(res.body.data.repaidLoans[0]).to.have.property('name');
+          expect(res.body.data.repaidLoans[0]).to.have.property('loan_id');
+          expect(res.body.data.repaidLoans[0]).to.have.property('status');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch repaid loans by the name of the loan applicant', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          search: 'adeleye blaise'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if export is not true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'false',
+          search: 'adeleye blaise'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('export must be [true]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch repaid loans by the loan applicant name where the query type is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          search: 'adeleye blaise'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data.repaidLoans[0]).to.have.property('user_id');
+          expect(res.body.data.repaidLoans[0]).to.have.property('name');
+          expect(res.body.data.repaidLoans[0]).to.have.property('loan_id');
+          expect(res.body.data.repaidLoans[0]).to.have.property('status');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch repaid loans by the loan applicant name with pages', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          search: 'adeleye blaise',
+          page: '1',
+          per_page: '2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter repaid loans by the date they were paid ', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          start_date: '2023-01-13',
+          end_date: '2023-01-14'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter repaid loans by the date they were paid if query is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          start_date: '2023-03-09',
+          end_date: '2023-03-10'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter repaid loans by the date they were paid with pages ', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          start_date: '2023-01-13',
+          end_date: '2023-01-14',
+          page: '1',
+          per_page: '2'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });  
   });
 });

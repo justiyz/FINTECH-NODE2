@@ -221,3 +221,5 @@ export const LOAN_APPLICATION_NOT_EXISTING_IN_DB = 'loan application does not ex
 export const LOAN_APPLICATION_STATUS = (status) => `loan application has status ${status}, thus action cannot be performed`;
 export const LOAN_APPLICATION_DECISION = (decision) => `Loan application ${decision} successfully`;
 export const LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY = 'loan application details fetched successfully';
+export const LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'loan applications fetched successfully';
+export const REPAID_LOANS_FETCHED_SUCCESSFULLY = 'Repaid loans fetched successfully';
