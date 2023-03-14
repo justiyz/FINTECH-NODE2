@@ -111,7 +111,7 @@ export default {
       type
     FROM clusters
     LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
-    LEFT JOIN users ON users.user_id = clusters.admin
+    LEFT JOIN users ON users.user_id = clusters.created_by
     WHERE cluster_members.user_id =$1
     AND clusters.is_deleted = FALSE AND cluster_members.is_left = FALSE;
     `,
@@ -165,7 +165,7 @@ AND cluster_members.cluster_id = $1
   current_members,
   type
 FROM clusters
-LEFT JOIN users ON users.user_id = clusters.admin
+LEFT JOIN users ON users.user_id = clusters.created_by
 WHERE clusters.cluster_id =$1
   `
 };
