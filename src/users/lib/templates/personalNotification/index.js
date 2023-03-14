@@ -7,7 +7,7 @@ export const inviteClusterMember = (data) => {
 };
 
 export const initiateDeleteCluster = (user, cluster) => {
-  return `${user.first_name} ${user.last_name}  is requesting to delete ${cluster.name} loan group. To grant her the permission to permanently delete this Cluster group. `;
+  return `${user.first_name} ${user.last_name}  is requesting to delete ${cluster.name} loan group. Kindly approve or decline the request. `;
 };
 
 export const selectNewAdmin = (user, cluster) => {

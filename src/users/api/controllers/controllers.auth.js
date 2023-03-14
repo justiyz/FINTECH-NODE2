@@ -202,7 +202,7 @@ export const completeProfile = async(req, res, next) => {
       await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasPhoneNumberClusterInvite.id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
       sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
-      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id});
       userActivityTracking(req.user.user_id, 80, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }
@@ -215,7 +215,7 @@ export const completeProfile = async(req, res, next) => {
       await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasEmailClusterInvite.id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
       sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation, user.fcm_token);
-      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id});
       userActivityTracking(req.user.user_id, 81, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }

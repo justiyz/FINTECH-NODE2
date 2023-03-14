@@ -282,7 +282,7 @@ export const inviteClusterMember = async (req, res, next) => {
       decoded that invited user is a valid and active user in the DB. inviteClusterMember.controllers.cluster.js`);
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
-      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id });
+      sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', {cluster_id: cluster.cluster_id});
       MailService('Cluster Invite', 'loanClusterInvite', { data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }
@@ -437,7 +437,7 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
     const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin, 
       [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members), params.invitee_id ]);
-    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { ticket_id: suggestAdminClusterTicket.ticket_id });
+    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { voting_ticket_id: suggestAdminClusterTicket.ticket_id });
     sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} suggest admin cluster`, 'suggest-admin-cluster', {});
     userActivityTracking(req.user.user_id, 64, 'success');
     return ApiResponse.success(res, enums.SELECT_NEW_ADMIN, enums.HTTP_OK, {

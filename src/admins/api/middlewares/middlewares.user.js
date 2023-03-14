@@ -82,3 +82,55 @@ export const checkIfUserExists = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * admin check cluster exists in the DB based on cluster and user_id
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminUserMiddleware
+ */
+export const adminCheckIfClusterExists = async(req, res, next) => {
+  try {
+    const { params: { cluster_id } } = req;
+    const [ existingCluster ] = await processAnyData(userQueries.checkIfClusterExists, [ cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
+    if (!existingCluster) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: cluster does not exist in the DB checkIfClusterExists.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ADMIN_CHECK_IF_CLUSTER_EXIST, enums.HTTP_BAD_REQUEST, enums.ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE);
+    } 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
+    req.cluster = existingCluster;
+    return next();
+  } catch (error) {
+    error.label = enums.ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE;
+    logger.error(`checking if cluster exists failed::${enums.ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * admin check cluster member exists in the DB based on cluster and user_id
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminUserMiddleware
+ */
+export const checkIfUserBelongsToCluster = async(req, res, next) => {
+  try {
+    const { params, cluster } = req;
+    const [ clusterMember ] = await processAnyData(userQueries.fetchClusterMemberDetails, [ params.user_id, cluster?.cluster_id ]);
+    if (!clusterMember) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user does not belong to this cluster adminCheckIfClusterMemberExist.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user belongs to this cluster and can proceed adminCheckIfClusterMemberExist.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE;
+    logger.error(`checking if user belongs to cluster failed::${enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

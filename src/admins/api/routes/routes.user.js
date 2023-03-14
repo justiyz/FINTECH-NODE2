@@ -65,4 +65,21 @@ router.get(
   UserController.fetchUserKycDetails
 );
 
+router.get(
+  '/:user_id/clusters',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserBelongsToCluster,
+  UserController.userClusters
+);
+
+router.get(
+  '/:user_id/:cluster_id/cluster-details', 
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.clusterDetailsParams, 'params'),
+  UserMiddleware.adminCheckIfClusterExists,
+  UserMiddleware.checkIfUserBelongsToCluster,
+  UserController.fetchingUserClusterDetails
+);
+
 export default router;

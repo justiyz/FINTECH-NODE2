@@ -27,7 +27,7 @@ export default {
     body.loan_goal_target || cluster.loan_goal_target,
     body.minimum_monthly_income || cluster.minimum_monthly_income
   ],
-  requestToDeleteCluster: (body, cluster, user, ticket_id) => [
+  recordUserVoteDecision: (body, cluster, user, ticket_id) => [
     ticket_id,
     cluster.cluster_id,
     user.user_id,
