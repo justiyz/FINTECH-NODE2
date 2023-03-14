@@ -283,7 +283,7 @@ export const inviteClusterMember = async (req, res, next) => {
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
       sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
-      MailService('Cluster Invite', 'loanClusterInvite', { data });
+      MailService('Cluster Invite', 'loanClusterInvite', { ...data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
@@ -334,7 +334,8 @@ export const leaveCluster = async (req, res, next) => {
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} left your cluster`, 'leave-cluster', {});
     sendMulticastPushNotification(PushNotifications.userLeftYourCluster(user, cluster), clusterMembersToken, 'leave-cluster', cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all notifications sent successfully leaveCluster.controllers.cluster.js`);
-    if (cluster.current_member < 1){
+    const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster_id ]);
+    if (clusterMembers.length < 1){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is the last person on the cluster leaveCluster.controllers.cluster.js`);
       await processOneOrNoneData(clusterQueries.deleteAcluster, cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully deletes the cluster leaveCluster.controllers.cluster.js`);

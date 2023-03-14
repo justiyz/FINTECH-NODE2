@@ -292,7 +292,7 @@ export default {
       to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
     FROM personal_loans
     WHERE user_id = $1
-    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review')
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
     ORDER BY created_at DESC`,
 
   updateLoanDisbursementTable: `
