@@ -203,3 +203,6 @@ export const FETCH_ADMIN_CLUSTER_DETAILS_CONTROLLER = 'AdminUserController::fetc
 export const FETCH_ADMIN_CLUSTER_MEMBER_DETAILS_CONTROLLER = 'AdminUserController::fetchClusterMemberDetails';
 export const ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterExists';
 export const CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserBelongsToCluster';
+export const FETCH_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchLoans';
+export const REPAID_LOANS_CONTROLLER = 'AdminLoanController::fetchRepaidLoans';
+

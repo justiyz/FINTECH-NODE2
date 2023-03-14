@@ -224,4 +224,5 @@ export const LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY = 'loan application d
 export const ADMIN_FETCH_CLUSTER_DETAILS = 'Admin fetched user clusters successfully';
 export const ADMIN_FETCH_MEMBER_CLUSTER_DETAILS = 'Admin fetched cluster member details successfully';
 export const ADMIN_CHECK_IF_CLUSTER_EXIST = 'User cluster does not exist';
-
+export const LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'loan applications fetched successfully';
+export const REPAID_LOANS_FETCHED_SUCCESSFULLY = 'Repaid loans fetched successfully';

@@ -39,4 +39,20 @@ router.get(
   LoanController.loanApplicationDetails
 );
 
+router.get(
+  '/personal-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchLoans, 'query'),
+  LoanController.fetchLoans
+);
+
+router.get(
+  '/repaid-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchRepaidloans, 'query'),
+  LoanController.fetchRepaidLoans
+);
+
 export default router;
