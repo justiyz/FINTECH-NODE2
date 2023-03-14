@@ -199,5 +199,5 @@ export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfLoanExi
 export const APPROVE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::approveLoanApplication';
 export const DECLINE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::declineLoanApplication';
 export const LOAN_APPLICATION_DETAILS_CONTROLLER = 'AdminLoanController::loanApplicationDetails';
-export const LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchLoans';
+export const FETCH_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchLoans';
 export const REPAID_LOANS_CONTROLLER = 'AdminLoanController::fetchRepaidLoans';

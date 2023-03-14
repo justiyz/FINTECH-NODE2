@@ -112,7 +112,7 @@ export default {
           personal_loan_payment_schedules.total_payment_amount AS repayment_amount,
           personal_loan_payment_schedules.repayment_order AS repayment_schedule,
           loan_tenor_in_months AS loan_duration,
-          to_char(DATE (personal_loan_payment_schedules.created_at)::date, 'Mon DD YYYY') As repayment_date,
+          to_char(DATE (personal_loan_payment_schedules.payment_at)::date, 'Mon DD YYYY') As repayment_date,
           personal_loan_payment_schedules.status
       FROM personal_loan_payment_schedules
       LEFT JOIN users
@@ -120,8 +120,8 @@ export default {
       LEFT JOIN personal_loans
       ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
       WHERE personal_loan_payment_schedules.status = 'paid' AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL)  AND 
-      ((personal_loan_payment_schedules.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
-      ORDER BY personal_loan_payment_schedules.created_at DESC
+      ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+      ORDER BY personal_loan_payment_schedules.payment_at DESC
       OFFSET $4
       LIMIT $5
   `,
@@ -133,7 +133,7 @@ export default {
     LEFT JOIN users
     ON personal_loan_payment_schedules.user_id = users.user_id
     WHERE personal_loan_payment_schedules.status = 'paid' AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL)  AND 
-    ((personal_loan_payment_schedules.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+    ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
   `,
   
   fetchAllRepaidLoans: `
@@ -145,7 +145,7 @@ export default {
       personal_loan_payment_schedules.total_payment_amount AS repayment_amount,
       personal_loan_payment_schedules.repayment_order AS repayment_schedule,
       loan_tenor_in_months AS loan_duration,
-      to_char(DATE (personal_loan_payment_schedules.created_at)::date, 'Mon DD YYYY') As repayment_date,
+      to_char(DATE (personal_loan_payment_schedules.payment_at)::date, 'Mon DD YYYY') As repayment_date,
       personal_loan_payment_schedules.status
   FROM personal_loan_payment_schedules
   LEFT JOIN users
@@ -153,8 +153,8 @@ export default {
   LEFT JOIN personal_loans
   ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
   WHERE personal_loan_payment_schedules.status = 'paid' AND personal_loans.loan_id = personal_loan_payment_schedules.loan_id AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL)  AND 
-    ((personal_loan_payment_schedules.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
-  ORDER BY personal_loan_payment_schedules.created_at DESC 
+    ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+  ORDER BY personal_loan_payment_schedules.payment_at DESC 
   `
 };
   

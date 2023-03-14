@@ -145,8 +145,8 @@ export const fetchLoans = async (req, res, next) => {
     };
     return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    error.label = enums.LOAN_APPLICATIONS_CONTROLLER;
-    logger.error(`fetching loan applications failed:::${enums.LOAN_APPLICATIONS_CONTROLLER}`, error.message);
+    error.label = enums.FETCH_LOAN_APPLICATIONS_CONTROLLER;
+    logger.error(`fetching loan applications failed:::${enums.FETCH_LOAN_APPLICATIONS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
