@@ -22,7 +22,7 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
  */
 export const editUserStatus = async(req, res, next) => {
   const { body: { status } } = req;
-  const activityType = status === 'active' ? 19 : 20;
+  const activityType = status === 'active' ? 19 : 20; // still to add tracker for blacklisted and watchlisted status
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     decoded that admin is about to user status. activateAndDeactivateUser.admin.controllers.user.js`);
