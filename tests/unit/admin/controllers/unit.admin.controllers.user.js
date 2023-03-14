@@ -45,6 +45,24 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call saveUserUploadedDocument', async() => {
+      const req = { admin: '', userDetails: '', body: '', document: '' };
+      const data = await AdminUserController.saveUserUploadedDocument(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchAdminUploadedUserDocuments', async() => {
+      const req = { admin: '', userDetails: '' };
+      const data = await AdminUserController.fetchAdminUploadedUserDocuments(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchUserOrrBreakdown', async() => {
+      const req = { admin: '', userDetails: '' };
+      const data = await AdminUserController.fetchUserOrrBreakdown(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call fetchUserKycDetails', async() => {
       const req = { admin: '', params: '' };
       const data = await AdminUserController.fetchUserKycDetails(req, res, next);

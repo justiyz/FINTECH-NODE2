@@ -56,6 +56,35 @@ router.get(
   UserController.fetchUsers
 );
 
+router.post(
+  '/:user_id/upload-document',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.fileTitle, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserMiddleware.uploadDocument,
+  UserController.saveUserUploadedDocument
+);
+
+router.get(
+  '/:user_id/uploaded-documents',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.fetchAdminUploadedUserDocuments
+);
+
+router.get(
+  '/:user_id/orr-breakdown',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.fetchUserOrrBreakdown
+);
+
 router.get(
   '/:user_id/kyc',
   AuthMiddleware.validateAdminAuthToken,
@@ -69,7 +98,7 @@ router.get(
   '/:user_id/clusters',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.userIdParams, 'params'),
-  UserMiddleware.checkIfUserBelongsToCluster,
+  UserMiddleware.checkIfUserExists,
   UserController.userClusters
 );
 
@@ -77,6 +106,7 @@ router.get(
   '/:user_id/:cluster_id/cluster-details', 
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.clusterDetailsParams, 'params'),
+  UserMiddleware.checkIfUserExists,
   UserMiddleware.adminCheckIfClusterExists,
   UserMiddleware.checkIfUserBelongsToCluster,
   UserController.fetchingUserClusterDetails

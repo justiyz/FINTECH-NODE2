@@ -89,6 +89,26 @@ export default {
     WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
     ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `,
+
+  uploadUserDocument: `
+    INSERT INTO user_admin_uploaded_documents (
+      user_id, 
+      uploaded_by,
+      document_title,
+      image_url
+    ) VALUES ($1, $2, $3, $4)
+    RETURNING id, user_id, document_title, uploaded_by, created_at`,
+
+  fetchUploadedUserDocuments: `
+      SELECT 
+        id,
+        user_id,
+        uploaded_by,
+        document_title,
+        image_url,
+        created_at
+      FROM user_admin_uploaded_documents
+      WHERE user_id = $1`,
   
   fetchUserKycDetails: `
     SELECT 
@@ -104,37 +124,46 @@ export default {
 
   fetchUserClusterDetails: `
     SELECT
-      name,
+      clusters.id,
+      clusters.cluster_id,
+      clusters.name,
       CONCAT(users.first_name, ' ', users.last_name) AS created_by,
-      minimum_monthly_income,
-      current_members,
-      type
+      clusters.minimum_monthly_income,
+      clusters.current_members,
+      clusters.type
     FROM clusters
     LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
     LEFT JOIN users ON users.user_id = clusters.created_by
     WHERE cluster_members.user_id =$1
-    AND clusters.is_deleted = FALSE AND cluster_members.is_left = FALSE;
-    `,
+    AND clusters.is_deleted = FALSE 
+    AND cluster_members.is_left = FALSE`,
+
   fetchClusterMemberDetails: `
-  SELECT 
-    cluster_id,
-    user_id,
-    status
-  FROM cluster_members
-  WHERE is_left = FALSE
-  AND user_id = $1
-  OR (user_id = $1 AND cluster_id = $2)
-  `,
+    SELECT 
+      id,
+      cluster_id,
+      user_id,
+      status
+    FROM cluster_members
+    WHERE user_id = $1
+    AND cluster_id = $2
+    AND is_left = FALSE`,
+
   fetchUserClusterMembers: `
-  SELECT 
-  CONCAT(users.first_name, ' ', users.last_name) AS member_name,
-  cluster_members.created_at,
-  cluster_members.status
-FROM cluster_members
-LEFT JOIN users ON users.user_id = cluster_members.user_id 
-WHERE is_left = FALSE
-AND cluster_members.cluster_id = $1
-  `,
+    SELECT 
+      cluster_members.id,
+      cluster_members.cluster_id,
+      cluster_members.user_id,
+      CONCAT(users.first_name, ' ', users.last_name) AS member_name,
+      to_char(DATE (cluster_members.created_at)::date, 'Mon DD, YYYY') As created_at,
+      cluster_members.status,
+      cluster_members.is_admin,
+      cluster_members.is_left
+    FROM cluster_members
+    LEFT JOIN users ON users.user_id = cluster_members.user_id 
+    WHERE cluster_members.is_left = FALSE
+    AND cluster_members.cluster_id = $1`,
+
   checkIfClusterExists: `
     SELECT 
         id,
@@ -155,17 +184,19 @@ AND cluster_members.cluster_id = $1
         join_cluster_closes_at,
         is_deleted
     FROM clusters
-    WHERE cluster_id = $1
-`,
+    WHERE cluster_id = $1`,
+
   fetchClusterById: `
-  SELECT
-  name,
-  CONCAT(users.first_name, ' ', users.last_name) AS created_by,
-  minimum_monthly_income,
-  current_members,
-  type
-FROM clusters
-LEFT JOIN users ON users.user_id = clusters.created_by
-WHERE clusters.cluster_id =$1
+    SELECT
+      clusters.id,
+      clusters.cluster_id,
+      clusters.name,
+      CONCAT(users.first_name, ' ', users.last_name) AS created_by,
+      clusters.minimum_monthly_income,
+      clusters.current_members,
+      clusters.type
+    FROM clusters
+    LEFT JOIN users ON users.user_id = clusters.created_by
+    WHERE clusters.cluster_id =$1
   `
 };
