@@ -117,8 +117,6 @@ export default {
       ORDER BY admins.created_at DESC
   `,
 
-
-
   editAdminStatus:`
       UPDATE admins
       SET
@@ -133,6 +131,192 @@ export default {
     SET 
       updated_at = NOW(),
       role_type = $2
-    WHERE admin_id = $1`
+    WHERE admin_id = $1`,
+
+  totalLoanApproved: `
+    SELECT COUNT(status) 
+    FROM personal_loans 
+    WHERE ((status = 'approved') 
+      OR (status = 'processing') 
+      OR (status = 'ongoing') 
+      OR (status = 'over due') 
+      OR (status = 'completed')) 
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  totalLoanRejected: `
+    SELECT COUNT(status) 
+    FROM personal_loans 
+    WHERE status = 'declined'
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  totalDisbursedLoan: `
+    SELECT SUM(amount) 
+    FROM personal_loan_disbursements 
+    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  totalRegisteredCustomers: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE is_deleted = FALSE 
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  fetchDetailsOfPaidLoans: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      payment_at,
+      status,
+      proposed_payment_date,
+      created_at
+    FROM personal_loan_payment_schedules
+    WHERE status = 'paid'
+    AND (payment_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
+
+  fetchDetailsOfUnpaidLoans: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      payment_at,
+      status,
+      proposed_payment_date,
+      created_at
+    FROM personal_loan_payment_schedules
+    WHERE status != 'paid'
+    AND (proposed_payment_date::DATE BETWEEN $1::DATE AND $2::DATE)`,
+
+  totalLoanRepayment: `
+    SELECT SUM(total_payment_amount) 
+    FROM personal_loan_payment_schedules 
+    WHERE status = 'paid'
+    AND ((payment_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  totalLoanOverDue: `
+    SELECT SUM(total_payment_amount) 
+    FROM personal_loan_payment_schedules 
+    WHERE status = 'over due'
+    AND ((proposed_payment_date::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  fetchDetailsOfAppliedLoans: `
+    SELECT 
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      status,
+      loan_decision,
+      created_at
+    FROM personal_loans
+    WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
+
+  fetchDetailsOfApprovedLoans: `
+    SELECT 
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      status,
+      loan_decision,
+      created_at
+    FROM personal_loans
+    WHERE ((status = 'approved') 
+      OR (status = 'processing') 
+      OR (status = 'ongoing') 
+      OR (status = 'over due') 
+      OR (status = 'completed')) 
+    AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
+
+  fetchTotalClusterCount: `
+    SELECT COUNT(cluster_id) 
+    FROM clusters
+    WHERE is_deleted = FALSE 
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  fetchPrivateClusterCount: `
+    SELECT COUNT(cluster_id) 
+    FROM clusters
+    WHERE type = 'private'
+    AND is_deleted = FALSE 
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  fetchPublicClusterCount: `
+    SELECT COUNT(cluster_id) 
+    FROM clusters
+    WHERE type = 'public'
+    AND is_deleted = FALSE 
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
+  fetchRecentClusters: `
+    SELECT
+      id,
+      cluster_id,
+      name,
+      description,
+      type,
+      current_members,
+      created_at
+    FROM clusters
+    WHERE is_deleted = FALSE
+    ORDER BY created_at DESC
+    LIMIT 10`,
+
+  totalTierOneUsers: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE tier = '1'
+    AND is_deleted = FALSE`,
+
+  totalTierTwoUsers: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE tier = '2'
+    AND is_deleted = FALSE`,
+
+  totalTierZeroUsers: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE tier = '0'
+    AND is_deleted = FALSE`,
+
+  totalActiveLoanUsers: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE loan_status = 'active'
+    AND is_deleted = FALSE`,
+
+  totalActiveUsers: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE is_deleted = FALSE`,
+
+  totalOverdueRepayment: `
+    SELECT SUM(total_payment_amount) 
+    FROM personal_loan_payment_schedules 
+    WHERE status = 'over due'`,
+
+  totalExpectedRepayment: `
+    SELECT SUM(total_payment_amount) 
+    FROM personal_loan_payment_schedules 
+    WHERE (status = 'paid' OR status = 'over due')`
 };
     

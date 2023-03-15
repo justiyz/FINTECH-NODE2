@@ -72,6 +72,15 @@ const roleType = Joi.object().keys({
   role_type: Joi.string().required()
 });
 
+const overviewPage = Joi.object().keys({
+  type: Joi.string().required().valid('filter', 'all')
+}).when(Joi.object({ type: Joi.string().valid('filter') }).unknown(), {
+  then: Joi.object({
+    from_date: Joi.date().required(),
+    to_date: Joi.date().required()
+  })
+});
+
 export default {
   createRole,
   inviteAdmin,
@@ -82,5 +91,6 @@ export default {
   editRole,
   activateDeactivateRole,
   fetchAdminsPerRole,
-  roleType
+  roleType,
+  overviewPage
 };

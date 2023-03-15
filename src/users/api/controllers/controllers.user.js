@@ -379,7 +379,8 @@ export const idUploadVerification = async(req, res, next) => {
     const { user, body } = req; 
     const payload = UserPayload.imgVerification(user, body);
     await processAnyData(userQueries.updateIdVerification, payload);
-    const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, '2' ]);
+    const tierChoice = user.is_verified_address ? '2' : '1'; // user needs to verify address and valid id before being upgraded to tier 2
+    const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');

@@ -192,6 +192,7 @@ export const UPLOAD_DOCUMENT_MIDDLEWARE = 'AdminUserMiddleware::uploadDocument';
 export const FETCH_ROLES = 'AdminRoleController::fetchRoles';
 export const FETCH_ADMINS_PER_ROLE_CONTROLLER = 'AdminRoleController::fetchAdminsPerRole';
 export const GET_PROFILE_CONTROLLER = 'AdminAdminController::getProfile';
+export const FETCH_PLATFORM_OVERVIEW_CONTROLLER = 'AdminAdminController::fetchPlatformOverview';
 export const SEND_NOTIFICATIONS_CONTROLLER = 'AdminUserController::sendNotifications';
 export const USER_LOAN_STATUS_MIDDLEWARE = 'AdminUserMiddleware::userLoanStatus';
 export const EDIT_USER_STATUS_CONTROLLER = 'AdminUserController::editUserStatus';
