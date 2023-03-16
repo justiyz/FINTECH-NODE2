@@ -19,6 +19,7 @@ export default {
         loan_decision,
         is_loan_disbursed,
         to_char(DATE(loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
+        to_char(DATE (created_at)::date, 'Mon DD YYYY') As application_date,
         rejection_reason
     FROM personal_loans
     WHERE loan_id = $1`,
@@ -63,7 +64,8 @@ export default {
     users.tier,
     personal_loans.amount_requested AS loan_amount,
     loan_tenor_in_months AS duration,
-    to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As date,
+    to_char(DATE(personal_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
+    to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As application_date,
     personal_loans.status
   FROM personal_loans
   LEFT JOIN users
@@ -93,7 +95,8 @@ export default {
       users.tier,
       personal_loans.amount_requested AS loan_amount,
       loan_tenor_in_months AS duration,
-      to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As date,
+      to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As application_date,
+      to_char(DATE(personal_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
       personal_loans.status
   FROM personal_loans
   LEFT JOIN users

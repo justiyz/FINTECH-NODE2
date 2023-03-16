@@ -63,5 +63,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should get platform overview', async() => {
+      const req = { admin: '', query: '' };
+      const data = await AdminController.fetchPlatformOverview(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -8,7 +8,7 @@ import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 import { createClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification,
   sendClusterNotification, sendPushNotification } from '../services/services.firebase';
 import MailService from '../services/services.email';
-import { collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
+import { collateUsersFcmTokens, collateUsersFcmTokensExceptAuthenticatedUser } from '../../lib/utils/lib.util.helpers';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
@@ -397,12 +397,12 @@ export const initiateDeleteCluster = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have any inconclusive request to join cluster ticket with this same cluster initiateDeleteCluster.controllers.cluster.js`);
     const initiateDeleteClusterTicket =  await processOneOrNoneData(clusterQueries.raiseClusterDecisionTicket, 
-      [ cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} wants to delete "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members) ]);
+      [ cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} wants to delete "${cluster.name}" cluster`, user.user_id, (Number(cluster.current_members) - 1) ]);
     await processOneOrNoneData(clusterQueries.initiateDeleteCluster, [ cluster_id, body.deletion_reason ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: request to delete cluster ticket raised successfully initiateDeleteCluster.controllers.cluster.js`);
-    const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
+    const [ clusterMembersToken, otherClusterMembers ] = await collateUsersFcmTokensExceptAuthenticatedUser(cluster.members, user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully initiateDeleteCluster.controllers.cluster.js`);
-    await cluster.members.forEach(async(member) => {
+    await otherClusterMembers.forEach(async(member) => {
       const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ member.user_id ]);
       sendUserPersonalNotification(userDetails, `${cluster.name} delete cluster`, PersonalNotifications.initiateDeleteCluster(user, cluster), 'delete-cluster', { voting_ticket_id: initiateDeleteClusterTicket.ticket_id, deletion_reason: body.deletion_reason });
       return member;
@@ -437,9 +437,9 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ params.invitee_id ]);
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
     const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin, 
-      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, Number(cluster.current_members), params.invitee_id ]);
-    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { voting_ticket_id: suggestAdminClusterTicket.ticket_id });
-    sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} suggest admin cluster`, 'suggest-admin-cluster', {});
+      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, 1, params.invitee_id ]);
+    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster request`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { voting_ticket_id: suggestAdminClusterTicket.ticket_id });
+    sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} is suggesting new cluster admin`, 'suggest-admin-cluster', {});
     userActivityTracking(req.user.user_id, 64, 'success');
     return ApiResponse.success(res, enums.SELECT_NEW_ADMIN, enums.HTTP_OK, {
       selected_admin: params.invitee_id,

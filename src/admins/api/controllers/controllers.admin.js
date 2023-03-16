@@ -1,7 +1,8 @@
+import dayjs from 'dayjs';
 import adminQueries from '../queries/queries.admin';
 import authQueries from '../queries/queries.auth';
 import roleQueries from '../queries/queries.role';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import AdminPayload from '../../lib/payloads/lib.payload.admin';
 import MailService from '../services/services.email';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
@@ -234,6 +235,101 @@ export const getProfile = async(req, res, next) => {
   } catch (error){
     error.label = enums.GET_PROFILE_CONTROLLER;
     logger.error(`Fetching admin profile failed:::${enums.GET_PROFILE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * platform overview page
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns overview page details.
+ * @memberof AdminAdminController
+ */
+export const fetchPlatformOverview = async(req, res, next) => {
+  try {
+    const { admin, query: { type, from_date, to_date } } = req;
+    const queryFromType = type === 'filter' ? from_date : null;
+    const queryToType = type === 'filter' ? to_date : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent fetchPlatformOverview.controllers.admin.admin.js`);
+    const [ totalLoanApproved, totalLoanRejected, totalLoanDisbursed, totalRegisteredCustomers, 
+      unpaidLoans, paidLoans, totalLoanRepayment, totalLoanOverDue, appliedLoans, approvedLoans, 
+      totalClusters, totalPrivateClusters, totalPublicClusters, recentClusters, totalTierOneUsers, 
+      totalTierTwoUsers, totalTierZeroUsers, totalActiveLoanUsers, totalActiveUsers,
+      totalOverdueRepayment, totalExpectedRepayment ] = await Promise.all([
+      processOneOrNoneData(adminQueries.totalLoanApproved, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalRegisteredCustomers, [ queryFromType, queryToType ]),
+      processAnyData(adminQueries.fetchDetailsOfUnpaidLoans, [ currentYearFromDate, currentYearToDate ]),
+      processAnyData(adminQueries.fetchDetailsOfPaidLoans, [ currentYearFromDate, currentYearToDate ]),
+      processOneOrNoneData(adminQueries.totalLoanRepayment, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalLoanOverDue, [ queryFromType, queryToType ]),
+      processAnyData(adminQueries.fetchDetailsOfAppliedLoans, [ currentYearFromDate, currentYearToDate ]),
+      processAnyData(adminQueries.fetchDetailsOfApprovedLoans, [ currentYearFromDate, currentYearToDate ]),
+      processOneOrNoneData(adminQueries.fetchTotalClusterCount, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.fetchPrivateClusterCount, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.fetchPublicClusterCount, [ queryFromType, queryToType ]),
+      processAnyData(adminQueries.fetchRecentClusters, [  ]),
+      processOneOrNoneData(adminQueries.totalTierOneUsers, [  ]),
+      processOneOrNoneData(adminQueries.totalTierTwoUsers, [  ]),
+      processOneOrNoneData(adminQueries.totalTierZeroUsers, [  ]),
+      processOneOrNoneData(adminQueries.totalActiveLoanUsers, [  ]),
+      processOneOrNoneData(adminQueries.totalActiveUsers, [  ]),
+      processOneOrNoneData(adminQueries.totalOverdueRepayment, [  ]),
+      processOneOrNoneData(adminQueries.totalExpectedRepayment, [  ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: all platform overview details fetched from the DB fetchPlatformOverview.controllers.admin.admin.js`);
+    const data = {
+      generalOverviewCount: {
+        total_loan_approved: Number(totalLoanApproved.count), 
+        total_loan_rejected: Number(totalLoanRejected.count),
+        total_loan_disbursed: parseFloat(parseFloat(totalLoanDisbursed.sum).toFixed(2)) || 0, 
+        totalRegisteredCustomers: Number(totalRegisteredCustomers.count)
+      },
+      loanTransactions: {
+        unpaid_loans: unpaidLoans,
+        paid_loans: paidLoans
+      },
+      loanRepayment: {
+        total_loan_repayment: parseFloat(parseFloat(totalLoanRepayment.sum).toFixed(2)) || 0,
+        total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0,
+        total_loan_rescheduled:  0 // tro later include the value once loan rescheduling is implemented
+      },
+      loanSchedule: {
+        applied_loans: appliedLoans,
+        approved_loans: approvedLoans
+      },
+      clusterGroup: {
+        total_cluster_group: Number(totalClusters.count),
+        total_private_cluster: Number(totalPrivateClusters.count),
+        total_public_cluster: Number(totalPublicClusters.count),
+        recent_clusters: recentClusters
+      },
+      others: {
+        total_tier_one_users: Number(totalTierOneUsers.count),
+        total_tier_two_users: Number(totalTierTwoUsers.count),
+        total_tier_zero_users: Number(totalTierZeroUsers.count),
+        borrowing_customers: {
+          total_active_loan_customers:  Number(totalActiveLoanUsers.count),
+          total_customers: Number(totalActiveUsers.count),
+          percentage: parseFloat(parseFloat((Number(totalActiveLoanUsers.count) / Number(totalActiveUsers.count)) * 100).toFixed(2)) || 0
+        },
+        npl_ratio: {
+          total_over_due_repayment: parseFloat(parseFloat(totalOverdueRepayment.sum).toFixed(2)) || 0,
+          total_expected_repayment: parseFloat(parseFloat(totalExpectedRepayment.sum).toFixed(2)) || 0,
+          percentage: parseFloat(parseFloat((parseFloat(totalOverdueRepayment.sum) / parseFloat(totalExpectedRepayment.sum)) * 100).toFixed(2)) || 0
+        }
+      }
+    };
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: overview data arranged and set to be returned fetchPlatformOverview.controllers.admin.admin.js`);
+    return ApiResponse.success(res, enums.PLATFORM_OVERVIEW_PAGE_FETCHED, enums.HTTP_OK, data);
+  } catch (error){
+    error.label = enums.FETCH_PLATFORM_OVERVIEW_CONTROLLER;
+    logger.error(`Fetching admin overview page details failed:::${enums.FETCH_PLATFORM_OVERVIEW_CONTROLLER}`, error.message);
     return next(error);
   }
 };

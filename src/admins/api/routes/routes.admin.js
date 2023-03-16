@@ -77,4 +77,11 @@ router.get(
   AdminController.getProfile
 );
 
+router.get(
+  '/overview',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(RoleSchema.overviewPage, 'query'),
+  AdminController.fetchPlatformOverview
+);
+
 export default router;

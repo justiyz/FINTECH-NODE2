@@ -424,8 +424,9 @@ export default {
       UPDATE clusters
       SET 
         updated_at = NOW(),
-        is_deleted = true,
-        status = 'inactive'
+        is_deleted = TRUE,
+        status = 'inactive',
+        current_members = '0'
       WHERE cluster_id = $1
   `,
 
@@ -440,6 +441,7 @@ export default {
         minimum_monthly_income = $6
       WHERE cluster_id = $1
       RETURNING name, description, maximum_members, loan_goal_target, minimum_monthly_income`,
+      
   initiateDeleteCluster: `
       UPDATE clusters
       SET 
@@ -472,20 +474,21 @@ export default {
   removeClusterMembers:`
     UPDATE cluster_members
     SET 
-    updated_at = NOW(),
-    is_left = TRUE,
-    status = 'inactive'
+      updated_at = NOW(),
+      is_left = TRUE,
+      status = 'inactive'
     WHERE cluster_id = $1`,
+
   suggestedAdmin: `
-  INSERT INTO cluster_decision_tickets(
-    cluster_id,
-    type,
-    message,
-    ticket_raised_by,
-    current_cluster_members,
-    suggested_cluster_admin
-  ) VALUES ($1, $2, $3, $4, $5, $6)
-  RETURNING ticket_id
+    INSERT INTO cluster_decision_tickets(
+      cluster_id,
+      type,
+      message,
+      ticket_raised_by,
+      current_cluster_members,
+      suggested_cluster_admin
+    ) VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING ticket_id
   `
 };
 

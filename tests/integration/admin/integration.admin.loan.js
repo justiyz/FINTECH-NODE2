@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import dayjs from 'dayjs';
 import 'dotenv/config';
 import app from '../../../src/app';
 import enums from '../../../src/users/lib/enums';
@@ -731,7 +732,6 @@ describe('Admin Loan management', () => {
       });
     });
   });
-
   describe('admin fetches repaid loans on the platform', () => {
     it('Should fetch all repaid loans with pages', (done) => {
       chai.request(app)
@@ -967,5 +967,105 @@ describe('Admin Loan management', () => {
           done();
         });
     });  
+  });
+  describe('admin fetches platform overview details', () => {
+    it('Should fetch platform overview page no date filter', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/overview')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('generalOverviewCount');
+          expect(res.body.data).to.have.property('loanTransactions');
+          expect(res.body.data).to.have.property('loanRepayment');
+          expect(res.body.data).to.have.property('loanSchedule');
+          expect(res.body.data).to.have.property('clusterGroup');
+          expect(res.body.data).to.have.property('others');
+          expect(res.body.data.others).to.have.property('borrowing_customers');
+          expect(res.body.data.others).to.have.property('npl_ratio');
+          expect(res.body.message).to.equal(enums.PLATFORM_OVERVIEW_PAGE_FETCHED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch platform overview page with date filter', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/overview')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'filter',
+          from_date: `${dayjs().subtract('1', 'month').format('YYYY-MM-DD 00:00:00')}`,
+          to_date: `${dayjs().format('YYYY-MM-DD 00:00:00')}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('generalOverviewCount');
+          expect(res.body.data).to.have.property('loanTransactions');
+          expect(res.body.data).to.have.property('loanRepayment');
+          expect(res.body.data).to.have.property('loanSchedule');
+          expect(res.body.data).to.have.property('clusterGroup');
+          expect(res.body.data).to.have.property('others');
+          expect(res.body.data.others).to.have.property('borrowing_customers');
+          expect(res.body.data.others).to.have.property('npl_ratio');
+          expect(res.body.message).to.equal(enums.PLATFORM_OVERVIEW_PAGE_FETCHED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/overview')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .query({
+          type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid type is sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/overview')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'export',
+          from_date: `${dayjs().subtract('1', 'month').format('YYYY-MM-DD 00:00:00')}`,
+          to_date: `${dayjs().format('YYYY-MM-DD 00:00:00')}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [filter, all]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    }); 
   });
 });
