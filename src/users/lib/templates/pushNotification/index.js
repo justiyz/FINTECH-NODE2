@@ -41,3 +41,7 @@ export const userLeftYourCluster = (user, cluster) => {
 export const initiateDeleteCluster = (user, cluster) => {
   return `${user.first_name} ${user.last_name} wants to delete ${cluster.name} cluster.`;
 };
+
+export const clusterDeletedSuccessfully = (cluster) => {
+  return `Cluster ${cluster.name} has been deleted successfully based on consensus.`;
+};
