@@ -586,8 +586,8 @@ export const requestToDeleteCluster = async(req, res, next) => {
         if(Number(votingTicketDetails.current_cluster_members) === Number(voteCount.count)) {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
           await Promise.allSettled([
-            processAnyData(clusterQueries.removeClusterMembers, [ cluster_id ]),
-            processOneOrNoneData(clusterQueries.deleteAcluster, [ cluster_id ]),
+            processAnyData(clusterQueries.removeClusterMembers, [ req.cluster.cluster_id ]),
+            processOneOrNoneData(clusterQueries.deleteAcluster, [ req.cluster.cluster_id ]),
             processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
           ]); 
           sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
