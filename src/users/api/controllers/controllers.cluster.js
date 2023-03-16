@@ -261,7 +261,7 @@ export const inviteClusterMember = async (req, res, next) => {
       cluster_name: cluster.name,
       inviter_first_name: user.first_name,
       inviter_last_name: user.last_name,
-      join_url: body.join_url
+      join_url: body.link_url
     };
     if(body.type === 'email' && !invitedUser){
       MailService('Cluster Invite', 'loanClusterInvite', { ...data });
