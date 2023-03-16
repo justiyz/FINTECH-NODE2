@@ -1384,7 +1384,7 @@ describe('Admin Users management', () => {
     });
     it('Should throw error if user does not belong to cluster', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/cluster-details`)
+        .get(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/cluster-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

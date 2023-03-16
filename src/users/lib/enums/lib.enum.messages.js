@@ -153,6 +153,7 @@ export const INVITE_CLUSTER_MEMBER = 'Cluster member invited successfully';
 export const CLUSTER_MEMBER_INVITATION = (type) => `Successfully invite cluster member through ${type}`;
 export const CLUSTER_MEMBER_NOT_ADMIN = 'Cluster member is not an admin and can not perform this action';
 export const CLUSTER_IS_ON_ACTIVE_LOAN = 'Cluster is on an active loan, hence you can not edit this field';
+export const USER_CANNOT_TAKE_DECISION_ON_THIS_TICKET = 'User cannot take a decisions on this ticket because you raised';
 export const USER_CAN_NOT_EDIT = (type) => `you can not edit ${type}`;
 export const CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY = 'Cluster members fetched successfully';
 export const USER_ON_ACTIVE_LOAN = 'You still have active loan on this cluster, kindly pay all for you to leave';
@@ -163,7 +164,7 @@ export const REQUEST_TO_DELETE_CLUSTER = (decision) => `User ${decision} request
 export const SELECT_NEW_ADMIN = 'Successfully send request to select new admin';
 export const CLUSTER_ADMIN_ACCEPTANCE = (decision) => `User successfully ${decision} to become new cluster admin.`;
 export const INITIATE_DELETE_CLUSTER = 'Successfully initiate a delete cluster';
-export const CLUSTER_DELETED_SUCCESSFULLY = 'Clusters was deleted successfully';
+export const CLUSTER_DELETED_SUCCESSFULLY = 'Cluster deleted successfully';
 export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
 export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 

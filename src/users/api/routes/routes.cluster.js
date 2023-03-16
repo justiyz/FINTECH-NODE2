@@ -92,6 +92,7 @@ router.post(
   ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
   ClusterController.inviteClusterMember
 );
+
 router.get(
   '/:cluster_id/members',
   AuthMiddleware.validateAuthToken,

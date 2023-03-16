@@ -1872,7 +1872,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('user should vote to decline admin cluster', (done) => {
+    it('should throw error if user already accepted cluster adminship responsibility', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_SUGGEST_ADMIN_CLUSTER_TWO_TICKET_ID}/voting-decision`)
         .set({
@@ -1883,12 +1883,11 @@ describe('Clusters', () => {
           decision: 'no'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.CLUSTER_ADMIN_ACCEPTANCE('declined'));
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.VOTING_DECISION_ALREADY_CONCLUDED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
@@ -1937,6 +1936,25 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('user should decline to accept request to delete cluster', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_DELETE_CLUSTER_ONE_TICKET_ID}/voting-decision`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'no'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_CANNOT_TAKE_DECISION_ON_THIS_TICKET);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('user should vote to delete cluster', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_DELETE_CLUSTER_ONE_TICKET_ID}/voting-decision`)
@@ -1952,27 +1970,7 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.REQUEST_TO_DELETE_CLUSTER('accepted'));
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-    it('user should decline to accept request to delete cluster', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_DELETE_CLUSTER_ONE_TICKET_ID}/voting-decision`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .send({
-          decision: 'no'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.REQUEST_TO_DELETE_CLUSTER('declined'));
+          expect(res.body.message).to.equal(enums.CLUSTER_DELETED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
@@ -2013,7 +2011,6 @@ describe('Clusters', () => {
         });
     });
   });
-
   describe('user leaves a cluster', () => {
     it('should throw error if id is not sent', (done) => {
       chai.request(app)
@@ -2067,7 +2064,7 @@ describe('Clusters', () => {
     });
     it('user should leave the cluster successfully', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
@@ -2081,9 +2078,25 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('user should leave the cluster successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_ID}/leave`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_LEFT_CLUSTER_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('user throw error if user has previously left the cluster', (done) => {
       chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/leave`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
