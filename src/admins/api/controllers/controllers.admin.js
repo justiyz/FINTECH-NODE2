@@ -297,7 +297,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       loanRepayment: {
         total_loan_repayment: parseFloat(parseFloat(totalLoanRepayment.sum).toFixed(2)) || 0,
         total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0,
-        total_loan_rescheduled:  0
+        total_loan_rescheduled:  0 // tro later include the value once loan rescheduling is implemented
       },
       loanSchedule: {
         applied_loans: appliedLoans,
