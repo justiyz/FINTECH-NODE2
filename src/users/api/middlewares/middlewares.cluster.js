@@ -4,11 +4,10 @@ import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
-import { formatUserIncomeRange, generateReferralCode } from '../../lib/utils/lib.util.helpers';
+import { formatUserIncomeRange, generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import { sendPushNotification, sendClusterNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import { userActivityTracking } from '../../lib/monitor';
-import { collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 
 /**
