@@ -228,7 +228,7 @@ export const failedCardDebit = async(data) => `
     </td>
   </tr>`;
 
-export const failedChargePayment = async(data) => `
+export const failedChargePayment = (data) => `
   <tr>
     <td style="padding-bottom: 20px">
       <span>
@@ -270,7 +270,7 @@ export const failedChargePayment = async(data) => `
     </td>
   </tr>`;
 
-export const successfulRepayment = async(data) => `
+export const successfulRepayment = (data) => `
   <tr>
     <td style="padding-bottom: 20px">
       <span>
