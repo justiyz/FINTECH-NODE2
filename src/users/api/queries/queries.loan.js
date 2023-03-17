@@ -50,7 +50,8 @@ export default {
         updated_at = NOW(),
         percentage_orr_score = $2,
         status = $3,
-        loan_decision = $4
+        loan_decision = $4,
+        loan_declination_reason = $5
     WHERE loan_id = $1
     RETURNING id, loan_id, user_id, status`,
 
@@ -118,6 +119,7 @@ export default {
       repayment_order,
       total_payment_amount,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
       status
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
@@ -133,6 +135,7 @@ export default {
       repayment_order,
       total_payment_amount,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
       status
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1

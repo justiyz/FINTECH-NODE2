@@ -26,7 +26,8 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
   data.loan_application_id,
   data.orr_score,
   'declined',
-  data.final_decision
+  data.final_decision,
+  'automatically declined because user failed loan eligibility check'
 ];
 
 const loanApplicationDeclinedDecisionResponse = async(user, data, loan_status, loan_decision) => ({

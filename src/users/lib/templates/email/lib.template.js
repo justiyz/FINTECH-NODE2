@@ -144,6 +144,7 @@ export const loanDisbursement = (data) => `
             <b>requested amount:</b> ${data.loanAmount} <br />
             <b>loan duration in months:</b> ${data.loanDuration} <br />
             <b>loan purpose:</b> ${data.loanPurpose} <br />
+            <b>Interest rate:</b> ${data.pricingBand} <br />
             <b>monthly interest:</b>  ${data.monthlyInterest} <br />
             <b>total interest amount:</b> ${data.totalInterestAmount} <br />
             <b>insurance fee:</b> ${data.insuranceFee} <br />
