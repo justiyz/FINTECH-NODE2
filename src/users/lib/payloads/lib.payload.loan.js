@@ -46,7 +46,7 @@ const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInter
   data.fees.processing_fee_percentage * 100,
   data.fees.insurance_fee_percentage * 100,
   data.fees.advisory_fee_percentage * 100,
-  parseFloat(data.monthly_interest).toFixed(2),
+  parseFloat((parseFloat(data.monthly_interest) * 100)).toFixed(2), // convert to percentage
   parseFloat(data.fees.processing_fee).toFixed(2),
   parseFloat(data.fees.insurance_fee).toFixed(2),
   parseFloat(data.fees.advisory_fee).toFixed(2),
