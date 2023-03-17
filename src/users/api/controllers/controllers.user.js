@@ -89,7 +89,7 @@ export const updateSelfieImage = async (req, res, next) => {
     }
     const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, body.image_url.trim(), token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database updateSelfieImage.controllers.user.js`);
-    MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp: token, ...user });
+    await MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp: token, ...user });
     userActivityTracking(user.user_id, 17, 'success');
     return ApiResponse.success(res, enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updateUserSelfie);
   } catch (error) {
@@ -150,7 +150,7 @@ export const requestEmailVerification = async(req, res, next) => {
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK, data);
     }
-    MailService('Verify your email', 'requestVerifyEmail', { otp: token, ...user });
+    await MailService('Verify your email', 'requestVerifyEmail', { otp: token, ...user });
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email verification has been sent successfully to user mail. requestEmailVerification.controller.auth.js`);
     return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK);

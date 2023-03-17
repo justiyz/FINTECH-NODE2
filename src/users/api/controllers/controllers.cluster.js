@@ -264,7 +264,7 @@ export const inviteClusterMember = async (req, res, next) => {
       join_url: body.link_url
     };
     if(body.type === 'email' && !invitedUser){
-      MailService('Cluster Invite', 'loanClusterInvite', { ...data });
+      await MailService('Cluster Invite', 'loanClusterInvite', { ...data });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that invited user email is NOT a valid email in the DB. inviteClusterMember.controllers.cluster.js`);
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
@@ -283,7 +283,7 @@ export const inviteClusterMember = async (req, res, next) => {
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
       sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
-      MailService('Cluster Invite', 'loanClusterInvite', { ...data });
+      await MailService('Cluster Invite', 'loanClusterInvite', { ...data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {

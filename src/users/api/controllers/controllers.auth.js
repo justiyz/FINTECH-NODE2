@@ -258,7 +258,7 @@ export const forgotPassword = async(req, res, next) => {
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
     }
-    MailService('Reset your password', 'forgotPassword', { otp, ...user });
+    await MailService('Reset your password', 'forgotPassword', { otp, ...user });
     return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK);
   } catch (error) {
     userActivityTracking(req.user.user_id, 8, 'fail');

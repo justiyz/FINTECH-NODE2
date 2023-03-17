@@ -74,7 +74,7 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
       if (result.data.status !== 'success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was not successful verifyPaystackPaymentStatus.middlewares.payment.js`);
         await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
-        MailService('Failed Payment', 'failedChargePayment', { 
+        await MailService('Failed Payment', 'failedChargePayment', { 
           ...user, 
           last4Digits: body.data.channel === 'card' ? body.data.authorization.last4 : 'N/A', 
           cardType: body.data.channel === 'card' ? body.data.authorization.card_type : 'N/A', 
@@ -235,7 +235,7 @@ export const saveCardAuth = async(req, res, next) => {
           last4Digits: body.data.authorization.last4,
           cardType: body.data.authorization.card_type
         };
-        MailService('Rejected Debit Card', 'rejectedDebitCard', { ...data });
+        await MailService('Rejected Debit Card', 'rejectedDebitCard', { ...data });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);
         sendPushNotification(user.user_id, PushNotifications.rejectDebitCard, user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push notification to the user saveCardAuth.middlewares.payment.js`);
@@ -429,7 +429,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusOption ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
-        MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+        await MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
         userActivityTracking(paymentRecord.user_id, activityType, 'success');
         return next();
       }
@@ -448,7 +448,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
       }
-      MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2)});
+      await MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
       userActivityTracking(paymentRecord.user_id, 72, 'success');
       return next();
     }
