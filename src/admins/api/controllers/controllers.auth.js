@@ -35,7 +35,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     const expireTime = dayjs(expireAt).format('HH:mm:ss');
     const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, token, expireAt ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set in the DB completeAdminLoginRequest.admin.controllers.auth.js`);
-    MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
+    await MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
     adminActivityTracking(req.admin.admin_id, 9, 'success');
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.LOGIN_REQUEST_SUCCESSFUL, enums.HTTP_OK, { ...updatedAdmin, token });
@@ -127,7 +127,7 @@ export const forgotPassword = async(req, res, next) => {
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK, data);
     }
-    MailService('Reset your password', 'forgotPassword', { token, expireTime, ...admin });
+    await MailService('Reset your password', 'forgotPassword', { token, expireTime, ...admin });
     return ApiResponse.success(res, enums.PASSWORD_TOKEN, enums.HTTP_OK);
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 1, 'fail');

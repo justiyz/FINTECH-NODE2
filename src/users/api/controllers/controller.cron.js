@@ -71,7 +71,7 @@ export const initiateLoanRepayment = async (req, res, next) => {
           userActivityTracking(user.user_id, 79, 'success');
           return repayment;
         }
-        MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment });
+        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment });
         return repayment;
       })
     ]);

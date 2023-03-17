@@ -281,8 +281,8 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
       loan_amount: payload.loan_amount,
       orr_score: 81.99,
       final_decision: 'APPROVED',
-      pricing_band: 45,
-      monthly_interest: 3.75,
+      pricing_band: 36,
+      monthly_interest: 3.00,
       fees: {
         processing_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
         insurance_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
@@ -291,7 +291,7 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
         insurance_fee_percentage: 0.01,
         advisory_fee_percentage: 0.01
       },
-      monthly_repayment: parseFloat(parseFloat((((3.75 / 100) * parseFloat(payload.loan_amount)) / (1 - ((1 + (3.75 / 100))**(-Number(payload.loan_duration_in_month)))))).toFixed(2))
+      monthly_repayment: parseFloat(parseFloat((((3.00 / 100) * parseFloat(payload.loan_amount)) / (1 - ((1 + (3.00 / 100))**(-Number(payload.loan_duration_in_month)))))).toFixed(2))
     }
   };
   return data;

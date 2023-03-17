@@ -86,7 +86,7 @@ export const sendNotifications = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile not  previously completed sendNotifications.admin.controllers.user.js`);
       await sendPushNotification(userDetails.user_id, PushNotifications.userCompleteProfile, userDetails.fcm_token);
       if (userDetails.email !== null) {
-        MailService('Kindly complete your kyc', 'completeKyc', { email: userDetails.email });
+        await MailService('Kindly complete your kyc', 'completeKyc', { email: userDetails.email });
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: push notification sent to user successfully sendNotifications.admin.controllers.user.js`);
     }
