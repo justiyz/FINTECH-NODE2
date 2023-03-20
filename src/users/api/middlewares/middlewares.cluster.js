@@ -483,9 +483,9 @@ export const checkIfUserCanLeaveCluster =  async (req, res, next) => {
 export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
   try {
     const {user} = req;
-    const  clusterAdmin  = await processOneOrNoneData(clusterQueries.checkIfClusterMemberIsAdmin, 
+    const  [ clusterAdmin ]  = await processAnyData(clusterQueries.checkIfClusterMemberIsAdmin, 
       [ user.user_id, req.params.cluster_id  ]);
-    if(!clusterAdmin.is_admin){
+    if(!clusterAdmin){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       the decoded user is not a cluster member admin  checkIfClusterMemberIsAdmin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.CLUSTER_MEMBER_NOT_ADMIN, enums.HTTP_CONFLICT, enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE);
