@@ -83,7 +83,7 @@ router.post(
 );
 
 router.post(
-  '/:cluster_id/invite-member/',
+  '/:cluster_id/invite-member',
   AuthMiddleware.validateAuthToken,
   Model(Schema.inviteClusterMember, 'payload'),
   ClusterMiddleware.checkIfClusterExists,

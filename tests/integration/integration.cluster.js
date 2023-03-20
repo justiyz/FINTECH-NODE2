@@ -1400,6 +1400,27 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('Should flag when cluster is filled up and admin wants to invite member', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          phone_number: '+2349075743312',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_CLOSED_FOR_MEMBERSHIP);
+          done();
+        });
+    });
   });
   describe('user eight and nine should sign up based on cluster invitation', () => {
     it('Should create user eight successfully', (done) => {
