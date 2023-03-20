@@ -105,15 +105,15 @@ export const confirmUserClusterInvitation = async(req, res, next) => {
  * @memberof ClusterMiddleware
  */
 export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res, next) => {
-  const activityType = type === 'request' ? 49 : 52;
   try {
     const {user, cluster } = req;
-    if ((dayjs().format('DD-MMM-YYYY HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('DD-MMM-YYYY HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members))) {
+    if ((type === 'join' || type === 'request') && ((dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members)))) {
+      const activityType = type === 'request' ? 49 : 52;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
     }
-    if(type === 'invite' && (Number(cluster.maximum_members) === Number(cluster.current_members))){
+    if((type === 'invite') && ((dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members)))) {
       const activityType = req.body.type === 'email' ? 54 : 55;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       cluster can no longer accept new member confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
@@ -123,7 +123,6 @@ export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is still open for members to join or added confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE;
     logger.error(`checking if members can still be a part of a cluster failed::${enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE}`, error.message);
     return next(error);
@@ -325,7 +324,7 @@ export const userTakesRequestToJoinClusterDecision = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision is for ${votingTicketDetails.type} userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const [ requestingNMemberDetails ] = await processAnyData(userQueries.getUserByUserId, [ votingTicketDetails.ticket_raised_by ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: details of requesting cluster member fetched from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      if ((dayjs().format('DD-MMM-YYYY HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('DD-MMM-YYYY HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members))) {
+      if ((dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members))) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestClusterJoiningClosed(cluster.name), requestingNMemberDetails.fcm_token);
@@ -484,9 +483,9 @@ export const checkIfUserCanLeaveCluster =  async (req, res, next) => {
 export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
   try {
     const {user} = req;
-    const  clusterAdmin  = await processOneOrNoneData(clusterQueries.checkIfClusterMemberIsAdmin, 
+    const  [ clusterAdmin ]  = await processAnyData(clusterQueries.checkIfClusterMemberIsAdmin, 
       [ user.user_id, req.params.cluster_id  ]);
-    if(!clusterAdmin.is_admin){
+    if(!clusterAdmin){
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       the decoded user is not a cluster member admin  checkIfClusterMemberIsAdmin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.CLUSTER_MEMBER_NOT_ADMIN, enums.HTTP_CONFLICT, enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE);

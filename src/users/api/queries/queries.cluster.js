@@ -377,6 +377,7 @@ export default {
        ) VALUES ($1, $2, $3, $4, $5)
        RETURNING *
     `,
+
   checkIfClusterMemberAlreadyExist: `
     SELECT 
       *
@@ -384,15 +385,18 @@ export default {
     WHERE user_id = $1
     AND cluster_id = $2
     AND is_left = TRUE`,
+
   checkIfClusterMemberIsAdmin: `
       SELECT 
         cluster_id,
+        user_id,
         loan_status,
         is_admin,
         status
       FROM cluster_members
       WHERE user_id = $1
-      AND cluster_id = $2`,
+      AND cluster_id = $2
+      AND is_admin = TRUE`,
       
   fetchClusterMembers:`
     SELECT 
