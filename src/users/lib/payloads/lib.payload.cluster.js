@@ -5,7 +5,7 @@ export default {
     body.type,
     body.maximum_members,
     1, // the cluster admin/creator
-    body.loan_goal_target,
+    body.loan_goal_target || 0,
     body.minimum_monthly_income,
     user.user_id,
     user.user_id,

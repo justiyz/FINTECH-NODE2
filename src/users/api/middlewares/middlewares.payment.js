@@ -12,8 +12,9 @@ import { confirmPaystackPaymentStatusByReference, initiateTransfer, raiseARefund
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import MailService from '../services/services.email';
-import { sendPushNotification } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 
@@ -346,6 +347,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
         const data = await PaymentPayload.loanDisbursementPayload(userDetails, loanDetails);
         await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
+        sendUserPersonalNotification(userDetails, 'Loan disbursement successful', PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-disbursement', { });
         sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
@@ -375,9 +377,9 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
           processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
           processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ])
         ]);
+        userActivityTracking(paymentRecord.user_id, 46, 'success');
+        return ApiResponse.success(res, enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED, enums.HTTP_OK);
       }
-      userActivityTracking(paymentRecord.user_id, 46, 'success');
-      return ApiResponse.success(res, enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED, enums.HTTP_OK);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} processPersonalLoanTransferPayments.middlewares.payment.js`);
     return next();
@@ -430,6 +432,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
         await MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+        sendUserPersonalNotification(user, 'Part loan repayment successful', PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
+        sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
         userActivityTracking(paymentRecord.user_id, activityType, 'success');
         return next();
       }
@@ -449,6 +453,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
       }
       await MailService('Successful loan repayment', 'successfulRepayment', { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+      sendUserPersonalNotification(user, 'Full loan repayment successful', PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
+      sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
       userActivityTracking(paymentRecord.user_id, 72, 'success');
       return next();
     }

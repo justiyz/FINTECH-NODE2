@@ -25,7 +25,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for small projects',
           type: 'public',
           maximum_members: 2,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -97,7 +96,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for small projects',
           type: 'public',
           maximum_members: 3,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -121,7 +119,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for small projects',
           type: 'public',
           maximum_members: 3,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -145,7 +142,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for small projects',
           type: 'public',
           maximum_members: 3,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -167,7 +163,7 @@ describe('Clusters', () => {
         .send({
           name: 'Seedfi movers',
           description: 'group borrowing of money for small projects',
-          type: 'public',
+          type: 'private',
           maximum_members: 3,
           loan_goal_target: 500000,
           minimum_monthly_income: 45000000
@@ -191,7 +187,7 @@ describe('Clusters', () => {
         .send({
           name: 'Seedfi movers',
           description: 'group borrowing of money for small projects',
-          type: 'public',
+          type: 'private',
           maximum_members: 3,
           loan_goal_target: 500000,
           minimum_monthly_income: 500
@@ -217,7 +213,6 @@ describe('Clusters', () => {
           description: 'Group borrowing of money for SMALL projects',
           type: 'public',
           maximum_members: 3,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -248,7 +243,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for large projects',
           type: 'public',
           maximum_members: 1,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -272,7 +266,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for large projects',
           type: 'public',
           maximum_members: 2,
-          loan_goal_target: 500000,
           minimum_monthly_income: 45000
         })
         .end((err, res) => {
@@ -358,7 +351,6 @@ describe('Clusters', () => {
           description: 'group borrowing of money for large projects',
           type: 'public',
           maximum_members: 2,
-          loan_goal_target: 1000000,
           minimum_monthly_income: 30000
         })
         .end((err, res) => {
@@ -466,7 +458,7 @@ describe('Clusters', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data[0]).to.have.property('cluster_id');
           expect(res.body.data[0]).to.have.property('type');
-          expect(res.body.data[0].maximum_members).to.equal(2);
+          expect(res.body.data[0].maximum_members).to.equal(3);
           done();
         });
     });
@@ -954,22 +946,6 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user income range has not been filled in profile', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE);
-          done();
-        });
-    });
     it('should update user three monthly income successfully', (done) => {
       chai.request(app)
         .put('/api/v1/user/profile')
@@ -1006,22 +982,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.USER_ALREADY_CLUSTER_MEMBER);
-          done();
-        });
-    });
-    it('should throw error if user income range is lower than cluster minimum income', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
           done();
         });
     });

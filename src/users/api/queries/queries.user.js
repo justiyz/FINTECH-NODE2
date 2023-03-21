@@ -325,5 +325,17 @@ export default {
         to_char(DATE (created_at)::date, 'DDth Mon, YYYY') AS payment_date
       FROM personal_loan_payments
       WHERE user_id = $1
-      ORDER BY created_at DESC`
+      ORDER BY created_at DESC`,
+
+  userOfferLetterDetails: `
+      SELECT 
+        id,
+        user_id,
+        INITCAP(
+          CONCAT (first_name, ' ', last_name)
+        ) AS full_name,
+        bvn,
+        gender
+      FROM users
+      WHERE user_id = $1`
 };

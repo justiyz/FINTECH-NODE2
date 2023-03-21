@@ -32,7 +32,7 @@ export default {
     INSERT INTO personal_loans(
         user_id, amount_requested, loan_reason, loan_tenor_in_months
     ) VALUES ($1, $2, $3, $4)
-    RETURNING id, loan_id, status`,
+    RETURNING *`,
 
   deleteInitiatedLoanApplication: `
     DELETE FROM personal_loans
@@ -51,7 +51,7 @@ export default {
         percentage_orr_score = $2,
         status = $3,
         loan_decision = $4,
-        loan_declination_reason = $5
+        rejection_reason = $5 
     WHERE loan_id = $1
     RETURNING id, loan_id, user_id, status`,
 
@@ -75,7 +75,7 @@ export default {
         loan_decision = $15,
         total_outstanding_amount = $16
     WHERE loan_id = $1
-    RETURNING id, loan_id, user_id, status`,
+    RETURNING *`,
 
   fetchUserLoanDetailsByLoanId: `
     SELECT 
@@ -99,7 +99,8 @@ export default {
       status,
       loan_decision,
       is_loan_disbursed,
-      loan_disbursed_at
+      loan_disbursed_at,
+      offer_letter_url
     FROM personal_loans
     WHERE loan_id = $1
     AND user_id = $2`,
@@ -353,5 +354,13 @@ export default {
       to_char(DATE (created_at)::date, 'Mon DDth, YYYY') AS payment_date
     FROM personal_loan_payments
     WHERE payment_id = $1
+    AND user_id = $2`,
+
+  updateOfferLetter: `
+    UPDATE personal_loans
+    SET 
+      updated_at = NOW(),
+      offer_letter_url = $3
+    WHERE loan_id = $1
     AND user_id = $2`
 };

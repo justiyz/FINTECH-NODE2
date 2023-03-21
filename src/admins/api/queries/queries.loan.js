@@ -20,7 +20,8 @@ export default {
         is_loan_disbursed,
         to_char(DATE(loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As application_date,
-        rejection_reason
+        rejection_reason,
+        offer_letter_url
     FROM personal_loans
     WHERE loan_id = $1`,
 

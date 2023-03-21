@@ -1,12 +1,22 @@
 const Joi = require('joi').extend(require('@joi/date'));
 
 const createCluster = Joi.object().keys({
-  name: Joi.string().required(),
-  description: Joi.string().required(),
-  type: Joi.string().required().valid('public', 'private'),
-  maximum_members: Joi.number().positive().required().min(2),
-  loan_goal_target: Joi.number().positive().required(),
-  minimum_monthly_income: Joi.number().positive().required()
+  type: Joi.string().required().valid('public', 'private')
+}).when(Joi.object({ type: Joi.string().valid('public') }).unknown(), {
+  then: Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().required(),
+    maximum_members: Joi.number().positive().required().min(2),
+    minimum_monthly_income: Joi.number().positive().required()
+  })
+}).when(Joi.object({ type: Joi.string().valid('private') }).unknown(), {
+  then: Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().required(),
+    maximum_members: Joi.number().positive().required().min(2),
+    loan_goal_target: Joi.number().positive().required(),
+    minimum_monthly_income: Joi.number().positive().required()
+  })
 });
 
 const fetchClusters = Joi.object().keys({

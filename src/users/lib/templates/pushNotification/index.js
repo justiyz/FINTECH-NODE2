@@ -3,7 +3,11 @@ export const rejectDebitCard = () => {
 };
 
 export const successfulLoanDisbursement = () => {
-  return 'Request loan facility approved and disbursement completed';
+  return 'Requested loan facility approved and disbursement completed';
+};
+
+export const successfulLoanRepayment = () => {
+  return 'Your loan repayment is processed successfully';
 };
 
 export const requestToJoinCluster = (user, cluster) => {

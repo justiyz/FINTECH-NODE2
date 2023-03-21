@@ -42,7 +42,8 @@ export const requestToJoinCluster = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully requestToJoinCluster.controllers.cluster.js`);
     await cluster.members.forEach(async(member) => {
       const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ member.user_id ]);
-      sendUserPersonalNotification(userDetails, `request to join ${cluster.name} cluster`, PersonalNotifications.requestToJoinClusterNotification(user, cluster), 'request-join-cluster', { voting_ticket_id: clusterJoiningTicket.ticket_id });
+      sendUserPersonalNotification(userDetails, `request to join ${cluster.name} cluster`, PersonalNotifications.requestToJoinClusterNotification(user, cluster), 'request-join-cluster', 
+        { voting_ticket_id: clusterJoiningTicket.ticket_id, decision: 'none' });
       return member;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully requestToJoinCluster.controllers.cluster.js`);
@@ -137,7 +138,7 @@ export const createCluster = async (req, res, next) => {
     const clusterOpenGrace = await processOneOrNoneData(clusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
     const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster grace period for membership joining set successfully createCluster.controllers.cluster.js`);
-    body.join_cluster_closes_at = join_cluster_closes_at;
+    body.join_cluster_closes_at = body.type === 'private' ? join_cluster_closes_at : null;
     const createClusterPayload = ClusterPayload.createClusterPayload(body, user);
     const newClusterDetails = await processOneOrNoneData(clusterQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster created successfully successfully createCluster.controllers.cluster.js`);
@@ -174,7 +175,14 @@ export const fetchClusters = async (req, res, next) => {
       await Promise.all(
         clusters.map(async(cluster)=> {
           const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
-          if(!userClusters){
+          if(!userClusters) {
+            const [ checkIfCurrentRequestToJoin ] = await processAnyData(clusterQueries.checkIfDecisionTicketPreviouslyRaisedAndStillOpened, [ user.user_id, cluster.cluster_id, 'join cluster' ]);
+            if (!checkIfCurrentRequestToJoin) {
+              cluster.has_pending_request = false;
+              nonClusters.push(cluster);
+              return cluster;
+            }
+            cluster.has_pending_request = true;
             nonClusters.push(cluster);
             return cluster;
           }
@@ -198,7 +206,9 @@ export const fetchClusters = async (req, res, next) => {
       await Promise.all(
         createdClusters.map(async(cluster)=> {
           const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster.cluster_id ]);
-          if(userClusters){
+          const [ checkIfCurrentRequestToJoin ] = await processAnyData(clusterQueries.checkIfDecisionTicketPreviouslyRaisedAndStillOpened, [ user.user_id, cluster.cluster_id, 'join cluster' ]);
+          cluster.has_pending_request = checkIfCurrentRequestToJoin ? true : false;
+          if(userClusters) {
             cluster.is_member = true;
             return cluster;
           }
@@ -404,7 +414,8 @@ export const initiateDeleteCluster = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully initiateDeleteCluster.controllers.cluster.js`);
     await otherClusterMembers.forEach(async(member) => {
       const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ member.user_id ]);
-      sendUserPersonalNotification(userDetails, `${cluster.name} delete cluster`, PersonalNotifications.initiateDeleteCluster(user, cluster), 'delete-cluster', { voting_ticket_id: initiateDeleteClusterTicket.ticket_id, deletion_reason: body.deletion_reason });
+      sendUserPersonalNotification(userDetails, `${cluster.name} delete cluster`, PersonalNotifications.initiateDeleteCluster(user, cluster), 'delete-cluster', 
+        { voting_ticket_id: initiateDeleteClusterTicket.ticket_id, deletion_reason: body.deletion_reason, decision: 'none' });
       return member;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: notifications of all cluster members updated successfully initiateDeleteCluster.controllers.cluster.js`);
@@ -438,7 +449,8 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
     const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin, 
       [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, 1, params.invitee_id ]);
-    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster request`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', { voting_ticket_id: suggestAdminClusterTicket.ticket_id });
+    sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster request`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', 
+      { voting_ticket_id: suggestAdminClusterTicket.ticket_id, decision: 'none' });
     sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} is suggesting new cluster admin`, 'suggest-admin-cluster', {});
     userActivityTracking(req.user.user_id, 64, 'success');
     return ApiResponse.success(res, enums.SELECT_NEW_ADMIN, enums.HTTP_OK, {
