@@ -166,7 +166,6 @@ export const validateAdminAuthToken = async(req, res, next) => {
       return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     if (admin && (admin.is_deleted || admin.status !== 'active')) {
-      // eslint-disable-next-line no-nested-ternary
       const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team'  : `${admin.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.admin_id}:::Info: successfully confirms that user account is ${adminStatus} in the database validateAdminAuthToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);

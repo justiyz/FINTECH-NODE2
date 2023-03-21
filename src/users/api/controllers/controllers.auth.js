@@ -55,10 +55,10 @@ export const signup = async(req, res, next) => {
     const data = { ...registeredUser, otp, otpExpire: expirationTime };
     userActivityTracking(registeredUser.user_id, 1, 'success');
     await sendSMS(body.phone_number, signupSms(data));
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.ACCOUNT_CREATED, enums.HTTP_CREATED, data);
     }
-    return ApiResponse.success(res, enums.ACCOUNT_CREATED, enums.HTTP_CREATED, data); // To still delete the OTP from being returned
+    return ApiResponse.success(res, enums.ACCOUNT_CREATED, enums.HTTP_CREATED, registeredUser); // not returning otp for production environment
   } catch (error) {
     error.label = enums.SIGNUP_CONTROLLER;
     logger.error(`User account creation failed::${enums.SIGNUP_CONTROLLER}`, error.message);
@@ -92,10 +92,10 @@ export const resendSignupOtp = async(req, res, next) => {
     const data = { user_id: user.user_id, otp, otpExpire: expirationTime };
     userActivityTracking(user.user_id, 6, 'success');
     await sendSMS(body.phone_number, resendSignupOTPSms(data));
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, data);
     }
-    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, data); // To still delete the OTP from being returned
+    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { user_id: user.user_id }); // not returning otp for production environment
   } catch (error) {
     userActivityTracking(req.user.user_id, 6, 'fail');
     error.label = enums.RESEND_SIGNUP_OTP_CONTROLLER;
@@ -479,11 +479,11 @@ export const forgotPin = async(req, res, next) => {
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},Info: sms for user to reset pin has been sent successfully forgotPin.controller.auth.js`);
     userActivityTracking(req.user.user_id, 12, 'success');
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, data);
     }
     await sendSMS(user.phone_number, resetPinOTPSms(data));
-    return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, data); // otp will be removed before going live
+    return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, { user_id: user.user_id }); // not returning otp for production environment
   } catch (error) {
     userActivityTracking(req.user.user_id, 12, 'fail');
     error.label = enums.FORGOT_PIN_CONTROLLER;

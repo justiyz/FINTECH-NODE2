@@ -186,7 +186,7 @@ describe('Admin Users management', () => {
         });
     });
   });
-  describe('Activate and deactivate user', () => {
+  describe('Activate, deactivate, suspend, blacklist and watchlist user', () => {
     it('Should flag when user id dose not exist ', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}`)
@@ -280,7 +280,7 @@ describe('Admin Users management', () => {
           done();
         });
     });
-    it('Should flag when user to be deactivated is already deactivated', (done) => {
+    it('Should suspend user successfully', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
         .set({
@@ -288,13 +288,73 @@ describe('Admin Users management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          status: 'deactivated'
+          status: 'suspended'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EDIT_USER_STATUS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('Should blacklist user successfully', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'blacklisted'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EDIT_USER_STATUS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('Should watchlist user successfully', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'watchlisted'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EDIT_USER_STATUS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('Should flag when user to be watchlisted is already watchlisted', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_FOUR_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'watchlisted'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_CURRENT_STATUS('deactivated'));
+          expect(res.body.message).to.equal(enums.USER_CURRENT_STATUS('watchlisted'));
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

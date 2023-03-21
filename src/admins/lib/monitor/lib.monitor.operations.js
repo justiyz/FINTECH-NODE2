@@ -21,6 +21,9 @@ export const operations = {
   20: 'DCTUSR', // admin deactivate user
   21: 'APLNAPMN', // admin approves loan application manually
   22: 'DCLNAPMN', // admin declines loan application manually
-  23: 'UPDOCFUSR' // admin uploads document for user
+  23: 'UPDOCFUSR', // admin uploads document for user
+  24: 'SUPUSR', // admin suspends user
+  25: 'BLTUSR', // admin blacklists user
+  26: 'WLTUSR' // admin watchlists user
 };
 

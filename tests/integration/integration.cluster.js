@@ -84,6 +84,30 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should throw error when loan goal target is sent for type public cluster', (done) => {
+      chai.request(app)
+        .post('/api/v1/cluster/create')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Seedfi movers',
+          description: 'group borrowing of money for small projects',
+          type: 'public',
+          maximum_members: 3,
+          loan_goal_target: 500000,
+          minimum_monthly_income: 45000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('loan_goal_target is not allowed');
+          done();
+        });
+    });
     it('should throw error if user has not verified email', (done) => {
       chai.request(app)
         .post('/api/v1/cluster/create')
@@ -946,6 +970,22 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should throw error if user income range has not been filled in profile', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE);
+          done();
+        });
+    });
     it('should update user three monthly income successfully', (done) => {
       chai.request(app)
         .put('/api/v1/user/profile')
@@ -982,6 +1022,22 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.USER_ALREADY_CLUSTER_MEMBER);
+          done();
+        });
+    });
+    it('should throw error if user income range is lower than cluster minimum income', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
           done();
         });
     });

@@ -17,7 +17,6 @@ export const IS_COMPLETED_KYC_MIDDLEWARE = 'AuthMiddleware::isCompletedKyc';
 export const IS_PASSWORD_CREATED_MIDDLEWARE = 'AuthMiddleware::isPasswordCreated';
 export const CHECK_IF_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AuthMiddleware::checkIfEmailAlreadyExist';
 export const COMPARE_PASSWORD_MIDDLEWARE = 'AuthMiddleware::comparePassword';
-export const STERLING_BVN_VERIFICATION_SERVICE = 'SterlingService::sterlingBvnVerificationCheck';
 export const PERSONAL_LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE = 'SeedfiUnderwritingService::personalLoanApplicationEligibilityCheck';
 export const DOJAH_BVN_VERIFICATION_SERVICE = 'DojahService::dojahBvnVerificationCheck';
 export const PAYSTACK_FETCH_BANKS_SERVICE = 'PaystackService::fetchBanks';

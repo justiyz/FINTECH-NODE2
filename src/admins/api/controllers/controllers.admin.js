@@ -254,6 +254,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
     const queryToType = type === 'filter' ? to_date : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent fetchPlatformOverview.controllers.admin.admin.js`);
     const [ totalLoanApproved, totalLoanRejected, totalLoanDisbursed, totalRegisteredCustomers, 
       unpaidLoans, paidLoans, totalLoanRepayment, totalLoanOverDue, appliedLoans, approvedLoans, 
@@ -279,7 +280,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       processOneOrNoneData(adminQueries.totalTierZeroUsers, [  ]),
       processOneOrNoneData(adminQueries.totalActiveLoanUsers, [  ]),
       processOneOrNoneData(adminQueries.totalActiveUsers, [  ]),
-      processOneOrNoneData(adminQueries.totalOverdueRepayment, [  ]),
+      processOneOrNoneData(adminQueries.totalOverdueRepayment, [ Number(nplGraceDay.value) ]),
       processOneOrNoneData(adminQueries.totalExpectedRepayment, [  ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: all platform overview details fetched from the DB fetchPlatformOverview.controllers.admin.admin.js`);
@@ -297,7 +298,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       loanRepayment: {
         total_loan_repayment: parseFloat(parseFloat(totalLoanRepayment.sum).toFixed(2)) || 0,
         total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0,
-        total_loan_rescheduled:  0 // tro later include the value once loan rescheduling is implemented
+        total_loan_rescheduled:  0 // to later include the value once loan rescheduling is implemented
       },
       loanSchedule: {
         applied_loans: appliedLoans,
