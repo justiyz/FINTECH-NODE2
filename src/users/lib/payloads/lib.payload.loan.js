@@ -56,7 +56,7 @@ const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInter
   parseFloat(totalAmountRepayable).toFixed(2)
 ];
 
-const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision) => ({
+const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision, offer_letter_url) => ({
   user_id: user.user_id,
   loan_id: data.loan_application_id,
   loan_amount: `${parseFloat(data.loan_amount)}`,
@@ -71,7 +71,8 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
   monthly_payment: `${parseFloat(data.monthly_repayment)}`,
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
   loan_status,
-  loan_decision
+  loan_decision,
+  offer_letter_url 
 });
 
 export default { 

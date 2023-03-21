@@ -86,7 +86,7 @@ export const uploadDocument = async(req, res, next) => {
     }
     const payload = Buffer.from(files.document.data, 'binary');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: upload payload and url set uploadDocument.admin.middlewares.user.js`);
-    const contentType = body.type === 'file' ? 'application/pd' : 'image/png';
+    const contentType = body.type === 'file' ? 'application/pdf' : 'image/png';
     const data  = await S3.uploadFile(url, payload, contentType);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:file uploaded to amazon s3 bucket uploadDocument.admin.middlewares.user.js`);
     req.document = encodeURIComponent(

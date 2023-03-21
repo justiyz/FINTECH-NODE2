@@ -50,6 +50,11 @@ export const checkIfClusterNameUnique = async(req, res, next) => {
 export const compareUserIncomeRange = async(req, res, next) => {
   try {
     const { body, user, cluster } = req;
+    if (body.type === 'public' || (cluster && cluster.type === 'public')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: this is a public cluster compareUserIncomeRange.middlewares.cluster.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: this is a private cluster compareUserIncomeRange.middlewares.cluster.js`);
     if (user.income_range === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to update income range compareUserIncomeRange.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE, enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
