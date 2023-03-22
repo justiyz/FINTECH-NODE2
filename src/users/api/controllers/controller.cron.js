@@ -17,7 +17,7 @@ import MailService from '../services/services.email';
  * @returns { JSON } - A JSON with the updated statuses
  * @memberof CronController
  */
-export const updateLoanStatusToOverdue = async (req, res, next) => {
+export const updateLoanStatusToOverdue = async(req, res, next) => {
   try {
     const overDueLoanRepayments = await processAnyData(cronQueries.fetchAllOverdueLoanRepayments, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database updateLoanStatusToOverdue.controllers.cron.js`);
@@ -53,9 +53,10 @@ export const updateLoanStatusToOverdue = async (req, res, next) => {
  * @returns { JSON } - A JSON with the initiated payments
  * @memberof CronController
  */
-export const initiateLoanRepayment = async (req, res, next) => {
+export const initiateLoanRepayment = async(req, res, next) => {
   try {
-    const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]); // still try to automatically debit until after 7 days proposed loan repayment date passes
+    const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]); 
+    // still try to automatically debit until after 7 days proposed loan repayment date passes
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database updateLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
       dueForPaymentLoanRepayments.map(async(repayment) => {
@@ -63,8 +64,10 @@ export const initiateLoanRepayment = async (req, res, next) => {
         const [ userDebitCardDetails ] = await processAnyData(cronQueries.fetchUserSavedDebitCardsToken, [ repayment.user_id ]);
         const reference = uuidv4();
         const paystackAmountFormatting = parseFloat(repayment.total_payment_amount) * 100; // Paystack requires amount to be in kobo for naira payment
-        await processAnyData(loanQueries.initializeBankTransferPayment, [ repayment.user_id, parseFloat(repayment.total_payment_amount), 'paystack', reference, 'automatic_loan_repayment', 'user repays part of or all of existing personal loan facility automatically via card', repayment.loan_id ]);
-        const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails); // the first in the array is the default card, if no default card, use the next tokenized card
+        await processAnyData(loanQueries.initializeBankTransferPayment, [ repayment.user_id, parseFloat(repayment.total_payment_amount), 'paystack', reference, 
+          'automatic_loan_repayment', 'user repays part of or all of existing personal loan facility automatically via card', repayment.loan_id ]);
+        const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails); 
+        // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
           await processOneOrNoneData(cronQueries.recordCronTrail, [ user.user_id, 'LNRPTCDIN', 'user next loan repayment initiated' ]);

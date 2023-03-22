@@ -91,7 +91,10 @@ export const uploadDocument = async(req, res, next) => {
     const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}${fileExt}`;
     if (config.SEEDFI_NODE_ENV === 'test') {
       req.document = encodeURIComponent(
-        await UserHash.encrypt({ document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc', document_extension: fileExt })
+        await UserHash.encrypt({ 
+          document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc',
+          document_extension: fileExt 
+        })
       );
       return next();
     }

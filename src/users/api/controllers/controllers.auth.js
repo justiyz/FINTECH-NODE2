@@ -42,7 +42,7 @@ export const signup = async(req, res, next) => {
     const payload = AuthPayload.register(body, otp, expireAt);
     const [ registeredUser ] = await processAnyData(authQueries.registerUser, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database signup.controllers.auth.js`);
-    if(body.referral_code) {
+    if (body.referral_code) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload signup.controllers.auth.js`);
       const [ referralPreviouslyRecorded ] = await processAnyData(authQueries.checkIfReferralPreviouslyRecorded, [ referringUserDetails.user_id, registeredUser.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: checked if referral has been previously recorded signup.controllers.auth.js`);
@@ -132,7 +132,8 @@ export const verifyAccount = async(req, res, next) => {
     const [ newUserDetails ] = await processAnyData(userQueries.getUserByPhoneNumber, [ user.phone_number ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database verifyAccount.controllers.auth.js`);
     userActivityTracking(user.user_id, 2, 'success');
-    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, token, tokenExpireAt });
+    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, 
+      { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 2, 'fail');
     error.label = enums.VERIFY_ACCOUNT_CONTROLLER;
@@ -310,7 +311,7 @@ export const resetPassword = async(req, res, next) => {
   try {
     const { user, body } = req;
     const hash = Hash.hashData(body.password.trim());
-    if(!user.is_verified_email){
+    if (!user.is_verified_email) {
       await processAnyData(authQueries.verifyUserEmail, [ user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       user email successfully verified. resetPassword.controllers.auth.js`);

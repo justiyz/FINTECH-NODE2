@@ -62,7 +62,7 @@ export const userProfileDetails = async(req, res, next) => {
   try {
     const { admin, userDetails } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
-    if(userDetails?.bvn){
+    if (userDetails?.bvn) {
       const result = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
       userDetails.bvn =  result?.slice(0, 7) + '****'; // return first 7 digits of the bvn
     }
@@ -85,12 +85,16 @@ export const userProfileDetails = async(req, res, next) => {
  * @returns {object} - Returns response of notification sent.
  * @memberof AdminRoleController
  */
-export const sendNotifications = async (req, res, next) => {
+export const sendNotifications = async(req, res, next) => {
   try {
     const { admin, userDetails, query: { type } } = req;
     if (type === 'incomplete-profile') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: type ${type} is decoded sendNotifications.admin.controllers.user.js`);
-      if (userDetails.is_completed_kyc && userDetails.is_verified_bvn && userDetails.is_uploaded_identity_card && userDetails?.address && userDetails?.income_range && userDetails?.number_of_dependents && userDetails?.marital_status && userDetails?.employment_type) {
+      if (userDetails.is_completed_kyc && userDetails.is_verified_bvn && 
+          userDetails.is_uploaded_identity_card && userDetails?.address && 
+          userDetails?.income_range && userDetails?.number_of_dependents && 
+          userDetails?.marital_status && userDetails?.employment_type
+      ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile previously completed sendNotifications.admin.controllers.user.js`);
         return ApiResponse.error(res, enums.USER_PROFILE_PREVIOUSLY_COMPLETED, enums.HTTP_BAD_REQUEST, enums.SEND_NOTIFICATIONS_CONTROLLER);
       }
@@ -158,10 +162,10 @@ export const userAccountInformation = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof AdminRoleController
  */
-export const fetchUsers = async (req, res, next) => {
+export const fetchUsers = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    if (query.export){
+    if (query.export) {
       const payload = UserPayload.fetchAllUsers(query);
       const users  = await processAnyData(userQueries.fetchAllUsers, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all users from the DB fetchUsers.admin.controllers.user.js`);
@@ -227,7 +231,8 @@ export const fetchAdminUploadedUserDocuments = async(req, res, next) => {
   try {
     const { admin, userDetails } = req;
     const uploadedDocuments = await processAnyData(userQueries.fetchUploadedUserDocuments, [ userDetails.user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents fetched successfully fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents fetched successfully 
+    fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
     await Promise.all([
       uploadedDocuments.map(async(document) => {
         const { document_url, document_extension } = await UserHash.decrypt(decodeURIComponent(document.image_url));
@@ -237,7 +242,8 @@ export const fetchAdminUploadedUserDocuments = async(req, res, next) => {
         return document;
       })
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents sorted successfully fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents sorted successfully 
+    fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
     return ApiResponse.success(res, enums.ADMIN_USER_UPLOADED_DOCUMENTS_FETCHED, enums.HTTP_OK, uploadedDocuments);
   } catch (error) {
     error.label = enums.FETCH_ADMIN_UPLOADED_USER_DOCUMENTS_CONTROLLER;

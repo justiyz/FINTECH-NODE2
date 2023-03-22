@@ -23,7 +23,7 @@ export default {
       FROM users
       WHERE email = $1`,
 
-  updateUserFcmToken:`
+  updateUserFcmToken: `
       UPDATE users
       SET 
         updated_at = NOW(),
@@ -40,7 +40,7 @@ export default {
       FROM users
       WHERE user_id = $1`,
 
-  updateUserRefreshToken:`
+  updateUserRefreshToken: `
       UPDATE users
       SET
         updated_at = NOW(),
@@ -248,7 +248,7 @@ export default {
               income_range, number_of_dependents, marital_status, employment_type
   `,
 
-  fetchCardsById:`
+  fetchCardsById: `
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
       WHERE id = $1
@@ -270,7 +270,7 @@ export default {
       AND id = $2
       RETURNING id, user_id, is_default, card_type`,
 
-  removeCard:`
+  removeCard: `
       DELETE FROM user_debit_cards
       WHERE user_id = $1 AND id = $2`,
 
@@ -282,7 +282,7 @@ export default {
       WHERE user_id = $1
       RETURNING id, user_id, is_default, card_type`,
 
-  userOutstandingPersonalLoan:`
+  userOutstandingPersonalLoan: `
       SELECT 
         id,
         user_id,
@@ -292,7 +292,7 @@ export default {
       WHERE user_id = $1
       AND (status = 'ongoing' OR status = 'over due')`,
 
-  userExistingProcessingLoans:`
+  userExistingProcessingLoans: `
       SELECT 
         id,
         loan_id,
@@ -309,7 +309,7 @@ export default {
       AND (status = 'in review' OR status = 'approved')
       ORDER BY created_at DESC`,
 
-  userPersonalLoanTransactions:`
+  userPersonalLoanTransactions: `
       SELECT 
         id,
         payment_id,

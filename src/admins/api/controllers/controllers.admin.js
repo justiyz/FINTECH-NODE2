@@ -63,7 +63,8 @@ export const adminPermissions = async(req, res, next) => {
       processAnyData(authQueries.fetchRolePermissions, adminUser.role_type),
       processAnyData(authQueries.fetchAdminPermissions, adminUser.admin_id)
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched system resources and admin's role and personal permissions adminPermissions.admin.controllers.amin.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched system resources and admin's role and personal permissions 
+    adminPermissions.admin.controllers.amin.js`);
     const fullRoleBasedResources = await Helpers.processRoleBasedPermissions(adminUser.admin_id, adminResources, rolePermissions);
     const fullAdminBasedResources = await Helpers.processAdminBasedPermissions(adminUser.role_type, adminResources, adminPermissions);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: admin role and personal permissions aggregated adminPermissions.admin.controllers.amin.js`);
@@ -93,7 +94,7 @@ export const adminPermissions = async(req, res, next) => {
 export const editAdminPermissions = async(req, res, next) => {
   try {
     const { admin, body, params: { admin_id } } = req;
-    if(body.role_code) {
+    if (body.role_code) {
       await processAnyData(adminQueries.updateUserRoleType, [ admin_id, body.role_code.trim().toUpperCase() ]);
     }
     if (body.permissions) {
@@ -161,7 +162,7 @@ export const inviteAdmin = async(req, res, next) => {
  */
 export const fetchAllAdmins = async(req, res, next) => {
   try {
-    if(req.query.export){
+    if (req.query.export) {
       const filter = {
         status: req.query.status || null,
         start_date: req.query.start_date || null,
@@ -185,7 +186,8 @@ export const fetchAllAdmins = async(req, res, next) => {
     };
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully assigned the start and end dates values to filter object. fetchAllAdmins.controllers.admin.admin.js`);
     const admins = await fetchAdminServices.fetchAllAdmins(req.query, filter, req.user);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully filtered or searched the admins and returned required data or response in the DB. fetchAllAdmins.controllers.admin.admin.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully filtered or searched the admins and returned required data or response in the DB. 
+    fetchAllAdmins.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, admins);
   } catch (error) {
     error.label = enums.FETCH_ALL_ADMINS_CONTROLLER;
@@ -232,7 +234,7 @@ export const getProfile = async(req, res, next) => {
     delete admin.refresh_token;
     const [ adminRoleDetails ] = await processAnyData(roleQueries.fetchRole, [ admin.role_type ]);
     return ApiResponse.success(res, enums.FETCH_ADMIN_PROFILE, enums.HTTP_OK, { ...admin, role_name: adminRoleDetails.name });
-  } catch (error){
+  } catch (error) {
     error.label = enums.GET_PROFILE_CONTROLLER;
     logger.error(`Fetching admin profile failed:::${enums.GET_PROFILE_CONTROLLER}`, error.message);
     return next(error);
@@ -298,7 +300,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       loanRepayment: {
         total_loan_repayment: parseFloat(parseFloat(totalLoanRepayment.sum).toFixed(2)) || 0,
         total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0,
-        total_loan_rescheduled:  0 // to later include the value once loan rescheduling is implemented
+        total_loan_rescheduled: 0 // to later include the value once loan rescheduling is implemented
       },
       loanSchedule: {
         applied_loans: appliedLoans,
@@ -315,7 +317,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
         total_tier_two_users: Number(totalTierTwoUsers.count),
         total_tier_zero_users: Number(totalTierZeroUsers.count),
         borrowing_customers: {
-          total_active_loan_customers:  Number(totalActiveLoanUsers.count),
+          total_active_loan_customers: Number(totalActiveLoanUsers.count),
           total_customers: Number(totalActiveUsers.count),
           percentage: parseFloat(parseFloat((Number(totalActiveLoanUsers.count) / Number(totalActiveUsers.count)) * 100).toFixed(2)) || 0
         },
@@ -328,7 +330,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
     };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: overview data arranged and set to be returned fetchPlatformOverview.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.PLATFORM_OVERVIEW_PAGE_FETCHED, enums.HTTP_OK, data);
-  } catch (error){
+  } catch (error) {
     error.label = enums.FETCH_PLATFORM_OVERVIEW_CONTROLLER;
     logger.error(`Fetching admin overview page details failed:::${enums.FETCH_PLATFORM_OVERVIEW_CONTROLLER}`, error.message);
     return next(error);

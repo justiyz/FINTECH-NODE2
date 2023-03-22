@@ -21,7 +21,8 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
   try {
     const { body } = req;
     const payload = body.phone_number || body.email || req.user.phone_number;
-    const [ user ] = payload.startsWith('+') ? await processAnyData(userQueries.getUserByPhoneNumber, [ payload.trim() ]) : await processAnyData(userQueries.getUserByEmail, [ payload.trim().toLowerCase() ]);
+    const [ user ] = payload.startsWith('+') ? await processAnyData(userQueries.getUserByPhoneNumber, [ payload.trim() ]) : 
+      await processAnyData(userQueries.getUserByEmail, [ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched users details from the database validateUnAuthenticatedUser.middlewares.user.js`);
     if (user && user.is_verified_phone_number && user.is_created_password && type === 'validate') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account already exists in
@@ -47,7 +48,8 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
     }
     if (user && type === 'login' && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated' || user.status === 'blacklisted')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database validateUnAuthenticatedUser.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
+      validateUnAuthenticatedUser.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }
     req.user = user;
@@ -67,12 +69,13 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const validateRefreshToken = async (req, res, next) => {
+export const validateRefreshToken = async(req, res, next) => {
   try {
     const { query: { refreshToken },  user } = req;
     const [ userRefreshToken ] = await processAnyData(userQueries.fetchUserRefreshToken, [ user.user_id ]);
     if (refreshToken !== userRefreshToken.refresh_token) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database validateRefreshToken.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database 
+      validateRefreshToken.middlewares.user.js`);
       return ApiResponse.error(res, enums.INVALID_USER_REFRESH_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE);
     }
     return next();
@@ -93,12 +96,14 @@ export const isUploadedImageSelfie = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
     if (user.is_uploaded_selfie_image && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image isUploadedImageSelfie.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image 
+      isUploadedImageSelfie.middlewares.user.js`);
       userActivityTracking(user.user_id, 17, 'fail');
       return ApiResponse.error(res, enums.SELFIE_IMAGE_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
     }
     if (!user.is_uploaded_selfie_image && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image isUploadedImageSelfie.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image 
+      isUploadedImageSelfie.middlewares.user.js`);
       return ApiResponse.error(res, enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
     }
     return next();
@@ -178,7 +183,7 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const verifyBvn = async (req, res, next) => {
+export const verifyBvn = async(req, res, next) => {
   try {
     const { body: { bvn },  user } = req;
     const data = await dojahBvnVerificationCheck(bvn.trim(), user);
@@ -345,7 +350,10 @@ export const checkAccountOwnership = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
     if (user.middle_name !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);
-      if(accountDetailsName.includes(user.first_name.toLowerCase()) && accountDetailsName.includes(user.middle_name.toLowerCase()) && accountDetailsName.includes(user.last_name.toLowerCase())) {
+      if (accountDetailsName.includes(user.first_name.toLowerCase()) && 
+        accountDetailsName.includes(user.middle_name.toLowerCase()) && 
+        accountDetailsName.includes(user.last_name.toLowerCase())
+      ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
         return next();
       }
@@ -353,7 +361,7 @@ export const checkAccountOwnership = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 27, 'fail');
       return ApiResponse.error(res, enums.ACCOUNT_USER_NOT_OWNED_BY_USER, enums.HTTP_FORBIDDEN, enums.CHECK_ACCOUNT_OWNERSHIP_MIDDLEWARE);
     }
-    if(accountDetailsName.includes(user.first_name.toLowerCase()) && accountDetailsName.includes(user.last_name.toLowerCase())) {
+    if (accountDetailsName.includes(user.first_name.toLowerCase()) && accountDetailsName.includes(user.last_name.toLowerCase())) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
       return next();
     }
@@ -432,7 +440,7 @@ export const checkUserLoanStatus = async(req, res, next) => {
 export const checkIfAccountDetailsExists = async(req, res, next) => {
   try {
     const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
-    if(!payment_channel || payment_channel === 'bank') {
+    if (!payment_channel || payment_channel === 'bank') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
       const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id || payment_channel_id ]);
@@ -506,7 +514,8 @@ export const verifyEmailVerificationToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct verification token is sent verifyEmailVerificationToken.middlewares.user.js`);
     if (!tokenUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: sent token is invalid verifyEmailVerificationToken.middlewares.user.js`);
-      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN, enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE) :
+      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN, 
+        enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE) :
         res.send(enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${tokenUser.user_id}:::Info: sent token is valid verifyEmailVerificationToken.middlewares.user.js`);
@@ -556,10 +565,10 @@ export const isUploadedVerifiedId  = (type = '') => async(req, res, next) => {
  * @memberof UserMiddleware
  */
 
-export const checkIfBvnIsVerified = async (req, res, next) => {
+export const checkIfBvnIsVerified = async(req, res, next) => {
   try {
     const { user, body } = req;
-    if ((user.is_verified_bvn) && (body.first_name ||  body.last_name || body.middle_name || body.date_of_birth || body.gender) ) {
+    if ((user.is_verified_bvn) && (body.first_name ||  body.last_name || body.middle_name || body.date_of_birth || body.gender)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully checked if BVN is verified checkIfBvnIsVerified.middlewares.user.js`);
       return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE);
@@ -581,10 +590,10 @@ export const checkIfBvnIsVerified = async (req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfCardOrUserExist = async (req, res, next) => {
+export const checkIfCardOrUserExist = async(req, res, next) => {
   try {
     const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
-    if(!payment_channel || payment_channel === 'card') {
+    if (!payment_channel || payment_channel === 'card') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       no query payment type sent or query payment type sent is to check for card repayment checkIfCardOrUserExist.middlewares.user.js`);
       const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id || payment_channel_id ]);
@@ -595,7 +604,7 @@ export const checkIfCardOrUserExist = async (req, res, next) => {
       successfully confirmed card does not exist in the DB checkIfCardOrUserExist.middlewares.user.js`);
         return ApiResponse.error(res, enums.CARD_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE);
       }
-      if ( user.user_id !== userCard.user_id ) {
+      if (user.user_id !== userCard.user_id) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully confirmed the card does not belong to user checkIfCardOrUserExist.middlewares.user.js`);
         return ApiResponse.error(res, enums.CARD_DOES_NOT_BELONG_TO_USER, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CARD_EXISTS_MIDDLEWARE);
@@ -623,7 +632,7 @@ export const checkIfCardOrUserExist = async (req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfCardAlreadyDefaultCard = async (req, res, next) => {
+export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
   try {
     const { user, userDebitCard } = req;
     if (userDebitCard.is_default) {

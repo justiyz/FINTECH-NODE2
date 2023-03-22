@@ -44,12 +44,12 @@ const verifyOtp = Joi.object().keys({
 });
 
 const idVerification = Joi.object().keys({
-  id_type:  Joi.string().required(),
-  card_number:  Joi.string().required(),
-  image_url:  Joi.string().required(),
-  verification_url:  Joi.string().required(),
-  issued_date:  Joi.string().optional() ,
-  expiry_date:  Joi.string().optional()
+  id_type: Joi.string().required(),
+  card_number: Joi.string().required(),
+  image_url: Joi.string().required(),
+  verification_url: Joi.string().required(),
+  issued_date: Joi.string().optional() ,
+  expiry_date: Joi.string().optional()
 });
 
 const updateUsersProfile = Joi.object().keys({

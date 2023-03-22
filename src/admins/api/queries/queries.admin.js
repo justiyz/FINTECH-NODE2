@@ -72,7 +72,7 @@ export default {
     OFFSET $4 LIMIT $5
   `,
 
-  fetchAdmins:`
+  fetchAdmins: `
     SELECT 
     count(*) OVER() AS total,
     admin_id,
@@ -117,7 +117,7 @@ export default {
       ORDER BY admins.created_at DESC
   `,
 
-  editAdminStatus:`
+  editAdminStatus: `
       UPDATE admins
       SET
       updated_at = NOW(),

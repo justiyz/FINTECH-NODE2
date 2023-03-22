@@ -1,19 +1,3 @@
-export const sterlingVerifyBvnTestResponse = (user) => {
-  const data = {
-    responseCode: '00',
-    responseDesc: null,
-    bvn: '56790647909378',
-    firstName: `${user.first_name.toUpperCase()}`,
-    middleName: user.middle_name !== null ? `${user.middle_name.toUpperCase()}` : '',
-    lastName: `${user.last_name.toUpperCase()}`,
-    dateOfBirth: '02-Dec-1994',
-    phoneNumber: '090000000000',
-    email: 'testuser89@mail.com',
-    gender: `${user.gender}`
-  };
-  return data;
-};
-
 export const dojahVerifyBvnTestResponse = (user, bvn) => {
   const data = {
     status: 200,
@@ -57,7 +41,8 @@ export const paystackResolveAccountNumberTestResponse = (account_number, user) =
     message: 'Account number resolved',
     data: {
       'account_number': account_number,
-      'account_name': `${user.first_name.toUpperCase()} ${user.middle_name.toUpperCase()} ${user.last_name.toUpperCase()}`, // This will only pass for users with middle name and won't pass for users without middle name
+      'account_name': `${user.first_name.toUpperCase()} ${user.middle_name.toUpperCase()} ${user.last_name.toUpperCase()}`, 
+      // This will only pass for users with middle name and won't pass for users without middle name
       'bank_id': 9
     }
   };
