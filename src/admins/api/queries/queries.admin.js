@@ -312,11 +312,21 @@ export default {
   totalOverdueRepayment: `
     SELECT SUM(total_payment_amount) 
     FROM personal_loan_payment_schedules 
-    WHERE status = 'over due'`,
-
+    WHERE status = 'over due'
+    AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE`,
+  
   totalExpectedRepayment: `
     SELECT SUM(total_payment_amount) 
     FROM personal_loan_payment_schedules 
-    WHERE (status = 'paid' OR status = 'over due')`
+    WHERE (status = 'paid' OR status = 'over due')`,
+
+  fetchAdminSetEnvDetails: `
+    SELECT 
+      id,
+      env_id,
+      name,
+      value
+    FROM admin_env_values_settings
+    WHERE name = $1`
 };
     

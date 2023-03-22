@@ -42,7 +42,18 @@ export const userLoanStatus = async(req, res, next) => {
  */
 export const checkUserCurrentStatus = async(req, res, next) => {
   const { body: { status } } = req;
-  const activityType = status === 'active' ? 19 : 20;
+  let activityType = '';
+  if (status === 'deactivated') {
+    activityType = 20;
+  } else if (status === 'suspended') {
+    activityType = 24;
+  } else if (status === 'watchlisted') {
+    activityType = 26;
+  } else if (status === 'blacklisted') {
+    activityType = 25;
+  } else {
+    activityType = 19;
+  }
   try {
     if (req.userDetails.status === req.body.status) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
