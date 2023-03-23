@@ -63,7 +63,8 @@ export const compareUserIncomeRange = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is less than cluster minimum income compareUserIncomeRange.middlewares.cluster.js`);
-    return ApiResponse.error(res, enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING, enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
+    return ApiResponse.error(res, enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING, 
+      enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
   } catch (error) {
     error.label = enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE;
     logger.error(`comparing cluster income range failed::${enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE}`, error.message);
@@ -194,7 +195,8 @@ export const checkIfAlreadyClusterMember = (type = '') => async(req, res, next) 
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE);
     }
     if (type === 'confirm' && !clusterMember) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join checkIfAlreadyClusterMember.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join 
+      checkIfAlreadyClusterMember.middlewares.cluster.js`);
       return next();
     }
     if (type === 'authenticate' && !clusterMember) {
@@ -227,7 +229,8 @@ export const checkIfClusterDecisionTicketExists = async(req, res, next) => {
     const [ existingTicket ] = await processAnyData(clusterQueries.fetchClusterDecisionTicketByTicketId, [ ticket_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if ticket is existing in the DB checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
     if (existingTicket) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket is existing in the DB checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket is existing in the DB 
+      checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
       const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ existingTicket.cluster_id, user.user_id ]);
       if (clusterMember) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user belongs to cluster where ticket is raised 
@@ -240,7 +243,8 @@ export const checkIfClusterDecisionTicketExists = async(req, res, next) => {
       checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket does not exist in the DB checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket does not exist in the DB 
+    checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
     return ApiResponse.error(res, enums.CLUSTER_DECISION_TICKET_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE;
@@ -359,7 +363,8 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
-      const [ currentClusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
+      const [ currentClusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, 
+        [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a current cluster member 
       userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       if (currentClusterMember) {
@@ -372,7 +377,8 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
       await processOneOrNoneData(clusterQueries.recordUserVoteDecision, [ ticket_id, votingTicketDetails.cluster_id, user.user_id, clusterMember.is_admin, body.decision ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user voting decision recorded successfully userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user voting decision recorded successfully 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const currentVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes counted from the DB 
       userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
@@ -480,7 +486,8 @@ export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
       decoded that user is already a cluster member checkIfInviteeAlreadyExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join checkIfInviteeAlreadyExist.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join 
+    checkIfInviteeAlreadyExist.middlewares.cluster.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE;

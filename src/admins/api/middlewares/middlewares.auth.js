@@ -91,7 +91,8 @@ export const adminPermissions = async(req, res, next) => {
       };
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms this is another admin role type asides super admin adminPermissions.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms this is another admin role type asides super admin 
+    adminPermissions.admin.middlewares.auth.js`);
     const [ rolePermissions, adminPermissions ] = await Promise.all([
       processAnyData(authQueries.fetchRolePermissions, admin.role_type),
       processAnyData(authQueries.fetchAdminPermissions, admin.admin_id)
@@ -199,7 +200,8 @@ export const checkIfChangedDefaultPassword = (type = '') => async(req, res, next
       return ApiResponse.error(res, enums.ADMIN_NOT_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
     }
     if (is_created_password && type === 'validate') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has previously changed from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has previously changed from their system default password 
+      checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ADMIN_ALREADY_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has changed from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);

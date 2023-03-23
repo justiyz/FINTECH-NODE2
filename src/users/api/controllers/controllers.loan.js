@@ -63,7 +63,8 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan 
+    checkUserLoanEligibility.controllers.loan.js`);
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount);
@@ -347,7 +348,8 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`, 
         `user repays part of or all of existing personal loan facility via ${payment_channel}`, loan_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB 
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) : 
         await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response 

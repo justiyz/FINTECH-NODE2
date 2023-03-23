@@ -53,7 +53,8 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
     const [ referringUserDetails ] = await processAnyData(authQueries.checkIfExistingReferralCode, [ body.referral_code.trim() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if referral code previously existed in the db checkIfReferralCodeExists.middlewares.auth.js`);
     if (!referringUserDetails) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that referral code does not belongs to an existing user checkIfReferralCodeExists.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that referral code does not belongs to an existing user 
+      checkIfReferralCodeExists.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID('referral code'), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_REFERRAL_CODE_EXISTS_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that referral code belongs to an existing user checkIfReferralCodeExists.middlewares.auth.js`);
@@ -200,10 +201,12 @@ export const isPasswordCreated = (type = '') => async(req, res, next) => {
     }
     if (user.is_created_password && type === 'validate') {
       userActivityTracking(user.user_id, 7, 'fail');
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password isPasswordCreated.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password 
+      isPasswordCreated.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created password isPasswordCreated.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created password 
+    isPasswordCreated.middlewares.auth.js`);
     return next();
   } catch (error) {
     userActivityTracking(req.user.user_id, 7, 'fail');

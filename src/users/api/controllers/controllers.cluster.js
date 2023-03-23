@@ -255,7 +255,8 @@ export const fetchClusterDetails = async(req, res, next) => {
     const [ userClusters ] = await processAnyData(clusterQueries.fetchActiveClusterUser, [ user.user_id, cluster_id ]);
     clusterDetails.is_member = userClusters ? true : false;
     clusterDetails.is_admin = (userClusters && userClusters.is_admin) ? true : false;
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully updates users cluster membership and adminship fetchClusterDetails.users.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully updates users cluster membership and adminship 
+    fetchClusterDetails.users.controllers.user.js`);
     return ApiResponse.success(res, enums.CLUSTER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, {...clusterDetails, user_referral_code: user.referral_code});
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_DETAILS_CONTROLLER;
@@ -441,7 +442,8 @@ export const initiateDeleteCluster = async(req, res, next) => {
     initiateDeleteCluster.controllers.cluster.js`);
     userActivityTracking(req.user.user_id, 59, 'success');
     return ApiResponse.success(res, enums.INITIATE_DELETE_CLUSTER, enums.HTTP_OK, {
-      user_id: user.user_id, cluster: cluster_id, decision_type: 'delete cluster' , deletion_reason: req.body.deletion_reason, ticket_id: initiateDeleteClusterTicket.ticket_id 
+      user_id: user.user_id, cluster: cluster_id, decision_type: 'delete cluster', 
+      deletion_reason: req.body.deletion_reason, ticket_id: initiateDeleteClusterTicket.ticket_id 
     });
   } catch (error) {
     userActivityTracking(req.user.user_id, 59, 'fail');
@@ -466,7 +468,8 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ params.invitee_id ]);
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
     const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin, 
-      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, user.user_id, 1, params.invitee_id ]);
+      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`, 
+        user.user_id, 1, params.invitee_id ]);
     sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster request`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster', 
       { voting_ticket_id: suggestAdminClusterTicket.ticket_id, decision: 'none' });
     sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} is suggesting new cluster admin`, 'suggest-admin-cluster', {});

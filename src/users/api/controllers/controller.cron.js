@@ -20,7 +20,8 @@ import MailService from '../services/services.email';
 export const updateLoanStatusToOverdue = async(req, res, next) => {
   try {
     const overDueLoanRepayments = await processAnyData(cronQueries.fetchAllOverdueLoanRepayments, []);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database updateLoanStatusToOverdue.controllers.cron.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
+    updateLoanStatusToOverdue.controllers.cron.js`);
     const key = 'loan_id';
     const distinctLoanApplications  = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
     await Promise.all([ distinctLoanApplications ]);
@@ -57,7 +58,8 @@ export const initiateLoanRepayment = async(req, res, next) => {
   try {
     const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]); 
     // still try to automatically debit until after 7 days proposed loan repayment date passes
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database updateLoanStatusToOverdue.controllers.cron.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
+    updateLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
       dueForPaymentLoanRepayments.map(async(repayment) => {
         const [ user ] = await processAnyData(userQueries.getUserByUserId, [ repayment.user_id ]);
@@ -69,7 +71,8 @@ export const initiateLoanRepayment = async(req, res, next) => {
         const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails); 
         // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
-          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized 
+          initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
           await processOneOrNoneData(cronQueries.recordCronTrail, [ user.user_id, 'LNRPTCDIN', 'user next loan repayment initiated' ]);
           userActivityTracking(user.user_id, 79, 'success');
           return repayment;

@@ -128,7 +128,8 @@ export const userAccountInformation = async(req, res, next) => {
       processAnyData(userQueries.fetchUserDebitCards, [ user_id ]),
       processAnyData(userQueries.fetchUserBankAccounts, [ user_id ])
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user debit cards and bank accounts fetched from the DB userAccountInformation.admin.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user debit cards and bank accounts fetched from the DB 
+    userAccountInformation.admin.controllers.user.js`);
     await Promise.all(
       userDebitCards.map(async(card) => {
         const decryptedFirst6Digits = await UserHash.decrypt(decodeURIComponent(card.first_6_digits));

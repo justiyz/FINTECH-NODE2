@@ -156,7 +156,8 @@ export const handleTransactionRefundResponse = async(req, res, next) => {
   const { body, paymentRecord, user } = req;
   try {
     if (body.event === 'refund.failed' || body.event === 'refund.pending' || body.event === 'refund.processed' || body.event === 'refund.processing') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} handleTransactionRefundResponse.middlewares.payment.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} 
+      handleTransactionRefundResponse.middlewares.payment.js`);
       if (body.data.status === 'processed') {
         await processAnyData(paymentQueries.updateTransactionRefundStatus, [ body.data.transaction_reference, 'success', body.data.refund_reference, true ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment refund success status updated in the DB using reference 
@@ -216,7 +217,8 @@ export const updatePaymentHistoryStatus = async(req, res, next) => {
         updatePaymentHistoryStatus.middlewares.payment.js`);
         return next();
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment was made through ${body.data.channel} updatePaymentHistoryStatus.middlewares.payment.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: payment was made through ${body.data.channel} 
+      updatePaymentHistoryStatus.middlewares.payment.js`);
       return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} updatePaymentHistoryStatus.middlewares.payment.js`);
@@ -247,7 +249,8 @@ export const saveCardAuth = async(req, res, next) => {
       if (paymentRecord.payment_type === 'card_tokenization' && 
           dayjs().format(`${body.data.authorization.exp_year}-${body.data.authorization.exp_month}-01`) <= dayjs().add(3, 'Month').format('YYYY-MM-01')
       ) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms card will expire in 3 months time saveCardAuth.middlewares.payment.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms card will expire in 3 months time 
+        saveCardAuth.middlewares.payment.js`);
         const data = {
           firstName: user.first_name,
           email: user.email,
@@ -316,7 +319,8 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
   try {
     const { body, paymentRecord, user } = req;
     if (body.event === 'charge.success' && paymentRecord.payment_type === 'card_tokenization') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} raiseRefundForCardTokenization.middlewares.payment.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} 
+      raiseRefundForCardTokenization.middlewares.payment.js`);
       const result = await raiseARefundTickedForCardTokenizationTransaction(body.data.id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: raiding refund request via paystack returned response 
       raiseRefundForCardTokenization.middlewares.payment.js`);
@@ -455,7 +459,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
     paymentRecord.payment_type === 'automatic_loan_repayment'
     ) {
       const [ user ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} processPersonalLoanRepayments.middlewares.payment.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} 
+      processPersonalLoanRepayments.middlewares.payment.js`);
       const [ loanDetails ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ paymentRecord.loan_id, paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the loan details fetched successfully processPersonalLoanRepayments.middlewares.payment.js`);
       const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ paymentRecord.user_id ]);

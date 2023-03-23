@@ -56,7 +56,7 @@
         "comma-dangle": "error",
         "eol-last": "error",
         "array-bracket-spacing": ["error", "always"],
-        "max-len": ["error", { "code": 180, "tabWidth": 2 }],
+        "max-len": ["error", { "code": 175, "tabWidth": 2 }],
         "valid-jsdoc": "error",
         "spaced-comment": ["error", "always"],
         "space-before-blocks": ["error", "always"],

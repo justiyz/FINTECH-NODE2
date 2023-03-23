@@ -257,7 +257,8 @@ export const fetchPlatformOverview = async(req, res, next) => {
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
     const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent fetchPlatformOverview.controllers.admin.admin.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
+    fetchPlatformOverview.controllers.admin.admin.js`);
     const [ totalLoanApproved, totalLoanRejected, totalLoanDisbursed, totalRegisteredCustomers, 
       unpaidLoans, paidLoans, totalLoanRepayment, totalLoanOverDue, appliedLoans, approvedLoans, 
       totalClusters, totalPrivateClusters, totalPublicClusters, recentClusters, totalTierOneUsers, 

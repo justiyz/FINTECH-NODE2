@@ -26,7 +26,8 @@ export const checkUserLoanApplicationExists = async(req, res, next) => {
       req.existingLoanApplication = existingLoanApplication;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user checkUserLoanApplicationExists.middlewares.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user 
+    checkUserLoanApplicationExists.middlewares.loan.js`);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE;
@@ -127,7 +128,8 @@ export const generateLoanDisbursementRecipient = async(req, res, next) => {
       req.userTransferRecipient = userPaystackTransferRecipient;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated generateLoanDisbursementRecipient.middlewares.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated 
+    generateLoanDisbursementRecipient.middlewares.loan.js`);
     userActivityTracking(req.user.user_id, 44, 'fail');
     return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
   } catch (error) {
@@ -161,7 +163,8 @@ export const checkIfLoanApplicationStatusIsCurrentlyApproved = async(req, res, n
       return ApiResponse.error(res, enums.LOAN_APPLICATION_STILL_AWAITS_APPROVAL, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
     }
     if (existingLoanApplication.status === 'declined') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is declined checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is declined 
+      checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
       userActivityTracking(req.user.user_id, 44, 'fail');
       return ApiResponse.error(res, enums.LOAN_APPLICATION_DECLINED, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
     }
@@ -190,7 +193,8 @@ export const checkIfLoanApplicationStatusIsStillPending = async(req, res, next) 
   try {
     const { existingLoanApplication, user } = req;
     if (existingLoanApplication.status === 'pending' || existingLoanApplication.status === 'approved') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending checkIfLoanApplicationStatusIsStillPending.middlewares.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending 
+      checkIfLoanApplicationStatusIsStillPending.middlewares.loan.js`);
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is no longer pending 

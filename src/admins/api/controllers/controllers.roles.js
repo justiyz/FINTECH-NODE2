@@ -49,7 +49,8 @@ export const adminPermissionResources = async(req, res, next) => {
   try {
     const { admin } = req;
     const resources = await processAnyData(roleQueries.fetchAdminResources, [  ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: admin module permission resources fetched from the DB adminPermissionResources.admin.controllers.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: admin module permission resources fetched from the DB 
+    adminPermissionResources.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ADMIN_RESOURCES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, resources);
   } catch (error) {
     error.label = enums.ADMIN_PERMISSION_RESOURCES_CONTROLLER;

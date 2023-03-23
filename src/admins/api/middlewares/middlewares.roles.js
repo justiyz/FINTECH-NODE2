@@ -188,7 +188,8 @@ export const checkAdminResources = async(req, res, next) => {
     return next();
   } catch (error) {
     error.label = enums.CHECK_ADMIN_RESOURCES_MIDDLEWARE;
-    logger.error(`checking if admin resource to be assigned to the role exists and are unique in the DB failed:::${enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE}`, error.message);
+    logger.error(`checking if admin resource to be assigned to the role exists and are unique in the DB 
+    failed:::${enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
@@ -206,7 +207,8 @@ export const checkIfRoleHasBeenAssigned = async(req, res, next) => {
   try {
     const { params: { role_code } } = req;
     const admins = await processOneOrNoneData(roleQueries.fetchAdminByRoleType, [ role_code ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his role type checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully fetched admin by his role type 
+    checkIfRoleHasBeenAssigned.admin.middlewares.roles.js`);
     if (admins) {
       return ApiResponse.error(res, enums.ROLE_HAS_BEEN_ASSIGNED_TO_AN_ADMIN, enums.HTTP_FORBIDDEN);
     }

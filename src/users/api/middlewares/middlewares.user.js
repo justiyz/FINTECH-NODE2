@@ -294,7 +294,8 @@ export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
     const { user } = req;
     const [ existingAccountsCount ] = await processAnyData(userQueries.checkMaximumExistingAccountCounts, [ user.user_id ]);
     if (Number(existingAccountsCount.count) >= 3) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved checkIfMaximumBankAccountsSaved.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved 
+      checkIfMaximumBankAccountsSaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 27, 'fail');
       return ApiResponse.error(res, enums.BANK_ACCOUNTS_LIMITS_REACHED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE);
     }
@@ -325,7 +326,8 @@ export const checkAccountPreviouslySaved = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 27, 'fail');
       return ApiResponse.error(res, enums.ACCOUNT_DETAILS_PREVIOUSLY_SAVED, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account has not been saved previously by user in the DB checkAccountPreviouslySaved.middlewares.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account has not been saved previously by user in the DB 
+    checkAccountPreviouslySaved.middlewares.user.js`);
     return next();
   } catch (error) {
     userActivityTracking(req.user.user_id, 27, 'fail');
@@ -484,7 +486,8 @@ export const checkAccountCurrentChoicesAndTypeSent = async(req, res, next) => {
       return ApiResponse.error(res, enums.ACCOUNT_ALREADY_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE);
     }
     if (accountDetails.is_disbursement_account && type === 'disbursement') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already set to disbursement account checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already set to disbursement account 
+      checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 36, 'fail');
       return ApiResponse.error(res, enums.ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE);
     }
