@@ -49,7 +49,8 @@ export const adminPermissionResources = async(req, res, next) => {
   try {
     const { admin } = req;
     const resources = await processAnyData(roleQueries.fetchAdminResources, [  ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: admin module permission resources fetched from the DB adminPermissionResources.admin.controllers.roles.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: admin module permission resources fetched from the DB 
+    adminPermissionResources.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ADMIN_RESOURCES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, resources);
   } catch (error) {
     error.label = enums.ADMIN_PERMISSION_RESOURCES_CONTROLLER;
@@ -186,7 +187,7 @@ export const nonSuperAdminRoles = async(req, res, next) => {
    * @memberof AdminRoleController
    */
 
-export const deleteRole = async (req, res, next) => {
+export const deleteRole = async(req, res, next) => {
   try {
     const { params: { role_code }, admin } = req;
     await processNoneData(roleQueries.deleteRoleType, [ role_code ]);
@@ -210,10 +211,10 @@ export const deleteRole = async (req, res, next) => {
    * @memberof AdminRoleController
    */
 
-export const fetchRoles = async (req, res, next) => {
+export const fetchRoles = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    if(query.export){
+    if (query.export) {
       const payload = RolePayload.fetchAllRoles(query);
       const roles = await processAnyData(roleQueries.getAllRoles, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all roles from the DB fetchRoles.admin.controllers.roles.js`);
@@ -251,7 +252,7 @@ export const fetchRoles = async (req, res, next) => {
    * @memberof AdminRoleController
    */
 
-export const fetchAdminsPerRole = async (req, res, next) => {
+export const fetchAdminsPerRole = async(req, res, next) => {
   try {
     const { query, params, admin } = req;
     const payload = RolePayload.fetchAdminsPerRole(query, params);

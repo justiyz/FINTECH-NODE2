@@ -15,7 +15,7 @@ import { userActivityTracking } from '../../lib/monitor';
  * @returns { JSON } - A JSON with the url to complete payment
  * @memberof PaymentController
  */
-export const initializeCardTokenizationPayment = async (req, res, next) => {
+export const initializeCardTokenizationPayment = async(req, res, next) => {
   try {
     const { user } = req;
     const reference = uuidv4();
@@ -27,13 +27,15 @@ export const initializeCardTokenizationPayment = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initializeCardTokenizationPayment.controllers.payment.js`);
     const paystackAmountFormatting = parseFloat(tokenizingAmount) * 100; // Paystack requires amount to be in kobo for naira payment
     const result = await initializeCardPayment(user, paystackAmountFormatting, reference);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response initializeCardTokenizationPayment.controllers.payment.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response 
+    initializeCardTokenizationPayment.controllers.payment.js`);
     if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack initialized initializeCardTokenizationPayment.controllers.payment.js`);
       userActivityTracking(user.user_id, 32, 'success');
-      return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data );
+      return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack failed to be initialized initializeCardTokenizationPayment.controllers.payment.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack failed to be initialized 
+    initializeCardTokenizationPayment.controllers.payment.js`);
     userActivityTracking(user.user_id, 32, 'fail');
     return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIALIZE_CARD_TOKENIZATION_PAYMENT_CONTROLLER);
   } catch (error) {
@@ -52,7 +54,7 @@ export const initializeCardTokenizationPayment = async (req, res, next) => {
  * @returns { JSON } - A JSON with the url to complete payment
  * @memberof PaymentController
  */
-export const finalWebhookResponse = async (req, res, next) => {
+export const finalWebhookResponse = async(req, res, next) => {
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: webhook event type not catered for finalWebhookResponse.controllers.payment.js`);
     return ApiResponse.success(res, enums.PAYSTACK_WEBHOOK_EVENT_TYPE_NOT_CATERED_FOR, enums.HTTP_OK);

@@ -59,7 +59,7 @@ export default {
     WHERE role_type = $1
     AND resource_id = $2`,
 
-  fetchNonSuperAdminRoles:`
+  fetchNonSuperAdminRoles: `
       SELECT
         id,
         code,
@@ -93,7 +93,7 @@ export default {
       WHERE code = $1 or
   `,
 
-  getRoles:`
+  getRoles: `
     SELECT
         id,
         code,
@@ -102,14 +102,15 @@ export default {
         status,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date
     FROM admin_roles
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
-    ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
+    AND (status = $2 OR $2 IS NULL) 
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     ORDER BY created_at DESC
     OFFSET $5
     LIMIT $6
   `,
 
-  getAllRoles:`
+  getAllRoles: `
     SELECT
         id,
         code,
@@ -118,41 +119,43 @@ export default {
         status,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date
     FROM admin_roles
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
-    ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
+    AND (status = $2 OR $2 IS NULL)
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     ORDER BY created_at DESC
   `,
 
-  getRoleCount:`
-  SELECT
+  getRoleCount: `
+    SELECT
        COUNT(code) AS total_count
     FROM admin_roles
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND 
-    ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
+    AND (status = $2 OR $2 IS NULL) 
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `,
 
   getAdminsPerRole: `
-  SELECT 
-    admin_id,
-    CONCAT(first_name, ' ', last_name) AS name,
-    email,
-    status,
-    to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
-    role_type
-  FROM admins 
-  WHERE role_type= $1 AND (status = $2 OR  $2 IS NULL) AND
-   ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) AND  
-   (CONCAT(first_name, ' ', last_name) ILIKE TRIM($5) OR $5 IS NULL)
-   OFFSET $6
-   LIMIT $7
+    SELECT 
+      admin_id,
+      CONCAT(first_name, ' ', last_name) AS name,
+      email,
+      status,
+      to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
+      role_type
+    FROM admins 
+    WHERE role_type= $1 AND (status = $2 OR  $2 IS NULL) 
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+    AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($5) OR $5 IS NULL)
+    OFFSET $6
+    LIMIT $7
   `,
 
   getAdminsPerRoleCount: `
   SELECT 
      COUNT(role_type) AS total_count
   FROM admins
-  WHERE role_type = $1  AND (status = $2 OR $2 IS NULL) AND
-   ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) AND  
-   (CONCAT(first_name, ' ', last_name) ILIKE TRIM($5) OR $5 IS NULL)
+  WHERE role_type = $1  AND (status = $2 OR $2 IS NULL) 
+  AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+  AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($5) OR $5 IS NULL)
   `
 };

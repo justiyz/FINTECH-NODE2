@@ -21,7 +21,8 @@ const personalLoanApplicationEligibilityCheck = async(payload) => {
     const data = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to seedfi underwriting service for loan personal eligibility check failed::${enums.PERSONAL_LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE}`, error.message);
+    logger.error(`Connecting to seedfi underwriting service for loan personal eligibility check 
+    failed::${enums.PERSONAL_LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE}`, error.message);
     return error;
   }
 };

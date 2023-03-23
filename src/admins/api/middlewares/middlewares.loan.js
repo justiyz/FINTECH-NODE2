@@ -44,10 +44,12 @@ export const checkIfLoanStatusIsInReview = async(req, res, next) => {
   const activityType = decision === 'approve' ? 21 : 22;
   try {
     if (loanApplication.status === 'in review') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} 
+      checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} 
+    checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
     adminActivityTracking(req.admin.admin_id, activityType, 'fail');
     return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS(loanApplication.status), enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_EXISTS_MIDDLEWARE);
   } catch (error) {

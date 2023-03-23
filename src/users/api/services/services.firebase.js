@@ -42,7 +42,7 @@ export const sendPushNotification = async(user_id, content, fcm_token) => {
  * @returns { JSON } - a response based on if the notifications were sent or not
  * @memberof FirebaseService
  */
-export const sendMulticastPushNotification = async (content, fcm_tokens, type, cluster_id) => {
+export const sendMulticastPushNotification = async(content, fcm_tokens, type, cluster_id) => {
   const clusterId = cluster_id ? cluster_id.toString() : '';
   try {
     if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
@@ -77,7 +77,7 @@ export const sendMulticastPushNotification = async (content, fcm_tokens, type, c
  * @returns { JSON } - a response based on if the notification was sent or not
  * @memberof FirebaseService
  */
-export const createClusterNotification = async (user, body, newClusterDetails, clusterMemberDetails, content, type, extra_data) => {
+export const createClusterNotification = async(user, body, newClusterDetails, clusterMemberDetails, content, type, extra_data) => {
   if (config.SEEDFI_NODE_ENV === 'test') {
     return;
   }
@@ -112,7 +112,7 @@ export const createClusterNotification = async (user, body, newClusterDetails, c
  * @returns { JSON } - a response based on if the notification was sent or not
  * @memberof FirebaseService
  */
-export const sendClusterNotification = async (user, cluster, clusterMemberDetails, content, type, extra_data) => {
+export const sendClusterNotification = async(user, cluster, clusterMemberDetails, content, type, extra_data) => {
   if (config.SEEDFI_NODE_ENV === 'test') {
     return;
   }
@@ -146,7 +146,7 @@ export const sendClusterNotification = async (user, cluster, clusterMemberDetail
  * @returns { JSON } - a response based on if the notification was sent or not
  * @memberof FirebaseService
  */
-export const sendUserPersonalNotification = async (user, title, content, type, extra_data) => {
+export const sendUserPersonalNotification = async(user, title, content, type, extra_data) => {
   if (config.SEEDFI_NODE_ENV === 'test') {
     return;
   }

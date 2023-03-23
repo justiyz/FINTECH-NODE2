@@ -311,7 +311,7 @@ export default {
     AND cluster_members.is_left = FALSE
     ORDER BY clusters.loan_status DESC`,
 
-  fetchActiveClusterUser:`
+  fetchActiveClusterUser: `
     SELECT
       cluster_id,
       user_id,
@@ -322,7 +322,7 @@ export default {
     AND cluster_id = $2  
     AND is_left = FALSE`,
 
-  fetchUserCreatedClusters:`
+  fetchUserCreatedClusters: `
     SELECT 
       id,
       cluster_id,
@@ -340,7 +340,7 @@ export default {
     AND is_deleted = FALSE
     ORDER BY created_at DESC `,
 
-  fetchClusterDetails:`
+  fetchClusterDetails: `
     SELECT 
       id,
       cluster_id,
@@ -398,7 +398,7 @@ export default {
       AND cluster_id = $2
       AND is_admin = TRUE`,
       
-  fetchClusterMembers:`
+  fetchClusterMembers: `
     SELECT 
       cluster_members.user_id,
       CONCAT(users.first_name, ' ', users.last_name) AS name,
@@ -415,7 +415,7 @@ export default {
     AND clusters.is_deleted = false
 	  AND cluster_members.is_left = false`,
 
-  leaveCluster:`
+  leaveCluster: `
       UPDATE 
          cluster_members
       SET 
@@ -434,7 +434,7 @@ export default {
       WHERE cluster_id = $1
   `,
 
-  editCluster:`
+  editCluster: `
       UPDATE clusters
       SET
         updated_at = NOW(),
@@ -475,7 +475,7 @@ export default {
   WHERE cluster_id = $1 
   AND user_id = $2
 `,
-  removeClusterMembers:`
+  removeClusterMembers: `
     UPDATE cluster_members
     SET 
       updated_at = NOW(),

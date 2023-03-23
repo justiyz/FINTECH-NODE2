@@ -281,7 +281,8 @@ export const successfulRepayment = (data) => `
 
   <tr>
     <td style="padding-bottom: 20px">
-      <span>Seedfi received your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} as a loan repayment of your existing loan facility</span>  
+      <span>Seedfi received your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+       as a loan repayment of your existing loan facility</span>  
     </td>
   </tr>
 

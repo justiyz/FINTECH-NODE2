@@ -1,5 +1,25 @@
 export const rejectDebitCard = () => {
-  return 'The debit card you inserted has been rejected, kindly insert a debit card that will not expire in 3 months time';
+  return 'The debit card you add has been rejected, kindly insert a debit card that will not expire in 3 months time';
+};
+
+export const cardTokenizationSuccessful = () => {
+  return 'The debit card you added has been accepted and saved successfully';
+};
+
+export const cardTokenizationRefundInitiated = () => {
+  return 'Refund for the amount charged on adding of card has been initiated successfully';
+};
+
+export const cardTokenizationAmountRefundInitiationFailed = () => {
+  return 'Refund for the amount charged on adding of card failed to be initiated';
+};
+
+export const cardTokenizationAmountRefundSuccessful = () => {
+  return 'Refund for the amount charged on adding of card is completed and amount fully refunded';
+};
+
+export const cardTokenizationAmountRefundFailed = () => {
+  return 'Refund for the amount charged on adding of card failed and could not be completed kindly reach out to our support. Thanks';
 };
 
 export const successfulLoanDisbursement = () => {

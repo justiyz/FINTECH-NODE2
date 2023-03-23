@@ -57,10 +57,12 @@ export const verifyLoginVerificationToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: OTP is valid verifyLoginVerificationToken.admin.middlewares.auth.js`);
     const isExpired = new Date().getTime() > new Date(otpAdmin.verification_token_expires).getTime();
     if (isExpired) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token has expired verifyLoginVerificationToken.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token has expired 
+      verifyLoginVerificationToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.EXPIRED_VERIFICATION_TOKEN, enums.HTTP_FORBIDDEN, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token is still active verifyLoginVerificationToken.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token is still active 
+    verifyLoginVerificationToken.admin.middlewares.auth.js`);
     req.admin = otpAdmin;
     return next();
   } catch (error) {
@@ -89,7 +91,8 @@ export const adminPermissions = async(req, res, next) => {
       };
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms this is another admin role type asides super admin adminPermissions.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms this is another admin role type asides super admin 
+    adminPermissions.admin.middlewares.auth.js`);
     const [ rolePermissions, adminPermissions ] = await Promise.all([
       processAnyData(authQueries.fetchRolePermissions, admin.role_type),
       processAnyData(authQueries.fetchAdminPermissions, admin.admin_id)
@@ -160,14 +163,17 @@ export const validateAdminAuthToken = async(req, res, next) => {
       return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     const [ admin ] = await processAnyData(adminQueries.getAdminByAdminId, [ decoded.admin_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.admin_id}:::Info: successfully fetched the users details using the decoded id validateAdminAuthToken.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.admin_id}:::Info: successfully fetched the users details using the decoded id 
+    validateAdminAuthToken.admin.middlewares.auth.js`);
     if (!admin) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAdminAuthToken.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB 
+      validateAdminAuthToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     if (admin && (admin.is_deleted || admin.status !== 'active')) {
       const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team'  : `${admin.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.admin_id}:::Info: successfully confirms that user account is ${adminStatus} in the database validateAdminAuthToken.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.admin_id}:::Info: successfully confirms that user account is ${adminStatus} in the database 
+      validateAdminAuthToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     req.admin = admin;
@@ -194,7 +200,8 @@ export const checkIfChangedDefaultPassword = (type = '') => async(req, res, next
       return ApiResponse.error(res, enums.ADMIN_NOT_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
     }
     if (is_created_password && type === 'validate') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has previously changed from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has previously changed from their system default password 
+      checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ADMIN_ALREADY_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has changed from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
@@ -240,7 +247,7 @@ export const validateAdminResetPasswordToken = async(req, res, next) => {
       error message validateAdminResetPasswordToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE);
     }
-    if(decoded.email){
+    if (decoded.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded authentication token sent using the authentication secret
       validateAdminResetPasswordToken.admin.middlewares.auth.js`);
       const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ decoded.email ]);
