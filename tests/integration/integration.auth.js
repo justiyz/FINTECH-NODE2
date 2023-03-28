@@ -140,7 +140,7 @@ describe('Auth', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
           expect(res.body.data.tier).to.equal(0);
-          expect(res.body.data.phone_number).to.equal( '+2347058703647');
+          expect(res.body.data.phone_number).to.equal('+2347058703647');
           process.env.SEEDFI_USER_SIX_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_SIX_PHONE_NUMBER = res.body.data.phone_number;
           process.env.SEEDFI_USER_SIX_VERIFICATION_OTP = res.body.data.otp;
@@ -162,7 +162,7 @@ describe('Auth', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
           expect(res.body.data.tier).to.equal(0);
-          expect(res.body.data.phone_number).to.equal( '+2347029703927');
+          expect(res.body.data.phone_number).to.equal('+2347029703927');
           process.env.SEEDFI_USER_SEVEN_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_SEVEN_PHONE_NUMBER = res.body.data.phone_number;
           process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP = res.body.data.otp;
@@ -294,12 +294,31 @@ describe('Auth', () => {
     });
   });
   describe('Verify Phone Number', () => {
+    it('Should return error if user has not verified account and wants to verify new device', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-new-device')
+        .send({
+          otp: process.env.SEEDFI_USER_ONE_VERIFICATION_OTP,
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(403);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_PREVIOUSLY_VERIFIED);
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should verify user one phone number successfully', (done) => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_ONE_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -317,6 +336,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_ONE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_ONE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_ONE_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_ONE_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -325,7 +345,8 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_TWO_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -343,6 +364,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_TWO_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_TWO_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_TWO_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_TWO_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -351,7 +373,8 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_THREE_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -369,6 +392,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_THREE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_THREE_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_THREE_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -376,8 +400,7 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
-          otp: process.env.SEEDFI_USER_FOUR_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          otp: process.env.SEEDFI_USER_FOUR_VERIFICATION_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -395,6 +418,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_FOUR_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_FOUR_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_FOUR_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -403,7 +427,8 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_FIVE_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -421,6 +446,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_FIVE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_FIVE_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_FIVE_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -429,7 +455,8 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_SIX_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -447,6 +474,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_SIX_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_SIX_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_SIX_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_SIX_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -454,8 +482,7 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
-          otp: process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          otp: process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -473,6 +500,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_SEVEN_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_SEVEN_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_SEVEN_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_SEVEN_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -481,7 +509,8 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: '239012',
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -497,7 +526,8 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -509,28 +539,13 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should return error if fcm token field missing', (done) => {
-      chai.request(app)
-        .post('/api/v1/auth/verify-phone-number')
-        .send({
-          otp: '239012'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(422);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('fcm_token is required');
-          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
     it('Should return error if less than or more than six OTP digits is sent', (done) => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: '2392',
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -587,7 +602,8 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_THREE_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -605,6 +621,7 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_THREE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_THREE_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_THREE_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -959,7 +976,11 @@ describe('Auth', () => {
         .post('/api/v1/auth/login')
         .send({
           email: userOneProfile.email,
-          password
+          password,
+          device_token: process.env.SEEDFI_USER_ONE_DEVICE_TOKEN
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -982,7 +1003,11 @@ describe('Auth', () => {
         .post('/api/v1/auth/login')
         .send({
           email: userTwoProfile.email,
-          password
+          password,
+          device_token: process.env.SEEDFI_USER_TWO_DEVICE_TOKEN
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1008,6 +1033,9 @@ describe('Auth', () => {
           email: userFourProfile.email,
           password
         })
+        .query({
+          type: 'web'
+        })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
@@ -1025,12 +1053,68 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should log user six in successfully', (done) => {
+    it('Should return otp for account verification when user six tries to log in on a different device', (done) => {
       chai.request(app)
         .post('/api/v1/auth/login')
         .send({
           email: userSixProfile.email,
-          password
+          password,
+          device_token: `${process.env.SEEDFI_USER_SIX_DEVICE_TOKEN}j67`
+        })
+        .query({
+          type: 'mobile'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.NEW_DEVICE_DETECTED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('otp');
+          expect(res.body.data).to.have.property('expirationTime');
+          process.env.SEEDFI_USER_SIX_NEW_DEVICE_LOGIN_VERIFICATION_OTP = res.body.data.otp;
+          done();
+        });
+    });
+    it('Should verify account on new device', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-new-device')
+        .send({
+          otp: process.env.SEEDFI_USER_SIX_NEW_DEVICE_LOGIN_VERIFICATION_OTP,
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_ACCOUNT_VERIFIED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.tier).to.equal(0);
+          expect(res.body.data.is_verified_phone_number).to.equal(true);
+          expect(res.body.data.phone_number).to.equal(process.env.SEEDFI_USER_SIX_PHONE_NUMBER);
+          process.env.SEEDFI_USER_SIX_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_SIX_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_SIX_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_SIX_DEVICE_TOKEN = res.body.data.device_token;
+          done();
+        });
+    });
+    it('Should log user three in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userSixProfile.email,
+          password,
+          device_token: process.env.SEEDFI_USER_SIX_DEVICE_TOKEN
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1049,12 +1133,16 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should log user three in successfully', (done) => {
+    it('Should log user SIX in successfully', (done) => {
       chai.request(app)
         .post('/api/v1/auth/login')
         .send({
           email: userThreeProfile.email,
-          password
+          password,
+          device_token: process.env.SEEDFI_USER_THREE_DEVICE_TOKEN
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1073,13 +1161,15 @@ describe('Auth', () => {
           done();
         });
     });
-
     it('Should return error if non existing email is sent', (done) => {
       chai.request(app)
         .post('/api/v1/auth/login')
         .send({
           email: `${userThreeProfile.email}.ng`,
           password
+        })
+        .query({
+          type: 'web'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -1096,7 +1186,11 @@ describe('Auth', () => {
         .post('/api/v1/auth/login')
         .send({
           email: userThreeProfile.email,
-          password: `6748${password}`
+          password: `6748${password}`,
+          device_token: process.env.SEEDFI_USER_ONE_DEVICE_TOKEN
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -1108,11 +1202,72 @@ describe('Auth', () => {
           done();
         });
     });
+    it('Should return error if device token is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userThreeProfile.email,
+          password: password
+        })
+        .query({
+          type: 'mobile'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.DEVICE_TOKEN_REQUIRED);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if type is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userThreeProfile.email,
+          password
+        })
+        .query({ })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid type is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userThreeProfile.email,
+          password
+        })
+        .query({
+          type: 'web interface'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [web, mobile]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should return error if email field missing', (done) => {
       chai.request(app)
         .post('/api/v1/auth/login')
         .send({
           password: `6748${password}`
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -1129,6 +1284,9 @@ describe('Auth', () => {
         .post('/api/v1/auth/login')
         .send({
           email: userThreeProfile.email
+        })
+        .query({
+          type: 'mobile'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);

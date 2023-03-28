@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import authQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
 import { processAnyData } from '../services/services.db';
@@ -5,7 +6,10 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import sendSMS from '../../config/sms';
+import { verifyAccountOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
+import config from '../../config';
 
 /**
  * generate user referral code
@@ -33,6 +37,7 @@ export const generateReferralCode = async(req, res, next) => {
     return next(error);
   }
 };
+
 
 /**
  * check if signup referral code exists
@@ -68,7 +73,7 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
 };
 
 /**
- * verify validity and expiry of signup verification token
+ * verify validity and expiry of signup or new device login verification token
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
@@ -99,6 +104,30 @@ export const verifyVerificationToken = async(req, res, next) => {
   } catch (error) {
     error.label = enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE;
     logger.error(`verify verification token failed::${enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user phone number(account) has not been previously verified
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const checkIfUserAccountNotVerified = async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (!user.is_verified_phone_number && user.referral_code === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user account has not been previously verified checkIfUserAccountNotVerified.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_NOT_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_ACCOUNT_NOT_VERIFIED_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user account has been previously verified checkIfUserAccountNotVerified.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_ACCOUNT_NOT_VERIFIED_MIDDLEWARE;
+    logger.error(`checking if user account has not been previously verified failed::${enums.CHECK_IF_USER_ACCOUNT_NOT_VERIFIED_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
@@ -271,6 +300,53 @@ export const comparePassword = async(req, res, next) => {
     error.label = enums.COMPARE_PASSWORD_MIDDLEWARE;
     logger.error(`comparing incoming and already set password in the DB failed:::${enums.COMPARE_PASSWORD_MIDDLEWARE}`, error.message);
     return next(error);
+  }
+};
+
+/**
+ * compare device token in the database with the current device token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const compareDeviceToken = async(req, res, next) => {
+  try {
+    const { user, query: { type } } = req;
+    if (type === 'web') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user login is being processed from the web compareDeviceToken.middlewares.auth.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user login is being processed from the mobile app compareDeviceToken.middlewares.auth.js`);
+    if (!req.body.device_token) {
+      return ApiResponse.error(res, enums.DEVICE_TOKEN_REQUIRED, enums.HTTP_BAD_REQUEST, enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE);
+    }
+    if (req.body.device_token.trim() !== user.device_token) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token does not match compareDeviceToken.middlewares.auth.js`);
+      const otp =  Helpers.generateOtp();
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated compareDeviceToken.middlewares.auth.jss`);
+      const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database compareDeviceToken.middlewares.auth.js`);
+      if (existingOtp) {
+        return compareDeviceToken(req, res, next);
+      }
+      const expireAt = dayjs().add(10, 'minutes');
+      const expirationTime = dayjs(expireAt);
+      await processAnyData(authQueries.updateVerificationToken, [ user.phone_number, otp, expireAt ]);
+      const data = { otp };
+      await sendSMS(user.phone_number, verifyAccountOTPSms(data));
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: New token successfully sent to user registered phone number compareDeviceToken.middlewares.auth.js`);
+      if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
+        return ApiResponse.success(res, enums.NEW_DEVICE_DETECTED, enums.HTTP_UNAUTHORIZED, { otp, expirationTime });
+      }
+      return ApiResponse.success(res, enums.NEW_DEVICE_DETECTED, enums.HTTP_UNAUTHORIZED);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token matches compareDeviceToken.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE;
+    logger.error(`Comparing user compare device token failed::${enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE}`, error.message);
   }
 };
 

@@ -39,13 +39,26 @@ export default {
       referrer_user_id, referred_user_id
     ) VALUES ($1, $2)`,
 
-  verifyUserAccount: `
+  verifyUserAccountAfterSignup: `
     UPDATE users
     SET
       updated_at = NOW(),
       refresh_token = $2,
       fcm_token = $3,
       referral_code = $4,
+      device_token = $5,
+      is_verified_phone_number = TRUE,
+      verification_token = NULL,
+      verification_token_expires = NULL
+    WHERE user_id = $1`,
+
+  verifyUserAccountOnNewDevice: `
+    UPDATE users
+    SET
+      updated_at = NOW(),
+      refresh_token = $2,
+      fcm_token = $3,
+      device_token = $4,
       is_verified_phone_number = TRUE,
       verification_token = NULL,
       verification_token_expires = NULL

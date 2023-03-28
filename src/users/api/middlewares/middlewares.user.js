@@ -662,10 +662,6 @@ export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
 export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   try {
     const { user } = req;
-    if (user.address === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated address in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('address'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
-    }
     if (user.income_range === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated income range in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('income range'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);

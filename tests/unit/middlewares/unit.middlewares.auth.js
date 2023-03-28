@@ -33,6 +33,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfUserAccountNotVerified', async() => {
+      const req = { user: '' };
+      const data = await AuthMiddleware.checkIfUserAccountNotVerified(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call verifyVerificationToken', async() => {
       const req = { body: '' };
       const data = await AuthMiddleware.verifyVerificationToken(req, res, next);

@@ -32,6 +32,15 @@ router.post(
 );
 
 router.post(
+  '/verify-new-device',
+  Model(Schema.verifyPhoneNumber, 'payload'),
+  AuthMiddleware.verifyVerificationToken,
+  UserMiddleware.validateUnAuthenticatedUser('verify'),
+  AuthMiddleware.checkIfUserAccountNotVerified,
+  AuthController.verifyAccount
+);
+
+router.post(
   '/complete-profile',
   AuthMiddleware.validateAuthToken,
   Model(Schema.completeProfile, 'payload'),
@@ -43,9 +52,11 @@ router.post(
 
 router.post(
   '/login',
+  Model(Schema.deviceType, 'query'),
   Model(Schema.login, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('login'),
   AuthMiddleware.comparePassword,
+  AuthMiddleware.compareDeviceToken,
   AuthController.login
 );
 

@@ -836,7 +836,7 @@ describe('Admin Auth', () => {
           permissions: [ 
             {
               resource_id: process.env.SEEDFI_ADMIN_USER_RESOURCE_ID,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             }
           ]
         })
@@ -862,7 +862,7 @@ describe('Admin Auth', () => {
           permissions: [ 
             {
               resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}78798i`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             }
           ]
         })
@@ -888,15 +888,15 @@ describe('Admin Auth', () => {
           permissions: [ 
             {
               resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             }
           ]
         })
@@ -922,19 +922,19 @@ describe('Admin Auth', () => {
           permissions: [ 
             {
               resource_id: `${process.env.SEEDFI_ADMIN_USER_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID}`,
-              user_permissions:  [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             },
             {
               resource_id: `${process.env.SEEDFI_ADMIN_ROLE_MANAGEMENT_RESOURCE_ID}`,
-              user_permissions:  [ 'read' ]
+              user_permissions: [ 'read' ]
             }
           ]
         })
