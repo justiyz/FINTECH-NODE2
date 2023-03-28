@@ -5,8 +5,9 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { formatUserIncomeRange, generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
-import { sendPushNotification, sendClusterNotification, sendMulticastPushNotification } from '../services/services.firebase';
+import { sendPushNotification, sendClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
 import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 
@@ -58,11 +59,13 @@ export const compareUserIncomeRange = async(req, res, next) => {
     const { lowerBoundIncome, upperBoundIncome } = formatUserIncomeRange(user.income_range);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user income range from DB properly formatted compareUserIncomeRange.middlewares.cluster.js`);
     if (parseFloat(upperBoundIncome) >= parseFloat(body.minimum_monthly_income || cluster.minimum_monthly_income)) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is greater than or equal to cluster minimum income compareUserIncomeRange.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is greater than or equal to cluster minimum income 
+      compareUserIncomeRange.middlewares.cluster.js`);
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is less than cluster minimum income compareUserIncomeRange.middlewares.cluster.js`);
-    return ApiResponse.error(res, enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING, enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
+    return ApiResponse.error(res, enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING, 
+      enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
   } catch (error) {
     error.label = enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE;
     logger.error(`comparing cluster income range failed::${enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE}`, error.message);
@@ -107,20 +110,34 @@ export const confirmUserClusterInvitation = async(req, res, next) => {
 export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res, next) => {
   try {
     const {user, cluster } = req;
-    if ((type === 'join' || type === 'request') && ((dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members)))) {
+    if (
+      (type === 'join' || type === 'request') && 
+      (
+        (dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || 
+        (Number(cluster.maximum_members) === Number(cluster.current_members))
+      )
+    ) {
       const activityType = type === 'request' ? 49 : 52;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster 
+      confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
     }
-    if((type === 'invite') && ((dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members)))) {
+    if (
+      (type === 'invite') && 
+        (
+          (dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || 
+          (Number(cluster.maximum_members) === Number(cluster.current_members))
+        )
+    ) {
       const activityType = req.body.type === 'email' ? 54 : 55;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       cluster can no longer accept new member confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is still open for members to join or added confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is still open for members to join or added 
+    confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
     return next();
   } catch (error) {
     error.label = enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE;
@@ -179,7 +196,8 @@ export const checkIfAlreadyClusterMember = (type = '') => async(req, res, next) 
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_ALREADY_CLUSTER_MEMBER_MIDDLEWARE);
     }
     if (type === 'confirm' && !clusterMember) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join checkIfAlreadyClusterMember.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join 
+      checkIfAlreadyClusterMember.middlewares.cluster.js`);
       return next();
     }
     if (type === 'authenticate' && !clusterMember) {
@@ -212,18 +230,22 @@ export const checkIfClusterDecisionTicketExists = async(req, res, next) => {
     const [ existingTicket ] = await processAnyData(clusterQueries.fetchClusterDecisionTicketByTicketId, [ ticket_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if ticket is existing in the DB checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
     if (existingTicket) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket is existing in the DB checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket is existing in the DB 
+      checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
       const [ clusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ existingTicket.cluster_id, user.user_id ]);
       if (clusterMember) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user belongs to cluster where ticket is raised checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user belongs to cluster where ticket is raised 
+        checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
         req.votingTicketDetails = existingTicket;
         req.clusterMember = clusterMember;
         return next();
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to cluster where ticket is raised checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to cluster where ticket is raised 
+      checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket does not exist in the DB checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket does not exist in the DB 
+    checkIfClusterDecisionTicketExists.middlewares.cluster.js`);
     return ApiResponse.error(res, enums.CLUSTER_DECISION_TICKET_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_IF_CLUSTER_DECISION_TICKET_EXISTS_MIDDLEWARE;
@@ -249,7 +271,8 @@ export const checkIfUserHasPreviouslyDecided = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has previously decided checkIfUserHasPreviouslyDecided.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_PREVIOUSLY_DECIDED, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_HAS_PREVIOUSLY_DECIDED_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not previously decided and can proceed to decide checkIfUserHasPreviouslyDecided.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not previously decided and can proceed to decide 
+    checkIfUserHasPreviouslyDecided.middlewares.cluster.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_USER_HAS_PREVIOUSLY_DECIDED_MIDDLEWARE;
@@ -270,10 +293,12 @@ export const checkIClusterDecisionHasBeenConcluded = async(req, res, next) => {
   try {
     const { votingTicketDetails, user } = req;
     if (votingTicketDetails.is_concluded) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket has been decided and ticket fulfilled checkIClusterDecisionHasBeenConcluded.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket has been decided and ticket fulfilled 
+      checkIClusterDecisionHasBeenConcluded.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.VOTING_DECISION_ALREADY_CONCLUDED, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CLUSTER_DECISION_HAS_BEEN_CONCLUDED_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket is still open and not yet fulfilled checkIClusterDecisionHasBeenConcluded.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision ticket is still open and not yet fulfilled 
+    checkIClusterDecisionHasBeenConcluded.middlewares.cluster.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_CLUSTER_DECISION_HAS_BEEN_CONCLUDED_MIDDLEWARE;
@@ -316,62 +341,92 @@ export const checkIfPublicOrPrivateCluster = (type = '') => async(req, res, next
  * @returns { JSON } - A JSON with empty data field
  * @memberof ClusterMiddleware
  */
-export const userTakesRequestToJoinClusterDecision = async (req, res, next) => {
+export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
   const { params: { ticket_id }, votingTicketDetails, cluster, clusterMember, body, user } = req;
   const activityType = body.decision === 'yes' ? 50 : 51;
   try {
     if (votingTicketDetails.type === 'join cluster') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision is for ${votingTicketDetails.type} userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster decision is for ${votingTicketDetails.type} 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const [ requestingNMemberDetails ] = await processAnyData(userQueries.getUserByUserId, [ votingTicketDetails.ticket_raised_by ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: details of requesting cluster member fetched from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      if ((dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || (Number(cluster.maximum_members) === Number(cluster.current_members))) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: details of requesting cluster member fetched from the DB 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      if (
+        (dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || 
+          (Number(cluster.maximum_members) === Number(cluster.current_members))
+      ) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster 
+        userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestClusterJoiningClosed(cluster.name), requestingNMemberDetails.fcm_token);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member 
+        userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
-      const [ currentClusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a current cluster member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      const [ currentClusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, 
+        [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a current cluster member 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       if (currentClusterMember) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting user already belongs to this cluster userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting user already belongs to this cluster 
+        userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member cannot be added and ticket is closed userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member cannot be added and ticket is closed 
+        userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
       await processOneOrNoneData(clusterQueries.recordUserVoteDecision, [ ticket_id, votingTicketDetails.cluster_id, user.user_id, clusterMember.is_admin, body.decision ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user voting decision recorded successfully userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user voting decision recorded successfully 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const currentVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes counted from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes counted from the DB 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
       const [ hasAdminVotedYes ] = await processAnyData(clusterQueries.checkIfAdminHasVotedYes, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if admin has voted from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const currentNonAdminYesVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketYesVotesByNonAdmins, [ ticket_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes by non cluster admin counted from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      const [ formerClusterMember ] = await processAnyData(clusterQueries.fetchDeactivatedClusterMemberDetails, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a one time cluster member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      if ((Number(votingTicketDetails.current_cluster_members) === 1 && clusterMember.is_admin && body.decision === 'yes')  || // since admin is the only current team member, only admin can accept join request
-          ((Number(votingTicketDetails.current_cluster_members) > 1) && (hasAdminVotedYes) && (Number(currentNonAdminYesVoteCount.count) >= 1))) {  // for a cluster of more than one member, the admin and another cluster member should accept request
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin and or another cluster member has accepted requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes by non cluster admin counted from the DB 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      const [ formerClusterMember ] = await processAnyData(clusterQueries.fetchDeactivatedClusterMemberDetails, 
+        [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a one time cluster member 
+      userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      if (
+        (Number(votingTicketDetails.current_cluster_members) === 1 && clusterMember.is_admin && body.decision === 'yes')  || 
+        // since admin is the only current team member, only admin can accept join request
+          ((Number(votingTicketDetails.current_cluster_members) > 1) && (hasAdminVotedYes) && (Number(currentNonAdminYesVoteCount.count) >= 1))
+      ) {  // for a cluster of more than one member, the admin and another cluster member should accept request
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin and or another cluster member has accepted requesting member 
+        userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await Promise.all([
-          formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]) : processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
+          formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]) : 
+            processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
           processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ votingTicketDetails.cluster_id ]),
           processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
-        sendClusterNotification(requestingNMemberDetails, cluster, { is_admin: false }, `${requestingNMemberDetails.first_name} ${requestingNMemberDetails.last_name} joined your cluster`, 'join-cluster', {});
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestAccepted(cluster.name), requestingNMemberDetails.fcm_token);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+        sendUserPersonalNotification(requestingNMemberDetails, 'Join cluster request accepted', PersonalNotifications.joinClusterRequestAccepted(cluster), 
+          'join-cluster-successful', {  });
+        sendClusterNotification(requestingNMemberDetails, cluster, { is_admin: false }, 
+          `${requestingNMemberDetails.first_name} ${requestingNMemberDetails.last_name} joined your cluster`, 'join-cluster', {});
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member 
+        userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
         userActivityTracking(req.user.user_id, 52, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);
       }
-      if ((clusterMember.is_admin && body.decision === 'no') || (Number(currentVoteCount.count) === Number(votingTicketDetails.current_cluster_members))) { // since admin must accept for requesting member to be accepted
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin has either rejected requesting member or the request does not meet with the acceptance criteria of one member and admin userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+      if ((clusterMember.is_admin && body.decision === 'no') || (Number(currentVoteCount.count) === Number(votingTicketDetails.current_cluster_members))) { 
+        // since admin must accept for requesting member to be accepted
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin has either rejected requesting member or the request does not meet with the 
+        acceptance criteria of one member and admin userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestRejected(cluster.name), requestingNMemberDetails.fcm_token);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+        sendUserPersonalNotification(requestingNMemberDetails, 'Join cluster request rejected', PersonalNotifications.joinClusterRequestRejected(cluster), 
+          'join-cluster-rejected', {  });
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member 
+        userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
         userActivityTracking(req.user.user_id, 53, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);
@@ -428,15 +483,16 @@ export const generateClusterUniqueCode = async(req, res, next) => {
  */
 export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
   try {
-    const {user, params:{cluster_id}, cluster:{ members}} = req;
+    const {user, params: {cluster_id}, cluster: { members}} = req;
     const [ memberData ] = members;
     const [ clusterMember ] = await processAnyData(clusterQueries.checkIfClusterMemberAlreadyExist, [ memberData.user_id, cluster_id  ]);
-    if(clusterMember) {
+    if (clusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       decoded that user is already a cluster member checkIfInviteeAlreadyExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join checkIfInviteeAlreadyExist.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to this cluster yet, so can join 
+    checkIfInviteeAlreadyExist.middlewares.cluster.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_INVITEE_ALREADY_EXIST_MIDDLEWARE;
@@ -453,15 +509,17 @@ export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof ClusterMiddleware
  */
-export const checkIfUserCanLeaveCluster =  async (req, res, next) => {
+export const checkIfUserCanLeaveCluster =  async(req, res, next) => {
   try {
     const { cluster, clusterMember, user } = req;
-    if(clusterMember.loan_status === 'active'){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan in the cluster checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
+    if (clusterMember.loan_status === 'active') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan in the cluster 
+      checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE);
     }
-    if(clusterMember.is_admin && Number(cluster.current_members) > 1) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin and not the last member checkIfUserIsAnAdmin.middlewares.cluster.js`);
+    if (clusterMember.is_admin && Number(cluster.current_members) > 1) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is an admin and not the last member 
+      checkIfUserIsAnAdmin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_IS_AN_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE);
     }
     return next();
@@ -485,7 +543,7 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
     const {user} = req;
     const  [ clusterAdmin ]  = await processAnyData(clusterQueries.checkIfClusterMemberIsAdmin, 
       [ user.user_id, req.params.cluster_id  ]);
-    if(!clusterAdmin){
+    if (!clusterAdmin) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       the decoded user is not a cluster member admin  checkIfClusterMemberIsAdmin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.CLUSTER_MEMBER_NOT_ADMIN, enums.HTTP_CONFLICT, enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE);
@@ -507,11 +565,12 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
  * @memberof ClusterMiddleware
  */
 
-export const checkIfClusterIsOnActiveLoan = async (req, res, next) => {
+export const checkIfClusterIsOnActiveLoan = async(req, res, next) => {
   try {
     const { user, cluster } = req;
-    if(cluster.loan_status === 'active'){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster on an active loan in the cluster checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
+    if (cluster.loan_status === 'active') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster on an active loan in the cluster 
+      checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.CLUSTER_IS_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE);
     }
     return next();
@@ -531,19 +590,22 @@ export const checkIfClusterIsOnActiveLoan = async (req, res, next) => {
  * @memberof ClusterMiddleware
  */
 
-export const checkIfThereIsMoreThanOnePersonInTheCluster = async (req, res, next) => {
+export const checkIfThereIsMoreThanOnePersonInTheCluster = async(req, res, next) => {
   try {
     const { user, body, cluster } = req;
-    if( (cluster.current_members > 1) && (body.maximum_members < cluster.current_members)){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
+    if ((cluster.current_members > 1) && (body.maximum_members < cluster.current_members)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster 
+      checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('maximum numbers'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE);
     }
-    if( (cluster.current_members > 1) && (body.loan_goal_target)){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
+    if ((cluster.current_members > 1) && (body.loan_goal_target)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster 
+      checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('loan goal target'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE);
     }
-    if( (cluster.current_members > 1) && (body.minimum_monthly_income)){
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
+    if ((cluster.current_members > 1) && (body.minimum_monthly_income)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms there is more than one person in the cluster 
+      checkIfThereIsMoreThanOnePersonInTheCluster.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_CAN_NOT_EDIT('minimum monthly income'),enums.HTTP_FORBIDDEN, enums.CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE);
     }
     return next();
@@ -573,17 +635,19 @@ export const requestToDeleteCluster = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user that raised ticket trying to vote requestToDeleteCluster.middleware.cluster.js`);
         return ApiResponse.error(res, enums.USER_CANNOT_TAKE_DECISION_ON_THIS_TICKET, enums.HTTP_FORBIDDEN, enums.REQUEST_TO_DELETE_CLUSTER_MIDDLEWARE);
       }
-      const payload = ClusterPayload.recordUserVoteDecision(body, cluster, user, ticket_id );
+      const payload = ClusterPayload.recordUserVoteDecision(body, cluster, user, ticket_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: vote recorded requestToDeleteCluster.middleware.cluster.js`);
       if (body.decision === 'yes') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion request requestToDeleteCluster.middleware.cluster.js`);
         await processOneOrNoneData(clusterQueries.recordUserVoteDecision, payload);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accepted to delete cluster`, 'delete-cluster', {});
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member accept to delete cluster group and all notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member accept to delete cluster group and all notifications sent successfully 
+        requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
         const [ voteCount ] = await processAnyData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
-        if(Number(votingTicketDetails.current_cluster_members) === Number(voteCount.count)) {
-          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster requestToDeleteCluster.middleware.cluster.js`);
+        if (Number(votingTicketDetails.current_cluster_members) === Number(voteCount.count)) {
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirm that all users have voted and about to delete cluster 
+          requestToDeleteCluster.middleware.cluster.js`);
           const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
           await Promise.allSettled([
             processAnyData(clusterQueries.removeClusterMembers, [ req.cluster.cluster_id ]),
@@ -596,16 +660,19 @@ export const requestToDeleteCluster = async(req, res, next) => {
           userActivityTracking(req.user.user_id, 62, 'success');
           return ApiResponse.success(res, enums.CLUSTER_DELETED_SUCCESSFULLY, enums.HTTP_OK, { cluster_id: cluster.cluster_id  });
         }
-        return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id:  cluster.cluster_id });
+        return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, 
+          { user_id: user.user_id, decision: 'accepted', cluster_id: cluster.cluster_id });
       }
-      if(body.decision === 'no') {
+      if (body.decision === 'no') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion requestToDeleteCluster.middleware.cluster.js`);
         await processAnyData(clusterQueries.recordUserVoteDecision, payload);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member has declined request to delete cluster and notifications sent successfully requestToDeleteCluster.middleware.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member has declined request to delete cluster and notifications sent successfully 
+        requestToDeleteCluster.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
-        return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'declined', cluster_id:  cluster.cluster_id });
+        return ApiResponse.success(res, enums.REQUEST_TO_DELETE_CLUSTER(decisionType), enums.HTTP_OK, 
+          { user_id: user.user_id, decision: 'declined', cluster_id: cluster.cluster_id });
       }
     }
     return next();
@@ -633,12 +700,13 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
     if (votingTicketDetails.type === 'cluster admin') {
       const activityType = req.body.decision === 'yes' ? 65 : 66;
       const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
-      if(votingTicketDetails.suggested_cluster_admin !== user.user_id){
+      if (votingTicketDetails.suggested_cluster_admin !== user.user_id) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user id dose not equal suggested user id newAdminClusterAcceptance.middleware.cluster.js`);
         return ApiResponse.error(res, enums.USER_CANNOT_PERFORM_ACTION, enums.HTTP_FORBIDDEN, enums.NEW_ADMIN_CLUSTER_ACCEPTANCE_MIDDLEWARE);
       }
       if (body.decision === 'yes') {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} request to become new cluster admin newAdminClusterAcceptance.middleware.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} request to become new cluster admin 
+        newAdminClusterAcceptance.middleware.cluster.js`);
         await Promise.all([
           processOneOrNoneData(clusterQueries.newAdmin, [ votingTicketDetails.cluster_id, user.user_id ]),
           processOneOrNoneData(clusterQueries.setAdmin, [ votingTicketDetails.cluster_id, user.user_id ]),
@@ -646,17 +714,20 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
           processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accepted to become new cluster admin`, 'admin-cluster', {});
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user accepted cluster admin role and all notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user accepted cluster admin role and all notifications sent successfully 
+        newAdminClusterAcceptance.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, 67, 'success');
-        return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, { user_id:user.user_id, decision: 'accepted', cluster_id: cluster.cluster_id });
+        return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, 
+          { user_id: user.user_id, decision: 'accepted', cluster_id: cluster.cluster_id });
       }
       await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} suggest to become an admin  newAdminClusterAcceptance.middleware.cluster.js`);
       sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined to become admin`, 'admin-cluster', {});
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user declined taking over as new admin cluster and notifications sent successfully  newAdminClusterAcceptance.middleware.cluster.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user declined taking over as new admin cluster and notifications sent successfully  
+      newAdminClusterAcceptance.middleware.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'success');
       return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK, { 
-        user_id:user.user_id, decision: 'declined', cluster_id: cluster.cluster_id
+        user_id: user.user_id, decision: 'declined', cluster_id: cluster.cluster_id
       });
     }
     return next();

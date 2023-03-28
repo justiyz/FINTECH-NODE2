@@ -1,5 +1,7 @@
 {
-    "defaultEnv": "development",
+    "defaultEnv": {
+      "ENV": "SEEDFI_NODE_ENV"
+    },
     "development": {
       "ENV": "SEEDFI_DEV_DATABASE_URL"
     },

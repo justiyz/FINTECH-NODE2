@@ -18,6 +18,7 @@ export const PAYMENT_RECORD_NOT_FOUND = 'Payment transaction record not found';
 export const REFUND_NOT_INITIATED_FOR_PAYMENT_TRANSACTION = 'Refund not initiated for payment transaction';
 export const PAYMENT_EARLIER_RECORDED = 'Payment transaction status has been previously recorded';
 export const EXPIRED_VERIFICATION_TOKEN = 'Verification OTP is expired';
+export const ACCOUNT_NOT_PREVIOUSLY_VERIFIED = 'User account has not been previously verified';
 export const NO_TOKEN = 'Please provide a token';
 export const INVALID_TOKEN = 'Invalid/Expired Token';
 export const SESSION_EXPIRED = 'Session expired';
@@ -52,6 +53,8 @@ export const TRANSACTION_REFUND_INITIATED_FAILED = 'Transaction refund initiatio
 export const INVALID_EMAIL_ADDRESS = 'Invalid email/password'; // mobile listens for this error message to perform an action be careful when changing
 export const INVALID_PASSWORD = 'Invalid email or password';
 export const INVALID_PIN = 'Invalid pin';
+export const DEVICE_TOKEN_REQUIRED = 'device token is required in payload';
+export const NEW_DEVICE_DETECTED = 'New device login, verify account with OTP sent to your registered phone number';
 export const IS_VALID_CREDENTIALS = (type) => `New ${type} cannot be the same as old ${type}`;
 export const PASSWORD_RESET = 'Password reset successful';
 export const USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY = 'User selfie image updated successfully';
@@ -62,7 +65,7 @@ export const ACCOUNT_DETAILS_PREVIOUSLY_SAVED = 'Account details previously save
 export const BANK_ACCOUNTS_LIMITS_REACHED = 'User cannot save more than 3 bank accounts';
 export const DEBIT_CARDS_LIMITS_REACHED = 'User cannot save more than 2 debit cards';
 export const USER_IS_ON_AN_ACTIVE_LOAN = 'User is on an active loan, action cannot be performed';
-export const USER_ADVANCED_KYC_NOT_COMPLETED = (type) => `kindly update you ${type} in profile to continue application`;
+export const USER_ADVANCED_KYC_NOT_COMPLETED = (type) => `kindly update your ${type} in profile to continue application`;
 export const ACCOUNT_DETAILS_NOT_EXISTING = 'Account details does not exist';
 export const ACCOUNT_ALREADY_DEFAULT_ACCOUNT = 'Account is already default account';
 export const ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT = 'Account is already disbursement account';
@@ -117,7 +120,8 @@ export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application
 export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `User currently have ${type}, thus cannot apply for another`;
 export const LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS = (type) => `Loan application is already ${type}, thus cannot be cancelled`;
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
-export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON = 'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
+export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON = 
+'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL = 'User loan application disbursement initiated successful';
 export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application cancelled successful';
 export const USER_LOAN_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan details fetched successful`;

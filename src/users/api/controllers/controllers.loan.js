@@ -40,7 +40,8 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     }
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, 
+      [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn);
     const result = await personalLoanApplicationEligibilityCheck(payload);
@@ -53,7 +54,8 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     }
     const { data } = result;
     if (data.final_decision === 'DECLINED') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan checkUserLoanEligibility.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan 
+      checkUserLoanEligibility.controllers.loan.js`);
       const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(data);
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication, declinedDecisionPayload);
       userActivityTracking(req.user.user_id, 37, 'fail');
@@ -61,33 +63,38 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan 
+    checkUserLoanEligibility.controllers.loan.js`);
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount);
     const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
     if (data.final_decision === 'MANUAL') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval checkUserLoanEligibility.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval 
+      checkUserLoanEligibility.controllers.loan.js`);
       const manualDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'in review');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, manualDecisionPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
       const offerLetterData = await generateOfferLetter(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
-      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
+      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 
+        updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
       userActivityTracking(req.user.user_id, 37, 'success');
       userActivityTracking(req.user.user_id, 38, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
     }
     if (data.final_decision === 'APPROVED') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval 
+      checkUserLoanEligibility.controllers.loan.js`);
       const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'approved');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
       const offerLetterData = await generateOfferLetter(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
-      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, updatedLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
+      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 
+        updatedLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
       userActivityTracking(req.user.user_id, 37, 'success');
       userActivityTracking(req.user.user_id, 39, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
@@ -135,7 +142,8 @@ export const initiateLoanDisbursement = async(req, res, next) => {
   try {
     const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication } = req;
     const reference = uuidv4();
-    await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference, 'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
+    await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference, 
+      'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment initialized in the DB initiateLoanDisbursement.controllers.loan.js`);
     const result = await initiateTransfer(userTransferRecipient, existingLoanApplication, reference);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: transfer initiate via paystack returns response initiateLoanDisbursement.controllers.loan.js`);
@@ -283,28 +291,32 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
   try {
     const { user, params: { loan_id }, existingLoanApplication, query: { payment_type } } = req;
     if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible initiateManualLoanRepayment.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible 
+      initiateManualLoanRepayment.controllers.loan.js`);
       const reference = uuidv4();
       const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan next repayment details fetched initiateManualLoanRepayment.controllers.loan.js`);
       const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount) : parseFloat(nextRepaymentDetails.total_payment_amount);
       const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualLoanRepayment.controllers.loan.js`);
-      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`, 'user repays out of or all of existing personal loan facility', loan_id ]);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`, 
+        'user repays out of or all of existing personal loan facility', loan_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initiateManualLoanRepayment.controllers.loan.js`);
       const result = await initializeCardPayment(user, paystackAmountFormatting, reference);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response initiateManualLoanRepayment.controllers.loan.js`);
       if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualLoanRepayment.controllers.loan.js`);
         userActivityTracking(req.user.user_id, 71, 'success');
-        return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data );
+        return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 71, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible initiateManualLoanRepayment.controllers.loan.js`);
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible 
+    initiateManualLoanRepayment.controllers.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), 
+      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
   } catch (error) {
     userActivityTracking(req.user.user_id, 71, 'fail');
     error.label = enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER;
@@ -326,18 +338,22 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
   const activityType = payment_channel === 'card' ? 71: 73;
   try {
     if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible 
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       const reference = uuidv4();
       const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan next repayment details fetched initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount) : parseFloat(nextRepaymentDetails.total_payment_amount);
       const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
-      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`, `user repays part of or all of existing personal loan facility via ${payment_channel}`, loan_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`, 
+        `user repays part of or all of existing personal loan facility via ${payment_channel}`, loan_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB 
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) : 
         await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response 
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
@@ -355,13 +371,16 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized 
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible 
+    initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
     userActivityTracking(req.user.user_id, activityType, 'fail');
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), 
+      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
   } catch (error) {
     userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER;
@@ -397,7 +416,8 @@ export const submitPaymentOtp = async(req, res, next) => {
     if (result.response && result.response.status === 400) {
       return ApiResponse.error(res, enums.PAYMENT_OTP_REJECTED, enums.HTTP_BAD_REQUEST, enums.SUBMIT_PAYMENT_OTP_CONTROLLER);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized 
+    initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 77, 'fail');
     return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.SUBMIT_PAYMENT_OTP_CONTROLLER);
   } catch (error) {

@@ -53,7 +53,8 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting); // this is because paystack will not process transaction greater than 1 Million
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting); 
+    // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -68,7 +69,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
         reference,
         channels: [ 'card' ],
         metadata: { 
-          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is provided by the mobile app developer
+          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is a paystack value "https://standard.paystack.co/close"
         }
       }
     };
@@ -179,7 +180,8 @@ const initiateTransfer = async(userTransferRecipient, existingLoanApplication, r
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.initiatePaystackBankTransferTestResponse(userTransferRecipient, existingLoanApplication, reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested); // this is because paystack will not process transaction greater than 1 Million
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested); 
+    // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transfer`,
@@ -211,7 +213,8 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
     const bankCodeType = SEEDFI_NODE_ENV === 'development' ? '057' : bankAccountDetails.bank_code;
     const bankAccountNumberChoice = SEEDFI_NODE_ENV === 'development' ? '0000000000' : bankAccountDetails.account_number;
     const userBirthdayChoice = SEEDFI_NODE_ENV === 'development' ? '1995-12-23' : user.date_of_birth;
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting); // this is because paystack will not process transaction greater than 1 Million
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge`,
@@ -233,7 +236,8 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to paystack API to initialize loan repayment charge via bank account failed::${enums.PAYSTACK_INITIATE_BANK_ACCOUNT_CHARGE_FOR_LOAN_REPAYMENT_SERVICE}`, error.message);
+    logger.error(`Connecting to paystack API to initialize loan repayment charge via bank account 
+    failed::${enums.PAYSTACK_INITIATE_BANK_ACCOUNT_CHARGE_FOR_LOAN_REPAYMENT_SERVICE}`, error.message);
     return error;
   }
 };
@@ -243,7 +247,8 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(paystackAmountFormatting.amount_requested); // this is because paystack will not process transaction greater than 1 Million
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(paystackAmountFormatting.amount_requested); 
+    // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge`,
@@ -261,7 +266,8 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to paystack API to initialize loan repayment charge via tokenized card failed::${enums.PAYSTACK_INITIATE_BANK_ACCOUNT_CHARGE_FOR_LOAN_REPAYMENT_SERVICE}`, error.message);
+    logger.error(`Connecting to paystack API to initialize loan repayment charge via tokenized card 
+    failed::${enums.PAYSTACK_INITIATE_BANK_ACCOUNT_CHARGE_FOR_LOAN_REPAYMENT_SERVICE}`, error.message);
     return error;
   }
 };

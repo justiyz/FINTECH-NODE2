@@ -73,7 +73,7 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_ADVANCED_KYC_NOT_COMPLETED('address'));
+          expect(res.body.message).to.equal(enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of dependents'));
           done();
         });
     });

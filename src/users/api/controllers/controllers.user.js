@@ -21,7 +21,7 @@ const { SEEDFI_NODE_ENV } = config;
  * @returns { JSON } - A JSON with the users updated fcm token
  * @memberof UserController
  */
-export const updateFcmToken = async (req, res, next) => {
+export const updateFcmToken = async(req, res, next) => {
   try {
     const {user, body} = req;
     await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token ]);
@@ -30,7 +30,7 @@ export const updateFcmToken = async (req, res, next) => {
       user_id: user.user_id,
       fcm_token: body.fcm_token
     };
-    return ApiResponse.success(res, enums.USER_FCM_TOKEN_UPDATED, enums.HTTP_OK, data );
+    return ApiResponse.success(res, enums.USER_FCM_TOKEN_UPDATED, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.UPDATE_USER_FCM_TOKEN_CONTROLLER;
     logger.error(`user token update failed::${enums.UPDATE_USER_FCM_TOKEN_CONTROLLER}`, error.message);
@@ -46,7 +46,7 @@ export const updateFcmToken = async (req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof UserController
  */
-export const updateUserRefreshToken = async (req, res, next) => {
+export const updateUserRefreshToken = async(req, res, next) => {
   try {
     const { user } = req;
     const token = await Hash.generateAuthToken(user);
@@ -77,7 +77,7 @@ export const updateUserRefreshToken = async (req, res, next) => {
  * @returns {object} - Returns a successful image upload response
  * @memberof UserController
  */
-export const updateSelfieImage = async (req, res, next) => {
+export const updateSelfieImage = async(req, res, next) => {
   try {
     const { user, body } = req;
     const token =  Hash.generateRandomString(50);
@@ -88,7 +88,8 @@ export const updateSelfieImage = async (req, res, next) => {
       return updateSelfieImage(req, res, next);
     }
     const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, body.image_url.trim(), token ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database updateSelfieImage.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database 
+    updateSelfieImage.controllers.user.js`);
     await MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp: token, ...user });
     userActivityTracking(user.user_id, 17, 'success');
     return ApiResponse.success(res, enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updateUserSelfie);
@@ -107,7 +108,7 @@ export const updateSelfieImage = async (req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof UserController
  */
-export const updateBvn = async (req, res, next) => {
+export const updateBvn = async(req, res, next) => {
   try {
     const { body: { bvn }, user } = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
@@ -438,7 +439,7 @@ export const getProfile = async(req, res, next) => {
     delete user.refresh_token;
     user.is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
     return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
-  } catch (error){
+  } catch (error) {
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
     logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
     return next(error);

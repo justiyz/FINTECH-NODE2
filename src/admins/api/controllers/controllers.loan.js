@@ -117,10 +117,10 @@ export const loanApplicationDetails = async(req, res, next) => {
  * @memberof AdminUserController
  */
 
-export const fetchLoans = async (req, res, next) => {
+export const fetchLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    if (query.export){
+    if (query.export) {
       const payload = loanPayload.fetchAllLoans(query);
       const loans = await processAnyData(loanQueries.fetchAllLoans, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched loans from the DB
@@ -162,7 +162,7 @@ export const fetchLoans = async (req, res, next) => {
  * @memberof AdminUserController
  */
 
-export const fetchRepaidLoans = async (req, res, next) => {
+export const fetchRepaidLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
     if (query.export) {

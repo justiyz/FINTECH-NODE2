@@ -91,7 +91,10 @@ export const uploadDocument = async(req, res, next) => {
     const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}${fileExt}`;
     if (config.SEEDFI_NODE_ENV === 'test') {
       req.document = encodeURIComponent(
-        await UserHash.encrypt({ document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc', document_extension: fileExt })
+        await UserHash.encrypt({ 
+          document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc',
+          document_extension: fileExt 
+        })
       );
       return next();
     }
@@ -183,7 +186,8 @@ export const checkIfUserBelongsToCluster = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user does not belong to this cluster adminCheckIfClusterMemberExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user belongs to this cluster and can proceed adminCheckIfClusterMemberExist.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user belongs to this cluster and can proceed 
+    adminCheckIfClusterMemberExist.middlewares.cluster.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE;

@@ -1,4 +1,4 @@
-export default{
+export default {
   fetchLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,

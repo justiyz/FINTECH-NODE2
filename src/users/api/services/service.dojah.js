@@ -7,7 +7,8 @@ const { SEEDFI_NODE_ENV } = config;
 
 const dojahBvnVerificationCheck = async(bvn, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') { // Dojah sandbox returns a fixed value, this is done for flexibility sake while testing and developing
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') { 
+      // Dojah sandbox returns a fixed value, this is done for flexibility sake while testing and developing
       return userMockedTestResponses.dojahVerifyBvnTestResponse(user, bvn);
     }
     const options = {

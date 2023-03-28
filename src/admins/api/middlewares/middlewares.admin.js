@@ -17,11 +17,13 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched admin details from the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
     if (!admin && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that admin's email is not existing in the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
-      return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Admin'), enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
+      return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Admin'),
+        enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
     }
-    if (admin && type === 'login' && (admin.status !== 'active' || admin.is_deleted )) {
+    if (admin && type === 'login' && (admin.status !== 'active' || admin.is_deleted)) {
       const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team'  : `${admin.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms that admin account is ${adminStatus} in the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms that admin account is ${adminStatus} in the database 
+      validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
     }
     req.admin = admin;
@@ -97,10 +99,12 @@ export const checkIfAuthenticatedAdmin = async(req, res, next) => {
   try {
     const { admin, adminUser } = req;
     if ((adminUser.admin_id === admin.admin_id) && (admin.role_type !== 'SADM')) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is same as authenticated non super admin checkIfAuthenticatedAdmin.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is same as authenticated non super admin 
+      checkIfAuthenticatedAdmin.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ACTION_NOT_ALLOWED_FOR_SELF_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is not the same as authenticated non super admin checkIfAuthenticatedAdmin.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is not the same as authenticated non super admin 
+    checkIfAuthenticatedAdmin.admin.middlewares.auth.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE;

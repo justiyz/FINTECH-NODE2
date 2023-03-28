@@ -8,7 +8,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
 import sendSMS from '../../config/sms';
-import { signupSms, resendSignupOTPSms, resetPinOTPSms } from '../../lib/templates/sms';
+import { signupSms, verifyAccountOTPSms, resetPinOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -42,7 +42,7 @@ export const signup = async(req, res, next) => {
     const payload = AuthPayload.register(body, otp, expireAt);
     const [ registeredUser ] = await processAnyData(authQueries.registerUser, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database signup.controllers.auth.js`);
-    if(body.referral_code) {
+    if (body.referral_code) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload signup.controllers.auth.js`);
       const [ referralPreviouslyRecorded ] = await processAnyData(authQueries.checkIfReferralPreviouslyRecorded, [ referringUserDetails.user_id, registeredUser.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: checked if referral has been previously recorded signup.controllers.auth.js`);
@@ -91,7 +91,7 @@ export const resendSignupOtp = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new verification token into the DB resendSignupOtp.controllers.auth.js`);
     const data = { user_id: user.user_id, otp, otpExpire: expirationTime };
     userActivityTracking(user.user_id, 6, 'success');
-    await sendSMS(body.phone_number, resendSignupOTPSms(data));
+    await sendSMS(body.phone_number, verifyAccountOTPSms(data));
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, data);
     }
@@ -126,13 +126,15 @@ export const verifyAccount = async(req, res, next) => {
     const myDate = new Date(tokenExpiration * 1000);
     const tokenExpireAt = dayjs(myDate);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully converted time from epoch time to a readable format verifyAccount.controllers.auth.js`);
-    const payload = AuthPayload.verifyUserAccount(user, refreshToken, body, referralCode);
-    await processAnyData(authQueries.verifyUserAccount, payload);
+    const payload = !referralCode ? AuthPayload.verifyUserAccountOnNewDevice(user, refreshToken, body) : 
+      AuthPayload.verifyUserAccountAfterSignup(user, refreshToken, body, referralCode);
+    !referralCode ? await processAnyData(authQueries.verifyUserAccountOnNewDevice, payload) : await processAnyData(authQueries.verifyUserAccountAfterSignup, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully verified users account in the database verifyAccount.controllers.auth.js`);
     const [ newUserDetails ] = await processAnyData(userQueries.getUserByPhoneNumber, [ user.phone_number ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database verifyAccount.controllers.auth.js`);
     userActivityTracking(user.user_id, 2, 'success');
-    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, token, tokenExpireAt });
+    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, 
+      { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 2, 'fail');
     error.label = enums.VERIFY_ACCOUNT_CONTROLLER;
@@ -310,7 +312,7 @@ export const resetPassword = async(req, res, next) => {
   try {
     const { user, body } = req;
     const hash = Hash.hashData(body.password.trim());
-    if(!user.is_verified_email){
+    if (!user.is_verified_email) {
       await processAnyData(authQueries.verifyUserEmail, [ user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       user email successfully verified. resetPassword.controllers.auth.js`);
