@@ -5,8 +5,9 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { formatUserIncomeRange, generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
-import { sendPushNotification, sendClusterNotification, sendMulticastPushNotification } from '../services/services.firebase';
+import { sendPushNotification, sendClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
 import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 
@@ -405,9 +406,11 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
           processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ votingTicketDetails.cluster_id ]),
           processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
+        sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestAccepted(cluster.name), requestingNMemberDetails.fcm_token);
+        sendUserPersonalNotification(requestingNMemberDetails, 'Join cluster request accepted', PersonalNotifications.joinClusterRequestAccepted(cluster), 
+          'join-cluster-successful', {  });
         sendClusterNotification(requestingNMemberDetails, cluster, { is_admin: false }, 
           `${requestingNMemberDetails.first_name} ${requestingNMemberDetails.last_name} joined your cluster`, 'join-cluster', {});
-        sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestAccepted(cluster.name), requestingNMemberDetails.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member 
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');
@@ -420,6 +423,8 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         acceptance criteria of one member and admin userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestRejected(cluster.name), requestingNMemberDetails.fcm_token);
+        sendUserPersonalNotification(requestingNMemberDetails, 'Join cluster request rejected', PersonalNotifications.joinClusterRequestRejected(cluster), 
+          'join-cluster-rejected', {  });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member 
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'success');

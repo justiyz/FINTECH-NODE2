@@ -1454,7 +1454,7 @@ describe('Clusters', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
           expect(res.body.data.tier).to.equal(0);
-          expect(res.body.data.phone_number).to.equal( '+2349075743312');
+          expect(res.body.data.phone_number).to.equal('+2349075743312');
           process.env.SEEDFI_USER_EIGHT_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_EIGHT_PHONE_NUMBER = res.body.data.phone_number;
           process.env.SEEDFI_USER_EIGHT_VERIFICATION_OTP = res.body.data.otp;
@@ -1476,7 +1476,7 @@ describe('Clusters', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data.status).to.equal('inactive');
           expect(res.body.data.tier).to.equal(0);
-          expect(res.body.data.phone_number).to.equal( '+2349067749313');
+          expect(res.body.data.phone_number).to.equal('+2349067749313');
           process.env.SEEDFI_USER_NINE_USER_ID = res.body.data.user_id;
           process.env.SEEDFI_USER_NINE_PHONE_NUMBER = res.body.data.phone_number;
           process.env.SEEDFI_USER_NINE_VERIFICATION_OTP = res.body.data.otp;
@@ -1488,7 +1488,8 @@ describe('Clusters', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_EIGHT_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1506,6 +1507,7 @@ describe('Clusters', () => {
           process.env.SEEDFI_USER_EIGHT_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_EIGHT_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_EIGHT_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_EIGHT_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -1514,7 +1516,8 @@ describe('Clusters', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_NINE_VERIFICATION_OTP,
-          fcm_token: Hash.generateRandomString(20)
+          fcm_token: Hash.generateRandomString(20),
+          device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1532,6 +1535,7 @@ describe('Clusters', () => {
           process.env.SEEDFI_USER_NINE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_NINE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_NINE_REFERRAL_CODE = res.body.data.referral_code;
+          process.env.SEEDFI_USER_NINE_DEVICE_TOKEN = res.body.data.device_token;
           done();
         });
     });
@@ -1589,6 +1593,9 @@ describe('Clusters', () => {
         .send({
           email: userNineProfile.email,
           password
+        })
+        .query({
+          type: 'web'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

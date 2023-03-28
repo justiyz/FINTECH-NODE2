@@ -2,6 +2,16 @@ export const requestToJoinClusterNotification = (user, cluster) => {
   return `${user.first_name} ${user.last_name} wants to join ${cluster.name} cluster loan group. Your approval is needed`;
 };
 
+export const joinClusterRequestAccepted = (cluster) => {
+  return `Your request to join ${cluster.name} cluster loan group as a cluster member has been examined and your request has been accepted.
+  Therefore, you are now a member of ${cluster.name} cluster loan group.`;
+};
+
+export const joinClusterRequestRejected = (cluster) => {
+  return `Your request to join ${cluster.name} cluster loan group as a cluster member has been examined and your request has been rejected.
+  We are sorry to inform you that you were not accepted to join ${cluster.name} cluster loan group.`;
+};
+
 export const inviteClusterMember = (data) => {
   return `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
 };

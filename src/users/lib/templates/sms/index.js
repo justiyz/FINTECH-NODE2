@@ -3,8 +3,8 @@ please use this OTP ${data.otp} to verify your phone number.\n
 This OTP expires in 10 minutes time.
 `;
 
-export const resendSignupOTPSms = (data) => `Hello, Please use the following OTP\n,
-${data.otp} to verify your phone number.\n
+export const verifyAccountOTPSms = (data) => `Hello, Please use the following OTP\n,
+${data.otp} to verify your account.\n
 This OTP expires in 10 minutes time.
 `;
 

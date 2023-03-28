@@ -69,7 +69,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
         reference,
         channels: [ 'card' ],
         metadata: { 
-          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is provided by the mobile app developer
+          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is a paystack value "https://standard.paystack.co/close"
         }
       }
     };

@@ -310,7 +310,7 @@ describe('Admin Loan management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          export:'true',
+          export: 'true',
           status: 'in review'
         })
         .end((err, res) => {
@@ -765,7 +765,7 @@ describe('Admin Loan management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          export:'true'
+          export: 'true'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);

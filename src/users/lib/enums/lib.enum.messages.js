@@ -18,6 +18,7 @@ export const PAYMENT_RECORD_NOT_FOUND = 'Payment transaction record not found';
 export const REFUND_NOT_INITIATED_FOR_PAYMENT_TRANSACTION = 'Refund not initiated for payment transaction';
 export const PAYMENT_EARLIER_RECORDED = 'Payment transaction status has been previously recorded';
 export const EXPIRED_VERIFICATION_TOKEN = 'Verification OTP is expired';
+export const ACCOUNT_NOT_PREVIOUSLY_VERIFIED = 'User account has not been previously verified';
 export const NO_TOKEN = 'Please provide a token';
 export const INVALID_TOKEN = 'Invalid/Expired Token';
 export const SESSION_EXPIRED = 'Session expired';
@@ -52,6 +53,8 @@ export const TRANSACTION_REFUND_INITIATED_FAILED = 'Transaction refund initiatio
 export const INVALID_EMAIL_ADDRESS = 'Invalid email/password'; // mobile listens for this error message to perform an action be careful when changing
 export const INVALID_PASSWORD = 'Invalid email or password';
 export const INVALID_PIN = 'Invalid pin';
+export const DEVICE_TOKEN_REQUIRED = 'device token is required in payload';
+export const NEW_DEVICE_DETECTED = 'New device login, verify account with OTP sent to your registered phone number';
 export const IS_VALID_CREDENTIALS = (type) => `New ${type} cannot be the same as old ${type}`;
 export const PASSWORD_RESET = 'Password reset successful';
 export const USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY = 'User selfie image updated successfully';

@@ -2362,7 +2362,7 @@ describe('User', () => {
         .patch(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_TWO_ID}/default-debit-card`)
         .set({
           'Content-Type': 'application/json',
-          Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -2465,7 +2465,7 @@ describe('User', () => {
         .delete(`/api/v1/user/settings/${process.env.SEEDFI_USER_ONE_DEBIT_CARD_ONE_ID}/debit-card`)
         .set({
           'Content-Type': 'application/json',
-          Authorization:  `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
