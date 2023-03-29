@@ -58,7 +58,6 @@ Repayment Mode:	Interest and principal repayments shall be repaid via debit card
 Processing Fee:     ${parseFloat(loanDetails.percentage_processing_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat
 Insurance Fee:      ${parseFloat(loanDetails.percentage_insurance_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat
 Advisory Fee:     ${parseFloat(loanDetails.percentage_advisory_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat
-Security
 
 CONDITIONS PRECEDENT TO DRAWDOWN
 1.  Submission of request for the facility. 

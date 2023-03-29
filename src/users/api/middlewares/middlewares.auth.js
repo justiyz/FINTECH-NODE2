@@ -338,9 +338,9 @@ export const compareDeviceToken = async(req, res, next) => {
       await sendSMS(user.phone_number, verifyAccountOTPSms(data));
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: New token successfully sent to user registered phone number compareDeviceToken.middlewares.auth.js`);
       if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
-        return ApiResponse.success(res, enums.NEW_DEVICE_DETECTED, enums.HTTP_UNAUTHORIZED, { otp, expirationTime });
+        return ApiResponse.success(res, enums.NEW_DEVICE_DETECTED, enums.HTTP_OK, { otp, expirationTime });
       }
-      return ApiResponse.success(res, enums.NEW_DEVICE_DETECTED, enums.HTTP_UNAUTHORIZED);
+      return ApiResponse.success(res, enums.NEW_DEVICE_DETECTED, enums.HTTP_OK);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token matches compareDeviceToken.middlewares.auth.js`);
     return next();
