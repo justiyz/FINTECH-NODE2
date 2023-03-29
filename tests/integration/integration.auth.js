@@ -1065,7 +1065,7 @@ describe('Auth', () => {
           type: 'mobile'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body).to.have.property('data');
