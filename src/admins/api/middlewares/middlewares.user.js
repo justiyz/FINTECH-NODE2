@@ -88,7 +88,7 @@ export const uploadDocument = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: to be uploaded file is existing uploadDocument.admin.middlewares.user.js`);
     const fileExt = path.extname(files.document.name);
-    const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}${fileExt}`;
+    const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}`;
     if (config.SEEDFI_NODE_ENV === 'test') {
       req.document = encodeURIComponent(
         await UserHash.encrypt({ 

@@ -1,7 +1,12 @@
 import Crypto from 'crypto';
 import dayjs from 'dayjs';
+import puppeteer from 'puppeteer';
 import { processOneOrNoneData } from '../../api/services/services.db';
 import userQueries from '../../api/queries/queries.user';
+import { processAnyData } from '../../api/services/services.db';
+import { offerLetterTemplate } from '../templates/offerLetter';
+import * as S3 from '../../api/services/services.s3';
+import config from '../../config';
 
 export const generateOtp = () => Crypto.randomInt(0, 1000000).toString().padStart(6, '0');
 export const generateReferralCode = (size) => {
@@ -98,4 +103,40 @@ export const collateUsersFcmTokensExceptAuthenticatedUser = async(users, user_id
   }));
   await Promise.all([ tokens ]);
   return [ tokens, otherClusterMembers ];
+};
+
+export const generateOfferLetterPDF = async(user, loanDetails) => {
+  const [ userOfferLetterDetail ] = await processAnyData(userQueries.userOfferLetterDetails, [ user.user_id ]);
+  const genderType = userOfferLetterDetail.gender === 'male' ? 'sir' : 'ma';
+
+  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType);
+  
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(html);
+  await page.emulateMediaType('screen');
+
+  const document = await page.pdf({
+    format: 'a4',
+    scale: 0.5,
+    printBackground: true
+  });
+
+  if (config.SEEDFI_NODE_ENV === 'test') {
+    const data = {
+      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
+      ServerSideEncryption: 'AES256',
+      Location: 'https://photow-profile-images.s3.us-west-2.amazonaws.com/files/user-documents/user-af4921b85068ed/loan-offer-letter/pers-loan-72c4918cc7ee1c30.pdf',
+      key: 'files/user-documents/user-af4922be97ef11edb0660fd1b85068ed/loan-offer-letter/pers-loan-72c4918cc7ee11eda5b8432fe1971c30.pdf',
+      Key: 'files/user-documents/user-af4922be97ef11edb0660fd1b85068ed/loan-offer-letter/pers-loan-72c4918cc7ee11eda5b8432fe1971c30.pdf',
+      Bucket: 'p-prof-img'
+    };
+    return data;
+  }
+
+  // upload to Amazon s3
+  const url = `files/user-documents/${user.user_id}/loan-offer-letter/${loanDetails.loan_id}.pdf`;
+  const payload = Buffer.from(document, 'binary');
+  const data  = await S3.uploadFile(url, payload, 'application/pdf');
+  return data;
 };
