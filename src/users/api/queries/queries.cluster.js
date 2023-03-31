@@ -401,7 +401,7 @@ export default {
   fetchClusterMembers: `
     SELECT 
       cluster_members.user_id,
-      CONCAT(users.first_name, ' ', users.last_name) AS name,
+      TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) AS name,
       to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined,
       cluster_members.is_admin,
       cluster_members.loan_status,

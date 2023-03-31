@@ -57,6 +57,7 @@ export default {
     processingFee: `₦${parseFloat(loanDetails.processing_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     advisoryFee: `₦${parseFloat(loanDetails.advisory_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     totalRepaymentAmount: `₦${parseFloat(loanDetails.total_repayment_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
-    monthlyRepayment: `₦${parseFloat(loanDetails.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
+    monthlyRepayment: `₦${parseFloat(loanDetails.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
+    offerLetterUrl: loanDetails.offer_letter_url
   })
 };

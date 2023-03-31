@@ -155,6 +155,12 @@ export const loanDisbursement = (data) => `
           </span>  
         </td>
     </tr>
+
+    <tr>
+        <td style="padding-bottom: 20px">
+           <span>click this <a href="${data.offerLetterUrl}">link</a>to view and download a copy of your loan offer letter</span>
+        </td>
+    </tr>
   
     <tr>
       <td>

@@ -332,7 +332,7 @@ export default {
         id,
         user_id,
         INITCAP(
-          CONCAT (first_name, ' ', last_name)
+          TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name))
         ) AS full_name,
         bvn,
         gender
