@@ -123,6 +123,7 @@ export const joinClusterOnInvitation = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster invitation joinClusterOnInvitation.controllers.cluster.js`);
     await processOneOrNoneData(clusterQueries.updateClusterInvitationStatus, [ user.user_id, cluster_id, false, true ]);
+    await processOneOrNoneData(clusterQueries.updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite, [ user.user_id, cluster_id, 'join cluster' ]);
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} declined to join your cluster`, 'join-cluster', {});
     sendUserPersonalNotification(adminUserDetails, `${cluster.name} cluster invitation declined`, PersonalNotifications.clusterInvitationDeclination(user, cluster), 
       'cluster-invitation-declined', { ...cluster });
