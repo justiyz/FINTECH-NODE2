@@ -80,7 +80,7 @@ export default {
         employment_type,
         status
       FROM users
-      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) OR $1 IS NULL) 
+      WHERE ((first_name ILIKE TRIM('rashidat') OR  middle_name ILIKE TRIM('') OR last_name ILIKE TRIM('')) OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL)
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
       AND (loan_status = $5 OR $5 IS NULL)
@@ -90,7 +90,7 @@ export default {
   fetchUsersCount: `
     SELECT COUNT(user_id) AS total_count
     FROM users
-    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) OR $1 IS NULL) 
+    WHERE ((first_name ILIKE TRIM('rashidat') OR  middle_name ILIKE TRIM('') OR last_name ILIKE TRIM('')) OR $1 IS NULL) 
     AND (status = $2 OR $2 IS NULL) 
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     AND (loan_status = $5 OR $5 IS NULL)

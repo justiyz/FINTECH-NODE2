@@ -137,7 +137,7 @@ export default {
     LEFT JOIN users
     ON personal_loan_payment_schedules.user_id = users.user_id
     WHERE personal_loan_payment_schedules.status = 'paid' 
-    AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) OR $1 IS NULL)  
+    AND ((first_name ILIKE TRIM($1) OR  middle_name ILIKE TRIM($1) OR last_name ILIKE TRIM($1)) OR $1 IS NULL)  
     AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
   `,
   
@@ -159,7 +159,7 @@ export default {
   ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
   WHERE personal_loan_payment_schedules.status = 'paid' 
   AND personal_loans.loan_id = personal_loan_payment_schedules.loan_id 
-  AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) OR $1 IS NULL) 
+  AND ((first_name ILIKE TRIM($1) OR  middle_name ILIKE TRIM($1) OR last_name ILIKE TRIM($1)) OR $1 IS NULL) 
   AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
   ORDER BY personal_loan_payment_schedules.payment_at DESC 
   `
