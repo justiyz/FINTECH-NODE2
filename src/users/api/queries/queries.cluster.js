@@ -154,6 +154,16 @@ export default {
     AND type = $3
     AND is_concluded = FALSE`,
 
+  updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite: `
+    UPDATE cluster_decision_tickets
+    SET 
+      updated_at = NOW(),
+      is_concluded = TRUE
+    WHERE ticket_raised_by = $1
+    AND cluster_id = $2
+    AND type = $3
+    AND is_concluded = FALSE`,
+
   checkIfUserPreviouslyVoted: `
     SELECT 
       id,

@@ -109,7 +109,8 @@ export const joinClusterOnInvitation = async(req, res, next) => {
         formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ cluster_id, user.user_id ]) :
           processOneOrNoneData(clusterQueries.createClusterMember, [ cluster_id, user.user_id, false ]),
         processOneOrNoneData(clusterQueries.updateClusterInvitationStatus, [ user.user_id, cluster_id, true, false ]),
-        processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ cluster_id ])
+        processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ cluster_id ]),
+        processOneOrNoneData(clusterQueries.updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite, [ user.user_id, cluster_id, 'join cluster' ])
       ]);
       sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} joined your cluster`, 'join-cluster', {});
       sendUserPersonalNotification(adminUserDetails, `${cluster.name} cluster invitation accepted`, PersonalNotifications.clusterInvitationAcceptance(user, cluster), 
