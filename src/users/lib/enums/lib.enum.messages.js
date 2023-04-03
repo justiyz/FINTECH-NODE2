@@ -103,6 +103,7 @@ export const CREATE_PIN = 'Successfully create pin for user';
 export const CHANGE_PIN = 'Pin changed successfully.';
 export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfully.`;
 export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account as default to proceed';
+export const USER_STATUS_INACTIVE = 'User status is not active and so cannot apply for loan';
 export const NO_DEFAULT_DEBIT_CARD = 'Kindly add a debit card and set as default to proceed';
 export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan greater than maximum allowable amount';
 export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration greater than maximum allowable tenor';

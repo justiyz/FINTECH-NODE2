@@ -122,7 +122,7 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
         </header>
 
         <section class="mb-2">
-        <h3 class="mb-2">RE: OFFER LETTER – …………………………………… LOAN</h3>
+        <h3 class="mb-2">RE: OFFER LETTER – INDIVIDUAL LOAN</h3>
         <p class="mb-2">
             Further to your request for the subject facility, we are pleased to inform you that the
             facility has been approved under the following terms and conditions:

@@ -1,14 +1,14 @@
-export const signupSms = (data) => `Hi, thanks for signing up on Seedfi\n,
-please use this OTP ${data.otp} to verify your phone number.\n
-This OTP expires in 10 minutes time.
+export const signupSms = (data) => `Hello, thank you for signing up with Seedfi.,
+Your confirmation code is ${data.otp}. This code is active for 10 minutes.
+Best, SeedFi team
 `;
 
-export const verifyAccountOTPSms = (data) => `Hello, Please use the following OTP\n,
-${data.otp} to verify your account.\n
-This OTP expires in 10 minutes time.
+export const verifyAccountOTPSms = (data) => `Hello, kindly use this code, ${data.otp} to verify your account.
+This code is active for 10 minutes.
+Best, SeedFi team
 `;
 
-export const resetPinOTPSms = (data) => `Kindly use the following OTP\n,
-${data.otp} to reset your pin.\n
-This OTP expires in 3 minutes time.
+export const resetPinOTPSms = (data) => `Hello, kindly use this code, ${data.otp} to reset your pin.
+This code is active for 5 minutes.
+Best, SeedFi team
 `;

@@ -98,7 +98,9 @@ export default {
       admins.status
       FROM admins
       LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-      WHERE (admins.first_name ILIKE $1 OR $1 is null) OR (admins.last_name ILIKE $1 OR $1 is null)
+      WHERE (TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(admins.last_name, ' ', admins.first_name)) ILIKE TRIM($1) 
+      OR $1 IS NULL)
       ORDER BY admins.created_at DESC
       OFFSET $2 LIMIT $3
   `,
@@ -113,7 +115,9 @@ export default {
       admins.status
       FROM admins
       LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-      WHERE (admins.first_name ILIKE $1 OR $1 is null) OR (admins.last_name ILIKE $1 OR $1 is null)
+      WHERE (TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(admins.last_name, ' ', admins.first_name)) ILIKE TRIM($1) 
+      OR $1 IS NULL)
       ORDER BY admins.created_at DESC
   `,
 
