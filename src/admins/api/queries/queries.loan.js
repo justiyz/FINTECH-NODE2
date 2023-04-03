@@ -61,7 +61,7 @@ export default {
    SELECT
     personal_loans.loan_id,
     personal_loans.user_id,
-    TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) AS name,
+    TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
     users.tier,
     personal_loans.amount_requested AS loan_amount,
     loan_tenor_in_months AS duration,
@@ -71,7 +71,14 @@ export default {
   FROM personal_loans
   LEFT JOIN users
   ON personal_loans.user_id = users.user_id
-  WHERE (TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1) OR $1 IS NULL) AND (personal_loans.status = $2 OR $2 IS NULL) 
+  WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+  OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+  OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+  OR $1 IS NULL) 
+  AND (personal_loans.status = $2 OR $2 IS NULL) 
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   ORDER BY personal_loans.created_at DESC
   OFFSET $5
@@ -84,7 +91,14 @@ export default {
     FROM personal_loans
     LEFT JOIN users
     ON personal_loans.user_id = users.user_id
-    WHERE (TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1) OR $1 IS NULL) AND (personal_loans.status = $2 OR $2 IS NULL) 
+    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+    OR $1 IS NULL) 
+    AND (personal_loans.status = $2 OR $2 IS NULL) 
     AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `,
 
@@ -92,7 +106,7 @@ export default {
    SELECT
       personal_loans.loan_id,
       personal_loans.user_id,
-      TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) AS name,
+      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       users.tier,
       personal_loans.amount_requested AS loan_amount,
       loan_tenor_in_months AS duration,
@@ -102,7 +116,14 @@ export default {
   FROM personal_loans
   LEFT JOIN users
   ON personal_loans.user_id = users.user_id
-  WHERE (TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1) OR $1 IS NULL) AND (personal_loans.status = $2 OR $2 IS NULL) 
+  WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+  OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+  OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+  OR $1 IS NULL)
+  AND (personal_loans.status = $2 OR $2 IS NULL) 
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   ORDER BY personal_loans.created_at DESC
    `,
@@ -111,7 +132,7 @@ export default {
       SELECT 
           personal_loan_payment_schedules.loan_id,
           personal_loan_payment_schedules.user_id,
-          TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) AS name,
+          TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
           users.tier,
           personal_loan_payment_schedules.total_payment_amount AS repayment_amount,
           personal_loan_payment_schedules.repayment_order AS repayment_schedule,
@@ -123,7 +144,14 @@ export default {
       ON personal_loan_payment_schedules.user_id = users.user_id
       LEFT JOIN personal_loans
       ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
-      WHERE personal_loan_payment_schedules.status = 'paid' AND (TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1) OR $1 IS NULL)  
+      WHERE personal_loan_payment_schedules.status = 'paid' 
+      AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL)  
       AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
       ORDER BY personal_loan_payment_schedules.payment_at DESC
       OFFSET $4
@@ -137,7 +165,13 @@ export default {
     LEFT JOIN users
     ON personal_loan_payment_schedules.user_id = users.user_id
     WHERE personal_loan_payment_schedules.status = 'paid' 
-    AND (TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1) OR $1 IS NULL)  
+    AND ((TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1))
+    OR $1 IS NULL)  
     AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
   `,
   
@@ -145,7 +179,7 @@ export default {
    SELECT 
       personal_loan_payment_schedules.loan_id,
       personal_loan_payment_schedules.user_id,
-      TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) AS name,
+      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       users.tier,
       personal_loan_payment_schedules.total_payment_amount AS repayment_amount,
       personal_loan_payment_schedules.repayment_order AS repayment_schedule,
@@ -159,7 +193,13 @@ export default {
   ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
   WHERE personal_loan_payment_schedules.status = 'paid' 
   AND personal_loans.loan_id = personal_loan_payment_schedules.loan_id 
-  AND (TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1) OR $1 IS NULL) 
+  AND (((TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+  OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+  OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+  OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)))
+  OR $1 IS NULL) 
   AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
   ORDER BY personal_loan_payment_schedules.payment_at DESC 
   `

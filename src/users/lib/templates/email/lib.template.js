@@ -2,142 +2,131 @@ import config from '../../../config/index';
 import * as Hash from '../../utils/lib.util.hash';
 
 export const forgotPassword = (data) => `
-    <tr>
-        <td style="padding-bottom: 30px;">
-        Hi ${data.first_name},
-        </td>
-    </tr>
-    <tr>
-        <td style="padding-bottom: 40px">
-        <h1>${data.otp}</h1>
-        </td>
-    </tr>
-    <tr>
-        <td style="padding-bottom: 40px">
-          If you didn't request a password reset, you can ignore this email. Your password will not be changed.
-        </td>
-    </tr>
-    <tr>
-        <td>
-          <span style="line-height: 40px">Thanks</span> <br />
-          <span style="line-height: 40px">Yours Credibly</span> <br />
-          <span style="font-weight: 600; display: block;">SeedFi</span>
-          <span style="display: block;">Email: ask@seedfi.com</span>
-          <span style="display: block;">Call: +234 814 650 7035</span>
-        </td>
-    </tr>`;
+<h2 style=" font-family: 'Figtree'; font-style: normal; font-weight: 400; font-size: 28px; line-height: 36px; color: #84868c;">
+Hi ${data.first_name},
+</h2>
+<tr>
+<td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Kindly reset your password using the otp below,
+    OTP expires by ${data.expirationTime} if not used. <br><br>
+    Please do not share this code with anyone.
+    </p>
+</td>
+</tr><br>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+  <td style=" background-color:#f2faf1;padding: 12px 35px;width: 100%;height: 35px;border-radius: 8px;"
+align="center">
+    <span style=" text-decoration: none; display: inline-block;font-family: 'Figtree';font-style: normal;font-weight: 700;
+    font-size: 25px;line-height: 24px;text-align: center;color: #1a201d;letter-spacing: 3px;">
+    ${data.otp}
+</span>
+  </td>
+</tr> <br>
+
+<tr>
+<td style="padding-bottom: 40px">
+<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+If you didn't request a reset password, you can ignore this email.
+</p>
+</td>
+</tr>
+`;
 
 export const verifyEmail = (data) => `
-    <tr>
-        <td style="padding-bottom: 20px">
-          <span>
-            <span>Hi ${data.first_name},</span> <br />
-          </span>
-        </td>
-    </tr>
+<tr>
+<td>
+    <h2 style="
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 36px;
+  color: #84868c;
+">
+        Hi ${data.first_name},
+    </h2>
 
-    <tr>
-        <td style="padding-bottom: 20px">
-           <span>
-              Thanks for signing up on SeedFi.<br />
-              we welcome you to this great lending platform. 
-              click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
-            </span>
-        </td>
-    </tr>
+    <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 17px;line-height: 24px;color: #84868c;margin-bottom: 30px; 
+">
+        We really appreciate you signing up for SeedFi, and I'm sure
+        you'll love it when you see how easy it is to get the right
+        things done.
+    </span><br><br>
 
-    <tr>
-      <td>
-        <span style="line-height: 40px">Thanks</span> <br />
-        <span style="line-height: 40px">Yours Credibly</span> <br />
-        <span style="font-weight: 600; display: block;">SeedFi</span>
-        <span style="display: block;">Email: ask@seedfi.com</span>
-        <span style="display: block;">Call: +234 814 650 7035</span>
-      </td>
-    </tr>`;
+    <span style=" font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 17px;line-height: 24px;color: #84868c;margin-bottom: 40px;">
+        We built Samu to help individuals (from managers via freelancers
+        through to students) improve their productivity, and I hope that
+        we can achieve that for you.
+    </span> <br><br>
+
+     <p style="
+background-color:#2a8851; padding: 12px 35px; width: 180px; height: 35px; border-radius: 8px; align-content: center;">
+
+<a
+href=" ${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}" target="_blank"
+style="
+text-decoration: none;display: inline-block;font-family: 'Figtree';font-style: normal;font-weight: 700;font-size: 16px;line-height: 24px;text-align: center;color: #ffffff;
+"> 
+Sign in to your account
+</a>
+</p>
+</td>
+</tr>`;
 
 export const requestVerifyEmail = (data) => `
-    <tr>
-        <td style="padding-bottom: 20px">
-          <span>
-            <span>Hi ${data.first_name},</span> <br />
-          </span>
-        </td>
-    </tr>
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+Hi ${data.first_name},
+</h2>
 
-    <tr>
-        <td style="padding-bottom: 20px">
-           <span>
-              Thanks for signing up on SeedFi.<br />
-              to verify your email, kindly click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
-            </span>
-        </td>
-    </tr>
-  
-    <tr>
-      <td>
-        <span style="line-height: 40px">Thanks</span> <br />
-        <span style="line-height: 40px">Yours Credibly</span> <br />
-        <span style="font-weight: 600; display: block;">SeedFi</span>
-        <span style="display: block;">Email: ask@seedfi.com</span>
-        <span style="display: block;">Call: +234 814 650 7035</span>
-      </td>
-    </tr>`;
+<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+Below is the link to complete your
+email verification. this email is valid for 30 minutes. <br><br>
+
+Kindly click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
+</p>`;
 
 export const rejectedDebitCard = (data) => `
-    <tr>
-        <td style="padding-bottom: 20px">
-          <span>
-            <span>Hi ${data.first_name},</span> <br />
-          </span>
-        </td>
-    </tr>
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+Hi ${data.first_name},
+</h2>
 
-    <tr>
+    <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
-           <span>
+           <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
               Thanks for adding your card details on SeedFi.<br />
               however, it has been rejected because the card will expire soon.<br /> 
               Kindly add a card that will not expire in about three months time. </span>  
         </td>
     </tr>
 
-    <tr>
+    <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
-          <p>card details</p><br />
-          <span>
+          <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">card details</p><br />
+          <span
+          style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
             Last 4 digits: ${data.last4Digits}, <br />
             Card Type: ${data.cardType}
           </span>  
         </td>
     </tr>
-  
-    <tr>
-      <td>
-        <span style="line-height: 40px">Thanks</span> <br />
-        <span style="line-height: 40px">Yours Credibly</span> <br />
-        <span style="font-weight: 600; display: block;">SeedFi</span>
-        <span style="display: block;">Email: ask@seedfi.com</span>
-        <span style="display: block;">Call: +234 814 650 7035</span>
-      </td>
-    </tr>`;
+  `;
 
 export const loanDisbursement = (data) => `
-    <tr>
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+Hi ${data.first_name},
+</h2>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
-          <span>
-            <span>Hi ${data.firstName},</span> <br />
-          </span>
+           <span
+           style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
+           >Your loan application has been approved and disbursement made.</span>  
         </td>
     </tr>
 
-    <tr>
-        <td style="padding-bottom: 20px">
-           <span>Your loan application has been approved and disbursement made.</span>  
-        </td>
-    </tr>
-
-    <tr>
+    <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
           <p>Below is a breakdown of the loan;</p><br />
           <span>
@@ -156,100 +145,67 @@ export const loanDisbursement = (data) => `
         </td>
     </tr>
 
-    <tr>
+    <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
            <span>click this <a href="${data.offerLetterUrl}">link</a>to view and download a copy of your loan offer letter</span>
         </td>
     </tr>
-  
-    <tr>
-      <td>
-        <span style="line-height: 40px">Thanks</span> <br />
-        <span style="line-height: 40px">Yours Credibly</span> <br />
-        <span style="font-weight: 600; display: block;">SeedFi</span>
-        <span style="display: block;">Email: ask@seedfi.com</span>
-        <span style="display: block;">Call: +234 814 650 7035</span>
-      </td>
-    </tr>`;
+  `;
 
 export const loanClusterInvite = (data) => `
-    <tr>
+    <tr  style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
-           <span>You have been invited to join a cluster, <br />
+           <span
+           style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
+           >You have been invited to join a cluster, <br />
            ${data.inviter_first_name} ${data.inviter_last_name}  is inviting you to join ${data.cluster_name} Cluster loan group <br />
            Kindly click on <a href="${data.join_url}">link</a> to join cluster.
            </span>  
         </td>
     </tr>
-
-    <tr>
-      <td>
-        <span style="line-height: 40px">Thanks</span> <br />
-        <span style="line-height: 40px">Yours Credibly</span> <br />
-        <span style="font-weight: 600; display: block;">SeedFi</span>
-        <span style="display: block;">Email: ask@seedfi.com</span>
-        <span style="display: block;">Call: +234 814 650 7035</span>
-      </td>
-    </tr>`;
+`;
 
 
-export const failedCardDebit = async(data) => `
-  <tr>
-    <td style="padding-bottom: 20px">
-      <span>
-        <span>Hi ${data.first_name},</span> <br />
-      </span>
-    </td>
-  </tr>
+export const failedCardDebit = (data) => `
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+Hi ${data.first_name},
+</h2>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">>
     <td style="padding-bottom: 20px">
       <span>Your card could not be debited for the loan repayment of ₦${parseFloat(data.total_payment_amount).toFixed(2)}</span>  
     </td>
   </tr>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
           <p>card details</p><br />
           <span>
-            Last 4 digits: ${await Hash.decrypt(decodeURIComponent(data.last_4_digits))}, <br />
+            Last 4 digits: ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, <br />
             Card Type: ${data.card_type}
           </span>  
         </td>
     </tr>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
     <td style="padding-bottom: 20px">
       <span>Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment</span>  
     </td>
   </tr>
-
-  <tr>
-    <td>
-      <span style="line-height: 40px">Thanks</span> <br />
-      <span style="line-height: 40px">Yours Credibly</span> <br />
-      <span style="font-weight: 600; display: block;">SeedFi</span>
-      <span style="display: block;">Email: ask@seedfi.com</span>
-      <span style="display: block;">Call: +234 814 650 7035</span>
-    </td>
-  </tr>`;
+`;
 
 export const failedChargePayment = (data) => `
-  <tr>
-    <td style="padding-bottom: 20px">
-      <span>
-        <span>Hi ${data.first_name},</span> <br />
-      </span>
-    </td>
-  </tr>
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+  Hi ${data.first_name},
+</h2>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
     <td style="padding-bottom: 20px">
       <span>Your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} on seedfi was not successful</span>  
     </td>
   </tr>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
           <p>card details</p><br />
           <span>
@@ -260,39 +216,26 @@ export const failedChargePayment = (data) => `
         </td>
   </tr>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
     <td style="padding-bottom: 20px">
       <span>Kindly try again or reach out to your bank if need be.</span>  
     </td>
   </tr>
-
-  <tr>
-    <td>
-      <span style="line-height: 40px">Thanks</span> <br />
-      <span style="line-height: 40px">Yours Credibly</span> <br />
-      <span style="font-weight: 600; display: block;">SeedFi</span>
-      <span style="display: block;">Email: ask@seedfi.com</span>
-      <span style="display: block;">Call: +234 814 650 7035</span>
-    </td>
-  </tr>`;
+`;
 
 export const successfulRepayment = (data) => `
-  <tr>
-    <td style="padding-bottom: 20px">
-      <span>
-        <span>Hi ${data.first_name},</span> <br />
-      </span>
-    </td>
-  </tr>
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+   Hi ${data.first_name},
+</h2>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
     <td style="padding-bottom: 20px">
       <span>Seedfi received your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
        as a loan repayment of your existing loan facility</span>  
     </td>
   </tr>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
           <p>payment details</p><br />
           <span>
@@ -302,18 +245,9 @@ export const successfulRepayment = (data) => `
         </td>
     </tr>
 
-  <tr>
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
     <td style="padding-bottom: 20px">
       <span>Thank you for being loyal and keeping to your promise of loan facility repayment</span>  
     </td>
   </tr>
-
-  <tr>
-    <td>
-      <span style="line-height: 40px">Thanks</span> <br />
-      <span style="line-height: 40px">Yours Credibly</span> <br />
-      <span style="font-weight: 600; display: block;">SeedFi</span>
-      <span style="display: block;">Email: ask@seedfi.com</span>
-      <span style="display: block;">Call: +234 814 650 7035</span>
-    </td>
-  </tr>`;
+`;

@@ -23,75 +23,56 @@ export const commonTemplate = (messageType, data) => {
   }
 
   return `
-  <html lang="en">
+  <!DOCTYPE html>
+  <html 
+  lang="en" xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <title></title>
-</head>
-<body>
-  <div style="font-family: Poppins">
-    <!--   HEADER   -->
-    <table role="header" width="100%">
-      <tr>
-        <td bgcolor="#003BB3" style="padding: 40px 64px; font-size: 14px; width: 73%;">
-        <span>just dummy email template</span>
-        </td>
-      </tr>
-    </table>
-    
-    <!--   CONTENT   -->
-    <table role="content" style="padding: 80px 64px; color: #363740;">
-      <tr>
-        <td style="font-weight: 600; font-size: 32px; line-height: 48px; color: #003BB3; padding-bottom: 23px">
-          <span>${headerText}</span>
-        </td>
-      </tr>
-      
-      ${getTemplate(messageType, data)}
-      
-    </table>
-    
-    <!--    FOOTER    -->
-    <table role="footer" width="100%">
-      <tr align="center">
-        <td  style="background: #003BB3; padding: 40px 0;">
-          <div style="padding-bottom: 34px">
-            <a href="#">
-                <img style="padding-right: 40px" src="https://res.cloudinary.com/dtsjiqrgd/image/upload/v1636711876/facebook_yl5wto.png" alt="facebook-icon">
-              </a>
-            <a href="#">
-            <img style="padding-right: 40px" src="https://res.cloudinary.com/dtsjiqrgd/image/upload/v1636711926/instagram_vfnpyx.png" alt="instagram-icon">
-            </a>
-            <a href="#">
-              <img style="padding-right: 40px" src="https://res.cloudinary.com/dtsjiqrgd/image/upload/v1636712047/twitter_kfu6bd.png" alt="twitter-icon">
-            </a>
-            <a href="#">
-            <img src="https://res.cloudinary.com/dtsjiqrgd/image/upload/v1636712011/linked-in_gkbnuo.png" alt="linked-in-icon">
-            </a>
-          </div>
-          
-          <div style="color: #fff; font-weight: 300; padding-bottom: 34px">
-            <span>You are receiving this email because you have signed up on the Seedfi platform. <br />
-            © ${new Date(new Date()).getFullYear()}, SEEDFI . All rights reserved.
-            </span>
-          </div>
-          
-          <div style="color: #fff; font-weight: 300;">
-            <a href="#" style="text-decoration: none; color: #fff;">Terms & Conditions</a>
-            <span style="padding: 0 16px;">|</span>
-            <a href="#" style="text-decoration: none; color: #fff;">Privacy Policy</a>
-            <span style="padding: 0 16px;">|</span>
-            <a href="#" style="text-decoration: none; color: #fff;">Help Center</a>
-          </div>
-        </td>
-      </tr>
-    </table>
-  </div>
-</body>
-</html>`;
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="x-apple-disable-message-reformatting" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+          href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,500;1,800&display=swap"
+          rel="stylesheet" />
+      <title>Seedfi</title>
+  </head>
+      <body style="margin: 0; padding: 0; background: #eeeeee;">
+          <center>
+          <div style="
+          width: 100%; margin-top: 20px!important;max-width: 600px;background: #ffffff;padding: 30px 30px;text-align: left;font-family: 'Figtree', sans-serif;  ">
+                  <div>
+                      <img src="https://seedfi-upload.s3.eu-west-1.amazonaws.com/IMG_3580.PNG" 
+                      width="150" height="50"
+                     style="display: block; margin-bottom: 10px" />
+                  </div> <br><br>
+  
+                  <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"bgcolor="#ffffff">
+                      <tr>
+                          <td>
+                              <span style="font-family: 'Figtree'; font-style: normal; font-weight: 600; font-size: 32px;
+                                  line-height: 44px; color: #1a201d; margin-bottom: 50px;"
+                                  >${headerText}</span>
+                          </td>
+                      </tr>
+  
+                      ${getTemplate(messageType, data)}     
+                  </table>
+  
+                  <footer style="text-align: center;">
+                      <!--   Border Line   -->
+                  <hr style=" border: none;height: 1px;color: #d9ecd4;background: #d9ecd4;width: 100%;margin-bottom: 20px;margin-top: 20px;" />
+                      <span style=" align-items: center; font-family: 'Figtree'; font-style: normal;font-weight: 400;font-size: 14px;line-height: 20px;color: #b5b5bd;margin-bottom: 30px;">
+                      You are receiving this email because you have signed up on the Seedfi platform. <br />
+                      © ${new Date(new Date()).getFullYear()}, SEEDFI . All rights reserved.
+                      </span>
+                  </footer>
+              </div>
+          </center>
+      </body>
+  </html>
+  `;
 };

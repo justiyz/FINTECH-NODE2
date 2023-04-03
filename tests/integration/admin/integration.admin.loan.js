@@ -807,7 +807,7 @@ describe('Admin Loan management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          search: 'adeleye blaise'
+          search: 'rashidat sikiru'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -831,7 +831,7 @@ describe('Admin Loan management', () => {
         })
         .query({
           export: 'false',
-          search: 'adeleye blaise'
+          search: 'rashidat sikiru'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -852,7 +852,7 @@ describe('Admin Loan management', () => {
         })
         .query({
           export: 'true',
-          search: 'adeleye blaise'
+          search: 'victory babatunde'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -875,7 +875,7 @@ describe('Admin Loan management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .query({
-          search: 'adeleye blaise',
+          search: 'rashidat sikiru',
           page: '1',
           per_page: '2'
         })
