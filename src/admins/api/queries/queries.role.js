@@ -145,7 +145,9 @@ export default {
     FROM admins 
     WHERE role_type= $1 AND (status = $2 OR  $2 IS NULL) 
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-    AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($5) OR $5 IS NULL)
+    AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5) 
+    OR TRIM(CONCAT(last_name, ' ', first_name)) ILIKE TRIM($5)
+    OR $5 IS NULL)
     OFFSET $6
     LIMIT $7
   `,
@@ -156,6 +158,8 @@ export default {
   FROM admins
   WHERE role_type = $1  AND (status = $2 OR $2 IS NULL) 
   AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-  AND (CONCAT(first_name, ' ', last_name) ILIKE TRIM($5) OR $5 IS NULL)
+  AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5) 
+  OR TRIM(CONCAT(last_name, ' ', first_name)) ILIKE TRIM($5) 
+  OR $5 IS NULL)
   `
 };

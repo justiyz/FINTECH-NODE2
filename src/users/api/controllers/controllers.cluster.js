@@ -102,15 +102,19 @@ export const joinClusterOnInvitation = async(req, res, next) => {
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully joinClusterOnInvitation.controllers.cluster.js`);
     const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
+    const [ adminUserDetails ] = await processAnyData(userQueries.getUserByUserId, [ cluster.admin ]);
     if (body.decision === 'yes') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster invitation joinClusterOnInvitation.controllers.cluster.js`);
       await Promise.all([
         formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ cluster_id, user.user_id ]) :
           processOneOrNoneData(clusterQueries.createClusterMember, [ cluster_id, user.user_id, false ]),
         processOneOrNoneData(clusterQueries.updateClusterInvitationStatus, [ user.user_id, cluster_id, true, false ]),
-        processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ cluster_id ])
+        processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ cluster_id ]),
+        processOneOrNoneData(clusterQueries.updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite, [ user.user_id, cluster_id, 'join cluster' ])
       ]);
       sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} joined your cluster`, 'join-cluster', {});
+      sendUserPersonalNotification(adminUserDetails, `${cluster.name} cluster invitation accepted`, PersonalNotifications.clusterInvitationAcceptance(user, cluster), 
+        'cluster-invitation-accepted', { ...cluster });
       sendMulticastPushNotification(PushNotifications.userJoinedYourCluster(user, cluster), clusterMembersToken, 'join-cluster', cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user added to new cluster and all notifications sent successfully 
       joinClusterOnInvitation.controllers.cluster.js`);
@@ -119,7 +123,10 @@ export const joinClusterOnInvitation = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster invitation joinClusterOnInvitation.controllers.cluster.js`);
     await processOneOrNoneData(clusterQueries.updateClusterInvitationStatus, [ user.user_id, cluster_id, false, true ]);
+    await processOneOrNoneData(clusterQueries.updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite, [ user.user_id, cluster_id, 'join cluster' ]);
     sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} declined to join your cluster`, 'join-cluster', {});
+    sendUserPersonalNotification(adminUserDetails, `${cluster.name} cluster invitation declined`, PersonalNotifications.clusterInvitationDeclination(user, cluster), 
+      'cluster-invitation-declined', { ...cluster });
     sendMulticastPushNotification(PushNotifications.userDeclinedJoiningYourCluster(user, cluster), clusterMembersToken, 'join-cluster', cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user rejected new cluster invite and all notifications sent successfully 
     joinClusterOnInvitation.controllers.cluster.js`);

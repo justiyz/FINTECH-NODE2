@@ -56,7 +56,7 @@ export const updateLoanStatusToOverdue = async(req, res, next) => {
  */
 export const initiateLoanRepayment = async(req, res, next) => {
   try {
-    const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]); 
+    const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]);
     // still try to automatically debit until after 7 days proposed loan repayment date passes
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
     updateLoanStatusToOverdue.controllers.cron.js`);

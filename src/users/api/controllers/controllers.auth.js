@@ -7,7 +7,7 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
-import sendSMS from '../../config/sms';
+import { sendSms } from '../services/service.sms';
 import { signupSms, verifyAccountOTPSms, resetPinOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
@@ -54,7 +54,7 @@ export const signup = async(req, res, next) => {
     }
     const data = { ...registeredUser, otp, otpExpire: expirationTime };
     userActivityTracking(registeredUser.user_id, 1, 'success');
-    await sendSMS(body.phone_number, signupSms(data));
+    await sendSms(body.phone_number, signupSms(data));
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.ACCOUNT_CREATED, enums.HTTP_CREATED, data);
     }
@@ -84,14 +84,14 @@ export const resendSignupOtp = async(req, res, next) => {
     if (existingOtp) {
       return resendSignupOtp(req, res, next);
     }
-    const expireAt = dayjs().add(30, 'minutes');
+    const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
     const payload = AuthPayload.register(body, otp, expireAt);
     await processAnyData(authQueries.updateVerificationToken, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new verification token into the DB resendSignupOtp.controllers.auth.js`);
     const data = { user_id: user.user_id, otp, otpExpire: expirationTime };
     userActivityTracking(user.user_id, 6, 'success');
-    await sendSMS(body.phone_number, verifyAccountOTPSms(data));
+    await sendSms(body.phone_number, verifyAccountOTPSms(data));
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, data);
     }
@@ -482,10 +482,10 @@ export const forgotPin = async(req, res, next) => {
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},Info: sms for user to reset pin has been sent successfully forgotPin.controller.auth.js`);
     userActivityTracking(req.user.user_id, 12, 'success');
+    await sendSms(user.phone_number, resetPinOTPSms(data));
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, data);
     }
-    await sendSMS(user.phone_number, resetPinOTPSms(data));
     return ApiResponse.success(res, enums.FORGOT_PIN_TOKEN, enums.HTTP_OK, { user_id: user.user_id }); // not returning otp for production environment
   } catch (error) {
     userActivityTracking(req.user.user_id, 12, 'fail');

@@ -247,7 +247,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(paystackAmountFormatting.amount_requested); 
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting.amount_requested); 
     // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',

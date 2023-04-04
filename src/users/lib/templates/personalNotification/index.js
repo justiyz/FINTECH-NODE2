@@ -16,6 +16,14 @@ export const inviteClusterMember = (data) => {
   return `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
 };
 
+export const clusterInvitationAcceptance = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} whom you invited to join ${cluster.name} Cluster loan group has accepted the invitation to be a member of the cluster`;
+};
+
+export const clusterInvitationDeclination = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} whom you invited to join ${cluster.name} Cluster loan group has declined the invitation to be a member of the cluster`;
+};
+
 export const initiateDeleteCluster = (user, cluster) => {
   return `${user.first_name} ${user.last_name} is requesting to delete ${cluster.name} loan group. 
   Kindly accept or decline this request to permanently delete the Cluster group. `;
