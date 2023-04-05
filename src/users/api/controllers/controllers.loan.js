@@ -11,7 +11,7 @@ import { userActivityTracking } from '../../lib/monitor';
 import { initiateTransfer, initializeCardPayment, initializeBankAccountChargeForLoanRepayment, 
   initializeDebitCarAuthChargeForLoanRepayment, submitPaymentOtpWithReference 
 } from '../services/service.paystack';
-import { generateOfferLetter } from '../../lib/templates/offerLetter';
+import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 
 /**
  * check if user is eligible for loan
@@ -26,6 +26,11 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const { user, body } = req;
     const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
+    if (user.status === 'inactive') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user status is inactive checkUserLoanEligibility.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.USER_STATUS_INACTIVE, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+    }
     if (!userDefaultAccountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not set default account in the db checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
@@ -75,7 +80,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       const manualDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'in review');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, manualDecisionPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
-      const offerLetterData = await generateOfferLetter(user, updatedLoanDetails);
+      const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 
@@ -90,7 +95,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'approved');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
-      const offerLetterData = await generateOfferLetter(user, updatedLoanDetails);
+      const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 

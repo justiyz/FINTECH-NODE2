@@ -1,4 +1,5 @@
 import helmet from 'helmet';
+import 'dotenv/config';
 import { json, urlencoded } from 'express';
 import compression from 'compression';
 import cors from 'cors';
@@ -10,7 +11,7 @@ import routes from '../routes/index';
 const expressConfig = app => {
   let logger;
 
-  switch (app.get('env')) {
+  switch (process.env.SEEDFI_NODE_ENV === '') {
   case 'development':
     logger = loggerInit('development');
     break;
@@ -30,7 +31,7 @@ const expressConfig = app => {
   global.logger = logger;
   logger.info(`${enums.CURRENT_TIME_STAMP} Application starting...`);
   logger.debug('Overriding \'Express\' logger');
-  logger.info(`${enums.CURRENT_TIME_STAMP} Environment is ${app.get('env')}`);
+  logger.info(`${enums.CURRENT_TIME_STAMP} Environment is ${process.env.SEEDFI_NODE_ENV}`);
 
   app.use(urlencoded({ extended: true }));
   app.use(json());

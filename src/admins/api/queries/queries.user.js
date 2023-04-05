@@ -54,14 +54,20 @@ export default {
       SELECT 
         id,
         user_id,
-        CONCAT(first_name, ' ', last_name) AS name,
+        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
         tier,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
         loan_status,
         employment_type,
         status
       FROM users
-      WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) 
+      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL) 
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
       AND (loan_status = $5 OR $5 IS NULL)
@@ -73,14 +79,20 @@ export default {
         SELECT
         id,
         user_id,
-        CONCAT(first_name, ' ', last_name) AS name,
+        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
         tier,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
         loan_status,
         employment_type,
         status
       FROM users
-      WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) 
+      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL)
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
       AND (loan_status = $5 OR $5 IS NULL)
@@ -90,7 +102,13 @@ export default {
   fetchUsersCount: `
     SELECT COUNT(user_id) AS total_count
     FROM users
-    WHERE (CONCAT(first_name, ' ', last_name) ILIKE TRIM($1) OR $1 IS NULL) 
+    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+    OR $1 IS NULL) 
     AND (status = $2 OR $2 IS NULL) 
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     AND (loan_status = $5 OR $5 IS NULL)
@@ -135,7 +153,7 @@ export default {
       clusters.id,
       clusters.cluster_id,
       clusters.name,
-      CONCAT(users.first_name, ' ', users.last_name) AS created_by,
+      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS created_by,
       clusters.minimum_monthly_income,
       clusters.current_members,
       clusters.type
@@ -162,7 +180,7 @@ export default {
       cluster_members.id,
       cluster_members.cluster_id,
       cluster_members.user_id,
-      CONCAT(users.first_name, ' ', users.last_name) AS member_name,
+      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS member_name,
       to_char(DATE (cluster_members.created_at)::date, 'Mon DD, YYYY') As created_at,
       cluster_members.status,
       cluster_members.is_admin,
@@ -199,7 +217,7 @@ export default {
       clusters.id,
       clusters.cluster_id,
       clusters.name,
-      CONCAT(users.first_name, ' ', users.last_name) AS created_by,
+      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS created_by,
       clusters.minimum_monthly_income,
       clusters.current_members,
       clusters.type
