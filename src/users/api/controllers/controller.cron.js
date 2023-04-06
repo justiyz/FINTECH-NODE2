@@ -60,7 +60,6 @@ export const updateLoanStatusToOverdue = async(req, res, next) => {
 export const initiateLoanRepayment = async(req, res, next) => {
   try {
     const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]);
-    console.log('dueForPaymentLoanRepayments', dueForPaymentLoanRepayments);
     // still try to automatically debit until after 7 days proposed loan repayment date passes
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
     updateLoanStatusToOverdue.controllers.cron.js`);
@@ -83,7 +82,7 @@ export const initiateLoanRepayment = async(req, res, next) => {
         }
         await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment }),
         sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
-        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit(repayment),
+        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...repayment }), 
           'failed-card-debit', { ...repayment});
         return repayment;
       })
