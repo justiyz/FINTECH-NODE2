@@ -1,3 +1,5 @@
+import * as Hash from '../../utils/lib.util.hash';
+
 export const requestToJoinClusterNotification = (user, cluster) => {
   return `${user.first_name} ${user.last_name} wants to join ${cluster.name} cluster loan group. Your approval is needed`;
 };
@@ -69,4 +71,14 @@ export const cardTokenizationAmountRefundCompletelyProcessed = () => {
 
 export const cardTokenizationAmountRefundProcessingFailed = () => {
   return 'Thanks for adding your card details on SeedFi. Refund of the amount charged on card could not be completed and it failed, kindly reach out to our support. Thanks';
+};
+
+export const failedCardDebit = (data) => {
+  return `Your card could not be debited for the loan repayment of
+    ₦${parseFloat(data.total_payment_amount).toFixed(2)}, \n
+    card details \n
+    Last 4 digits: ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, \n
+    Card Type: ${data.card_type} \n
+    Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment.
+  `;
 };

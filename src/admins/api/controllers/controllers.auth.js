@@ -32,7 +32,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token completeAdminLoginRequest.admin.controllers.auth.js`);
     const expireAt = dayjs().add(3, 'minutes');
-    const expireTime = dayjs(expireAt).format('HH:mm:ss');
+    const expireTime = dayjs(expireAt).format('HH:mm');
     const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, token, expireAt ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set in the DB completeAdminLoginRequest.admin.controllers.auth.js`);
     await MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
@@ -118,7 +118,7 @@ export const forgotPassword = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token forgotPassword.admin.controllers.auth.js`);
     const expireAt = dayjs().add(5, 'minutes');
-    const expireTime = dayjs(expireAt).format('HH:mm:ss');
+    const expireTime = dayjs(expireAt).format('HH:mm');
     const payload = [ admin.email, token, expireAt ];
     await processAnyData(authQueries.adminForgotPassword, payload);
     const data ={ admin_id: admin.admin_id, token };

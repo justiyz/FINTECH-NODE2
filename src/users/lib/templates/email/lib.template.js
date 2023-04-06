@@ -2,18 +2,23 @@ import config from '../../../config/index';
 import * as Hash from '../../utils/lib.util.hash';
 
 export const forgotPassword = (data) => `
-<h2 style=" font-family: 'Figtree'; font-style: normal; font-weight: 400; font-size: 28px; line-height: 36px; color: #84868c;">
+<tr>
+<td>
+<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
 Hi ${data.first_name},
 </h2>
+</td>
+</tr>
+
 <tr>
 <td>
     <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-    Kindly reset your password using the otp below,
+    Kindly reset your password using the OTP below,
     OTP expires by ${data.expirationTime} if not used. <br><br>
     Please do not share this code with anyone.
     </p>
 </td>
-</tr><br>
+</tr>
 
 <tr border="0" cellspacing="0" cellpadding="0" width="100%">
   <td style=" background-color:#f2faf1;padding: 12px 35px;width: 100%;height: 35px;border-radius: 8px;"
@@ -23,10 +28,10 @@ align="center">
     ${data.otp}
 </span>
   </td>
-</tr> <br>
+</tr>
 
 <tr>
-<td style="padding-bottom: 40px">
+<td>
 <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
 If you didn't request a reset password, you can ignore this email.
 </p>
@@ -36,64 +41,87 @@ If you didn't request a reset password, you can ignore this email.
 
 export const verifyEmail = (data) => `
 <tr>
-<td>
-    <h2 style="
-  font-family: 'Figtree';
-  font-style: normal;
-  font-weight: 400;
-  font-size: 28px;
-  line-height: 36px;
-  color: #84868c;
-">
-        Hi ${data.first_name},
+  <td>
+    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
     </h2>
+  </td>
+</tr>
 
-    <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 17px;line-height: 24px;color: #84868c;margin-bottom: 30px; 
-">
-        We really appreciate you signing up for SeedFi, and I'm sure
-        you'll love it when you see how easy it is to get the right
-        things done.
-    </span><br><br>
-
-    <span style=" font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 17px;line-height: 24px;color: #84868c;margin-bottom: 40px;">
-        We built Samu to help individuals (from managers via freelancers
-        through to students) improve their productivity, and I hope that
-        we can achieve that for you.
-    </span> <br><br>
-
-     <p style="
-background-color:#2a8851; padding: 12px 35px; width: 180px; height: 35px; border-radius: 8px; align-content: center;">
-
-<a
-href=" ${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}" target="_blank"
-style="
-text-decoration: none;display: inline-block;font-family: 'Figtree';font-style: normal;font-weight: 700;font-size: 16px;line-height: 24px;text-align: center;color: #ffffff;
-"> 
-Sign in to your account
-</a>
-</p>
+<tr>
+<td>
+   <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+      Thanks for signing up on SeedFi.<br />
+      we welcome you to this great lending platform. <br><br>
+      Kindly sign in to verify your email.
+   </p>
 </td>
-</tr>`;
+</tr>
+
+    <tr>
+      <td
+        bgcolor="#2a8851"
+        style="
+          padding: 12px 35px;
+          width: 180px;
+          height: 35px;
+          border-radius: 8px;
+        "
+        align="center"
+      >
+        <a
+        href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}"
+          target="_blank"
+          style="
+            text-decoration: none;
+            display: inline-block;
+            font-family: 'Figtree';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            text-align: center;
+            color: #ffffff;
+          ">
+          click here to sign in
+        </a>
+      </td>
+    </tr>
+`;
 
 export const requestVerifyEmail = (data) => `
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
+<tr>
+  <td>
+    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
 
-<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-Below is the link to complete your
-email verification. this email is valid for 30 minutes. <br><br>
 
-Kindly click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
-</p>`;
+<tr>
+<td>
+  <span style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+  Below is the link to complete your
+  email verification. this email is valid for 30 minutes. <br><br>
+
+  Kindly click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
+  </span>
+</td>
+</tr>
+`;
 
 export const rejectedDebitCard = (data) => `
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
+<tr>
+  <td>
+    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
 
     <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-        <td style="padding-bottom: 20px">
+        <td>
            <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
               Thanks for adding your card details on SeedFi.<br />
               however, it has been rejected because the card will expire soon.<br /> 
@@ -102,7 +130,7 @@ Hi ${data.first_name},
     </tr>
 
     <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-        <td style="padding-bottom: 20px">
+        <td>
           <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">card details</p><br />
           <span
           style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
@@ -114,9 +142,13 @@ Hi ${data.first_name},
   `;
 
 export const loanDisbursement = (data) => `
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
+<tr>
+  <td>
+    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
@@ -154,7 +186,7 @@ Hi ${data.first_name},
 
 export const loanClusterInvite = (data) => `
     <tr  style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-        <td style="padding-bottom: 20px">
+        <td>
            <span
            style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
            >You have been invited to join a cluster, <br />
@@ -167,18 +199,22 @@ export const loanClusterInvite = (data) => `
 
 
 export const failedCardDebit = (data) => `
+<tr>
+<td>
 <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
 Hi ${data.first_name},
 </h2>
+</td>
+</tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">>
-    <td style="padding-bottom: 20px">
+    <td>
       <span>Your card could not be debited for the loan repayment of ₦${parseFloat(data.total_payment_amount).toFixed(2)}</span>  
     </td>
   </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-        <td style="padding-bottom: 20px">
+        <td>
           <p>card details</p><br />
           <span>
             Last 4 digits: ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, <br />
@@ -188,25 +224,29 @@ Hi ${data.first_name},
     </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-    <td style="padding-bottom: 20px">
+    <td>
       <span>Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment</span>  
     </td>
   </tr>
 `;
 
 export const failedChargePayment = (data) => `
+<tr>
+<td>
 <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-  Hi ${data.first_name},
+Hi ${data.first_name},
 </h2>
+</td>
+</tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-    <td style="padding-bottom: 20px">
+    <td>
       <span>Your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} on seedfi was not successful</span>  
     </td>
   </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-        <td style="padding-bottom: 20px">
+        <td>
           <p>card details</p><br />
           <span>
             Last 4 digits: ${data.last4Digits}, <br />
@@ -224,19 +264,23 @@ export const failedChargePayment = (data) => `
 `;
 
 export const successfulRepayment = (data) => `
+<tr>
+<td>
 <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-   Hi ${data.first_name},
+Hi ${data.first_name},
 </h2>
+</td>
+</tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-    <td style="padding-bottom: 20px">
+    <td>
       <span>Seedfi received your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
        as a loan repayment of your existing loan facility</span>  
     </td>
   </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-        <td style="padding-bottom: 20px">
+        <td>
           <p>payment details</p><br />
           <span>
             Total Loan amount: ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
@@ -246,7 +290,7 @@ export const successfulRepayment = (data) => `
     </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-    <td style="padding-bottom: 20px">
+    <td>
       <span>Thank you for being loyal and keeping to your promise of loan facility repayment</span>  
     </td>
   </tr>
