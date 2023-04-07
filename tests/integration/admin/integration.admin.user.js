@@ -1064,6 +1064,44 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should flag when not accepted file type is sent for image upload', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
+        .field('type', 'image')
+        .field('title', 'Property ownership')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag when not accepted file type is sent for document upload', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .field('type', 'file')
+        .field('title', 'Property ownership')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.UPLOAD_PDF_DOCUMENT_VALIDATION);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should upload file for user successfully', (done) => {
       chai.request(app)
         .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/upload-document`)
@@ -1093,7 +1131,7 @@ describe('Admin Users management', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .attach('document', path.resolve(__dirname, '../../files/BRD.docx'))
+        .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
         .field('type', 'file')
         .field('title', 'Proof of loan indemnity')
         .end((err, res) => {

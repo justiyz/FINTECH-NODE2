@@ -250,7 +250,7 @@ export const forgotPassword = async(req, res, next) => {
       return forgotPassword(req, res, next);
     }
     const expireAt = dayjs().add(10, 'minutes');
-    const expirationTime = dayjs(expireAt).format('HH:mm:ss');
+    const expirationTime = dayjs(expireAt).format('HH:mm');
     const payload = [ user.email, otp, expireAt ];
     await processAnyData(authQueries.forgotPassword, payload);
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };

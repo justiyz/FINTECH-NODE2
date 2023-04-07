@@ -7,6 +7,9 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 import { initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
+import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import * as PushNotifications from '../../lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 
 /**
@@ -77,7 +80,10 @@ export const initiateLoanRepayment = async(req, res, next) => {
           userActivityTracking(user.user_id, 79, 'success');
           return repayment;
         }
-        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment });
+        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment }),
+        sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
+        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...repayment }), 
+          'failed-card-debit', { ...repayment});
         return repayment;
       })
     ]);

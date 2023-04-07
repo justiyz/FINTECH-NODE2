@@ -69,3 +69,7 @@ export const initiateDeleteCluster = (user, cluster) => {
 export const clusterDeletedSuccessfully = (cluster) => {
   return `Cluster ${cluster.name} has been deleted successfully based on consensus.`;
 };
+
+export const failedCardDebit = () => {
+  return 'Your card could not be debited for the loan repayment.';
+};
