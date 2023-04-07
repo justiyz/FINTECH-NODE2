@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import AuthQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
@@ -213,7 +214,7 @@ export const verifyBvn = async(req, res, next) => {
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_GENDER_NOT_MATCHING_BVN_GENDER, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.date_of_birth !== data.data.entity.date_of_birth) {
+    if (dayjs(user.date_of_birth).format('YYYY-MM-DD') !== dayjs(data.data.entity.date_of_birth).format('YYYY-MM-DD')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's date of birth does not match bvn returned date of birth verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_DOB_NOT_MATCHING_BVN_DOB, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);

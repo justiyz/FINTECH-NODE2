@@ -257,7 +257,8 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
         insurance_fee_percentage: 0.01,
         advisory_fee_percentage: 0.01
       },
-      monthly_repayment: parseFloat(parseFloat((((0.03) * parseFloat(payload.loan_amount)) / (1 - ((1 + (0.03))**(-Number(payload.loan_duration_in_month)))))).toFixed(2))
+      monthly_repayment: parseFloat(parseFloat((((0.03) * parseFloat(payload.loan_amount)) / (1 - ((1 + (0.03))**(-Number(payload.loan_duration_in_month)))))).toFixed(2)),
+      max_approval: 679629.6000000001
     }
   };
   return data;

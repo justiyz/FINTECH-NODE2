@@ -88,6 +88,22 @@ export const uploadDocument = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: to be uploaded file is existing uploadDocument.admin.middlewares.user.js`);
     const fileExt = path.extname(files.document.name);
+    if (files.document.size > 3197152) { // 3 MB
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: file size is greater than 3MB uploadDocument.admin.middlewares.user.js`);
+      adminActivityTracking(req.admin.admin_id, 23, 'fail');
+      return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
+    }
+    if (body.type === 'file' && fileExt !== '.pdf') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: document type is not a pdf file uploadDocument.admin.middlewares.user.js`);
+      adminActivityTracking(req.admin.admin_id, 23, 'fail');
+      return ApiResponse.error(res, enums.UPLOAD_PDF_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
+    }
+    const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
+    if (body.type === 'image' && !acceptedImageFileTypes.includes(fileExt)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: document type is not a jpeg, jpg or png file uploadDocument.admin.middlewares.user.js`);
+      adminActivityTracking(req.admin.admin_id, 23, 'fail');
+      return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
+    }
     const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}`;
     if (config.SEEDFI_NODE_ENV === 'test') {
       req.document = encodeURIComponent(
