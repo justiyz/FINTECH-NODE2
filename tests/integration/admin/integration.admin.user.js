@@ -1093,7 +1093,7 @@ describe('Admin Users management', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .attach('document', path.resolve(__dirname, '../../files/BRD.docx'))
+        .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
         .field('type', 'file')
         .field('title', 'Proof of loan indemnity')
         .end((err, res) => {
