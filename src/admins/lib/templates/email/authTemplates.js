@@ -10,13 +10,13 @@ Hi ${data.first_name},
 </tr>
 
 <tr>
- <td style=" font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+ <td style=" font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
  <p>Kindly complete your login process by using the OTP below</p>
 </td>
 </tr>
 
 <tr>
-  <td style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+  <td style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
   <p>OTP expires by ${data.expireTime} if not used</p>
 </td>
 </tr>
@@ -31,7 +31,7 @@ Hi ${data.first_name},
     </tr>
   <tr>
     <td>
-    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
     If you didn't initiate this login, you can ignore this email.
     </p>
     </td>
@@ -48,7 +48,7 @@ Hi ${data.first_name},
 
 <tr>
 <td>
-<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
 Kindly reset your password using the OTP below,
 OTP expires by ${data.expireTime} if not used. <br><br>
 Please do not share this code with anyone.
@@ -68,7 +68,7 @@ align="center">
 
 <tr>
 <td style="padding-bottom: 40px">
-<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
 If you didn't request a reset password, you can ignore this email.
 </p>
 </td>
@@ -106,17 +106,17 @@ export const  insufficientBalance = (data) => `
   </h2>
   </td>
 </tr>
-    <tr style="font-weight: 500; font-size: 14px; line-height: 160%; color: #84868c">
+    <tr style="font-weight: 500; font-size: 16px; line-height: 160%; color: #84868c">
         <td>
             <span>Kindly fund your paystack wallet balance for loan disbursement</span>
         </td>
     </tr>
-    <tr style="font-weight: 500; font-size: 14px; line-height: 160%; color: #84868c">
+    <tr style="font-weight: 500; font-size: 16px; line-height: 160%; color: #84868c">
         <td>
             <span>current balance: <b>${data.currentBalance}</b></span>
         </td>
     </tr>
-    <tr style="font-weight: 500; font-size: 14px; line-height: 160%; color: #84868c">
+    <tr style="font-weight: 500; font-size: 16px; line-height: 160%; color: #84868c">
         <td>
           Kindly login to your paystack dashboard to fund balance
         </td>
