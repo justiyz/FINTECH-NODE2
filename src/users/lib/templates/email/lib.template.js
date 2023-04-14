@@ -3,11 +3,11 @@ import * as Hash from '../../utils/lib.util.hash';
 
 export const forgotPassword = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
 <tr>
@@ -42,7 +42,7 @@ If you didn't request a reset password, you can ignore this email.
 export const verifyEmail = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -92,7 +92,7 @@ export const verifyEmail = (data) => `
 export const requestVerifyEmail = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -114,7 +114,7 @@ export const requestVerifyEmail = (data) => `
 export const rejectedDebitCard = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -144,7 +144,7 @@ export const rejectedDebitCard = (data) => `
 export const loanDisbursement = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -200,11 +200,11 @@ export const loanClusterInvite = (data) => `
 
 export const failedCardDebit = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">>
@@ -232,11 +232,11 @@ Hi ${data.first_name},
 
 export const failedChargePayment = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
@@ -265,11 +265,11 @@ Hi ${data.first_name},
 
 export const successfulRepayment = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">

@@ -50,7 +50,7 @@ export const commonTemplate = (messageType, data) => {
     <!--   CONTENT   -->
     <table role="content" style="padding: 40px 50px; color: #363740; width: 100%;">
       <tr>
-        <td style="font-weight: 900; font-size: 1.5rem; line-height: 48px; color: #84868c; padding-bottom: 23px">
+        <td style="font-weight: 900; font-size: 1.2rem; line-height: 48px; color: #84868c; padding-bottom: 23px">
           <span>${headerText}</span>
         </td>
       </tr>
