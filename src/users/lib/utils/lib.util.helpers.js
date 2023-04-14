@@ -1,9 +1,8 @@
 import Crypto from 'crypto';
 import dayjs from 'dayjs';
 import puppeteer from 'puppeteer';
-import { processOneOrNoneData } from '../../api/services/services.db';
+import { processOneOrNoneData, processAnyData } from '../../api/services/services.db';
 import userQueries from '../../api/queries/queries.user';
-import { processAnyData } from '../../api/services/services.db';
 import { offerLetterTemplate } from '../templates/offerLetter';
 import * as S3 from '../../api/services/services.s3';
 import config from '../../config';
