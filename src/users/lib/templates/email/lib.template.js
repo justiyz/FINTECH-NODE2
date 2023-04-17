@@ -3,16 +3,16 @@ import * as Hash from '../../utils/lib.util.hash';
 
 export const forgotPassword = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
 <tr>
 <td>
-    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
     Kindly reset your password using the OTP below,
     OTP expires by ${data.expirationTime} if not used. <br><br>
     Please do not share this code with anyone.
@@ -24,7 +24,7 @@ Hi ${data.first_name},
   <td style=" background-color:#f2faf1;padding: 12px 35px;width: 100%;height: 35px;border-radius: 8px;"
 align="center">
     <span style=" text-decoration: none; display: inline-block;font-family: 'Figtree';font-style: normal;font-weight: 700;
-    font-size: 25px;line-height: 24px;text-align: center;color: #1a201d;letter-spacing: 3px;">
+    font-size: 20px;line-height: 24px;text-align: center;color: #1a201d;letter-spacing: 3px;">
     ${data.otp}
 </span>
   </td>
@@ -32,7 +32,7 @@ align="center">
 
 <tr>
 <td>
-<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+<p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
 If you didn't request a reset password, you can ignore this email.
 </p>
 </td>
@@ -42,7 +42,7 @@ If you didn't request a reset password, you can ignore this email.
 export const verifyEmail = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -50,7 +50,7 @@ export const verifyEmail = (data) => `
 
 <tr>
 <td>
-   <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 20px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+   <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       Thanks for signing up on SeedFi.<br />
       we welcome you to this great lending platform. <br><br>
       Kindly sign in to verify your email.
@@ -92,7 +92,7 @@ export const verifyEmail = (data) => `
 export const requestVerifyEmail = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -101,7 +101,7 @@ export const requestVerifyEmail = (data) => `
 
 <tr>
 <td>
-  <span style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+  <span style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 16px;cline-height: 36px;color: #84868c;">
   Below is the link to complete your
   email verification. this email is valid for 30 minutes. <br><br>
 
@@ -114,7 +114,7 @@ export const requestVerifyEmail = (data) => `
 export const rejectedDebitCard = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -144,7 +144,7 @@ export const rejectedDebitCard = (data) => `
 export const loanDisbursement = (data) => `
 <tr>
   <td>
-    <h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
     Hi ${data.first_name},
     </h2>
   </td>
@@ -200,11 +200,11 @@ export const loanClusterInvite = (data) => `
 
 export const failedCardDebit = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">>
@@ -232,11 +232,11 @@ Hi ${data.first_name},
 
 export const failedChargePayment = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
@@ -265,11 +265,11 @@ Hi ${data.first_name},
 
 export const successfulRepayment = (data) => `
 <tr>
-<td>
-<h2 style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 28px;cline-height: 36px;color: #84868c;">
-Hi ${data.first_name},
-</h2>
-</td>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
 </tr>
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
