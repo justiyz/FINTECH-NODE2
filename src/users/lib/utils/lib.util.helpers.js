@@ -111,7 +111,8 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
 
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType);
   
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'});
+
   const page = await browser.newPage();
   await page.setContent(html);
   await page.emulateMediaType('screen');
