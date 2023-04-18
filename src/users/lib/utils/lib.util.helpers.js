@@ -110,8 +110,9 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const genderType = userOfferLetterDetail.gender === 'male' ? 'sir' : 'ma';
 
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType);
-  
-  const browser = await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'});
+
+  const browser = [ 'test', 'development' ].includes(config.SEEDFI_NODE_ENV) ? await puppeteer.launch() : 
+    await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'});
 
   const page = await browser.newPage();
   await page.setContent(html);
