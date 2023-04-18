@@ -15,11 +15,6 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
     const payload = body.email || req.admin.email;
     const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched admin details from the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
-    if (admin && type === 'validate' && admin.is_completed_profile && (admin.phone_number === body.phone_number)) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms that user account already exists in
-        the database validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ADMIN_ALREADY_COMPLETED_PROFILE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
-    }
     if (!admin && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that admin's email is not existing in the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
       return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Admin'),
@@ -163,6 +158,32 @@ export const checkAdminCurrentStatus = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE;
     logger.error(`checking if user email is not already existing failed::${enums.CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if admin phone number being sent previously exists in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const checkIfAdminPhoneNumberAlreadyExist = async(req, res, next) => {
+  try {
+    const [ adminNumber ] = await processAnyData(adminQueries.getAdminByPhoneNumber, [ req.body.phone_number.trim() ]);
+    if (!adminNumber) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      successfully confirms that admin's phone number is not existing in the database checkIfAdminUserAlreadyExist.middlewares.admin.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+    successfully confirms that admin's phone number is existing in the database checkIfAminEmailAlreadyExist.middlewares.admin.js`);
+    return ApiResponse.error(res, enums.ADMIN_PHONE_NUMBER_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_ADMIN_PHONE_NUMBER_ALREADY_EXIST_MIDDLEWARE;
+    logger.error(`checking if admin phone number already existing failed::${enums.CHECK_IF_ADMIN_PHONE_NUMBER_ALREADY_EXIST_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

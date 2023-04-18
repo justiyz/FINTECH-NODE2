@@ -13,8 +13,8 @@ router.post(
   '/complete-profile',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.adminCompleteProfile, 'payload'),
-  AdminMiddleware.validateUnAuthenticatedAdmin('validate'),
   AuthMiddleware.checkIfChangedDefaultPassword('verify'),
+  AdminMiddleware.checkIfAdminPhoneNumberAlreadyExist,
   AdminController.completeAdminProfile
 );
 

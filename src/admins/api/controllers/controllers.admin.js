@@ -27,6 +27,10 @@ const { SEEDFI_NODE_ENV } = config;
 export const completeAdminProfile = async(req, res, next) => {
   try {
     const { admin, body } = req;
+    if (admin.is_completed_profile) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin has previously completed profile completeAdminProfile.admin.controllers.admin.js`);
+      return ApiResponse.error(res, enums.ADMIN_ALREADY_COMPLETED_PROFILE, enums.HTTP_BAD_REQUEST, enums.COMPLETE_ADMIN_PROFILE_CONTROLLER);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin has not previously completed profile completeAdminProfile.admin.controllers.amin.js`);
     const payload = AdminPayload.completeAdminProfile(admin, body);
     const [ updatedAdmin ] = await processAnyData(adminQueries.updateAdminProfile, payload);

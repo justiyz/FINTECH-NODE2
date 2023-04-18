@@ -180,6 +180,7 @@ export const CHECK_IF_ROLE_EXIST_MIDDLEWARE = 'AdminRoleMiddleware::checkIfRoleE
 export const INVITE_ADMIN_CONTROLLER = 'AdminAdminController::inviteAdmin';
 export const VALIDATE_ROLE_CODE_MIDDLEWARE = 'AdminRoleMiddleware::validateRoleCode';
 export const CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AdminAminMiddleware::checkIfAminEmailAlreadyExist';
+export const CHECK_IF_ADMIN_PHONE_NUMBER_ALREADY_EXIST_MIDDLEWARE = 'AdminAminMiddleware::checkIfAdminPhoneNumberAlreadyExist';
 export const CHECK_IF_SUPER_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::checkIfSuperAdmin';
 export const CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::checkIfAuthenticatedAdmin';
 export const CHECK_IF_ADMIN_EXISTS_MIDDLEWARE = 'AdminAdminMiddleware::checkIfAdminExists';
