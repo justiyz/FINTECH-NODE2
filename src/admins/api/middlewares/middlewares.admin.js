@@ -15,6 +15,11 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
     const payload = body.email || req.admin.email;
     const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched admin details from the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
+    if (admin && type === 'validate' && admin.is_completed_profile && (admin.phone_number === body.phone_number)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms that user account already exists in
+        the database validateUnAuthenticatedUser.middlewares.user.js`);
+      return ApiResponse.error(res, enums.ADMIN_ALREADY_COMPLETED_PROFILE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
+    }
     if (!admin && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that admin's email is not existing in the database validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
       return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Admin'),
