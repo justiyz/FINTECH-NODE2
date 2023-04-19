@@ -52,7 +52,7 @@ export const verifyEmail = (data) => `
 <td>
    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       Thanks for signing up on SeedFi.<br />
-      we welcome you to this great lending platform. <br><br>
+      We welcome you to this great lending platform. <br><br>
       Kindly sign in to verify your email.
    </p>
 </td>
@@ -83,7 +83,7 @@ export const verifyEmail = (data) => `
             text-align: center;
             color: #ffffff;
           ">
-          click here to sign in
+          Click here to sign in
         </a>
       </td>
     </tr>

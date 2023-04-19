@@ -110,18 +110,7 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const genderType = userOfferLetterDetail.gender === 'male' ? 'sir' : 'ma';
 
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType);
-  
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.setContent(html);
-  await page.emulateMediaType('screen');
 
-  const document = await page.pdf({
-    format: 'a4',
-    scale: 0.5,
-    printBackground: true
-  });
-  
   if (config.SEEDFI_NODE_ENV === 'test') {
     const data = {
       ETag: '"68bec848a3eea33f3ccfad41c1242691"',
@@ -134,6 +123,18 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
     return data;
   }
 
+  const browser = config.SEEDFI_NODE_ENV === 'production' ? await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'}) : await puppeteer.launch();
+
+  const page = await browser.newPage();
+  await page.setContent(html);
+  await page.emulateMediaType('screen');
+
+  const document = await page.pdf({
+    format: 'a4',
+    scale: 0.5,
+    printBackground: true
+  });
+  
   // upload to Amazon s3
   const url = `files/user-documents/${user.user_id}/loan-offer-letter/${loanDetails.loan_id}.pdf`;
   const payload = Buffer.from(document, 'binary');

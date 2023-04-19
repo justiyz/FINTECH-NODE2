@@ -161,3 +161,29 @@ export const checkAdminCurrentStatus = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * check if admin phone number being sent previously exists in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const checkIfAdminPhoneNumberAlreadyExist = async(req, res, next) => {
+  try {
+    const [ adminNumber ] = await processAnyData(adminQueries.getAdminByPhoneNumber, [ req.body.phone_number.trim() ]);
+    if (!adminNumber) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      successfully confirms that admin's phone number is not existing in the database checkIfAdminUserAlreadyExist.middlewares.admin.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+    successfully confirms that admin's phone number is existing in the database checkIfAminEmailAlreadyExist.middlewares.admin.js`);
+    return ApiResponse.error(res, enums.ADMIN_PHONE_NUMBER_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_ADMIN_PHONE_NUMBER_ALREADY_EXIST_MIDDLEWARE;
+    logger.error(`checking if admin phone number already existing failed::${enums.CHECK_IF_ADMIN_PHONE_NUMBER_ALREADY_EXIST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

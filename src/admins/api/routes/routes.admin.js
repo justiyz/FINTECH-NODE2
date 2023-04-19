@@ -14,6 +14,7 @@ router.post(
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.adminCompleteProfile, 'payload'),
   AuthMiddleware.checkIfChangedDefaultPassword('verify'),
+  AdminMiddleware.checkIfAdminPhoneNumberAlreadyExist,
   AdminController.completeAdminProfile
 );
 

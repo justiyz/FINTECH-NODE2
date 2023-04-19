@@ -209,6 +209,7 @@ export const SUPER_ADMIN_ROLE_NONASSIGNABLE = 'Super admin role cannot be assign
 export const VALIDATE_ROLE_CODE_NOT_EXIST = 'Role does not exist';
 export const ADMIN_SUCCESSFULLY_INVITED = 'Admin invited successfully.';
 export const ADMIN_EMAIL_EXIST = 'Account with this email address already exist';
+export const ADMIN_PHONE_NUMBER_EXIST = 'Account with this phone number already exist';
 export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
 export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';
