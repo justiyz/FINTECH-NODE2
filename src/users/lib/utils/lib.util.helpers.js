@@ -123,7 +123,7 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
     return data;
   }
 
-  const browser = await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'});
+  const browser = config.SEEDFI_NODE_ENV === 'production' ? await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'}) : await puppeteer.launch();
 
   const page = await browser.newPage();
   await page.setContent(html);
