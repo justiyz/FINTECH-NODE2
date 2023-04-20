@@ -55,7 +55,7 @@ export const updateUserRefreshToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully generated refresh token updateUserRefreshToken.controllers.user.js`);
     const [ updatedUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new refresh token to the database updateUserRefreshToken.controllers.user.js`);
-    const is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
+    const is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
     const data = {
       ...updatedUser,
       is_updated_advanced_kyc,
@@ -437,7 +437,7 @@ export const getProfile = async(req, res, next) => {
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
-    user.is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
+    user.is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
     return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
   } catch (error) {
     error.label = enums.GET_USER_PROFILE_CONTROLLER;

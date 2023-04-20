@@ -1765,7 +1765,7 @@ describe('Clusters', () => {
         .send({
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '3',
+          number_of_children: '3',
           income_range: '1,000 - 5,000'
         })
         .end((err, res) => {

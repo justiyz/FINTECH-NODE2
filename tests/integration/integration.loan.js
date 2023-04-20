@@ -86,7 +86,7 @@ describe('Individual loan', () => {
         })
         .send({
           address: 'Lagos Mushin',
-          number_of_dependents: '4'
+          number_of_children: '4'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -130,7 +130,7 @@ describe('Individual loan', () => {
         })
         .send({
           employment_type: 'employed',
-          number_of_dependents: '2'
+          number_of_children: '2'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

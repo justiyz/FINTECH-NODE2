@@ -3,7 +3,7 @@ export default {
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
         is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-        number_of_dependents, marital_status, loan_status, employment_type, is_verified_address, device_token
+        number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token
       FROM users
       WHERE phone_number = $1`,
 
@@ -11,7 +11,7 @@ export default {
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
         is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-        number_of_dependents, marital_status, loan_status, employment_type, is_verified_address, device_token
+        number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token
       FROM users
       WHERE user_id = $1`,
 
@@ -19,7 +19,7 @@ export default {
       SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
         is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
         is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-        number_of_dependents, marital_status, loan_status, employment_type, is_verified_address, device_token
+        number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token
       FROM users
       WHERE email = $1`,
 
@@ -240,12 +240,12 @@ export default {
      gender = $6,
      address = $7,
      income_range = $8,
-     number_of_dependents = $9,
+     number_of_children = $9,
      marital_status = $10,
      employment_type = $11
      WHERE user_id = $1
      RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, address,
-              income_range, number_of_dependents, marital_status, employment_type
+              income_range, number_of_children, marital_status, employment_type
   `,
 
   fetchCardsById: `
