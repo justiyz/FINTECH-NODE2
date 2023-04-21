@@ -165,7 +165,7 @@ export const login = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully converted time from epoch time to a readable format login.controllers.auth.js`);
     const [ loggedInUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user login login.controllers.auth.js`);
-    const is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
+    const is_updated_advanced_kyc = (user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
     userActivityTracking(user.user_id, 15, 'success');
     return ApiResponse.success(res, enums.USER_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...loggedInUser, is_updated_advanced_kyc, token, tokenExpireAt });
   } catch (error) {

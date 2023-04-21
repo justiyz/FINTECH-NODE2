@@ -12,7 +12,7 @@ export default {
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
       number_of_children, marital_status, loan_status, employment_type, is_verified_address,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users

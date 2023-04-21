@@ -1,7 +1,8 @@
 ALTER TABLE users RENAME COLUMN number_of_dependents TO number_of_children;
+ALTER TABLE users DROP COLUMN IF EXISTS address;
 ALTER TABLE users DROP COLUMN IF EXISTS address_image_url;
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS next_profile_update VARCHAR;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS next_profile_update TIMESTAMPTZ DEFAULT NOW() + INTERVAL '3 months';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_uploaded_utility_bill BOOLEAN DEFAULT false;
 
 ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS max_possible_approval VARCHAR;
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS next_of_kin(
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     phone_number VARCHAR NOT NULL,
-    email VARCHAR NOT NULL,
+    email VARCHAR,
     kind_of_relationship VARCHAR NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -41,8 +42,8 @@ CREATE TABLE IF NOT EXISTS employment_type(
     company_name VARCHAR,
     school_name VARCHAR,
     date_started VARCHAR,
-    next_update VARCHAR NOT NULL,
-    income_range  VARCHAR,
+    next_update TIMESTAMPTZ DEFAULT NOW() + INTERVAL '3 months',
+    income_range  NUMERIC(19,4),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

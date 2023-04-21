@@ -25,7 +25,6 @@ export default {
     body.last_name || user.last_name,
     body.date_of_birth || user.date_of_birth,
     body.gender || user.gender,
-    body.address || user.address,
     body.income_range || user.income_range,
     body.number_of_children || user.number_of_children,
     body.marital_status || user.marital_status,

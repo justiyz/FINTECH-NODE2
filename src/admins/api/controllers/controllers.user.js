@@ -91,7 +91,7 @@ export const sendNotifications = async(req, res, next) => {
     if (type === 'incomplete-profile') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: type ${type} is decoded sendNotifications.admin.controllers.user.js`);
       if (userDetails.is_completed_kyc && userDetails.is_verified_bvn && 
-          userDetails.is_uploaded_identity_card && userDetails?.address && 
+          userDetails.is_uploaded_identity_card &&
           userDetails?.income_range && userDetails?.number_of_children && 
           userDetails?.marital_status && userDetails?.employment_type
       ) {

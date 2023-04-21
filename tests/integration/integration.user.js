@@ -1904,7 +1904,6 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'single',
           number_of_children: '4',
@@ -1930,7 +1929,6 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
           number_of_children: '2',
@@ -1956,7 +1954,6 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
           number_of_children: '1',
@@ -1982,7 +1979,6 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
           number_of_children: '4',

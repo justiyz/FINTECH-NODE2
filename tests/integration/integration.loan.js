@@ -85,7 +85,6 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           number_of_children: '4'
         })
         .end((err, res) => {
