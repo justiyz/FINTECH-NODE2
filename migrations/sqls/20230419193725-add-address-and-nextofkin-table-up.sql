@@ -1,11 +1,10 @@
 ALTER TABLE users RENAME COLUMN number_of_dependents TO number_of_children;
-ALTER TABLE users DROP COLUMN IF EXISTS address;
 ALTER TABLE users DROP COLUMN IF EXISTS address_image_url;
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS next_profile_update TIMESTAMPTZ DEFAULT NOW() + INTERVAL '3 months';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS next_profile_update TIMESTAMPTZ;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_uploaded_utility_bill BOOLEAN DEFAULT false;
 
-ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS max_possible_approval VARCHAR;
+ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS max_possible_approval NUMERIC(19,4);
 
 CREATE TABLE IF NOT EXISTS address_verification(
     id SERIAL PRIMARY KEY,
@@ -16,7 +15,7 @@ CREATE TABLE IF NOT EXISTS address_verification(
     lga VARCHAR NOT NULL,
     country VARCHAR NOT NULL,
     type_of_residence VARCHAR NOT NULL,
-    rent_amount VARCHAR,
+    rent_amount  NUMERIC(19,4),
     is_verified_address BOOLEAN DEFAULT false,
     address_image_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -42,7 +41,7 @@ CREATE TABLE IF NOT EXISTS employment_type(
     company_name VARCHAR,
     school_name VARCHAR,
     date_started VARCHAR,
-    next_update TIMESTAMPTZ DEFAULT NOW() + INTERVAL '3 months',
+    next_update TIMESTAMPTZ,
     income_range  NUMERIC(19,4),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
