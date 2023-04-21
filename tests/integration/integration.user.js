@@ -1858,7 +1858,7 @@ describe('User', () => {
           last_name: 'sikiru',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '3',
+          number_of_children: '3',
           income_range: '20,000 - 100,000'
         })
         .end((err, res) => {
@@ -1904,10 +1904,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'single',
-          number_of_dependents: '4',
+          number_of_children: '4',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -1930,10 +1929,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '2',
+          number_of_children: '2',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -1956,10 +1954,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '1',
+          number_of_children: '1',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -1982,10 +1979,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '4',
+          number_of_children: '4',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
