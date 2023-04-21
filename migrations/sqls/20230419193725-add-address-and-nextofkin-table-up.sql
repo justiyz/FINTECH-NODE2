@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS address_verification(
     country VARCHAR NOT NULL,
     type_of_residence VARCHAR NOT NULL,
     rent_amount  NUMERIC(19,4),
-    is_verified_address BOOLEAN DEFAULT false,
+    is_verified_address BOOLEAN,
     address_image_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
