@@ -8,6 +8,7 @@ const heading = {
   loanDisbursement: 'Loan Application Successful',
   loanClusterInvite: 'Loan cluster invite',
   failedCardDebit: 'Failed card debiting',
+  rejectedDebitCard: 'Rejected Debit Card',
   successfulRepayment: 'Successful loan repayment',
   failedChargePayment: 'Failed Payment'
 };

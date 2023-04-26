@@ -353,10 +353,13 @@ export const checkAccountOwnership = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
     if (user.middle_name !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);
-      if (accountDetailsName.includes(user.first_name.toLowerCase()) && 
+      if ((accountDetailsName.includes(user.first_name.toLowerCase()) && 
         accountDetailsName.includes(user.middle_name.toLowerCase()) && 
         accountDetailsName.includes(user.last_name.toLowerCase())
-      ) {
+      ) || 
+      (accountDetailsName.includes(user.first_name.toLowerCase()) && 
+      accountDetailsName.includes(user.last_name.toLowerCase())
+      )) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
         return next();
       }

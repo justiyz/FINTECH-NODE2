@@ -252,7 +252,7 @@ export const saveCardAuth = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms card will expire in 3 months time 
         saveCardAuth.middlewares.payment.js`);
         const data = {
-          firstName: user.first_name,
+          first_name: user.first_name,
           email: user.email,
           last4Digits: body.data.authorization.last4,
           cardType: body.data.authorization.card_type
