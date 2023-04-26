@@ -169,7 +169,7 @@ router.get(
 );
 
 router.post(
-  '/create-next-of-kin',
+  '/next-of-kin',
   AuthMiddleware.validateAuthToken,
   Model(Schema.nextOfKin, 'payload'),
   UserMiddleware.checkIfUserHasPreviouslyCreatedNextOfKin,

@@ -2674,7 +2674,7 @@ describe('User', () => {
   describe('Create next of kin', () => {
     it('Should throw error if invalid token is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}thfsfydue`
@@ -2692,7 +2692,7 @@ describe('User', () => {
     });
     it('Should throw error if first name is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2710,7 +2710,7 @@ describe('User', () => {
     });
     it('Should throw error if last name is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2730,7 +2730,7 @@ describe('User', () => {
     });
     it('Should throw error if phone number is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2751,7 +2751,7 @@ describe('User', () => {
     });
     it('Should throw error if invalid phone number is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2773,7 +2773,7 @@ describe('User', () => {
     });
     it('Should throw error if email is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2795,7 +2795,7 @@ describe('User', () => {
     });
     it('Should throw error if invalid email is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2818,7 +2818,7 @@ describe('User', () => {
     });
     it('Should throw error if kind of relationship is not sent', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2841,7 +2841,7 @@ describe('User', () => {
     });
     it('Should create next of kin', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
@@ -2866,7 +2866,7 @@ describe('User', () => {
     });
     it('Should throw error if user previously created next of kin', (done) => {
       chai.request(app)
-        .post('/api/v1/user/create-next-of-kin')
+        .post('/api/v1/user/next-of-kin')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
