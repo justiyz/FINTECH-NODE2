@@ -167,12 +167,13 @@ export default {
     WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
       OR ($1 IS NULL AND $2 IS NULL))`,
 
+
   totalRegisteredCustomers: `
-    SELECT COUNT(user_id) 
-    FROM users
-    WHERE is_deleted = FALSE 
-    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+      SELECT COUNT(user_id) 
+      FROM users
+      WHERE is_deleted = FALSE 
+      AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+        OR ($1 IS NULL AND $2 IS NULL)) AND is_completed_kyc = true`,
 
   fetchDetailsOfPaidLoans: `
     SELECT 
@@ -306,7 +307,7 @@ export default {
     SELECT COUNT(user_id) 
     FROM users
     WHERE tier = '0'
-    AND is_deleted = FALSE`,
+    AND is_deleted = FALSE AND is_completed_kyc = true`,
 
   totalActiveLoanUsers: `
     SELECT COUNT(user_id) 
@@ -317,7 +318,7 @@ export default {
   totalActiveUsers: `
     SELECT COUNT(user_id) 
     FROM users
-    WHERE is_deleted = FALSE`,
+    WHERE is_deleted = FALSE AND is_completed_kyc = true`,
 
   totalOverdueRepayment: `
     SELECT SUM(total_payment_amount) 

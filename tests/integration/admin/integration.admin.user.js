@@ -495,7 +495,7 @@ describe('Admin Users management', () => {
         })
         .query({
           export: 'true',
-          search: 'rashidat sikiru'
+          search: 'yemisi ojo'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);

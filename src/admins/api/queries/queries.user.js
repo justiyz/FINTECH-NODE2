@@ -71,11 +71,11 @@ export default {
       OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL) 
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-      AND (loan_status = $5 OR $5 IS NULL)
+      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
       ORDER BY created_at DESC
       OFFSET $6
       LIMIT $7`,
-
+      
   fetchAllUsers: `
         SELECT
         id,
@@ -96,25 +96,25 @@ export default {
       OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL)
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-      AND (loan_status = $5 OR $5 IS NULL)
+      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
       ORDER BY created_at DESC
       `,
 
   fetchUsersCount: `
-    SELECT COUNT(user_id) AS total_count
-    FROM users
-    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
-    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
-    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
-    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-    OR $1 IS NULL) 
-    AND (status = $2 OR $2 IS NULL) 
-    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-    AND (loan_status = $5 OR $5 IS NULL)
-  `,
-
+      SELECT COUNT(user_id) AS total_count
+      FROM users
+      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL) 
+      AND (status = $2 OR $2 IS NULL) 
+      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
+    `,
+    
   uploadUserDocument: `
     INSERT INTO user_admin_uploaded_documents (
       user_id, 

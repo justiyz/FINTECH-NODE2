@@ -336,5 +336,26 @@ export default {
         bvn,
         gender
       FROM users
-      WHERE user_id = $1`
+      WHERE user_id = $1`,
+
+  createNextOfKin: `
+      INSERT INTO next_of_kin(
+        user_id,
+        first_name,
+        last_name,
+        phone_number,
+        email,
+        kind_of_relationship
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *`,
+  getUserNextOfKin: `
+        SELECT 
+            id,
+            first_name,
+            last_name,
+            phone_number,
+            email,
+            kind_of_relationship
+        FROM next_of_kin
+        WHERE user_id = $1`
 };

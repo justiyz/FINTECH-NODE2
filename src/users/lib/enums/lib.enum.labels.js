@@ -145,6 +145,9 @@ export const REQUEST_TO_DELETE_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::requestT
 export const NEW_ADMIN_CLUSTER_ACCEPTANCE_MIDDLEWARE = 'ClusterMiddleware::newAdminClusterAcceptance';
 export const INITIATE_DELETE_CLUSTER_CONTROLLER = 'ClusterController::initiateDeleteCluster';
 export const SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER = 'ClusterController::suggestNewClusterAdmin';
+export const CREATE_NEXT_OF_KIN_CONTROLLER = 'UserController::createNextOfKin';
+export const FETCH_NEXT_OF_KIN_CONTROLLER = 'UserController::fetchNextOfKin';
+export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE = 'UserMiddleware::checkIfUserHasPreviouslyCreatedNextOfKin';
 
 
 // Admin related labels

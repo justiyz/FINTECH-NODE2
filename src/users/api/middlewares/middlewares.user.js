@@ -688,6 +688,22 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   }
 };
 
+export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user next of kin checkIfUserHasPreviouslyCreatedNextOfKin.middlewares.user.js`);
+    if (nextOfKin) {
+      return ApiResponse.error(res, enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN, enums.HTTP_FORBIDDEN);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE;
+    logger.error(`checking if user has previously filled next of kin details in the DB failed::${enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
 
 
 
