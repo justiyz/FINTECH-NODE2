@@ -129,5 +129,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfUserHasPreviouslyCreatedNextOfKin',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.checkIfUserHasPreviouslyCreatedNextOfKin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

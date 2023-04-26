@@ -29,6 +29,15 @@ export default {
     body.number_of_children || user.number_of_children,
     body.marital_status || user.marital_status,
     body.employment_type || user.employment_type
+  ],
+
+  createNextOfKin: (body, user) => [
+    user.user_id,
+    body.first_name,
+    body.last_name,
+    body.phone_number,
+    body.email,
+    body.kind_of_relationship
   ]
 };
   

@@ -64,6 +64,19 @@ const updateUsersProfile = Joi.object().keys({
   employment_type: Joi.string().optional() 
 });
 
+const nextOfKin = Joi.object().keys({
+  first_name: Joi.string().required(),
+  last_name: Joi.string().required(),
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).required(),
+  email: Joi.string().email().required(),
+  kind_of_relationship: Joi.string().required()
+});
+
 
 export default  {
   updateFcmToken,
@@ -77,5 +90,6 @@ export default  {
   verifyEmail,
   verifyOtp,
   idVerification,
-  updateUsersProfile
+  updateUsersProfile,
+  nextOfKin
 };   

@@ -558,3 +558,30 @@ export const homepageDetails = async(req, res, next) => {
     return next(error);
   }
 };
+
+export const createNextOfKin = async(req, res, next) => {
+  try {
+    const { body, user} = req;
+    const payload = UserPayload.createNextOfKin(body, user);
+    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully created user's next of kin createNextOfKin.controller.user.js`);
+    return ApiResponse.success(res, enums.NEXT_OF_KIN_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, nextOfKin);
+  } catch (error) {
+    error.label = enums.CREATE_NEXT_OF_KIN_CONTROLLER;
+    logger.error(`creating next of kin failed:::${enums.CREATE_NEXT_OF_KIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+export const fetchNextOfKin= async(req, res, next) => {
+  try {
+    const { user } = req;
+    const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's next of kin from the DB fetchNextOfKin.controller.user.js`);
+    return ApiResponse.success(res, enums.NEXT_OF_KIN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, nextOfKin);
+  } catch (error) {
+    error.label = enums.FETCH_NEXT_OF_KIN_CONTROLLER;
+    logger.error(`fetching next of kin failed:::${enums.FETCH_NEXT_OF_KIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
