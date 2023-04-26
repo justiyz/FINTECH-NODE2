@@ -174,7 +174,7 @@ export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
 export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
 export const NEXT_OF_KIN_FETCHED_SUCCESSFULLY = 'Next of kin fetched successfully';
-export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN = 'You have previously filled your next of kin details';
+export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
 
 
 

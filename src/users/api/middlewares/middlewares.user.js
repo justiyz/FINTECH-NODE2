@@ -697,7 +697,7 @@ export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) =>
     const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user next of kin checkIfUserHasPreviouslyCreatedNextOfKin.middlewares.user.js`);
     if (nextOfKin) {
-      return ApiResponse.error(res, enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN, enums.HTTP_FORBIDDEN);
+      return ApiResponse.error(res, enums.CANNOT_CHANGE_NEXT_OF_KIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE);
     }
     return next();
   } catch (error) {

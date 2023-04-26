@@ -2882,7 +2882,7 @@ describe('User', () => {
           expect(res.statusCode).to.equal(403);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('You have previously filled your next of kin details');
+          expect(res.body.message).to.equal(enums.CANNOT_CHANGE_NEXT_OF_KIN);
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
