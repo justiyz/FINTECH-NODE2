@@ -157,6 +157,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call updateNotificationIsRead', async() => {
+      const req = { user: '', body: '', params: '' };
+      const data = await UserController.updateNotificationIsRead(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call createNextOfKin', async() => {
       const req = { user: '', body: '' };
       const data = await UserController.createNextOfKin(req, res, next);

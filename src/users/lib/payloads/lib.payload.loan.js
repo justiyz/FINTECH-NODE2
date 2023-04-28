@@ -17,6 +17,7 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   lastName: user.last_name,
   dateOfBirth: user.date_of_birth,
   email: user.email,
+  address: '',
   phoneNumber: user.phone_number,
   gender: user.gender
 });
