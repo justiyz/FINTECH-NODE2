@@ -84,8 +84,15 @@ export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
 export const EMAIL_NOT_VERIFIED = 'User email not verified, kindly verify email to continue';
 export const ID_UPLOAD_VERIFICATION = 'User id successfully verified';
 export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly contact support team if you want to update id.';
+export const CHECK_USER_ADDRESS_VERIFICATION = 'User address already verified,  kindly contact support team if you want to update address info.';
+export const CHECK_USER_UTILITY_BILL_VERIFICATION = 'User uploaded utility bill already verified,  kindly contact support team if you want to update utility bill details';
+export const USER_ADDRESS_VERIFICATION_STILL_PENDING = 'User address verification is still pending, you will ne informed once it is verified';
 export const USER_VALID_ID_NOT_UPLOADED = 'User valid id not uploaded yet, kindly do this to continue.';
+export const USER_ADDRESS_NOT_VERIFIED = 'User address not verified yet, kindly do this to continue.';
+export const USER_UTILITY_BILL_NOT_VERIFIED = 'User uploaded utility bill not verified yet, kindly do this to continue.';
 export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
+export const USER_ADDRESS_UPDATED_SUCCESSFULLY = 'Updated user address successfully, kindly await verification';
+export const USER_UTILITY_BILL_UPDATED_SUCCESSFULLY = 'Updated user utility bill successfully, kindly await verification';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 export const FETCH_USER_PROFILE = 'User profile fetched successfully';
 export const CARD_CAN_NOT_BE_SET_AS_DEFAULT = 'Card can not be set as default';
@@ -106,6 +113,7 @@ export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account as default to 
 export const USER_STATUS_INACTIVE = 'User status is not active and so cannot apply for loan';
 export const NO_DEFAULT_DEBIT_CARD = 'Kindly add a debit card and set as default to proceed';
 export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan greater than maximum allowable amount';
+export const USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan lesser than minimum allowable amount';
 export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration greater than maximum allowable tenor';
 export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
@@ -121,6 +129,7 @@ export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application
 export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `User currently have ${type}, thus cannot apply for another`;
 export const LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS = (type) => `Loan application is already ${type}, thus cannot be cancelled`;
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
+export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON = 
 'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL = 'User loan application disbursement initiated successful';

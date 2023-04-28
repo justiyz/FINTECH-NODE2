@@ -52,6 +52,21 @@ const idVerification = Joi.object().keys({
   expiry_date: Joi.string().optional()
 });
 
+const addressVerification = Joi.object().keys({
+  house_number: Joi.string().required(),
+  landmark: Joi.string().required(),
+  street: Joi.string().required(),
+  city: Joi.string().required(),
+  state: Joi.string().required(),
+  lga: Joi.string().required(),
+  resident_type: Joi.string().required(),
+  rent_amount: Joi.number().positive().optional()
+});
+
+const utilityBillUpload = Joi.object().keys({
+  type: Joi.string().required().valid('image', 'file')
+});
+
 const updateUsersProfile = Joi.object().keys({
   first_name: Joi.string().optional(), 
   middle_name: Joi.string().optional(), 
@@ -138,6 +153,8 @@ export default  {
   verifyEmail,
   verifyOtp,
   idVerification,
+  addressVerification,
+  utilityBillUpload,
   updateUsersProfile,
   updateNotificationIsRead,
   notificationIdParams,

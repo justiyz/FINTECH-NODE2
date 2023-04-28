@@ -264,22 +264,38 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
 export const validateLoanAmountAndTenor = async(req, res, next) => {
   try {
     const { user, body } = req;
-    const [ maximumLoanAmountDetails, maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_amount' ]),
+    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails, 
+      maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ])
     ]);
-    if ((Number(user.tier) === 1) && (parseFloat(body.amount) > (parseFloat(maximumLoanAmountDetails.value) / 2))) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount greater than maximum allowable maximum amount 
+    if ((Number(user.tier) === 1) && (parseFloat(body.amount) > (parseFloat(tierOneMaximumLoanAmountDetails.value)))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount greater than maximum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if ((Number(user.tier) === 2) && (parseFloat(body.amount) > (parseFloat(maximumLoanAmountDetails.value)))) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount greater than maximum allowable maximum amount 
+    if ((Number(user.tier) === 2) && (parseFloat(body.amount) > (parseFloat(tierTwoMaximumLoanAmountDetails.value)))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount greater than maximum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
+    }
+    if ((Number(user.tier) === 1) && (parseFloat(body.amount) < (parseFloat(tierOneMinimumLoanAmountDetails.value)))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount lesser than minimum allowable amount 
+      validateLoanAmountAndTenor.middleware.loan.js`);
+      userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
+    }
+    if ((Number(user.tier) === 2) && (parseFloat(body.amount) < (parseFloat(tierTwoMinimumLoanAmountDetails.value)))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount lesser than minimum allowable amount 
+      validateLoanAmountAndTenor.middleware.loan.js`);
+      userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(body.duration_in_months) < Number(minimumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor 

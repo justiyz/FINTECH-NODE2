@@ -4,7 +4,7 @@ export default {
     is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
     is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
     number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token,
-    to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
+    to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
   FROM users
   WHERE phone_number = $1`,
 
@@ -13,7 +13,7 @@ export default {
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
       number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token,
-      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
+      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
    FROM users
    WHERE user_id = $1`,
 
@@ -22,7 +22,7 @@ export default {
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
       number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token,
-      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
+      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
     FROM users
     WHERE email = $1`
   ,
@@ -227,6 +227,78 @@ export default {
       expiry_date
     ) VALUES ($1, $2, $3, $4, $5, $6, $7)
      `,
+
+  addDocumentTOUserUploadedDocuments: `
+    INSERT INTO user_admin_uploaded_documents (
+      user_id, 
+      document_title,
+      image_url
+    ) VALUES ($1, $2, $3)`,
+
+  fetchUserAddressDetails: `
+    SELECT 
+      id,
+      user_id,
+      street,
+      state,
+      city,
+      house_number,
+      lga,
+      landmark,
+      country,
+      type_of_residence,
+      rent_amount,
+      is_verified_address,
+      address_image_url,
+      you_verify_candidate_id,
+      you_verify_request_id,
+      you_verify_address_id,
+      you_verify_address_verification_status
+    FROM address_verification
+    WHERE user_id = $1`,
+
+  createUserAddressDetails: `
+    INSERT INTO address_verification (
+      user_id,
+      street,
+      state,
+      city,
+      house_number,
+      landmark,
+      lga,
+      country,
+      type_of_residence,
+      rent_amount,
+      is_verified_address,
+      you_verify_candidate_id
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+
+  updateUserAddressDetails: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      street = $2,
+      state = $3,
+      city = $4,
+      house_number = $5,
+      landmark = $6,
+      lga = $7,
+      country = $8,
+      type_of_residence = $9,
+      rent_amount = $10,
+      you_verify_request_id = $11,
+      you_verify_address_id = $12,
+      you_verify_address_verification_status = $13,
+      you_verify_candidate_id = $14
+    WHERE user_id = $1
+    RETURNING *`,
+
+  updateUtilityBillDocument: `
+    UPDATE address_verification
+    SET 
+      update_at = NOW(),
+      address_image_url = $2
+    WHERE user_id = $1`,
 
   userIdVerification: `
     UPDATE users

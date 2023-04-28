@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
 import authQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
@@ -9,6 +11,7 @@ import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
 import { updateNotificationReadBoolean } from '../services/services.firebase';
+import { initiateUserYouVerifyAddressVerification } from '../services/service.youVerify';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 
@@ -379,8 +382,15 @@ export const verifyEmail = async(req, res, next) => {
 export const idUploadVerification = async(req, res, next) => {
   try {
     const { user, body } = req; 
+    const fileExt = path.extname(body.image_url.trim());
+    const document = encodeURIComponent(
+      await Hash.encrypt({ document_url: body.image_url.trim(), document_extension: fileExt })
+    );
     const payload = UserPayload.imgVerification(user, body);
     await processAnyData(userQueries.updateIdVerification, payload);
+    await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'valid identification', document ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved uploaded selfie to user uploaded documents to the database 
+    idUploadVerification.controllers.user.js`);
     const tierChoice = user.is_verified_address ? '2' : '1'; // user needs to verify address and valid id before being upgraded to tier 2
     const data =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
@@ -391,6 +401,88 @@ export const idUploadVerification = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 18, 'fail');
     error.label = enums.ID_UPLOAD_VERIFICATION_CONTROLLER;
     logger.error(`Id verification failed:::${enums.ID_UPLOAD_VERIFICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * initiate user address verification using youVerify
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user address details.
+ * @memberof UserController
+ */
+
+export const initiateAddressVerification = async(req, res, next) => {
+  try {
+    const { body, user, userAddressDetails, userYouVerifyCandidateDetails } = req;
+    const candidateId = userAddressDetails ? userAddressDetails.you_verify_candidate_id : userYouVerifyCandidateDetails.id;
+    const requestId = uuidv4();
+    const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
+    if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
+      initiateAddressVerification.controller.user.js`);
+      const payload = UserPayload.updateAddressVerification(body, user, requestId, candidateId, result.data);
+      const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details updated in the DB but still awaiting verification
+      initiateAddressVerification.controller.user.js`);
+      return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification could not be initiated with youVerify 
+    initiateAddressVerification.controller.user.js`);
+    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
+      enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+  } catch (error) {
+    error.label = enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER;
+    logger.error(`initiating user address verification failed:::${enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update user uploaded utility bill
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+
+export const updateUploadedUtilityBill = async(req, res, next) => {
+  try {
+    const { user, document } = req;
+    await Promise.all([
+      processOneOrNoneData(userQueries.updateUtilityBillDocument, [ user.user_id, document ]),
+      processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'utility bill', document ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user uploaded utility bill document saved in the DB
+    updateUploadedUtilityBill.controller.user.js`);
+    return ApiResponse.success(res, enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_UPLOADED_UTILITY_BILL_CONTROLLER;
+    logger.error(`updating user's uploaded utility bill failed:::${enums.UPDATE_UPLOADED_UTILITY_BILL_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update user address verification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+
+export const updateUserAddressVerification = async(req, res, next) => {
+  try {
+    console.log('body', req.body);
+    console.log('Headers', req.headers);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 19, 'fail');
+    error.label = enums.UPDATE_USER_PROFILE_CONTROLLER;
+    logger.error(`updating user's profile failed:::${enums.UPDATE_USER_PROFILE_CONTROLLER}`, error.message);
     return next(error);
   }
 };

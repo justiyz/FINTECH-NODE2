@@ -128,6 +128,37 @@ router.post(
   UserController.idUploadVerification
 );
 
+router.post(
+  '/address-verification',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.addressVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isVerifiedAddressDetails('complete'),
+  UserMiddleware.createUserAddressYouVerifyCandidate,
+  UserController.initiateAddressVerification
+);
+
+router.post(
+  '/upload-utility-bill',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.addressVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  UserMiddleware.isVerifiedAddressDetails('confirm'),
+  UserMiddleware.isVerifiedUtilityBill('complete'),
+  UserMiddleware.uploadUtilityBillDocument,
+  UserController.updateUploadedUtilityBill
+);
+
+router.post(
+  '/address-verification-webhook',
+  UserController.updateUserAddressVerification
+);
+
 router.put(
   '/profile',
   AuthMiddleware.validateAuthToken,

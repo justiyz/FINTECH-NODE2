@@ -13,10 +13,42 @@ export default {
     user.user_id, 
     body.id_type.toLowerCase(),
     body.card_number,
-    body.image_url,
+    body.image_url.trim(),
     body.verification_url,
     body.issued_date || null,
     body.expiry_date || null
+  ],
+
+  addressVerification: (body, user, userCandidateId) => [
+    user.user_id,
+    body.street.trim().toLowerCase(),
+    body.state.trim().toLowerCase(),
+    body.city.trim().toLowerCase(),
+    body.house_number.trim().toLowerCase(),
+    body.landmark.trim().toLowerCase(),
+    body.lga.trim().toLowerCase(),
+    'nigeria',
+    body.resident_type.trim().toLowerCase(),
+    body.rent_amount || null,
+    false,
+    userCandidateId
+  ],
+
+  updateAddressVerification: (body, user, requestId, candidateId, userAddressVerificationRequestDetails) => [
+    user.user_id,
+    body.street.trim().toLowerCase(),
+    body.state.trim().toLowerCase(),
+    body.city.trim().toLowerCase(),
+    body.house_number.trim().toLowerCase(),
+    body.landmark.trim().toLowerCase(),
+    body.lga.trim().toLowerCase(),
+    'nigeria',
+    body.resident_type.trim().toLowerCase(),
+    body.rent_amount || null,
+    requestId,
+    userAddressVerificationRequestDetails.id,
+    userAddressVerificationRequestDetails.status,
+    candidateId
   ],
 
   updateUserProfile: (body, user) => [

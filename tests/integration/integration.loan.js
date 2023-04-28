@@ -248,7 +248,7 @@ describe('Individual loan', () => {
           done();
         });
     });
-    it('should throw error if user applies for loan for a tenor greater than allowable maximum tenor', (done) => {
+    it('should throw error if user applies for loan amount lesser than allowable amount', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')
         .set({
@@ -257,6 +257,27 @@ describe('Individual loan', () => {
         })
         .send({
           amount: 20000,
+          duration_in_months: 5,
+          loan_reason: 'camera fixing loan'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE);
+          done();
+        });
+    });
+    it('should throw error if user applies for loan for a tenor greater than allowable maximum tenor', (done) => {
+      chai.request(app)
+        .post('/api/v1/loan/application')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          amount: 200000,
           duration_in_months: 15,
           loan_reason: 'camera fixing loan'
         })
