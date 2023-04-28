@@ -168,6 +168,14 @@ router.get(
   UserController.homepageDetails
 );
 
+router.patch(
+  '/:notificationId/notification',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.notificationIdParams, 'params'),
+  Model(Schema.updateNotificationIsRead, 'payload'),
+  UserController.updateNotificationIsRead
+);
+
 router.post(
   '/next-of-kin',
   AuthMiddleware.validateAuthToken,

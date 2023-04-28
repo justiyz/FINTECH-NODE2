@@ -172,6 +172,7 @@ export const INITIATE_DELETE_CLUSTER = 'Successfully initiate a delete cluster';
 export const CLUSTER_DELETED_SUCCESSFULLY = 'Cluster deleted successfully';
 export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
 export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
+export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
 export const NEXT_OF_KIN_FETCHED_SUCCESSFULLY = 'Next of kin fetched successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';

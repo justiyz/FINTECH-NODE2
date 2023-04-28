@@ -8,6 +8,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
+import { updateNotificationReadBoolean } from '../services/services.firebase';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 
@@ -402,7 +403,6 @@ export const idUploadVerification = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-
 export const updateUserProfile = async(req, res, next) => {
   try {
     const { body, user } = req;
@@ -428,7 +428,6 @@ export const updateUserProfile = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-
 export const getProfile = async(req, res, next) => {
   try {
     const {user} = req;
@@ -559,6 +558,35 @@ export const homepageDetails = async(req, res, next) => {
   }
 };
 
+/**
+ * update a user notification is read status
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns successful or failed response of the updating action
+ * @memberof UserController
+ */
+export const updateNotificationIsRead = async(req, res, next) => {
+  try {
+    const { body, user, params} = req;
+    await updateNotificationReadBoolean(user, params, body);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated notification read status updateNotificationIsRead.controller.user.js`);
+    return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_NOTIFICATION_IS_READ_CONTROLLER;
+    logger.error(`updating user existing notification read status failed:::${enums.UPDATE_NOTIFICATION_IS_READ_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * create user next of kin details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user created next of kin details
+ * @memberof UserController
+ */
 export const createNextOfKin = async(req, res, next) => {
   try {
     const { body, user} = req;
@@ -573,6 +601,14 @@ export const createNextOfKin = async(req, res, next) => {
   }
 };
 
+/**
+ * fetch user next of kin details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user pre saved next of kin details
+ * @memberof UserController
+ */
 export const fetchNextOfKin= async(req, res, next) => {
   try {
     const { user } = req;

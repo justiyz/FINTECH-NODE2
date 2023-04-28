@@ -64,6 +64,18 @@ const updateUsersProfile = Joi.object().keys({
   employment_type: Joi.string().optional() 
 });
 
+const updateNotificationIsRead = Joi.object().keys({
+  type: Joi.string().required().valid('regular', 'voting')
+}).when(Joi.object({ type: Joi.string().valid('voting') }).unknown(), {
+  then: Joi.object({
+    extra_data: Joi.object().required()
+  })
+});
+
+const notificationIdParams = Joi.object().keys({
+  notificationId: Joi.string().required()
+});
+
 const nextOfKin = Joi.object().keys({
   first_name: Joi.string().required(),
   last_name: Joi.string().required(),
@@ -91,5 +103,7 @@ export default  {
   verifyOtp,
   idVerification,
   updateUsersProfile,
+  updateNotificationIsRead,
+  notificationIdParams,
   nextOfKin
 };   
