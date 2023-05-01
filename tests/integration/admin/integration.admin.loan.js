@@ -852,7 +852,7 @@ describe('Admin Loan management', () => {
         })
         .query({
           export: 'true',
-          search: 'victory babatunde'
+          search: 'adeleye blaise'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);

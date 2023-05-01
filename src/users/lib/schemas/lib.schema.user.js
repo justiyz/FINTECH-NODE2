@@ -58,10 +58,8 @@ const updateUsersProfile = Joi.object().keys({
   last_name: Joi.string().optional(),
   date_of_birth: Joi.date().optional(),
   gender: Joi.string().optional().valid('male', 'female'), 
-  income_range: Joi.string().optional(), 
   number_of_children: Joi.number().optional(),
-  marital_status: Joi.string().optional(),
-  employment_type: Joi.string().optional() 
+  marital_status: Joi.string().optional()
 });
 
 const updateNotificationIsRead = Joi.object().keys({
@@ -89,6 +87,44 @@ const nextOfKin = Joi.object().keys({
   kind_of_relationship: Joi.string().required()
 });
 
+const employmentDetails = Joi.object().keys({
+  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired')
+}).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
+  then: Joi.object({
+    company_name: Joi.string().required(),
+    income_range: Joi.string().required()
+  })
+}).when(Joi.object({ employment_type: Joi.string().valid('self employed', 'unemployed', 'retired') }).unknown(), {
+  then: Joi.object({
+    income_range: Joi.string().required()
+  })
+}).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
+  then: Joi.object({
+    school_name: Joi.string().required(), 
+    date_started: Joi.string().required(),
+    income_range: Joi.string().required()
+  })
+});
+
+const updateEmploymentDetails = Joi.object().keys({
+  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired')
+}).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
+  then: Joi.object({
+    company_name: Joi.string().optional(),
+    income_range: Joi.string().optional()
+  })
+}).when(Joi.object({ employment_type: Joi.string().valid('self employed', 'unemployed', 'retired') }).unknown(), {
+  then: Joi.object({
+    income_range: Joi.string().optional()
+  })
+}).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
+  then: Joi.object({
+    school_name: Joi.string().optional(), 
+    date_started: Joi.string().optional(),
+    income_range: Joi.string().optional()
+  })
+});
+
 
 export default  {
   updateFcmToken,
@@ -105,5 +141,7 @@ export default  {
   updateUsersProfile,
   updateNotificationIsRead,
   notificationIdParams,
-  nextOfKin
-};   
+  nextOfKin,
+  employmentDetails,
+  updateEmploymentDetails
+};

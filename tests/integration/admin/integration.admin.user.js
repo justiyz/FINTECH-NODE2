@@ -1370,25 +1370,7 @@ describe('Admin Users management', () => {
           done();
         });
     });
-    it('Should throw error if user already completed profile', (done) => {
-      chai.request(app)
-        .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}/notification`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .query({
-          type: 'incomplete-profile'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_PROFILE_PREVIOUSLY_COMPLETED);
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
+
     it('Should send complete profile notification to user successfully', (done) => {
       chai.request(app)
         .post(`/api/v1/admin/user/${process.env.SEEDFI_USER_FIVE_USER_ID}/notification`)

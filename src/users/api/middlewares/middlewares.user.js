@@ -707,6 +707,30 @@ export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) =>
   }
 };
 
+/**
+ * check user profile next update
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const userProfileNextUpdate =(type)=> async(req, res, next) =>{
+  try {
+    const {user} = req;
+    const canUpdate = type === 'profile' ?  dayjs().isAfter(dayjs(user.next_profile_update)) :
+      dayjs().isAfter(dayjs(user.employment_next_update));
+    if ((user.next_profile_update || user.employment_next_update !== null) && !canUpdate) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
+        details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE, enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+    }
 
-
-
+    return next();
+  } catch (error) {
+    error.label = enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE;
+    logger.error(`checking user profile next update in the DB failed::${enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

@@ -135,5 +135,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call userProfileNextUpdate',  async() => {
+      const req = { user: '', type: '' };
+      const data = await UserMiddleware.userProfileNextUpdate()(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
