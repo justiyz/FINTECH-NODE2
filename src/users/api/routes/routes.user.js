@@ -51,7 +51,7 @@ router.post(
   UserMiddleware.isEmailVerified('validate'),
   UserController.requestEmailVerification
 );
-  
+
 router.get(
   '/verify-email',
   Model(Schema.verifyOtp, 'query'),
@@ -116,7 +116,7 @@ router.get(
   AuthMiddleware.validateAuthToken,
   UserController.fetchUserDebitCards
 );
-    
+
 router.post(
   '/id-verification',
   AuthMiddleware.validateAuthToken,
@@ -134,6 +134,7 @@ router.put(
   Model(Schema.updateUsersProfile, 'payload'),
   UserMiddleware.checkIfBvnIsVerified,
   UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.userProfileNextUpdate('profile'),
   UserController.updateUserProfile
 );
 
@@ -188,6 +189,27 @@ router.get(
   '/next-of-kin',
   AuthMiddleware.validateAuthToken,
   UserController.fetchNextOfKin
+);
+
+router.post(
+  '/employment-details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.employmentDetails, 'payload'),
+  UserController.createUserEmploymentDetails
+);
+
+router.put(
+  '/employment-details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.updateEmploymentDetails, 'payload'),
+  UserMiddleware.userProfileNextUpdate(),
+  UserController.updateEmploymentDetails
+);
+
+router.get(
+  '/employment-details',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserEmploymentDetails
 );
 
 export default router;

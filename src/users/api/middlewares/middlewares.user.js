@@ -665,8 +665,8 @@ export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
  */
 export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   try {
-    const { user } = req;
-    if (user.income_range === null) {
+    const { user, userEmploymentDetails } = req;
+    if (!userEmploymentDetails || userEmploymentDetails.income_range === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated income range in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('income range'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
@@ -678,7 +678,7 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated marital status in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('marital status'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
-    if (user.employment_type === null) {
+    if (!userEmploymentDetails || userEmploymentDetails.employment_type === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated employment type in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('employment type'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
@@ -707,6 +707,31 @@ export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) =>
   }
 };
 
+/**
+ * check user profile next update
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const userProfileNextUpdate = (type = '')=> async(req, res, next) =>{
+  try {
+    const {user, userEmploymentDetails} = req;
+    const canUpdate = type === 'profile' ?  dayjs().isAfter(dayjs(user.next_profile_update)) :
+      dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
+    if ((user.next_profile_update || userEmploymentDetails.employment_next_update === null) && !canUpdate) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
+        details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
+      const info = type === 'profile' ? 'profile' : 'employment';
+      return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(info), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+    }
 
-
-
+    return next();
+  } catch (error) {
+    error.label = enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE;
+    logger.error(`checking user profile next update in the DB failed::${enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

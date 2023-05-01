@@ -23,7 +23,7 @@ import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
  */
 export const checkUserLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body } = req;
+    const { user, body, userEmploymentDetails } = req;
     const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
     if (user.status === 'inactive') {
@@ -48,7 +48,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, 
       [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn);
+    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn);
     const result = await personalLoanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);

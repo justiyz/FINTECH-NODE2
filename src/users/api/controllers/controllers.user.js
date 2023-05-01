@@ -407,6 +407,12 @@ export const updateUserProfile = async(req, res, next) => {
   try {
     const { body, user } = req;
     const payload = UserPayload.updateUserProfile(body, user);
+    const hasUpdates = Boolean(body.first_name || body.middle_name || body.last_name || body.date_of_birth || body.gender);
+    if (user.is_verified_bvn && hasUpdates) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+        decoded that user details are already linked to their bvn and cant be edited in the DB updateUserProfile.controller.user.js`);
+      return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
+    }
     const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully updated user profile in the DB updateUserProfile.controller.user.js`);
@@ -436,6 +442,9 @@ export const getProfile = async(req, res, next) => {
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
+    const userBvn = await processOneOrNoneData(userQueries.fetchUserBvn, user.user_id);
+    user.bvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
+    user.next_profile_update = dayjs().isAfter(dayjs(user.next_profile_update));
     user.is_updated_advanced_kyc = (user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
     return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
   } catch (error) {
@@ -618,6 +627,79 @@ export const fetchNextOfKin= async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_NEXT_OF_KIN_CONTROLLER;
     logger.error(`fetching next of kin failed:::${enums.FETCH_NEXT_OF_KIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user employment details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const createUserEmploymentDetails = async(req, res, next) => {
+  try {
+    const payload = UserPayload.employmentDetails(req.body, req.user);
+    const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
+    if (result) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+      User already created employment type in the DB. createUserEmploymentDetails.controller.user.js`);
+      return ApiResponse.success(res, enums.EMPLOYMENT_TYPE_ALREADY_EXIST, enums.HTTP_BAD_REQUEST);
+    }
+    const data = await processOneOrNoneData(userQueries.createUserEmploymentDetails, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    user employment details successfully updated in the DB. createUserEmploymentDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.EMPLOYMENT_DETAILS, enums.HTTP_CREATED, data);
+  } catch (error) {
+    error.label = enums.EMPLOYMENT_DETAILS_CONTROLLER;
+    logger.error(`creating user employment details failed:::${enums.EMPLOYMENT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+ * user update employment details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const updateEmploymentDetails = async(req, res, next) => {
+  try {
+    const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
+    const payload = UserPayload.updateEmploymentDetails(req.body, result);
+    const data = await processAnyData(userQueries.updateEmploymentDetails, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    User successfully updated employment in the DB. updateEmploymentDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.UPDATE_EMPLOYMENT_DETAILS, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER;
+    logger.error(`updating user employment details failed:::${enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch user employment details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const fetchUserEmploymentDetails = async(req, res, next) => {
+  try {
+    const fetchedData = await processAnyData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    successfully fetched user employment details from the DB. updateEmploymentDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.FETCH_EMPLOYMENT_DETAILS_CONTROLLER, enums.HTTP_OK, fetchedData);
+  } catch (error) {
+    error.label = enums.FETCH_EMPLOYMENT_DETAILS_CONTROLLER;
+    logger.error(`fetching user employment details failed:::${enums.FETCH_EMPLOYMENT_DETAILS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

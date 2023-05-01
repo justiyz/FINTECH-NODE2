@@ -4,7 +4,7 @@ import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
-import { formatUserIncomeRange, generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
+import { generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import { sendPushNotification, sendClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
@@ -50,15 +50,13 @@ export const checkIfClusterNameUnique = async(req, res, next) => {
  */
 export const compareUserIncomeRange = async(req, res, next) => {
   try {
-    const { body, user, cluster } = req;
-    if (user.income_range === null) {
+    const { body, user, cluster, userEmploymentDetails } = req;
+    if (!userEmploymentDetails || userEmploymentDetails.income_range === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to update income range compareUserIncomeRange.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE, enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
     }
-    // eslint-disable-next-line no-unused-vars
-    const { lowerBoundIncome, upperBoundIncome } = formatUserIncomeRange(user.income_range);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user income range from DB properly formatted compareUserIncomeRange.middlewares.cluster.js`);
-    if (parseFloat(upperBoundIncome) >= parseFloat(body.minimum_monthly_income || cluster.minimum_monthly_income)) {
+    if (userEmploymentDetails && (parseFloat(userEmploymentDetails.income_range) >= (parseFloat(body.minimum_monthly_income) || parseFloat(cluster.minimum_monthly_income)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is greater than or equal to cluster minimum income 
       compareUserIncomeRange.middlewares.cluster.js`);
       return next();

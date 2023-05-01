@@ -85,6 +85,7 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
+          marital_status: 'single',
           number_of_children: '4'
         })
         .end((err, res) => {
@@ -104,7 +105,7 @@ describe('Individual loan', () => {
         .post('/api/v1/loan/application')
         .set({
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
         })
         .send({
           amount: 200000,
@@ -116,33 +117,11 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_ADVANCED_KYC_NOT_COMPLETED('employment type'));
+          expect(res.body.message).to.equal('User selfie image is yet to be uploaded, kindly do this first');
           done();
         });
     });
-    it('should update user one profile successfully', (done) => {
-      chai.request(app)
-        .put('/api/v1/user/profile')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .send({
-          employment_type: 'employed',
-          number_of_children: '2'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
-          done();
-        });
-    });
+
     it('should throw error if user has not verified email', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')

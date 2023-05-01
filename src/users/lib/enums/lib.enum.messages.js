@@ -176,7 +176,10 @@ export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfu
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
 export const NEXT_OF_KIN_FETCHED_SUCCESSFULLY = 'Next of kin fetched successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
-
+export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
+export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
+export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment type';
+export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
 
 
 // admin module related messages

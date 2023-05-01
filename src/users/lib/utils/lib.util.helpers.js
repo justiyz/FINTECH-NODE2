@@ -70,13 +70,6 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
   return repaymentArray;
 };
 
-export const formatUserIncomeRange = (incomeRange) => {
-  const formattedIncomeRange = incomeRange.replaceAll(',', '').split('-');
-  const lowerBoundIncome = formattedIncomeRange[0].trim();
-  const upperBoundIncome = formattedIncomeRange[1].trim();
-  return { lowerBoundIncome, upperBoundIncome };
-};
-
 export const collateUsersFcmTokens = async(users) => {
   const tokens = [];
   await Promise.all(users.map(async(user) => {
