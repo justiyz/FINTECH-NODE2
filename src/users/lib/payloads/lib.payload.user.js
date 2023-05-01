@@ -37,6 +37,7 @@ export default {
     body.company_name,
     body.school_name,
     body.date_started,
+    dayjs().add(3, 'month').format(),
     body.income_range
   ],
 

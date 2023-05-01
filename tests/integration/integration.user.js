@@ -2150,7 +2150,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
         })
         .send({
-          first_name: 'Oreoluwa'
+          first_name: 'Oreoluwa',
+          number_of_children: 7,
+          marital_status: 'single'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);

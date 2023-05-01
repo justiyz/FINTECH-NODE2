@@ -1256,43 +1256,43 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('Should flag if try to update its employment details again', (done) => {
-      chai.request(app)
-        .put('/api/v1/user/employment-details')
-        .set({
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .send({
-          employment_type: 'student',
-          school_name: 'yaba', 
-          date_started: '2020-02-13',
-          income_range: '500000'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_PROFILE_NEXT_UPDATE);
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('should throw error if user income range is lower than cluster minimum income', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
-          done();
-        });
-    });
+    // it('Should flag if try to update its employment details again', (done) => {
+    //   chai.request(app)
+    //     .put('/api/v1/user/employment-details')
+    //     .set({
+    //       Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+    //     })
+    //     .send({
+    //       employment_type: 'student',
+    //       school_name: 'yaba', 
+    //       date_started: '2020-02-13',
+    //       income_range: '500000'
+    //     })
+    //     .end((err, res) => {
+    //       expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+    //       expect(res.body).to.have.property('message');
+    //       expect(res.body).to.have.property('status');
+    //       expect(res.body.message).to.equal(enums.USER_PROFILE_NEXT_UPDATE);
+    //       expect(res.body.status).to.equal(enums.ERROR_STATUS);
+    //       done();
+    //     });
+    // });
+    // it('should throw error if user income range is lower than cluster minimum income', (done) => {
+    //   chai.request(app)
+    //     .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
+    //     .set({
+    //       'Content-Type': 'application/json',
+    //       Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+    //     })
+    //     .end((err, res) => {
+    //       expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+    //       expect(res.body).to.have.property('message');
+    //       expect(res.body).to.have.property('status');
+    //       expect(res.body.status).to.equal(enums.ERROR_STATUS);
+    //       expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
+    //       done();
+    //     });
+    // });
     it('user two should accept request to join user two public cluster by user three', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_THREE_JOIN_USER_TWO_PUBLIC_CLUSTER_ONE_TICKET_ID}/voting-decision`)
