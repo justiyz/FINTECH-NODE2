@@ -1,13 +1,13 @@
 import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
-const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn) => ({
+const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
   loan_duration_in_month: `${body.duration_in_months}`,
   loan_amount: parseFloat(body.amount),
   loan_reason: body.loan_reason,
-  monthly_income: user.income_range.replaceAll(',', ''),
+  monthly_income: userEmploymentDetails.income_range.replaceAll(',', ''),
   employment_type: user.employment_type,
   martial_status: user.marital_status,
   number_of_dependants: user.number_of_children,

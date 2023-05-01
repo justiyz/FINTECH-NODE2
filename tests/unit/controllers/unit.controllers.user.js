@@ -187,9 +187,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call userEmploymentDetails', async() => {
+    it('should call createUserEmploymentDetails', async() => {
       const req = { user: '' };
-      const data = await UserController.userEmploymentDetails(req, res, next);
+      const data = await UserController.createUserEmploymentDetails(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

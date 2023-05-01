@@ -639,18 +639,18 @@ export const fetchNextOfKin= async(req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const userEmploymentDetails = async(req, res, next) => {
+export const createUserEmploymentDetails = async(req, res, next) => {
   try {
     const payload = UserPayload.employmentDetails(req.body, req.user);
     const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
     if (result) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
-      User already created employment type in the DB. employmentDetails.controller.user.js`);
+      User already created employment type in the DB. createUserEmploymentDetails.controller.user.js`);
       return ApiResponse.success(res, enums.EMPLOYMENT_TYPE_ALREADY_EXIST, enums.HTTP_BAD_REQUEST);
     }
-    const data = await processOneOrNoneData(userQueries.employmentDetails, payload);
+    const data = await processOneOrNoneData(userQueries.createUserEmploymentDetails, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
-    user employment details successfully updated in the DB. employmentDetails.controller.user.js`);
+    user employment details successfully updated in the DB. createUserEmploymentDetails.controller.user.js`);
     return ApiResponse.success(res, enums.EMPLOYMENT_DETAILS, enums.HTTP_CREATED, data);
   } catch (error) {
     error.label = enums.EMPLOYMENT_DETAILS_CONTROLLER;

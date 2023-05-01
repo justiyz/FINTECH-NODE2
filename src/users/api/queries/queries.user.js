@@ -365,7 +365,7 @@ export default {
         FROM next_of_kin
         WHERE user_id = $1`,
 
-  employmentDetails: `  
+  createUserEmploymentDetails: `  
     INSERT INTO employment_type(
         user_id,
         employment_type,

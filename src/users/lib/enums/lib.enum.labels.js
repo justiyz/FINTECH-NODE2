@@ -150,7 +150,7 @@ export const CREATE_NEXT_OF_KIN_CONTROLLER = 'UserController::createNextOfKin';
 export const FETCH_NEXT_OF_KIN_CONTROLLER = 'UserController::fetchNextOfKin';
 export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE = 'UserMiddleware::checkIfUserHasPreviouslyCreatedNextOfKin';
 export const USER_PROFILE_NEXT_UPDATE_MIDDLEWARE = 'UserMiddleware::userProfileNextUpdate';
-export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::employmentDetails';
+export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::createUserEmploymentDetails';
 export const UPDATE_EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::updateEmploymentDetails';
 export const FETCH_EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::fetchUserEmploymentDetails';
 

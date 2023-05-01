@@ -195,7 +195,7 @@ router.post(
   '/employment-details',
   AuthMiddleware.validateAuthToken,
   Model(Schema.employmentDetails, 'payload'),
-  UserController.userEmploymentDetails
+  UserController.createUserEmploymentDetails
 );
 
 router.put(
