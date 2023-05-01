@@ -8,6 +8,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
+import { updateNotificationReadBoolean } from '../services/services.firebase';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 
@@ -55,7 +56,7 @@ export const updateUserRefreshToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully generated refresh token updateUserRefreshToken.controllers.user.js`);
     const [ updatedUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new refresh token to the database updateUserRefreshToken.controllers.user.js`);
-    const is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
+    const is_updated_advanced_kyc = (user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
     const data = {
       ...updatedUser,
       is_updated_advanced_kyc,
@@ -402,7 +403,6 @@ export const idUploadVerification = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-
 export const updateUserProfile = async(req, res, next) => {
   try {
     const { body, user } = req;
@@ -428,7 +428,6 @@ export const updateUserProfile = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-
 export const getProfile = async(req, res, next) => {
   try {
     const {user} = req;
@@ -437,7 +436,7 @@ export const getProfile = async(req, res, next) => {
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
-    user.is_updated_advanced_kyc = (user?.address && user?.income_range && user?.number_of_dependents && user?.marital_status && user?.employment_type) ? true : false;
+    user.is_updated_advanced_kyc = (user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
     return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
   } catch (error) {
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
@@ -555,6 +554,70 @@ export const homepageDetails = async(req, res, next) => {
   } catch (error) {
     error.label = enums.HOMEPAGE_DETAILS_CONTROLLER;
     logger.error(`fetching user homepage details failed:::${enums.HOMEPAGE_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update a user notification is read status
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns successful or failed response of the updating action
+ * @memberof UserController
+ */
+export const updateNotificationIsRead = async(req, res, next) => {
+  try {
+    const { body, user, params} = req;
+    await updateNotificationReadBoolean(user, params, body);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated notification read status updateNotificationIsRead.controller.user.js`);
+    return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_NOTIFICATION_IS_READ_CONTROLLER;
+    logger.error(`updating user existing notification read status failed:::${enums.UPDATE_NOTIFICATION_IS_READ_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * create user next of kin details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user created next of kin details
+ * @memberof UserController
+ */
+export const createNextOfKin = async(req, res, next) => {
+  try {
+    const { body, user} = req;
+    const payload = UserPayload.createNextOfKin(body, user);
+    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully created user's next of kin createNextOfKin.controller.user.js`);
+    return ApiResponse.success(res, enums.NEXT_OF_KIN_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, nextOfKin);
+  } catch (error) {
+    error.label = enums.CREATE_NEXT_OF_KIN_CONTROLLER;
+    logger.error(`creating next of kin failed:::${enums.CREATE_NEXT_OF_KIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch user next of kin details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user pre saved next of kin details
+ * @memberof UserController
+ */
+export const fetchNextOfKin= async(req, res, next) => {
+  try {
+    const { user } = req;
+    const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's next of kin from the DB fetchNextOfKin.controller.user.js`);
+    return ApiResponse.success(res, enums.NEXT_OF_KIN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, nextOfKin);
+  } catch (error) {
+    error.label = enums.FETCH_NEXT_OF_KIN_CONTROLLER;
+    logger.error(`fetching next of kin failed:::${enums.FETCH_NEXT_OF_KIN_CONTROLLER}`, error.message);
     return next(error);
   }
 };

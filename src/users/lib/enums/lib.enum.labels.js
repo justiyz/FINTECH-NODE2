@@ -145,6 +145,10 @@ export const REQUEST_TO_DELETE_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::requestT
 export const NEW_ADMIN_CLUSTER_ACCEPTANCE_MIDDLEWARE = 'ClusterMiddleware::newAdminClusterAcceptance';
 export const INITIATE_DELETE_CLUSTER_CONTROLLER = 'ClusterController::initiateDeleteCluster';
 export const SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER = 'ClusterController::suggestNewClusterAdmin';
+export const UPDATE_NOTIFICATION_IS_READ_CONTROLLER = 'UserController::updateNotificationIsRead';
+export const CREATE_NEXT_OF_KIN_CONTROLLER = 'UserController::createNextOfKin';
+export const FETCH_NEXT_OF_KIN_CONTROLLER = 'UserController::fetchNextOfKin';
+export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE = 'UserMiddleware::checkIfUserHasPreviouslyCreatedNextOfKin';
 
 
 // Admin related labels
@@ -180,6 +184,7 @@ export const CHECK_IF_ROLE_EXIST_MIDDLEWARE = 'AdminRoleMiddleware::checkIfRoleE
 export const INVITE_ADMIN_CONTROLLER = 'AdminAdminController::inviteAdmin';
 export const VALIDATE_ROLE_CODE_MIDDLEWARE = 'AdminRoleMiddleware::validateRoleCode';
 export const CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AdminAminMiddleware::checkIfAminEmailAlreadyExist';
+export const CHECK_IF_ADMIN_PHONE_NUMBER_ALREADY_EXIST_MIDDLEWARE = 'AdminAminMiddleware::checkIfAdminPhoneNumberAlreadyExist';
 export const CHECK_IF_SUPER_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::checkIfSuperAdmin';
 export const CHECK_IF_AUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::checkIfAuthenticatedAdmin';
 export const CHECK_IF_ADMIN_EXISTS_MIDDLEWARE = 'AdminAdminMiddleware::checkIfAdminExists';

@@ -167,3 +167,35 @@ export const sendUserPersonalNotification = async(user, title, content, type, ex
     created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
   });
 };
+
+/**
+ * update a notifications is read status
+ * @param {Object} user - the user object for which the notification is being updated for
+ * @param {String} params - the params from the request
+ * @param {String} body - the payload from the request
+ * @returns { JSON } - a response based on if the notification was updated or not
+ * @memberof FirebaseService
+ */
+export const updateNotificationReadBoolean = async(user, params, body) => {
+  if (config.SEEDFI_NODE_ENV === 'test') {
+    return;
+  }
+  const { notificationId } = params;
+  const updateNotification = await dbFireStore
+    .collection('notifications')
+    .doc(`${user.user_id}`)
+    .collection('messages-timestamp')
+    .doc(notificationId);
+
+  if (body.type === 'voting') {
+    await updateNotification.update({
+      is_read: true,
+      extra_data: JSON.stringify(body.extra_data)
+    });
+    return updateNotification;
+  }
+  await updateNotification.update({
+    is_read: true
+  });
+  return updateNotification;
+};

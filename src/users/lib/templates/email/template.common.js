@@ -8,6 +8,7 @@ const heading = {
   loanDisbursement: 'Loan Application Successful',
   loanClusterInvite: 'Loan cluster invite',
   failedCardDebit: 'Failed card debiting',
+  rejectedDebitCard: 'Rejected Debit Card',
   successfulRepayment: 'Successful loan repayment',
   failedChargePayment: 'Failed Payment'
 };
@@ -39,7 +40,7 @@ export const commonTemplate = (messageType, data) => {
     <!--   HEADER   -->
     <table role="header" width="100%">
       <tr>
-        <td style="padding: 40px 64px; font-size: 14px; width: 73%;">
+        <td style="padding: 40px 0px; width: 73%;">
           <img src="https://seedfi-upload.s3.eu-west-1.amazonaws.com/IMG_3580.PNG" 
           width="150px"
           alt="seedfi-icon">

@@ -71,7 +71,7 @@ const editCluster = Joi.object().keys({
   description: Joi.string().optional(),
   maximum_members: Joi.number().optional(),
   loan_goal_target: Joi.number().optional(),
-  maximum_monthly_income: Joi.number().optional()
+  minimum_monthly_income: Joi.number().optional()
 });
 
 export default  {

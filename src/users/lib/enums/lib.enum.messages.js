@@ -172,6 +172,11 @@ export const INITIATE_DELETE_CLUSTER = 'Successfully initiate a delete cluster';
 export const CLUSTER_DELETED_SUCCESSFULLY = 'Cluster deleted successfully';
 export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
 export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
+export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
+export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
+export const NEXT_OF_KIN_FETCHED_SUCCESSFULLY = 'Next of kin fetched successfully';
+export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
+
 
 
 // admin module related messages
@@ -209,6 +214,7 @@ export const SUPER_ADMIN_ROLE_NONASSIGNABLE = 'Super admin role cannot be assign
 export const VALIDATE_ROLE_CODE_NOT_EXIST = 'Role does not exist';
 export const ADMIN_SUCCESSFULLY_INVITED = 'Admin invited successfully.';
 export const ADMIN_EMAIL_EXIST = 'Account with this email address already exist';
+export const ADMIN_PHONE_NUMBER_EXIST = 'Account with this phone number already exist';
 export const IS_ROLE_ACTIVE = (role) => `Role code ${role} is deactivated`;
 export const SEARCH_FILTER_ADMINS = 'Searched/filtered admins successfully';
 export const CHECK_IF_ROLE_IS_SUPER_ADMIN = 'Kindly confirm that rule is not super admin role';

@@ -1858,7 +1858,7 @@ describe('User', () => {
           last_name: 'sikiru',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '3',
+          number_of_children: '3',
           income_range: '20,000 - 100,000'
         })
         .end((err, res) => {
@@ -1904,10 +1904,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'single',
-          number_of_dependents: '4',
+          number_of_children: '4',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -1930,10 +1929,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '2',
+          number_of_children: '2',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -1956,10 +1954,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '1',
+          number_of_children: '1',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -1982,10 +1979,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
-          address: 'Lagos Mushin',
           employment_type: 'employed',
           marital_status: 'married',
-          number_of_dependents: '4',
+          number_of_children: '4',
           income_range: '100,000.01 - 300,000'
         })
         .end((err, res) => {
@@ -2675,5 +2671,407 @@ describe('User', () => {
         });
     });
   });
-});
+  describe('Update notification is read status', () => {
+    it('Should throw error if invalid token is sent', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/1679127933280/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}thfsfydue`
+        })
+        .send({
+          type: 'regular'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if type is not sent', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/1679127933280/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid type is sent', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/1679127933280/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'decision'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [regular, voting]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if extra data is sent with type regular', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/1679127933280/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'regular',
+          extra_data: {
+            voting_ticket_id: 'cluster-ticket-7373d42ec56611edb79f670e01e43575',
+            decision: 'yes'
+          }
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('extra_data is not allowed');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if extra data is not sent with type voting', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/1679127933280/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'voting'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('extra_data is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should update regular notification is read', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/1679127933280/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'regular'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NOTIFICATION_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should update voting notification is read', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/9379127956281/notification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'voting',
+          extra_data: {
+            voting_ticket_id: 'cluster-ticket-7373d42ec56611edb79f670e01e43575',
+            decision: 'yes'
+          }
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NOTIFICATION_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Create next of kin', () => {
+    it('Should throw error if invalid token is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}thfsfydue`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if first name is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('first_name is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if last name is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('last_name is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if phone number is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('phone_number is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid phone number is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola',
+          phone_number: '0827364558498'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Phone number must contain +countryCode and extra required digits');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if email is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola',
+          phone_number: '+23465767947564'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid email is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola',
+          phone_number: '+23465767947564',
+          email: 'sadiq'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('email must be a valid email');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if kind of relationship is not sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola',
+          phone_number: '+23465767947564',
+          email: 'sadiq@gmail.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('kind_of_relationship is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should create next of kin', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola',
+          phone_number: '+23467876544565',
+          email: 'sadiq@gmail.com',
+          kind_of_relationship: 'brother'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('id');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.message).to.equal('Next of kin created successfully');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if user previously created next of kin', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoola',
+          phone_number: '+23465767947564',
+          email: 'sadiq@gmail.com',
+          kind_of_relationship: 'brother'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(403);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CANNOT_CHANGE_NEXT_OF_KIN);
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Fetch next of kin details', () => {
+    it('Should throw error if invalid token is not sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}thfsfydue`
+        })
+        .send({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
 
+    it('Should fetch next of kin details', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('id');
+          expect(res.body.data).to.have.property('first_name');
+          expect(res.body.message).to.equal('Next of kin fetched successfully');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+});

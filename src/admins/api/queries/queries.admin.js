@@ -36,6 +36,12 @@ export default {
     FROM admins
     WHERE email = $1`,
 
+  getAdminByPhoneNumber: `
+    SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted
+    FROM admins
+    WHERE phone_number = $1`,
+
   getAdminByAdminId: `
     SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
       is_verified_email, is_created_password, is_completed_profile, status, is_deleted
@@ -161,12 +167,13 @@ export default {
     WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
       OR ($1 IS NULL AND $2 IS NULL))`,
 
+
   totalRegisteredCustomers: `
-    SELECT COUNT(user_id) 
-    FROM users
-    WHERE is_deleted = FALSE 
-    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+      SELECT COUNT(user_id) 
+      FROM users
+      WHERE is_deleted = FALSE 
+      AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+        OR ($1 IS NULL AND $2 IS NULL)) AND is_completed_kyc = true`,
 
   fetchDetailsOfPaidLoans: `
     SELECT 
@@ -300,7 +307,7 @@ export default {
     SELECT COUNT(user_id) 
     FROM users
     WHERE tier = '0'
-    AND is_deleted = FALSE`,
+    AND is_deleted = FALSE AND is_completed_kyc = true`,
 
   totalActiveLoanUsers: `
     SELECT COUNT(user_id) 
@@ -311,7 +318,7 @@ export default {
   totalActiveUsers: `
     SELECT COUNT(user_id) 
     FROM users
-    WHERE is_deleted = FALSE`,
+    WHERE is_deleted = FALSE AND is_completed_kyc = true`,
 
   totalOverdueRepayment: `
     SELECT SUM(total_payment_amount) 

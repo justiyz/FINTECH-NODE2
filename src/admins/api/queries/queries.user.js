@@ -12,8 +12,8 @@ export default {
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, address, income_range,
-      number_of_dependents, marital_status, loan_status, employment_type, is_verified_address,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
+      number_of_children, marital_status, loan_status, employment_type, is_verified_address,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
     WHERE user_id = $1`,
@@ -71,11 +71,11 @@ export default {
       OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL) 
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-      AND (loan_status = $5 OR $5 IS NULL)
+      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
       ORDER BY created_at DESC
       OFFSET $6
       LIMIT $7`,
-
+      
   fetchAllUsers: `
         SELECT
         id,
@@ -96,25 +96,25 @@ export default {
       OR $1 IS NULL) 
       AND (status = $2 OR $2 IS NULL)
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-      AND (loan_status = $5 OR $5 IS NULL)
+      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
       ORDER BY created_at DESC
       `,
 
   fetchUsersCount: `
-    SELECT COUNT(user_id) AS total_count
-    FROM users
-    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
-    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
-    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
-    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-    OR $1 IS NULL) 
-    AND (status = $2 OR $2 IS NULL) 
-    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-    AND (loan_status = $5 OR $5 IS NULL)
-  `,
-
+      SELECT COUNT(user_id) AS total_count
+      FROM users
+      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL) 
+      AND (status = $2 OR $2 IS NULL) 
+      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
+    `,
+    
   uploadUserDocument: `
     INSERT INTO user_admin_uploaded_documents (
       user_id, 
@@ -143,8 +143,7 @@ export default {
       is_completed_kyc,
       is_uploaded_identity_card,
       user_national_id_details.image_url AS valid_id_image_url,
-      is_verified_address,
-      address_image_url
+      is_verified_address
     FROM users
     LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
     WHERE users.user_id = $1`,

@@ -58,11 +58,35 @@ const updateUsersProfile = Joi.object().keys({
   last_name: Joi.string().optional(),
   date_of_birth: Joi.date().optional(),
   gender: Joi.string().optional().valid('male', 'female'), 
-  address: Joi.string().optional(), 
   income_range: Joi.string().optional(), 
-  number_of_dependents: Joi.number().optional(),
+  number_of_children: Joi.number().optional(),
   marital_status: Joi.string().optional(),
   employment_type: Joi.string().optional() 
+});
+
+const updateNotificationIsRead = Joi.object().keys({
+  type: Joi.string().required().valid('regular', 'voting')
+}).when(Joi.object({ type: Joi.string().valid('voting') }).unknown(), {
+  then: Joi.object({
+    extra_data: Joi.object().required()
+  })
+});
+
+const notificationIdParams = Joi.object().keys({
+  notificationId: Joi.string().required()
+});
+
+const nextOfKin = Joi.object().keys({
+  first_name: Joi.string().required(),
+  last_name: Joi.string().required(),
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).required(),
+  email: Joi.string().email().required(),
+  kind_of_relationship: Joi.string().required()
 });
 
 
@@ -78,5 +102,8 @@ export default  {
   verifyEmail,
   verifyOtp,
   idVerification,
-  updateUsersProfile
+  updateUsersProfile,
+  updateNotificationIsRead,
+  notificationIdParams,
+  nextOfKin
 };   

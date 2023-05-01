@@ -45,7 +45,7 @@ export default {
     'paystack transfer'
   ],
   loanDisbursementPayload: async(userDetails, loanDetails) => ({
-    firstName: userDetails.first_name,
+    first_name: userDetails.first_name,
     email: userDetails.email,
     loanAmount: `₦${parseFloat(loanDetails.amount_requested).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     loanDuration: Number(loanDetails.loan_tenor_in_months),

@@ -252,7 +252,7 @@ export const saveCardAuth = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms card will expire in 3 months time 
         saveCardAuth.middlewares.payment.js`);
         const data = {
-          firstName: user.first_name,
+          first_name: user.first_name,
           email: user.email,
           last4Digits: body.data.authorization.last4,
           cardType: body.data.authorization.card_type
@@ -282,7 +282,7 @@ export const saveCardAuth = async(req, res, next) => {
       const saveCardPayload = await PaymentPayload.saveDebitCardPayload(paymentRecord, body, isDefaultCardChoice);
       await processAnyData(paymentQueries.saveCardDetails, saveCardPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: tokenized card details saved successfully saveCardAuth.middlewares.payment.js`);
-      sendUserPersonalNotification(user, 'Card Tokenization fails', 
+      sendUserPersonalNotification(user, 'Card Tokenization successful', 
         PersonalNotifications.cardTokenizedSuccessfully(), 'successful-card-tokenization', { });
       sendPushNotification(user.user_id, PushNotifications.cardTokenizationSuccessful, user.fcm_token);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 

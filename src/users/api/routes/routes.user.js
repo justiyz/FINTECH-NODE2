@@ -168,4 +168,26 @@ router.get(
   UserController.homepageDetails
 );
 
+router.patch(
+  '/:notificationId/notification',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.notificationIdParams, 'params'),
+  Model(Schema.updateNotificationIsRead, 'payload'),
+  UserController.updateNotificationIsRead
+);
+
+router.post(
+  '/next-of-kin',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.nextOfKin, 'payload'),
+  UserMiddleware.checkIfUserHasPreviouslyCreatedNextOfKin,
+  UserController.createNextOfKin
+);
+
+router.get(
+  '/next-of-kin',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchNextOfKin
+);
+
 export default router;

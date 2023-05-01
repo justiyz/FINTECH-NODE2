@@ -45,5 +45,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfAdminEmailAlreadyExist', async() => {
+      const req = { body: '' };
+      const data = await AdminAdminMiddleware.checkIfAdminEmailAlreadyExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkAdminCurrentStatus', async() => {
+      const req = { adminUser: '',  body: '' };
+      const data = await AdminAdminMiddleware.checkAdminCurrentStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfAdminPhoneNumberAlreadyExist', async() => {
+      const req = { body: '' };
+      const data = await AdminAdminMiddleware.checkIfAdminPhoneNumberAlreadyExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

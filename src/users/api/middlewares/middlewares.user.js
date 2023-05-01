@@ -353,10 +353,13 @@ export const checkAccountOwnership = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
     if (user.middle_name !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);
-      if (accountDetailsName.includes(user.first_name.toLowerCase()) && 
+      if ((accountDetailsName.includes(user.first_name.toLowerCase()) && 
         accountDetailsName.includes(user.middle_name.toLowerCase()) && 
         accountDetailsName.includes(user.last_name.toLowerCase())
-      ) {
+      ) || 
+      (accountDetailsName.includes(user.first_name.toLowerCase()) && 
+      accountDetailsName.includes(user.last_name.toLowerCase())
+      )) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
         return next();
       }
@@ -667,7 +670,7 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated income range in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('income range'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
-    if (user.number_of_dependents === null) {
+    if (user.number_of_children === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated number of dependents in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of dependents'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
@@ -684,6 +687,22 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE;
     logger.error(`checking if user has done advanced kyc in the DB failed::${enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user next of kin checkIfUserHasPreviouslyCreatedNextOfKin.middlewares.user.js`);
+    if (nextOfKin) {
+      return ApiResponse.error(res, enums.CANNOT_CHANGE_NEXT_OF_KIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE;
+    logger.error(`checking if user has previously filled next of kin details in the DB failed::${enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
