@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS blacklisted_bvns(
     last_name VARCHAR,
     date_of_birth TIMESTAMPTZ,
     bvn TEXT NOT NULL,
+    description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS unblacklisted_bvns(
     last_name VARCHAR,
     date_of_birth TIMESTAMPTZ,
     bvn TEXT NOT NULL,
+    description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
