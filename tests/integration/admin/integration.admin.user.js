@@ -1212,7 +1212,7 @@ describe('Admin Users management', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.be.an('array');
-          expect(res.body.data.length).to.equal(2);
+          expect(res.body.data.length).to.equal(3);
           expect(res.body.data[0]).to.have.property('uploaded_by');
           expect(res.body.data[0]).to.have.property('document_url');
           expect(res.body.data[0].document_extension).to.equal('.png');

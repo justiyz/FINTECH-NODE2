@@ -123,9 +123,40 @@ router.post(
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.idUploadVerification
+);
+
+router.post(
+  '/address-verification',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.addressVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  UserMiddleware.isVerifiedAddressDetails('complete'),
+  UserMiddleware.createUserAddressYouVerifyCandidate,
+  UserController.initiateAddressVerification
+);
+
+router.post(
+  '/upload-utility-bill',
+  AuthMiddleware.validateAuthToken,
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  UserMiddleware.isVerifiedAddressDetails('confirm'),
+  UserMiddleware.isVerifiedUtilityBill('complete'),
+  UserMiddleware.uploadUtilityBillDocument,
+  UserController.updateUploadedUtilityBill
+);
+
+router.get(
+  '/address-details',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserAddressDetails
 );
 
 router.put(

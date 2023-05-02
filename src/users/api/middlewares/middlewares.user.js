@@ -1,14 +1,19 @@
 import dayjs from 'dayjs';
+import path from 'path';
 import AuthQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
+import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { resolveAccount } from '../services/service.paystack';
 import { dojahBvnVerificationCheck } from '../services/service.dojah';
+import { createUserYouVerifyCandidate } from '../services/service.youVerify';
 import { userActivityTracking } from '../../lib/monitor';
+import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
+import UserPayload from '../../lib/payloads/lib.payload.user';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -47,7 +52,7 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
         enums.HTTP_BAD_REQUEST,
         enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }
-    if (user && type === 'login' && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated' || user.status === 'blacklisted')) {
+    if (user && type === 'login' && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
       validateUnAuthenticatedUser.middlewares.user.js`);
@@ -551,13 +556,178 @@ export const isUploadedVerifiedId  = (type = '') => async(req, res, next) => {
     }
     if (!req.user.is_uploaded_identity_card && type === 'confirm') {
       logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
-      decoded that User valid id ha not been uploaded yet to the DB. isUploadedVerifiedId.middlewares.user.js`);
+      decoded that User valid id has not been uploaded yet to the DB. isUploadedVerifiedId.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_VALID_ID_NOT_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
     }
     return next();
   } catch (error) {
     error.label = enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE;
     logger.error(`checking if user valid id upload is or is not already existing failed::${enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check user address verification
+ * @param {string} type - a type to know which of the response to return
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const isVerifiedAddressDetails  = (type = '') => async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (req.user.is_verified_address && type === 'complete') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      decoded that User address has been verified in the DB. isVerifiedAddressDetails.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CHECK_USER_ADDRESS_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
+    }
+    if (!req.user.is_verified_address && type === 'confirm') {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
+      decoded that User address has not been verified yet in the DB. isVerifiedAddressDetails.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADDRESS_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE;
+    logger.error(`checking if user address is or is not already verified failed::${enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user utility bill has been previously verified
+ * @param {string} type - a type to know which of the response to return
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const isVerifiedUtilityBill  = (type = '') => async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (req.user.is_verified_utility_bill && type === 'complete') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      decoded that User utility bill has been verified in the DB. isVerifiedUtilityBill.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CHECK_USER_UTILITY_BILL_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+    }
+    if (!req.user.is_verified_utility_bill && type === 'confirm') {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
+      decoded that User utility bill is yet to be verified in the DB. isVerifiedUtilityBill.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_UTILITY_BILL_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE;
+    logger.error(`checking if user uploaded utility bill is verified failed::${enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user has verified his BVN
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+
+export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const [ userAddressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
+    if (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has previously created on youVerify 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      if (userAddressDetails.you_verify_address_verification_status === 'pending') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification still pending 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        return ApiResponse.error(res, enums.USER_ADDRESS_VERIFICATION_STILL_PENDING, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      }
+      if (!userAddressDetails.is_editable) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification cannot be edited at this point 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        return ApiResponse.error(res, enums.USER_ADDRESS_CANNOT_BE_UPDATED, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      }
+      req.userAddressDetails = userAddressDetails;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify 
+    createUserAddressYouVerifyCandidate.middlewares.user.js`);
+    let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    userBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
+    const result = await createUserYouVerifyCandidate(user, userBvn);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details creation has been initiated with youVerify 
+    createUserAddressYouVerifyCandidate.middlewares.user.js`);
+    if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
+    createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      const payload = UserPayload.addressVerification(body, user, result.data.id);
+      if (!userAddressDetails) {
+        await processOneOrNoneData(userQueries.createUserAddressDetails, payload);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+        createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      }
+      req.userYouVerifyCandidateDetails = result.data;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
+    createUserAddressYouVerifyCandidate.middlewares.user.js`);
+    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
+      enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE;
+    logger.error(`creating user youVerify candidate failed::${enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * uploading utility bill document to s3
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminUserMiddleware
+ */
+export const uploadUtilityBillDocument = async(req, res, next) => {
+  try {
+    const { files, user, body } = req;
+    if (!files || (files && !files.document)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: no file is being selected for upload uploadUtilityBillDocument.middlewares.user.js`);
+      return ApiResponse.error(res, enums.UPLOAD_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: to be uploaded file is existing uploadUtilityBillDocument.middlewares.user.js`);
+    const fileExt = path.extname(files.document.name);
+    if (files.document.size > 3197152) { // 3 MB
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: file size is greater than 3MB uploadUtilityBillDocument.middlewares.user.js`);
+      return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
+    }
+    const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
+    if (!acceptedImageFileTypes.includes(fileExt)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: document type is not a jpeg, jpg or png file uploadUtilityBillDocument.middlewares.user.js`);
+      return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
+    }
+    const url = `files/user-documents/${user.user_id}/utility-bills/${files.document.name}`;
+    if (config.SEEDFI_NODE_ENV === 'test') {
+      req.document = encodeURIComponent(
+        await Hash.encrypt({ 
+          document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc',
+          document_extension: fileExt 
+        })
+      );
+      return next();
+    }
+    const payload = Buffer.from(files.document.data, 'binary');
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: upload payload and url set uploadUtilityBillDocument.middlewares.user.js`);
+    const contentType = body.type === 'file' ? 'application/pdf' : 'image/png';
+    const data  = await S3.uploadFile(url, payload, contentType);
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info:file uploaded to amazon s3 bucket uploadUtilityBillDocument.middlewares.user.js`);
+    req.document = encodeURIComponent(
+      await Hash.encrypt({ document_url: data.Location, document_extension: fileExt })
+    );
+    return next();
+  } catch (error) {
+    error.label = enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE;
+    logger.error(`uploading utility bill document to amazon s3 failed::${enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
@@ -666,13 +836,13 @@ export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
 export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   try {
     const { user, userEmploymentDetails } = req;
-    if (!userEmploymentDetails || userEmploymentDetails.income_range === null) {
+    if (!userEmploymentDetails || userEmploymentDetails.monthly_income === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated income range in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('income range'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('monthly income'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
     if (user.number_of_children === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated number of dependents in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of dependents'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of children'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
     if (user.marital_status === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated marital status in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);

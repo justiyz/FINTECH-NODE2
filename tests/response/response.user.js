@@ -1,3 +1,5 @@
+import { generateReferralCode } from '../../src/users/lib/utils/lib.util.helpers';
+
 export const dojahVerifyBvnTestResponse = (user, bvn) => {
   const data = {
     status: 200,
@@ -260,6 +262,99 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
       monthly_repayment: parseFloat(parseFloat((((0.03) * parseFloat(payload.loan_amount)) / (1 - ((1 + (0.03))**(-Number(payload.loan_duration_in_month)))))).toFixed(2)),
       max_approval: 679629.6000000001
     }
+  };
+  return data;
+};
+
+export const seedfiYouVerifyUserCandidateCreationTestResponse = (user) => {
+  const data = {
+    success: true,
+    statusCode: 201,
+    message: 'Candidate created successfully!',
+    data: {
+      firstName: user.first_name,
+      middleName: '',
+      lastName: user.last_name,
+      dateOfBirth: user.date_of_birth,
+      photo: user.image_url,
+      email: user.email,
+      mobile: user.phone_number.replace('+234', '0'),
+      idNumber: null,
+      type: 'form',
+      medium: 'form',
+      youverifyCandidateId: '644988355df07530ef289564',
+      businessId: '642e9966bfa9c5d130d62571',
+      createdAt: '2023-04-26T20:23:17.638Z',
+      lastModifiedAt: '2023-04-26T20:23:17.638Z',
+      _createdAt: '2023-04-26T20:23:1717+00:00',
+      _lastModifiedAt: '2023-04-26T20:23:1717+00:00',
+      id: generateReferralCode(12)
+    },
+    links: []
+  };
+  return data;
+};
+
+export const seedfiYouVerifyUserAddressVerificationRequestTestResponse = (user, body, requestId, candidateId) => {
+  const data = {
+    success: true,
+    statusCode: 201,
+    message: 'Address requested successfully!',
+    data: {
+      candidate: {
+        candidateId: candidateId,
+        firstName: user.first_name,
+        middleName: '',
+        lastName: user.first_name,
+        photo: user.image_url,
+        email: null,
+        mobile: user.phone_number.replace('+234', '0')
+      },
+      agent: {
+        firstName: null,
+        middleName: null,
+        lastName: null,
+        signature: null,
+        photo: null
+      },
+      address: {
+        latlong: [ Object ],
+        flatNumber: '',
+        buildingName: '',
+        buildingNumber: body.house_number,
+        subStreet: '',
+        street: body.street,
+        landmark: body.landmark,
+        state: body.state,
+        city: body.city,
+        country: 'nigeria',
+        lga: body.lga
+      },
+      referenceId: '6449b9e75df07589e8289597',
+      parentId: null,
+      status: 'pending',
+      taskStatus: 'PENDING',
+      tatStatus: 'NOT_AVAILABLE',
+      subjectConsent: 'true',
+      notes: [],
+      isFlagged: false,
+      description: 'Verify the candidate',
+      reportId: '6449b9e75df07589e8289597',
+      downloadUrl: null,
+      apiVersion: 'v2',
+      businessType: 'business',
+      businessId: '642e9966bfa9c5d130d62571',
+      userId: '642e9966bfa9c50707d6256d',
+      type: 'individual',
+      metadata: { requestId },
+      createdAt: '2023-04-26T23:55:19.272Z',
+      lastModifiedAt: '2023-04-26T23:55:19.272Z',
+      _createdAt: '2023-04-26T23:55:1919+00:00',
+      _lastModifiedAt: '2023-04-26T23:55:1919+00:00',
+      verificationId: '6449b9e75df07589e8289597',
+      id: generateReferralCode(12)
+    },
+    links: []
   };
   return data;
 };

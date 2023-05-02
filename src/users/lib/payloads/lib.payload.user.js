@@ -13,10 +13,42 @@ export default {
     user.user_id, 
     body.id_type.toLowerCase(),
     body.card_number,
-    body.image_url,
+    body.image_url.trim(),
     body.verification_url,
     body.issued_date || null,
     body.expiry_date || null
+  ],
+
+  addressVerification: (body, user, userCandidateId) => [
+    user.user_id,
+    body.street.trim().toLowerCase(),
+    body.state.trim().toLowerCase(),
+    body.city.trim().toLowerCase(),
+    body.house_number.trim().toLowerCase(),
+    body.landmark.trim().toLowerCase(),
+    body.lga.trim().toLowerCase(),
+    'nigeria',
+    body.resident_type.trim().toLowerCase(),
+    body.rent_amount || null,
+    false,
+    userCandidateId
+  ],
+
+  updateAddressVerification: (body, user, requestId, candidateId, userAddressVerificationRequestDetails) => [
+    user.user_id,
+    body.street.trim().toLowerCase(),
+    body.state.trim().toLowerCase(),
+    body.city.trim().toLowerCase(),
+    body.house_number.trim().toLowerCase(),
+    body.landmark.trim().toLowerCase(),
+    body.lga.trim().toLowerCase(),
+    'nigeria',
+    body.resident_type.trim().toLowerCase(),
+    body.rent_amount || null,
+    requestId,
+    userAddressVerificationRequestDetails.id,
+    userAddressVerificationRequestDetails.status,
+    candidateId
   ],
 
   updateUserProfile: (body, user) => [
@@ -38,7 +70,7 @@ export default {
     body.school_name,
     body.date_started,
     dayjs().add(3, 'month').format(),
-    body.income_range
+    body.monthly_income
   ],
 
   updateEmploymentDetails: (body, result) => [
@@ -48,7 +80,7 @@ export default {
     body.school_name ||  result.school_name,
     body.date_started || result.date_started,
     dayjs().add(3, 'month').format(),
-    body.income_range || result.income_range
+    body.monthly_income || result.monthly_income
   ],
 
   createNextOfKin: (body, user) => [

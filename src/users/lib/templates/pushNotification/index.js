@@ -73,3 +73,11 @@ export const clusterDeletedSuccessfully = (cluster) => {
 export const failedCardDebit = () => {
   return 'Your card could not be debited for the loan repayment.';
 };
+
+export const clusterNewAdminSelectionAccepted = (user, clusterName) => {
+  return `${user.first_name} ${user.last_name} accepted your request to be the admin for ${clusterName} cluster`;
+};
+
+export const clusterNewAdminSelectionDeclined = (user, clusterName) => {
+  return `${user.first_name} ${user.last_name} declined your request to be the admin for ${clusterName} cluster`;
+};

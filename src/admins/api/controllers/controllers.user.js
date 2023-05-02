@@ -60,14 +60,14 @@ export const editUserStatus = async(req, res, next) => {
  */
 export const userProfileDetails = async(req, res, next) => {
   try {
-    const { admin, userDetails } = req;
+    const { admin, userDetails, userEmploymentDetails, userAddressDetails } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
     if (userDetails?.bvn) {
       const result = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
       userDetails.bvn =  result?.slice(0, 7) + '****'; // return first 7 digits of the bvn
     }
     const data = {
-      personalInformation: userDetails
+      personalInformation: { userDetails, userEmploymentDetails, userAddressDetails }
     };
     return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
@@ -87,13 +87,13 @@ export const userProfileDetails = async(req, res, next) => {
  */
 export const sendNotifications = async(req, res, next) => {
   try {
-    const { admin, userDetails, query: { type } } = req;
+    const { admin, userDetails, userEmploymentDetails, query: { type } } = req;
     if (type === 'incomplete-profile') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: type ${type} is decoded sendNotifications.admin.controllers.user.js`);
       if (userDetails.is_completed_kyc && userDetails.is_verified_bvn && 
           userDetails.is_uploaded_identity_card &&
-          userDetails?.income_range && userDetails?.number_of_children && 
-          userDetails?.marital_status && userDetails?.employment_type
+          userEmploymentDetails?.monthly_income && userDetails?.number_of_children && 
+          userDetails?.marital_status && userEmploymentDetails?.employment_type
       ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile previously completed sendNotifications.admin.controllers.user.js`);
         return ApiResponse.error(res, enums.USER_PROFILE_PREVIOUSLY_COMPLETED, enums.HTTP_BAD_REQUEST, enums.SEND_NOTIFICATIONS_CONTROLLER);
