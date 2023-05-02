@@ -25,3 +25,7 @@ DROP INDEX IF EXISTS nunblacklisted_bvns_id_index;
 
 DROP TABLE IF EXISTS blacklisted_bvns CASCADE;
 DROP TABLE IF EXISTS unblacklisted_bvns CASCADE;
+
+DELETE FROM admin_resources WHERE name = 'settings';
+DELETE FROM admin_resources WHERE name = 'bvn management';
+DELETE FROM admin_resources WHERE name = 'report management';

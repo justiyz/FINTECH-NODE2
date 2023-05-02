@@ -62,3 +62,10 @@ CREATE TABLE IF NOT EXISTS unblacklisted_bvns(
 
 CREATE INDEX blacklisted_bvns_id_index ON blacklisted_bvns(id);
 CREATE INDEX nunblacklisted_bvns_id_index ON unblacklisted_bvns(id);
+
+INSERT INTO admin_resources
+    (name) 
+VALUES
+    ('settings'),
+    ('bvn management'),
+    ('report management');
