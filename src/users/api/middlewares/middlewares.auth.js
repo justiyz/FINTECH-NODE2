@@ -173,7 +173,7 @@ export const validateAuthToken = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
-    if (user && (user.is_deleted || user.status === 'suspended' || user.status === 'deactivated' || user.status === 'blacklisted')) {
+    if (user && (user.is_deleted || user.status === 'suspended' || user.status === 'deactivated')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
       validateAuthToken.middlewares.auth.js`);

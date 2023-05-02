@@ -73,7 +73,7 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of dependents'));
+          expect(res.body.message).to.equal(enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of children'));
           done();
         });
     });
@@ -202,7 +202,7 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE);
+          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE(20));
           done();
         });
     });
@@ -223,7 +223,7 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE);
+          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE(80));
           done();
         });
     });

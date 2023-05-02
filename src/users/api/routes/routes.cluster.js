@@ -16,7 +16,7 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   ClusterMiddleware.checkIfClusterNameUnique,
-  ClusterMiddleware.compareUserIncomeRange,
+  ClusterMiddleware.compareUserIncome,
   ClusterMiddleware.generateClusterUniqueCode,
   ClusterController.createCluster
 );
@@ -47,7 +47,7 @@ router.post(
   ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('request'),
   ClusterMiddleware.checkIfPublicOrPrivateCluster('public'),
-  ClusterMiddleware.compareUserIncomeRange,
+  ClusterMiddleware.compareUserIncome,
   ClusterController.requestToJoinCluster
 );
 
@@ -78,7 +78,7 @@ router.post(
   ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
   ClusterMiddleware.confirmUserClusterInvitation,
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('join'),
-  ClusterMiddleware.compareUserIncomeRange,
+  ClusterMiddleware.compareUserIncome,
   ClusterController.joinClusterOnInvitation
 );
 
@@ -120,7 +120,7 @@ router.patch(
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
   ClusterMiddleware.checkIfClusterIsOnActiveLoan,
-  ClusterMiddleware.compareUserIncomeRange,
+  ClusterMiddleware.compareUserIncome,
   ClusterMiddleware.checkIfThereIsMoreThanOnePersonInTheCluster,
   ClusterMiddleware.checkIfClusterNameUnique,
   ClusterController.editCluster

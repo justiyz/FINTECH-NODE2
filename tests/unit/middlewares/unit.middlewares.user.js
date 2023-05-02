@@ -141,5 +141,29 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call isVerifiedAddressDetails',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.userProfileNextUpdate('complete')(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call createUserAddressYouVerifyCandidate',  async() => {
+      const req = { user: '', body: '' };
+      const data = await UserMiddleware.createUserAddressYouVerifyCandidate(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call isVerifiedUtilityBill',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.isVerifiedUtilityBill('complete')(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call uploadUtilityBillDocument',  async() => {
+      const req = { user: '', body: '', files: '' };
+      const data = await UserMiddleware.uploadUtilityBillDocument(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -52,7 +52,7 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
         enums.HTTP_BAD_REQUEST,
         enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }
-    if (user && type === 'login' && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated' || user.status === 'blacklisted')) {
+    if (user && type === 'login' && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
       validateUnAuthenticatedUser.middlewares.user.js`);
@@ -642,6 +642,11 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
         return ApiResponse.error(res, enums.USER_ADDRESS_VERIFICATION_STILL_PENDING, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
       }
+      if (!userAddressDetails.is_editable) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification cannot be edited at this point 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        return ApiResponse.error(res, enums.USER_ADDRESS_CANNOT_BE_UPDATED, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      }
       req.userAddressDetails = userAddressDetails;
       return next();
     }
@@ -696,12 +701,8 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: file size is greater than 3MB uploadUtilityBillDocument.middlewares.user.js`);
       return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
     }
-    if (body.type === 'file' && fileExt !== '.pdf') {
-      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: document type is not a pdf file uploadUtilityBillDocument.middlewares.user.js`);
-      return ApiResponse.error(res, enums.UPLOAD_PDF_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
-    }
     const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
-    if (body.type === 'image' && !acceptedImageFileTypes.includes(fileExt)) {
+    if (!acceptedImageFileTypes.includes(fileExt)) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: document type is not a jpeg, jpg or png file uploadUtilityBillDocument.middlewares.user.js`);
       return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
     }
@@ -835,13 +836,13 @@ export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
 export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   try {
     const { user, userEmploymentDetails } = req;
-    if (!userEmploymentDetails || userEmploymentDetails.income_range === null) {
+    if (!userEmploymentDetails || userEmploymentDetails.monthly_income === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated income range in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('income range'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('monthly income'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
     if (user.number_of_children === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated number of dependents in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of dependents'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_ADVANCED_KYC_NOT_COMPLETED('number of children'), enums.HTTP_FORBIDDEN, enums.CHECK_USER_ADVANCED_KYC_UPDATE_MIDDLEWARE);
     }
     if (user.marital_status === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not updated marital status in the DB checkUserAdvancedKycUpdate.middlewares.user.js`);

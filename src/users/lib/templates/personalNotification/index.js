@@ -35,6 +35,16 @@ export const selectNewAdmin = (user, cluster) => {
   return `${user.first_name} ${user.last_name} selected you to be the new cluster admin of ${cluster.name} loan group. Kindly accept or decline this request`;
 };
 
+export const newAdminSelectionRequestAccepted = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} has accepted the request to be the new cluster admin for cluster ${cluster.name} group. 
+  Therefore, you are no longer the cluster admin.`;
+};
+
+export const newAdminSelectionRequestDeclined = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} has declined the request to be the new cluster admin for cluster ${cluster.name} group. 
+  Therefore, You are still the cluster admin.`;
+};
+
 export const loanDisbursementSuccessful = (data) => {
   return `Requested loan facility of ₦${parseFloat(data.amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} approved and disbursement completed successfully`;
 };

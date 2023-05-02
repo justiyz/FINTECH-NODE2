@@ -81,9 +81,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call compareUserIncomeRange', async() => {
+    it('should call compareUserIncome', async() => {
       const req = { user: '', body: '' };
-      const data = await ClusterMiddlewares.compareUserIncomeRange(req, res, next);
+      const data = await ClusterMiddlewares.compareUserIncome(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
@@ -112,13 +112,13 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call requestToDeleteCluster', async() => {
-      const req = { params: null, body:'', cluster:'', user:'', votingTicketDetails:''  };
+      const req = { params: null, body: '', cluster: '', user: '', votingTicketDetails: ''  };
       const data = await ClusterMiddlewares.requestToDeleteCluster(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call newAdminClusterAcceptance', async() => {
-      const req = { params: null, body:'', cluster:'', user:'', votingTicketDetails:''  }; 
+      const req = { params: null, body: '', cluster: '', user: '', votingTicketDetails: ''  }; 
       const data = await ClusterMiddlewares.newAdminClusterAcceptance(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

@@ -26,6 +26,39 @@ ALTER TABLE address_verification ADD COLUMN IF NOT EXISTS you_verify_candidate_i
 ALTER TABLE address_verification ADD COLUMN IF NOT EXISTS you_verify_request_id VARCHAR;
 ALTER TABLE address_verification ADD COLUMN IF NOT EXISTS you_verify_address_id VARCHAR;
 ALTER TABLE address_verification ADD COLUMN IF NOT EXISTS you_verify_address_verification_status VARCHAR;
+ALTER TABLE address_verification ADD COLUMN IF NOT EXISTS is_editable BOOLEAN DEFAULT false;
 ALTER TABLE address_verification ADD COLUMN IF NOT EXISTS is_verified_utility_bill BOOLEAN DEFAULT false;
 
 ALTER TABLE users RENAME COLUMN is_uploaded_utility_bill TO is_verified_utility_bill;
+
+ALTER TABLE user_bank_accounts ADD COLUMN IF NOT EXISTS mono_account_id VARCHAR;
+
+ALTER TABLE users DROP COLUMN IF EXISTS employment_type; 
+ALTER TABLE users DROP COLUMN IF EXISTS income_range; 
+
+ALTER TABLE employment_type RENAME COLUMN income_range TO monthly_income;
+
+CREATE TABLE IF NOT EXISTS blacklisted_bvns(
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR,
+    middle_name VARCHAR,
+    last_name VARCHAR,
+    date_of_birth TIMESTAMPTZ,
+    bvn TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS unblacklisted_bvns(
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR,
+    middle_name VARCHAR,
+    last_name VARCHAR,
+    date_of_birth TIMESTAMPTZ,
+    bvn TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX blacklisted_bvns_id_index ON blacklisted_bvns(id);
+CREATE INDEX nunblacklisted_bvns_id_index ON unblacklisted_bvns(id);

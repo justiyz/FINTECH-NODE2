@@ -15,6 +15,7 @@ router.post(
   Model(Schema.loanApplication, 'payload'),
   LoanMiddleware.checkIfUserHasActivePersonalLoan,
   UserMiddleware.checkUserAdvancedKycUpdate,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   LoanMiddleware.validateLoanAmountAndTenor,
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),

@@ -26,10 +26,10 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const { user, body, userEmploymentDetails } = req;
     const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
-    if (user.status === 'inactive') {
+    if ((user.status === 'inactive') || (user.status === 'blacklisted')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user status is inactive checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, enums.USER_STATUS_INACTIVE, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+      return ApiResponse.error(res, enums.USER_STATUS_INACTIVE_OR_BLACKLISTED(user.status), enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
     if (!userDefaultAccountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not set default account in the db checkUserLoanEligibility.controllers.loan.js`);

@@ -362,5 +362,12 @@ export default {
       updated_at = NOW(),
       offer_letter_url = $3
     WHERE loan_id = $1
-    AND user_id = $2`
+    AND user_id = $2`,
+
+  fetchUserPreviousPersonalLoanCounts: `
+    SELECT 
+      COUNT(user_id)
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`
 };

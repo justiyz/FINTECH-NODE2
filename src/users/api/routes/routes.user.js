@@ -123,7 +123,6 @@ router.post(
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.idUploadVerification
 );
@@ -135,6 +134,7 @@ router.post(
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.isVerifiedAddressDetails('complete'),
   UserMiddleware.createUserAddressYouVerifyCandidate,
   UserController.initiateAddressVerification
@@ -143,7 +143,6 @@ router.post(
 router.post(
   '/upload-utility-bill',
   AuthMiddleware.validateAuthToken,
-  Model(Schema.addressVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
@@ -154,9 +153,10 @@ router.post(
   UserController.updateUploadedUtilityBill
 );
 
-router.post(
-  '/address-verification-webhook',
-  UserController.updateUserAddressVerification
+router.get(
+  '/address-details',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserAddressDetails
 );
 
 router.put(

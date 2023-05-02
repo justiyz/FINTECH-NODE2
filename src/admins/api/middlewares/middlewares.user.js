@@ -146,7 +146,11 @@ export const checkIfUserExists = async(req, res, next) => {
     if (userDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
         successfully confirms that user being queried exists in the DB checkIfUserExists.admin.middlewares.user.js`);
+      const [ userEmploymentDetails ] = await processAnyData(userQueries.getUserEmploymentDetails, [ user_id ]);
+      const [ userAddressDetails ] = await processAnyData(userQueries.getUserAddressDetails, [ user_id ]);
       req.userDetails = userDetails;
+      req.userEmploymentDetails = userEmploymentDetails;
+      req.userAddressDetails = userAddressDetails;
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 

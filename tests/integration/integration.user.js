@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import path from 'path';
 import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
@@ -343,7 +344,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -367,7 +368,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -499,7 +500,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -728,9 +729,9 @@ describe('User', () => {
         })
         .send({
           id_type: 'ninm',
-          card_number: '3e344e5rtft7tfgfuu',
-          image_url: 'https:local:3r45dfghjiuytfb',
-          verification_url: 'https:local:3r45dfghjiuytfb',
+          card_number: '3e344e5rtft7tfgfuuu87',
+          image_url: 'https:local:3r45dfghjiuytfb.png',
+          verification_url: 'https:local:3r45dfghjiuytfbshjks.com',
           issued_date: '2023-12-4',
           expiry_date: '2021-1-4'
         })
@@ -741,6 +742,33 @@ describe('User', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.message).to.equal(enums.ID_UPLOAD_VERIFICATION);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.tier).to.equal(1);
+          done();
+        });
+    });
+    it('should verify user one id successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/id-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          id_type: 'ninm',
+          card_number: '3e344e5rtft7tfgfuu',
+          image_url: 'https:local:3r45dfghjiuytfbjkdl.png',
+          verification_url: 'https:local:3r45dfghjiuytfb.com',
+          issued_date: '2023-12-4',
+          expiry_date: '2021-1-4'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ID_UPLOAD_VERIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.tier).to.equal(1);
           done();
         });
     });
@@ -1845,7 +1873,7 @@ describe('User', () => {
         });
     });
   });
-  describe('Employment details', () => {
+  describe('Add employment details', () => {
     it('Should successfully create user one employment details', (done) => {
       chai.request(app)
         .post('/api/v1/user/employment-details')
@@ -1854,7 +1882,7 @@ describe('User', () => {
         })
         .send({
           employment_type: 'retired',
-          income_range: '500000'
+          monthly_income: '500000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CREATED);
@@ -1874,7 +1902,7 @@ describe('User', () => {
         .send({
           employment_type: 'employed',
           company_name: 'may ltd',
-          income_range: '600000'
+          monthly_income: '600000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CREATED);
@@ -1895,7 +1923,7 @@ describe('User', () => {
         .send({
           employment_type: 'employed',
           company_name: 'may ltd',
-          income_range: '500000'
+          monthly_income: '500000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CREATED);
@@ -1914,7 +1942,7 @@ describe('User', () => {
         })
         .send({
           employment_type: 'unemployed',
-          income_range: '500000'
+          monthly_income: '500000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CREATED);
@@ -1933,7 +1961,7 @@ describe('User', () => {
         })
         .send({
           employment_type: 'unemployed',
-          income_range: '500000'
+          monthly_income: '500000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1953,7 +1981,7 @@ describe('User', () => {
         .send({
           employment_type: 'employed',
           company_name: 'may ltd',
-          income_range: '500000'
+          monthly_income: '500000'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CREATED);
@@ -1993,6 +2021,246 @@ describe('User', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.FETCH_EMPLOYMENT_DETAILS_CONTROLLER);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Add address details for verification', () => {
+    it('Should successfully create user one address details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '18',
+          landmark: 'Bovas Filling station',
+          street: 'Bombay Drive',
+          city: 'Akure',
+          state: 'Ondo' ,
+          lga: 'Ose',
+          resident_type: 'rented',
+          rent_amount: '300000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          done();
+        });
+    });
+    it('Should successfully create user two address details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '2',
+          landmark: 'Enyata avenue',
+          street: 'Cannon road',
+          city: 'Mushin',
+          state: 'Lagos' ,
+          lga: 'Mushin',
+          resident_type: 'owned'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          done();
+        });
+    });
+    it('Should flag if user five try creating address information', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.KYC_NOT_PREVIOUSLY_COMPLETED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user four try creating address information', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user three try creating address information', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_VALID_ID_NOT_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Fetch user address details', () => {
+    it('Should successfully fetch user one address details', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/address-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.FETCHED_USER_ADDRESS_DETAILS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('landmark');
+          expect(res.body.data).to.have.property('country');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          done();
+        });
+    });
+    it('Should successfully fetch user two address details', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/address-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.FETCHED_USER_ADDRESS_DETAILS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('landmark');
+          expect(res.body.data).to.have.property('country');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          done();
+        });
+    });
+  });
+  describe('Upload utility bill for user', () => {
+    it('Should flag if user one try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_NOT_VERIFIED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user five try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.KYC_NOT_PREVIOUSLY_COMPLETED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user four try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user three try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_VALID_ID_NOT_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });

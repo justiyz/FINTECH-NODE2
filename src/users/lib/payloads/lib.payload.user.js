@@ -70,7 +70,7 @@ export default {
     body.school_name,
     body.date_started,
     dayjs().add(3, 'month').format(),
-    body.income_range
+    body.monthly_income
   ],
 
   updateEmploymentDetails: (body, result) => [
@@ -80,7 +80,7 @@ export default {
     body.school_name ||  result.school_name,
     body.date_started || result.date_started,
     dayjs().add(3, 'month').format(),
-    body.income_range || result.income_range
+    body.monthly_income || result.monthly_income
   ],
 
   createNextOfKin: (body, user) => [

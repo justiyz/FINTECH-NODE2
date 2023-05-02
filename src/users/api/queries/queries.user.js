@@ -2,8 +2,8 @@ export default {
   getUserByPhoneNumber: `
   SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
     is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-    is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
-    number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token,
+    is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
+    number_of_children, marital_status, loan_status, is_verified_address, device_token,
     to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
   FROM users
   WHERE phone_number = $1`,
@@ -11,8 +11,8 @@ export default {
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
-      number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
+      number_of_children, marital_status, loan_status, is_verified_address, device_token,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
    FROM users
    WHERE user_id = $1`,
@@ -20,8 +20,8 @@ export default {
   getUserByEmail: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
-      number_of_children, marital_status, loan_status, employment_type, is_verified_address, device_token,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
+      number_of_children, marital_status, loan_status, is_verified_address, device_token,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
     FROM users
     WHERE email = $1`
@@ -249,11 +249,14 @@ export default {
       type_of_residence,
       rent_amount,
       is_verified_address,
+      is_verified_utility_bill,
       address_image_url,
       you_verify_candidate_id,
       you_verify_request_id,
       you_verify_address_id,
-      you_verify_address_verification_status
+      is_editable,
+      you_verify_address_verification_status,
+      created_at
     FROM address_verification
     WHERE user_id = $1`,
 
@@ -296,7 +299,7 @@ export default {
   updateUtilityBillDocument: `
     UPDATE address_verification
     SET 
-      update_at = NOW(),
+      updated_at = NOW(),
       address_image_url = $2
     WHERE user_id = $1`,
 
@@ -446,9 +449,9 @@ export default {
         school_name,
         date_started,
         next_update,
-        income_range
+        monthly_income
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING user_id, employment_type, income_range
+      RETURNING user_id, employment_type, monthly_income
       `,
   updateEmploymentDetails: `
     UPDATE employment_type
@@ -459,9 +462,9 @@ export default {
       school_name = $4,
       date_started = $5,
       next_update = $6,
-      income_range = $7
+      monthly_income = $7
     WHERE user_id = $1
-    RETURNING user_id, employment_type, next_update, income_range
+    RETURNING user_id, employment_type, next_update, monthly_income
     `,
 
   fetchEmploymentDetails: `
@@ -471,7 +474,7 @@ export default {
           company_name,
           school_name,
           date_started,
-          income_range,
+          monthly_income,
           next_update AS employment_next_update
         FROM employment_type
         WHERE user_id = $1

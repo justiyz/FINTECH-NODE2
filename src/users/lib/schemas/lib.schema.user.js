@@ -63,10 +63,6 @@ const addressVerification = Joi.object().keys({
   rent_amount: Joi.number().positive().optional()
 });
 
-const utilityBillUpload = Joi.object().keys({
-  type: Joi.string().required().valid('image', 'file')
-});
-
 const updateUsersProfile = Joi.object().keys({
   first_name: Joi.string().optional(), 
   middle_name: Joi.string().optional(), 
@@ -103,40 +99,30 @@ const nextOfKin = Joi.object().keys({
 });
 
 const employmentDetails = Joi.object().keys({
-  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired')
+  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired'),
+  monthly_income: Joi.string().required()
 }).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
   then: Joi.object({
-    company_name: Joi.string().required(),
-    income_range: Joi.string().required()
-  })
-}).when(Joi.object({ employment_type: Joi.string().valid('self employed', 'unemployed', 'retired') }).unknown(), {
-  then: Joi.object({
-    income_range: Joi.string().required()
+    company_name: Joi.string().required()
   })
 }).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
   then: Joi.object({
     school_name: Joi.string().required(), 
-    date_started: Joi.string().required(),
-    income_range: Joi.string().required()
+    date_started: Joi.string().required()
   })
 });
 
 const updateEmploymentDetails = Joi.object().keys({
-  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired')
+  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired'),
+  monthly_income: Joi.string().optional()
 }).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
   then: Joi.object({
-    company_name: Joi.string().optional(),
-    income_range: Joi.string().optional()
-  })
-}).when(Joi.object({ employment_type: Joi.string().valid('self employed', 'unemployed', 'retired') }).unknown(), {
-  then: Joi.object({
-    income_range: Joi.string().optional()
+    company_name: Joi.string().optional()
   })
 }).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
   then: Joi.object({
     school_name: Joi.string().optional(), 
-    date_started: Joi.string().optional(),
-    income_range: Joi.string().optional()
+    date_started: Joi.string().optional()
   })
 });
 
@@ -154,7 +140,6 @@ export default  {
   verifyOtp,
   idVerification,
   addressVerification,
-  utilityBillUpload,
   updateUsersProfile,
   updateNotificationIsRead,
   notificationIdParams,
