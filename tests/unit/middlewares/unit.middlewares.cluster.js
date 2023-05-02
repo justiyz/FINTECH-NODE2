@@ -81,9 +81,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call compareUserIncome', async() => {
+    it('should call compareUserMonthlyIncome', async() => {
       const req = { user: '', body: '' };
-      const data = await ClusterMiddlewares.compareUserIncome(req, res, next);
+      const data = await ClusterMiddlewares.compareUserMonthlyIncome(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

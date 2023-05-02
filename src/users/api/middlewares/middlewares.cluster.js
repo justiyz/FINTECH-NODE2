@@ -48,26 +48,27 @@ export const checkIfClusterNameUnique = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof ClusterMiddleware
  */
-export const compareUserIncome = async(req, res, next) => {
+export const compareUserMonthlyIncome = async(req, res, next) => {
   try {
     const { body, user, cluster, userEmploymentDetails } = req;
     if (!userEmploymentDetails || userEmploymentDetails.monthly_income === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to update income range compareUserIncome.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.UPDATE_INCOME_FOR_ACTION_PERFORMANCE, enums.HTTP_BAD_REQUEST, enums.COMPARE_USER_INCOME_MIDDLEWARE);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to update income range compareUserMonthlyIncome.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.UPDATE_INCOME_FOR_ACTION_PERFORMANCE, enums.HTTP_BAD_REQUEST, enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user income range from DB properly formatted compareUserIncome.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user income range from DB properly formatted compareUserMonthlyIncome.middlewares.cluster.js`);
     if (userEmploymentDetails && (parseFloat(userEmploymentDetails.monthly_income) >= 
     (parseFloat(body.minimum_monthly_income) || parseFloat(cluster.minimum_monthly_income)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is greater than or equal to cluster minimum income 
-      compareUserIncome.middlewares.cluster.js`);
+      compareUserMonthlyIncome.middlewares.cluster.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is less than cluster minimum income compareUserIncome.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is less than cluster minimum income 
+    compareUserMonthlyIncome.middlewares.cluster.js`);
     return ApiResponse.error(res, enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING, 
-      enums.HTTP_BAD_REQUEST, enums.COMPARE_USER_INCOME_MIDDLEWARE);
+      enums.HTTP_BAD_REQUEST, enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE);
   } catch (error) {
-    error.label = enums.COMPARE_USER_INCOME_MIDDLEWARE;
-    logger.error(`comparing user monthly income failed::${enums.COMPARE_USER_INCOME_MIDDLEWARE}`, error.message);
+    error.label = enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE;
+    logger.error(`comparing user monthly income failed::${enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
