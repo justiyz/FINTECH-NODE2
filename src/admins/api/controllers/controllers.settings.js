@@ -3,6 +3,14 @@ import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 
+/**
+ * fetches admin env values settings
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
 
 export const fetchEnvValues = async(req, res, next) => {
   try { 
@@ -18,6 +26,14 @@ export const fetchEnvValues = async(req, res, next) => {
 };
 
 
+/**
+ * updates admin env values settings
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
 export const updateEnvValues = async(req, res, next) => {
   try {
     const { admin, body } = req;
