@@ -3,14 +3,14 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import * as Schema from '../../../admins/lib/schemas/lib.schema.settings';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
-import * as AdminController from '../controllers/controllers.settings';
+import * as  AdminSettingsController from '../controllers/controllers.settings';
 
 const router = Router();
 router.get(
   '/env-settings',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('settings', 'read'),
-  AdminController.fetchEnvValues
+  AdminSettingsController.fetchEnvValues
 );
 
 router.put(
@@ -18,7 +18,7 @@ router.put(
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('settings', 'update'),
   Model(Schema.updateEnvValues, 'payload'),
-  AdminController.updateEnvValues
+  AdminSettingsController.updateEnvValues
 );
 
 
