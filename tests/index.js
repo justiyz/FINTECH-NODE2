@@ -23,6 +23,7 @@ import './unit/admin/controllers/unit.admin.controllers.roles';
 import './unit/admin/controllers/unit.admin.controllers.admin';
 import './unit/admin/controllers/unit.admin.controllers.user';
 import './unit/admin/controllers/unit.admin.controllers.loan';
+import './unit/admin/controllers/unit.admin.controllers.settings';
 import './unit/admin/lib/utils/unit.admin.lib.utility.hash';
 import './unit/admin/lib/utils/unit.admin.lib.utility.helpers';
 
@@ -37,3 +38,4 @@ import './integration/admin/integration.admin.roles';
 import './integration/admin/integration.admin';
 import './integration/admin/integration.admin.user';
 import './integration/admin/integration.admin.loan';
+import './integration/admin/integration.admin.settings';
