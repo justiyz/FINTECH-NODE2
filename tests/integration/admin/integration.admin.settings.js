@@ -127,6 +127,28 @@ describe('Admin Settings management', () => {
           done();
         });
     });
+    it('Should return error if value is not sent', (done) => {
+      chai.request(app)
+        .put('/api/v1/admin/settings/env-settings')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send( 
+          [ {
+            env_id: 'admin-env-2f4c57f2e9a711edb'
+          } ]
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('[0].value is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should update env value settings successfully', (done) => {
       chai.request(app)
         .put('/api/v1/admin/settings/env-settings')
