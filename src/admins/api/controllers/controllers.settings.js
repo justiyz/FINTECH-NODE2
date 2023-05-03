@@ -37,8 +37,7 @@ export const updateEnvValues = async(req, res, next) => {
       envToUpdate.map(async(env) => {
         const envId = env.env_id;
         const value = env.value;
-        await processOneOrNoneData(settingsQueries.updateEnvValues, [ envId, value ]);
-        return;
+        return await processOneOrNoneData(settingsQueries.updateEnvValues, [ envId, value ]);
       })
     );
   
