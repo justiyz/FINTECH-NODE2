@@ -1993,38 +1993,6 @@ describe('User', () => {
         });
     });
   });
-  describe('update and fetch employment details', () => {
-    it('Should flag if UNAUTHORIZED user try fetching employment details', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/employment-details')
-        .set({
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}pp`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should successfully fetch user one employment details', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/employment-details')
-        .set({
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.FETCH_EMPLOYMENT_DETAILS_CONTROLLER);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-  });
   describe('Add address details for verification', () => {
     it('Should successfully create user one address details', (done) => {
       chai.request(app)
@@ -2157,48 +2125,7 @@ describe('User', () => {
         });
     });
   });
-  describe('Fetch user address details', () => {
-    it('Should successfully fetch user one address details', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/address-details')
-        .set({
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.FETCHED_USER_ADDRESS_DETAILS_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('is_verified_utility_bill');
-          expect(res.body.data).to.have.property('landmark');
-          expect(res.body.data).to.have.property('country');
-          expect(res.body.data).to.have.property('you_verify_candidate_id');
-          expect(res.body.data.is_editable).to.equal(false);
-          done();
-        });
-    });
-    it('Should successfully fetch user two address details', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/address-details')
-        .set({
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.FETCHED_USER_ADDRESS_DETAILS_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('is_verified_utility_bill');
-          expect(res.body.data).to.have.property('landmark');
-          expect(res.body.data).to.have.property('country');
-          expect(res.body.data).to.have.property('you_verify_candidate_id');
-          expect(res.body.data.is_editable).to.equal(false);
-          done();
-        });
-    });
-  });
+ 
   describe('Upload utility bill for user', () => {
     it('Should flag if user one try uploading utility bill', (done) => {
       chai.request(app)
@@ -3352,7 +3279,33 @@ describe('User', () => {
           done();
         });
     });
-    it('Should create next of kin', (done) => {
+    
+    it('Should create user one next of kin successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoade',
+          phone_number: '+23467876544545',
+          email: 'ayoade@gmail.com',
+          kind_of_relationship: 'brother'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('id');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.message).to.equal('Next of kin created successfully');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should create user two next of kin successfully', (done) => {
       chai.request(app)
         .post('/api/v1/user/next-of-kin')
         .set({
@@ -3360,11 +3313,11 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          first_name: 'sadiq',
-          last_name: 'ayoola',
+          first_name: 'Abubakar',
+          last_name: 'opeyemi',
           phone_number: '+23467876544565',
-          email: 'sadiq@gmail.com',
-          kind_of_relationship: 'brother'
+          email: 'opeyemi@gmail.com',
+          kind_of_relationship: 'father'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(201);
@@ -3401,44 +3354,43 @@ describe('User', () => {
           done();
         });
     });
-  });
-  describe('Fetch next of kin details', () => {
-    it('Should throw error if invalid token is not sent', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/next-of-kin')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}thfsfydue`
-        })
-        .send({})
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-
-    it('Should fetch next of kin details', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/next-of-kin')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.data).to.have.property('id');
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.message).to.equal('Next of kin fetched successfully');
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
+    describe('Fetch user information details', () => {
+      it('Should successfully fetch user one information details', (done) => {
+        chai.request(app)
+          .get('/api/v1/user/user-details')
+          .set({
+            Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(enums.HTTP_OK);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.FETCHED_USER_INFORMATION_DETAILS_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            expect(res.body.data).to.have.property('employmentDetails');
+            expect(res.body.data).to.have.property('nextOfKin');
+            expect(res.body.data).to.have.property('addressDetails');
+            done();
+          });
+      });
+      it('Should successfully fetch user two information details', (done) => {
+        chai.request(app)
+          .get('/api/v1/user/user-details')
+          .set({
+            Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+          })
+          .end((err, res) => {
+            expect(res.statusCode).to.equal(enums.HTTP_OK);
+            expect(res.body).to.have.property('message');
+            expect(res.body).to.have.property('status');
+            expect(res.body.message).to.equal(enums.FETCHED_USER_INFORMATION_DETAILS_SUCCESSFULLY);
+            expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+            expect(res.body.data).to.have.property('employmentDetails');
+            expect(res.body.data).to.have.property('nextOfKin');
+            expect(res.body.data).to.have.property('addressDetails');
+            done();
+          });
+      });
     });
   });
 });

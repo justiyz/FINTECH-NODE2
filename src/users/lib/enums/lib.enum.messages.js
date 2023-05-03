@@ -94,7 +94,6 @@ export const USER_UTILITY_BILL_NOT_VERIFIED = 'User uploaded utility bill not ve
 export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
 export const USER_ADDRESS_UPDATED_SUCCESSFULLY = 'Updated user address successfully, kindly await verification';
 export const USER_UTILITY_BILL_UPDATED_SUCCESSFULLY = 'Updated user utility bill successfully, kindly await verification';
-export const FETCHED_USER_ADDRESS_DETAILS_SUCCESSFULLY = 'Fetched user address details successfully';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 export const FETCH_USER_PROFILE = 'User profile fetched successfully';
 export const CARD_CAN_NOT_BE_SET_AS_DEFAULT = 'Card can not be set as default';
@@ -187,12 +186,12 @@ export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
 export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
-export const NEXT_OF_KIN_FETCHED_SUCCESSFULLY = 'Next of kin fetched successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
 export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
 export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment type';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
+export const FETCHED_USER_INFORMATION_DETAILS_SUCCESSFULLY = 'User information details fetched successfully';
 
 
 // admin module related messages

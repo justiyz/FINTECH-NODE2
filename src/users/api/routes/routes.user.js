@@ -153,12 +153,6 @@ router.post(
   UserController.updateUploadedUtilityBill
 );
 
-router.get(
-  '/address-details',
-  AuthMiddleware.validateAuthToken,
-  UserController.fetchUserAddressDetails
-);
-
 router.put(
   '/profile',
   AuthMiddleware.validateAuthToken,
@@ -216,12 +210,6 @@ router.post(
   UserController.createNextOfKin
 );
 
-router.get(
-  '/next-of-kin',
-  AuthMiddleware.validateAuthToken,
-  UserController.fetchNextOfKin
-);
-
 router.post(
   '/employment-details',
   AuthMiddleware.validateAuthToken,
@@ -238,9 +226,9 @@ router.put(
 );
 
 router.get(
-  '/employment-details',
+  '/user-details',
   AuthMiddleware.validateAuthToken,
-  UserController.fetchUserEmploymentDetails
+  UserController.fetchUserInformationDetails
 );
 
 export default router;

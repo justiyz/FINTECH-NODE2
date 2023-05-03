@@ -169,18 +169,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call fetchNextOfKin', async() => {
-      const req = { user: '' };
-      const data = await UserController.fetchNextOfKin(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call fetchUserEmploymentDetails', async() => {
-      const req = { user: '' };
-      const data = await UserController.fetchUserEmploymentDetails(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call updateEmploymentDetails', async() => {
       const req = { user: '' };
       const data = await UserController.updateEmploymentDetails(req, res, next);
@@ -205,9 +193,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call fetchUserAddressDetails', async() => {
+    it('should call fetchUserInformationDetails ', async() => {
       const req = { user: '' };
-      const data = await UserController.fetchUserAddressDetails(req, res, next);
+      const data = await UserController.fetchUserInformationDetails(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

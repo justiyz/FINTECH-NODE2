@@ -48,7 +48,6 @@ export const updateEnvValues = async(req, res, next) => {
         value: env.value || existingEnvValue.value
       };
     }).filter((env) => env !== null);
-    console.log(envToUpdate);
     await Promise.all(
       envToUpdate.map(async(env) => {
         const envId = env.env_id;
