@@ -233,4 +233,6 @@ export const ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE = 'ClusterMiddl
 export const CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserBelongsToCluster';
 export const FETCH_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchLoans';
 export const REPAID_LOANS_CONTROLLER = 'AdminLoanController::fetchRepaidLoans';
+export const FETCH_ENV_VALUES_CONTROLLER = 'AdminLoanController::fetchEnvValues';
+export const UPDATE_ENV_VALUES_CONTROLLER = 'AdminLoanController::updateEnvValues';
 

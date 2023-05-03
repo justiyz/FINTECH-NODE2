@@ -541,7 +541,7 @@ export const getProfile = async(req, res, next) => {
     delete user.fcm_token;
     delete user.refresh_token;
     const userBvn = await processOneOrNoneData(userQueries.fetchUserBvn, user.user_id);
-    user.bvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
+    user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
     user.next_profile_update = dayjs().isAfter(dayjs(user.next_profile_update));
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ? 
       true : false;

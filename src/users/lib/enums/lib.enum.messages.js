@@ -263,3 +263,5 @@ export const ADMIN_FETCH_MEMBER_CLUSTER_DETAILS = 'Admin fetched cluster member 
 export const ADMIN_CHECK_IF_CLUSTER_EXIST = 'Cluster does not exist';
 export const LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'loan applications fetched successfully';
 export const REPAID_LOANS_FETCHED_SUCCESSFULLY = 'Repaid loans fetched successfully';
+export const FETCH_ENV_VALUES_SUCCESSFULLY = 'Fetched env values successfully';
+export const UPDATED_ENV_VALUES_SUCCESSFULLY = 'Updated env values successfully';
