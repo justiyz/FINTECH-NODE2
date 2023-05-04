@@ -225,10 +225,5 @@ router.put(
   UserController.updateEmploymentDetails
 );
 
-router.get(
-  '/user-details',
-  AuthMiddleware.validateAuthToken,
-  UserController.fetchUserInformationDetails
-);
 
 export default router;

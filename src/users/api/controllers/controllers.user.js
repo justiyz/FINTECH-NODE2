@@ -517,18 +517,32 @@ export const getProfile = async(req, res, next) => {
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
-    const userBvn = await processOneOrNoneData(userQueries.fetchUserBvn, user.user_id);
+    const [ userEmploymentDetail,  userNextOfKinDetails ,  userAddressDetails, userBvn ]   = await Promise.all([
+      processOneOrNoneData(userQueries.fetchEmploymentDetails, user.user_id),
+      processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id),
+      processOneOrNoneData(userQueries.fetchUserAddressDetails, user.user_id),
+      processOneOrNoneData(userQueries.fetchUserBvn, user.user_id)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's employment details, address details and next of kin from the DB
+    fetchUserInformationDetails.controller.user.js`);
     user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
     user.next_profile_update = dayjs().isAfter(dayjs(user.next_profile_update));
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ? 
       true : false;
-    return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, user);
+    const data = {
+      userProfileDetails: user,
+      employmentDetails: userEmploymentDetail,
+      nextOfKin: userNextOfKinDetails,
+      addressDetails: userAddressDetails
+    };
+    return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
     logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
     return next(error);
   }
 };
+
 
 /**
  * sets a card as default
@@ -738,34 +752,3 @@ export const updateEmploymentDetails = async(req, res, next) => {
   }
 };
 
-/**
- * fetches user information details
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns user information details
- * @memberof UserController
- */
-
-export const fetchUserInformationDetails = async(req, res, next) => {
-  try {
-    const { user } = req;
-    const [ userEmploymentDetails,  userNextOfKinDetails ,  userAddressDetails ]   = await Promise.all([
-      processOneOrNoneData(userQueries.fetchEmploymentDetails, user.user_id),
-      processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id),
-      processOneOrNoneData(userQueries.fetchUserAddressDetails, user.user_id)
-    ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's employment details, address details and next of kin from the DB
-    fetchUserInformationDetails.controller.user.js`);
-    const data = {
-      employmentDetails: userEmploymentDetails,
-      nextOfKin: userNextOfKinDetails,
-      addressDetails: userAddressDetails
-    };
-    return ApiResponse.success(res, enums.FETCHED_USER_INFORMATION_DETAILS_SUCCESSFULLY, enums.HTTP_OK, data);
-  } catch (error) {
-    error.label = enums.FETCH_USER_INFORMATION_DETAILS_CONTROLLER;
-    logger.error(`fetching user information details failed:::${enums.FETCH_USER_INFORMATION_DETAILS_CONTROLLER}`, error.message);
-    return next(error); 
-  }
-};

@@ -191,7 +191,6 @@ export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} 
 export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
 export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment type';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
-export const FETCHED_USER_INFORMATION_DETAILS_SUCCESSFULLY = 'User information details fetched successfully';
 
 
 // admin module related messages
