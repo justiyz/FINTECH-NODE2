@@ -21,7 +21,7 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
  * @memberof AdminUserController
  */
 export const editUserStatus = async(req, res, next) => {
-  const { body: { status } } = req;
+  const { body: { status }, userDetails } = req;
   let activityType = '';
   if (status === 'deactivated') {
     activityType = 20;
@@ -36,10 +36,38 @@ export const editUserStatus = async(req, res, next) => {
   }
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
-    decoded that admin is about to user status. activateAndDeactivateUser.admin.controllers.user.js`);
+    decoded that admin is about to update user status. editUserStatus.admin.controllers.user.js`);
     await processAnyData(userQueries.editUserStatus, [ req.params.user_id, req.body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
-    confirm that user status has been edited and updated in the DB. activateAndDeactivateUser.admin.controllers.user.js`);
+    confirm that user status has been edited and updated in the DB. editUserStatus.admin.controllers.user.js`);
+    const addBlacklistedBvnPayload = UserPayload.addBlacklistedBvn(userDetails);
+    if (status === 'blacklisted' && userDetails.bvn !== null) {
+      await processOneOrNoneData(userQueries.addBlacklistedBvn, addBlacklistedBvnPayload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to blacklisted bvn list editUserStatus.admin.controllers.user.js`);
+    }
+    if (userDetails.status === 'blacklisted' && status === 'active') {
+      const userDecryptedBvn = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
+      const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvns, []);
+      const plainBlacklistedBvnsDetails = [];
+      const decryptBvns = allExistingBlacklistedBvns.forEach(async(data) => {
+        const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
+        data.decryptedBvn = decryptedBvn;
+        plainBlacklistedBvnsDetails.push(data);
+      });
+      await Promise.all([ decryptBvns ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: all encoded blacklisted BVNs are decrypted editUserStatus.admin.controllers.user.js`);
+      const usersBlacklistedDetails = await plainBlacklistedBvnsDetails.filter((bvnDetail) => userDecryptedBvn === bvnDetail.decryptedBvn);
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: users blacklisted BVNs are filtered out editUserStatus.admin.controllers.user.js`);
+      if (usersBlacklistedDetails.length >= 1) {
+        usersBlacklistedDetails.map(async(userDetails) => {
+          await processOneOrNoneData(userQueries.removeBlacklistedBvn, [ userDetails.id ]);
+          return userDetails;
+        });
+        logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is removed from blacklisted bvn list editUserStatus.admin.controllers.user.js`);
+        await processOneOrNoneData(userQueries.addUnBlacklistedBvn, addBlacklistedBvnPayload);
+        logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to unBlacklisted bvn list editUserStatus.admin.controllers.user.js`);
+      }
+    }
     adminActivityTracking(req.admin.admin_id, activityType, 'success');
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
@@ -293,13 +321,65 @@ export const fetchUserOrrBreakdown = async(req, res, next) => {
 export const fetchUserKycDetails = async(req, res, next) => {
   try {
     const { admin, userDetails } = req;
-    const userKycDetail = await processOneOrNoneData(userQueries.fetchUserKycDetails, [ userDetails.user_id ]);
+    const [ userKycDetail ] = await processAnyData(userQueries.fetchUserKycDetails, [ userDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
      user kyc details fetched from the DB fetchUserKycDetails.admin.controllers.user.js`);
+    if (!userKycDetail || userKycDetail.utility_bill_image_url === null) {
+      return ApiResponse.success(res, enums.FETCH_USER_KYC_DETAILS, enums.HTTP_OK, userKycDetail);
+    }
+    const { document_url  } = await UserHash.decrypt(decodeURIComponent(userKycDetail.utility_bill_image_url));
+    userKycDetail.utility_bill_image_url = document_url;
     return ApiResponse.success(res, enums.FETCH_USER_KYC_DETAILS, enums.HTTP_OK, userKycDetail);
   } catch (error) {
     error.label = enums.USER_KYC_DETAILS_CONTROLLER;
     logger.error(`fetching user kyc details failed:::${enums.USER_KYC_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * verify user utility bill
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user address and utility bill details.
+ * @memberof AdminUserController
+ */
+export const verifyUserUtilityBill = async(req, res, next) => {
+  try {
+    const { admin, userDetails, userAddressDetails, body } = req;
+    console.log(userAddressDetails, 'userAddressDetails=====><<<');
+    if (!userAddressDetails || userAddressDetails.address_image_url === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user has not filled address details or has not uploaded any utility bill 
+      verifyUserUtilityBill.admin.controllers.user.js`);
+      return ApiResponse.error(res, enums.USER_HAS_NOT_UPLOADED_UTILITY_BILL, enums.HTTP_BAD_REQUEST, enums.VERIFY_USER_UTILITY_BILL_CONTROLLER);
+    }
+    if (userAddressDetails.is_verified_utility_bill) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user uploaded utility bill has been previously approved 
+      verifyUserUtilityBill.admin.controllers.user.js`);
+      return ApiResponse.error(res, enums.USER_UTILITY_BILL_PREVIOUSLY_APPROVED, enums.HTTP_BAD_REQUEST, enums.VERIFY_USER_UTILITY_BILL_CONTROLLER);
+    }
+    if (body.decision === 'decline') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to decline the uploaded utility bill 
+      verifyUserUtilityBill.admin.controllers.user.js`);
+      const declineUtilityBill = await processOneOrNoneData(userQueries.declineUserUploadedUtilityBill, [ userDetails.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been declined so user can upload another 
+      verifyUserUtilityBill.admin.controllers.user.js`);
+      return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to approve the uploaded utility bill 
+      verifyUserUtilityBill.admin.controllers.user.js`);
+    const approveUtilityBill = await processOneOrNoneData(userQueries.approveUserUploadedUtilityBill, [ userDetails.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been approved verifyUserUtilityBill.admin.controllers.user.js`);
+    const tierChoice = (approveUtilityBill.is_verified_address && approveUtilityBill.is_verified_utility_bill) ? '2' : '1'; 
+    // user needs address to have been verified and uploaded utility bill verified to move to tier 2
+    await processOneOrNoneData(userQueries.updateUserTier, [ userDetails.user_id, tierChoice ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user tier value has been updated based on previous verifications
+      verifyUserUtilityBill.admin.controllers.user.js`);
+    return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
+  } catch (error) {
+    error.label = enums.VERIFY_USER_UTILITY_BILL_CONTROLLER;
+    logger.error(`verifying user utility bill details failed:::${enums.VERIFY_USER_UTILITY_BILL_CONTROLLER}`, error.message);
     return next(error);
   }
 };

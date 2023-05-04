@@ -343,6 +343,24 @@ describe('Individual loan', () => {
         });
     });
   });
+  describe('user tries to accept maximum value when it is not available', () => {
+    it('should throw error when trying to accept system maximum allowable amount when it does not apply', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/accept-allowable-amount`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE);
+          done();
+        });
+    });
+  });
   describe('user cancels loan application process', () => {
     it('should throw error when invalid loan id is sent', (done) => {
       chai.request(app)
@@ -535,6 +553,24 @@ describe('Individual loan', () => {
         });
     });
     it('should throw error when loan application is no longer pending or approved', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/cancel-application`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS('processing'));
+          done();
+        });
+    });
+  });
+  describe('user tries to cancel an already processing loan application', () => {
+    it('should throw error when trying to cancel a loan that is already being processed', (done) => {
       chai.request(app)
         .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/cancel-application`)
         .set({

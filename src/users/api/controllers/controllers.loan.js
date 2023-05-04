@@ -113,6 +113,39 @@ export const checkUserLoanEligibility = async(req, res, next) => {
 };
 
 /**
+ * updates loan application with system maximum allowable loan amount
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of cancelled loan
+ * @memberof LoanController
+ */
+export const acceptSystemMaximumAllowableLoanAmount = async(req, res, next) => {
+  try {
+    const { user, params: { loan_id }, existingLoanApplication } = req;
+    if (existingLoanApplication.max_possible_approval === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
+      acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
+        enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application have system maximum allowable loan amount value in the DB 
+      acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+    const totalMonthlyRepayment = (parseFloat(existingLoanApplication.monthly_repayment) * Number(existingLoanApplication.loan_tenor_in_months));
+    const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(existingLoanApplication.max_possible_approval);
+    const updateLoanAmount = await processOneOrNoneData(loanQueries.updateLoanAmountToSystemAllowableAmount, 
+      [ loan_id, user.user_id, existingLoanApplication.max_possible_approval, parseFloat(totalInterestAmount) ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount updated for used in the DB 
+    acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+    return ApiResponse.success(res, enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED__SUCCESSFULLY, enums.HTTP_OK, updateLoanAmount);
+  } catch (error) {
+    error.label = enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER;
+    logger.error(`updating loan amount with system allowable loan amount failed::${enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * cancel loan application process
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

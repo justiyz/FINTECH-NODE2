@@ -1237,7 +1237,7 @@ describe('Clusters', () => {
         });
     });
 
-    it('Should successfully update user three employment details', (done) => {
+    it('Should throw error when user wants to update employment details in less than 3 months', (done) => {
       chai.request(app)
         .put('/api/v1/user/employment-details')
         .set({
@@ -1248,11 +1248,11 @@ describe('Clusters', () => {
           monthly_income: '3000'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.UPDATE_EMPLOYMENT_DETAILS);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.USER_PROFILE_NEXT_UPDATE('employment'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });

@@ -1,11 +1,37 @@
 export default {
   editUserStatus: `
-  UPDATE users
-  SET 
-    updated_at = NOW(),
-    status = $2
-  WHERE user_id = $1
-  `,
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      status = $2
+    WHERE user_id = $1`,
+
+  addBlacklistedBvn: `
+    INSERT INTO blacklisted_bvns(
+      first_name,
+      middle_name,
+      last_name,
+      date_of_birth,
+      bvn
+    ) VALUES ($1, $2, $3, $4, $5)`,
+
+  removeBlacklistedBvn: `
+    DELETE FROM blacklisted_bvns
+    WHERE id = $1`,
+
+  addUnBlacklistedBvn: `
+    INSERT INTO unblacklisted_bvns(
+      first_name,
+      middle_name,
+      last_name,
+      date_of_birth,
+      bvn
+    ) VALUES ($1, $2, $3, $4, $5)`,
+
+  fetchAllExistingBlacklistedBvns: `
+      SELECT id, bvn 
+      FROM blacklisted_bvns
+      WHERE bvn IS NOT NULL`,
 
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
@@ -13,7 +39,7 @@ export default {
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, is_verified_address,
+      number_of_children, marital_status, loan_status,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
     WHERE user_id = $1`,
@@ -36,7 +62,11 @@ export default {
       user_id,
       (CONCAT(house_number, ' ', street, ' ', city, ' city', ' ', lga, ' lga', ' ', state, ' state', ' ', country)) AS address,
       is_verified_address,
+      is_verified_utility_bill,
+      address_image_url,
       you_verify_address_verification_status,
+      is_editable,
+      can_upload_utility_bill,
       created_at
     FROM address_verification
     WHERE user_id = $1`,
@@ -165,15 +195,43 @@ export default {
   fetchUserKycDetails: `
     SELECT 
       users.user_id, 
-      tier,
-      is_verified_bvn,
-      is_completed_kyc,
-      is_uploaded_identity_card,
+      users.tier,
+      users.is_verified_bvn,
+      users.is_completed_kyc,
+      users.is_uploaded_identity_card,
       user_national_id_details.image_url AS valid_id_image_url,
-      is_verified_address
+      address_verification.is_verified_address,
+      address_verification.is_verified_utility_bill,
+      address_verification.address_image_url AS utility_bill_image_url
     FROM users
     LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
+    LEFT JOIN address_verification ON address_verification.user_id = users.user_id
     WHERE users.user_id = $1`,
+
+  declineUserUploadedUtilityBill: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      address_image_url = null,
+      can_upload_utility_bill = TRUE
+    WHERE user_id = $1
+    RETURNING id, user_id, address_image_url, is_verified_address, is_verified_utility_bill, can_upload_utility_bill, is_editable`,
+
+  approveUserUploadedUtilityBill: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      is_verified_utility_bill = TRUE,
+      can_upload_utility_bill = FALSE
+    WHERE user_id = $1
+    RETURNING id, user_id, address_image_url, is_verified_address, is_verified_utility_bill, can_upload_utility_bill, is_editable`,
+
+  updateUserTier: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      tier = $2
+    WHERE user_id = $1`,
 
   fetchUserClusterDetails: `
     SELECT

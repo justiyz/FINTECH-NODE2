@@ -19,7 +19,7 @@ import { processAnyData } from '../services/services.db';
  */
 export const userLoanStatus = async(req, res, next) => {
   try {
-    if (req.userDetails.loan_status !== 'inactive') {
+    if ((req.userDetails.loan_status !== 'inactive') && ((req.body.status === 'deactivated') || (req.body.status === 'suspended'))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user is currently on an active loan userLoanStatus.admin.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_IS_ON_AN_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.USER_LOAN_STATUS_MIDDLEWARE);
     }

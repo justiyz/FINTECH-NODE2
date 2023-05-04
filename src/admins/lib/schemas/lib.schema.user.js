@@ -28,6 +28,10 @@ const editStatus = Joi.object().keys({
   status: Joi.string().valid('active', 'deactivated', 'suspended', 'watchlisted', 'blacklisted').required()
 });
 
+const approveDeclineUtilityBill = Joi.object().keys({
+  decision: Joi.string().valid('approve', 'decline').required()
+});
+
 const clusterDetailsParams = Joi.object().keys({
   user_id: Joi.string().required(),
   cluster_id: Joi.string().required()
@@ -39,5 +43,6 @@ export default {
   editStatus,
   fetchUsers,
   clusterDetailsParams,
+  approveDeclineUtilityBill,
   fileTitle
 };

@@ -168,6 +168,7 @@ export const validateAuthToken = async(req, res, next) => {
     }
     const [ user ] = await processAnyData(userQueries.getUserByUserId, [ decoded.user_id ]);
     const [ employmentDetails ] = await processAnyData(userQueries.fetchEmploymentDetails, [ user.user_id ]);
+    const [ addressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully fetched the users details using the decoded id validateAuthToken.middlewares.auth.js`);
     if (!user) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAuthToken.middlewares.auth.js`);
@@ -180,6 +181,7 @@ export const validateAuthToken = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
     req.userEmploymentDetails = employmentDetails;
+    req.userAddressDetails = addressDetails;
     req.user = user;
     return next();
   } catch (error) {

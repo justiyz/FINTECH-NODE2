@@ -24,6 +24,11 @@ export const operations = {
   23: 'UPDOCFUSR', // admin uploads document for user
   24: 'SUPUSR', // admin suspends user
   25: 'BLTUSR', // admin blacklists user
-  26: 'WLTUSR' // admin watchlists user
+  26: 'WLTUSR', // admin watchlists user
+  27: 'ADAPRUTBIL', // admin approves user uploaded utility bill
+  28: 'ADDCLUTBIL', // admin declines user uploaded utility bill
+  29: 'UPLBKBLBVN', // admin uploads bulk blacklisted bvns
+  30: 'UPTSGBLBVN', // admin updates single blacklisted bvn
+  31: 'ADUPTENVAL' // admin updates environment variables values in settings
 };
 

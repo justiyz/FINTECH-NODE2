@@ -39,6 +39,7 @@ router.post(
   UserMiddleware.isVerifiedBvn('complete'),
   UserMiddleware.isBvnPreviouslyExisting,
   UserMiddleware.verifyBvn,
+  UserMiddleware.checkIfBvnFlaggedBlacklisted,
   UserController.updateBvn
 );
 
@@ -221,7 +222,7 @@ router.put(
   '/employment-details',
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateEmploymentDetails, 'payload'),
-  UserMiddleware.userProfileNextUpdate(),
+  UserMiddleware.userProfileNextUpdate('employment'),
   UserController.updateEmploymentDetails
 );
 
