@@ -140,7 +140,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should get user profile', async() => {
-      const req = { user: '' };
+      const req = { user: '', userEmploymentDetails: '' };
       const data = await UserController.getProfile(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -169,18 +169,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call fetchNextOfKin', async() => {
-      const req = { user: '' };
-      const data = await UserController.fetchNextOfKin(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call fetchUserEmploymentDetails', async() => {
-      const req = { user: '' };
-      const data = await UserController.fetchUserEmploymentDetails(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call updateEmploymentDetails', async() => {
       const req = { user: '' };
       const data = await UserController.updateEmploymentDetails(req, res, next);
@@ -202,12 +190,6 @@ describe('', () => {
     it('should call updateUploadedUtilityBill', async() => {
       const req = { user: '', document: '' };
       const data = await UserController.updateUploadedUtilityBill(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
-    it('should call fetchUserAddressDetails', async() => {
-      const req = { user: '' };
-      const data = await UserController.fetchUserAddressDetails(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
