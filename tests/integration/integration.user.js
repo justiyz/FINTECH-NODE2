@@ -1552,7 +1552,7 @@ describe('User', () => {
           expect(res.body.data).to.have.property('userProfileDetails');
           expect(res.body.data.userProfileDetails.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
           expect(res.body.data.userProfileDetails.loan_status).to.equal('inactive');
-          expect(res.body.data.userProfileDetails.referral_code).to.equal('B99ADE8A71');
+          expect(res.body.data.userProfileDetails.email).to.equal('victory@enyata.com');
           done();
         });
     });
