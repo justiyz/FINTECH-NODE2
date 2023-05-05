@@ -234,4 +234,5 @@ export const FETCH_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchLoa
 export const REPAID_LOANS_CONTROLLER = 'AdminLoanController::fetchRepaidLoans';
 export const FETCH_ENV_VALUES_CONTROLLER = 'AdminLoanController::fetchEnvValues';
 export const UPDATE_ENV_VALUES_CONTROLLER = 'AdminLoanController::updateEnvValues';
-
+export const BLACKLIST_BVN_CONTROLLER = 'AdminLoanController::blacklistBvn';
+export const IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE = 'AdminAdminMiddleware::isBvnAlreadyBlacklisted';

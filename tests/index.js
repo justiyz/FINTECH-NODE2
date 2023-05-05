@@ -22,6 +22,7 @@ import './unit/admin/controllers/unit.admin.controllers.auth';
 import './unit/admin/controllers/unit.admin.controllers.roles';
 import './unit/admin/controllers/unit.admin.controllers.admin';
 import './unit/admin/controllers/unit.admin.controllers.user';
+import './unit/admin/controllers/unit.admin.controllers.user';
 import './unit/admin/controllers/unit.admin.controllers.loan';
 import './unit/admin/controllers/unit.admin.controllers.settings';
 import './unit/admin/lib/utils/unit.admin.lib.utility.hash';
