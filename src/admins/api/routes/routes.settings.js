@@ -24,7 +24,7 @@ router.put(
 router.get(
   '/loan-score-card',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('settings', 'update'),
+  RolesMiddleware.adminAccess('settings', 'read'),
   AdminSettingsController.scoreCardBreakdown
 
 );
