@@ -20,14 +20,13 @@ import enums from '../../../users/lib/enums';
 export const addBlacklistedBvns = async(req, res, next) => {
   try {
     const { body, query }= req;
-    const dataInfo = (!req.info) ? body : req.info;
     let processedData;
     if (query.type === 'single') {
-      const hashedBvn = encodeURIComponent(await UserHash.encrypt(dataInfo.bvn));
-      const payload = AdminPayload.blacklistedBvn(dataInfo, hashedBvn);
+      const hashedBvn = encodeURIComponent(await UserHash.encrypt(body.bvn));
+      const payload = AdminPayload.blacklistedBvn(body, hashedBvn);
       processedData  = await processAnyData(adminQueries.blacklistedBvn, payload);
     } else {
-      processedData = await Promise.all(dataInfo.map(async(data) => {
+      processedData = await Promise.all(body.map(async(data) => {
         const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn));
         const payload = AdminPayload.blacklistedBvn(data, hashedBvn);
         const result = await processAnyData(adminQueries.blacklistedBvn, payload);
@@ -55,42 +54,31 @@ export const addBlacklistedBvns = async(req, res, next) => {
 export const fetchBlacklistedBvn = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    if (query.export) {
-      const payload = AdminPayload.fetchBlacklistedBvn(query);
-      const blacklistBvns  = await processAnyData(adminQueries.fetchUserBlacklistedBvn, payload);
-      await Promise.all(
-        blacklistBvns.map(async(data) => {
-          const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
-          data.bvn = decryptedBvn;
-          return data;
-        }));
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all blacklisted bvn in  the DB fetchBlacklistedBvn.admin.admin.js`);
-      const data = {
-        total_count: blacklistBvns.length,
-        blacklistBvns
-      };
-      return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
-    }
-    const  payload  = AdminPayload.fetchBlacklistedBvn(query);
-    const [ blacklistBvns, [ blacklistBvnCount ] ] = await Promise.all([
-      processAnyData(adminQueries.fetchUserBlacklistedBvn, payload),
-      processAnyData(adminQueries.countBlacklistedBvn, payload)
-    ]);
+    const payload = AdminPayload.fetchBlacklistedBvn(query);
+    const blacklistBvns = await processAnyData(adminQueries.fetchUserBlacklistedBvn, payload);
   
     await Promise.all(
       blacklistBvns.map(async(data) => {
         const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
         data.bvn = decryptedBvn;
         return data;
-      }));
+      })
+    );
+    const responseMessage = `${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all blacklisted bvn in the DB fetchBlacklistedBvn.admin.admin.js`;
+    const totalCount = blacklistBvns.length;
   
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all blacklisted bvn in  the DB fetchBlacklistedBvn.admin.admin.js`);
-    const data = {
-      page: parseFloat(req.query.page) || 1,
-      total_count: Number(blacklistBvnCount.total_count),
-      total_pages: Helpers.calculatePages(Number(blacklistBvnCount.total_count), Number(req.query.per_page) || 10),
-      blacklistBvns
-    };
+    if (query.export) {
+      logger.info(responseMessage);
+      const data = { total_count: totalCount, blacklistBvns };
+      return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    }
+    const [ blacklistBvnCount ] = await processAnyData(adminQueries.countBlacklistedBvn, payload);
+    const page = parseFloat(req.query.page) || 1;
+    const perPage = Number(req.query.per_page) || 10;
+    const total_pages = Helpers.calculatePages(Number(blacklistBvnCount.total_count), perPage);
+  
+    logger.info(responseMessage);
+    const data = { page, total_count: Number(blacklistBvnCount.total_count), total_pages, blacklistBvns };
     return ApiResponse.success(res, enums.BLACKLIST_BVN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.BLACKLIST_BVN_CONTROLLER;
@@ -98,4 +86,3 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
     return next(error);
   }
 };
-  
