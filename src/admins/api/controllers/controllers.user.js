@@ -348,7 +348,6 @@ export const fetchUserKycDetails = async(req, res, next) => {
 export const verifyUserUtilityBill = async(req, res, next) => {
   try {
     const { admin, userDetails, userAddressDetails, body } = req;
-    console.log(userAddressDetails, 'userAddressDetails=====><<<');
     if (!userAddressDetails || userAddressDetails.address_image_url === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user has not filled address details or has not uploaded any utility bill 
       verifyUserUtilityBill.admin.controllers.user.js`);
