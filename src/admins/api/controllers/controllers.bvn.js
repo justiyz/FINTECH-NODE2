@@ -64,7 +64,8 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
         return data;
       })
     );
-    const responseMessage = `${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched all blacklisted bvn in the DB fetchBlacklistedBvn.admin.admin.js`;
+    const responseMessage = `${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: 
+    successfully fetched all blacklisted bvn in the DB fetchBlacklistedBvn.admin.admin.js`;
     const totalCount = blacklistBvns.length;
   
     if (query.export) {
