@@ -1057,7 +1057,7 @@ describe('Admin', () => {
   describe('Blacklisted single and bulk Bvn', () => {
     it('should blacklist bulk bvn', (done) => {
       chai.request(app)
-        .post('/api/v1/admin/blacklist-bvn')
+        .post('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1083,7 +1083,7 @@ describe('Admin', () => {
     });
     it('should insert bvn to blacklisted', (done) => {
       chai.request(app)
-        .post('/api/v1/admin/blacklist-bvn')
+        .post('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1117,7 +1117,7 @@ describe('Admin', () => {
     });
     it('should throw error if try blacklisting single user bvn', (done) => {
       chai.request(app)
-        .post('/api/v1/admin/blacklist-bvn')
+        .post('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1146,7 +1146,7 @@ describe('Admin', () => {
   describe('Fetch Blacklisted Bvn', () => {
     it('Should return error if token is not set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/blacklist-bvn')
+        .get('/api/v1/admin/bvn/blacklist')
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
           expect(res.body).to.have.property('message');
@@ -1159,7 +1159,7 @@ describe('Admin', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/blacklist-bvn')
+        .get('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -1176,7 +1176,7 @@ describe('Admin', () => {
     });
     it('Should fetch blacklisted bvn', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/blacklist-bvn')
+        .get('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
