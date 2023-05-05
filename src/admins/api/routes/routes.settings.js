@@ -26,7 +26,6 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('settings', 'read'),
   AdminSettingsController.scoreCardBreakdown
-
 );
 
 

@@ -80,10 +80,17 @@ export const updateEnvValues = async(req, res, next) => {
 export const scoreCardBreakdown = async(req, res, next) => {
   try {
     const { admin } = req;
-    const result = await loanScoreCardBreakdown();
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the loan scorecard weights
+    const individualLoanScoreCardResult = await loanScoreCardBreakdown();
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the individual loan scorecard weights
         from seedfi underwriting service scoreCardBreakdown.admin.controllers.admin.js`);
-    return ApiResponse.success(res, enums.SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, result.data);
+    const clusterLoanScoreCardResult = { data: {} }; // to later implement for cluster loan scoreCard
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the cluster loan scorecard weights
+        from seedfi underwriting service scoreCardBreakdown.admin.controllers.admin.js`);
+    const data = {
+      individualLoanScoreCardResult: individualLoanScoreCardResult.data,
+      clusterLoanScoreCardResult: clusterLoanScoreCardResult.data
+    };
+    return ApiResponse.success(res, enums.SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.SCORE_CARD_BREAKDOWN_CONTROLLER;
     logger.error(`fetching score card breakdown failed:::${enums.SCORE_CARD_BREAKDOWN_CONTROLLER}`, error.message);
