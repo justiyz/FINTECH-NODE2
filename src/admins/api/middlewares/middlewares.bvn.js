@@ -2,7 +2,7 @@ import adminQueries from '../queries/queries.admin';
 import { processAnyData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import * as Hash from '../../lib/utils/lib.util.hash';
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 
 /**
  * 
@@ -12,7 +12,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
- * @memberof AdminAdminMiddleware
+ * @memberof AdminBvnMifdleware
  */
 export const isBvnAlreadyBlacklisted = async(req, res, next) => {
   try {
@@ -20,7 +20,7 @@ export const isBvnAlreadyBlacklisted = async(req, res, next) => {
     if (req.query.type === 'single' && blacklistedBvn) {
       await Promise.all(
         blacklistedBvn.map(async(data) => {
-          const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+          const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
           data.bvn = decryptedBvn;
           return data;
         }));

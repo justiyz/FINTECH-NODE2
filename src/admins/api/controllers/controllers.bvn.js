@@ -3,32 +3,32 @@ import adminQueries from '../queries/queries.admin';
 import { processAnyData } from '../services/services.db';
 import AdminPayload from '../../lib/payloads/lib.payload.admin';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
-import * as Hash from '../../lib/utils/lib.util.hash';
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 
 
 
 /**
- * black list user bvn
+ * adding blacklisted bvns to db
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns overview page details.
- * @memberof AdminAdminController
+ * @memberof AdminBvnController
  */
-export const blacklistedBvn = async(req, res, next) => {
+export const addBlacklistedBvns = async(req, res, next) => {
   try {
     const { body, query }= req;
     const dataInfo = (!req.info) ? body : req.info;
     let processedData;
     if (query.type === 'single') {
-      const hashedBvn = encodeURIComponent(await Hash.encrypt(dataInfo.bvn));
+      const hashedBvn = encodeURIComponent(await UserHash.encrypt(dataInfo.bvn));
       const payload = AdminPayload.blacklistedBvn(dataInfo, hashedBvn);
       processedData  = await processAnyData(adminQueries.blacklistedBvn, payload);
     } else {
       processedData = await Promise.all(dataInfo.map(async(data) => {
-        const hashedBvn = encodeURIComponent(await Hash.encrypt(data.bvn));
+        const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn));
         const payload = AdminPayload.blacklistedBvn(data, hashedBvn);
         const result = await processAnyData(adminQueries.blacklistedBvn, payload);
         return result[0];
@@ -50,7 +50,7 @@ export const blacklistedBvn = async(req, res, next) => {
    * @param {Response} res - The response returned by the method.
    * @param {Next} next - Call the next operation.
    * @returns {object} - Returns overview page details.
-   * @memberof AdminAdminController
+   * @memberof AdminBvnController
    */
 export const fetchBlacklistedBvn = async(req, res, next) => {
   try {
@@ -60,7 +60,7 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
       const blacklistBvns  = await processAnyData(adminQueries.fetchUserBlacklistedBvn, payload);
       await Promise.all(
         blacklistBvns.map(async(data) => {
-          const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+          const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
           data.bvn = decryptedBvn;
           return data;
         }));
@@ -79,7 +79,7 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
   
     await Promise.all(
       blacklistBvns.map(async(data) => {
-        const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+        const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
         data.bvn = decryptedBvn;
         return data;
       }));
