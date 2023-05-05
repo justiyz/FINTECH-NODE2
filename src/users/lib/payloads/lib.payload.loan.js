@@ -53,7 +53,8 @@ const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInter
   parseFloat(data.monthly_repayment).toFixed(2),
   status,
   data.final_decision,
-  parseFloat(totalAmountRepayable).toFixed(2)
+  parseFloat(totalAmountRepayable).toFixed(2),
+  data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : null
 ];
 
 const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision, offer_letter_url) => ({
@@ -72,7 +73,8 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
   loan_status,
   loan_decision,
-  offer_letter_url 
+  offer_letter_url ,
+  max_allowable_amount: data.max_approval !== null ? `${parseFloat(data.max_approval).toFixed(2)}` : null
 });
 
 export default { 

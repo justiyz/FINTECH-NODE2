@@ -3,8 +3,8 @@ export default {
   SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
     is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
     is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-    number_of_children, marital_status, loan_status, is_verified_address, device_token,
-    to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
+    number_of_children, marital_status, loan_status, device_token,
+    to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
   FROM users
   WHERE phone_number = $1`,
 
@@ -12,8 +12,8 @@ export default {
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, is_verified_address, device_token,
-      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
+      number_of_children, marital_status, loan_status, device_token,
+      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
    FROM users
    WHERE user_id = $1`,
 
@@ -21,8 +21,8 @@ export default {
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, is_verified_address, device_token,
-      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, is_verified_utility_bill
+      number_of_children, marital_status, loan_status, device_token,
+      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
     FROM users
     WHERE email = $1`
   ,
@@ -201,6 +201,18 @@ export default {
       FROM users
       WHERE bvn IS NOT NULL`,
 
+  fetchAllExistingBlacklistedBvns: `
+      SELECT bvn 
+      FROM blacklisted_bvns
+      WHERE bvn IS NOT NULL`,
+
+  blacklistUser: `
+      UPDATE user
+      SET 
+        updated_at = NOW(),
+        status = 'blacklisted'
+      WHERE user_id = $1`,
+
   fetchUserBvn: `
       SELECT bvn 
       FROM users
@@ -255,6 +267,7 @@ export default {
       you_verify_request_id,
       you_verify_address_id,
       is_editable,
+      can_upload_utility_bill,
       you_verify_address_verification_status,
       created_at
     FROM address_verification
@@ -300,7 +313,8 @@ export default {
     UPDATE address_verification
     SET 
       updated_at = NOW(),
-      address_image_url = $2
+      address_image_url = $2,
+      can_upload_utility_bill = false
     WHERE user_id = $1`,
 
   userIdVerification: `
