@@ -24,6 +24,15 @@ router.post(
   LoanController.checkUserLoanEligibility
 );
 
+router.patch(
+  '/:loan_id/accept-allowable-amount',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfLoanApplicationStatusIsStillPending,
+  LoanController.acceptSystemMaximumAllowableLoanAmount
+);
+
 router.post(
   '/:loan_id/cancel-application',
   AuthMiddleware.validateAuthToken,

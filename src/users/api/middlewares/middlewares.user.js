@@ -235,6 +235,41 @@ export const verifyBvn = async(req, res, next) => {
 };
 
 /**
+ * check if user bvn has been previously flagged as blacklisted
+ * @param {String} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfBvnFlaggedBlacklisted = async(req, res, next) => {
+  try {
+    const { body, user } = req;
+    const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvns, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+    const plainBlacklistedBvns = [];
+    const decryptBvns = allExistingBlacklistedBvns.forEach(async(data) => {
+      const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+      plainBlacklistedBvns.push(decryptedBvn);
+    });
+    await Promise.all([ decryptBvns ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+    if (plainBlacklistedBvns.includes(body.bvn.trim())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously flagged blacklisted checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+      await processOneOrNoneData(userQueries.blacklistUser, [ user.user_id ]);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is clean and is not on blacklisted bvns list checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 5, 'fail');
+    error.label = enums.CHECK_IF_BVN_FLAGGED_BLACKLISTED_MIDDLEWARE;
+    logger.error(`checking if sent bvn has not been blacklisted failed:::${enums.CHECK_IF_BVN_FLAGGED_BLACKLISTED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check if email is already verified
  * @param {string} type - a type to know which of the response to return
  * @returns {object} - Returns an object (error or response).
@@ -575,13 +610,13 @@ export const isUploadedVerifiedId  = (type = '') => async(req, res, next) => {
  */
 export const isVerifiedAddressDetails  = (type = '') => async(req, res, next) => {
   try {
-    const { user } = req;
-    if (req.user.is_verified_address && type === 'complete') {
+    const { user, userAddressDetails } = req;
+    if (userAddressDetails && userAddressDetails.is_verified_address && type === 'complete') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that User address has been verified in the DB. isVerifiedAddressDetails.middlewares.user.js`);
       return ApiResponse.error(res, enums.CHECK_USER_ADDRESS_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
     }
-    if (!req.user.is_verified_address && type === 'confirm') {
+    if ((!userAddressDetails || !userAddressDetails.is_verified_address) && type === 'confirm') {
       logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
       decoded that User address has not been verified yet in the DB. isVerifiedAddressDetails.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ADDRESS_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
@@ -602,13 +637,18 @@ export const isVerifiedAddressDetails  = (type = '') => async(req, res, next) =>
  */
 export const isVerifiedUtilityBill  = (type = '') => async(req, res, next) => {
   try {
-    const { user } = req;
-    if (req.user.is_verified_utility_bill && type === 'complete') {
+    const { user, userAddressDetails } = req;
+    if (userAddressDetails && userAddressDetails.is_verified_utility_bill && type === 'complete') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that User utility bill has been verified in the DB. isVerifiedUtilityBill.middlewares.user.js`);
       return ApiResponse.error(res, enums.CHECK_USER_UTILITY_BILL_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
     }
-    if (!req.user.is_verified_utility_bill && type === 'confirm') {
+    if (userAddressDetails && !userAddressDetails.can_upload_utility_bill && type === 'complete') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+      decoded that User utility bill is still under verification and cannot be updated yet. isVerifiedUtilityBill.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_UTILITY_BILL_VERIFICATION_PENDING, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+    }
+    if ((!userAddressDetails || !userAddressDetails.is_verified_utility_bill) && type === 'confirm') {
       logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
       decoded that User utility bill is yet to be verified in the DB. isVerifiedUtilityBill.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_UTILITY_BILL_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
@@ -861,6 +901,14 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
   }
 };
 
+/**
+ * check if user has previously added next of kin details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
 export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) => {
   try {
     const { user } = req;
@@ -886,18 +934,28 @@ export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) =>
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const userProfileNextUpdate = (type = '')=> async(req, res, next) =>{
+export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
   try {
-    const {user, userEmploymentDetails} = req;
-    const canUpdate = type === 'profile' ?  dayjs().isAfter(dayjs(user.next_profile_update)) :
-      dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
-    if ((user.next_profile_update || userEmploymentDetails.employment_next_update === null) && !canUpdate) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
+    const {user, userEmploymentDetails, body} = req;
+    if (type === 'employment') {
+      const canUpdate = dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
+      if (!canUpdate) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
         details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
-      const info = type === 'profile' ? 'profile' : 'employment';
-      return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(info), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+        return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+      }
+      return next();
     }
-
+    if ((user.next_profile_update !== null) && ((parseFloat(body.number_of_children) !== parseFloat(user.number_of_children)) ||
+    (body.marital_status.toLowerCase() !== user.marital_status?.toLowerCase()))) {
+      const canUpdate = dayjs().isAfter(dayjs(user.next_profile_update));
+      if (!canUpdate) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
+        details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
+        return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+      }
+      return next();
+    }
     return next();
   } catch (error) {
     error.label = enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE;

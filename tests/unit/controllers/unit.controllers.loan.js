@@ -81,5 +81,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call acceptSystemMaximumAllowableLoanAmount', async() => {
+      const req = { user: '', existingLoanApplication: '', params: '' };
+      const data = await LoanController.acceptSystemMaximumAllowableLoanAmount(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

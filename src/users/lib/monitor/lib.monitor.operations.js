@@ -80,6 +80,17 @@ export const operations = {
   79: 'LNRPTCDIN', // system invokes loan repayment via tokenised card initiated
   80: 'STCLIVNVPN', // set new user cluster invite notification via phone number
   81: 'STCLIVNVEM', // set new user cluster invite notification via email
-  82: 'VRYADRS' // user verifies address
+  82: 'VRYADRS', // user verifies address
+  83: 'UPTADDTLS', // user update address details
+  84: 'ADDTLSVRFL',  // user's address details verification failed
+  85: 'ADDTLSVRSC', // user's address details verification successful
+  86: 'UPLUTBILL', // user uploads utility bill
+  87: 'UTBILLDCLN', // user uploaded utility bill decline
+  88: 'UTBILLAPRD', // user uploaded utility bill approved
+  89: 'UPTNOKDTLS', // user updates next of kin details
+  90: 'UPDTEMPDTS', // user updates employment type details
+  91: 'ACTMXALLON', // user accepts system maximum allowable loan amount
+  92: 'UPTMNACTID', // user mono account id is updated
+  93: 'UPTOKACTID' // user okra account id is updated
 };
   

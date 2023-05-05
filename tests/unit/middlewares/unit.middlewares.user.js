@@ -51,6 +51,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfBvnFlaggedBlacklisted', async() => {
+      const req = { user: '', body: '' };
+      const data = await UserMiddleware.checkIfBvnFlaggedBlacklisted(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call verifyEmailVerificationToken', async() => {
       const req = { query: '' };
       const data = await UserMiddleware.verifyEmailVerificationToken(req, res, next);

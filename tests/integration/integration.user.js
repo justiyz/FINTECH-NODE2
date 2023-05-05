@@ -2292,6 +2292,28 @@ describe('User', () => {
           done();
         });
     });
+    it('Should throw error if user tries to update marital status or number of children in less than 3 months', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'Oreoluwa',
+          number_of_children: 7,
+          marital_status: 'married'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_NEXT_UPDATE('profile'));
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('should throw error if invalid token is set', (done) => {
       chai.request(app)
         .put('/api/v1/user/profile')
