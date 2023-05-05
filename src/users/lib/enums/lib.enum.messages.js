@@ -270,3 +270,4 @@ export const LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'loan applications fetched
 export const REPAID_LOANS_FETCHED_SUCCESSFULLY = 'Repaid loans fetched successfully';
 export const FETCH_ENV_VALUES_SUCCESSFULLY = 'Fetched env values successfully';
 export const UPDATED_ENV_VALUES_SUCCESSFULLY = 'Updated env values successfully';
+export const SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY = 'Score card weights breakdown fetched successfully';
