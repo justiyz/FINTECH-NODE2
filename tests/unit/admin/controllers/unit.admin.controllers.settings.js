@@ -33,5 +33,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call scoreCardBreakdown', async() => {
+      const req = { admin: '' };
+      const data = await AdminSettingsController.scoreCardBreakdown(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

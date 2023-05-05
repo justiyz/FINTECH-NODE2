@@ -21,6 +21,13 @@ router.put(
   AdminSettingsController.updateEnvValues
 );
 
+router.get(
+  '/loan-score-card',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('settings', 'read'),
+  AdminSettingsController.scoreCardBreakdown
+);
+
 
 
 export default router;

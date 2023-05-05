@@ -56,10 +56,10 @@ export const editUserStatus = async(req, res, next) => {
       });
       await Promise.all([ decryptBvns ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: all encoded blacklisted BVNs are decrypted editUserStatus.admin.controllers.user.js`);
-      const usersBlacklistedDetails = await plainBlacklistedBvnsDetails.filter((bvnDetail) => userDecryptedBvn === bvnDetail.decryptedBvn);
+      const usersBlacklistedDetails = plainBlacklistedBvnsDetails.filter((bvnDetail) => userDecryptedBvn === bvnDetail.decryptedBvn);
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: users blacklisted BVNs are filtered out editUserStatus.admin.controllers.user.js`);
       if (usersBlacklistedDetails.length >= 1) {
-        usersBlacklistedDetails.map(async(userDetails) => {
+        usersBlacklistedDetails.forEach(async(userDetails) => {
           await processOneOrNoneData(userQueries.removeBlacklistedBvn, [ userDetails.id ]);
           return userDetails;
         });

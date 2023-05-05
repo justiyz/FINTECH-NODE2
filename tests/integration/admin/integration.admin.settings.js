@@ -170,4 +170,59 @@ describe('Admin Settings management', () => {
         });
     });
   });
+  describe('Loan score card breakdown', () => {
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/loan-score-card')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if token is not sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/loan-score-card')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Please provide a token');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch loan score card breakdown successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/loan-score-card')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('individualLoanScoreCardResult');
+          expect(res.body.data).to.have.property('clusterLoanScoreCardResult');
+          expect(res.body.data.individualLoanScoreCardResult).to.have.property('monthly_income_weight');
+          expect(res.body.data.individualLoanScoreCardResult).to.have.property('employment_type_weight');
+          expect(res.body.data.individualLoanScoreCardResult).to.have.property('dependant_weight');
+          expect(res.body.data.individualLoanScoreCardResult.monthly_income_weight).to.equal(5);
+          expect(res.body.data.individualLoanScoreCardResult.returned_cheques_from_cr_weight).to.equal(15);
+          expect(res.body.message).to.equal(enums.SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
 });

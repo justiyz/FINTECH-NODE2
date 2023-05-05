@@ -273,3 +273,4 @@ export const UPDATED_ENV_VALUES_SUCCESSFULLY = 'Updated env values successfully'
 export const BLACKLISTED_BVN = 'Blacklisted BVNs added';
 export const BLACKLIST_BVN_EXIST = 'Bvn already exist';
 export const BLACKLIST_BVN_FETCHED_SUCCESSFULLY = 'Blacklisted bvn fetched successfully';
+export const SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY = 'Score card weights breakdown fetched successfully';

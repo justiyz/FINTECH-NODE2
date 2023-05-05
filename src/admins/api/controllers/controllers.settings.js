@@ -2,6 +2,8 @@ import settingsQueries from '../queries/queries.settings';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import { loanScoreCardBreakdown } from '../services/services.seedfiUnderwriting';
+
 
 /**
  * fetches admin env values settings
@@ -66,4 +68,33 @@ export const updateEnvValues = async(req, res, next) => {
   }
 };
   
+/**
+ * fetches loan score card breakdown
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+
+export const scoreCardBreakdown = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    const individualLoanScoreCardResult = await loanScoreCardBreakdown();
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the individual loan scorecard weights
+        from seedfi underwriting service scoreCardBreakdown.admin.controllers.admin.js`);
+    const clusterLoanScoreCardResult = { data: {} }; // to later implement for cluster loan scoreCard
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the cluster loan scorecard weights
+        from seedfi underwriting service scoreCardBreakdown.admin.controllers.admin.js`);
+    const data = {
+      individualLoanScoreCardResult: individualLoanScoreCardResult.data,
+      clusterLoanScoreCardResult: clusterLoanScoreCardResult.data
+    };
+    return ApiResponse.success(res, enums.SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.SCORE_CARD_BREAKDOWN_CONTROLLER;
+    logger.error(`fetching score card breakdown failed:::${enums.SCORE_CARD_BREAKDOWN_CONTROLLER}`, error.message);
+    return next(error);  
+  }
+};
 
