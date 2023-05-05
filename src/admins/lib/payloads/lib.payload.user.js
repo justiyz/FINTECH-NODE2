@@ -15,6 +15,7 @@ export default {
     query.to_date,
     query.loan_status
   ],
+  
   addBlacklistedBvn: (userDetails) => [
     userDetails.first_name,
     userDetails.middle_name || null,

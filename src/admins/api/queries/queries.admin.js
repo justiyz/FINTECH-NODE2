@@ -357,6 +357,7 @@ export default {
 
   fetchSingleBlacklistedBvn: `
    SELECT 
+     id,
       first_name,
       middle_name,
       last_name,
@@ -368,6 +369,7 @@ export default {
 
   fetchBlacklistedBvn: `
    SELECT 
+      id,
       first_name,
       middle_name,
       last_name,
@@ -378,6 +380,7 @@ export default {
 
   fetchUserBlacklistedBvn: `
     SELECT 
+    id,
      first_name,
      middle_name,
      last_name,
@@ -394,14 +397,17 @@ export default {
    OR $1 IS NULL) 
    AND (bvn = $2 OR $2 IS NULL)
    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-   GROUP BY
+   GROUP BY 
+   id,
    first_name,
    middle_name,
    last_name,
    date_of_birth,
    bvn,
    created_at
-   ORDER BY created_at DESC;
+   ORDER BY created_at DESC
+   OFFSET $5
+   LIMIT $6
  `,
  
   countBlacklistedBvn: `
@@ -416,14 +422,17 @@ export default {
     OR $1 IS NULL) 
     AND (bvn = $2 OR $2 IS NULL)
     AND ((created_at::DATE BETWEEN $3 AND $4) OR ($3 IS NULL AND $4 IS NULL)) 
-    GROUP BY 
-    first_name,
-    middle_name,
-    last_name,
-    date_of_birth,
-    bvn,
-    created_at
-   ORDER BY created_at DESC;
+   GROUP BY   
+   id,
+   first_name,
+   middle_name,
+   last_name,
+   date_of_birth,
+   bvn,
+   created_at
+    ORDER BY created_at DESC
+   OFFSET $5
+   LIMIT $6
  `
 };
     

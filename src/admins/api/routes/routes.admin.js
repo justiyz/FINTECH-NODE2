@@ -92,7 +92,7 @@ router.post(
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('bvn management', 'create'),
   BvnMiddleware.isBvnAlreadyBlacklisted,
-  BvnController.blacklistedBvn
+  BvnController.addBlacklistedBvns
 );
 
 router.get(

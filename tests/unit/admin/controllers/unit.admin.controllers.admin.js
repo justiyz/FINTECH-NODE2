@@ -72,7 +72,7 @@ describe('', () => {
     });
     it('should call blacklistedBvn', async() => {
       const req = { body: '', admin: '', query: '' };
-      const data = await BvnController.blacklistedBvn(req, res, next);
+      const data = await BvnController.addBlacklistedBvns(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
