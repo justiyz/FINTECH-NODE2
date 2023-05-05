@@ -607,3 +607,25 @@ export const paystackSubmitOtpTestResponse = (reference) => {
   };
   return data;
 };
+
+export const seedfiUnderwritingLoanScoreCardBreakdown = () => {
+  const result =  {
+    status: 200,
+    data: {
+      monthly_income_weight: 5.0,
+      employment_type_weight: 10.0,
+      marital_status_weight: 2.5,
+      dependant_weight: 2.5,
+      monthly_income_returned_cheque_weight: 5.0,
+      returned_cheques_from_cr_weight: 15.0,
+      date_of_birth_weight: 5.0,
+      length_of_cr_history_weight: 15.0,
+      closed_loan_availed_weight: 15.0,
+      active_loan_availed_weight: 15.0,
+      court_case_history_weight: 5.0,
+      history_of_written_account_unpaid: 0.0
+    }
+  };
+  return result;
+};
+

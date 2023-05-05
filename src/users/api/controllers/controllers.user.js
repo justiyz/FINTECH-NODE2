@@ -526,7 +526,6 @@ export const getProfile = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's employment details, address details and next of kin from the DB
     fetchUserInformationDetails.controller.user.js`);
     user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
-    user.next_profile_update = dayjs().isAfter(dayjs(user.next_profile_update));
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ? 
       true : false;
     const data = {
