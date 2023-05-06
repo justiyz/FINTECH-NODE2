@@ -1,4 +1,4 @@
-import adminQueries from '../queries/queries.admin';
+import bvnQueries from '../queries/queries.bvn';
 import { processAnyData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
@@ -16,18 +16,30 @@ import * as UserHash from '../../../users/lib/utils/lib.util.hash';
  */
 export const isBvnAlreadyBlacklisted = async(req, res, next) => {
   try {
-    const blacklistedBvn =  await processAnyData(adminQueries.fetchBlacklistedBvn, []);
-    if (req.query.type === 'single' && blacklistedBvn) {
-      await Promise.all(
-        blacklistedBvn.map(async(data) => {
-          const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
-          data.bvn = decryptedBvn;
-          return data;
-        }));
-    }
+    const { body } = req;
+    const blacklistedBvn =  await processAnyData(bvnQueries.fetchBlacklistedBvn, []);
+    await Promise.all(
+      blacklistedBvn.map(async(data) => {
+        const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
+        data.bvn = decryptedBvn;
+        return data;
+      })
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+    successfully decrypted bvn coming from the database checkIfAminEmailAlreadyExist.middlewares.admin.js`);
+    
     if (req.query.type === 'single' && blacklistedBvn.find((data) => data.bvn === req.body.bvn)) { 
       return ApiResponse.error(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_CONFLICT, enums.IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE);
     }
+    if (req.query.type === 'single') return next();
+    
+    const ids = new Set(blacklistedBvn.map(({ bvn }) => bvn));
+    const addBvn = body.filter(({ bvn }) => !ids.has(bvn));
+
+    if (!addBvn || !addBvn.length) {
+      return ApiResponse.error(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_CONFLICT, enums.IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE);
+    }
+    req.addBvn = addBvn;
     return next();
   } catch (error) {
     error.label = enums.IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE;

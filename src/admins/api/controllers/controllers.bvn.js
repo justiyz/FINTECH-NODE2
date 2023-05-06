@@ -1,7 +1,7 @@
 
-import adminQueries from '../queries/queries.admin';
+import bvnQueries from '../queries/queries.bvn';
 import { processAnyData } from '../services/services.db';
-import AdminPayload from '../../lib/payloads/lib.payload.admin';
+import BvnPayload from '../../lib/payloads/lib.payload.bvn';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -19,17 +19,18 @@ import enums from '../../../users/lib/enums';
  */
 export const addBlacklistedBvns = async(req, res, next) => {
   try {
-    const { body, query }= req;
+    const { addBvn, query }= req;
+    const bodyData = addBvn ? addBvn : req.body;
     let processedData;
     if (query.type === 'single') {
-      const hashedBvn = encodeURIComponent(await UserHash.encrypt(body.bvn));
-      const payload = AdminPayload.blacklistedBvn(body, hashedBvn);
-      processedData  = await processAnyData(adminQueries.blacklistedBvn, payload);
+      const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn));
+      const payload = BvnPayload.blacklistedBvn(bodyData, hashedBvn);
+      processedData  = await processAnyData(bvnQueries.blacklistedBvn, payload);
     } else {
-      processedData = await Promise.all(body.map(async(data) => {
+      processedData = await Promise.all(bodyData.map(async(data) => {
         const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn));
-        const payload = AdminPayload.blacklistedBvn(data, hashedBvn);
-        const result = await processAnyData(adminQueries.blacklistedBvn, payload);
+        const payload = BvnPayload.blacklistedBvn(data, hashedBvn);
+        const result = await processAnyData(bvnQueries.blacklistedBvn, payload);
         return result[0];
       }));
     }
@@ -54,8 +55,8 @@ export const addBlacklistedBvns = async(req, res, next) => {
 export const fetchBlacklistedBvn = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    const payload = AdminPayload.fetchBlacklistedBvn(query);
-    const blacklistBvns = await processAnyData(adminQueries.fetchUserBlacklistedBvn, payload);
+    const payload = BvnPayload.fetchBlacklistedBvn(query);
+    const blacklistBvns = await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
   
     await Promise.all(
       blacklistBvns.map(async(data) => {
@@ -73,7 +74,18 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
       const data = { total_count: totalCount, blacklistBvns };
       return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
-    const [ blacklistBvnCount ] = await processAnyData(adminQueries.countBlacklistedBvn, payload);
+
+    if (req.query.bvn) {
+      const filterBvn = blacklistBvns.find((data) => {
+        return data.bvn === req.query.bvn;
+      });
+      if (!filterBvn) {
+        return ApiResponse.success(res, enums.BLACKLIST_BVN_NOT_EXIST, enums.HTTP_NOT_FOUND);
+      }
+      return ApiResponse.success(res, enums.BLACKLIST_BVN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, filterBvn);
+    }
+
+    const [ blacklistBvnCount ] = await processAnyData(bvnQueries.countFilterBlacklistedBvn, payload);
     const page = parseFloat(req.query.page) || 1;
     const perPage = Number(req.query.per_page) || 10;
     const total_pages = Helpers.calculatePages(Number(blacklistBvnCount.total_count), perPage);
