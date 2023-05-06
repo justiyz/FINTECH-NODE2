@@ -20,7 +20,7 @@ import enums from '../../../users/lib/enums';
 export const addBlacklistedBvns = async(req, res, next) => {
   try {
     const { addBvn, query }= req;
-    const bodyData = query.type === 'single' ? addBvn : req.body;
+    const bodyData = query.type === 'single' ? req.body : addBvn;
     let processedData;
     if (query.type === 'single') {
       const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn));
