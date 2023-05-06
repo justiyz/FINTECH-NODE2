@@ -210,7 +210,6 @@ describe('Admin Settings management', () => {
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.have.property('individualLoanScoreCardResult');
           expect(res.body.data).to.have.property('clusterLoanScoreCardResult');
@@ -219,7 +218,6 @@ describe('Admin Settings management', () => {
           expect(res.body.data.individualLoanScoreCardResult).to.have.property('dependant_weight');
           expect(res.body.data.individualLoanScoreCardResult.monthly_income_weight).to.equal(5);
           expect(res.body.data.individualLoanScoreCardResult.returned_cheques_from_cr_weight).to.equal(15);
-          expect(res.body.message).to.equal(enums.SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });

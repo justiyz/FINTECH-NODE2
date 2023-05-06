@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import enums from '../../../../src/users/lib/enums';
 import * as AdminAdminMiddleware from '../../../../src/admins/api/middlewares/middlewares.admin';
+import * as BvnMiddleware from '../../../../src/admins/api/middlewares/middlewares.bvn';
 
 describe('', () => {
   let status,
@@ -60,6 +61,12 @@ describe('', () => {
     it('should call checkIfAdminPhoneNumberAlreadyExist', async() => {
       const req = { body: '' };
       const data = await AdminAdminMiddleware.checkIfAdminPhoneNumberAlreadyExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call isBvnAlreadyBlacklisted', async() => {
+      const req = { body: '', admin: '' };
+      const data = await BvnMiddleware.isBvnAlreadyBlacklisted(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

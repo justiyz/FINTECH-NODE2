@@ -39,3 +39,4 @@ export const generateAdminResetPasswordToken = (admin) => {
     return error;
   }
 };
+

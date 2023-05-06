@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import enums from '../../../../src/users/lib/enums';
 import * as AdminController from '../../../../src/admins/api/controllers/controllers.admin';
+import * as BvnController from '../../../../src/admins/api/controllers/controllers.bvn';
 
 describe('', () => {
   let status,
@@ -66,6 +67,18 @@ describe('', () => {
     it('should get platform overview', async() => {
       const req = { admin: '', query: '' };
       const data = await AdminController.fetchPlatformOverview(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call blacklistedBvn', async() => {
+      const req = { body: '', admin: '', query: '' };
+      const data = await BvnController.addBlacklistedBvns(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchBlacklistedBvn', async() => {
+      const req = { admin: '', query: '' };
+      const data = await BvnController.fetchBlacklistedBvn(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
