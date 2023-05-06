@@ -6,8 +6,6 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as AdminController from '../controllers/controllers.admin';
-import * as BvnController from '../controllers/controllers.bvn';
-import * as BvnMiddleware from '../middlewares/middlewares.bvn';
 
 const router = Router();
 
@@ -85,20 +83,6 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   Model(RoleSchema.overviewPage, 'query'),
   AdminController.fetchPlatformOverview
-);
-
-router.post(
-  '/blacklist-bvn',
-  AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('bvn management', 'create'),
-  BvnMiddleware.isBvnAlreadyBlacklisted,
-  BvnController.addBlacklistedBvns
-);
-
-router.get(
-  '/blacklist-bvn',
-  AuthMiddleware.validateAdminAuthToken,
-  BvnController.fetchBlacklistedBvn
 );
 
 export default router;
