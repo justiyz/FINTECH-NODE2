@@ -225,6 +225,7 @@ export const USER_KYC_DETAILS_CONTROLLER = 'AdminUserController::fetchUserKycDet
 export const VERIFY_USER_UTILITY_BILL_CONTROLLER = 'AdminUserController::verifyUserUtilityBill';
 export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfLoanExists';
 export const USER_ORR_SCORE_BREAKDOWN_SERVICE = 'SeedfiUnderwritingService::userOrrScoreBreakdown';
+export const LOAN_SCORE_CARD_BREAKDOWN_WEIGHT_SERVICE = 'SeedfiUnderwritingService::loanScoreCardBreakdown';
 export const LOAN_ORR_SCORE_BREAKDOWN_SERVICE = 'SeedfiUnderwritingService::loanOrrScoreBreakdown';
 export const APPROVE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::approveLoanApplication';
 export const DECLINE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::declineLoanApplication';
@@ -239,3 +240,5 @@ export const FETCH_ENV_VALUES_CONTROLLER = 'AdminLoanController::fetchEnvValues'
 export const UPDATE_ENV_VALUES_CONTROLLER = 'AdminLoanController::updateEnvValues';
 export const BLACKLIST_BVN_CONTROLLER = 'AdminLoanController::blacklistBvn';
 export const IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE = 'AdminAdminMiddleware::isBvnAlreadyBlacklisted';
+export const SCORE_CARD_BREAKDOWN_CONTROLLER = 'AdminLoanController::scoreCardBreakdown';
+
