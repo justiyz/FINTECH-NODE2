@@ -13,18 +13,6 @@ export default {
     date_of_birth,
     bvn`,
   
-  fetchSingleBlacklistedBvn: `
-     SELECT 
-       id,
-        first_name,
-        middle_name,
-        last_name,
-        date_of_birth,
-        bvn
-      FROM blacklisted_bvns
-      WHERE bvn = $1
-    `,
-  
   fetchBlacklistedBvn: `
      SELECT 
         id,
