@@ -137,8 +137,10 @@ export const acceptSystemMaximumAllowableLoanAmount = async(req, res, next) => {
       [ loan_id, user.user_id, existingLoanApplication.max_possible_approval, parseFloat(totalInterestAmount) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount updated for used in the DB 
     acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+    userActivityTracking(user.user_id, 91, 'success');
     return ApiResponse.success(res, enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED__SUCCESSFULLY, enums.HTTP_OK, updateLoanAmount);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 91, 'fail');
     error.label = enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER;
     logger.error(`updating loan amount with system allowable loan amount failed::${enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER}`, error.message);
     return next(error);

@@ -476,17 +476,17 @@ export const isPinCreated = (type = '') => async(req, res, next) => {
     const { user } = req;
     if (!user.is_created_pin && type == 'confirm') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user have not created pin in the DB. isPinCreated.middlewares.auth.js`);
+      userActivityTracking(user.user_id, 11, 'fail');
       return ApiResponse.error(res, enums.USER_CREDENTIALS('pin'), enums.HTTP_BAD_REQUEST, enums.IS_PIN_CREATED_MIDDLEWARE);
     }
     if (user.is_created_pin && type === 'validate') {
-      userActivityTracking(user.user_id, 7, 'fail');
+      userActivityTracking(req.user.user_id, 11, 'fail');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin isPinCreated.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ALREADY_CREATED('pin'), enums.HTTP_FORBIDDEN, enums.IS_PIN_CREATED_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created pin isPinCreated.middlewares.auth.js`);
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, 7, 'fail');
     error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
     logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
     return next(error);
