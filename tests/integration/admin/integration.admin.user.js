@@ -1084,7 +1084,7 @@ describe('Admin Users management', () => {
           done();
         });
     });
-    it('Should throw error coz user has not uploaded any utility bill', (done) => {
+    it('Should approve user one uploaded utility bill', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/verify-utility-bill`)
         .set({
@@ -1095,11 +1095,40 @@ describe('Admin Users management', () => {
           decision: 'approve'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_HAS_NOT_UPLOADED_UTILITY_BILL);
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('address_image_url');
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data.is_verified_utility_bill).to.equal(true);
+          expect(res.body.data.can_upload_utility_bill).to.equal(false);
+          done();
+        });
+    });
+    it('Should decline user two uploaded utility bill', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}/verify-utility-bill`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'decline'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('address_image_url');
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data.is_verified_utility_bill).to.equal(false);
+          expect(res.body.data.can_upload_utility_bill).to.equal(true);
           done();
         });
     });
@@ -1347,7 +1376,7 @@ describe('Admin Users management', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body).to.have.property('data');
           expect(res.body.data).to.be.an('array');
-          expect(res.body.data.length).to.equal(3);
+          expect(res.body.data.length).to.equal(4);
           expect(res.body.data[0]).to.have.property('uploaded_by');
           expect(res.body.data[0]).to.have.property('document_url');
           expect(res.body.data[0].document_extension).to.equal('.png');

@@ -695,7 +695,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     userBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     const result = await createUserYouVerifyCandidate(user, userBvn);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details creation has been initiated with youVerify 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details creation has been initiated with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
@@ -711,6 +711,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
+    userActivityTracking(req.user.user_id, 84, 'fail');
     return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
       enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
   } catch (error) {

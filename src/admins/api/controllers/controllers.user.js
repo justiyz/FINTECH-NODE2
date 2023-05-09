@@ -5,10 +5,12 @@ import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
-import { sendPushNotification } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
 import { userOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { adminActivityTracking } from '../../lib/monitor';
+import { userActivityTracking } from '../../../users/lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 
 
@@ -364,6 +366,12 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       const declineUtilityBill = await processOneOrNoneData(userQueries.declineUserUploadedUtilityBill, [ userDetails.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been declined so user can upload another 
       verifyUserUtilityBill.admin.controllers.user.js`);
+      sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('decline'), userDetails.fcm_token);
+      sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
+        PersonalNotifications.declinedUtilityBillNotification, 'utility-declined', {});
+      await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
+      adminActivityTracking(req.admin.admin_id, 28, 'success');
+      userActivityTracking(userDetails.user_id, 87, 'success');
       return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to approve the uploaded utility bill 
@@ -375,6 +383,12 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     await processOneOrNoneData(userQueries.updateUserTier, [ userDetails.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user tier value has been updated based on previous verifications
       verifyUserUtilityBill.admin.controllers.user.js`);
+    sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('approved'), userDetails.fcm_token);
+    sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
+      PersonalNotifications.approvedUtilityBillNotification, 'utility-bill-approved', {});
+    await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
+    adminActivityTracking(req.admin.admin_id, 27, 'success');
+    userActivityTracking(userDetails.user_id, 88, 'success');
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
     error.label = enums.VERIFY_USER_UTILITY_BILL_CONTROLLER;

@@ -1997,6 +1997,70 @@ describe('User', () => {
         });
     });
   });
+  describe('update user mono account id', () => {
+    it('should update the fcm-token of user one successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/mono-account-id')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          mono_account_id: Hash.generateRandomString(5)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('mono_account_id');
+          expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
+          expect(res.body.message).to.equal(enums.UPDATE_USER_MONO_ID);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.is_default).to.equal(true);
+          done();
+        });
+    });
+    it('should throw error when fcm token is not sent for user one', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/mono-account-id')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('mono_account_id is required');
+          done();
+        });
+    });
+    it('should update the fcm-token of user two successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/mono-account-id')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          mono_account_id: Hash.generateRandomString(5)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('mono_account_id');
+          expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_TWO_USER_ID);
+          expect(res.body.message).to.equal(enums.UPDATE_USER_MONO_ID);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.is_default).to.equal(true);
+          done();
+        });
+    });
+  });
   describe('Add address details for verification', () => {
     it('Should successfully create user one address details', (done) => {
       chai.request(app)
@@ -2131,19 +2195,41 @@ describe('User', () => {
   });
  
   describe('Upload utility bill for user', () => {
-    it('Should flag if user one try uploading utility bill', (done) => {
+    it('Should upload utility bill successfully for user one', (done) => {
       chai.request(app)
         .post('/api/v1/user/upload-utility-bill')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.USER_ADDRESS_NOT_VERIFIED);
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('Should upload utility bill successfully for user two', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
           done();
         });
     });

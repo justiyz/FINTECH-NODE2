@@ -21,6 +21,7 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  LoanMiddleware.checkIfUserBvnNotBlacklisted,
   LoanController.checkUserLoanEligibility
 );
 

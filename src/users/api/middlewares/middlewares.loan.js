@@ -4,6 +4,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
 import AdminMailService from '../../../admins/api/services/services.email';
+import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import { fetchSeedfiPaystackBalance, createTransferRecipient } from '../services/service.paystack';
 
@@ -406,6 +407,42 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
     error.label = enums.CHECK_IF_EMPLOYMENT_TYPE_LIMIT_APPLIES_MIDDLEWARE;
     logger.error(`validating user employment type loan amount limit based on number of previous loans 
     failed::${enums.CHECK_IF_EMPLOYMENT_TYPE_LIMIT_APPLIES_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user bvn not on blacklisted bvn list
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user bvn checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
+    const allBlackListedBvns = await processAnyData(loanQueries.fetchAllBlackListedBvnsBlacklistedBvn, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched platform blacklisted bvns checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
+    await Promise.all(
+      allBlackListedBvns.map(async(data) => {
+        const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+        data.bvn = decryptedBvn;
+        return data;
+      })
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    successfully decrypted bvn coming from the database checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
+    if (allBlackListedBvns.find((data) => data.bvn === userDecryptedBvn)) { 
+      return ApiResponse.error(res, enums.BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE;
+    logger.error(`checking if user bvn is not on blacklisted bvn lists in the DB failed::${enums.CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

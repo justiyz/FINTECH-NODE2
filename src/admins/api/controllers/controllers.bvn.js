@@ -6,7 +6,7 @@ import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
-
+import { adminActivityTracking } from '../../lib/monitor';
 
 
 /**
@@ -26,11 +26,13 @@ export const addBlacklistedBvns = async(req, res, next) => {
       const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn));
       const payload = BvnPayload.blacklistedBvn(bodyData, hashedBvn);
       processedData  = await processAnyData(bvnQueries.blacklistedBvn, payload);
+      adminActivityTracking(req.admin.admin_id, 29, 'success');
     } else {
       processedData = await Promise.all(bodyData.map(async(data) => {
         const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn));
         const payload = BvnPayload.blacklistedBvn(data, hashedBvn);
         const result = await processAnyData(bvnQueries.blacklistedBvn, payload);
+        adminActivityTracking(req.admin.admin_id, 30, 'success');
         return result[0];
       }));
     }

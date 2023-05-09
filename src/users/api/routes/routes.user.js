@@ -148,7 +148,6 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('confirm'),
-  UserMiddleware.isVerifiedAddressDetails('confirm'),
   UserMiddleware.isVerifiedUtilityBill('complete'),
   UserMiddleware.uploadUtilityBillDocument,
   UserController.updateUploadedUtilityBill
@@ -224,6 +223,13 @@ router.put(
   Model(Schema.updateEmploymentDetails, 'payload'),
   UserMiddleware.userProfileNextUpdate('employment'),
   UserController.updateEmploymentDetails
+);
+
+router.patch(
+  '/mono-account-id',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.updateMonoId, 'payload'),
+  UserController.updateMonoAccountId
 );
 
 

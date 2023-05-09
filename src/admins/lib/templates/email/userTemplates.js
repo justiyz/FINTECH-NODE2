@@ -67,3 +67,46 @@ export const sendLoanDisapprovalMail = (data) => `
           <span style="display: block;">Call: +234 814 650 7035</span>
         </td>
     </tr>`;
+export const utilityBillDeclinedMail = (data) => `
+    <tr>
+        <td style="padding-bottom: 30px;">
+        Hello ${data.first_name},
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+        <p>Your utility bill submission has been declined. <br /> 
+        Please login upload your utility bill again.
+        </td>
+    </tr>
+    <tr>
+        <td>
+          <span style="line-height: 40px">Thanks</span> <br />
+          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="font-weight: 600; display: block;">SeedFi</span>
+          <span style="display: block;">Email: ask@seedfi.com</span>
+          <span style="display: block;">Call: +234 814 650 7035</span>
+        </td>
+    </tr>`;
+
+export const utilityBillApprovalMail = (data) => `
+    <tr>
+        <td style="padding-bottom: 30px;">
+        Hello ${data.first_name},
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 40px">
+        <p>The utility bill you supplied has been accepted.<br />
+         Please sign in to continue with your loan activity.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+          <span style="line-height: 40px">Thanks</span> <br />
+          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="font-weight: 600; display: block;">SeedFi</span>
+          <span style="display: block;">Email: ask@seedfi.com</span>
+          <span style="display: block;">Call: +234 814 650 7035</span>
+        </td>
+    </tr>`;

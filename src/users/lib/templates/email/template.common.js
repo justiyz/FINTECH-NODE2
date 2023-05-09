@@ -35,13 +35,13 @@ export const commonTemplate = (messageType, data) => {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <title></title>
 </head>
-<body style=" background: #eeeeee;">
+<body style=" background: #eeeeee; padding-top: 20px">
   <div style="font-family: Poppins; max-width: 600px; margin: 20px auto;  background: #FFFFFF;">
     <!--   HEADER   -->
     <table role="header" width="100%">
       <tr>
-        <td style="padding: 40px 0px; width: 73%;">
-          <img src="https://seedfi-upload.s3.eu-west-1.amazonaws.com/IMG_3580.PNG" 
+        <td style="padding: 40px 40px 0px; width: 73%;">
+          <img src="https://photow-profile-images.s3.us-west-2.amazonaws.com/seedfi-logo.png" 
           width="150px"
           alt="seedfi-icon">
         </td>

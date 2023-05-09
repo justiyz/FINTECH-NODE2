@@ -99,6 +99,7 @@ export const updateSelfieImage = async(req, res, next) => {
     userActivityTracking(user.user_id, 17, 'success');
     return ApiResponse.success(res, enums.USER_SELFIE_IMAGE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updateUserSelfie);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 17, 'fail');
     error.label = enums.UPDATE_SELFIE_IMAGE_CONTROLLER;
     logger.error(`updating user selfie image and email verification token in the DB failed::${enums.UPDATE_SELFIE_IMAGE_CONTROLLER}`, error.message);
     return next(error);
@@ -161,8 +162,10 @@ export const requestEmailVerification = async(req, res, next) => {
     await MailService('Verify your email', 'requestVerifyEmail', { otp: token, ...user });
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email verification has been sent successfully to user mail. requestEmailVerification.controller.auth.js`);
+    userActivityTracking(req.user.user_id, 3, 'success');
     return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 3, 'fail');
     error.label = enums.REQUEST_EMAIL_VERIFICATION_CONTROLLER;
     logger.error(`updating user email failed:::${enums.REQUEST_EMAIL_VERIFICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -431,10 +434,12 @@ export const initiateAddressVerification = async(req, res, next) => {
       const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details updated in the DB but still awaiting verification
       initiateAddressVerification.controller.user.js`);
+      userActivityTracking(req.user.user_id, 83, 'success');
       return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification could not be initiated with youVerify 
     initiateAddressVerification.controller.user.js`);
+    userActivityTracking(req.user.user_id, 83, 'fail');
     return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
       enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
   } catch (error) {
@@ -462,8 +467,10 @@ export const updateUploadedUtilityBill = async(req, res, next) => {
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user uploaded utility bill document saved in the DB
     updateUploadedUtilityBill.controller.user.js`);
+    userActivityTracking(req.user.user_id, 86, 'success');
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 86, 'fail');
     error.label = enums.UPDATE_UPLOADED_UTILITY_BILL_CONTROLLER;
     logger.error(`updating user's uploaded utility bill failed:::${enums.UPDATE_UPLOADED_UTILITY_BILL_CONTROLLER}`, error.message);
     return next(error);
@@ -690,9 +697,11 @@ export const createNextOfKin = async(req, res, next) => {
     const { body, user} = req;
     const payload = UserPayload.createNextOfKin(body, user);
     const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
+    userActivityTracking(req.user.user_id, 89, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully created user's next of kin createNextOfKin.controller.user.js`);
     return ApiResponse.success(res, enums.NEXT_OF_KIN_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, nextOfKin);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 89, 'fail');
     error.label = enums.CREATE_NEXT_OF_KIN_CONTROLLER;
     logger.error(`creating next of kin failed:::${enums.CREATE_NEXT_OF_KIN_CONTROLLER}`, error.message);
     return next(error);
@@ -719,8 +728,10 @@ export const createUserEmploymentDetails = async(req, res, next) => {
     const data = await processOneOrNoneData(userQueries.createUserEmploymentDetails, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
     user employment details successfully updated in the DB. createUserEmploymentDetails.controller.user.js`);
+    userActivityTracking(req.user.user_id, 90, 'success');
     return ApiResponse.success(res, enums.EMPLOYMENT_DETAILS, enums.HTTP_CREATED, data);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 90, 'fail');
     error.label = enums.EMPLOYMENT_DETAILS_CONTROLLER;
     logger.error(`creating user employment details failed:::${enums.EMPLOYMENT_DETAILS_CONTROLLER}`, error.message);
     return next(error);
@@ -743,10 +754,35 @@ export const updateEmploymentDetails = async(req, res, next) => {
     const data = await processAnyData(userQueries.updateEmploymentDetails, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
     User successfully updated employment in the DB. updateEmploymentDetails.controller.user.js`);
+    userActivityTracking(req.user.user_id, 90, 'success');
     return ApiResponse.success(res, enums.UPDATE_EMPLOYMENT_DETAILS, enums.HTTP_OK, data);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 90, 'fail');
     error.label = enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER;
     logger.error(`updating user employment details failed:::${enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user update mono account id details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user account details
+ * @memberof UserController
+ */
+export const updateMonoAccountId = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const data = await processOneOrNoneData(userQueries.updateUserMonoAccountId, [ user.user_id, body.mono_account_id.trim() ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User mono id updated successfully in the DB. updateMonoAccountId.controller.user.js`);
+    userActivityTracking(req.user.user_id, 92, 'success');
+    return ApiResponse.success(res, enums.UPDATE_USER_MONO_ID, enums.HTTP_OK, data);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 92, 'fail');
+    error.label = enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER;
+    logger.error(`updating user mono id failed:::${enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER}`, error.message);
     return next(error);
   }
 };
