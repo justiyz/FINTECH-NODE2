@@ -364,6 +364,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       const declineUtilityBill = await processOneOrNoneData(userQueries.declineUserUploadedUtilityBill, [ userDetails.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been declined so user can upload another 
       verifyUserUtilityBill.admin.controllers.user.js`);
+      adminActivityTracking(req.admin.admin_id, 28, 'success');
       return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to approve the uploaded utility bill 
@@ -375,6 +376,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     await processOneOrNoneData(userQueries.updateUserTier, [ userDetails.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user tier value has been updated based on previous verifications
       verifyUserUtilityBill.admin.controllers.user.js`);
+    adminActivityTracking(req.admin.admin_id, 27, 'success');
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
     error.label = enums.VERIFY_USER_UTILITY_BILL_CONTROLLER;

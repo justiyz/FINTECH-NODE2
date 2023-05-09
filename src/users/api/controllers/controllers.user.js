@@ -434,10 +434,12 @@ export const initiateAddressVerification = async(req, res, next) => {
       const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details updated in the DB but still awaiting verification
       initiateAddressVerification.controller.user.js`);
+      userActivityTracking(req.user.user_id, 83, 'success');
       return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification could not be initiated with youVerify 
     initiateAddressVerification.controller.user.js`);
+    userActivityTracking(req.user.user_id, 83, 'fail');
     return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
       enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
   } catch (error) {
@@ -750,9 +752,9 @@ export const updateEmploymentDetails = async(req, res, next) => {
     const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
     const payload = UserPayload.updateEmploymentDetails(req.body, result);
     const data = await processAnyData(userQueries.updateEmploymentDetails, payload);
-    userActivityTracking(req.user.user_id, 90, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
     User successfully updated employment in the DB. updateEmploymentDetails.controller.user.js`);
+    userActivityTracking(req.user.user_id, 90, 'success');
     return ApiResponse.success(res, enums.UPDATE_EMPLOYMENT_DETAILS, enums.HTTP_OK, data);
   } catch (error) {
     userActivityTracking(req.user.user_id, 90, 'fail');
