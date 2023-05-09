@@ -764,3 +764,26 @@ export const updateEmploymentDetails = async(req, res, next) => {
   }
 };
 
+/**
+ * user update mono account id details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user account details
+ * @memberof UserController
+ */
+export const updateMonoAccountId = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const data = await processOneOrNoneData(userQueries.updateUserMonoAccountId, [ user.user_id, body.mono_account_id.trim() ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User mono id updated successfully in the DB. updateMonoAccountId.controller.user.js`);
+    userActivityTracking(req.user.user_id, 92, 'success');
+    return ApiResponse.success(res, enums.UPDATE_USER_MONO_ID, enums.HTTP_OK, data);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 92, 'fail');
+    error.label = enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER;
+    logger.error(`updating user mono id failed:::${enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+

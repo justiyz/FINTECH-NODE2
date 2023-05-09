@@ -9,7 +9,8 @@ export default {
       account_name,
       is_default,
       is_disbursement_account,
-      created_at
+      created_at,
+      mono_account_id
     FROM user_bank_accounts
     WHERE user_id = $1
     AND is_default = true
@@ -43,6 +44,16 @@ export default {
     SELECT bvn
     FROM users
     WHERE user_id = $1`,
+
+  fetchAllBlackListedBvnsBlacklistedBvn: `
+     SELECT 
+        id,
+        first_name,
+        middle_name,
+        last_name,
+        date_of_birth,
+        bvn
+      FROM blacklisted_bvns`,
 
   updateUserDeclinedDecisionLoanApplication: `
     UPDATE personal_loans

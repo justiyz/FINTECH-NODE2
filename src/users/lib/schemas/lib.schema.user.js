@@ -126,6 +126,10 @@ const updateEmploymentDetails = Joi.object().keys({
   })
 });
 
+const updateMonoId = Joi.object().keys({
+  mono_account_id: Joi.string().required()
+});
+
 
 export default  {
   updateFcmToken,
@@ -145,5 +149,6 @@ export default  {
   notificationIdParams,
   nextOfKin,
   employmentDetails,
-  updateEmploymentDetails
+  updateEmploymentDetails,
+  updateMonoId
 };

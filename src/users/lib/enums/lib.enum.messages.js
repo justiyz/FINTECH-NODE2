@@ -194,7 +194,9 @@ export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next 
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
 export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
 export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment type';
+export const BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION = 'You are not allowed to access loan facility at the moment';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
+export const UPDATE_USER_MONO_ID = 'User mono account id updated successfully';
 
 
 // admin module related messages

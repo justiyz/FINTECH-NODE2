@@ -36,6 +36,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.NO_DEFAULT_BANK_ACCOUNT, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
+    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const [ userDefaultDebitCardDetails ] = await processAnyData(loanQueries.fetchUserDefaultDebitCard, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default debit card details from the db checkUserLoanEligibility.controllers.loan.js`);
     if (!userDefaultDebitCardDetails) {
@@ -48,7 +49,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, 
       [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn);
+    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId);
     const result = await personalLoanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);

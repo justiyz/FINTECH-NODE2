@@ -161,9 +161,11 @@ export const UPDATE_NOTIFICATION_IS_READ_CONTROLLER = 'UserController::updateNot
 export const CREATE_NEXT_OF_KIN_CONTROLLER = 'UserController::createNextOfKin';
 export const FETCH_NEXT_OF_KIN_CONTROLLER = 'UserController::fetchNextOfKin';
 export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE = 'UserMiddleware::checkIfUserHasPreviouslyCreatedNextOfKin';
+export const CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE = 'LoanMiddleware::checkIfUserBvnNotBlacklisted';
 export const USER_PROFILE_NEXT_UPDATE_MIDDLEWARE = 'UserMiddleware::userProfileNextUpdate';
 export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::createUserEmploymentDetails';
 export const UPDATE_EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::updateEmploymentDetails';
+export const UPDATE_MONO_ACCOUNT_ID_CONTROLLER = 'UserMiddleware::updateMonoAccountId';
 
 
 // Admin related labels

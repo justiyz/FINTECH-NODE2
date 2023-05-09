@@ -492,5 +492,15 @@ export default {
           next_update AS employment_next_update
         FROM employment_type
         WHERE user_id = $1
+    `,
+
+  updateUserMonoAccountId: `
+    UPDATE user_bank_accounts
+    SET 
+      updated_at = NOW(),
+      mono_account_id = $2
+    WHERE user_id = $1
+    AND is_default = TRUE
+    RETURNING id, user_id, bank_name, account_name, is_default, mono_account_id
     `
 };
