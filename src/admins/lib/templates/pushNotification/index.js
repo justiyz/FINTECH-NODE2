@@ -10,6 +10,6 @@ export const userLoanApplicationDisapproval = () => {
   return 'Your loan application previously subjected to manual approval has been declined, kindly try again some other time or contact our support team';
 };
 
-export const userUtilityBillNotification = () => {
-  return (decision) => `Your uploaded utility bill was ${decision}`;
+export const userUtilityBillNotification = (decision) => {
+  return `Your uploaded utility bill was ${decision}`;
 };
