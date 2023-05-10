@@ -8,6 +8,7 @@ export default {
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
+
   fetchAllUsers: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,

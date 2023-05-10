@@ -15,5 +15,3 @@ export default {
     query.per_page ? query.per_page : '10'
   ]
 };
-    
-  
