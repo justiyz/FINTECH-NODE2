@@ -17,6 +17,7 @@ router.post(
 router.get(
   '/blacklist',
   AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('bvn management', 'read'),
   BvnController.fetchBlacklistedBvn
 );
 
