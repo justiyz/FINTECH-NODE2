@@ -338,8 +338,58 @@ export default {
       name,
       value
     FROM admin_env_values_settings
-    WHERE name = $1`
-    
+    WHERE name = $1`,
 
+  fetchAndFilterActivityLog: `
+    SELECT 
+      CONCAT(ad.first_name, ' ', ad.last_name) AS admin_name,
+      ar.name AS role,
+      log.description,
+      to_char(log.created_at, 'Mon DD, YYYY') AS date,
+      log.activity_status
+    FROM admin_activity_logs AS log
+    LEFT JOIN admins AS ad ON ad.admin_id = log.admin_id
+    LEFT JOIN admin_roles AS ar ON ar.code = ad.role_type
+     WHERE (TRIM(CONCAT(ad.first_name, ' ', ad.middle_name, ' ', ad.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(ad.first_name, ' ', ad.last_name, ' ', ad.middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(ad.last_name, ' ', ad.first_name, ' ', ad.middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(ad.last_name, ' ', ad.middle_name, ' ', ad.first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(ad.middle_name, ' ', ad.first_name, ' ', ad.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(ad.middle_name, ' ', ad.last_name, ' ', ad.first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL)
+      AND ((log.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+      ORDER BY log.created_at DESC
+      OFFSET $4
+      LIMIT $5
+  `,
+
+  countFetchedActivityLog: `
+      SELECT 
+        COUNT(log.id) AS total_count
+      FROM admin_activity_logs AS log
+      LEFT JOIN admins AS ad ON ad.admin_id = log.admin_id
+      LEFT JOIN admin_roles AS ar ON ar.code = ad.role_type
+      WHERE (TRIM(CONCAT(ad.first_name, ' ', ad.middle_name, ' ', ad.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(ad.first_name, ' ', ad.last_name, ' ', ad.middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(ad.last_name, ' ', ad.first_name, ' ', ad.middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(ad.last_name, ' ', ad.middle_name, ' ', ad.first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(ad.middle_name, ' ', ad.first_name, ' ', ad.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(ad.middle_name, ' ', ad.last_name, ' ', ad.first_name)) ILIKE TRIM($1)
+      OR $1 IS NULL)
+      AND ((log.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+  `,
+  fetchActivityLog: `
+    SELECT 
+      CONCAT(ad.first_name, ' ', ad.last_name) AS admin_name,
+      ar.name AS role,
+      log.description,
+      to_char(log.created_at, 'Mon DD, YYYY') AS date,
+      to_char(log.created_at, 'hh12:mi AM') AS time,
+      log.activity_status
+    FROM admin_activity_logs AS log
+    LEFT JOIN admins AS ad ON ad.admin_id = log.admin_id
+    LEFT JOIN admin_roles AS ar ON ar.code = ad.role_type
+    WHERE log.id = $1
+  `
 };
     

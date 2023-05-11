@@ -1261,5 +1261,103 @@ describe('Admin', () => {
         });
     });
   });
+
+  describe('fetch admin activity log', () => {
+    it('should fetch activity log paginated', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/activity-log')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          page: 1,
+          per_page: 3
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.SUCCESSFULLY_FETCH_ACTIVITY_LOG);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch activity log by search', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/activity-log')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({ 
+          search: 'samaila'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.SUCCESSFULLY_FETCH_ACTIVITY_LOG);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should fetch single activity log', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/activity-log/1')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.FETCH_ACTIVITY_LOG);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch activity log with the default filter value', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/activity-log')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.SUCCESSFULLY_FETCH_ACTIVITY_LOG);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid signature', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/activity-log')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}0p`
+        })
+        .send({ 
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
 });
  

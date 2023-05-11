@@ -82,5 +82,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchAndFilterActivityLog', async() => {
+      const req = { admin: '', query: '' };
+      const data = await AdminController.fetchAndFilterActivityLog(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchActivityLog', async() => {
+      const req = { admin: '' };
+      const data = await AdminController.fetchActivityLog(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
