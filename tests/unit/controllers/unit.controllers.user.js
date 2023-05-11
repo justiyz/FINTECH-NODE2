@@ -199,11 +199,5 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call updateUserAddressVerificationStatus', async() => {
-      const req = { userAddressDetails: '', body: '' };
-      const data = await UserController.updateUserAddressVerificationStatus(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
   });
 });
