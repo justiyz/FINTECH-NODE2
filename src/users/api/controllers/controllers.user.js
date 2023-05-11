@@ -12,6 +12,9 @@ import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
 import { updateNotificationReadBoolean } from '../services/services.firebase';
 import { initiateUserYouVerifyAddressVerification } from '../services/service.youVerify';
+import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import * as PushNotifications from '../../lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 
@@ -457,7 +460,6 @@ export const initiateAddressVerification = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-
 export const updateUploadedUtilityBill = async(req, res, next) => {
   try {
     const { user, document } = req;
@@ -473,6 +475,57 @@ export const updateUploadedUtilityBill = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 86, 'fail');
     error.label = enums.UPDATE_UPLOADED_UTILITY_BILL_CONTROLLER;
     logger.error(`updating user's uploaded utility bill failed:::${enums.UPDATE_UPLOADED_UTILITY_BILL_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update user address verification status based on youVerify response
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+export const updateUserAddressVerificationStatus = async(req, res, next) => {
+  try {
+    const { body, userAddressDetails } = req;
+    const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ userAddressDetails.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user details fetched from the DB
+    updateUserAddressVerificationStatus.controller.user.js`);
+    if (body.data.taskStatus.toLowerCase() === 'verified') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user address verification successful
+      updateUserAddressVerificationStatus.controller.user.js`);
+      await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [ userAddressDetails.user_id, 'verified', false, true ]);
+      const tierChoice = (userAddressDetails.is_verified_utility_bill) ? '2' : '1'; 
+      // user needs address to have been verified and uploaded utility bill verified to move to tier 2
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user tier value updated
+      updateUserAddressVerificationStatus.controller.user.js`);
+      await processOneOrNoneData(userQueries.updateUserTierValue, [ userDetails.user_id, tierChoice ]);
+      sendPushNotification(userDetails.user_id, PushNotifications.successfulYouVerifyAddressVerification(), userDetails.fcm_token);
+      sendUserPersonalNotification(userDetails, `${userDetails.first_name} address verification successful`, 
+        PersonalNotifications.userAddressVerificationSuccessful(userDetails, userAddressDetails), 'address-verification-successful', {});
+      await MailService('Address verification successful', 'successfulAddressVerification', { ...userDetails, ...userAddressDetails });
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: notifications of successful verification sent to user
+    updateUserAddressVerificationStatus.controller.user.js`);
+      await userActivityTracking(req.userAddressDetails.user_id, 85, 'success');
+      return ApiResponse.success(res, enums.USER_ADDRESS_VERIFICATION_SUCCESSFUL, enums.HTTP_OK);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user address verification failed
+    updateUserAddressVerificationStatus.controller.user.js`);
+    await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [ userAddressDetails.user_id, 'failed', true, false ]);
+    sendPushNotification(userDetails.user_id, PushNotifications.failedYouVerifyAddressVerification(), userDetails.fcm_token);
+    sendUserPersonalNotification(userDetails, `${userDetails.first_name} address verification failed`, 
+      PersonalNotifications.userAddressVerificationFailed(userDetails, userAddressDetails), 'address-verification-failed', {});
+    await MailService('Address verification failed', 'failedAddressVerification', { ...userDetails, ...userAddressDetails });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: notifications of failed verification sent to user
+    updateUserAddressVerificationStatus.controller.user.js`);
+    await userActivityTracking(req.userAddressDetails.user_id, 84, 'success');
+    return ApiResponse.success(res, enums.USER_ADDRESS_VERIFICATION_FAILED, enums.HTTP_OK);
+  } catch (error) {
+    await userActivityTracking(req.userAddressDetails.user_id, 85, 'fail');
+    error.label = enums.UPDATE_USER_ADDRESS_VERIFICATION_STATUS_CONTROLLER;
+    logger.error(`updating user's address verification status failed:::${enums.UPDATE_USER_ADDRESS_VERIFICATION_STATUS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

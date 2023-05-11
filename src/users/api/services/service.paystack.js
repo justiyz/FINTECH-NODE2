@@ -251,7 +251,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     // this is because paystack will not process transaction greater than 1 Million in test environment
     const options = {
       method: 'post',
-      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge`,
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/charge_authorization`,
       headers: {
         Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
         'Content-Type': 'application/json'
