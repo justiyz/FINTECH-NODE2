@@ -10,6 +10,8 @@ const getTemplate = (type, data) => {
   case 'insufficientBalance': return authEmail.insufficientBalance(data);
   case 'approvedLoan': return userEmail.sendLoanApprovalMail(data);
   case 'declinedLoan': return userEmail.sendLoanDisapprovalMail(data);
+  case 'declinedUtilityBill': return userEmail.utilityBillDeclinedMail(data);
+  case 'approvedUtilityBill': return userEmail.utilityBillApprovalMail(data);
   default: return '';
   }
 };

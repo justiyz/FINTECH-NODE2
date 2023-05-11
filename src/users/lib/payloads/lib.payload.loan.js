@@ -1,14 +1,14 @@
 import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
-const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn) => ({
+const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
   loan_duration_in_month: `${body.duration_in_months}`,
   loan_amount: parseFloat(body.amount),
   loan_reason: body.loan_reason,
-  monthly_income: user.income_range.replaceAll(',', ''),
-  employment_type: user.employment_type,
+  monthly_income: userEmploymentDetails.monthly_income,
+  employment_type: userEmploymentDetails.employment_type,
   martial_status: user.marital_status,
   number_of_dependants: user.number_of_children,
   account_number: userDefaultAccountDetails.account_number,
@@ -19,7 +19,8 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   email: user.email,
   address: '',
   phoneNumber: user.phone_number,
-  gender: user.gender
+  gender: user.gender,
+  user_mono_account_id: userMonoId
 });
 
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
@@ -53,7 +54,8 @@ const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInter
   parseFloat(data.monthly_repayment).toFixed(2),
   status,
   data.final_decision,
-  parseFloat(totalAmountRepayable).toFixed(2)
+  parseFloat(totalAmountRepayable).toFixed(2),
+  data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : null
 ];
 
 const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision, offer_letter_url) => ({
@@ -72,7 +74,8 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
   loan_status,
   loan_decision,
-  offer_letter_url 
+  offer_letter_url ,
+  max_allowable_amount: data.max_approval !== null ? `${parseFloat(data.max_approval).toFixed(2)}` : null
 });
 
 export default { 

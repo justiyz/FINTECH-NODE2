@@ -9,7 +9,8 @@ export default {
       account_name,
       is_default,
       is_disbursement_account,
-      created_at
+      created_at,
+      mono_account_id
     FROM user_bank_accounts
     WHERE user_id = $1
     AND is_default = true
@@ -44,6 +45,16 @@ export default {
     FROM users
     WHERE user_id = $1`,
 
+  fetchAllBlackListedBvnsBlacklistedBvn: `
+     SELECT 
+        id,
+        first_name,
+        middle_name,
+        last_name,
+        date_of_birth,
+        bvn
+      FROM blacklisted_bvns`,
+
   updateUserDeclinedDecisionLoanApplication: `
     UPDATE personal_loans
     SET 
@@ -73,7 +84,8 @@ export default {
         monthly_repayment = $13,
         status = $14,
         loan_decision = $15,
-        total_outstanding_amount = $16
+        total_outstanding_amount = $16,
+        max_possible_approval = $17
     WHERE loan_id = $1
     RETURNING *`,
 
@@ -100,7 +112,8 @@ export default {
       loan_decision,
       is_loan_disbursed,
       loan_disbursed_at,
-      offer_letter_url
+      offer_letter_url,
+      max_possible_approval
     FROM personal_loans
     WHERE loan_id = $1
     AND user_id = $2`,
@@ -250,6 +263,16 @@ export default {
       loan_status = $2
     WHERE user_id = $1`,
 
+  updateLoanAmountToSystemAllowableAmount: `
+    UPDATE personal_loans
+    SET
+      updated_at = NOW(),
+      amount_requested = $3,
+      total_interest_amount = $4
+    WHERE loan_id = $1
+    AND user_id = $2
+    RETURNING id, user_id, loan_id, amount_requested, status, loan_decision`,
+
   cancelUserLoanApplication: `
     UPDATE personal_loans
     SET
@@ -362,5 +385,12 @@ export default {
       updated_at = NOW(),
       offer_letter_url = $3
     WHERE loan_id = $1
-    AND user_id = $2`
+    AND user_id = $2`,
+
+  fetchUserPreviousPersonalLoanCounts: `
+    SELECT 
+      COUNT(user_id)
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`
 };

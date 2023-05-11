@@ -167,17 +167,21 @@ export const validateAuthToken = async(req, res, next) => {
       return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
     const [ user ] = await processAnyData(userQueries.getUserByUserId, [ decoded.user_id ]);
+    const [ employmentDetails ] = await processAnyData(userQueries.fetchEmploymentDetails, [ user.user_id ]);
+    const [ addressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully fetched the users details using the decoded id validateAuthToken.middlewares.auth.js`);
     if (!user) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
-    if (user && (user.is_deleted || user.status === 'suspended' || user.status === 'deactivated' || user.status === 'blacklisted')) {
+    if (user && (user.is_deleted || user.status === 'suspended' || user.status === 'deactivated')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
       validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
+    req.userEmploymentDetails = employmentDetails;
+    req.userAddressDetails = addressDetails;
     req.user = user;
     return next();
   } catch (error) {
@@ -472,17 +476,17 @@ export const isPinCreated = (type = '') => async(req, res, next) => {
     const { user } = req;
     if (!user.is_created_pin && type == 'confirm') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user have not created pin in the DB. isPinCreated.middlewares.auth.js`);
+      userActivityTracking(user.user_id, 11, 'fail');
       return ApiResponse.error(res, enums.USER_CREDENTIALS('pin'), enums.HTTP_BAD_REQUEST, enums.IS_PIN_CREATED_MIDDLEWARE);
     }
     if (user.is_created_pin && type === 'validate') {
-      userActivityTracking(user.user_id, 7, 'fail');
+      userActivityTracking(req.user.user_id, 11, 'fail');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin isPinCreated.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ALREADY_CREATED('pin'), enums.HTTP_FORBIDDEN, enums.IS_PIN_CREATED_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created pin isPinCreated.middlewares.auth.js`);
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, 7, 'fail');
     error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
     logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
     return next(error);

@@ -23,19 +23,20 @@ import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
  */
 export const checkUserLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body } = req;
+    const { user, body, userEmploymentDetails } = req;
     const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
-    if (user.status === 'inactive') {
+    if ((user.status === 'inactive') || (user.status === 'blacklisted')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user status is inactive checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, enums.USER_STATUS_INACTIVE, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+      return ApiResponse.error(res, enums.USER_STATUS_INACTIVE_OR_BLACKLISTED(user.status), enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
     if (!userDefaultAccountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not set default account in the db checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.NO_DEFAULT_BANK_ACCOUNT, enums.HTTP_FORBIDDEN, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
+    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const [ userDefaultDebitCardDetails ] = await processAnyData(loanQueries.fetchUserDefaultDebitCard, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default debit card details from the db checkUserLoanEligibility.controllers.loan.js`);
     if (!userDefaultDebitCardDetails) {
@@ -48,7 +49,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, 
       [ user.user_id, parseFloat(body.amount), body.loan_reason, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userBvn);
+    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId);
     const result = await personalLoanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
@@ -108,6 +109,41 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 37, 'fail');
     error.label = enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER;
     logger.error(`checking user loan application eligibility failed::${enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * updates loan application with system maximum allowable loan amount
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of cancelled loan
+ * @memberof LoanController
+ */
+export const acceptSystemMaximumAllowableLoanAmount = async(req, res, next) => {
+  try {
+    const { user, params: { loan_id }, existingLoanApplication } = req;
+    if (existingLoanApplication.max_possible_approval === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
+      acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
+        enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application have system maximum allowable loan amount value in the DB 
+      acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+    const totalMonthlyRepayment = (parseFloat(existingLoanApplication.monthly_repayment) * Number(existingLoanApplication.loan_tenor_in_months));
+    const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(existingLoanApplication.max_possible_approval);
+    const updateLoanAmount = await processOneOrNoneData(loanQueries.updateLoanAmountToSystemAllowableAmount, 
+      [ loan_id, user.user_id, existingLoanApplication.max_possible_approval, parseFloat(totalInterestAmount) ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount updated for used in the DB 
+    acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
+    userActivityTracking(user.user_id, 91, 'success');
+    return ApiResponse.success(res, enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED__SUCCESSFULLY, enums.HTTP_OK, updateLoanAmount);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 91, 'fail');
+    error.label = enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER;
+    logger.error(`updating loan amount with system allowable loan amount failed::${enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER}`, error.message);
     return next(error);
   }
 };

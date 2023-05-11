@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import path from 'path';
 import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
@@ -343,7 +344,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -367,7 +368,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -499,7 +500,7 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
@@ -728,9 +729,9 @@ describe('User', () => {
         })
         .send({
           id_type: 'ninm',
-          card_number: '3e344e5rtft7tfgfuu',
-          image_url: 'https:local:3r45dfghjiuytfb',
-          verification_url: 'https:local:3r45dfghjiuytfb',
+          card_number: '3e344e5rtft7tfgfuuu87',
+          image_url: 'https:local:3r45dfghjiuytfb.png',
+          verification_url: 'https:local:3r45dfghjiuytfbshjks.com',
           issued_date: '2023-12-4',
           expiry_date: '2021-1-4'
         })
@@ -741,6 +742,33 @@ describe('User', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.message).to.equal(enums.ID_UPLOAD_VERIFICATION);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.tier).to.equal(1);
+          done();
+        });
+    });
+    it('should verify user one id successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/id-verification')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          id_type: 'ninm',
+          card_number: '3e344e5rtft7tfgfuu',
+          image_url: 'https:local:3r45dfghjiuytfbjkdl.png',
+          verification_url: 'https:local:3r45dfghjiuytfb.com',
+          issued_date: '2023-12-4',
+          expiry_date: '2021-1-4'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ID_UPLOAD_VERIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.tier).to.equal(1);
           done();
         });
     });
@@ -1518,9 +1546,13 @@ describe('User', () => {
           expect(res).to.have.property('body');
           expect(res.body.message).to.equal(enums.FETCH_USER_PROFILE);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data.email).to.equal('victory@enyata.com');
-          expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
-          expect(res.body.data.loan_status).to.equal('inactive');
+          expect(res.body.data).to.have.property('employmentDetails');
+          expect(res.body.data).to.have.property('nextOfKin');
+          expect(res.body.data).to.have.property('addressDetails');
+          expect(res.body.data).to.have.property('userProfileDetails');
+          expect(res.body.data.userProfileDetails.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
+          expect(res.body.data.userProfileDetails.loan_status).to.equal('inactive');
+          expect(res.body.data.userProfileDetails.email).to.equal('victory@enyata.com');
           done();
         });
     });
@@ -1845,6 +1877,411 @@ describe('User', () => {
         });
     });
   });
+  describe('Add employment details', () => {
+    it('Should successfully create user one employment details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'retired',
+          monthly_income: '500000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully create user two employment details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'employed',
+          company_name: 'may ltd',
+          monthly_income: '600000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+
+    it('Should successfully create user four employment details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'employed',
+          company_name: 'may ltd',
+          monthly_income: '500000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully create user five employment details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'unemployed',
+          monthly_income: '500000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user five try creating employment details again', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'unemployed',
+          monthly_income: '500000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_TYPE_ALREADY_EXIST);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully create user six employment details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'employed',
+          company_name: 'may ltd',
+          monthly_income: '500000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('update user mono account id', () => {
+    it('should update the fcm-token of user one successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/mono-account-id')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          mono_account_id: Hash.generateRandomString(5)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('mono_account_id');
+          expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_ONE_USER_ID);
+          expect(res.body.message).to.equal(enums.UPDATE_USER_MONO_ID);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.is_default).to.equal(true);
+          done();
+        });
+    });
+    it('should throw error when fcm token is not sent for user one', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/mono-account-id')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('mono_account_id is required');
+          done();
+        });
+    });
+    it('should update the fcm-token of user two successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/user/mono-account-id')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          mono_account_id: Hash.generateRandomString(5)
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('mono_account_id');
+          expect(res.body.data.user_id).to.equal(process.env.SEEDFI_USER_TWO_USER_ID);
+          expect(res.body.message).to.equal(enums.UPDATE_USER_MONO_ID);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data.is_default).to.equal(true);
+          done();
+        });
+    });
+  });
+  describe('Add address details for verification', () => {
+    it('Should successfully create user one address details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '18',
+          landmark: 'Bovas Filling station',
+          street: 'Bombay Drive',
+          city: 'Akure',
+          state: 'Ondo' ,
+          lga: 'Ose',
+          resident_type: 'rented',
+          rent_amount: '300000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          done();
+        });
+    });
+    it('Should successfully create user two address details', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '2',
+          landmark: 'Enyata avenue',
+          street: 'Cannon road',
+          city: 'Mushin',
+          state: 'Lagos' ,
+          lga: 'Mushin',
+          resident_type: 'owned'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          done();
+        });
+    });
+    it('Should flag if user five try creating address information', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.KYC_NOT_PREVIOUSLY_COMPLETED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user four try creating address information', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user three try creating address information', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_VALID_ID_NOT_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+ 
+  describe('Upload utility bill for user', () => {
+    it('Should upload utility bill successfully for user one', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('Should upload utility bill successfully for user two', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('Should flag if user five try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.KYC_NOT_PREVIOUSLY_COMPLETED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user four try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user three try uploading utility bill', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_VALID_ID_NOT_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
   describe('update user profile', () => {
     it('should update user five profile successfully', (done) => {
       chai.request(app)
@@ -1856,10 +2293,8 @@ describe('User', () => {
         .send({
           first_name: 'Rashidat',
           last_name: 'sikiru',
-          employment_type: 'employed',
           marital_status: 'married',
-          number_of_children: '3',
-          income_range: '20,000 - 100,000'
+          number_of_children: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1873,29 +2308,7 @@ describe('User', () => {
           done();
         });
     });
-    it('should update user one profile successfully', (done) => {
-      chai.request(app)
-        .put('/api/v1/user/profile')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .send({
-          marital_status: 'single',
-          income_range: '100,000.01 - 300,000'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
-          done();
-        });
-    });
+
     it('should update user two profile successfully', (done) => {
       chai.request(app)
         .put('/api/v1/user/profile')
@@ -1904,35 +2317,8 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'employed',
           marital_status: 'single',
-          number_of_children: '4',
-          income_range: '100,000.01 - 300,000'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
-          done();
-        });
-    });
-    it('should update user five profile successfully', (done) => {
-      chai.request(app)
-        .put('/api/v1/user/profile')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_FIVE_ACCESS_TOKEN}`
-        })
-        .send({
-          employment_type: 'employed',
-          marital_status: 'married',
-          number_of_children: '2',
-          income_range: '100,000.01 - 300,000'
+          number_of_children: '4'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1954,10 +2340,8 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'employed',
           marital_status: 'married',
-          number_of_children: '1',
-          income_range: '100,000.01 - 300,000'
+          number_of_children: '1'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1979,10 +2363,8 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'employed',
           marital_status: 'married',
-          number_of_children: '4',
-          income_range: '100,000.01 - 300,000'
+          number_of_children: '4'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1993,6 +2375,28 @@ describe('User', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('first_name');
           expect(res.body.data).to.have.property('last_name');
+          done();
+        });
+    });
+    it('Should throw error if user tries to update marital status or number of children in less than 3 months', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/profile')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_SIX_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'Oreoluwa',
+          number_of_children: 7,
+          marital_status: 'married'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_NEXT_UPDATE('profile'));
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
@@ -2053,7 +2457,9 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
         })
         .send({
-          first_name: 'Oreoluwa'
+          first_name: 'Oreoluwa',
+          number_of_children: 7,
+          marital_status: 'single'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -2985,7 +3391,33 @@ describe('User', () => {
           done();
         });
     });
-    it('Should create next of kin', (done) => {
+    
+    it('Should create user one next of kin successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/next-of-kin')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          first_name: 'sadiq',
+          last_name: 'ayoade',
+          phone_number: '+23467876544545',
+          email: 'ayoade@gmail.com',
+          kind_of_relationship: 'brother'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('id');
+          expect(res.body.data).to.have.property('user_id');
+          expect(res.body.message).to.equal('Next of kin created successfully');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should create user two next of kin successfully', (done) => {
       chai.request(app)
         .post('/api/v1/user/next-of-kin')
         .set({
@@ -2993,11 +3425,11 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          first_name: 'sadiq',
-          last_name: 'ayoola',
+          first_name: 'Abubakar',
+          last_name: 'opeyemi',
           phone_number: '+23467876544565',
-          email: 'sadiq@gmail.com',
-          kind_of_relationship: 'brother'
+          email: 'opeyemi@gmail.com',
+          kind_of_relationship: 'father'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(201);
@@ -3031,45 +3463,6 @@ describe('User', () => {
           expect(res.body.message).to.equal(enums.CANNOT_CHANGE_NEXT_OF_KIN);
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-  });
-  describe('Fetch next of kin details', () => {
-    it('Should throw error if invalid token is not sent', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/next-of-kin')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}thfsfydue`
-        })
-        .send({})
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(401);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-
-    it('Should fetch next of kin details', (done) => {
-      chai.request(app)
-        .get('/api/v1/user/next-of-kin')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.data).to.have.property('id');
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.message).to.equal('Next of kin fetched successfully');
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });

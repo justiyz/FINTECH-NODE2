@@ -4,7 +4,7 @@ import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
-import { formatUserIncomeRange, generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
+import { generateReferralCode, collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import { sendPushNotification, sendClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
@@ -41,34 +41,34 @@ export const checkIfClusterNameUnique = async(req, res, next) => {
 };
 
 /**
- * comparing cluster income range
+ * comparing user monthly income
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof ClusterMiddleware
  */
-export const compareUserIncomeRange = async(req, res, next) => {
+export const compareUserMonthlyIncome = async(req, res, next) => {
   try {
-    const { body, user, cluster } = req;
-    if (user.income_range === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to update income range compareUserIncomeRange.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE, enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
+    const { body, user, cluster, userEmploymentDetails } = req;
+    if (!userEmploymentDetails || userEmploymentDetails.monthly_income === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to update income range compareUserMonthlyIncome.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.UPDATE_INCOME_FOR_ACTION_PERFORMANCE, enums.HTTP_BAD_REQUEST, enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE);
     }
-    // eslint-disable-next-line no-unused-vars
-    const { lowerBoundIncome, upperBoundIncome } = formatUserIncomeRange(user.income_range);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user income range from DB properly formatted compareUserIncomeRange.middlewares.cluster.js`);
-    if (parseFloat(upperBoundIncome) >= parseFloat(body.minimum_monthly_income || cluster.minimum_monthly_income)) {
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user income range from DB properly formatted compareUserMonthlyIncome.middlewares.cluster.js`);
+    if (userEmploymentDetails && (parseFloat(userEmploymentDetails.monthly_income) >= 
+    (parseFloat(body.minimum_monthly_income) || parseFloat(cluster.minimum_monthly_income)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is greater than or equal to cluster minimum income 
-      compareUserIncomeRange.middlewares.cluster.js`);
+      compareUserMonthlyIncome.middlewares.cluster.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is less than cluster minimum income compareUserIncomeRange.middlewares.cluster.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user minimum income is less than cluster minimum income 
+    compareUserMonthlyIncome.middlewares.cluster.js`);
     return ApiResponse.error(res, enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING, 
-      enums.HTTP_BAD_REQUEST, enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE);
+      enums.HTTP_BAD_REQUEST, enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE);
   } catch (error) {
-    error.label = enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE;
-    logger.error(`comparing cluster income range failed::${enums.COMPARE_CLUSTER_INCOME_RANGE_MIDDLEWARE}`, error.message);
+    error.label = enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE;
+    logger.error(`comparing user monthly income failed::${enums.COMPARE_USER_MONTHLY_INCOME_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
@@ -700,6 +700,7 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
     if (votingTicketDetails.type === 'cluster admin') {
       const activityType = req.body.decision === 'yes' ? 65 : 66;
       const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
+      const [ currentAdminDetails ] = await processAnyData(userQueries.getUserByUserId, [ votingTicketDetails.ticket_raised_by ]);
       if (votingTicketDetails.suggested_cluster_admin !== user.user_id) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user id dose not equal suggested user id newAdminClusterAcceptance.middleware.cluster.js`);
         return ApiResponse.error(res, enums.USER_CANNOT_PERFORM_ACTION, enums.HTTP_FORBIDDEN, enums.NEW_ADMIN_CLUSTER_ACCEPTANCE_MIDDLEWARE);
@@ -714,6 +715,9 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
           processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accepted to become new cluster admin`, 'admin-cluster', {});
+        sendPushNotification(currentAdminDetails.user_id, PushNotifications.clusterNewAdminSelectionAccepted(user, cluster.name), currentAdminDetails.fcm_token);
+        sendUserPersonalNotification(currentAdminDetails, 'New cluster admin request accepted', PersonalNotifications.newAdminSelectionRequestAccepted(user, cluster), 
+          'cluster-admin-request-accepted', {  });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user accepted cluster admin role and all notifications sent successfully 
         newAdminClusterAcceptance.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, 67, 'success');
@@ -723,6 +727,9 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
       await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} suggest to become an admin  newAdminClusterAcceptance.middleware.cluster.js`);
       sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined to become admin`, 'admin-cluster', {});
+      sendPushNotification(currentAdminDetails.user_id, PushNotifications.clusterNewAdminSelectionDeclined(user, cluster.name), currentAdminDetails.fcm_token);
+      sendUserPersonalNotification(currentAdminDetails, 'New cluster admin request declined', PersonalNotifications.newAdminSelectionRequestDeclined(user, cluster), 
+        'cluster-admin-request-declined', {  });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user declined taking over as new admin cluster and notifications sent successfully  
       newAdminClusterAcceptance.middleware.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'success');

@@ -1,21 +1,74 @@
 export default {
   editUserStatus: `
-  UPDATE users
-  SET 
-    updated_at = NOW(),
-    status = $2
-  WHERE user_id = $1
-  `,
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      status = $2
+    WHERE user_id = $1`,
+
+  addBlacklistedBvn: `
+    INSERT INTO blacklisted_bvns(
+      first_name,
+      middle_name,
+      last_name,
+      date_of_birth,
+      bvn
+    ) VALUES ($1, $2, $3, $4, $5)`,
+
+  removeBlacklistedBvn: `
+    DELETE FROM blacklisted_bvns
+    WHERE id = $1`,
+
+  addUnBlacklistedBvn: `
+    INSERT INTO unblacklisted_bvns(
+      first_name,
+      middle_name,
+      last_name,
+      date_of_birth,
+      bvn
+    ) VALUES ($1, $2, $3, $4, $5)`,
+
+  fetchAllExistingBlacklistedBvns: `
+      SELECT id, bvn 
+      FROM blacklisted_bvns
+      WHERE bvn IS NOT NULL`,
 
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, income_range,
-      number_of_children, marital_status, loan_status, employment_type, is_verified_address,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
+      number_of_children, marital_status, loan_status,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
+    WHERE user_id = $1`,
+
+  getUserEmploymentDetails: `
+    SELECT 
+      user_id,
+      employment_type,
+      company_name,
+      school_name,
+      date_started,
+      monthly_income,
+      next_update AS employment_next_update
+    FROM employment_type
+    WHERE user_id = $1`,
+
+  getUserAddressDetails: `
+    SELECT 
+      id,
+      user_id,
+      (CONCAT(house_number, ' ', street, ' ', city, ' city', ' ', lga, ' lga', ' ', state, ' state', ' ', country)) AS address,
+      is_verified_address,
+      is_verified_utility_bill,
+      address_image_url,
+      you_verify_address_verification_status,
+      is_editable,
+      can_upload_utility_bill,
+      created_at
+    FROM address_verification
     WHERE user_id = $1`,
 
   fetchUserBankAccounts: `
@@ -53,51 +106,55 @@ export default {
 
   fetchUsers: `
       SELECT 
-        id,
-        user_id,
-        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
-        tier,
-        to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
-        loan_status,
-        employment_type,
-        status
+        users.id,
+        users.user_id,
+        TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+        users.tier,
+        to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
+        users.loan_status,
+        employment_type.employment_type,
+        users.status
       FROM users
-      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
-      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
-      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
-      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      LEFT JOIN employment_type
+      ON users.user_id = employment_type.user_id
+      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
       OR $1 IS NULL) 
-      AND (status = $2 OR $2 IS NULL) 
-      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
-      ORDER BY created_at DESC
+      AND (users.status = $2 OR $2 IS NULL) 
+      AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+      AND (users.loan_status = $5 OR $5 IS NULL) AND users.is_completed_kyc = true
+      ORDER BY users.created_at DESC
       OFFSET $6
       LIMIT $7`,
       
   fetchAllUsers: `
         SELECT
-        id,
-        user_id,
-        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
-        tier,
-        to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
-        loan_status,
-        employment_type,
-        status
+        users.id,
+        users.user_id,
+        TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+        users.tier,
+        to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
+        users.loan_status,
+        employment_type.employment_type,
+        users.status
       FROM users
-      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
-      OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
-      OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
-      OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+      LEFT JOIN employment_type
+      ON users.user_id = employment_type.user_id
+      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
       OR $1 IS NULL) 
-      AND (status = $2 OR $2 IS NULL)
-      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-      AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
-      ORDER BY created_at DESC
+      AND (users.status = $2 OR $2 IS NULL)
+      AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+      AND (users.loan_status = $5 OR $5 IS NULL) AND users.is_completed_kyc = true
+      ORDER BY users.created_at DESC
       `,
 
   fetchUsersCount: `
@@ -138,15 +195,43 @@ export default {
   fetchUserKycDetails: `
     SELECT 
       users.user_id, 
-      tier,
-      is_verified_bvn,
-      is_completed_kyc,
-      is_uploaded_identity_card,
+      users.tier,
+      users.is_verified_bvn,
+      users.is_completed_kyc,
+      users.is_uploaded_identity_card,
       user_national_id_details.image_url AS valid_id_image_url,
-      is_verified_address
+      address_verification.is_verified_address,
+      address_verification.is_verified_utility_bill,
+      address_verification.address_image_url AS utility_bill_image_url
     FROM users
     LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
+    LEFT JOIN address_verification ON address_verification.user_id = users.user_id
     WHERE users.user_id = $1`,
+
+  declineUserUploadedUtilityBill: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      address_image_url = null,
+      can_upload_utility_bill = TRUE
+    WHERE user_id = $1
+    RETURNING id, user_id, address_image_url, is_verified_address, is_verified_utility_bill, can_upload_utility_bill, is_editable`,
+
+  approveUserUploadedUtilityBill: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      is_verified_utility_bill = TRUE,
+      can_upload_utility_bill = FALSE
+    WHERE user_id = $1
+    RETURNING id, user_id, address_image_url, is_verified_address, is_verified_utility_bill, can_upload_utility_bill, is_editable`,
+
+  updateUserTier: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      tier = $2
+    WHERE user_id = $1`,
 
   fetchUserClusterDetails: `
     SELECT

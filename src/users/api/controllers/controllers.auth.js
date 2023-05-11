@@ -131,10 +131,11 @@ export const verifyAccount = async(req, res, next) => {
     !referralCode ? await processAnyData(authQueries.verifyUserAccountOnNewDevice, payload) : await processAnyData(authQueries.verifyUserAccountAfterSignup, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully verified users account in the database verifyAccount.controllers.auth.js`);
     const [ newUserDetails ] = await processAnyData(userQueries.getUserByPhoneNumber, [ user.phone_number ]);
+    const next_profile_update = dayjs().isAfter(dayjs(user.next_profile_update));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database verifyAccount.controllers.auth.js`);
     userActivityTracking(user.user_id, 2, 'success');
     return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, 
-      { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, token, tokenExpireAt });
+      { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, next_profile_update, token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 2, 'fail');
     error.label = enums.VERIFY_ACCOUNT_CONTROLLER;
@@ -154,6 +155,7 @@ export const verifyAccount = async(req, res, next) => {
 export const login = async(req, res, next) => {
   try {
     const { user } = req;
+    const [ userEmploymentDetails ] = await processAnyData(userQueries.fetchEmploymentDetails, [ user.user_id ]);
     const refreshToken = await Hash.generateRandomString(50);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully generated refresh token login.controllers.auth.js`);
     const token = await Hash.generateAuthToken(user);
@@ -165,7 +167,8 @@ export const login = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully converted time from epoch time to a readable format login.controllers.auth.js`);
     const [ loggedInUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user login login.controllers.auth.js`);
-    const is_updated_advanced_kyc = (user?.income_range && user?.number_of_children && user?.marital_status && user?.employment_type) ? true : false;
+    const is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ? 
+      true : false;
     userActivityTracking(user.user_id, 15, 'success');
     return ApiResponse.success(res, enums.USER_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...loggedInUser, is_updated_advanced_kyc, token, tokenExpireAt });
   } catch (error) {

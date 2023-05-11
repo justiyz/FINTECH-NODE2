@@ -52,16 +52,25 @@ const idVerification = Joi.object().keys({
   expiry_date: Joi.string().optional()
 });
 
+const addressVerification = Joi.object().keys({
+  house_number: Joi.string().required(),
+  landmark: Joi.string().required(),
+  street: Joi.string().required(),
+  city: Joi.string().required(),
+  state: Joi.string().required(),
+  lga: Joi.string().required(),
+  resident_type: Joi.string().required(),
+  rent_amount: Joi.number().positive().optional()
+});
+
 const updateUsersProfile = Joi.object().keys({
   first_name: Joi.string().optional(), 
   middle_name: Joi.string().optional(), 
   last_name: Joi.string().optional(),
   date_of_birth: Joi.date().optional(),
   gender: Joi.string().optional().valid('male', 'female'), 
-  income_range: Joi.string().optional(), 
-  number_of_children: Joi.number().optional(),
-  marital_status: Joi.string().optional(),
-  employment_type: Joi.string().optional() 
+  number_of_children: Joi.number().required(),
+  marital_status: Joi.string().required()
 });
 
 const updateNotificationIsRead = Joi.object().keys({
@@ -89,6 +98,38 @@ const nextOfKin = Joi.object().keys({
   kind_of_relationship: Joi.string().required()
 });
 
+const employmentDetails = Joi.object().keys({
+  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired'),
+  monthly_income: Joi.string().required()
+}).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
+  then: Joi.object({
+    company_name: Joi.string().required()
+  })
+}).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
+  then: Joi.object({
+    school_name: Joi.string().required(), 
+    date_started: Joi.string().required()
+  })
+});
+
+const updateEmploymentDetails = Joi.object().keys({
+  employment_type: Joi.string().required().valid('employed', 'self employed', 'unemployed', 'student', 'retired'),
+  monthly_income: Joi.string().optional()
+}).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
+  then: Joi.object({
+    company_name: Joi.string().optional()
+  })
+}).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
+  then: Joi.object({
+    school_name: Joi.string().optional(), 
+    date_started: Joi.string().optional()
+  })
+});
+
+const updateMonoId = Joi.object().keys({
+  mono_account_id: Joi.string().required()
+});
+
 
 export default  {
   updateFcmToken,
@@ -102,8 +143,12 @@ export default  {
   verifyEmail,
   verifyOtp,
   idVerification,
+  addressVerification,
   updateUsersProfile,
   updateNotificationIsRead,
   notificationIdParams,
-  nextOfKin
-};   
+  nextOfKin,
+  employmentDetails,
+  updateEmploymentDetails,
+  updateMonoId
+};

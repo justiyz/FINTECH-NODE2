@@ -1054,5 +1054,212 @@ describe('Admin', () => {
         });
     });
   });
+  describe('Blacklisted single and bulk Bvn', () => {
+    it('should blacklist bulk bvn', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'single'
+        })
+        .send({
+          first_name: 'st',
+          middle_name: 'ola',
+          last_name: 'dence ',
+          date_of_birth: '1954-12-08',
+          bvn: '22330123231'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.BLACKLISTED_BVN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should insert bulk blacklisted bvn', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          [
+            {
+              first_name: 'st',
+              middle_name: 'ola',
+              last_name: 'dence ',
+              date_of_birth: '1954-12-08',
+              bvn: '22330121101'
+            },
+            {
+              first_name: 'jacob',
+              middle_name: 'michael ',
+              last_name: 'tolu',
+              date_of_birth: '1954-12-08',
+              bvn: '2231222110'
+            }
+          ]
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.BLACKLISTED_BVN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should remove already existing bvn for bulk upload', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          [
+            {
+              first_name: 'st',
+              middle_name: 'ola',
+              last_name: 'dence ',
+              date_of_birth: '1954-12-08',
+              bvn: '22330121101'
+            },
+            {
+              first_name: 'janet',
+              middle_name: 'michael ',
+              last_name: 'tolu',
+              date_of_birth: '1954-12-08',
+              bvn: '22312110'
+            }
+          ]
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.BLACKLISTED_BVN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data[0].first_name).to.equal('janet');
+          done();
+        });
+    });
+    it('should throw error inserting same bvn', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          [
+            {
+              first_name: 'st',
+              middle_name: 'ola',
+              last_name: 'dence ',
+              date_of_birth: '1954-12-08',
+              bvn: '22330121101'
+            },
+            {
+              first_name: 'jacob',
+              middle_name: 'michael ',
+              last_name: 'tolu',
+              date_of_birth: '1954-12-08',
+              bvn: '2231222110'
+            }
+          ]
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(409);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.BLACKLIST_BVN_EXIST);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if try blacklisting single user bvn', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'single'
+        })
+        .send({
+          first_name: 'st',
+          middle_name: 'ola',
+          last_name: 'dence ',
+          date_of_birth: '1954-12-08',
+          bvn: '22330123231'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(409);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.BLACKLIST_BVN_EXIST);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+
+  describe('Fetch Blacklisted Bvn', () => {
+    it('Should return error if token is not set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/bvn/blacklist')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch blacklisted bvn', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/bvn/blacklist')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.BLACKLIST_BVN_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
 });
  

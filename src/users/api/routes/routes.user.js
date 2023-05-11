@@ -39,6 +39,7 @@ router.post(
   UserMiddleware.isVerifiedBvn('complete'),
   UserMiddleware.isBvnPreviouslyExisting,
   UserMiddleware.verifyBvn,
+  UserMiddleware.checkIfBvnFlaggedBlacklisted,
   UserController.updateBvn
 );
 
@@ -51,7 +52,7 @@ router.post(
   UserMiddleware.isEmailVerified('validate'),
   UserController.requestEmailVerification
 );
-  
+
 router.get(
   '/verify-email',
   Model(Schema.verifyOtp, 'query'),
@@ -116,16 +117,40 @@ router.get(
   AuthMiddleware.validateAuthToken,
   UserController.fetchUserDebitCards
 );
-    
+
 router.post(
   '/id-verification',
   AuthMiddleware.validateAuthToken,
   Model(Schema.idVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.idUploadVerification
+);
+
+router.post(
+  '/address-verification',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.addressVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  UserMiddleware.isVerifiedAddressDetails('complete'),
+  UserMiddleware.createUserAddressYouVerifyCandidate,
+  UserController.initiateAddressVerification
+);
+
+router.post(
+  '/upload-utility-bill',
+  AuthMiddleware.validateAuthToken,
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  UserMiddleware.isVerifiedUtilityBill('complete'),
+  UserMiddleware.uploadUtilityBillDocument,
+  UserController.updateUploadedUtilityBill
 );
 
 router.put(
@@ -134,6 +159,7 @@ router.put(
   Model(Schema.updateUsersProfile, 'payload'),
   UserMiddleware.checkIfBvnIsVerified,
   UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.userProfileNextUpdate('profile'),
   UserController.updateUserProfile
 );
 
@@ -184,10 +210,27 @@ router.post(
   UserController.createNextOfKin
 );
 
-router.get(
-  '/next-of-kin',
+router.post(
+  '/employment-details',
   AuthMiddleware.validateAuthToken,
-  UserController.fetchNextOfKin
+  Model(Schema.employmentDetails, 'payload'),
+  UserController.createUserEmploymentDetails
 );
+
+router.put(
+  '/employment-details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.updateEmploymentDetails, 'payload'),
+  UserMiddleware.userProfileNextUpdate('employment'),
+  UserController.updateEmploymentDetails
+);
+
+router.patch(
+  '/mono-account-id',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.updateMonoId, 'payload'),
+  UserController.updateMonoAccountId
+);
+
 
 export default router;

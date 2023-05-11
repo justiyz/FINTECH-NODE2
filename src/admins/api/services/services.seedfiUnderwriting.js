@@ -45,4 +45,25 @@ const loanOrrScoreBreakdown = async(user_id, loan_id) => {
   }
 };
 
-export { userOrrScoreBreakdown, loanOrrScoreBreakdown };
+const loanScoreCardBreakdown = async() => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.seedfiUnderwritingLoanScoreCardBreakdown();
+    }
+    const options = {
+      method: 'get',
+      url: `${config.SEEDFI_UNDERWRITING_SERVICE_BASE_URL}/v1/category_weights/`,
+      headers: {
+        Authorization: `Api-Key ${config.SEEDFI_UNDERWRITING_SERVICE_API_KEY}`
+      }
+    };
+    const data = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to seedfi underwriting service for loan score card category weight failed::${enums.LOAN_SCORE_CARD_BREAKDOWN_WEIGHT_SERVICE}`, error.message);
+    return error;
+
+  }
+};
+
+export { userOrrScoreBreakdown, loanOrrScoreBreakdown, loanScoreCardBreakdown };

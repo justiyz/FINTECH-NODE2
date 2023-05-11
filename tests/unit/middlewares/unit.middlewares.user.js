@@ -51,6 +51,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfBvnFlaggedBlacklisted', async() => {
+      const req = { user: '', body: '' };
+      const data = await UserMiddleware.checkIfBvnFlaggedBlacklisted(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call verifyEmailVerificationToken', async() => {
       const req = { query: '' };
       const data = await UserMiddleware.verifyEmailVerificationToken(req, res, next);
@@ -132,6 +138,36 @@ describe('', () => {
     it('should call checkIfUserHasPreviouslyCreatedNextOfKin',  async() => {
       const req = { user: '' };
       const data = await UserMiddleware.checkIfUserHasPreviouslyCreatedNextOfKin(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call userProfileNextUpdate',  async() => {
+      const req = { user: '', type: '' };
+      const data = await UserMiddleware.userProfileNextUpdate()(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call isVerifiedAddressDetails',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.userProfileNextUpdate('complete')(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call createUserAddressYouVerifyCandidate',  async() => {
+      const req = { user: '', body: '' };
+      const data = await UserMiddleware.createUserAddressYouVerifyCandidate(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call isVerifiedUtilityBill',  async() => {
+      const req = { user: '' };
+      const data = await UserMiddleware.isVerifiedUtilityBill('complete')(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call uploadUtilityBillDocument',  async() => {
+      const req = { user: '', body: '', files: '' };
+      const data = await UserMiddleware.uploadUtilityBillDocument(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

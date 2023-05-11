@@ -69,6 +69,18 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfEmploymentTypeLimitApplies', async() => {
+      const req = { userEmploymentDetails: '', user: '', body: '' };
+      const data = await LoanMiddleware.checkIfEmploymentTypeLimitApplies(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfUserBvnNotBlacklisted', async() => {
+      const req = {  user: '' };
+      const data = await LoanMiddleware.checkIfUserBvnNotBlacklisted(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
 

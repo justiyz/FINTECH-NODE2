@@ -177,7 +177,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user income range is lower than cluster minimum income', (done) => {
+    it('should throw error if user monthly income is lower than cluster minimum income 0', (done) => {
       chai.request(app)
         .post('/api/v1/cluster/create')
         .set({
@@ -201,7 +201,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user income range has not been filled in profile', (done) => {
+    it('should throw error if user monthly income has not been filled in employment details', (done) => {
       chai.request(app)
         .post('/api/v1/cluster/create')
         .set({
@@ -221,7 +221,7 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE);
+          expect(res.body.message).to.equal(enums.UPDATE_INCOME_FOR_ACTION_PERFORMANCE);
           done();
         });
     });
@@ -880,7 +880,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should successfully accept cluster invite', (done) => {
+    it('should successfully accept cluster invite 0', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
         .set({
@@ -970,7 +970,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user income range has not been filled in profile', (done) => {
+    it('should throw error if user monthly income has not been filled in employment details', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
         .set({
@@ -982,30 +982,26 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE);
+          expect(res.body.message).to.equal(enums.UPDATE_INCOME_FOR_ACTION_PERFORMANCE);
           done();
         });
     });
-    it('should update user three monthly income successfully', (done) => {
+    it('Should successfully create user three employment details', (done) => {
       chai.request(app)
-        .put('/api/v1/user/profile')
+        .post('/api/v1/user/employment-details')
         .set({
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'unemployed',
-          income_range: '0 - 20000'
+          employment_type: 'self employed',
+          monthly_income: '500000'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
           done();
         });
     });
@@ -1022,22 +1018,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.USER_ALREADY_CLUSTER_MEMBER);
-          done();
-        });
-    });
-    it('should throw error if user income range is lower than cluster minimum income', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
           done();
         });
     });
@@ -1235,29 +1215,6 @@ describe('Clusters', () => {
     });
   });
   describe('another user decides to request to join cluster', () => {
-    it('should update user three monthly income successfully', (done) => {
-      chai.request(app)
-        .put('/api/v1/user/profile')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
-        })
-        .send({
-          employment_type: 'employed',
-          income_range: '0 - 300000'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
-          done();
-        });
-    });
     it('user three should request to join user two public cluster', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/request-to-join`)
@@ -1276,6 +1233,26 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('decision_type');
           expect(res.body.data.decision_type).to.equal('join cluster');
           process.env.SEEDFI_USER_THREE_JOIN_USER_TWO_PUBLIC_CLUSTER_ONE_TICKET_ID = res.body.data.ticket_id;
+          done();
+        });
+    });
+
+    it('Should throw error when user wants to update employment details in less than 3 months', (done) => {
+      chai.request(app)
+        .put('/api/v1/user/employment-details')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          employment_type: 'unemployed',
+          monthly_income: '3000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_PROFILE_NEXT_UPDATE('employment'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
@@ -1731,12 +1708,12 @@ describe('Clusters', () => {
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_verified_bvn');
           expect(res.body.data).to.have.property('is_completed_kyc');
-          expect(res.body.data.tier).to.equal(1);
+          expect(res.body.data.tier).to.equal(0);
           expect(res.body.data.is_verified_bvn).to.equal(true);
           done();
         });
     });
-    it('should throw error if user income range has not been filled in profile', (done) => {
+    it('should throw error if user monthly income has not been filled in employment details', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
         .set({
@@ -1751,36 +1728,30 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.UPDATE_INCOME_RANGE_FOR_ACTION_PERFORMANCE);
+          expect(res.body.message).to.equal(enums.UPDATE_INCOME_FOR_ACTION_PERFORMANCE);
           done();
         });
     });
-    it('should update user nine profile successfully', (done) => {
+    it('Should successfully create user nine employment details', (done) => {
       chai.request(app)
-        .put('/api/v1/user/profile')
+        .post('/api/v1/user/employment-details')
         .set({
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'employed',
-          marital_status: 'married',
-          number_of_children: '3',
-          income_range: '1,000 - 5,000'
+          employment_type: 'self employed',
+          monthly_income: '455000'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.statusCode).to.equal(enums.HTTP_CREATED);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
+          expect(res.body.message).to.equal(enums.EMPLOYMENT_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
           done();
         });
     });
-    it('should throw error if user income range is lower than cluster minimum income', (done) => {
+    it('should successfully accept cluster invite 1', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
         .set({
@@ -1791,33 +1762,11 @@ describe('Clusters', () => {
           decision: 'yes'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.CLUSTER_MINIMUM_INCOME_GREATER_THAN_USER_MINIMUM_INCOME_EXISTING);
-          done();
-        });
-    });
-    it('should update user nine profile successfully', (done) => {
-      chai.request(app)
-        .put('/api/v1/user/profile')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
-        })
-        .send({
-          income_range: '100,000 - 500,000'
-        })
-        .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.UPDATED_USER_PROFILE_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('first_name');
-          expect(res.body.data).to.have.property('last_name');
+          expect(res.body.message).to.equal(enums.JOIN_CLUSTER_DECISION_CHOICE('accepted'));
           done();
         });
     });
@@ -1837,25 +1786,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.CREATE_PIN);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-    it('should successfully accept cluster invite', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
-        })
-        .send({
-          decision: 'yes'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.message).to.equal(enums.JOIN_CLUSTER_DECISION_CHOICE('accepted'));
           done();
         });
     });
@@ -2292,7 +2222,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user cluster minimum income is greater than user maximum monthly income', (done) => {
+    it('should throw error if user cluster minimum income is greater than user monthly income', (done) => {
       chai.request(app)
         .patch(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/edit`)
         .set({
@@ -2393,3 +2323,4 @@ describe('Clusters', () => {
     });
   });
 });
+

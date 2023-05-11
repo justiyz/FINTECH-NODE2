@@ -86,7 +86,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call idVerification', async() => {
-      const req = { user: '', body: ''};
+      const req = { user: '', body: '' };
       const data = await UserController.idUploadVerification(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -134,19 +134,19 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call updateUserProfile', async() => {
-      const req = { user: '', body: ''};
+      const req = { user: '', body: '' };
       const data = await UserController.updateUserProfile(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should get user profile', async() => {
-      const req = { user: '' };
+      const req = { user: '', userEmploymentDetails: '' };
       const data = await UserController.getProfile(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should set default card', async() => {
-      const req = { user: '' , params: ''};
+      const req = { user: '', params: '' };
       const data = await UserController.setDefaultCard(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -169,9 +169,33 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call fetchNextOfKin', async() => {
-      const req = { user: ''};
-      const data = await UserController.fetchNextOfKin(req, res, next);
+    it('should call updateEmploymentDetails', async() => {
+      const req = { user: '' };
+      const data = await UserController.updateEmploymentDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call createUserEmploymentDetails', async() => {
+      const req = { user: '' };
+      const data = await UserController.createUserEmploymentDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call initiateAddressVerification', async() => {
+      const req = { user: '', body: '' };
+      const data = await UserController.initiateAddressVerification(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateUploadedUtilityBill', async() => {
+      const req = { user: '', document: '' };
+      const data = await UserController.updateUploadedUtilityBill(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateMonoAccountId', async() => {
+      const req = { user: '', body: '' };
+      const data = await UserController.updateMonoAccountId(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

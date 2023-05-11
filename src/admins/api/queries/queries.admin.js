@@ -339,5 +339,7 @@ export default {
       value
     FROM admin_env_values_settings
     WHERE name = $1`
+    
+
 };
     

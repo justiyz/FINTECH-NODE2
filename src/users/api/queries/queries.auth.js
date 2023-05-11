@@ -99,7 +99,7 @@ export default {
     WHERE user_id = $1
     RETURNING id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
     is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-    is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, refresh_token, loan_status`,
+    is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, refresh_token, loan_status, next_profile_update`,
 
   forgotPassword: `
     UPDATE users

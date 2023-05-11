@@ -15,12 +15,23 @@ router.post(
   Model(Schema.loanApplication, 'payload'),
   LoanMiddleware.checkIfUserHasActivePersonalLoan,
   UserMiddleware.checkUserAdvancedKycUpdate,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   LoanMiddleware.validateLoanAmountAndTenor,
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  LoanMiddleware.checkIfUserBvnNotBlacklisted,
   LoanController.checkUserLoanEligibility
+);
+
+router.patch(
+  '/:loan_id/accept-allowable-amount',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfLoanApplicationStatusIsStillPending,
+  LoanController.acceptSystemMaximumAllowableLoanAmount
 );
 
 router.post(

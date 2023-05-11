@@ -81,6 +81,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call verifyUserUtilityBill', async() => {
+      const req = { admin: '', body: '', userAddressDetails: '', userDetails: '' };
+      const data = await AdminUserController.verifyUserUtilityBill(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call userClusters', async() => {
       const req = { admin: '', params: null };
       const data = await AdminUserController.userClusters(req, res, next);

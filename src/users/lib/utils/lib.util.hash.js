@@ -63,3 +63,4 @@ export const decrypt = async(ciphertext) => {
   const bytes = CryptoJS.AES.decrypt(ciphertext.toString(), SEEDFI_ENCODING_AUTHENTICATION_SECRET);
   return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 };
+

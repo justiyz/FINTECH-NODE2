@@ -94,6 +94,16 @@ router.get(
   UserController.fetchUserKycDetails
 );
 
+router.patch(
+  '/:user_id/verify-utility-bill',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.approveDeclineUtilityBill, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.verifyUserUtilityBill
+);
+
 router.get(
   '/:user_id/clusters',
   AuthMiddleware.validateAdminAuthToken,
