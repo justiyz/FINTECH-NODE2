@@ -276,3 +276,4 @@ export const BLACKLISTED_BVN = 'Blacklisted BVNs added';
 export const BLACKLIST_BVN_EXIST = 'Bvn already exist';
 export const BLACKLIST_BVN_FETCHED_SUCCESSFULLY = 'Blacklisted bvn fetched successfully';
 export const BLACKLIST_BVN_NOT_EXIST = 'Bvn does not exist';
+export const SUCCESSFULLY_FETCH_ACTIVITY_LOG = 'Activity logs fetched successfully';

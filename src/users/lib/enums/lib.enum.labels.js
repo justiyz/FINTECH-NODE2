@@ -243,4 +243,5 @@ export const UPDATE_ENV_VALUES_CONTROLLER = 'AdminLoanController::updateEnvValue
 export const BLACKLIST_BVN_CONTROLLER = 'AdminLoanController::blacklistBvn';
 export const IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE = 'AdminAdminMiddleware::isBvnAlreadyBlacklisted';
 export const SCORE_CARD_BREAKDOWN_CONTROLLER = 'AdminLoanController::scoreCardBreakdown';
+export const FETCH_ACTIVITY_LOG_CONTROLLER = 'AdminAdminController::fetchActivityLog';
 

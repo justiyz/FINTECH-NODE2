@@ -338,8 +338,38 @@ export default {
       name,
       value
     FROM admin_env_values_settings
-    WHERE name = $1`
-    
+    WHERE name = $1`,
 
+  fetchAndFilterActivityLog: `
+    SELECT 
+      admin_activity_logs.id,
+      CONCAT(admins.first_name, ' ', admins.last_name) AS admin_name,
+      admin_roles.name AS role,
+      admin_activity_logs.description,
+      to_char(admin_activity_logs.created_at, 'Mon DD, YYYY') AS date,
+      to_char(admin_activity_logs.created_at, 'hh12:mi AM') AS time,
+      admin_activity_logs.activity_status
+    FROM admin_activity_logs
+    LEFT JOIN admins ON admins.admin_id = admin_activity_logs.admin_id
+    LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
+    WHERE (TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
+    OR $1 IS NULL)
+    AND ((admin_activity_logs.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+      ORDER BY admin_activity_logs.created_at DESC
+      OFFSET $4
+      LIMIT $5
+  `,
+
+  countFetchedActivityLog: `
+      SELECT 
+        COUNT(admin_activity_logs.id) AS total_count
+        FROM admin_activity_logs
+        LEFT JOIN admins ON admins.admin_id = admin_activity_logs.admin_id
+        LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
+        WHERE (TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) OR $1 IS NULL)
+        AND ((admin_activity_logs.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+  `
 };
     
