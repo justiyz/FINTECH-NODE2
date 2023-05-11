@@ -278,4 +278,3 @@ export const BLACKLIST_BVN_FETCHED_SUCCESSFULLY = 'Blacklisted bvn fetched succe
 export const BLACKLIST_BVN_NOT_EXIST = 'Bvn does not exist';
 export const SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY = 'Score card weights breakdown fetched successfully';
 export const SUCCESSFULLY_FETCH_ACTIVITY_LOG = 'Activity logs fetched successfully';
-export const FETCH_ACTIVITY_LOG = 'single activity log fetched successfully';

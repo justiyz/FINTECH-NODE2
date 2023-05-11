@@ -89,13 +89,6 @@ router.get(
   '/activity-log',
   AuthMiddleware.validateAdminAuthToken,
   Model(RoleSchema.fetchActivityLog, 'query'),
-  AdminController.fetchAndFilterActivityLog
-);
-
-router.get(
-  '/activity-log/:id',
-  AuthMiddleware.validateAdminAuthToken,
-  Model(RoleSchema.fetchActivityLogId, 'params'),
   AdminController.fetchActivityLog
 );
 

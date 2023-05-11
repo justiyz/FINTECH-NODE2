@@ -1304,23 +1304,6 @@ describe('Admin', () => {
           done();
         });
     });
-    it('should fetch single activity log', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/activity-log/1')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.FETCH_ACTIVITY_LOG);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
     it('Should fetch activity log with the default filter value', (done) => {
       chai.request(app)
         .get('/api/v1/admin/activity-log')
