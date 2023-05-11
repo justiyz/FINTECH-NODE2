@@ -89,9 +89,6 @@ const fetchActivityLog = Joi.object().keys({
   per_page: Joi.number().positive().optional()
 });
 
-const fetchActivityLogId = Joi.object().keys({
-  id: Joi.number().positive().optional()
-});
 
 export default {
   createRole,
@@ -105,6 +102,5 @@ export default {
   fetchAdminsPerRole,
   roleType,
   overviewPage,
-  fetchActivityLog,
-  fetchActivityLogId
+  fetchActivityLog
 };
