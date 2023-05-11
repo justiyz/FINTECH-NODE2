@@ -81,3 +81,11 @@ export const clusterNewAdminSelectionAccepted = (user, clusterName) => {
 export const clusterNewAdminSelectionDeclined = (user, clusterName) => {
   return `${user.first_name} ${user.last_name} declined your request to be the admin for ${clusterName} cluster`;
 };
+
+export const failedYouVerifyAddressVerification = () => {
+  return 'Your address verification processing failed';
+};
+
+export const successfulYouVerifyAddressVerification = () => {
+  return 'Your address verification processing is successful';
+};

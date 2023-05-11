@@ -171,5 +171,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call youVerifyWebhookVerification',  async() => {
+      const req = {  };
+      const data = await UserMiddleware.youVerifyWebhookVerification(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call verifyUserAndAddressResponse',  async() => {
+      const req = { body: '' };
+      const data = await UserMiddleware.verifyUserAndAddressResponse(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

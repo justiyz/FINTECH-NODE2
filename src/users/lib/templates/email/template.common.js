@@ -10,7 +10,9 @@ const heading = {
   failedCardDebit: 'Failed card debiting',
   rejectedDebitCard: 'Rejected Debit Card',
   successfulRepayment: 'Successful loan repayment',
-  failedChargePayment: 'Failed Payment'
+  failedChargePayment: 'Failed Payment',
+  failedAddressVerification: 'Address verification failed',
+  successfulAddressVerification: 'Address verification successful'
 };
 
 export const commonTemplate = (messageType, data) => {

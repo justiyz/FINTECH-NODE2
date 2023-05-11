@@ -11,6 +11,8 @@ const getTemplate = (type, data) => {
   case 'failedCardDebit': return email.failedCardDebit(data);
   case 'successfulRepayment': return email.successfulRepayment(data);
   case 'failedChargePayment': return email.failedChargePayment(data);
+  case 'failedAddressVerification': return email.failedAddressVerification(data);
+  case 'successfulAddressVerification': return email.successfulAddressVerification(data);
   default: return '';
   }
 };

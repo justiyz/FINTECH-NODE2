@@ -295,3 +295,73 @@ export const successfulRepayment = (data) => `
     </td>
   </tr>
 `;
+
+export const failedAddressVerification = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td>
+      <span>your address verification processing FAILED for address with the following details:</span>  
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+        <td>
+          <p>card details</p><br />
+          <span>
+            house_number: ${data.landmark},  <br />
+            landmark: ${data.house_number},  <br />
+            street: ${data.street},  <br />
+            city: ${data.city},  <br />
+            state: ${data.state}
+          </span>  
+        </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td style="padding-bottom: 20px">
+      <span>kindly update your valid address details. Thank you</span>  
+    </td>
+  </tr>
+`;
+
+export const successfulAddressVerification = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td>
+      <span>your address verification processing is SUCCESSFUL for address with the following details:</span>  
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+        <td>
+          <p>card details</p><br />
+          <span>
+            house_number: ${data.landmark},  <br />
+            landmark: ${data.house_number},  <br />
+            street: ${data.street},  <br />
+            city: ${data.city},  <br />
+            state: ${data.state}
+          </span>  
+        </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td style="padding-bottom: 20px">
+      <span>Thank you</span>  
+    </td>
+  </tr>
+`;

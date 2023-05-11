@@ -153,6 +153,13 @@ router.post(
   UserController.updateUploadedUtilityBill
 );
 
+router.post(
+  '/address-verification-webhook',
+  UserMiddleware.youVerifyWebhookVerification,
+  UserMiddleware.verifyUserAndAddressResponse,
+  UserController.updateUserAddressVerificationStatus
+);
+
 router.put(
   '/profile',
   AuthMiddleware.validateAuthToken,

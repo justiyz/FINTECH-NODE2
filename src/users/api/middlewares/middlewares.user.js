@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import crypto from 'crypto';
 import path from 'path';
 import AuthQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
@@ -961,6 +962,79 @@ export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
   } catch (error) {
     error.label = enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE;
     logger.error(`checking user profile next update in the DB failed::${enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * verify the legibility of the webhook response if from YouVerify
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const youVerifyWebhookVerification = async(req, res, next) => {
+  try {
+    const webhookSigningKey = config.SEEDFI_YOU_VERIFY_WEBHOOK_SIGNING_KEY;
+    const hash = crypto.createHmac('sha256', webhookSigningKey).update(JSON.stringify(req.body)).digest('hex');
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully saved the hash generated using the signing key into a variable "hash" 
+    and the webhook signing key from the config into the variable "secret" youVerifyWebhookVerification.middlewares.user.js`);
+    if (!hash) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that no hash is returned in 
+      the headers of the response youVerifyWebhookVerification.middlewares.user.js`);
+      return ApiResponse.error(res, enums.NO_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE);
+    }
+    if (config.SEEDFI_NODE_ENV === 'test') {
+      return next();
+    }
+    if (hash !== req.headers['x-youverify-signature']) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the youVerify authorization token is 
+      invalid youVerifyWebhookVerification.middlewares.user.js`);
+      return ApiResponse.error(res, enums.INVALID_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that youVerify authorization token is a valid one from
+      youVerify youVerifyWebhookVerification.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE;
+    logger.error(`verification of youVerify webhook hash failed:::${enums.YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * verify the webhook event type and the user
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const verifyUserAndAddressResponse = async(req, res, next) => {
+  try {
+    const { body } = req;
+    if (body.event !== 'address.completed') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the webhook event sent is not valid 
+      verifyUserAndAddressResponse.middlewares.user.js`);
+      return ApiResponse.error(res, enums.INVALID_YOU_VERIFY_WEBHOOK_EVENT, enums.HTTP_FORBIDDEN, enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE);
+    }
+    const [ userAddressDetails ] = await processOneOrNoneData(userQueries.fetchUserAddressDetails, [ body.data.candidate.candidateId.trim() ]);
+    if (!userAddressDetails) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: no user exists for the candidate ID that was sent with the webhook
+      verifyUserAndAddressResponse.middlewares.user.js`);
+      return ApiResponse.error(res, enums.NON_EXISTING_USER_CANDIDATE_ID_SENT, enums.HTTP_BAD_REQUEST, enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE);
+    }
+    if (userAddressDetails.you_verify_address_verification_status === 'verified') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${userAddressDetails.user_id}:::Info: successfully candidates address has been previously verified by
+      youVerify verifyUserAndAddressResponse.middlewares.user.js`);
+      return ApiResponse.error(res, enums.USER_ADDRESS_PREVIOUSLY_VERIFIED, enums.HTTP_CONFLICT, enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE);
+    }
+    req.userAddressDetails = userAddressDetails;
+    return next();
+  } catch (error) {
+    error.label = enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE;
+    logger.error(`verification of webhook details sent failed:::${enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

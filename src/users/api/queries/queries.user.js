@@ -271,7 +271,7 @@ export default {
       you_verify_address_verification_status,
       created_at
     FROM address_verification
-    WHERE user_id = $1`,
+    WHERE (user_id = $1 OR you_verify_candidate_id = $1)`,
 
   createUserAddressDetails: `
     INSERT INTO address_verification (
@@ -309,6 +309,16 @@ export default {
     WHERE user_id = $1
     RETURNING *`,
 
+  updateAddressVerificationStatus: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      you_verify_address_verification_status = $2,
+      is_editable = $3,
+      is_verified_address = $4
+    WHERE user_id = $1
+    `,
+
   updateUtilityBillDocument: `
     UPDATE address_verification
     SET 
@@ -326,6 +336,13 @@ export default {
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
+
+  updateUserTierValue: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      tier = $2
+    WHERE user_id = $1`,
 
   updateUserProfile: `
      UPDATE users
