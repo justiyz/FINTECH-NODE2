@@ -337,3 +337,55 @@ export const fetchPlatformOverview = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * fetch and filter activity log
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns overview page details.
+ * @memberof AdminAdminController
+ */
+export const fetchAndFilterActivityLog = async(req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const  payload  = AdminPayload.fetchActivityLog(query);
+    const [ activityLog, [ activityLogCount ] ] = await Promise.all([
+      processAnyData(adminQueries.fetchAndFilterActivityLog, payload),
+      processAnyData(adminQueries.countFetchedActivityLog, payload)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched admin activities from the DB fetchAndFilterActivityLog.controllers.admin.admin.js`);
+    const data = {
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(activityLogCount.total_count),
+      total_pages: Helpers.calculatePages(Number(activityLogCount.total_count), Number(req.query.per_page) || 10),
+      activityLog
+    };
+    return ApiResponse.success(res, enums.SUCCESSFULLY_FETCH_ACTIVITY_LOG, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_ACTIVITY_LOG_CONTROLLER;
+    logger.error(`fetching activity log in the DB failed:::${enums.FETCH_ACTIVITY_LOG_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch single activity log
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns overview page details.
+ * @memberof AdminAdminController
+ */
+export const fetchActivityLog = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    const  activityLog = await processAnyData(adminQueries.fetchActivityLog, [ req.params.id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched activities from the DB fetchActivityLog.controllers.admin.admin.js`);
+    return ApiResponse.success(res, enums.FETCH_ACTIVITY_LOG, enums.HTTP_OK, activityLog);
+  } catch (error) {
+    error.label = enums.FETCH_AND_FILTER_ACTIVITY_LOG_CONTROLLER;
+    logger.error(`fetching single activity log in the DB failed:::${enums.FETCH_AND_FILTER_ACTIVITY_LOG_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
