@@ -2237,6 +2237,19 @@ describe('User', () => {
           done();
         });
     });
+    it('should throw error if user address previously verified', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification-webhook')
+        .send(receiveAddressVerificationWebhookResponse(process.env.SEEDFI_USER_ONE_YOU_VERIFY_CANDIDATE_ID))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_PREVIOUSLY_VERIFIED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('should successfully un-verify user two address', (done) => {
       chai.request(app)
         .post('/api/v1/user/address-verification-webhook')
