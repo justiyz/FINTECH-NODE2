@@ -1,5 +1,6 @@
 import path from 'path';
 import userQueries from '../queries/queries.user';
+import UserQueries from '../../../users/api/queries/queries.user';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { adminActivityTracking } from '../../lib/monitor';
@@ -148,9 +149,11 @@ export const checkIfUserExists = async(req, res, next) => {
         successfully confirms that user being queried exists in the DB checkIfUserExists.admin.middlewares.user.js`);
       const [ userEmploymentDetails ] = await processAnyData(userQueries.getUserEmploymentDetails, [ user_id ]);
       const [ userAddressDetails ] = await processAnyData(userQueries.getUserAddressDetails, [ user_id ]);
+      const [ userNextOfKinDetails ] = await processAnyData(UserQueries.getUserNextOfKin, [ user_id ]);
       req.userDetails = userDetails;
       req.userEmploymentDetails = userEmploymentDetails;
       req.userAddressDetails = userAddressDetails;
+      req.userNextOfKinDetails = userNextOfKinDetails;
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 

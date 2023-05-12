@@ -246,5 +246,8 @@ export const UPDATE_ENV_VALUES_CONTROLLER = 'AdminLoanController::updateEnvValue
 export const BLACKLIST_BVN_CONTROLLER = 'AdminLoanController::blacklistBvn';
 export const IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE = 'AdminAdminMiddleware::isBvnAlreadyBlacklisted';
 export const SCORE_CARD_BREAKDOWN_CONTROLLER = 'AdminLoanController::scoreCardBreakdown';
-export const FETCH_ACTIVITY_LOG_CONTROLLER = 'AdminAdminController::fetchActivityLog';
+export const ADMIN_FETCH_CLUSTERS_CONTROLLER = 'AdminLoanController::fetchAndFilterClusters';
+export const ADMIN_FETCH_CLUSTER_DETAILS_CONTROLLER = 'AdminLoanController::fetchSingleClusterDetails';
+export const ADMIN_CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
+export const ADMIN_CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterNameUnique';
 
