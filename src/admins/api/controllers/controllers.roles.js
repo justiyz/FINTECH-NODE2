@@ -152,7 +152,6 @@ export const activateDeactivateRole = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: role details fetched from DB rolePermissions.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ACTIVATE_DEACTIVATE_ROLE_SUCCESSFULLY(updatingStatus), enums.HTTP_OK, updatedStatus);
   } catch (error) {
-    // adminActivityTracking(req.admin.admin_id, activityType, 'fail', descriptionType);
     error.label = enums.ACTIVATE_DEACTIVATE_ROLE_CONTROLLER;
     logger.error(`updating role status in the DB failed:::${enums.ACTIVATE_DEACTIVATE_ROLE_CONTROLLER}`, error.message);
     return next(error);
