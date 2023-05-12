@@ -440,6 +440,11 @@ export const initiateAddressVerification = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 83, 'success');
       return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
     }
+    if (result && result.statusCode !== 201) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
+      userActivityTracking(req.user.user_id, 83, 'fail');
+      return ApiResponse.error(res, result.response.data.message, result.response.data.statusCode, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification could not be initiated with youVerify 
     initiateAddressVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 83, 'fail');
