@@ -100,7 +100,7 @@ export const checkSeedfiPaystackBalance = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: seedfi balance  could not be retrieved successfully checkSeedfiPaystackBalance.middlewares.loan.js`);
     if (result.response.status !== 200) {
       userActivityTracking(user.user_id, 44, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.data.status, enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE);
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE);
     }
   } catch (error) {
     userActivityTracking(req.user.user_id, 44, 'fail');
@@ -137,7 +137,7 @@ export const generateLoanDisbursementRecipient = async(req, res, next) => {
     generateLoanDisbursementRecipient.middlewares.loan.js`);
     if (result.response.status !== 200) {
       userActivityTracking(user.user_id, 44, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.data.status, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
     }
     userActivityTracking(req.user.user_id, 44, 'fail');
     return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
