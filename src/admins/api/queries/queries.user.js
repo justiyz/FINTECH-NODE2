@@ -67,6 +67,9 @@ export default {
       you_verify_address_verification_status,
       is_editable,
       can_upload_utility_bill,
+      type_of_residence,
+      rent_amount,
+      landmark,
       created_at
     FROM address_verification
     WHERE user_id = $1`,

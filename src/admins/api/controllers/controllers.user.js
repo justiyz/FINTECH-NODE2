@@ -103,14 +103,14 @@ export const editUserStatus = async(req, res, next) => {
  */
 export const userProfileDetails = async(req, res, next) => {
   try {
-    const { admin, userDetails, userEmploymentDetails, userAddressDetails } = req;
+    const { admin, userDetails, userEmploymentDetails, userAddressDetails, userNextOfKinDetails } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
     if (userDetails?.bvn) {
       const result = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
       userDetails.bvn =  result?.slice(0, 7) + '****'; // return first 7 digits of the bvn
     }
     const data = {
-      personalInformation: { userDetails, userEmploymentDetails, userAddressDetails }
+      personalInformation: { userDetails, userEmploymentDetails, userAddressDetails, userNextOfKinDetails }
     };
     return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
