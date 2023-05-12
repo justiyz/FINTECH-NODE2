@@ -41,7 +41,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call inviteAdmin', async() => {
-      const req = { token: '', admin: '' };
+      const req = { body: '', token: '', admin: '' };
       const data = await AdminController.inviteAdmin(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -53,7 +53,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call editAdminStatus', async() => {
-      const req = { token: '', params: '', body: '' };
+      const req = { token: '', params: '', body: '', adminUser: '' };
       const data = await AdminController.editAdminStatus(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

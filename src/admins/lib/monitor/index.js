@@ -12,13 +12,14 @@ const monitor = async(query, param, type, operation, admin_id) => {
   }
 };
 
-export const adminActivityTracking = (admin_id, op_code, activity_status) => {
+export const adminActivityTracking = (admin_id, op_code, activity_status, description) => {
   if (admin_id) {
     const operation = operations[op_code];
     return monitor(adminLogQueries.createAdminActivityLogs, [
       admin_id,
       operation,
-      activity_status
+      activity_status,
+      description
     ], 'adminActivityTracking', operation, admin_id);
   }
 };

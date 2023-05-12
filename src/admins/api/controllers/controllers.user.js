@@ -12,7 +12,7 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { adminActivityTracking } from '../../lib/monitor';
 import { userActivityTracking } from '../../../users/lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * should activate and deactivate user status
@@ -24,17 +24,30 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
  */
 export const editUserStatus = async(req, res, next) => {
   const { body: { status }, userDetails } = req;
-  let activityType = '';
-  if (status === 'deactivated') {
+  let activityType;
+  let description;
+  
+  switch (status) {
+  case 'deactivated':
     activityType = 20;
-  } else if (status === 'suspended') {
+    description = descriptions.deactivate_user(req.admin.first_name);
+    break;
+  case 'suspended':
     activityType = 24;
-  } else if (status === 'watchlisted') {
+    description = descriptions.suspends_user(req.admin.first_name);
+    break;
+  case 'watchlisted':
     activityType = 26;
-  } else if (status === 'blacklisted') {
+    description = descriptions.watchlist_user(req.admin.first_name);
+    break;
+  case 'blacklisted':
     activityType = 25;
-  } else {
+    description = descriptions.blacklist_user(req.admin.first_name);
+    break;
+  default:
     activityType = 19;
+    description = descriptions.activate_user(req.admin.first_name);
+    break;
   }
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
@@ -70,10 +83,10 @@ export const editUserStatus = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to unBlacklisted bvn list editUserStatus.admin.controllers.user.js`);
       }
     }
-    adminActivityTracking(req.admin.admin_id, activityType, 'success');
+    adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail');
+    adminActivityTracking(req.admin.admin_id, activityType, 'fail', description);
     error.label = enums.EDIT_USER_STATUS_CONTROLLER;
     logger.error(`activate and deactivate user failed:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message);
     return next(error);
@@ -240,10 +253,10 @@ export const saveUserUploadedDocument = async(req, res, next) => {
     const uploadedDocument = await processOneOrNoneData(userQueries.uploadUserDocument, [ userDetails.user_id, admin.admin_id, body.title.trim(), document ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
     document uploaded and saved for user successfully saveUserUploadedDocument.admin.controllers.user.js`);
-    adminActivityTracking(req.admin.admin_id, 23, 'success');
+    adminActivityTracking(admin.admin_id, 23, 'success', descriptions.uploads_document(admin.first_name));
     return ApiResponse.success(res, enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER, enums.HTTP_OK, uploadedDocument);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 23, 'fail');
+    adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document(req.admin.first_name));
     error.label = enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER;
     logger.error(`Saving uploaded document for user failed:::${enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -370,7 +383,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
         PersonalNotifications.declinedUtilityBillNotification, 'utility-declined', {});
       await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
-      adminActivityTracking(req.admin.admin_id, 28, 'success');
+      adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(admin.first_name));
       userActivityTracking(userDetails.user_id, 87, 'success');
       return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
     }
@@ -387,7 +400,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
       PersonalNotifications.approvedUtilityBillNotification, 'utility-bill-approved', {});
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
-    adminActivityTracking(req.admin.admin_id, 27, 'success');
+    adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(admin.first_name));
     userActivityTracking(userDetails.user_id, 88, 'success');
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
