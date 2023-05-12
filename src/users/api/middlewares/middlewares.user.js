@@ -710,6 +710,11 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       req.userYouVerifyCandidateDetails = result.data;
       return next();
     }
+    if (result && result.statusCode !== 201) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
+      userActivityTracking(user.user_id, 5, 'fail');
+      return ApiResponse.error(res, result.response.data.message, result.response.data.statusCode, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     userActivityTracking(req.user.user_id, 84, 'fail');
