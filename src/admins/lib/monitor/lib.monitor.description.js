@@ -1,10 +1,12 @@
-export const forgot_password  = 'initiate forgot password';
-export const reset_password = 'initiate reset password';
+export const forgot_password  = 'admin initiate forgot password';
+export const reset_password = 'admin resets password';
 export const change_password = 'admin change password';
-export const create_role_permission = (name) => `${name}, create role type with permission`;
-export const edit_role_permission = (name) => `${name}, edit role type with permission`;
-export const invite_admin = (name, newAdmin) => `${name}, invite new admin ${newAdmin}`;
-export const completes_profile = 'admin have completed his/her profile';
+export const create_role_permission = (name, roleName) => `${name}, successfully created role type ${roleName} with permissions`;
+export const create_role_permission_failed = (name, roleName) => `${name}, failed to create role type ${roleName} with permissions`;
+export const invite_admin = (name, newAdmin) => `Admin ${name}, successfully invites new admin ${newAdmin}`;
+export const invite_admin_failed = (name, newAdmin) => `Admin ${name}, could not successfully invite new admin ${newAdmin}`;
+export const completes_profile = () => 'admin completes profile process successful';
+export const completes_profile_failed = () => 'admin completes profile process failed';
 export const edit_permission = (name) => `${name}, edit admin permission`;
 export const login_request = (name) => `${name}, initiate a request to login`;
 export const login_approved = (name) => `${name}, login request approved`;
@@ -29,3 +31,4 @@ export const decline_utility_bill = (name) => `${name} declines user uploaded ut
 export const upload_blacklisted_bvns = (name, type) => `${name} uploads ${type} blacklisted bvns`;
 export const updates_single_blacklisted_bvn = (name) => `${name} updates single blacklisted bvn`;
 export const updates_environment = (name) => `${name} updates environment variables values in settings`;
+export const edit_role_permission = (name) => `${name}, edit role type with permission`;

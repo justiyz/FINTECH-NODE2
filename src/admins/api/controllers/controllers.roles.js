@@ -27,11 +27,11 @@ export const createRole = async(req, res, next) => {
     });
     await Promise.all([ updateRolesPermissions ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: created role permissions set in the DB createRole.admin.controllers.roles.js`);
-    adminActivityTracking(req.admin.admin_id, 4, 'success', descriptions.create_role_permission(admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 4, 'success', descriptions.create_role_permission(admin.first_name, body.name.trim()));
     body.roleCode = roleCode;
     return ApiResponse.success(res, enums.ROLE_CREATION_SUCCESSFUL, enums.HTTP_OK, body);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 4, 'fail', descriptions.create_role_permission(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 4, 'fail', descriptions.create_role_permission_failed(req.admin.first_name, req.body.name?.trim()));
     error.label = enums.CREATE_ROLE_CONTROLLER;
     logger.error(`creating role and permissions in the DB failed:::${enums.CREATE_ROLE_CONTROLLER}`, error.message);
     return next(error);

@@ -96,7 +96,7 @@ export const uploadDocument = async(req, res, next) => {
     const { files, userDetails, body } = req;
     if (!files || (files && !files.document)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: no file is being selected for upload uploadDocument.admin.middlewares.user.js`);
-      adminActivityTracking(req.admin.admin_id, 23,  'fail', descriptions.create_role_permission(req.admin.first_name));
+      adminActivityTracking(req.admin.admin_id, 23,  'fail', descriptions.uploads_document(req.admin.first_name));
       return ApiResponse.error(res, enums.UPLOAD_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: to be uploaded file is existing uploadDocument.admin.middlewares.user.js`);
