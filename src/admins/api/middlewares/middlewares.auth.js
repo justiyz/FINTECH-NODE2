@@ -5,6 +5,7 @@ import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { adminActivityTracking } from '../../lib/monitor';
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * check if password sent matches admins password in the DB
@@ -26,11 +27,10 @@ export const compareAdminPassword = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login password matches compareAdminPassword.admin.middlewares.auth.js`);
       return next();
     }
-    adminActivityTracking(req.admin.admin_id, 9, 'fail');
+    adminActivityTracking(req.admin.admin_id, 9, 'fail', descriptions.login_request(admin.first_name));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login password does not match compareAdminPassword.admin.middlewares.auth.js`);
     return ApiResponse.error(res, enums.INVALID_PASSWORD, enums.HTTP_BAD_REQUEST, enums.COMPARE_ADMIN_PASSWORD_MIDDLEWARE);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 9, 'fail');
     error.label = enums.COMPARE_ADMIN_PASSWORD_MIDDLEWARE;
     logger.error(`comparing incoming and already set password in the DB failed:::${enums.COMPARE_ADMIN_PASSWORD_MIDDLEWARE}`, error.message);
     return next(error);
@@ -118,12 +118,11 @@ export const adminPermissions = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin roles properly aggregated adminPermissions.admin.middlewares.auth.js`);
       return next();
     }
-    adminActivityTracking(req.admin.admin_id, 10, 'fail');
+    adminActivityTracking(req.admin.admin_id, 10, 'fail', descriptions.login_approved(admin.first_name));
     return ApiResponse.error(res, enums.ADMIN_HAS_NO_PERMISSIONS, enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 10, 'fail');
-    error.label = enums.GENERATE_ADMIN_VERIFICATION_TOKEN_MIDDLEWARE;
-    logger.error(`sorting admin permissions failed:::${enums.GENERATE_ADMIN_VERIFICATION_TOKEN_MIDDLEWARE}`, error.message);
+    error.label = enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE;
+    logger.error(`sorting admin permissions failed:::${enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

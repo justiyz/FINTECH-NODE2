@@ -4,7 +4,7 @@ import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import { loanScoreCardBreakdown } from '../services/services.seedfiUnderwriting';
 import { adminActivityTracking } from '../../lib/monitor';
-
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * fetches admin env values settings
@@ -44,7 +44,7 @@ export const updateEnvValues = async(req, res, next) => {
     const envToUpdate = body.map((env) => {
       const existingEnvValue = existingEnvs.find((existingEnv) => existingEnv.env_id === env.env_id);
       if (!existingEnvValue) {
-        adminActivityTracking(req.admin.admin_id, 31, 'fail');
+        adminActivityTracking(req.admin.admin_id, 31, 'fail', descriptions.updates_environment(admin.first_name));
         return null;
       }
       return {
@@ -62,7 +62,7 @@ export const updateEnvValues = async(req, res, next) => {
   
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated the env values settings 
       in the DB updateEnvValues.admin.controllers.admin.js`);
-    adminActivityTracking(req.admin.admin_id, 31, 'success');
+    adminActivityTracking(req.admin.admin_id, 31, 'success', descriptions.updates_environment(admin.first_name));
     return ApiResponse.success(res, enums.UPDATED_ENV_VALUES_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_ENV_VALUES_CONTROLLER;

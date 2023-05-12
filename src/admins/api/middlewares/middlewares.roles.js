@@ -5,6 +5,7 @@ import roleQueries from '../queries/queries.role';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import { adminActivityTracking } from '../../lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * check if admin user has valid access to resource
@@ -65,14 +66,14 @@ export const checkRoleNameIsUnique = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role queried from DB using role name checkRoleNameIsUnique.admin.middlewares.roles.js`);
     if (roleName) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role already exists in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
-      adminActivityTracking(req.admin.admin_id, 4, 'fail');
+      adminActivityTracking(req.admin.admin_id, 4, 'fail', descriptions.create_role_permission_failed(req.admin.first_name, name?.trim()));
       return ApiResponse.error(res, enums.ADMIN_ROLE_NAME_EXISTS(name), enums.HTTP_CONFLICT, enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin role does not exists in the DB checkRoleNameIsUnique.admin.middlewares.roles.js`);
     req.roleCode = roleCode.trim().toUpperCase();
     return next();
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 4, 'fail');
+    adminActivityTracking(req.admin.admin_id, 4, 'fail', descriptions.create_role_permission_failed(req.admin.first_name, req.body.name?.trim()));
     error.label = enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE;
     logger.error(`checking if admin role name already exists in the DB failed:::${enums.CHECK_ROLE_NAME_IS_UNIQUE_MIDDLEWARE}`, error.message);
     return next(error);

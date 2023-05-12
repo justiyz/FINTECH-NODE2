@@ -10,6 +10,7 @@ import { sendPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * approve loan applications manually by admin
@@ -30,10 +31,10 @@ export const approveLoanApplication = async(req, res, next) => {
     await MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval(), loanApplicant.fcm_token);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveLoanApplication.admin.controllers.loan.js`);
-    adminActivityTracking(req.admin.admin_id, 21, 'success');
+    adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(admin.first_name));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 21, 'fail');
+    adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval(req.admin.first_name));
     error.label = enums.APPROVE_LOAN_APPLICATION_CONTROLLER;
     logger.error(`approving a loan application manually failed:::${enums.APPROVE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -59,10 +60,10 @@ export const declineLoanApplication = async(req, res, next) => {
     await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval(), loanApplicant.fcm_token);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineLoanApplication.admin.controllers.loan.js`);
-    adminActivityTracking(req.admin.admin_id, 22, 'success');
+    adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_approval(req.admin.first_name));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 22, 'fail');
+    adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_approval(req.admin.first_name));
     error.label = enums.DECLINE_LOAN_APPLICATION_CONTROLLER;
     logger.error(`declining a loan application manually failed:::${enums.DECLINE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);

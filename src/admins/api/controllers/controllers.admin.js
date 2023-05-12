@@ -12,7 +12,7 @@ import enums from '../../../users/lib/enums';
 import config from '../../../users/config/index';
 import * as fetchAdminServices from '../services/services.admin';
 import { adminActivityTracking } from '../../lib/monitor';
-
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -35,10 +35,10 @@ export const completeAdminProfile = async(req, res, next) => {
     const payload = AdminPayload.completeAdminProfile(admin, body);
     const [ updatedAdmin ] = await processAnyData(adminQueries.updateAdminProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin profile completed successfully completeAdminProfile.admin.controllers.admin.js`);
-    adminActivityTracking(req.admin.admin_id, 7, 'success');
+    adminActivityTracking(req.admin.admin_id, 7, 'success', descriptions.completes_profile());
     return ApiResponse.success(res, enums.ADMIN_COMPLETE_PROFILE_SUCCESSFUL, enums.HTTP_OK, updatedAdmin);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 7, 'fail');
+    adminActivityTracking(req.admin.admin_id, 7, 'fail', descriptions.completes_profile_failed());
     error.label = enums.COMPLETE_ADMIN_PROFILE_CONTROLLER;
     logger.error(`completing admin profile in the DB failed${enums.COMPLETE_ADMIN_PROFILE_CONTROLLER}`, error.message);
     return next(error);
@@ -108,10 +108,10 @@ export const editAdminPermissions = async(req, res, next) => {
       await Promise.all([ editAdminPermissions ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin permissions edited successfully editAdminPermissions.admin.controllers.admin.js`);
     }
-    adminActivityTracking(req.admin.admin_id, 8, 'success');
+    adminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(admin.first_name));
     return ApiResponse.success(res, enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL, enums.HTTP_OK, { admin_id, ...body });
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 8, 'fail');
+    adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission(req.admin.first_name));
     error.label = enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER;
     logger.error(`editing admin permissions failed:::${enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);
@@ -143,10 +143,12 @@ export const inviteAdmin = async(req, res, next) => {
     }
     await MailService('Admin Invite', 'adminInviteMail', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: invite admin mail successfully sent. inviteAdmin.controllers.admin.admin.js`);
-    adminActivityTracking(req.admin.admin_id, 6, 'success');
+    adminActivityTracking(req.admin.admin_id, 6, 'success', 
+      descriptions.invite_admin(`${req.admin.first_name} ${req.admin.last_name}`, `${req.body.first_name} ${req.body.last_name}`));
     return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  newAdmin);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 6, 'fail');
+    adminActivityTracking(req.admin.admin_id, 6, 'fail', 
+      descriptions.invite_admin_failed(`${req.admin.first_name} ${req.admin.last_name}`, `${req.body.first_name} ${req.body.last_name}`));
     error.label = enums.INVITE_ADMIN_CONTROLLER;
     logger.error(`Inviting new admin failed:::${enums.INVITE_ADMIN_CONTROLLER}`, error.message);
     return next(error);
