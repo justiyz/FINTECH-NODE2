@@ -44,7 +44,7 @@ export const updateEnvValues = async(req, res, next) => {
     const envToUpdate = body.map((env) => {
       const existingEnvValue = existingEnvs.find((existingEnv) => existingEnv.env_id === env.env_id);
       if (!existingEnvValue) {
-        adminActivityTracking(req.admin.admin_id, 31, 'fail', descriptions.updates_environment(admin.first_name));
+        adminActivityTracking(req.admin.admin_id, 31, 'fail', descriptions.updates_environment_failed(admin.first_name));
         return null;
       }
       return {

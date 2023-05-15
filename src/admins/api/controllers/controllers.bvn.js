@@ -40,6 +40,7 @@ export const addBlacklistedBvns = async(req, res, next) => {
       Info: have successfully added bvns in the DB blacklistedBvn.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.BLACKLISTED_BVN, enums.HTTP_CREATED, processedData);
   } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns_failed(req.admin.first_name,'bulk'));
     error.label = enums.BLACKLIST_BVN_CONTROLLER;
     logger.error(`Failed to blacklist BVNs:::${enums.BLACKLIST_BVN_CONTROLLER}`, error.message);
     return next(error);

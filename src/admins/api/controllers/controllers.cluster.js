@@ -40,7 +40,7 @@ export const createCluster = async(req, res, next) => {
     adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(admin.first_name));
     return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, newClusterDetails);
   } catch (error) {
-    adminActivityTracking(admin.admin_id, 32, 'fail', descriptions.create_cluster(req.admin.first_name));
+    adminActivityTracking(admin.admin_id, 32, 'fail', descriptions.create_cluster_failed(req.admin.first_name));
     error.label = enums.ADMIN_CREATE_CLUSTER_CONTROLLER;
     logger.error(`creating cluster failed::${enums.ADMIN_CREATE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);
@@ -144,7 +144,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 40, 'success', descriptions.cluster_member_invite(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 40, 'fail', descriptions.cluster_member_invite_failed(req.admin.first_name));
     error.label = enums.CLUSTER_MEMBER_INVITE_CONTROLLER;
     logger.error(`Admin inviting cluster member failed::${enums.CLUSTER_MEMBER_INVITE_CONTROLLER}`, error.message);
     return next(error);
@@ -171,7 +171,6 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
     adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return ApiResponse.success(res, enums.ADMIN_EDIT_CLUSTER_STATUS(body.status, name), enums.HTTP_OK, cluster);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail', description);
     error.label = enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER;
     logger.error(`Admin activate/deactivate cluster failed::${enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);
@@ -189,7 +188,7 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
 export const deactivateClusterMember = async(req, res, next) => {
   const {body, params: { user_id, cluster_id },admin } = req;
   const activityType = body.status === 'active' ? 39 : 40;
-  const description = body.status === 'active' ? descriptions.deactivated_cluster_member(admin.first_name) : descriptions.activate_cluster_member(admin.first_name);
+  const description = body.status === 'active' ? descriptions.deactivate_cluster_member(admin.first_name) : descriptions.activate_cluster_member(admin.first_name);
   try {
     const data = await processOneOrNoneData(AdminQueries.deactivateClusterMember, 
       [ cluster_id.trim(), user_id.trim(), body.status ]);
@@ -198,7 +197,6 @@ export const deactivateClusterMember = async(req, res, next) => {
     adminActivityTracking(admin.admin_id, activityType, 'success', description);
     return ApiResponse.success(res, enums.ADMIN_EDIT_CLUSTER_MEMBER_STATUS(body.status), enums.HTTP_OK, data);
   } catch (error) {
-    adminActivityTracking(admin.admin_id, activityType, 'fail', description);
     error.label = enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER;
     logger.error(`Admin activate/deactivate cluster member failed::${enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);

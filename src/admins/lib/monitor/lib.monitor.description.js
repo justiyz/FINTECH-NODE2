@@ -1,6 +1,6 @@
-export const forgot_password  = 'admin initiate forgot password';
-export const reset_password = 'admin resets password';
-export const change_password = 'admin change password';
+export const forgot_password  = () => 'admin initiate forgot password successfully';
+export const forgot_password_failed  = () => 'admin initiating forgot password failed';
+export const reset_password = () => 'admin resets password successfully';
 export const create_role_permission = (name, roleName) => `${name}, successfully created role type ${roleName} with permissions`;
 export const create_role_permission_failed = (name, roleName) => `${name}, failed to create role type ${roleName} with permissions`;
 export const invite_admin = (name, newAdmin) => `Admin ${name}, successfully invites new admin ${newAdmin}`;
@@ -33,11 +33,10 @@ export const updates_single_blacklisted_bvn = (name) => `${name} updates single 
 export const updates_environment = (name) => `${name} updates environment variables values in settings`;
 export const edit_role_permission = (name) => `${name}, edit role type with permission`;
 export const create_cluster = (name, cluster) => `${name} create cluster ${cluster}`;
+export const create_cluster_failed = (name, cluster) => `${name} failed to create cluster ${cluster}`;
 export const activate_cluster = (name, cluster) => `${name} activate ${cluster} cluster`;
 export const deactivate_cluster = (name, cluster) => `${name} deactivate ${cluster} cluster`;
-export const delete_cluster = (name, cluster) => `${name} delete ${cluster} cluster`;
-export const remove_cluster_member = (name, member) => `${name} remove cluster member ${member}`;
 export const cluster_member_invite  = (name) => `${name} invite a cluster member`;
-export const unblacklist_bvn = (name) => `${name} unblacklist bvn a user bvn`;
+export const cluster_member_invite_failed  = (name) => `${name} inviting a cluster member failed`;
 export const activate_cluster_member = (name) => `${name} admin activate cluster member`;
-export const deactivated_cluster_member = (name) => `${name} admin deactivated cluster member`;
+export const deactivate_cluster_member = (name) => `${name} admin deactivated cluster member`;

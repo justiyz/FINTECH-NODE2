@@ -128,7 +128,7 @@ export const editRoleWithPermissions = async(req, res, next) => {
     adminActivityTracking(admin.admin_id, 15, 'success', descriptions.edit_role(admin.first_name));
     return ApiResponse.success(res, enums.EDIT_ROLE_DETAILS_SUCCESSFUL, enums.HTTP_OK, { role_code, ...body });
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 15, 'fail', descriptions.edit_role(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 15, 'fail', descriptions.edit_role_failed(req.admin.first_name));
     error.label = enums.ROLE_PERMISSIONS_CONTROLLER;
     logger.error(`editing role and role permissions failed:::${enums.ROLE_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);
@@ -150,6 +150,10 @@ export const activateDeactivateRole = async(req, res, next) => {
     const updatingStatus = action === 'activate' ? 'active' : 'deactivated';
     const [ updatedStatus ] = await processAnyData(roleQueries.updateRoleStatus, [ role_code, updatingStatus ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: role details fetched from DB rolePermissions.admin.controllers.roles.js`);
+    if (action === 'activate') {
+      adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.activate_role(admin.first_name, action));
+    }
+    adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.deactivate_role(admin.first_name));
     return ApiResponse.success(res, enums.ACTIVATE_DEACTIVATE_ROLE_SUCCESSFULLY(updatingStatus), enums.HTTP_OK, updatedStatus);
   } catch (error) {
     error.label = enums.ACTIVATE_DEACTIVATE_ROLE_CONTROLLER;
@@ -197,7 +201,7 @@ export const deleteRole = async(req, res, next) => {
     adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.delete_role(admin.first_name));
     return ApiResponse.success(res, enums.ROLE_DELETED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 14, 'fail', descriptions.delete_role(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 14, 'fail', descriptions.delete_role_failed(req.admin.first_name));
     error.label = enums.DELETE_ROLE_CONTROLLER;
     logger.error(`deleting role in the DB failed:::${enums.DELETE_ROLE_CONTROLLER}`, error.message);
     return next(error);

@@ -111,7 +111,7 @@ export const editAdminPermissions = async(req, res, next) => {
     adminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(admin.first_name));
     return ApiResponse.success(res, enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL, enums.HTTP_OK, { admin_id, ...body });
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission_failed(req.admin.first_name));
     error.label = enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER;
     logger.error(`editing admin permissions failed:::${enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);

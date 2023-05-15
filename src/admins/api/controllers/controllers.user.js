@@ -30,23 +30,23 @@ export const editUserStatus = async(req, res, next) => {
   switch (status) {
   case 'deactivated':
     activityType = 20;
-    description = descriptions.deactivate_user(req.admin.first_name);
+    description = descriptions.user_status(req.admin.first_name, status);
     break;
   case 'suspended':
     activityType = 24;
-    description = descriptions.suspends_user(req.admin.first_name);
+    description = descriptions.user_status(req.admin.first_name, status);
     break;
   case 'watchlisted':
     activityType = 26;
-    description = descriptions.watchlist_user(req.admin.first_name);
+    description = descriptions.user_status(req.admin.first_name, status);
     break;
   case 'blacklisted':
     activityType = 25;
-    description = descriptions.blacklist_user(req.admin.first_name);
+    description = descriptions.user_status(req.admin.first_name, status);
     break;
   default:
     activityType = 19;
-    description = descriptions.activate_user(req.admin.first_name);
+    description = descriptions.user_status(req.admin.first_name, status);
     break;
   }
   try {
@@ -86,7 +86,6 @@ export const editUserStatus = async(req, res, next) => {
     adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail', description);
     error.label = enums.EDIT_USER_STATUS_CONTROLLER;
     logger.error(`activate and deactivate user failed:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message);
     return next(error);
@@ -256,7 +255,7 @@ export const saveUserUploadedDocument = async(req, res, next) => {
     adminActivityTracking(admin.admin_id, 23, 'success', descriptions.uploads_document(admin.first_name));
     return ApiResponse.success(res, enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER, enums.HTTP_OK, uploadedDocument);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
     error.label = enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER;
     logger.error(`Saving uploaded document for user failed:::${enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -404,6 +403,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     userActivityTracking(userDetails.user_id, 88, 'success');
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 27, 'fail', descriptions.approves_utility_bill_failed(req.admin.first_name));
     error.label = enums.VERIFY_USER_UTILITY_BILL_CONTROLLER;
     logger.error(`verifying user utility bill details failed:::${enums.VERIFY_USER_UTILITY_BILL_CONTROLLER}`, error.message);
     return next(error);
