@@ -188,6 +188,14 @@ export const checkIfAdminPhoneNumberAlreadyExist = async(req, res, next) => {
   }
 };
 
+/**
+ * check if user is super admin in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
 export const checkAdminType = async(req, res, next) => {
   try {
     if (req.admin.role_type !== 'SADM') {

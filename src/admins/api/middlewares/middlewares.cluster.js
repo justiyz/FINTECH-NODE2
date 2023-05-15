@@ -95,7 +95,7 @@ export const checkIfClusterExists = async(req, res, next) => {
 };
 
 /**
- * admin activate and deactivate cluster member
+ * middle to check cluster member exist
  * @param {Type} type - The type for conditioning function
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
