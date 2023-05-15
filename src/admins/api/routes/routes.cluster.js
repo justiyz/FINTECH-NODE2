@@ -33,6 +33,7 @@ router.get(
 router.get(
   '/:cluster_id/details',
   AuthMiddleware.validateAdminAuthToken,
+  AdminClusterMiddleware.checkIfClusterExists,
   RolesMiddleware.adminAccess('cluster', 'read'),
   Model(Schema.clusterId, 'params'),
   AdminClusterController.fetchSingleClusterDetails
@@ -41,17 +42,17 @@ router.get(
 router.post(
   '/:cluster_id/invite',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster'),
+  RolesMiddleware.adminAccess('cluster', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
-  AdminClusterMiddleware.checkClusterMemberExist('confirm'),
   Model(Schema.inviteCluster, 'payload'),
+  AdminClusterMiddleware.checkClusterMemberExist('confirm'),
   AdminClusterController.clusterMemberInvite
 );
 
 router.patch(
   '/:cluster_id/status',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster'),
+  RolesMiddleware.adminAccess('cluster', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
   Model(Schema.editClusterStatus, 'payload'),
   AdminClusterController.activateAndDeactivateCluster
@@ -60,11 +61,11 @@ router.patch(
 router.patch(
   '/:cluster_id/member/:user_id',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster'),
+  RolesMiddleware.adminAccess('cluster', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
   AdminClusterMiddleware.checkClusterMemberExist('validate'),
   Model(Schema.editClusterMember, 'payload'),
-  AdminClusterController.activateAndDeactivateClusterMember
+  AdminClusterController.deactivateClusterMember
 );
 
 export default router;

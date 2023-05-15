@@ -79,7 +79,7 @@ export default {
       WHERE cluster_id = $1
       RETURNING id, cluster_id, name, description,  type, status, is_deleted
     `,
-  activateOrDeactivateClusterMember: `
+  deactivateClusterMember: `
     UPDATE cluster_members
     SET  updated_at = NOW(),
      status = $3,
@@ -99,7 +99,7 @@ export default {
         is_left
       FROM cluster_members
       WHERE cluster_id = $1 AND user_id = $2
-      AND is_left = FALSE;
+      AND is_left = FALSE
   `
 };
 

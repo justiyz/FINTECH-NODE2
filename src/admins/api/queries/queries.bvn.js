@@ -42,9 +42,9 @@ export default {
               OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
               OR $1 IS NULL) 
              AND ((created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
+             ORDER BY created_at DESC
              OFFSET $4
              LIMIT $5
-
    `,
    
   countFilterBlacklistedBvn: `

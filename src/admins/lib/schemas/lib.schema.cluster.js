@@ -23,8 +23,7 @@ export const createCluster = Joi.object().keys({
 });
   
 export const inviteCluster = Joi.object().keys({
-  email: Joi.string().email().required(),
-  link_url: Joi.string().required()
+  email: Joi.string().email().required()
 });
 
 export const editClusterStatus = Joi.object().keys({

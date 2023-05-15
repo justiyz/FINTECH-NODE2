@@ -1,12 +1,20 @@
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import clusterQueries from '../../../users/api/queries/queries.cluster';
 import AdminClusterQueries from '../../../admins/api/queries/queries.cluster';
+import UserQueries from '../queries/queries.user';
 import enums from '../../../users/lib/enums';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import { generateReferralCode } from '../../../users/lib/utils/lib.util.helpers';
 
 
-
+/**
+ * check if cluster name unique
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns single cluster details.
+ * @memberof AdminClusterController
+ */
 export const checkIfClusterNameUnique = async(req, res, next) => {
   const { body, admin } = req;
   try {
@@ -25,6 +33,14 @@ export const checkIfClusterNameUnique = async(req, res, next) => {
   }
 };
 
+/**
+ * generate cluster unique code
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns single cluster details.
+ * @memberof AdminClusterController
+ */
 export const generateClusterUniqueCode = async(req, res, next) => {
   const { body, admin } = req;
   try {
@@ -44,6 +60,14 @@ export const generateClusterUniqueCode = async(req, res, next) => {
   }
 };
   
+/**
+ * admin check if cluster exists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns single cluster details.
+ * @memberof AdminClusterController
+ */
 export const checkIfClusterExists = async(req, res, next) => {
   try {
     const { params: { cluster_id }, admin } = req;
@@ -59,7 +83,6 @@ export const checkIfClusterExists = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: cluster active members fetched from the DB checkIfClusterExists.middlewares.cluster.js`);
       req.cluster = existingCluster;
       req.cluster.members = clusterMembers;
-      req.cluster = existingCluster;
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster does not exist in the DB checkIfClusterExists.middlewares.cluster.js`);
@@ -78,16 +101,23 @@ export const checkIfClusterExists = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
 export const checkClusterMemberExist = (type) => async(req, res, next) => {
   try {
     const { params: { cluster_id, user_id }, cluster: { members }  } = req;
+    const userDetails = await processOneOrNoneData(UserQueries.getUserByUserEmail, [ req.body.email ]);
     const existingClusterMember = await processOneOrNoneData(AdminClusterQueries.fetchClusterMembers, [ cluster_id, user_id ]);
     if (type === 'confirm' && members.find((data) => data.email === req.body.email)) {
       logger.info(`${enums.CURRENT_TIME_STAMP} :::Info: user already belongs to this cluster checkClusterMemberExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE);
     }
+    if (type === 'confirm' && !userDetails) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      decoded that user does not exists in the DB checkClusterMemberExist.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('user'), enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE);
+    }
+
     if (type === 'validate' && !existingClusterMember) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
       decoded that cluster member does not exist in the DB checkClusterMemberExist.middlewares.cluster.js`);

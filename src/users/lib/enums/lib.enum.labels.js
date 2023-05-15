@@ -253,3 +253,4 @@ export const ADMIN_CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'AdminClusterMiddle
 export const CLUSTER_MEMBER_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberInvite';
 export const ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER = 'AdminClusterController::activateAndDeactivateCluster';
 export const CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE = 'AdminClusterController::checkClusterMemberExist';
+export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminClusterController::checkAdminType';

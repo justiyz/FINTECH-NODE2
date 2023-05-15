@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import clusterPayload from '../../../admins/lib/payloads/lib.payload.cluster';
-import clusterQueries from '../../../users/api/queries/queries.cluster';
+import ClusterPayload from '../../../users/api/queries/queries.cluster';
 import userQueries from '../queries/queries.user';
 import AdminQueries from '../../../admins/api/queries/queries.cluster';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -30,7 +30,7 @@ const { SEEDFI_NODE_ENV } = config;
 export const createCluster = async(req, res, next) => {
   const { body, admin } = req;
   try {
-    const clusterOpenGrace = await processOneOrNoneData(clusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
+    const clusterOpenGrace = await processOneOrNoneData(ClusterPayload.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
     const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster grace period for membership joining set successfully createCluster.controllers.cluster.js`);
     body.join_cluster_closes_at =  join_cluster_closes_at;
@@ -125,23 +125,10 @@ export const clusterMemberInvite = async(req, res, next) => {
     const inviteInfo = {inviter: admin.first_name, name: cluster.name};
     const data = {
       email: body.email.trim().toLowerCase(),
-      cluster_name: cluster.name,
-      join_url: body.link_url
+      cluster_name: cluster.name
     };
 
     adminActivityTracking(admin.admin_id, 40, 'success', descriptions.cluster_member_invite(admin.first_name));
-    if (!invitedUser) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
-      decoded that invited user email is NOT a valid email in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
-      const clusterInvite = await processOneOrNoneData(AdminQueries.adminInviteClusterMember, payload);
-      if (SEEDFI_NODE_ENV === 'test') {
-        return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, clusterInvite);
-      }
-
-      await MailService('Cluster Loan Invitation', 'adminClusterInvite', { ...data });
-      return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, clusterInvite);
-    }
-
     if (body.email.trim().toLowerCase() === invitedUser.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
@@ -199,12 +186,12 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
  * @returns {object} - Returns single cluster details.
  * @memberof AdminUserController
  */
-export const activateAndDeactivateClusterMember = async(req, res, next) => {
+export const deactivateClusterMember = async(req, res, next) => {
   const {body, params: { user_id, cluster_id },admin } = req;
   const activityType = body.status === 'active' ? 39 : 40;
   const description = body.status === 'active' ? descriptions.deactivated_cluster_member(admin.first_name) : descriptions.activate_cluster_member(admin.first_name);
   try {
-    const data = await processOneOrNoneData(AdminQueries.activateOrDeactivateClusterMember, 
+    const data = await processOneOrNoneData(AdminQueries.deactivateClusterMember, 
       [ cluster_id.trim(), user_id.trim(), body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
      admin have successfully ${body.status} cluster member in the DB. activateAndDeactivateClusterMember.admin.controllers.cluster.js`);

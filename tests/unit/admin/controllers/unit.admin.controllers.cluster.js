@@ -51,9 +51,9 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call activateAndDeactivateClusterMember', async() => {
+    it('should call deactivateClusterMember', async() => {
       const req = { body: '', params: '', admin: '' };
-      const data = await AdminClusterController.activateAndDeactivateClusterMember(req, res, next);
+      const data = await AdminClusterController.deactivateClusterMember(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

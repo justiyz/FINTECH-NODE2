@@ -289,3 +289,4 @@ export const ADMIN_CLUSTER_MEMBER_INVITE = 'Admin Successfully invite cluster me
 export const ADMIN_EDIT_CLUSTER_STATUS = (status, name) => `admin successfully ${status} ${name} cluster`;
 export const ADMIN_EDIT_CLUSTER_MEMBER_STATUS = (status) => `admin successfully ${status} cluster member`;
 export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
+export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';

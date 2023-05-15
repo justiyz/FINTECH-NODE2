@@ -452,7 +452,7 @@ describe('Clusters', () => {
     });
   });
   describe('Admin fetches single cluster details', () => {
-    it('should successfully invite none existing user', (done) => {
+    it('should flag if try to invite none existing user', (done) => {
       chai.request(app)
         .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
         .set({
@@ -460,17 +460,14 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          email: 'miracle@enyata.com',
-          link_url: 'https://theseedfi.com/invite-member_uri'
+          email: 'miracle@enyata.com'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('cluster_id');
-          expect(res.body.data).to.have.property('invitee');
-          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('user'));
           done();
         });
     });
@@ -482,8 +479,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          email: process.env.SEEDFI_USER_TWO_EMAIL,
-          link_url: 'https://theseedfi.com/invite-member_uri'
+          email: process.env.SEEDFI_USER_TWO_EMAIL
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -507,7 +503,6 @@ describe('Clusters', () => {
           decision: 'yes'
         })
         .end((err, res) => {
-
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
@@ -524,8 +519,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          email: 'test@gamil.com',
-          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
+          email: 'test@gamil.com'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -543,9 +537,7 @@ describe('Clusters', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .send({
-          link_url: 'https://theseedfi.com/invite-member_uri'
-        })
+        .send({})
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
           expect(res.body).to.have.property('message');
@@ -563,8 +555,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          email: process.env.SEEDFI_USER_TWO_EMAIL,
-          link_url: 'https://theseedfi.com/invite-member_uri'
+          email: process.env.SEEDFI_USER_TWO_EMAIL
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
