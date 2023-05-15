@@ -22,3 +22,14 @@ export const createCluster = Joi.object().keys({
   minimum_monthly_income: Joi.number().required()
 });
   
+export const inviteCluster = Joi.object().keys({
+  email: Joi.string().email().required()
+});
+
+export const editClusterStatus = Joi.object().keys({
+  status: Joi.string().required().valid('active', 'deactivated')
+});
+
+export const editClusterMember = Joi.object().keys({
+  status: Joi.string().required().valid('deactivated')
+});

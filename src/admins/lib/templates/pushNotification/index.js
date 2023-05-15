@@ -13,3 +13,7 @@ export const userLoanApplicationDisapproval = () => {
 export const userUtilityBillNotification = (decision) => {
   return `Your uploaded utility bill was ${decision}`;
 };
+
+export const clusterMemberInvitation = () => {
+  return 'You have been invited to join a cluster';
+};

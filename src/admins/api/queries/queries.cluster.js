@@ -59,7 +59,48 @@ export default {
     LEFT JOIN users
     ON cluster_members.user_id = users.user_id
     WHERE cluster_id = $1 AND is_left = false
-    `
+    `,
+
+  adminInviteClusterMember: `
+    INSERT INTO cluster_invitees(
+         cluster_id,
+         inviter_id,
+         invitee,
+         invitation_mode,
+         invitee_id
+       ) VALUES ($1, $2, $3, $4, $5)
+       RETURNING *
+    `,
+
+  activateOrDeactivateCluster: `
+      UPDATE clusters
+      SET  updated_at = NOW(),
+       status = $2
+      WHERE cluster_id = $1
+      RETURNING id, cluster_id, name, description,  type, status, is_deleted
+    `,
+  deactivateClusterMember: `
+    UPDATE cluster_members
+    SET  updated_at = NOW(),
+     status = $3,
+     is_left = TRUE
+    WHERE cluster_id = $1 AND user_id = $2
+    RETURNING cluster_id, user_id, status, is_left;
+    `,
+  fetchClusterMembers: `
+      SELECT 
+        id,
+        cluster_id,
+        user_id,
+        status,
+        loan_status,
+        loan_obligation,
+        is_admin,
+        is_left
+      FROM cluster_members
+      WHERE cluster_id = $1 AND user_id = $2
+      AND is_left = FALSE
+  `
 };
 
 

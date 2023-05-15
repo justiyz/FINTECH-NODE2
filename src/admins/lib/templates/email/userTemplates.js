@@ -110,3 +110,24 @@ export const utilityBillApprovalMail = (data) => `
           <span style="display: block;">Call: +234 814 650 7035</span>
         </td>
     </tr>`;
+
+export const adminClusterInvite = (data) => `
+ <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td>
+        <p>
+        You have been invited to join a cluster, <br />
+        SeedFi is inviting you to join ${data.cluster_name} Cluster loan group <br />
+        Kindly login to accept/decline invitation.
+        </p>       
+    </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+<td>
+  <span style="line-height: 40px">Yours Credibly</span> <br />
+  <span style="font-weight: 600; display: block;">SeedFi</span>
+  <span style="display: block;">Email: ask@seedfi.com</span>
+  <span style="display: block;">Call: +234 814 650 7035</span>
+</td>
+</tr>
+`;

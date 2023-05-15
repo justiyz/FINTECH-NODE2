@@ -64,17 +64,20 @@ export default {
 
   fetchActiveClusterMembers: `
     SELECT 
-      id,
-      cluster_id,
-      user_id,
-      status,
-      loan_status,
-      loan_obligation,
-      is_admin,
-      is_left
+      cluster_members.id,
+      cluster_members.cluster_id,
+      cluster_members.user_id,
+      cluster_members.status,
+      cluster_members.loan_status,
+      cluster_members.loan_obligation,
+      cluster_members.is_admin,
+      users.email,
+      cluster_members.is_left
     FROM cluster_members
+    LEFT JOIN users ON users.user_id = cluster_members.user_id
     WHERE cluster_id = $1
-    AND is_left = FALSE`,
+    AND is_left = FALSE;
+`,
 
   fetchActiveClusterMemberDetails: `
     SELECT 
@@ -379,8 +382,8 @@ export default {
     WHERE cluster_id = $1`,
   inviteClusterMember: `
     INSERT INTO cluster_invitees(
-          cluster_id,
-          inviter_id,
+         cluster_id,
+         inviter_id,
          invitee,
          invitation_mode,
          invitee_id

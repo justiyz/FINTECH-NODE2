@@ -33,5 +33,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfClusterExists', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminClusterMiddleware.checkIfClusterExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

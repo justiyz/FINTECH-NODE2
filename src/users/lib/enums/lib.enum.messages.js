@@ -285,3 +285,8 @@ export const SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY = 'Score card wei
 export const SUCCESSFULLY_FETCH_ACTIVITY_LOG = 'Activity logs fetched successfully';
 export const CLUSTERS_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
 export const CLUSTER__DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
+export const ADMIN_CLUSTER_MEMBER_INVITE = 'Admin Successfully invite cluster member';
+export const ADMIN_EDIT_CLUSTER_STATUS = (status, name) => `admin successfully ${status} ${name} cluster`;
+export const ADMIN_EDIT_CLUSTER_MEMBER_STATUS = (status) => `admin successfully ${status} cluster member`;
+export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
+export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';

@@ -107,6 +107,7 @@ router.patch(
 router.get(
   '/:user_id/clusters',
   AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserController.userClusters
@@ -115,6 +116,7 @@ router.get(
 router.get(
   '/:user_id/:cluster_id/cluster-details', 
   AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.clusterDetailsParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserMiddleware.adminCheckIfClusterExists,

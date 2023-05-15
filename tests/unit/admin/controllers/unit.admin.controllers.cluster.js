@@ -39,5 +39,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call clusterMemberInvite', async() => {
+      const req = { body: '', admin: '', cluster: '' };
+      const data = await AdminClusterController.clusterMemberInvite(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call activateAndDeactivateCluster', async() => {
+      const req = { body: '', admin: '', cluster: '' };
+      const data = await AdminClusterController.activateAndDeactivateCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call deactivateClusterMember', async() => {
+      const req = { body: '', params: '', admin: '' };
+      const data = await AdminClusterController.deactivateClusterMember(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

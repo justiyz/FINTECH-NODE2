@@ -880,7 +880,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should successfully accept cluster invite 0', (done) => {
+    it('should successfully accept cluster invite ', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/join`)
         .set({

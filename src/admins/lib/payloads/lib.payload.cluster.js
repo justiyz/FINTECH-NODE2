@@ -18,6 +18,13 @@ export default {
     true,
     body.clusterCode,
     body.join_cluster_closes_at
+  ],
+  clusterInvite: (body, cluster, admin, invitedUser) => [
+    cluster.cluster_id,
+    admin.admin_id,
+    body.email.trim().toLowerCase(),
+    'email',
+    invitedUser?.user_id || null
   ]
 };
 

@@ -32,3 +32,12 @@ export const upload_blacklisted_bvns = (name, type) => `${name} uploads ${type} 
 export const updates_single_blacklisted_bvn = (name) => `${name} updates single blacklisted bvn`;
 export const updates_environment = (name) => `${name} updates environment variables values in settings`;
 export const edit_role_permission = (name) => `${name}, edit role type with permission`;
+export const create_cluster = (name, cluster) => `${name} create cluster ${cluster}`;
+export const activate_cluster = (name, cluster) => `${name} activate ${cluster} cluster`;
+export const deactivate_cluster = (name, cluster) => `${name} deactivate ${cluster} cluster`;
+export const delete_cluster = (name, cluster) => `${name} delete ${cluster} cluster`;
+export const remove_cluster_member = (name, member) => `${name} remove cluster member ${member}`;
+export const cluster_member_invite  = (name) => `${name} invite a cluster member`;
+export const unblacklist_bvn = (name) => `${name} unblacklist bvn a user bvn`;
+export const activate_cluster_member = (name) => `${name} admin activate cluster member`;
+export const deactivated_cluster_member = (name) => `${name} admin deactivated cluster member`;
