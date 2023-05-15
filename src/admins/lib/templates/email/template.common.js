@@ -8,7 +8,8 @@ const heading = {
   completeKyc: 'Kindly complete your kyc',
   insufficientBalance: 'Insufficient Paystack Balance',
   approvedLoan: 'Loan application approved',
-  declinedLoan: 'Loan application declined'
+  declinedLoan: 'Loan application declined',
+  adminClusterInvite: 'Cluster loan invitation'
 };
 
 export const commonTemplate = (messageType, data) => {

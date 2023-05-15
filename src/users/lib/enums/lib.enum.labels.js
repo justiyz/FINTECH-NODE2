@@ -248,6 +248,8 @@ export const IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE = 'AdminAdminMiddleware::isBv
 export const SCORE_CARD_BREAKDOWN_CONTROLLER = 'AdminLoanController::scoreCardBreakdown';
 export const ADMIN_FETCH_CLUSTERS_CONTROLLER = 'AdminLoanController::fetchAndFilterClusters';
 export const ADMIN_FETCH_CLUSTER_DETAILS_CONTROLLER = 'AdminLoanController::fetchSingleClusterDetails';
-export const ADMIN_CREATE_CLUSTER_CONTROLLER = 'ClusterController::createCluster';
-export const ADMIN_CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterNameUnique';
-
+export const ADMIN_CREATE_CLUSTER_CONTROLLER = 'AminClusterController::createCluster';
+export const ADMIN_CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE = 'AdminClusterMiddleware::checkIfClusterNameUnique';
+export const CLUSTER_MEMBER_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberInvite';
+export const ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER = 'AdminClusterController::activateAndDeactivateCluster';
+export const CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE = 'AdminClusterController::checkClusterMemberExist';

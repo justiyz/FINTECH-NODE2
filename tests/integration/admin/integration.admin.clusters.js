@@ -221,7 +221,7 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('cluster_id');
           expect(res.body.data).to.have.property('loan_status');
           expect(res.body.data).to.have.property('name');
-          res.body.data.cluster_id = process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID;
+          process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID = res.body.data.cluster_id;
           expect(res.body.message).to.equal('Cluster created successfully');
           done();
         });
@@ -447,6 +447,231 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.CLUSTER__DETAILS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Admin fetches single cluster details', () => {
+    it('should successfully invite none existing user', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          email: 'miracle@enyata.com',
+          link_url: 'https://theseedfi.com/invite-member_uri'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('cluster_id');
+          expect(res.body.data).to.have.property('invitee');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should successfully invite an existing user', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_TWO_EMAIL,
+          link_url: 'https://theseedfi.com/invite-member_uri'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('cluster_id');
+          expect(res.body.data).to.have.property('invitee');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should successfully accept admin cluster invite', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.JOIN_CLUSTER_DECISION_CHOICE('accepted'));
+          done();
+        });
+    });
+    it('Should flag when try to invite with wrong cluster id', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}p/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          email: 'test@gamil.com',
+          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('Cluster does not exist');
+          done();
+        });
+    });
+    it('should throw error if a field is missing', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          link_url: 'https://theseedfi.com/invite-member_uri'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('email is required');
+          done();
+        });
+    });
+    it('should flag if user is already existing in the cluster', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          email: process.env.SEEDFI_USER_TWO_EMAIL,
+          link_url: 'https://theseedfi.com/invite-member_uri'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.USER_ALREADY_CLUSTER_MEMBER);
+          done();
+        });
+    });
+  });
+  describe('Admin activate and deactivate cluster and cluster member', () => {
+    it('should successfully deactivated cluster', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/status`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal('admin successfully deactivated enyata admin cluster cluster');
+          done();
+        });
+    });
+    it('should successfully activate cluster', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/status`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'active'
+        })
+        .end((err, res) => {
+
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal('admin successfully active enyata admin cluster cluster');
+          done();
+        });
+    });
+    it('should flag if cluster does not exist', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}p/status`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'active'
+        })
+        .end((err, res) => {
+
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('Cluster does not exist');
+          done();
+        });
+    });
+    it('should successfully deactivate cluster member', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_left');
+          expect(res.body.message).to.equal('admin successfully deactivated cluster member');
+          done();
+        });
+    });
+    it('should flag if cluster member dose not exist', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}0`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('Cluster member does not belong to this cluster');
           done();
         });
     });

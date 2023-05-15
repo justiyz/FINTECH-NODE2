@@ -5,3 +5,6 @@ export const approvedUtilityBillNotification = () => {
   return 'Your uploaded utility bill has been approved';
 };
   
+export const inviteClusterMember = (data) => {
+  return `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
+};

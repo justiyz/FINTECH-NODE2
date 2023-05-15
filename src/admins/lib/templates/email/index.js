@@ -12,6 +12,7 @@ const getTemplate = (type, data) => {
   case 'declinedLoan': return userEmail.sendLoanDisapprovalMail(data);
   case 'declinedUtilityBill': return userEmail.utilityBillDeclinedMail(data);
   case 'approvedUtilityBill': return userEmail.utilityBillApprovalMail(data);
+  case 'adminClusterInvite': return userEmail.adminClusterInvite(data);
   default: return '';
   }
 };

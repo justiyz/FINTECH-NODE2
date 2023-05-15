@@ -38,7 +38,33 @@ router.get(
   AdminClusterController.fetchSingleClusterDetails
 );
 
+router.post(
+  '/:cluster_id/invite',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('cluster'),
+  AdminClusterMiddleware.checkIfClusterExists,
+  AdminClusterMiddleware.checkClusterMemberExist('confirm'),
+  Model(Schema.inviteCluster, 'payload'),
+  AdminClusterController.clusterMemberInvite
+);
 
+router.patch(
+  '/:cluster_id/status',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('cluster'),
+  AdminClusterMiddleware.checkIfClusterExists,
+  Model(Schema.editClusterStatus, 'payload'),
+  AdminClusterController.activateAndDeactivateCluster
+);
 
+router.patch(
+  '/:cluster_id/member/:user_id',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('cluster'),
+  AdminClusterMiddleware.checkIfClusterExists,
+  AdminClusterMiddleware.checkClusterMemberExist('validate'),
+  Model(Schema.editClusterMember, 'payload'),
+  AdminClusterController.activateAndDeactivateClusterMember
+);
 
 export default router;
