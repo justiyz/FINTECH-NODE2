@@ -73,7 +73,8 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     checkUserLoanEligibility.controllers.loan.js`);
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
-    const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount);
+    const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
+      parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
     const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
     if (data.final_decision === 'MANUAL') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval 
@@ -132,10 +133,8 @@ export const acceptSystemMaximumAllowableLoanAmount = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application have system maximum allowable loan amount value in the DB 
       acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
-    const totalMonthlyRepayment = (parseFloat(existingLoanApplication.monthly_repayment) * Number(existingLoanApplication.loan_tenor_in_months));
-    const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(existingLoanApplication.max_possible_approval);
     const updateLoanAmount = await processOneOrNoneData(loanQueries.updateLoanAmountToSystemAllowableAmount, 
-      [ loan_id, user.user_id, existingLoanApplication.max_possible_approval, parseFloat(totalInterestAmount) ]);
+      [ loan_id, user.user_id, existingLoanApplication.max_possible_approval ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount updated for used in the DB 
     acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
     userActivityTracking(user.user_id, 91, 'success');
@@ -200,6 +199,10 @@ export const initiateLoanDisbursement = async(req, res, next) => {
         currentBalance: 'Kindly login to confirm'
       };
       await AdminMailService('Insufficient Paystack Balance', 'insufficientBalance', { ...data });
+    }
+    if (result.response.data.message !== 'Your balance is not enough to fulfil this request') {
+      userActivityTracking(user.user_id, 44, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_LOAN_DISBURSEMENT_CONTROLLER);
     }
     userActivityTracking(req.user.user_id, 44, 'fail');
     return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_LOAN_DISBURSEMENT_CONTROLLER);

@@ -267,8 +267,7 @@ export default {
     UPDATE personal_loans
     SET
       updated_at = NOW(),
-      amount_requested = $3,
-      total_interest_amount = $4
+      amount_requested = $3
     WHERE loan_id = $1
     AND user_id = $2
     RETURNING id, user_id, loan_id, amount_requested, status, loan_decision`,
