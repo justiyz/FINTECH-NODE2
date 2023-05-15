@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import clusterPayload from '../../../admins/lib/payloads/lib.payload.cluster';
-import ClusterPayload from '../../../users/api/queries/queries.cluster';
+import ClusterPayload from '../../../admins/lib/payloads/lib.payload.cluster';
+import ClusterQueries from '../../../users/api/queries/queries.cluster';
 import userQueries from '../queries/queries.user';
 import AdminQueries from '../../../admins/api/queries/queries.cluster';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -30,11 +30,11 @@ const { SEEDFI_NODE_ENV } = config;
 export const createCluster = async(req, res, next) => {
   const { body, admin } = req;
   try {
-    const clusterOpenGrace = await processOneOrNoneData(ClusterPayload.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
+    const clusterOpenGrace = await processOneOrNoneData(ClusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
     const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster grace period for membership joining set successfully createCluster.controllers.cluster.js`);
     body.join_cluster_closes_at =  join_cluster_closes_at;
-    const createClusterPayload = clusterPayload.createClusterPayload(body);
+    const createClusterPayload = ClusterPayload.createClusterPayload(body);
     const newClusterDetails = await processOneOrNoneData(AdminQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster created successfully createCluster.controllers.cluster.js`);
     adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(admin.first_name));
@@ -60,7 +60,7 @@ export const createCluster = async(req, res, next) => {
 export const fetchAndFilterClusters = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    const payload = clusterPayload.fetchClusters(query);
+    const payload = ClusterPayload.fetchClusters(query);
     const [ clusters, [ clusterCount ] ] = await Promise.all([
       processAnyData(AdminQueries.fetchClustersDetails, payload),
       processAnyData(AdminQueries.fetchClusterCount, payload)
@@ -121,7 +121,7 @@ export const clusterMemberInvite = async(req, res, next) => {
   try {
     const {body, admin, cluster } = req;
     const [ invitedUser ] =  await processAnyData(userQueries.getUserByUserEmail, [ body.email.trim().toLowerCase() ]);
-    const payload = clusterPayload.clusterInvite(body, cluster, admin, invitedUser);
+    const payload = ClusterPayload.clusterInvite(body, cluster, admin, invitedUser);
     const inviteInfo = {inviter: admin.first_name, name: cluster.name};
     const data = {
       email: body.email.trim().toLowerCase(),

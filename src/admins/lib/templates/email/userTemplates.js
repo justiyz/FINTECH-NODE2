@@ -117,7 +117,7 @@ export const adminClusterInvite = (data) => `
         <p>
         You have been invited to join a cluster, <br />
         SeedFi is inviting you to join ${data.cluster_name} Cluster loan group <br />
-        Kindly login top accept invitation.
+        Kindly login to accept/decline invitation.
         </p>       
     </td>
 </tr>
