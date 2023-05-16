@@ -42,8 +42,10 @@ export const checkIfLoanExists = async(req, res, next) => {
  */
 export const checkIfLoanStatusIsInReview = async(req, res, next) => {
   const { loanApplication, admin, body: { decision } } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   const activityType = decision === 'approve' ? 21 : 22;
-  const descriptionType = decision === 'approve' ? descriptions.manually_loan_approval(admin.first_name) : descriptions.manually_loan_decline(admin.first_name);
+  const descriptionType = decision === 'approve' ? 
+    descriptions.manually_loan_approval_failed(adminName) : descriptions.manually_loan_disapproval_failed(adminName);
   try {
     if (loanApplication.status === 'in review') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} 
@@ -52,10 +54,9 @@ export const checkIfLoanStatusIsInReview = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} 
     checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail', descriptionType);
+    await adminActivityTracking(req.admin.admin_id, activityType, 'fail', descriptionType);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS(loanApplication.status), enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_EXISTS_MIDDLEWARE);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail', descriptionType);
     error.label = enums.CHECK_LOAN_EXISTS_MIDDLEWARE;
     logger.error(`checking if loan application status is still in review failed::${enums.CHECK_LOAN_EXISTS_MIDDLEWARE}`, error.message);
     return next(error);

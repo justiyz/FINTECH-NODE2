@@ -27,7 +27,7 @@ export const compareAdminPassword = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login password matches compareAdminPassword.admin.middlewares.auth.js`);
       return next();
     }
-    adminActivityTracking(req.admin.admin_id, 9, 'fail', descriptions.login_request(admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 9, 'fail', descriptions.login_request_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login password does not match compareAdminPassword.admin.middlewares.auth.js`);
     return ApiResponse.error(res, enums.INVALID_PASSWORD, enums.HTTP_BAD_REQUEST, enums.COMPARE_ADMIN_PASSWORD_MIDDLEWARE);
   } catch (error) {
@@ -118,7 +118,7 @@ export const adminPermissions = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin roles properly aggregated adminPermissions.admin.middlewares.auth.js`);
       return next();
     }
-    adminActivityTracking(req.admin.admin_id, 10, 'fail', descriptions.login_approved(admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 10, 'fail', descriptions.login_approved_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     return ApiResponse.error(res, enums.ADMIN_HAS_NO_PERMISSIONS, enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
   } catch (error) {
     error.label = enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE;
