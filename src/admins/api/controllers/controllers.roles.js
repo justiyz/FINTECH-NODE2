@@ -19,6 +19,7 @@ import * as descriptions from '../../lib/monitor/lib.monitor.description';
 export const createRole = async(req, res, next) => {
   try {
     const { body, admin, roleCode } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     await processAnyData(roleQueries.createAdminUserRole, [ body.name.trim().toLowerCase(), roleCode ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role created in the DB createRole.admin.controllers.roles.js`);
     const updateRolesPermissions = await body.permissions.map(async(permission) => {
@@ -27,7 +28,7 @@ export const createRole = async(req, res, next) => {
     });
     await Promise.all([ updateRolesPermissions ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: created role permissions set in the DB createRole.admin.controllers.roles.js`);
-    adminActivityTracking(req.admin.admin_id, 4, 'success', descriptions.create_role_permission(admin.first_name, body.name.trim()));
+    adminActivityTracking(req.admin.admin_id, 4, 'success', descriptions.create_role_permission(adminName, body.name.trim()));
     body.roleCode = roleCode;
     return ApiResponse.success(res, enums.ROLE_CREATION_SUCCESSFUL, enums.HTTP_OK, body);
   } catch (error) {
@@ -102,6 +103,7 @@ export const rolePermissions = async(req, res, next) => {
 export const editRoleWithPermissions = async(req, res, next) => {
   try {
     const { admin, body, params: { role_code } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     if (body.name) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role name is being edited editRoleWithPermissions.admin.middlewares.roles.js`);
       const [ roleName ] = await processAnyData(roleQueries.fetchRole, [ body.name.trim().toLowerCase() ]);
@@ -125,10 +127,10 @@ export const editRoleWithPermissions = async(req, res, next) => {
       await Promise.all([ editRolesPermissions ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: role permissions edited successfully editRoleWithPermissions.admin.middlewares.roles.js`);
     }
-    adminActivityTracking(admin.admin_id, 15, 'success', descriptions.edit_role(admin.first_name));
+    adminActivityTracking(admin.admin_id, 15, 'success', descriptions.edit_role(adminName));
     return ApiResponse.success(res, enums.EDIT_ROLE_DETAILS_SUCCESSFUL, enums.HTTP_OK, { role_code, ...body });
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 15, 'fail', descriptions.edit_role_failed(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 15, 'fail', descriptions.edit_role_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.ROLE_PERMISSIONS_CONTROLLER;
     logger.error(`editing role and role permissions failed:::${enums.ROLE_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);
@@ -146,14 +148,15 @@ export const editRoleWithPermissions = async(req, res, next) => {
 
 export const activateDeactivateRole = async(req, res, next) => {
   const { admin, query: { action }, params: { role_code } } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
     const updatingStatus = action === 'activate' ? 'active' : 'deactivated';
     const [ updatedStatus ] = await processAnyData(roleQueries.updateRoleStatus, [ role_code, updatingStatus ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: role details fetched from DB rolePermissions.admin.controllers.roles.js`);
     if (action === 'activate') {
-      adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.activate_role(admin.first_name, action));
+      adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.activate_role(adminName, action));
     }
-    adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.deactivate_role(admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.deactivate_role(adminName));
     return ApiResponse.success(res, enums.ACTIVATE_DEACTIVATE_ROLE_SUCCESSFULLY(updatingStatus), enums.HTTP_OK, updatedStatus);
   } catch (error) {
     error.label = enums.ACTIVATE_DEACTIVATE_ROLE_CONTROLLER;
@@ -195,13 +198,14 @@ export const nonSuperAdminRoles = async(req, res, next) => {
 export const deleteRole = async(req, res, next) => {
   try {
     const { params: { role_code }, admin } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     await processNoneData(roleQueries.deleteRoleType, [ role_code ]);
     await processNoneData(roleQueries.deleteRole, [ role_code ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully deleted a role from the DB deleteRole.admin.controllers.roles.js`);
-    adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.delete_role(admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 14, 'success', descriptions.delete_role(adminName));
     return ApiResponse.success(res, enums.ROLE_DELETED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 14, 'fail', descriptions.delete_role_failed(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 14, 'fail', descriptions.delete_role_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.DELETE_ROLE_CONTROLLER;
     logger.error(`deleting role in the DB failed:::${enums.DELETE_ROLE_CONTROLLER}`, error.message);
     return next(error);

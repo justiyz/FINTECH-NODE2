@@ -29,6 +29,7 @@ const { SEEDFI_NODE_ENV } = config;
 
 export const createCluster = async(req, res, next) => {
   const { body, admin } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
     const clusterOpenGrace = await processOneOrNoneData(ClusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
     const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
@@ -37,10 +38,10 @@ export const createCluster = async(req, res, next) => {
     const createClusterPayload = ClusterPayload.createClusterPayload(body);
     const newClusterDetails = await processOneOrNoneData(AdminQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster created successfully createCluster.controllers.cluster.js`);
-    adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(admin.first_name));
+    adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(adminName, newClusterDetails.name));
     return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, newClusterDetails);
   } catch (error) {
-    adminActivityTracking(admin.admin_id, 32, 'fail', descriptions.create_cluster_failed(req.admin.first_name));
+    adminActivityTracking(admin.admin_id, 32, 'fail', descriptions.create_cluster_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.ADMIN_CREATE_CLUSTER_CONTROLLER;
     logger.error(`creating cluster failed::${enums.ADMIN_CREATE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);
@@ -120,6 +121,7 @@ export const fetchSingleClusterDetails = async(req, res, next) => {
 export const clusterMemberInvite = async(req, res, next) => {
   try {
     const {body, admin, cluster } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const [ invitedUser ] =  await processAnyData(userQueries.getUserByUserEmail, [ body.email.trim().toLowerCase() ]);
     const payload = ClusterPayload.clusterInvite(body, cluster, admin, invitedUser);
     const inviteInfo = {inviter: admin.first_name, name: cluster.name};
@@ -128,7 +130,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       cluster_name: cluster.name
     };
 
-    adminActivityTracking(admin.admin_id, 40, 'success', descriptions.cluster_member_invite(admin.first_name));
+    adminActivityTracking(admin.admin_id, 40, 'success', descriptions.cluster_member_invite(adminName, invitedUser.name));
     if (body.email.trim().toLowerCase() === invitedUser.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
@@ -144,7 +146,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 40, 'fail', descriptions.cluster_member_invite_failed(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 40, 'fail', descriptions.cluster_member_invite_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.CLUSTER_MEMBER_INVITE_CONTROLLER;
     logger.error(`Admin inviting cluster member failed::${enums.CLUSTER_MEMBER_INVITE_CONTROLLER}`, error.message);
     return next(error);
@@ -162,8 +164,9 @@ export const clusterMemberInvite = async(req, res, next) => {
  */
 export const activateAndDeactivateCluster = async(req, res, next) => {
   const {body, admin, cluster: { cluster_id, name } } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   const activityType = body.status === 'active' ? 33 : 34;
-  const description = body.status === 'active' ? descriptions.activate_cluster(admin.first_name, name) : descriptions.deactivate_cluster(admin.first_name, name);
+  const description = body.status === 'active' ? descriptions.activate_cluster(adminName, name) : descriptions.deactivate_cluster(adminName, name);
   try {
     const cluster = await processOneOrNoneData(AdminQueries.activateOrDeactivateCluster, [ cluster_id, body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
@@ -186,9 +189,11 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
  * @memberof AdminUserController
  */
 export const deactivateClusterMember = async(req, res, next) => {
-  const {body, params: { user_id, cluster_id },admin } = req;
+  const {body, params: { user_id, cluster_id },admin, cluster } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   const activityType = body.status === 'active' ? 39 : 40;
-  const description = body.status === 'active' ? descriptions.deactivate_cluster_member(admin.first_name) : descriptions.activate_cluster_member(admin.first_name);
+  const description = body.status === 'active' ? descriptions.deactivate_cluster_member(adminName, cluster.name) 
+    : descriptions.activate_cluster_member(adminName, cluster.name);
   try {
     const data = await processOneOrNoneData(AdminQueries.deactivateClusterMember, 
       [ cluster_id.trim(), user_id.trim(), body.status ]);

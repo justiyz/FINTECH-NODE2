@@ -94,6 +94,7 @@ export const adminPermissions = async(req, res, next) => {
 export const editAdminPermissions = async(req, res, next) => {
   try {
     const { admin, body, params: { admin_id } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     if (body.role_code) {
       await processAnyData(adminQueries.updateUserRoleType, [ admin_id, body.role_code.trim().toUpperCase() ]);
     }
@@ -108,10 +109,10 @@ export const editAdminPermissions = async(req, res, next) => {
       await Promise.all([ editAdminPermissions ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin permissions edited successfully editAdminPermissions.admin.controllers.admin.js`);
     }
-    adminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(adminName));
     return ApiResponse.success(res, enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL, enums.HTTP_OK, { admin_id, ...body });
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission_failed(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER;
     logger.error(`editing admin permissions failed:::${enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);

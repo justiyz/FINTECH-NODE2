@@ -18,6 +18,7 @@ export default {
           id,
           cluster_id,
           name,
+          status,
           description,
           type,
           maximum_members,
@@ -41,6 +42,7 @@ export default {
     SELECT  
         id,
         cluster_id,
+        status,
         name as cluster_name,
         type,
         loan_amount,
@@ -54,6 +56,7 @@ export default {
     SELECT 
         CONCAT(first_name, ' ', last_name) as name,
         to_char(DATE (cluster_members.created_at)::date, 'Mon DD YYYY') As date_joined,
+        cluster_members.user_id,
         cluster_members.status
     FROM cluster_members
     LEFT JOIN users

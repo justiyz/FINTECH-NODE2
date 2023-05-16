@@ -25,6 +25,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
   try {
     const { admin } = req;
     const token = UserHelpers.generateOtp();
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random token generated completeAdminLoginRequest.admin.controllers.auth.js`);
     const [ existingToken ] = await processAnyData(authQueries.fetchAdminByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if token is existing in the database completeAdminLoginRequest.admin.controllers.auth.js`);
@@ -37,7 +38,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, token, expireAt ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set in the DB completeAdminLoginRequest.admin.controllers.auth.js`);
     await MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
-    adminActivityTracking(req.admin.admin_id, 9, 'success', descriptions.login_request(admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 9, 'success', descriptions.login_request(adminName));
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.LOGIN_REQUEST_SUCCESSFUL, enums.HTTP_OK, { ...updatedAdmin, token });
     }
@@ -61,12 +62,13 @@ export const completeAdminLoginRequest = async(req, res, next) => {
 export const login = async(req, res, next) => {
   try {
     const { admin , permissions} = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const token = await Hash.generateAdminAuthToken(admin, permissions);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: auth token generated login.admin.controllers.auth.js`);
     const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, null, null ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set to null in the DB login.admin.controllers.auth.js`);
     const [ adminRoleDetails ] = await processAnyData(roleQueries.fetchRole, [ admin.role_type ]);
-    adminActivityTracking(req.admin.admin_id, 10, 'success', descriptions.login_approved(admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 10, 'success', descriptions.login_approved(adminName));
     return ApiResponse.success(res, enums.ADMIN_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...updatedAdmin, role_name: adminRoleDetails.name, token });
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 10, 'fail', descriptions.login_approved_failed(req.admin.first_name));
@@ -85,16 +87,17 @@ export const login = async(req, res, next) => {
 export const setPassword =  (type = '') => async(req, res, next) => {
   try {
     const { admin, body } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const hash = await Hash.hashData(body.password.trim());
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: password hashed setPassword.admin.controllers.auth.js`);
     const [ setNewPassword ] = await processAnyData(authQueries.setNewAdminPassword, [ admin.admin_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: hashed password saved in the DB setPassword.admin.controllers.auth.js`);
     const typeMonitor = type === 'first' ? 11 : 2;
-    const description = type === 'first' ? descriptions.new_password(admin.first_name) : descriptions.reset_password();
+    const description = type === 'first' ? descriptions.new_password(adminName) : descriptions.reset_password();
     adminActivityTracking(req.admin.admin_id, typeMonitor, 'success', description);
     return ApiResponse.success(res, enums.PASSWORD_SET_SUCCESSFULLY, enums.HTTP_OK, setNewPassword);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 'fail', descriptions.new_password_failed(req.admin.first_name));
+    adminActivityTracking(req.admin.admin_id, 'fail', descriptions.new_password_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.SET_PASSWORD_CONTROLLER;
     logger.error(`admin set new password failed:::${enums.SET_PASSWORD_CONTROLLER}`, error.message);
     return next(error);

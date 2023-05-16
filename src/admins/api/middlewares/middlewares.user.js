@@ -42,29 +42,31 @@ export const userLoanStatus = async(req, res, next) => {
  * @memberof AdminUserMiddleware
  */
 export const checkUserCurrentStatus = async(req, res, next) => {
-  const { body: { status } } = req;
+  const { body: { status }, userDetails } = req;
   let activityType;
   let descriptionType;
+  const userName = `${userDetails.first_name} ${userDetails.last_name}`;
+  const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
   switch (status) {
   case 'deactivated':
     activityType = 20;
-    descriptionType = descriptions.user_status_failed(req.admin.first_name, status);
+    descriptionType = descriptions.user_status_failed(adminName, status, userName);
     break;
   case 'suspended':
     activityType = 24;
-    descriptionType = descriptions.user_status_failed(req.admin.first_name, status);
+    descriptionType = descriptions.user_status_failed(adminName, status, userName);
     break;
   case 'watchlisted':
     activityType = 26;
-    descriptionType = descriptions.user_status_failed(req.admin.first_name, status);
+    descriptionType = descriptions.user_status_failed(adminName, status, userName);
     break;
   case 'blacklisted':
     activityType = 25;
-    descriptionType = descriptions.user_status_failed(req.admin.first_name, status);
+    descriptionType = descriptions.user_status_failed(adminName, status, userName);
     break;
   default:
     activityType = 19;
-    descriptionType = descriptions.user_status_failed(req.admin.first_name, status);
+    descriptionType = descriptions.user_status_failed(adminName, status, userName);
     break;
   }
 
@@ -94,27 +96,28 @@ export const checkUserCurrentStatus = async(req, res, next) => {
 export const uploadDocument = async(req, res, next) => {
   try {
     const { files, userDetails, body } = req;
+    const userName = `${userDetails.first_name} ${userDetails.last_name}`;
     if (!files || (files && !files.document)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: no file is being selected for upload uploadDocument.admin.middlewares.user.js`);
-      adminActivityTracking(req.admin.admin_id, 23,  'fail', descriptions.uploads_document_failed(req.admin.first_name));
+      adminActivityTracking(req.admin.admin_id, 23,  'fail', descriptions.uploads_document_failed(`${req.admin.first_name} ${req.admin.last_name}`, userName));
       return ApiResponse.error(res, enums.UPLOAD_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: to be uploaded file is existing uploadDocument.admin.middlewares.user.js`);
     const fileExt = path.extname(files.document.name);
     if (files.document.size > 3197152) { // 3 MB
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: file size is greater than 3MB uploadDocument.admin.middlewares.user.js`);
-      adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
+      adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(`${req.admin.first_name} ${req.admin.last_name}`, userName));
       return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
     }
     if (body.type === 'file' && fileExt !== '.pdf') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: document type is not a pdf file uploadDocument.admin.middlewares.user.js`);
-      adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
+      adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(`${req.admin.first_name} ${req.admin.last_name}`, userName));
       return ApiResponse.error(res, enums.UPLOAD_PDF_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
     }
     const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
     if (body.type === 'image' && !acceptedImageFileTypes.includes(fileExt)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: document type is not a jpeg, jpg or png file uploadDocument.admin.middlewares.user.js`);
-      adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
+      adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(`${req.admin.first_name} ${req.admin.last_name}`, userName));
       return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_DOCUMENT_MIDDLEWARE);
     }
     const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}`;
