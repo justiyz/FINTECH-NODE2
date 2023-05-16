@@ -54,7 +54,7 @@ export const checkIfLoanStatusIsInReview = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} 
     checkIfLoanStatusIsInReview.admin.middlewares.loan.js`);
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail', descriptionType);
+    await adminActivityTracking(req.admin.admin_id, activityType, 'fail', descriptionType);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS(loanApplication.status), enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_EXISTS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_LOAN_EXISTS_MIDDLEWARE;

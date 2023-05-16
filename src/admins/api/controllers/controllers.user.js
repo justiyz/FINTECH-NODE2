@@ -85,7 +85,7 @@ export const editUserStatus = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to unBlacklisted bvn list editUserStatus.admin.controllers.user.js`);
       }
     }
-    adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
+    await adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.EDIT_USER_STATUS_CONTROLLER;
@@ -256,10 +256,10 @@ export const saveUserUploadedDocument = async(req, res, next) => {
     const uploadedDocument = await processOneOrNoneData(userQueries.uploadUserDocument, [ userDetails.user_id, admin.admin_id, body.title.trim(), document ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
     document uploaded and saved for user successfully saveUserUploadedDocument.admin.controllers.user.js`);
-    adminActivityTracking(admin.admin_id, 23, 'success', descriptions.uploads_document(adminName, userName));
+    await adminActivityTracking(admin.admin_id, 23, 'success', descriptions.uploads_document(adminName, userName));
     return ApiResponse.success(res, enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER, enums.HTTP_OK, uploadedDocument);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
     error.label = enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER;
     logger.error(`Saving uploaded document for user failed:::${enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -388,7 +388,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
         PersonalNotifications.declinedUtilityBillNotification, 'utility-declined', {});
       await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
-      adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(adminName, userName));
+      await adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(adminName, userName));
       userActivityTracking(userDetails.user_id, 87, 'success');
       return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
     }
@@ -405,11 +405,11 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
       PersonalNotifications.approvedUtilityBillNotification, 'utility-bill-approved', {});
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
-    adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));
+    await adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));
     userActivityTracking(userDetails.user_id, 88, 'success');
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 27, 'fail', descriptions.approves_utility_bill_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(req.admin.admin_id, 27, 'fail', descriptions.approves_utility_bill_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.VERIFY_USER_UTILITY_BILL_CONTROLLER;
     logger.error(`verifying user utility bill details failed:::${enums.VERIFY_USER_UTILITY_BILL_CONTROLLER}`, error.message);
     return next(error);

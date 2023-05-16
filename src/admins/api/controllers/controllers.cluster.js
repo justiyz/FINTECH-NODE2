@@ -38,10 +38,10 @@ export const createCluster = async(req, res, next) => {
     const createClusterPayload = ClusterPayload.createClusterPayload(body);
     const newClusterDetails = await processOneOrNoneData(AdminQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster created successfully createCluster.controllers.cluster.js`);
-    adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(adminName, newClusterDetails.name));
+    await adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(adminName, newClusterDetails.name));
     return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, newClusterDetails);
   } catch (error) {
-    adminActivityTracking(admin.admin_id, 32, 'fail', descriptions.create_cluster_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(admin.admin_id, 32, 'fail', descriptions.create_cluster_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.ADMIN_CREATE_CLUSTER_CONTROLLER;
     logger.error(`creating cluster failed::${enums.ADMIN_CREATE_CLUSTER_CONTROLLER}`, error.message);
     return next(error);
@@ -130,7 +130,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       cluster_name: cluster.name
     };
 
-    adminActivityTracking(admin.admin_id, 40, 'success', descriptions.cluster_member_invite(adminName, invitedUser.name));
+    await adminActivityTracking(admin.admin_id, 40, 'success', descriptions.cluster_member_invite(adminName, invitedUser.name));
     if (body.email.trim().toLowerCase() === invitedUser.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
@@ -146,7 +146,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 40, 'fail', descriptions.cluster_member_invite_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(req.admin.admin_id, 40, 'fail', descriptions.cluster_member_invite_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.CLUSTER_MEMBER_INVITE_CONTROLLER;
     logger.error(`Admin inviting cluster member failed::${enums.CLUSTER_MEMBER_INVITE_CONTROLLER}`, error.message);
     return next(error);
@@ -171,7 +171,7 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
     const cluster = await processOneOrNoneData(AdminQueries.activateOrDeactivateCluster, [ cluster_id, body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
     decoded that admin have ${body.status} ${name} cluster in the DB. activateAndDeactivateCluster.admin.controllers.cluster.js`);
-    adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
+    await adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return ApiResponse.success(res, enums.ADMIN_EDIT_CLUSTER_STATUS(body.status, name), enums.HTTP_OK, cluster);
   } catch (error) {
     error.label = enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER;
@@ -199,7 +199,7 @@ export const deactivateClusterMember = async(req, res, next) => {
       [ cluster_id.trim(), user_id.trim(), body.status ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
      admin have successfully ${body.status} cluster member in the DB. activateAndDeactivateClusterMember.admin.controllers.cluster.js`);
-    adminActivityTracking(admin.admin_id, activityType, 'success', description);
+    await adminActivityTracking(admin.admin_id, activityType, 'success', description);
     return ApiResponse.success(res, enums.ADMIN_EDIT_CLUSTER_MEMBER_STATUS(body.status), enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER;

@@ -63,7 +63,7 @@ export const updateEnvValues = async(req, res, next) => {
   
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated the env values settings 
       in the DB updateEnvValues.admin.controllers.admin.js`);
-    adminActivityTracking(req.admin.admin_id, 31, 'success', descriptions.updates_environment(adminName));
+    await adminActivityTracking(req.admin.admin_id, 31, 'success', descriptions.updates_environment(adminName));
     return ApiResponse.success(res, enums.UPDATED_ENV_VALUES_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_ENV_VALUES_CONTROLLER;
