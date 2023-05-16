@@ -42,10 +42,10 @@ export const updateEnvValues = async(req, res, next) => {
     const { admin, body } = req;
     const existingEnvs= await processAnyData(settingsQueries.fetchEnvValues);
     const adminName = `${admin.first_name} ${admin.last_name}`;
-    const envToUpdate = body.map((env) => {
+    const envToUpdate = body.map(async(env) => {
       const existingEnvValue = existingEnvs.find((existingEnv) => existingEnv.env_id === env.env_id);
       if (!existingEnvValue) {
-        adminActivityTracking(req.admin.admin_id, 31, 'fail', descriptions.updates_environment_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+        await adminActivityTracking(req.admin.admin_id, 31, 'fail', descriptions.updates_environment_failed(`${req.admin.first_name} ${req.admin.last_name}`));
         return null;
       }
       return {
