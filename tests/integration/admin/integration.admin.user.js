@@ -1658,6 +1658,23 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should successfully unblack an existing user bvn', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/bvn/unblacklist-bvn/6')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.UNBLACKLIST_BVN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
   });
 });
 

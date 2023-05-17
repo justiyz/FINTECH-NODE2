@@ -1363,35 +1363,12 @@ describe('Admin', () => {
     });
   });
   describe('Unbacklist bvn', () => {
-    it('Should lag if bvn length is not 11 characters long', (done) => {
-      chai.request(app)
-        .patch('/api/v1/admin/bvn/unblacklist-bvn')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          bvn: '223301231'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res).to.have.property('body');
-          expect(res.body.message).to.equal('bvn length must be 11 characters long');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
     it('Should successfully unblack bvn', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/bvn/unblacklist-bvn')
+        .patch('/api/v1/admin/bvn/unblacklist-bvn/1')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          bvn: '22330123231'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1403,15 +1380,13 @@ describe('Admin', () => {
           done();
         });
     });
+
     it('Should flag if try to unblacklisted not blacklisted bvn', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/bvn/unblacklist-bvn')
+        .patch('/api/v1/admin/bvn/unblacklist-bvn/90')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          bvn: '22330123231'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
