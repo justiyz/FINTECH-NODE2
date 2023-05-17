@@ -80,7 +80,7 @@ export default {
   WHERE id = $1
   `,
 
-  getUsers: `
+  getBlacklistedUsers: `
     SELECT 
       user_id,
       first_name,
@@ -89,7 +89,30 @@ export default {
       date_of_birth,
       bvn
     FROM users
-    WHERE status = 'blacklisted'`
+    WHERE status = 'blacklisted'`,
+
+  fetchBlacklistedBvnById: `
+    SELECT 
+    id,
+    first_name,
+    middle_name,
+    last_name,
+    date_of_birth,
+    bvn
+    FROM blacklisted_bvns
+    WHERE id = $1
+    `,
+  unblacklistExistingUserBvn: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      status = $2
+    WHERE user_id = $1
+    RETURNING  first_name,
+    middle_name,
+    last_name,
+    date_of_birth,
+    bvn`
 };
       
   

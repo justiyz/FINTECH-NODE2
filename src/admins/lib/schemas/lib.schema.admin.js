@@ -27,7 +27,7 @@ const adminIdParams = Joi.object().keys({
 });
 
 const unblacklist_bvn = Joi.object().keys({
-  bvn: Joi.string().required().length(11)
+  id: Joi.string().required()
 });
 
 export default {

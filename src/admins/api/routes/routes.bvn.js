@@ -24,10 +24,10 @@ router.get(
 );
 
 router.patch(
-  '/unblacklist-bvn',
+  '/unblacklist-bvn/:id',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('bvn management', 'update'),
-  Model(Schema.unblacklist_bvn, 'payload'),
+  Model(Schema.unblacklist_bvn, 'params'),
   BvnMiddleware.checkIfBvnExist,
   BvnController.unblacklistBvn
 );
