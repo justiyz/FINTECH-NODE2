@@ -59,7 +59,37 @@ export default {
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
     OR $1 IS NULL) 
    AND ((created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
-   `
+   `,
+
+  unblacklistBvns: `
+  INSERT INTO unblacklisted_bvns(
+    first_name,
+    middle_name,
+    last_name,
+    date_of_birth,
+    bvn
+  ) VALUES($1, $2, $3, $4, $5)
+  RETURNING  first_name,
+  middle_name,
+  last_name,
+  date_of_birth,
+  bvn
+  `,
+  removeBlacklistedBvn: `
+  DELETE FROM blacklisted_bvns
+  WHERE id = $1
+  `,
+
+  getUsers: `
+    SELECT 
+      user_id,
+      first_name,
+      middle_name,
+      last_name,
+      date_of_birth,
+      bvn
+    FROM users
+    WHERE status = 'blacklisted'`
 };
       
   

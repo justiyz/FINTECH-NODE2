@@ -46,3 +46,5 @@ export const cluster_member_invite  = (name, userName) => `${name} invite a clus
 export const cluster_member_invite_failed  = (name) => `${name} failed to invite a cluster member`;
 export const activate_cluster_member = (name, clusterName) => `${name} activates cluster member of cluster ${clusterName}`;
 export const deactivate_cluster_member = (name, clusterName) => `${name} admin deactivates cluster member of cluster ${clusterName}`;
+export const unblacklist_bvn = (name) => `${name} unblacklist user bvn`;
+export const unblacklist_existing_user = (name) => `${name} unblacklist an existing user bvn`;

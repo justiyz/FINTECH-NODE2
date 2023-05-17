@@ -279,6 +279,7 @@ export const FETCH_ENV_VALUES_SUCCESSFULLY = 'Fetched env values successfully';
 export const UPDATED_ENV_VALUES_SUCCESSFULLY = 'Updated env values successfully';
 export const BLACKLISTED_BVN = 'Blacklisted BVNs added';
 export const BLACKLIST_BVN_EXIST = 'Bvn already exist';
+export const BLACKLIST_BVN_DOES_NOT_EXIST = 'Bvn does not exist';
 export const BLACKLIST_BVN_FETCHED_SUCCESSFULLY = 'Blacklisted bvn fetched successfully';
 export const BLACKLIST_BVN_NOT_EXIST = 'Bvn does not exist';
 export const SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY = 'Score card weights breakdown fetched successfully';
@@ -290,3 +291,4 @@ export const ADMIN_EDIT_CLUSTER_STATUS = (status, name) => `admin successfully $
 export const ADMIN_EDIT_CLUSTER_MEMBER_STATUS = (status) => `admin successfully ${status} cluster member`;
 export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
 export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';
+export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';

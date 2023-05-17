@@ -1341,6 +1341,88 @@ describe('Admin', () => {
           done();
         });
     });
+    it('should flag if none super admin try fetching activity log', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/activity-log')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_TWO_ACCESS_TOKEN}`
+        })
+        .send({ 
+          page: 1,
+          per_page: 3
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Unbacklist bvn', () => {
+    it('Should lag if bvn length is not 11 characters long', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/bvn/unblacklist-bvn')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          bvn: '223301231'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal('bvn length must be 11 characters long');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully unblack bvn', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/bvn/unblacklist-bvn')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          bvn: '22330123231'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.UNBLACKLIST_BVN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag if try to unblacklisted not blacklisted bvn', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/bvn/unblacklist-bvn')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          bvn: '22330123231'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.BLACKLIST_BVN_DOES_NOT_EXIST);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
   });
 });
  
