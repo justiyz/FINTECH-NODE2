@@ -62,7 +62,7 @@ export const editUserStatus = async(req, res, next) => {
       await processOneOrNoneData(userQueries.addBlacklistedBvn, addBlacklistedBvnPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to blacklisted bvn list editUserStatus.admin.controllers.user.js`);
     }
-    if (userDetails.status === 'blacklisted' && status === 'active') {
+    if ((userDetails.status === 'blacklisted') && (status === 'active') && (userDetails.bvn !== null)) {
       const userDecryptedBvn = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
       const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvns, []);
       const plainBlacklistedBvnsDetails = [];
@@ -407,6 +407,11 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
     await adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));
     userActivityTracking(userDetails.user_id, 88, 'success');
+    if (tierChoice === '2') {
+      sendPushNotification(userDetails.user_id, PushNotifications.userTierUpgraded(), userDetails.fcm_token);
+      sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
+        PersonalNotifications.tierUpgradedSuccessfully(userDetails.first_name), 'tier-upgraded-successfully', {});
+    }
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
     await adminActivityTracking(req.admin.admin_id, 27, 'fail', descriptions.approves_utility_bill_failed(`${req.admin.first_name} ${req.admin.last_name}`));

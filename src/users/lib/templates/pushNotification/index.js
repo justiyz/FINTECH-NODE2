@@ -89,3 +89,7 @@ export const failedYouVerifyAddressVerification = () => {
 export const successfulYouVerifyAddressVerification = () => {
   return 'Your address verification processing is successful';
 };
+
+export const userTierUpgraded = () => {
+  return 'Your tier has been successfully upgraded to tier 2';
+};

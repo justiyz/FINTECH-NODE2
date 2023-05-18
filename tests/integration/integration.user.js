@@ -2535,7 +2535,7 @@ describe('User', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Details can not be updated');
+          expect(res.body.message).to.equal(enums.DETAILS_CAN_NOT_BE_UPDATED);
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();

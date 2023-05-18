@@ -123,10 +123,11 @@ export const updateBvn = async(req, res, next) => {
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0'; 
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
+    const tier_upgraded = tierChoice === '1' ? true : false;
     const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
-    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, updateBvn);
+    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, { ...updateBvn, tier_upgraded });
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
@@ -402,11 +403,12 @@ export const idUploadVerification = async(req, res, next) => {
     idUploadVerification.controllers.user.js`);
     const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? '1' : '0'; 
     // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
+    const tier_upgraded = tierChoice === '1' ? true : false;
     const [ data ] =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
-    return ApiResponse.success(res, enums.ID_UPLOAD_VERIFICATION, enums.HTTP_OK, data);
+    return ApiResponse.success(res, enums.ID_UPLOAD_VERIFICATION, enums.HTTP_OK, { ...data, tier_upgraded });
   } catch (error) {
     userActivityTracking(req.user.user_id, 18, 'fail');
     error.label = enums.ID_UPLOAD_VERIFICATION_CONTROLLER;
@@ -514,6 +516,11 @@ export const updateUserAddressVerificationStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: notifications of successful verification sent to user
     updateUserAddressVerificationStatus.controller.user.js`);
       await userActivityTracking(req.userAddressDetails.user_id, 85, 'success');
+      if (tierChoice === '2') {
+        sendPushNotification(userDetails.user_id, PushNotifications.userTierUpgraded(), userDetails.fcm_token);
+        sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
+          PersonalNotifications.tierUpgradedSuccessfully(userDetails.first_name), 'tier-upgraded-successfully', {});
+      }
       return ApiResponse.success(res, enums.USER_ADDRESS_VERIFICATION_SUCCESSFUL, enums.HTTP_OK);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user address verification failed
