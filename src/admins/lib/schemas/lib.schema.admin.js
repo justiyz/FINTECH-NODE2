@@ -26,8 +26,13 @@ const adminIdParams = Joi.object().keys({
   admin_id: Joi.string().required()
 });
 
+const unblacklist_bvn = Joi.object().keys({
+  id: Joi.string().required()
+});
+
 export default {
   adminCompleteProfile,
   editAdminPermissions,
-  adminIdParams
+  adminIdParams,
+  unblacklist_bvn
 };

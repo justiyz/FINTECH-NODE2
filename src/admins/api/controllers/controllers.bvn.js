@@ -1,6 +1,6 @@
 
 import bvnQueries from '../queries/queries.bvn';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import BvnPayload from '../../lib/payloads/lib.payload.bvn';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
@@ -102,6 +102,49 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
   } catch (error) {
     error.label = enums.BLACKLIST_BVN_CONTROLLER;
     logger.error(`Failed to fetch blacklisted BVNs:::${enums.BLACKLIST_BVN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+   * unblacklisted users bvn
+   * @param {Request} req - The request from the endpoint.
+   * @param {Response} res - The response returned by the method.
+   * @param {Next} next - Call the next operation.
+   * @returns {object} - Returns unblacklisted user details
+   * @memberof AdminBvnController
+   */
+export const unblacklistBvn = async(req, res, next) => {
+  const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
+  try {
+    const { blacklistedBvn } = req;
+    const blacklistedUsers = await processAnyData(bvnQueries.getBlacklistedUsers, []);
+    const decryptBlacklistedBvn = await UserHash.decrypt(decodeURIComponent(blacklistedBvn.bvn));
+  
+    if (blacklistedUsers.length > 0) {
+      await Promise.all(
+        blacklistedUsers.map(async(data) => {
+          const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
+          if (decryptedBvn === decryptBlacklistedBvn) {
+            await processOneOrNoneData(bvnQueries.unblacklistExistingUserBvn, [ data.user_id, 'active' ]);
+            return data;
+          }
+          return data;
+        }));
+    }
+
+    const payload = BvnPayload.unBlacklistedBvn(blacklistedBvn);
+    await Promise.all([
+      processOneOrNoneData(bvnQueries.updateUnblackListedBvn, payload),
+      processOneOrNoneData(bvnQueries.removeBlacklistedBvn, [ req.params.id ])
+    ]);
+    adminActivityTracking(req.admin.admin_id, 38, 'success', descriptions.unblacklist_bvn(adminName));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully unblacklisted bvn the database unblacklistBvn.admin.controllers.bvn.js`);
+    return ApiResponse.success(res, enums.UNBLACKLIST_BVN, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UNBLACKLIST_BVN_CONTROLLER;
+    logger.error(`Unblacklist bvn failed:::${enums.UNBLACKLIST_BVN_CONTROLLER}`, error.message);
     return next(error);
   }
 };

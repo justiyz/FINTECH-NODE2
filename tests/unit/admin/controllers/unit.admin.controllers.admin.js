@@ -88,5 +88,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call unblacklistBvn', async() => {
+      const req = { admin: '', body: '' };
+      const data = await BvnController.unblacklistBvn(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
