@@ -411,7 +411,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     userActivityTracking(userDetails.user_id, 88, 'success');
     if (tierChoice === '2') {
       await sendPushNotification(userDetails.user_id, PushNotifications.userTierUpgraded(), userDetails.fcm_token);
-      await sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
+      sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
         PersonalNotifications.tierUpgradedSuccessfully(userDetails.first_name), 'tier-upgraded-successfully', {});
     }
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
