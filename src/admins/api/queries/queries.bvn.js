@@ -69,11 +69,6 @@ export default {
     date_of_birth,
     bvn
   ) VALUES($1, $2, $3, $4, $5)
-  RETURNING  first_name,
-  middle_name,
-  last_name,
-  date_of_birth,
-  bvn
   `,
   removeBlacklistedBvn: `
   DELETE FROM blacklisted_bvns
@@ -108,11 +103,7 @@ export default {
       updated_at = NOW(),
       status = $2
     WHERE user_id = $1
-    RETURNING  first_name,
-    middle_name,
-    last_name,
-    date_of_birth,
-    bvn`
+`
 };
       
   

@@ -135,13 +135,13 @@ export const unblacklistBvn = async(req, res, next) => {
     }
 
     const payload = BvnPayload.unBlacklistedBvn(blacklistedBvn);
-    const updatePromise = await Promise.all([
+    await Promise.all([
       processOneOrNoneData(bvnQueries.updateUnblackListedBvn, payload),
       processOneOrNoneData(bvnQueries.removeBlacklistedBvn, [ req.params.id ])
     ]);
     adminActivityTracking(req.admin.admin_id, 38, 'success', descriptions.unblacklist_bvn(adminName));
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully unblacklisted bvn the database unblacklistBvn.admin.controllers.bvn.js`);
-    return ApiResponse.success(res, enums.UNBLACKLIST_BVN, enums.HTTP_OK, updatePromise[0]);
+    return ApiResponse.success(res, enums.UNBLACKLIST_BVN, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UNBLACKLIST_BVN_CONTROLLER;
     logger.error(`Unblacklist bvn failed:::${enums.UNBLACKLIST_BVN_CONTROLLER}`, error.message);
