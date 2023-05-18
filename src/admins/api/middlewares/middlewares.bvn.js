@@ -64,9 +64,9 @@ export const checkIfBvnExist = async(req, res, next) => {
     if (!blacklistedBvn) { 
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
       decoded that blacklisted bvn id does not exist in the database checkIfBvnExist.admin.middlewares.bvn.js`);
-      return ApiResponse.error(res, enums.BLACKLIST_BVN_DOES_NOT_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_BVN_EXIST_MIDDLEWARE);
+      return ApiResponse.error(res, enums.BLACKLIST_BVN_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_BVN_EXIST_MIDDLEWARE);
     }
-
+    req.blacklistedBvn = blacklistedBvn;
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_BVN_EXIST_MIDDLEWARE;

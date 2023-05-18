@@ -1389,7 +1389,7 @@ describe('Admin', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res).to.have.property('body');

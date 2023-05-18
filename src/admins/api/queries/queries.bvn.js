@@ -61,7 +61,7 @@ export default {
    AND ((created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
    `,
 
-  unblacklistBvns: `
+  updateUnblackListedBvn: ` 
   INSERT INTO unblacklisted_bvns(
     first_name,
     middle_name,
@@ -89,7 +89,7 @@ export default {
       date_of_birth,
       bvn
     FROM users
-    WHERE status = 'blacklisted'`,
+    WHERE status = 'blacklisted' AND bvn IS NOT NULL;`,
 
   fetchBlacklistedBvnById: `
     SELECT 
