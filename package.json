@@ -60,6 +60,7 @@
     "http-status": "^1.5.3",
     "joi": "^17.7.0",
     "jsonwebtoken": "^8.5.1",
+    "moment-timezone": "^0.5.43",
     "node-cron": "^3.0.2",
     "pg-promise": "^10.15.4",
     "puppeteer": "^18.1.0",

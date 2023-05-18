@@ -346,8 +346,8 @@ export default {
       CONCAT(admins.first_name, ' ', admins.last_name) AS admin_name,
       admin_roles.name AS role,
       admin_activity_logs.description,
-      to_char(admin_activity_logs.created_at, 'Mon DD, YYYY') AS date,
-      to_char(admin_activity_logs.created_at, 'hh12:mi AM') AS time,
+      to_char(admin_activity_logs.created_at AT TIME ZONE 'Africa/Lagos', 'Mon DD, YYYY') AS date,
+      to_char(admin_activity_logs.created_at AT TIME ZONE 'Africa/Lagos', 'hh12:mi AM') AS time,
       admin_activity_logs.activity_status
     FROM admin_activity_logs
     LEFT JOIN admins ON admins.admin_id = admin_activity_logs.admin_id

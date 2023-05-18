@@ -223,6 +223,7 @@ export const deleteRole = async(req, res, next) => {
 export const fetchRoles = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = RolePayload.fetchAllRoles(query);
       const roles = await processAnyData(roleQueries.getAllRoles, payload);
@@ -231,6 +232,7 @@ export const fetchRoles = async(req, res, next) => {
         total_count: roles.length,
         roles 
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'admin roles'));
       return ApiResponse.success(res, enums.ROLES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const  payload  = RolePayload.fetchRoles(query);
