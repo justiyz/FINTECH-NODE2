@@ -59,6 +59,7 @@ export const addBlacklistedBvns = async(req, res, next) => {
 export const fetchBlacklistedBvn = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     const payload = BvnPayload.fetchBlacklistedBvn(query);
     const blacklistBvns = await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
   
@@ -76,6 +77,7 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
     if (query.export) {
       logger.info(responseMessage);
       const data = { total_count: totalCount, blacklistBvns };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'blacklisted bvns'));
       return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
 

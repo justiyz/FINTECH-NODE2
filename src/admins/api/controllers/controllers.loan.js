@@ -122,6 +122,7 @@ export const loanApplicationDetails = async(req, res, next) => {
 export const fetchLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = loanPayload.fetchAllLoans(query);
       const loans = await processAnyData(loanQueries.fetchAllLoans, payload);
@@ -131,6 +132,7 @@ export const fetchLoans = async(req, res, next) => {
         total_count: loans.length,
         loans
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'loan applications'));
       return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
       
     }
@@ -167,6 +169,7 @@ export const fetchLoans = async(req, res, next) => {
 export const fetchRepaidLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = loanPayload.fetchAllRepaidLoans(query);
       const repaidLoans = await processAnyData(loanQueries.fetchAllRepaidLoans, payload);
@@ -176,6 +179,7 @@ export const fetchRepaidLoans = async(req, res, next) => {
         total_count: repaidLoans.length,
         repaidLoans
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid loans'));
       return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchRepaidLoans(query);

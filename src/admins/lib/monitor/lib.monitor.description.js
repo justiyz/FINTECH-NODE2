@@ -13,8 +13,8 @@ export const login_request = (name) => `${name}, initiates a request to login`;
 export const login_request_failed = (name) => `${name}, failed to initiate a request to login`;
 export const login_approved = (name) => `${name}, login request approved`;
 export const login_approved_failed = (name) => `${name}, login request failed`;
-export const new_password = (name) => `${name}, sets new password`;
-export const new_password_failed = (name) => `${name}, failed to set new password`;
+export const new_password = () => 'admin sets new password';
+export const new_password_failed = () => 'admin set new password failed';
 export const activate_role = (name, type) => `${name}, activate admin role ${type}`;
 export const deactivate_role = (name) => `${name}, deactivate admin role type`;
 export const delete_role = (name) => `${name}, delete admin role type`;
@@ -46,3 +46,4 @@ export const cluster_member_invite  = (name, userName) => `${name} invite a clus
 export const cluster_member_invite_failed  = (name) => `${name} failed to invite a cluster member`;
 export const activate_cluster_member = (name, clusterName) => `${name} activates cluster member of cluster ${clusterName}`;
 export const deactivate_cluster_member = (name, clusterName) => `${name} admin deactivates cluster member of cluster ${clusterName}`;
+export const initiate_document_type_export = (name, type) => `${name} successfully initiates selected ${type} file export`;

@@ -88,17 +88,16 @@ export const login = async(req, res, next) => {
 export const setPassword =  (type = '') => async(req, res, next) => {
   try {
     const { admin, body } = req;
-    const adminName = `${admin.first_name} ${admin.last_name}`;
     const hash = await Hash.hashData(body.password.trim());
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: password hashed setPassword.admin.controllers.auth.js`);
     const [ setNewPassword ] = await processAnyData(authQueries.setNewAdminPassword, [ admin.admin_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: hashed password saved in the DB setPassword.admin.controllers.auth.js`);
     const typeMonitor = type === 'first' ? 11 : 2;
-    const description = type === 'first' ? descriptions.new_password(adminName) : descriptions.reset_password();
+    const description = type === 'first' ? descriptions.new_password() : descriptions.reset_password();
     await adminActivityTracking(req.admin.admin_id, typeMonitor, 'success', description);
     return ApiResponse.success(res, enums.PASSWORD_SET_SUCCESSFULLY, enums.HTTP_OK, setNewPassword);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 'fail', descriptions.new_password_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(req.admin.admin_id, 'fail', descriptions.new_password_failed());
     error.label = enums.SET_PASSWORD_CONTROLLER;
     logger.error(`admin set new password failed:::${enums.SET_PASSWORD_CONTROLLER}`, error.message);
     return next(error);

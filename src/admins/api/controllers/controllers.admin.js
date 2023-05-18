@@ -165,6 +165,7 @@ export const inviteAdmin = async(req, res, next) => {
  */
 export const fetchAllAdmins = async(req, res, next) => {
   try {
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (req.query.export) {
       const filter = {
         status: req.query.status || null,
@@ -176,6 +177,7 @@ export const fetchAllAdmins = async(req, res, next) => {
         total_count: admins.admins.length,
         ...admins                                           
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'admins'));
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched admins from the DB fetchAllAdmins.controllers.admin.admin.js`);
       return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, data);
     }
