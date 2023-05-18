@@ -38,6 +38,8 @@ export const operations = {
   37: 'ANCRMRIR', // admin cluster member invite 
   38: 'ANUTBN', // admin unblacklist bvn
   39: 'ANAECRMR', // admin activate cluster member
-  40: 'ANDECRMR' // admin deactivate cluster member
+  40: 'ANDECRMR', // admin deactivate cluster member
+  41: 'IEDTET', // admin about to export data from the DB
+  42: 'ANVWAS' // admin views reports and analytics
 };
 

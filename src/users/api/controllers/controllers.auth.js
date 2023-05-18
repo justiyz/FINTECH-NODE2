@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import momentTZ from 'moment-timezone';
 import AuthPayload from '../../lib/payloads/lib.payload.auth';
 import authQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
@@ -252,8 +253,8 @@ export const forgotPassword = async(req, res, next) => {
     if (existingOtp) {
       return forgotPassword(req, res, next);
     }
-    const expireAt = dayjs().add(10, 'minutes');
-    const expirationTime = dayjs(expireAt).format('HH:mm');
+    const expireAt = momentTZ().add(5, 'minutes');
+    const expirationTime = momentTZ(expireAt).tz('Africa/Lagos').format('hh:mm a');
     const payload = [ user.email, otp, expireAt ];
     await processAnyData(authQueries.forgotPassword, payload);
     const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
