@@ -60,6 +60,16 @@ export default {
     OR $1 IS NULL) 
    AND ((created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
    `,
+  fetchBlacklistedBvns: `
+    SELECT 
+     id,
+      first_name,
+      middle_name,
+      last_name,
+      date_of_birth,
+      bvn,
+      created_at
+    FROM blacklisted_bvns`,
 
   updateUnblackListedBvn: ` 
   INSERT INTO unblacklisted_bvns(

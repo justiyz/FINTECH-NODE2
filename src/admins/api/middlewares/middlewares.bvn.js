@@ -18,27 +18,27 @@ export const isBvnAlreadyBlacklisted = async(req, res, next) => {
   try {
     const { body } = req;
     const blacklistedBvn =  await processAnyData(bvnQueries.fetchBlacklistedBvn, []);
-    await Promise.all(
-      blacklistedBvn.map(async(data) => {
-        const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
-        data.bvn = decryptedBvn;
-        return data;
-      })
-    );
+
+    await blacklistedBvn.map(async(data) => {
+      const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
+      return data.bvn = decryptedBvn;
+    });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
     successfully decrypted bvn coming from the database checkIfAminEmailAlreadyExist.admin.middlewares.bvn.js`);
     
-    if (req.query.type === 'single' && blacklistedBvn.find((data) => data.bvn === req.body.bvn)) { 
-      return ApiResponse.error(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_CONFLICT, enums.IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE);
+    if (body.type === 'single' && blacklistedBvn.find((data) => data.bvn === body.bvn)) { 
+      return ApiResponse.error(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_CONFLICT, 
+        enums.IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE);
     }
-    if (req.query.type === 'single') return next();
-    
+    if (body.type === 'single') return next();
+
     const ids = new Set(blacklistedBvn.map(({ bvn }) => bvn));
-    const addBvn = body.filter(({ bvn }) => !ids.has(bvn));
+    const addBvn = body.data.filter(({ bvn }) => !ids.has(bvn));
 
     if (!addBvn || !addBvn.length) {
-      return ApiResponse.error(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_CONFLICT, enums.IS_BVN_ALREADY_BLACKLISTED_MIDDLEWARE);
+      return ApiResponse.success(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_OK);
     }
+
     req.addBvn = addBvn;
     return next();
   } catch (error) {
@@ -48,8 +48,6 @@ export const isBvnAlreadyBlacklisted = async(req, res, next) => {
   }
 };
   
-/**
- * 
 /**
  * check if blacklisted bvn exist in the DB
  * @param {Request} req - The request from the endpoint.
