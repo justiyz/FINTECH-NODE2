@@ -1055,7 +1055,7 @@ describe('Admin', () => {
     });
   });
   describe('Blacklisted single and bulk Bvn', () => {
-    it('should blacklist bulk bvn', (done) => {
+    it('should blacklist single bvn', (done) => {
       chai.request(app)
         .post('/api/v1/admin/bvn/blacklist')
         .set({
