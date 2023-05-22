@@ -61,7 +61,7 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
     const { query, admin } = req;
     const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     const payload = BvnPayload.fetchBlacklistedBvn(query);
-    const blacklistBvns = query.export ? await processAnyData(bvnQueries.fetchBlacklistedBvn, []) 
+    const blacklistBvns = query.export ? await processAnyData(bvnQueries.fetchBlacklistedBvn, payload) 
       : await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
   
     await Promise.all(
