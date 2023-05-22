@@ -1055,17 +1055,15 @@ describe('Admin', () => {
     });
   });
   describe('Blacklisted single and bulk Bvn', () => {
-    it('should blacklist bulk bvn', (done) => {
+    it('should blacklist single bvn', (done) => {
       chai.request(app)
         .post('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .query({
-          type: 'single'
-        })
         .send({
+          type: 'single',
           first_name: 'st',
           middle_name: 'ola',
           last_name: 'dence ',
@@ -1088,8 +1086,9 @@ describe('Admin', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .send(
-          [
+        .send({
+          type: 'bulk',
+          data: [
             {
               first_name: 'st',
               middle_name: 'ola',
@@ -1105,7 +1104,7 @@ describe('Admin', () => {
               bvn: '2231222110'
             }
           ]
-        )
+        })
         .end((err, res) => {
           expect(res.statusCode).to.equal(201);
           expect(res.body).to.have.property('message');
@@ -1122,10 +1121,11 @@ describe('Admin', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .send(
-          [
+        .send({
+          type: 'bulk',
+          data: [
             {
-              first_name: 'st',
+              first_name: 'ade',
               middle_name: 'ola',
               last_name: 'dence ',
               date_of_birth: '1954-12-08',
@@ -1139,7 +1139,7 @@ describe('Admin', () => {
               bvn: '22312110'
             }
           ]
-        )
+        })
         .end((err, res) => {
           expect(res.statusCode).to.equal(201);
           expect(res.body).to.have.property('message');
@@ -1150,15 +1150,16 @@ describe('Admin', () => {
           done();
         });
     });
-    it('should throw error inserting same bvn', (done) => {
+    it('should return success if try inserting same bulk bvn', (done) => {
       chai.request(app)
         .post('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .send(
-          [
+        .send({
+          type: 'bulk',
+          data: [
             {
               first_name: 'st',
               middle_name: 'ola',
@@ -1174,27 +1175,25 @@ describe('Admin', () => {
               bvn: '2231222110'
             }
           ]
-        )
+        })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(409);
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.BLACKLIST_BVN_EXIST);
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });
-    it('should throw error if try blacklisting single user bvn', (done) => {
+    it('should throw error if try blacklisting already blacklisted user bvn', (done) => {
       chai.request(app)
         .post('/api/v1/admin/bvn/blacklist')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .query({
-          type: 'single'
-        })
         .send({
+          type: 'single',
           first_name: 'st',
           middle_name: 'ola',
           last_name: 'dence ',

@@ -19,11 +19,11 @@ import * as descriptions from '../../lib/monitor/lib.monitor.description';
  */
 export const addBlacklistedBvns = async(req, res, next) => {
   try {
-    const { addBvn, query, admin }= req;
-    const bodyData = query.type === 'single' ? req.body : addBvn;
+    const { addBvn, body, admin }= req;
+    const bodyData = body.type === 'single' ? body : addBvn;
     const adminName = `${admin.first_name} ${admin.last_name}`;
     let processedData;
-    if (query.type === 'single') {
+    if (body.type === 'single') {
       const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn));
       const payload = BvnPayload.blacklistedBvn(bodyData, hashedBvn);
       processedData  = await processAnyData(bvnQueries.blacklistedBvn, payload);
@@ -61,7 +61,8 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
     const { query, admin } = req;
     const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     const payload = BvnPayload.fetchBlacklistedBvn(query);
-    const blacklistBvns = await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
+    const blacklistBvns = query.export ? await processAnyData(bvnQueries.fetchBlacklistedBvns, payload) 
+      : await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
   
     await Promise.all(
       blacklistBvns.map(async(data) => {

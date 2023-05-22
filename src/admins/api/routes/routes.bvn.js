@@ -12,6 +12,7 @@ router.post(
   '/blacklist',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('bvn management', 'create'),
+  Model(Schema.blacklistedBvn, 'payload'),
   BvnMiddleware.isBvnAlreadyBlacklisted,
   BvnController.addBlacklistedBvns
 );
@@ -20,6 +21,7 @@ router.get(
   '/blacklist',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('bvn management', 'read'),
+  Model(Schema.fetchBlacklistedBvn, 'params'),
   BvnController.fetchBlacklistedBvn
 );
 
