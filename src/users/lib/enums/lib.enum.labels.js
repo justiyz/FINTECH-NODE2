@@ -163,6 +163,7 @@ export const SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER = 'ClusterController::suggestN
 export const UPDATE_NOTIFICATION_IS_READ_CONTROLLER = 'UserController::updateNotificationIsRead';
 export const CREATE_NEXT_OF_KIN_CONTROLLER = 'UserController::createNextOfKin';
 export const FETCH_NEXT_OF_KIN_CONTROLLER = 'UserController::fetchNextOfKin';
+export const FETCH_LOAN_TIER_CONTROLLER = 'UserController::fetchLoanTierValue';
 export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE = 'UserMiddleware::checkIfUserHasPreviouslyCreatedNextOfKin';
 export const CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE = 'LoanMiddleware::checkIfUserBvnNotBlacklisted';
 export const USER_PROFILE_NEXT_UPDATE_MIDDLEWARE = 'UserMiddleware::userProfileNextUpdate';

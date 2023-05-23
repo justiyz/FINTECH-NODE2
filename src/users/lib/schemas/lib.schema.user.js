@@ -130,6 +130,10 @@ const updateMonoId = Joi.object().keys({
   mono_account_id: Joi.string().required()
 });
 
+const tierLoanValue = Joi.object().keys({
+  type: Joi.string().required().valid('tier_one', 'tier_two')
+});
+
 
 export default  {
   updateFcmToken,
@@ -150,5 +154,6 @@ export default  {
   nextOfKin,
   employmentDetails,
   updateEmploymentDetails,
-  updateMonoId
+  updateMonoId,
+  tierLoanValue
 };
