@@ -266,6 +266,13 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
   return data;
 };
 
+export const seedfiMonoAccountIdGenerationTestResponse = () => {
+  const data = {
+    id: '646c85c6e7c746906dbb4ac4'
+  };
+  return data;
+};
+
 export const seedfiYouVerifyUserCandidateCreationTestResponse = (user) => {
   const data = {
     success: true,

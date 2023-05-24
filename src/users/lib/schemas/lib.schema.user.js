@@ -127,7 +127,7 @@ const updateEmploymentDetails = Joi.object().keys({
 });
 
 const updateMonoId = Joi.object().keys({
-  mono_account_id: Joi.string().required()
+  mono_account_code: Joi.string().required()
 });
 
 const tierLoanValue = Joi.object().keys({

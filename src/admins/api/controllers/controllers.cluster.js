@@ -130,7 +130,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       cluster_name: cluster.name
     };
 
-    await adminActivityTracking(admin.admin_id, 40, 'success', descriptions.cluster_member_invite(adminName, invitedUser.name));
+    await adminActivityTracking(admin.admin_id, 37, 'success', descriptions.cluster_member_invite(adminName, invitedUser.name));
     if (body.email.trim().toLowerCase() === invitedUser.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
@@ -146,7 +146,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 40, 'fail', descriptions.cluster_member_invite_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(req.admin.admin_id, 37, 'fail', descriptions.cluster_member_invite_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.CLUSTER_MEMBER_INVITE_CONTROLLER;
     logger.error(`Admin inviting cluster member failed::${enums.CLUSTER_MEMBER_INVITE_CONTROLLER}`, error.message);
     return next(error);

@@ -2008,7 +2008,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          mono_account_id: Hash.generateRandomString(5)
+          mono_account_code: Hash.generateRandomString(5)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -2035,7 +2035,7 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('mono_account_id is required');
+          expect(res.body.message).to.equal('mono_account_code is required');
           done();
         });
     });
@@ -2047,7 +2047,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          mono_account_id: Hash.generateRandomString(5)
+          mono_account_code: Hash.generateRandomString(5)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

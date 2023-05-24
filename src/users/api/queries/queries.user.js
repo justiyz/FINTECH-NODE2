@@ -168,6 +168,7 @@ export default {
       UPDATE user_bank_accounts
       SET 
         updated_at = NOW(),
+        mono_account_id = NULL,
         is_default = FALSE
       WHERE user_id = $1`,
 

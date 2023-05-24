@@ -20,6 +20,7 @@ export const CHECK_IF_EMAIL_ALREADY_EXIST_MIDDLEWARE = 'AuthMiddleware::checkIfE
 export const COMPARE_PASSWORD_MIDDLEWARE = 'AuthMiddleware::comparePassword';
 export const COMPARE_DEVICE_TOKEN_MIDDLEWARE = 'AuthMiddleware::compareDeviceToken';
 export const PERSONAL_LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE = 'SeedfiUnderwritingService::personalLoanApplicationEligibilityCheck';
+export const GENERATE_MONO_ACCOUNT_ID_SERVICE = 'MonoService::generateMonoAccountId';
 export const CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE = 'YouVerifyService::createUserYouVerifyCandidate';
 export const INITIATE_YOU_VERIFY_ADDRESS_VERIFICATION_SERVICE = 'YouVerifyService::initiateUserYouVerifyAddressVerification';
 export const DOJAH_BVN_VERIFICATION_SERVICE = 'DojahService::dojahBvnVerificationCheck';

@@ -13,6 +13,7 @@ import { fetchBanks } from '../services/service.paystack';
 import { updateNotificationReadBoolean } from '../services/services.firebase';
 import { initiateUserYouVerifyAddressVerification } from '../services/service.youVerify';
 import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import { generateMonoAccountId } from '../services/services.mono';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
@@ -840,10 +841,19 @@ export const updateEmploymentDetails = async(req, res, next) => {
 export const updateMonoAccountId = async(req, res, next) => {
   try {
     const { user, body } = req;
-    const data = await processOneOrNoneData(userQueries.updateUserMonoAccountId, [ user.user_id, body.mono_account_id.trim() ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User mono id updated successfully in the DB. updateMonoAccountId.controller.user.js`);
-    userActivityTracking(req.user.user_id, 92, 'success');
-    return ApiResponse.success(res, enums.UPDATE_USER_MONO_ID, enums.HTTP_OK, data);
+    const result = await generateMonoAccountId(body);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User mono id generate request response returned. updateMonoAccountId.controller.user.js`);
+    if (result && result.id) {
+      const data = await processOneOrNoneData(userQueries.updateUserMonoAccountId, [ user.user_id, result.id.trim() ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User mono id updated successfully in the DB. updateMonoAccountId.controller.user.js`);
+      userActivityTracking(req.user.user_id, 92, 'success');
+      return ApiResponse.success(res, enums.UPDATE_USER_MONO_ID, enums.HTTP_OK, data);
+    }
+    if (result && result.response) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: error response returned from account id generation updateMonoAccountId.controller.user.js`);
+      userActivityTracking(req.user.user_id, 92, 'fail');
+      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER);
+    }
   } catch (error) {
     userActivityTracking(req.user.user_id, 92, 'fail');
     error.label = enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER;

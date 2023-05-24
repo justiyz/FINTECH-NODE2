@@ -95,11 +95,21 @@ router.get(
 );
 
 router.patch(
-  '/:user_id/verify-utility-bill',
+  '/:user_id/approve-utility-bill',
   AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('users', 'update'),
+  RoleMiddleware.adminAccess('users', 'approve'),
   Model(Schema.userIdParams, 'params'),
-  Model(Schema.approveDeclineUtilityBill, 'payload'),
+  Model(Schema.approveUtilityBill, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.verifyUserUtilityBill
+);
+
+router.patch(
+  '/:user_id/decline-utility-bill',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'reject'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.declineUtilityBill, 'payload'),
   UserMiddleware.checkIfUserExists,
   UserController.verifyUserUtilityBill
 );
