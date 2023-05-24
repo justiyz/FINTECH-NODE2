@@ -165,6 +165,9 @@ export const PAYMENT_OTP_REJECTED = 'payment OTP is invalid please check and inp
 export const PIN_RESET = 'Pin reset successful';
 export const CLUSTER_NAME_ALREADY_EXISTING = (name) => `A cluster with this name "${name}" already exists`;
 export const UPDATE_INCOME_FOR_ACTION_PERFORMANCE = 'kindly update income in employment details to perform action';
+export const CLUSTER_STATUS_SAME_AS_STATUS_ACTION = (status) => `Cluster status is currently "${status}" and cannot be changed again`;
+export const ACTIVE_CLUSTER_LOAN_OBLIGATIONS = 'Cluster still has active loan obligation and thus cannot be deactivated';
+export const ACTIVE_CLUSTER_MEMBER_LOAN_OBLIGATIONS = 'Cluster member still has active cluster loan obligation and thus cannot be deleted';
 export const NOT_CATERED_FOR_DECISION_TYPE = 'Decision ticket belongs to a type not catered for yet';
 export const CLUSTER_CLOSED_FOR_MEMBERSHIP = 'No member can join this cluster again';
 export const USER_NO_CLUSTER_INVITATION = (name) => `User has no active invitation from ${name} cluster`;
@@ -289,7 +292,7 @@ export const CLUSTERS_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
 export const CLUSTER__DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
 export const ADMIN_CLUSTER_MEMBER_INVITE = 'Admin Successfully invite cluster member';
 export const ADMIN_EDIT_CLUSTER_STATUS = (status, name) => `admin successfully ${status} ${name} cluster`;
-export const ADMIN_EDIT_CLUSTER_MEMBER_STATUS = (status) => `admin successfully ${status} cluster member`;
+export const ADMIN_DELETES_CLUSTER_MEMBER = 'admin successfully deletes cluster member';
 export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
 export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';
 export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';

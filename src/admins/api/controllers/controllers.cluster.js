@@ -24,7 +24,7 @@ const { SEEDFI_NODE_ENV } = config;
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns newly created cluster details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
 
 export const createCluster = async(req, res, next) => {
@@ -55,7 +55,7 @@ export const createCluster = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns clusters details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
 
 export const fetchAndFilterClusters = async(req, res, next) => {
@@ -87,7 +87,7 @@ export const fetchAndFilterClusters = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
 export const fetchSingleClusterDetails = async(req, res, next) => {
   try {
@@ -116,7 +116,7 @@ export const fetchSingleClusterDetails = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
 export const clusterMemberInvite = async(req, res, next) => {
   try {
@@ -160,7 +160,7 @@ export const clusterMemberInvite = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
 export const activateAndDeactivateCluster = async(req, res, next) => {
   const {body, admin, cluster: { cluster_id, name } } = req;
@@ -181,29 +181,26 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
 };
 
 /**
- * admin activate and deactivate cluster member
+ * admin deletes/removes cluster member from cluster
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminUserController
+ * @memberof AdminClusterController
  */
-export const deactivateClusterMember = async(req, res, next) => {
-  const {body, params: { user_id, cluster_id },admin, cluster } = req;
+export const deleteClusterMember = async(req, res, next) => {
+  const {params: { user_id, cluster_id }, admin, cluster, userDetails } = req;
   const adminName = `${admin.first_name} ${admin.last_name}`;
-  const activityType = body.status === 'active' ? 39 : 40;
-  const description = body.status === 'active' ? descriptions.deactivate_cluster_member(adminName, cluster.name) 
-    : descriptions.activate_cluster_member(adminName, cluster.name);
   try {
-    const data = await processOneOrNoneData(AdminQueries.deactivateClusterMember, 
-      [ cluster_id.trim(), user_id.trim(), body.status ]);
+    const data = await processOneOrNoneData(AdminQueries.deleteClusterMember, 
+      [ cluster_id.trim(), user_id.trim() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
-     admin have successfully ${body.status} cluster member in the DB. activateAndDeactivateClusterMember.admin.controllers.cluster.js`);
-    await adminActivityTracking(admin.admin_id, activityType, 'success', description);
-    return ApiResponse.success(res, enums.ADMIN_EDIT_CLUSTER_MEMBER_STATUS(body.status), enums.HTTP_OK, data);
+     admin have successfully remove cluster member in the DB. deleteClusterMember.admin.controllers.cluster.js`);
+    await adminActivityTracking(admin.admin_id, 36, 'success', descriptions.delete_cluster_member(adminName, userDetails.name, cluster.name));
+    return ApiResponse.success(res, enums.ADMIN_DELETES_CLUSTER_MEMBER, enums.HTTP_OK, data);
   } catch (error) {
-    error.label = enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER;
-    logger.error(`Admin activate/deactivate cluster member failed::${enums.ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER}`, error.message);
+    error.label = enums.DELETE_CLUSTER_MEMBER_CONTROLLER;
+    logger.error(`Admin deletes cluster member failed::${enums.DELETE_CLUSTER_MEMBER_CONTROLLER}`, error.message);
     return next(error);
   }
 };

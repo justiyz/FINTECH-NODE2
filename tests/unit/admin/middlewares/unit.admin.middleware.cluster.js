@@ -39,5 +39,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkClusterCurrentStatus', async() => {
+      const req = { cluster: '', admin: '', body: '' };
+      const data = await AdminClusterMiddleware.checkClusterCurrentStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkClusterLoanStatus', async() => {
+      const req = { cluster: '', admin: '' };
+      const data = await AdminClusterMiddleware.checkClusterLoanStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkUserClusterLoanStatus', async() => {
+      const req = { userClusterDetails: '', admin: '' };
+      const data = await AdminClusterMiddleware.checkUserClusterLoanStatus(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
