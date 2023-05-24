@@ -30,7 +30,7 @@ const { SEEDFI_NODE_ENV } = config;
  */
 export const updateFcmToken = async(req, res, next) => {
   try {
-    const {user, body} = req;
+    const { user, body } = req;
     await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user fcm token to the database updateFcmToken.controllers.user.js`);
     const data = {
@@ -88,7 +88,7 @@ export const updateUserRefreshToken = async(req, res, next) => {
 export const updateSelfieImage = async(req, res, next) => {
   try {
     const { user, body } = req;
-    const token =  Hash.generateRandomString(50);
+    const token = Hash.generateRandomString(50);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated updateSelfieImage.controllers.user.j`);
     const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database updateSelfieImage.controllers.user.j`);
@@ -121,7 +121,7 @@ export const updateBvn = async(req, res, next) => {
   try {
     const { body: { bvn }, user } = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-    const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0'; 
+    const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     const tier_upgraded = tierChoice === '1' ? true : false;
     const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn, tierChoice ]);
@@ -148,7 +148,7 @@ export const updateBvn = async(req, res, next) => {
 export const requestEmailVerification = async(req, res, next) => {
   try {
     const { user } = req;
-    const token =  Hash.generateRandomString(50);
+    const token = Hash.generateRandomString(50);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated requestEmailVerification.controller.auth.js`);
     const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database requestEmailVerification.controller.auth.js`);
@@ -159,7 +159,7 @@ export const requestEmailVerification = async(req, res, next) => {
     const expirationTime = dayjs(expireAt);
     const payload = [ user.email, token, expireAt ];
     await processAnyData(userQueries.emailVerificationToken, payload);
-    const data ={ user_id: user.user_id, otp: token, otpExpire: expirationTime };
+    const data = { user_id: user.user_id, otp: token, otpExpire: expirationTime };
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK, data);
     }
@@ -391,7 +391,7 @@ export const verifyEmail = async(req, res, next) => {
  */
 export const idUploadVerification = async(req, res, next) => {
   try {
-    const { user, body } = req; 
+    const { user, body } = req;
     const fileExt = path.extname(body.image_url.trim());
     const document = encodeURIComponent(
       await Hash.encrypt({ document_url: body.image_url.trim(), document_extension: fileExt })
@@ -401,10 +401,10 @@ export const idUploadVerification = async(req, res, next) => {
     await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'valid identification', document ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved uploaded selfie to user uploaded documents to the database 
     idUploadVerification.controllers.user.js`);
-    const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? '1' : '0'; 
+    const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? '1' : '0';
     // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
     const tier_upgraded = tierChoice === '1' ? true : false;
-    const [ data ] =  await processAnyData(userQueries.userIdVerification, [ user.user_id, tierChoice ]);
+    const [ data ] = await processAnyData(userQueries.userIdVerification, [ user.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
@@ -450,7 +450,7 @@ export const initiateAddressVerification = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification could not be initiated with youVerify 
     initiateAddressVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 83, 'fail');
-    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
+    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
       enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
   } catch (error) {
     error.label = enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER;
@@ -504,13 +504,13 @@ export const updateUserAddressVerificationStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user address verification successful
       updateUserAddressVerificationStatus.controller.user.js`);
       await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [ userAddressDetails.user_id, 'verified', false, true ]);
-      const tierChoice = (userAddressDetails.is_verified_utility_bill) ? '2' : '1'; 
+      const tierChoice = (userAddressDetails.is_verified_utility_bill) ? '2' : '1';
       // user needs address to have been verified and uploaded utility bill verified to move to tier 2
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: user tier value updated
       updateUserAddressVerificationStatus.controller.user.js`);
       await processOneOrNoneData(userQueries.updateUserTierValue, [ userDetails.user_id, tierChoice ]);
       sendPushNotification(userDetails.user_id, PushNotifications.successfulYouVerifyAddressVerification(), userDetails.fcm_token);
-      sendUserPersonalNotification(userDetails, `${userDetails.first_name} address verification successful`, 
+      sendUserPersonalNotification(userDetails, `${userDetails.first_name} address verification successful`,
         PersonalNotifications.userAddressVerificationSuccessful(userDetails, userAddressDetails), 'address-verification-successful', {});
       await MailService('Address verification successful', 'successfulAddressVerification', { ...userDetails, ...userAddressDetails });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: notifications of successful verification sent to user
@@ -518,7 +518,7 @@ export const updateUserAddressVerificationStatus = async(req, res, next) => {
       await userActivityTracking(req.userAddressDetails.user_id, 85, 'success');
       if (tierChoice === '2') {
         sendPushNotification(userDetails.user_id, PushNotifications.userTierUpgraded(), userDetails.fcm_token);
-        sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
+        sendUserPersonalNotification(userDetails, 'Tier upgraded successfully',
           PersonalNotifications.tierUpgradedSuccessfully(userDetails.first_name), 'tier-upgraded-successfully', {});
       }
       return ApiResponse.success(res, enums.USER_ADDRESS_VERIFICATION_SUCCESSFUL, enums.HTTP_OK);
@@ -527,7 +527,7 @@ export const updateUserAddressVerificationStatus = async(req, res, next) => {
     updateUserAddressVerificationStatus.controller.user.js`);
     await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [ userAddressDetails.user_id, 'failed', true, false ]);
     sendPushNotification(userDetails.user_id, PushNotifications.failedYouVerifyAddressVerification(), userDetails.fcm_token);
-    sendUserPersonalNotification(userDetails, `${userDetails.first_name} address verification failed`, 
+    sendUserPersonalNotification(userDetails, `${userDetails.first_name} address verification failed`,
       PersonalNotifications.userAddressVerificationFailed(userDetails, userAddressDetails), 'address-verification-failed', {});
     await MailService('Address verification failed', 'failedAddressVerification', { ...userDetails, ...userAddressDetails });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}:::Info: notifications of failed verification sent to user
@@ -585,11 +585,11 @@ export const getProfile = async(req, res, next) => {
   try {
     const { user, userEmploymentDetails } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User data Info fetched. getProfile.controllers.user.js`);
-    delete user.pin; 
+    delete user.pin;
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
-    const [ userEmploymentDetail,  userNextOfKinDetails ,  userAddressDetails, userBvn ]   = await Promise.all([
+    const [ userEmploymentDetail, userNextOfKinDetails, userAddressDetails, userBvn ] = await Promise.all([
       processOneOrNoneData(userQueries.fetchEmploymentDetails, user.user_id),
       processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id),
       processOneOrNoneData(userQueries.fetchUserAddressDetails, user.user_id),
@@ -598,7 +598,7 @@ export const getProfile = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's employment details, address details and next of kin from the DB
     fetchUserInformationDetails.controller.user.js`);
     user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
-    user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ? 
+    user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
       true : false;
     const data = {
       userProfileDetails: user,
@@ -606,7 +606,7 @@ export const getProfile = async(req, res, next) => {
       nextOfKin: userNextOfKinDetails,
       addressDetails: userAddressDetails
     };
-    return ApiResponse.success(res,enums.FETCH_USER_PROFILE, enums.HTTP_OK, data);
+    return ApiResponse.success(res, enums.FETCH_USER_PROFILE, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
     logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
@@ -688,9 +688,9 @@ export const homepageDetails = async(req, res, next) => {
     const outstandingPersonalLoanAmount = !userOutstandingPersonalLoanRepayment ? 0 : parseFloat(userOutstandingPersonalLoanRepayment.total_outstanding_amount);
     // to implement the query when cluster loan is implement
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan outstanding fetched homepageDetails.controller.user.js`);
-    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount +  0).toFixed(2)); // to include for cluster loan when implemented
+    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount + 0).toFixed(2)); // to include for cluster loan when implemented
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's total loan obligation calculated homepageDetails.controller.user.js`);
-    const personalLoanTransactions =  await processAnyData(userQueries.userPersonalLoanTransactions, [ user.user_id ]);
+    const personalLoanTransactions = await processAnyData(userQueries.userPersonalLoanTransactions, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan repayment transactions fetched homepageDetails.controller.user.js`);
     const underProcessingPersonalLoans = await processAnyData(userQueries.userExistingProcessingLoans, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process personal loans fetched from the DB homepageDetails.controller.user.jss`);
@@ -738,7 +738,7 @@ export const homepageDetails = async(req, res, next) => {
  */
 export const updateNotificationIsRead = async(req, res, next) => {
   try {
-    const { body, user, params} = req;
+    const { body, user, params } = req;
     await updateNotificationReadBoolean(user, params, body);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated notification read status updateNotificationIsRead.controller.user.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
@@ -759,7 +759,7 @@ export const updateNotificationIsRead = async(req, res, next) => {
  */
 export const createNextOfKin = async(req, res, next) => {
   try {
-    const { body, user} = req;
+    const { body, user } = req;
     const payload = UserPayload.createNextOfKin(body, user);
     const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
     userActivityTracking(req.user.user_id, 89, 'success');
@@ -848,6 +848,28 @@ export const updateMonoAccountId = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 92, 'fail');
     error.label = enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER;
     logger.error(`updating user mono id failed:::${enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch loan tier value
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns loan tier value
+ * @memberof UserController
+ */
+export const fetchLoanTierValue = async(req, res, next) => {
+  try {
+    const query = (req.query.type === 'tier_one') ? userQueries.fetchTierOneLoanValue : userQueries.fetchTierTwoLoanValue;
+    const data = await processAnyData(query, []);
+    
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched loan tiers value from the DB. fetchTierLoanValue.controller.user.js`);
+    return ApiResponse.success(res, enums.FETCH_LOAN_VALUE, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_LOAN_TIER_CONTROLLER;
+    logger.error(`Fetch tier loan value failed:::${enums.FETCH_LOAN_TIER_CONTROLLER}`, error.message);
     return next(error);
   }
 };

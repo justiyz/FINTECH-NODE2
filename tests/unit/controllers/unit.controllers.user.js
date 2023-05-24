@@ -199,5 +199,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchLoanTierValue', async() => {
+      const req = { query: '' };
+      const data = await UserController.fetchLoanTierValue(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

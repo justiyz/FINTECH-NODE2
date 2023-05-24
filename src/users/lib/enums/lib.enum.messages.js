@@ -202,6 +202,7 @@ export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment ty
 export const BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION = 'You are not allowed to access loan facility at the moment';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
 export const UPDATE_USER_MONO_ID = 'User mono account id updated successfully';
+export const FETCH_LOAN_VALUE = 'successfully fetch loan user loan value';
 
 
 // admin module related messages

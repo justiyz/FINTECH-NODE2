@@ -239,5 +239,12 @@ router.patch(
   UserController.updateMonoAccountId
 );
 
+router.get(
+  '/tiers',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.tierLoanValue, 'query'),
+  UserController.fetchLoanTierValue
+);
+
 
 export default router;

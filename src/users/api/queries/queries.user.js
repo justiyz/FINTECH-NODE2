@@ -519,5 +519,21 @@ export default {
     WHERE user_id = $1
     AND is_default = TRUE
     RETURNING id, user_id, bank_name, account_name, is_default, mono_account_id
-    `
+    `,
+  fetchTierOneLoanValue: `
+   SELECT 
+    name,
+    value
+   FROM admin_env_values_settings
+   WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
+   'tier_one_minimum_loan_amount', 'tier_one_maximum_loan_amount');
+  `,
+  fetchTierTwoLoanValue: `
+    SELECT 
+    name,
+    value
+    FROM admin_env_values_settings
+    WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
+    'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount');
+ `
 };
