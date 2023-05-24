@@ -1,6 +1,4 @@
-import dayjs from 'dayjs';
 import ClusterPayload from '../../../admins/lib/payloads/lib.payload.cluster';
-import ClusterQueries from '../../../users/api/queries/queries.cluster';
 import userQueries from '../queries/queries.user';
 import AdminQueries from '../../../admins/api/queries/queries.cluster';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -31,10 +29,6 @@ export const createCluster = async(req, res, next) => {
   const { body, admin } = req;
   const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
-    const clusterOpenGrace = await processOneOrNoneData(ClusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
-    const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster grace period for membership joining set successfully createCluster.controllers.cluster.js`);
-    body.join_cluster_closes_at =  join_cluster_closes_at;
     const createClusterPayload = ClusterPayload.createClusterPayload(body);
     const newClusterDetails = await processOneOrNoneData(AdminQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster created successfully createCluster.controllers.cluster.js`);

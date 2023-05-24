@@ -16,8 +16,7 @@ export default {
     body.loan_goal_target || 0,
     body.minimum_monthly_income,
     true,
-    body.clusterCode,
-    body.join_cluster_closes_at
+    body.clusterCode
   ],
   clusterInvite: (body, cluster, admin, invitedUser) => [
     cluster.cluster_id,

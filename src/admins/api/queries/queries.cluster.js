@@ -9,9 +9,8 @@ export default {
         loan_goal_target,
         minimum_monthly_income,
         is_created_by_admin,
-        unique_code,
-        join_cluster_closes_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        unique_code
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *`,
   fetchClustersDetails:
     `SELECT
