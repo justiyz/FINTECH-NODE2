@@ -38,6 +38,8 @@ ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS renegotiation_count INTEGER;
 ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS reschedule_loan_tenor_in_months VARCHAR;
 ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS reschedule_at TIMESTAMPTZ;
 
+ALTER TABLE personal_loan_payment_schedules ADD COLUMN IF NOT EXISTS rescheduled_proposed_payment_date TIMESTAMPTZ;
+
 INSERT INTO activity_types
     (code, name, description) 
 VALUES

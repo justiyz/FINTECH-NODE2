@@ -18,3 +18,4 @@ ALTER TABLE personal_loans DROP COLUMN IF EXISTS reschedule_count;
 ALTER TABLE personal_loans DROP COLUMN IF EXISTS renegotiation_count;
 ALTER TABLE personal_loans DROP COLUMN IF EXISTS reschedule_loan_tenor_in_months;
 ALTER TABLE personal_loans DROP COLUMN IF EXISTS reschedule_at;
+ALTER TABLE personal_loan_payment_schedules DROP COLUMN IF EXISTS rescheduled_proposed_payment_date;
