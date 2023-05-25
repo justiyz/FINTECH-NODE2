@@ -567,7 +567,26 @@ describe('Clusters', () => {
         });
     });
   });
-  describe('Admin activate and deactivate cluster and cluster member', () => {
+  describe('Admin activate and deactivate cluster', () => {
+    it('should flag error if cluster current status is same a what is being sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/status`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'active'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_STATUS_SAME_AS_STATUS_ACTION('active'));
+          done();
+        });
+    });
     it('should successfully deactivated cluster', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/status`)
@@ -584,6 +603,25 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.message).to.equal('admin successfully deactivated enyata admin cluster cluster');
+          done();
+        });
+    });
+    it('should flag error if cluster current status is same a what is being sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/status`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          status: 'deactivated'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_STATUS_SAME_AS_STATUS_ACTION('deactivated'));
           done();
         });
     });
@@ -627,15 +665,14 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should successfully deactivate cluster member', (done) => {
+  });
+  describe('Admin deletes cluster member', () => {
+    it('should successfully delete cluster member', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}`)
+        .delete(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          status: 'deactivated'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -643,26 +680,55 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('is_left');
-          expect(res.body.message).to.equal('admin successfully deactivated cluster member');
+          expect(res.body.message).to.equal(enums.ADMIN_DELETES_CLUSTER_MEMBER);
           done();
         });
     });
-    it('should flag if cluster member dose not exist', (done) => {
+    it('should flag if cluster does not exist', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}0`)
+        .delete(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}78549/member/${process.env.SEEDFI_USER_TWO_USER_ID}`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          status: 'deactivated'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('Cluster member does not belong to this cluster');
+          expect(res.body.message).to.equal(enums.CLUSTER_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should flag if cluster member does not exist', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}0`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('user'));
+          done();
+        });
+    });
+    it('should flag if user does not belong to cluster', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/member/${process.env.SEEDFI_USER_THREE_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_MEMBER_NOT_EXISTING);
           done();
         });
     });

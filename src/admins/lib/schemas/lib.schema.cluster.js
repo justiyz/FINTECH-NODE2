@@ -29,7 +29,3 @@ export const inviteCluster = Joi.object().keys({
 export const editClusterStatus = Joi.object().keys({
   status: Joi.string().required().valid('active', 'deactivated')
 });
-
-export const editClusterMember = Joi.object().keys({
-  status: Joi.string().required().valid('deactivated')
-});

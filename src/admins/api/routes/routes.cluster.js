@@ -5,6 +5,7 @@ import * as Schema from '../../../admins/lib/schemas/lib.schema.cluster';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as  AdminClusterController from '../controllers/controllers.cluster';
 import * as AdminClusterMiddleware from '../../../admins/api/middlewares/middlewares.cluster';
+import * as AdminUserMiddleware from '../../../admins/api/middlewares/middlewares.user';
 
 
 
@@ -18,7 +19,6 @@ router.post(
   AdminClusterMiddleware.checkIfClusterNameUnique,
   AdminClusterMiddleware.generateClusterUniqueCode,
   AdminClusterController.createCluster
- 
 );
   
 
@@ -55,17 +55,20 @@ router.patch(
   RolesMiddleware.adminAccess('cluster', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
   Model(Schema.editClusterStatus, 'payload'),
+  AdminClusterMiddleware.checkClusterCurrentStatus,
+  AdminClusterMiddleware.checkClusterLoanStatus,
   AdminClusterController.activateAndDeactivateCluster
 );
 
-router.patch(
+router.delete(
   '/:cluster_id/member/:user_id',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'update'),
+  RolesMiddleware.adminAccess('cluster', 'delete'),
   AdminClusterMiddleware.checkIfClusterExists,
+  AdminUserMiddleware.checkIfUserExists,
   AdminClusterMiddleware.checkClusterMemberExist('validate'),
-  Model(Schema.editClusterMember, 'payload'),
-  AdminClusterController.deactivateClusterMember
+  AdminClusterMiddleware.checkUserClusterLoanStatus,
+  AdminClusterController.deleteClusterMember
 );
 
 export default router;

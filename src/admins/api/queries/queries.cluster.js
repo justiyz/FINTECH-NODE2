@@ -9,9 +9,8 @@ export default {
         loan_goal_target,
         minimum_monthly_income,
         is_created_by_admin,
-        unique_code,
-        join_cluster_closes_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        unique_code
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *`,
   fetchClustersDetails:
     `SELECT
@@ -82,15 +81,17 @@ export default {
       WHERE cluster_id = $1
       RETURNING id, cluster_id, name, description,  type, status, is_deleted
     `,
-  deactivateClusterMember: `
+
+  deleteClusterMember: `
     UPDATE cluster_members
     SET  updated_at = NOW(),
-     status = $3,
-     is_left = TRUE
+     is_left = TRUE,
+     status = 'inactive'
     WHERE cluster_id = $1 AND user_id = $2
     RETURNING cluster_id, user_id, status, is_left;
     `,
-  fetchClusterMembers: `
+
+  fetchClusterMember: `
       SELECT 
         id,
         cluster_id,
@@ -101,7 +102,8 @@ export default {
         is_admin,
         is_left
       FROM cluster_members
-      WHERE cluster_id = $1 AND user_id = $2
+      WHERE cluster_id = $1 
+      AND user_id = $2
       AND is_left = FALSE
   `
 };

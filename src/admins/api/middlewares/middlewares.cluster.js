@@ -13,7 +13,7 @@ import { generateReferralCode } from '../../../users/lib/utils/lib.util.helpers'
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminClusterController
+ * @memberof AdminClusterMiddleware
  */
 export const checkIfClusterNameUnique = async(req, res, next) => {
   const { body, admin } = req;
@@ -39,7 +39,7 @@ export const checkIfClusterNameUnique = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminClusterController
+ * @memberof AdminClusterMiddleware
  */
 export const generateClusterUniqueCode = async(req, res, next) => {
   const { body, admin } = req;
@@ -66,7 +66,7 @@ export const generateClusterUniqueCode = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminClusterController
+ * @memberof AdminClusterMiddleware
  */
 export const checkIfClusterExists = async(req, res, next) => {
   try {
@@ -101,13 +101,13 @@ export const checkIfClusterExists = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
- * @memberof AdminClusterController
+ * @memberof AdminClusterMiddleware
  */
 export const checkClusterMemberExist = (type) => async(req, res, next) => {
   try {
     const { params: { cluster_id, user_id }, cluster: { members }  } = req;
     const userDetails = await processOneOrNoneData(UserQueries.getUserByUserEmail, [ req.body.email ]);
-    const existingClusterMember = await processOneOrNoneData(AdminClusterQueries.fetchClusterMembers, [ cluster_id, user_id ]);
+    const existingClusterMember = await processOneOrNoneData(AdminClusterQueries.fetchClusterMember, [ cluster_id, user_id ]);
     if (type === 'confirm' && members.find((data) => data.email === req.body.email)) {
       logger.info(`${enums.CURRENT_TIME_STAMP} :::Info: user already belongs to this cluster checkClusterMemberExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE);
@@ -123,10 +123,92 @@ export const checkClusterMemberExist = (type) => async(req, res, next) => {
       decoded that cluster member does not exist in the DB checkClusterMemberExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.CLUSTER_MEMBER_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE);
     }
+    req.userClusterDetails = existingClusterMember;
     return next();
   } catch (error) {
     error.label = enums.CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE;
     logger.error(`checking if cluster member exists failed::${enums.CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check cluster current status
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns single cluster details.
+ * @memberof AdminClusterMiddleware
+ */
+export const checkClusterCurrentStatus = async(req, res, next) => {
+  const { cluster, admin, body } = req;
+  try {
+    if (cluster.status === 'active' && body.status === 'active') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster status is active and status action is to activate 
+      checkClusterCurrentStatus.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_STATUS_SAME_AS_STATUS_ACTION(cluster.status), enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_CURRENT_STATUS_MIDDLEWARE);
+    }
+    if (cluster.status === 'deactivated' && body.status === 'deactivated') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster status is deactivated and status action is to deactivate 
+      checkClusterCurrentStatus.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_STATUS_SAME_AS_STATUS_ACTION(cluster.status), enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_CURRENT_STATUS_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster status and action status are not the same checkClusterCurrentStatus.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_CLUSTER_CURRENT_STATUS_MIDDLEWARE;
+    logger.error(`checking if cluster current status is nit same as what is being sent failed::${enums.CHECK_CLUSTER_CURRENT_STATUS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if cluster has existing loan obligations
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns single cluster details.
+ * @memberof AdminClusterMiddleware
+ */
+export const checkClusterLoanStatus = async(req, res, next) => {
+  const { cluster, admin, body } = req;
+  try {
+    if (body.status === 'active') {
+      return next();
+    }
+    if (cluster.loan_status !== 'inactive') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster loan status is not inactive checkClusterLoanStatus.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ACTIVE_CLUSTER_LOAN_OBLIGATIONS, enums.HTTP_FORBIDDEN, enums.CHECK_CLUSTER_LOAN_STATUS_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster loan status is inactive checkClusterLoanStatus.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_CLUSTER_LOAN_STATUS_MIDDLEWARE;
+    logger.error(`checking if cluster has an active loan obligation in the DB failed::${enums.CHECK_CLUSTER_LOAN_STATUS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if cluster member has existing loan obligations
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns single cluster details.
+ * @memberof AdminClusterMiddleware
+ */
+export const checkUserClusterLoanStatus = async(req, res, next) => {
+  const { userClusterDetails, admin } = req;
+  try {
+    if (userClusterDetails.loan_status !== 'inactive') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: user cluster loan status is not inactive checkUserClusterLoanStatus.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ACTIVE_CLUSTER_MEMBER_LOAN_OBLIGATIONS, enums.HTTP_FORBIDDEN, enums.CHECK_USER_CLUSTER_LOAN_STATUS_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: user cluster loan status is inactive checkUserClusterLoanStatus.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_USER_CLUSTER_LOAN_STATUS_MIDDLEWARE;
+    logger.error(`checking if user has an active cluster loan status in the DB failed::${enums.CHECK_USER_CLUSTER_LOAN_STATUS_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

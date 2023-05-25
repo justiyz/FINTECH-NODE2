@@ -9,7 +9,9 @@ const heading = {
   insufficientBalance: 'Insufficient Paystack Balance',
   approvedLoan: 'Loan application approved',
   declinedLoan: 'Loan application declined',
-  adminClusterInvite: 'Cluster loan invitation'
+  adminClusterInvite: 'Cluster loan invitation',
+  approvedUtilityBill: 'Approved utility bill',
+  declinedUtilityBill: 'Declined utility bill'
 };
 
 export const commonTemplate = (messageType, data) => {
