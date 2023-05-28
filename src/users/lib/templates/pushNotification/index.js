@@ -47,11 +47,11 @@ export const joinClusterRequestAccepted = (clusterName) => {
 };
 
 export const joinClusterRequestRejected = (clusterName) => {
-  return `You request to join ${clusterName} cluster has been declined`;
+  return `Your request to join ${clusterName} cluster has been declined`;
 };
 
 export const joinClusterRequestClusterJoiningClosed = (clusterName) => {
-  return `You request to join ${clusterName} cluster cannot be completed as cluster can no longer accept new members`;
+  return `Your request to join ${clusterName} cluster cannot be completed as cluster can no longer accept new members`;
 };
 
 export const clusterMemberInvitation = () => {

@@ -81,6 +81,24 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfOngoingLoanApplication', async() => {
+      const req = {  user: '', existingLoanApplication: '' };
+      const data = await LoanMiddleware.checkIfOngoingLoanApplication(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkRescheduleExtensionExists', async() => {
+      const req = {  user: '', query: '' };
+      const data = await LoanMiddleware.checkRescheduleExtensionExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkLoanReschedulingRequest', async() => {
+      const req = {  user: '', query: '' };
+      const data = await LoanMiddleware.checkLoanReschedulingRequest(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
 

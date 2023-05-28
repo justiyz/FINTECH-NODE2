@@ -78,10 +78,24 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
   max_allowable_amount: data.max_approval !== null ? `${parseFloat(data.max_approval).toFixed(2)}` : null
 });
 
+const loanReschedulingRequestSummaryResponse = async(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment) => ({
+  user_id: user.user_id,
+  loan_id: existingLoanApplication.loan_id,
+  loan_amount: `${parseFloat(existingLoanApplication.amount_requested)}`,
+  loan_duration_in_months: `${Number(existingLoanApplication.loan_tenor_in_months)}`,
+  total_interest: `${parseFloat(existingLoanApplication.total_interest_amount).toFixed(2)}`,
+  total_repayment: `${parseFloat(existingLoanApplication.total_repayment_amount).toFixed(2)}`,
+  monthly_payment: `${parseFloat(existingLoanApplication.monthly_repayment)}`,
+  next_repayment_date: dayjs(nextRepayment.proposed_payment_date).add(Number(loanRescheduleExtensionDetails.extension_in_days), 'days').format('MMM DD, YYYY'),
+  loan_status: existingLoanApplication.status,
+  rescheduling_count: existingLoanApplication.reschedule_count || 0
+});
+
 export default { 
   checkUserEligibilityPayload, 
   processDeclinedLoanDecisionUpdatePayload,
   loanApplicationDeclinedDecisionResponse,
   processLoanDecisionUpdatePayload,
-  loanApplicationApprovalDecisionResponse
+  loanApplicationApprovalDecisionResponse,
+  loanReschedulingRequestSummaryResponse
 };

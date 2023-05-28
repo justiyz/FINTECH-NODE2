@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import 'dotenv/config';
@@ -1395,6 +1396,292 @@ describe('Individual loan', () => {
           expect(res.body.data.loanRepaymentDetails.length).to.equal(2);
           expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('fetch rescheduling durations', () => {
+    it('should fetch loan extension durations successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/loan/reschedule-durations')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data.length).to.equal(3);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_EXTENSION_DURATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_ONE = res.body.data[0].id;
+          process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_TWO = res.body.data[1].id;
+          process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_THREE = res.body.data[2].id;
+          done();
+        });
+    });
+  });
+  describe('Generate loan rescheduling summary', () => {
+    it('should throw error if extension id is not set', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('extension_id is required');
+          done();
+        });
+    });
+    it('should throw error when invalid loan id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}fygui/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_TWO
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error when loan id sent is not for user', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_TWO
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error when loan is no longer ongoing', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_TWO
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS('cancelled'));
+          done();
+        });
+    });
+    it('should throw error when invalid loan extension duration id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: 50000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_EXTENSION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should generate loan rescheduling summary for user two loan two', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_TWO
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('rescheduling_count');
+          expect(res.body.data.loan_status).to.equal('ongoing');
+          expect(res.body.data.rescheduling_count).to.equal(0);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_ONE = res.body.data.reschedule_id;
+          done();
+        });
+    });
+    it('should generate another loan rescheduling summary for user two loan two', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_THREE
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('rescheduling_count');
+          expect(res.body.data.loan_status).to.equal('ongoing');
+          expect(res.body.data.rescheduling_count).to.equal(0);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_TWO = res.body.data.reschedule_id;
+          done();
+        });
+    });
+  });
+  describe('Accept loan rescheduling offer', () => {
+    it('should throw error when invalid loan id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}7u/${process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_TWO}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error when loan is no longer ongoing', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/${process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_TWO}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS('cancelled'));
+          done();
+        });
+    });
+    it('should throw error when invalid reschedule id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_TWO}8i/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULE_REQUEST_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should accept loan rescheduling offer for user two loan two', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_TWO}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('reschedule_extension_days');
+          expect(res.body.data.is_reschedule).to.equal(true);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should throw error when reschedule offer has been previously accepted', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_TWO}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING);
+          done();
+        });
+    });
+    it('should throw error when another reschedule ID is sent to process rescheduling after it has been accepted', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/${process.env.SEEDFI_USER_TWO_LOAN_TWO_LOAN_RESCHEDULING_ID_ONE}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_NOT_ALLOWED(1));
+          done();
+        });
+    });
+    it('should throw error generating another reschedule id for a loan that rescheduling has been previously accepted', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_TWO
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_NOT_ALLOWED(1));
           done();
         });
     });

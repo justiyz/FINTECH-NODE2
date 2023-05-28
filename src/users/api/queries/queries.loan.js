@@ -31,8 +31,8 @@ export default {
 
   initiatePersonalLoanApplication: `
     INSERT INTO personal_loans(
-        user_id, amount_requested, loan_reason, loan_tenor_in_months
-    ) VALUES ($1, $2, $3, $4)
+        user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, reschedule_count, renegotiation_count
+    ) VALUES ($1, $2, $3, $4, $5, 0, 0)
     RETURNING *`,
 
   deleteInitiatedLoanApplication: `
@@ -95,6 +95,7 @@ export default {
       loan_id,
       user_id,
       amount_requested,
+      initial_amount_requested,
       loan_reason,
       loan_tenor_in_months,
       total_repayment_amount,
@@ -113,7 +114,13 @@ export default {
       is_loan_disbursed,
       loan_disbursed_at,
       offer_letter_url,
-      max_possible_approval
+      max_possible_approval,
+      is_rescheduled,
+      reschedule_extension_days,
+      reschedule_count,
+      renegotiation_count,
+      reschedule_loan_tenor_in_months,
+      reschedule_at
     FROM personal_loans
     WHERE loan_id = $1
     AND user_id = $2`,
@@ -122,8 +129,8 @@ export default {
     INSERT INTO personal_loan_payment_schedules(
       loan_id, user_id, repayment_order, principal_payment, interest_payment, fees, 
       total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount, 
-      proposed_payment_date
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      proposed_payment_date, pre_reschedule_proposed_payment_date
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 
   fetchLoanRepaymentSchedule: `
     SELECT 
@@ -132,7 +139,10 @@ export default {
       user_id,
       repayment_order,
       total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
       to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
       status
     FROM personal_loan_payment_schedules
@@ -148,7 +158,10 @@ export default {
       user_id,
       repayment_order,
       total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
       to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
       status
     FROM personal_loan_payment_schedules
@@ -158,6 +171,24 @@ export default {
     AND payment_at IS NULL
     ORDER BY proposed_payment_date ASC
     LIMIT 1`,
+
+  fetchUserUnpaidRepayments: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      status
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL
+    ORDER BY proposed_payment_date ASC`,
 
   updateNextLoanRepayment: `
     UPDATE personal_loan_payment_schedules
@@ -391,5 +422,66 @@ export default {
       COUNT(user_id)
     FROM personal_loans
     WHERE user_id = $1
-    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`,
+
+  fetchIndividualLoanReschedulingDurations: `
+    SELECT 
+      id,
+      extension_in_days,
+      created_at,
+      updated_at
+    FROM personal_loan_rescheduling_extension`,
+
+  fetchIndividualLoanReschedulingDurationById: `
+    SELECT 
+      id,
+      extension_in_days,
+      created_at,
+      updated_at
+    FROM personal_loan_rescheduling_extension
+    WHERE id = $1`,
+
+  createRescheduleRequest: `
+    INSERT INTO personal_rescheduled_loan(
+      loan_id, user_id, extension_in_days
+    ) VALUES ($1, $2, $3)
+    RETURNING *`,
+
+  fetchLoanRescheduleRequest: `
+    SELECT 
+      id,
+      reschedule_id,
+      loan_id, 
+      user_id, 
+      extension_in_days,
+      is_accepted
+    FROM personal_rescheduled_loan
+    WHERE reschedule_id = $1
+    AND loan_id = $2`,
+
+  updateNewRepaymentDate: `
+    UPDATE personal_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      proposed_payment_date = $2,
+      status = 'not due'
+    WHERE id = $1`,
+
+  updateLoanWithRescheduleDetails: `
+    UPDATE personal_loans
+    SET
+      updated_at = NOW(),
+      is_rescheduled = TRUE,
+      reschedule_extension_days = $2,
+      reschedule_count = $3,
+      reschedule_loan_tenor_in_months = $4,
+      reschedule_at = NOW()
+    WHERE loan_id = $1`,
+
+  updateRescheduleRequestAccepted: `
+    UPDATE personal_rescheduled_loan
+    SET
+      updated_at = NOW(),
+      is_accepted = TRUE
+    WHERE reschedule_id = $1`
 };

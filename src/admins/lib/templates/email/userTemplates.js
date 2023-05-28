@@ -54,7 +54,7 @@ export const sendLoanDisapprovalMail = (data) => `
     </tr>
     <tr>
         <td style="padding-bottom: 40px">
-        <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been rejected.<br /> 
+        <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been declined.<br /> 
             Kindly login to try again or reach out to our support team.</p>
         </td>
     </tr>
