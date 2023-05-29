@@ -6,8 +6,9 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import MailService from '../services/services.email';
-import { sendPushNotification } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
@@ -31,6 +32,8 @@ export const approveLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin approval recorded approveLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval(), loanApplicant.fcm_token);
+    sendUserPersonalNotification(loanApplicant, 'Approved loan application', 
+      PersonalNotifications.approvedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'approved-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveLoanApplication.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
@@ -60,6 +63,8 @@ export const declineLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin rejection recorded declineLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval(), loanApplicant.fcm_token);
+    sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
+      PersonalNotifications.declinedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'declined-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineLoanApplication.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_approval(req.admin.first_name));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);

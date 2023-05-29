@@ -87,5 +87,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call individualLoanReschedulingDurations', async() => {
+      const req = { user: '' };
+      const data = await LoanController.individualLoanReschedulingDurations(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call loanReschedulingSummary', async() => {
+      const req = { user: '', existingLoanApplication: '', loanRescheduleExtensionDetails: '' };
+      const data = await LoanController.loanReschedulingSummary(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call processLoanRescheduling', async() => {
+      const req = { user: '', existingLoanApplication: '', loanRescheduleRequest: '' };
+      const data = await LoanController.processLoanRescheduling(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

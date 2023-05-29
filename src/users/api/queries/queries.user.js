@@ -306,7 +306,8 @@ export default {
       you_verify_request_id = $11,
       you_verify_address_id = $12,
       you_verify_address_verification_status = $13,
-      you_verify_candidate_id = $14
+      you_verify_candidate_id = $14,
+      is_editable = FALSE
     WHERE user_id = $1
     RETURNING *`,
 

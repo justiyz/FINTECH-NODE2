@@ -114,4 +114,31 @@ router.post(
   LoanController.submitPaymentOtp
 );
 
+router.get(
+  '/reschedule-durations',
+  AuthMiddleware.validateAuthToken,
+  LoanController.individualLoanReschedulingDurations
+);
+
+router.get(
+  '/:loan_id/reschedule-summary',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  Model(Schema.rescheduleExtensionId, 'query'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfOngoingLoanApplication,
+  LoanMiddleware.checkRescheduleExtensionExists,
+  LoanController.loanReschedulingSummary
+);
+
+router.post(
+  '/:loan_id/:reschedule_id/process-rescheduling',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanRescheduleParams, 'params'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfOngoingLoanApplication,
+  LoanMiddleware.checkLoanReschedulingRequest,
+  LoanController.processLoanRescheduling
+);
+
 export default router;
