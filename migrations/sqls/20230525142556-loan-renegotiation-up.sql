@@ -5,6 +5,8 @@ ALTER TABLE clusters ALTER COLUMN minimum_monthly_income DROP NOT NULL;
 ALTER TABLE personal_loans DROP CONSTRAINT IF EXISTS personal_loans_reschedule_extension_days_fkey;
 
 ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS initial_amount_requested NUMERIC(19,4);
+ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS initial_loan_tenor_in_months VARCHAR;
+ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS total_reschedule_extension_days VARCHAR;
 
 CREATE TABLE IF NOT EXISTS personal_rescheduled_loan(
     id SERIAL,

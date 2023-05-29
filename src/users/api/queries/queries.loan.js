@@ -31,8 +31,8 @@ export default {
 
   initiatePersonalLoanApplication: `
     INSERT INTO personal_loans(
-        user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, reschedule_count, renegotiation_count
-    ) VALUES ($1, $2, $3, $4, $5, 0, 0)
+        user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months, reschedule_count, renegotiation_count
+    ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0)
     RETURNING *`,
 
   deleteInitiatedLoanApplication: `
@@ -475,6 +475,7 @@ export default {
       reschedule_extension_days = $2,
       reschedule_count = $3,
       reschedule_loan_tenor_in_months = $4,
+      total_reschedule_extension_days = $5,
       reschedule_at = NOW()
     WHERE loan_id = $1`,
 
