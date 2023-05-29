@@ -6,10 +6,12 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import MailService from '../services/services.email';
-import { sendPushNotification } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * approve loan applications manually by admin
@@ -22,6 +24,7 @@ import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 export const approveLoanApplication = async(req, res, next) => {
   try {
     const { admin, body: { decision }, params: { loan_id }, loanApplication } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched approveLoanApplication.admin.controllers.loan.js`);
     const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateLoanStatus, [ loan_id, 'approved', null ]);
@@ -29,11 +32,13 @@ export const approveLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin approval recorded approveLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval(), loanApplicant.fcm_token);
+    sendUserPersonalNotification(loanApplicant, 'Approved loan application', 
+      PersonalNotifications.approvedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'approved-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveLoanApplication.admin.controllers.loan.js`);
-    adminActivityTracking(req.admin.admin_id, 21, 'success');
+    await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 21, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.APPROVE_LOAN_APPLICATION_CONTROLLER;
     logger.error(`approving a loan application manually failed:::${enums.APPROVE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -58,11 +63,13 @@ export const declineLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin rejection recorded declineLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval(), loanApplicant.fcm_token);
+    sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
+      PersonalNotifications.declinedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'declined-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineLoanApplication.admin.controllers.loan.js`);
-    adminActivityTracking(req.admin.admin_id, 22, 'success');
+    await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_approval(req.admin.first_name));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 22, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_approval_failed(req.admin.first_name));
     error.label = enums.DECLINE_LOAN_APPLICATION_CONTROLLER;
     logger.error(`declining a loan application manually failed:::${enums.DECLINE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -120,6 +127,7 @@ export const loanApplicationDetails = async(req, res, next) => {
 export const fetchLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = loanPayload.fetchAllLoans(query);
       const loans = await processAnyData(loanQueries.fetchAllLoans, payload);
@@ -129,6 +137,7 @@ export const fetchLoans = async(req, res, next) => {
         total_count: loans.length,
         loans
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'loan applications'));
       return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
       
     }
@@ -165,6 +174,7 @@ export const fetchLoans = async(req, res, next) => {
 export const fetchRepaidLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = loanPayload.fetchAllRepaidLoans(query);
       const repaidLoans = await processAnyData(loanQueries.fetchAllRepaidLoans, payload);
@@ -174,6 +184,7 @@ export const fetchRepaidLoans = async(req, res, next) => {
         total_count: repaidLoans.length,
         repaidLoans
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid loans'));
       return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchRepaidLoans(query);

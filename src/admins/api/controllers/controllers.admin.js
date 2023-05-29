@@ -12,7 +12,7 @@ import enums from '../../../users/lib/enums';
 import config from '../../../users/config/index';
 import * as fetchAdminServices from '../services/services.admin';
 import { adminActivityTracking } from '../../lib/monitor';
-
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -35,10 +35,10 @@ export const completeAdminProfile = async(req, res, next) => {
     const payload = AdminPayload.completeAdminProfile(admin, body);
     const [ updatedAdmin ] = await processAnyData(adminQueries.updateAdminProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin profile completed successfully completeAdminProfile.admin.controllers.admin.js`);
-    adminActivityTracking(req.admin.admin_id, 7, 'success');
+    await adminActivityTracking(req.admin.admin_id, 7, 'success', descriptions.completes_profile());
     return ApiResponse.success(res, enums.ADMIN_COMPLETE_PROFILE_SUCCESSFUL, enums.HTTP_OK, updatedAdmin);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 7, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 7, 'fail', descriptions.completes_profile_failed());
     error.label = enums.COMPLETE_ADMIN_PROFILE_CONTROLLER;
     logger.error(`completing admin profile in the DB failed${enums.COMPLETE_ADMIN_PROFILE_CONTROLLER}`, error.message);
     return next(error);
@@ -94,6 +94,7 @@ export const adminPermissions = async(req, res, next) => {
 export const editAdminPermissions = async(req, res, next) => {
   try {
     const { admin, body, params: { admin_id } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     if (body.role_code) {
       await processAnyData(adminQueries.updateUserRoleType, [ admin_id, body.role_code.trim().toUpperCase() ]);
     }
@@ -108,10 +109,10 @@ export const editAdminPermissions = async(req, res, next) => {
       await Promise.all([ editAdminPermissions ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin permissions edited successfully editAdminPermissions.admin.controllers.admin.js`);
     }
-    adminActivityTracking(req.admin.admin_id, 8, 'success');
+    await adminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(adminName));
     return ApiResponse.success(res, enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL, enums.HTTP_OK, { admin_id, ...body });
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 8, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER;
     logger.error(`editing admin permissions failed:::${enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);
@@ -143,10 +144,12 @@ export const inviteAdmin = async(req, res, next) => {
     }
     await MailService('Admin Invite', 'adminInviteMail', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: invite admin mail successfully sent. inviteAdmin.controllers.admin.admin.js`);
-    adminActivityTracking(req.admin.admin_id, 6, 'success');
+    await adminActivityTracking(req.admin.admin_id, 6, 'success', 
+      descriptions.invite_admin(`${req.admin.first_name} ${req.admin.last_name}`, `${req.body.first_name} ${req.body.last_name}`));
     return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  newAdmin);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 6, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 6, 'fail', 
+      descriptions.invite_admin_failed(`${req.admin.first_name} ${req.admin.last_name}`, `${req.body.first_name} ${req.body.last_name}`));
     error.label = enums.INVITE_ADMIN_CONTROLLER;
     logger.error(`Inviting new admin failed:::${enums.INVITE_ADMIN_CONTROLLER}`, error.message);
     return next(error);
@@ -162,6 +165,7 @@ export const inviteAdmin = async(req, res, next) => {
  */
 export const fetchAllAdmins = async(req, res, next) => {
   try {
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (req.query.export) {
       const filter = {
         status: req.query.status || null,
@@ -173,6 +177,7 @@ export const fetchAllAdmins = async(req, res, next) => {
         total_count: admins.admins.length,
         ...admins                                           
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'admins'));
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched admins from the DB fetchAllAdmins.controllers.admin.admin.js`);
       return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, data);
     }
@@ -334,6 +339,37 @@ export const fetchPlatformOverview = async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_PLATFORM_OVERVIEW_CONTROLLER;
     logger.error(`Fetching admin overview page details failed:::${enums.FETCH_PLATFORM_OVERVIEW_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch and filter activity log
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns overview page details.
+ * @memberof AdminAdminController
+ */
+export const fetchActivityLog = async(req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const  payload  = AdminPayload.fetchActivityLog(query);
+    const [ activityLog, [ activityLogCount ] ] = await Promise.all([
+      processAnyData(adminQueries.fetchAndFilterActivityLog, payload),
+      processAnyData(adminQueries.countFetchedActivityLog, payload)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched admin activities from the DB fetchAndFilterActivityLog.controllers.admin.admin.js`);
+    const data = {
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(activityLogCount.total_count),
+      total_pages: Helpers.calculatePages(Number(activityLogCount.total_count), Number(req.query.per_page) || 10),
+      activityLog
+    };
+    return ApiResponse.success(res, enums.SUCCESSFULLY_FETCH_ACTIVITY_LOG, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_ACTIVITY_LOG_CONTROLLER;
+    logger.error(`fetching activity log in the DB failed:::${enums.FETCH_ACTIVITY_LOG_CONTROLLER}`, error.message);
     return next(error);
   }
 };

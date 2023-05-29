@@ -85,4 +85,12 @@ router.get(
   AdminController.fetchPlatformOverview
 );
 
+router.get(
+  '/activity-log',
+  AuthMiddleware.validateAdminAuthToken,
+  AdminMiddleware.checkAdminType,
+  Model(RoleSchema.fetchActivityLog, 'query'),
+  AdminController.fetchActivityLog
+);
+
 export default router;

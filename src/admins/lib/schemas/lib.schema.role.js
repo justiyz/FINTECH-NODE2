@@ -81,6 +81,15 @@ const overviewPage = Joi.object().keys({
   })
 });
 
+const fetchActivityLog = Joi.object().keys({
+  search: Joi.string().optional(),
+  from_date: Joi.date().optional(),
+  to_date: Joi.date().optional(),
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional()
+});
+
+
 export default {
   createRole,
   inviteAdmin,
@@ -92,5 +101,6 @@ export default {
   activateDeactivateRole,
   fetchAdminsPerRole,
   roleType,
-  overviewPage
+  overviewPage,
+  fetchActivityLog
 };

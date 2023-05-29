@@ -36,7 +36,7 @@ describe('', () => {
     });
 
     it('should call activateDeactivateRole', async() => {
-      const req = { query: '', params: '' };
+      const req = { query: '', params: '', admin: '' };
       const data = await AdminRolesController.activateDeactivateRole(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

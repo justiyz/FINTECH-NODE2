@@ -1,13 +1,13 @@
 
 import bvnQueries from '../queries/queries.bvn';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import BvnPayload from '../../lib/payloads/lib.payload.bvn';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import { adminActivityTracking } from '../../lib/monitor';
-
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * adding blacklisted bvns to db
@@ -19,20 +19,21 @@ import { adminActivityTracking } from '../../lib/monitor';
  */
 export const addBlacklistedBvns = async(req, res, next) => {
   try {
-    const { addBvn, query }= req;
-    const bodyData = query.type === 'single' ? req.body : addBvn;
+    const { addBvn, body, admin }= req;
+    const bodyData = body.type === 'single' ? body : addBvn;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     let processedData;
-    if (query.type === 'single') {
+    if (body.type === 'single') {
       const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn));
       const payload = BvnPayload.blacklistedBvn(bodyData, hashedBvn);
       processedData  = await processAnyData(bvnQueries.blacklistedBvn, payload);
-      adminActivityTracking(req.admin.admin_id, 29, 'success');
+      await adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns(adminName,'single'));
     } else {
       processedData = await Promise.all(bodyData.map(async(data) => {
         const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn));
         const payload = BvnPayload.blacklistedBvn(data, hashedBvn);
         const result = await processAnyData(bvnQueries.blacklistedBvn, payload);
-        adminActivityTracking(req.admin.admin_id, 30, 'success');
+        await adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns(adminName,'bulk'));
         return result[0];
       }));
     }
@@ -40,6 +41,7 @@ export const addBlacklistedBvns = async(req, res, next) => {
       Info: have successfully added bvns in the DB blacklistedBvn.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.BLACKLISTED_BVN, enums.HTTP_CREATED, processedData);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns_failed(`${req.admin.first_name} ${req.admin.last_name}`,'bulk'));
     error.label = enums.BLACKLIST_BVN_CONTROLLER;
     logger.error(`Failed to blacklist BVNs:::${enums.BLACKLIST_BVN_CONTROLLER}`, error.message);
     return next(error);
@@ -57,8 +59,10 @@ export const addBlacklistedBvns = async(req, res, next) => {
 export const fetchBlacklistedBvn = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     const payload = BvnPayload.fetchBlacklistedBvn(query);
-    const blacklistBvns = await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
+    const blacklistBvns = query.export ? await processAnyData(bvnQueries.fetchBlacklistedBvns, payload) 
+      : await processAnyData(bvnQueries.fetchFilterBlacklistedBvn, payload);
   
     await Promise.all(
       blacklistBvns.map(async(data) => {
@@ -74,6 +78,7 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
     if (query.export) {
       logger.info(responseMessage);
       const data = { total_count: totalCount, blacklistBvns };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'blacklisted bvns'));
       return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
 
@@ -98,6 +103,49 @@ export const fetchBlacklistedBvn = async(req, res, next) => {
   } catch (error) {
     error.label = enums.BLACKLIST_BVN_CONTROLLER;
     logger.error(`Failed to fetch blacklisted BVNs:::${enums.BLACKLIST_BVN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+   * unblacklisted users bvn
+   * @param {Request} req - The request from the endpoint.
+   * @param {Response} res - The response returned by the method.
+   * @param {Next} next - Call the next operation.
+   * @returns {object} - Returns unblacklisted user details
+   * @memberof AdminBvnController
+   */
+export const unblacklistBvn = async(req, res, next) => {
+  const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
+  try {
+    const { blacklistedBvn } = req;
+    const blacklistedUsers = await processAnyData(bvnQueries.getBlacklistedUsers, []);
+    const decryptBlacklistedBvn = await UserHash.decrypt(decodeURIComponent(blacklistedBvn.bvn));
+  
+    if (blacklistedUsers.length > 0) {
+      await Promise.all(
+        blacklistedUsers.map(async(data) => {
+          const decryptedBvn = await UserHash.decrypt(decodeURIComponent(data.bvn));
+          if (decryptedBvn === decryptBlacklistedBvn) {
+            await processOneOrNoneData(bvnQueries.unblacklistExistingUserBvn, [ data.user_id, 'active' ]);
+            return data;
+          }
+          return data;
+        }));
+    }
+
+    const payload = BvnPayload.unBlacklistedBvn(blacklistedBvn);
+    await Promise.all([
+      processOneOrNoneData(bvnQueries.updateUnblackListedBvn, payload),
+      processOneOrNoneData(bvnQueries.removeBlacklistedBvn, [ req.params.id ])
+    ]);
+    adminActivityTracking(req.admin.admin_id, 38, 'success', descriptions.unblacklist_bvn(adminName));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully unblacklisted bvn the database unblacklistBvn.admin.controllers.bvn.js`);
+    return ApiResponse.success(res, enums.UNBLACKLIST_BVN, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UNBLACKLIST_BVN_CONTROLLER;
+    logger.error(`Unblacklist bvn failed:::${enums.UNBLACKLIST_BVN_CONTROLLER}`, error.message);
     return next(error);
   }
 };

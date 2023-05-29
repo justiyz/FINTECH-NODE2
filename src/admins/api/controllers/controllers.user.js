@@ -12,7 +12,7 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { adminActivityTracking } from '../../lib/monitor';
 import { userActivityTracking } from '../../../users/lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
  * should activate and deactivate user status
@@ -23,18 +23,33 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
  * @memberof AdminUserController
  */
 export const editUserStatus = async(req, res, next) => {
-  const { body: { status }, userDetails } = req;
-  let activityType = '';
-  if (status === 'deactivated') {
+  const { body: { status }, userDetails, admin } = req;
+  let activityType;
+  let description;
+  const userName = `${userDetails.first_name} ${userDetails.last_name}`;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
+  
+  switch (status) {
+  case 'deactivated':
     activityType = 20;
-  } else if (status === 'suspended') {
+    description = descriptions.user_status(adminName, status, userName);
+    break;
+  case 'suspended':
     activityType = 24;
-  } else if (status === 'watchlisted') {
+    description = descriptions.user_status(adminName, status, userName);
+    break;
+  case 'watchlisted':
     activityType = 26;
-  } else if (status === 'blacklisted') {
+    description = descriptions.user_status(adminName, status, userName);
+    break;
+  case 'blacklisted':
     activityType = 25;
-  } else {
+    description = descriptions.user_status(adminName, status, userName);
+    break;
+  default:
     activityType = 19;
+    description = descriptions.user_status(adminName, status, userName);
+    break;
   }
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
@@ -47,7 +62,7 @@ export const editUserStatus = async(req, res, next) => {
       await processOneOrNoneData(userQueries.addBlacklistedBvn, addBlacklistedBvnPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to blacklisted bvn list editUserStatus.admin.controllers.user.js`);
     }
-    if (userDetails.status === 'blacklisted' && status === 'active') {
+    if ((userDetails.status === 'blacklisted') && (status === 'active') && (userDetails.bvn !== null)) {
       const userDecryptedBvn = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
       const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvns, []);
       const plainBlacklistedBvnsDetails = [];
@@ -70,10 +85,9 @@ export const editUserStatus = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to unBlacklisted bvn list editUserStatus.admin.controllers.user.js`);
       }
     }
-    adminActivityTracking(req.admin.admin_id, activityType, 'success');
+    await adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, activityType, 'fail');
     error.label = enums.EDIT_USER_STATUS_CONTROLLER;
     logger.error(`activate and deactivate user failed:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message);
     return next(error);
@@ -90,14 +104,14 @@ export const editUserStatus = async(req, res, next) => {
  */
 export const userProfileDetails = async(req, res, next) => {
   try {
-    const { admin, userDetails, userEmploymentDetails, userAddressDetails } = req;
+    const { admin, userDetails, userEmploymentDetails, userAddressDetails, userNextOfKinDetails } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user referrals details fetched from the DB userProfileDetails.admin.controllers.user.js`);
     if (userDetails?.bvn) {
       const result = await UserHash.decrypt(decodeURIComponent(userDetails.bvn));
       userDetails.bvn =  result?.slice(0, 7) + '****'; // return first 7 digits of the bvn
     }
     const data = {
-      personalInformation: { userDetails, userEmploymentDetails, userAddressDetails }
+      personalInformation: { userDetails, userEmploymentDetails, userAddressDetails, userNextOfKinDetails }
     };
     return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
@@ -196,6 +210,7 @@ export const userAccountInformation = async(req, res, next) => {
 export const fetchUsers = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = UserPayload.fetchAllUsers(query);
       const users  = await processAnyData(userQueries.fetchAllUsers, payload);
@@ -204,6 +219,7 @@ export const fetchUsers = async(req, res, next) => {
         total_count: users.length,
         users
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'users'));
       return ApiResponse.success(res, enums.USERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const  payload  = UserPayload.fetchUsers(query);
@@ -237,13 +253,15 @@ export const fetchUsers = async(req, res, next) => {
 export const saveUserUploadedDocument = async(req, res, next) => {
   try {
     const { admin, userDetails, body, document } = req;
+    const userName = `${userDetails.first_name} ${userDetails.last_name}`;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const uploadedDocument = await processOneOrNoneData(userQueries.uploadUserDocument, [ userDetails.user_id, admin.admin_id, body.title.trim(), document ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
     document uploaded and saved for user successfully saveUserUploadedDocument.admin.controllers.user.js`);
-    adminActivityTracking(req.admin.admin_id, 23, 'success');
+    await adminActivityTracking(admin.admin_id, 23, 'success', descriptions.uploads_document(adminName, userName));
     return ApiResponse.success(res, enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER, enums.HTTP_OK, uploadedDocument);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 23, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
     error.label = enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER;
     logger.error(`Saving uploaded document for user failed:::${enums.SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -350,6 +368,8 @@ export const fetchUserKycDetails = async(req, res, next) => {
 export const verifyUserUtilityBill = async(req, res, next) => {
   try {
     const { admin, userDetails, userAddressDetails, body } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const userName = `${userDetails.first_name} ${userDetails.last_name}`;
     if (!userAddressDetails || userAddressDetails.address_image_url === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user has not filled address details or has not uploaded any utility bill 
       verifyUserUtilityBill.admin.controllers.user.js`);
@@ -370,7 +390,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
         PersonalNotifications.declinedUtilityBillNotification, 'utility-declined', {});
       await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
-      adminActivityTracking(req.admin.admin_id, 28, 'success');
+      await adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(adminName, userName));
       userActivityTracking(userDetails.user_id, 87, 'success');
       return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
     }
@@ -387,10 +407,16 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
       PersonalNotifications.approvedUtilityBillNotification, 'utility-bill-approved', {});
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
-    adminActivityTracking(req.admin.admin_id, 27, 'success');
+    await adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));
     userActivityTracking(userDetails.user_id, 88, 'success');
+    if (tierChoice === '2') {
+      await sendPushNotification(userDetails.user_id, PushNotifications.userTierUpgraded(), userDetails.fcm_token);
+      sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
+        PersonalNotifications.tierUpgradedSuccessfully(userDetails.first_name), 'tier-upgraded-successfully', {});
+    }
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 27, 'fail', descriptions.approves_utility_bill_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.VERIFY_USER_UTILITY_BILL_CONTROLLER;
     logger.error(`verifying user utility bill details failed:::${enums.VERIFY_USER_UTILITY_BILL_CONTROLLER}`, error.message);
     return next(error);

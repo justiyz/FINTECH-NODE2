@@ -41,7 +41,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call inviteAdmin', async() => {
-      const req = { token: '', admin: '' };
+      const req = { body: { role_code: 'THUJKLG', email: 'u@mail.com' }, token: '', admin: '' };
       const data = await AdminController.inviteAdmin(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -53,7 +53,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call editAdminStatus', async() => {
-      const req = { token: '', params: '', body: '' };
+      const req = { token: '', params: '', body: '', adminUser: '' };
       const data = await AdminController.editAdminStatus(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
@@ -79,6 +79,18 @@ describe('', () => {
     it('should call fetchBlacklistedBvn', async() => {
       const req = { admin: '', query: '' };
       const data = await BvnController.fetchBlacklistedBvn(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchActivityLog', async() => {
+      const req = { admin: '', query: '' };
+      const data = await AdminController.fetchActivityLog(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call unblacklistBvn', async() => {
+      const req = { admin: '', body: '' };
+      const data = await BvnController.unblacklistBvn(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

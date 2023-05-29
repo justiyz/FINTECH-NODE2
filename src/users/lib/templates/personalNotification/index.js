@@ -92,3 +92,29 @@ export const failedCardDebit = (data) => {
     Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment.
   `;
 };
+
+export const userAddressVerificationFailed = (user, addressDetails) => {
+  return `Hello ${user.first_name} ${user.last_name} your address verification processing FAILED for address with the following details:\n
+  house_number: ${addressDetails.landmark}\n,
+  landmark: ${addressDetails.house_number}\n,
+  street: ${addressDetails.street}\n,
+  city: ${addressDetails.city}\n,
+  state: ${addressDetails.state}\n
+  
+  kindly update your valid address details. 
+  Thank you`;
+};
+
+export const userAddressVerificationSuccessful = (user, addressDetails) => {
+  return `Hello ${user.first_name} ${user.last_name} your address verification processing is SUCCESSFUL for address with the following details:\n
+  house_number: ${addressDetails.landmark}\n,
+  landmark: ${addressDetails.house_number}\n,
+  street: ${addressDetails.street}\n,
+  city: ${addressDetails.city}\n,
+  state: ${addressDetails.state}\n
+  Thank you`;
+};
+
+export const tierUpgradedSuccessfully = (first_name) => {
+  return `Hi ${first_name}, You have been successfully upgraded to tier 2. We hope you will enjoy the benefits and privileges that comes with this upgrade. Cheers`;
+};

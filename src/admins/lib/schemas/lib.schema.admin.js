@@ -22,12 +22,53 @@ const editAdminPermissions = Joi.object().keys({
   ).optional()
 });
 
+const fetchBlacklistedBvn = Joi.object().keys({
+  search: Joi.string().optional(),
+  bvn: Joi.string().optional(),
+  from_date: Joi.date().optional(),
+  to_date: Joi.date().optional(),
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  export: Joi.string().optional().valid('true')
+});
+
 const adminIdParams = Joi.object().keys({
   admin_id: Joi.string().required()
 });
 
+const unblacklist_bvn = Joi.object().keys({
+  id: Joi.string().required()
+});
+
+const singleBvn = Joi.object({
+  type: Joi.string().required().valid('single'),
+  first_name: Joi.string().required(),
+  middle_name: Joi.string().required(),
+  last_name: Joi.string().required(),
+  date_of_birth: Joi.string().required(),
+  bvn: Joi.string().length(11).required()
+});
+
+const bulkBvn = Joi.object({
+  type: Joi.string().required().valid('bulk'),
+  data: Joi.array().min(1).items(
+    Joi.object({
+      first_name: Joi.string().required(),
+      middle_name: Joi.string().required(),
+      last_name: Joi.string().required(),
+      date_of_birth: Joi.string().required(),
+      bvn: Joi.string().required()
+    })
+  )
+});
+
+const blacklistedBvn = Joi.alternatives().try(singleBvn, bulkBvn);
+
 export default {
   adminCompleteProfile,
   editAdminPermissions,
-  adminIdParams
+  adminIdParams,
+  unblacklist_bvn,
+  fetchBlacklistedBvn,
+  blacklistedBvn
 };

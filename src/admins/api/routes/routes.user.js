@@ -95,11 +95,21 @@ router.get(
 );
 
 router.patch(
-  '/:user_id/verify-utility-bill',
+  '/:user_id/approve-utility-bill',
   AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('users', 'update'),
+  RoleMiddleware.adminAccess('users', 'approve'),
   Model(Schema.userIdParams, 'params'),
-  Model(Schema.approveDeclineUtilityBill, 'payload'),
+  Model(Schema.approveUtilityBill, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.verifyUserUtilityBill
+);
+
+router.patch(
+  '/:user_id/decline-utility-bill',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'reject'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.declineUtilityBill, 'payload'),
   UserMiddleware.checkIfUserExists,
   UserController.verifyUserUtilityBill
 );
@@ -107,6 +117,7 @@ router.patch(
 router.get(
   '/:user_id/clusters',
   AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserController.userClusters
@@ -115,6 +126,7 @@ router.get(
 router.get(
   '/:user_id/:cluster_id/cluster-details', 
   AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.clusterDetailsParams, 'params'),
   UserMiddleware.checkIfUserExists,
   UserMiddleware.adminCheckIfClusterExists,

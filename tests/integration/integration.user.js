@@ -9,6 +9,8 @@ import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 import { receiveChargeSuccessWebHookOne, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookThree,
   receiveRefundSuccessWebHook, receiveRefundProcessingWebHook, receiveRefundPendingWebHook, receiveChargeSuccessWebHookOneUserTwo
 } from '../payload/payload.payment';
+import { receiveAddressVerificationWebhookResponse, receiveAddressVerificationWrongEventWebhookResponse, 
+  receiveAddressVerificationNotVerifiedWebhookResponse } from '../payload/payload.user';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -2006,7 +2008,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          mono_account_id: Hash.generateRandomString(5)
+          mono_account_code: Hash.generateRandomString(5)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -2033,7 +2035,7 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('mono_account_id is required');
+          expect(res.body.message).to.equal('mono_account_code is required');
           done();
         });
     });
@@ -2045,7 +2047,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          mono_account_id: Hash.generateRandomString(5)
+          mono_account_code: Hash.generateRandomString(5)
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -2087,6 +2089,7 @@ describe('User', () => {
           expect(res.body.data).to.have.property('is_verified_utility_bill');
           expect(res.body.data).to.have.property('you_verify_candidate_id');
           expect(res.body.data.is_editable).to.equal(false);
+          process.env.SEEDFI_USER_ONE_YOU_VERIFY_CANDIDATE_ID = res.body.data.you_verify_candidate_id;
           done();
         });
     });
@@ -2114,6 +2117,7 @@ describe('User', () => {
           expect(res.body.data).to.have.property('is_verified_utility_bill');
           expect(res.body.data).to.have.property('you_verify_candidate_id');
           expect(res.body.data.is_editable).to.equal(false);
+          process.env.SEEDFI_USER_TWO_YOU_VERIFY_CANDIDATE_ID = res.body.data.you_verify_candidate_id;
           done();
         });
     });
@@ -2193,7 +2197,73 @@ describe('User', () => {
         });
     });
   });
- 
+  describe('process youVerify webhook to record address verification status', () => {
+    it('should throw error if wrong webhook event sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification-webhook')
+        .send(receiveAddressVerificationWrongEventWebhookResponse(process.env.SEEDFI_USER_ONE_YOU_VERIFY_CANDIDATE_ID))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.INVALID_YOU_VERIFY_WEBHOOK_EVENT);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if invalid candidate id is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification-webhook')
+        .send(receiveAddressVerificationWebhookResponse(`${process.env.SEEDFI_USER_TWO_YOU_VERIFY_CANDIDATE_ID}T7YT76`))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NON_EXISTING_USER_CANDIDATE_ID_SENT);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should successfully verify user one address', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification-webhook')
+        .send(receiveAddressVerificationWebhookResponse(process.env.SEEDFI_USER_ONE_YOU_VERIFY_CANDIDATE_ID))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_VERIFICATION_SUCCESSFUL);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should throw error if user address previously verified', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification-webhook')
+        .send(receiveAddressVerificationWebhookResponse(process.env.SEEDFI_USER_ONE_YOU_VERIFY_CANDIDATE_ID))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_PREVIOUSLY_VERIFIED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should successfully un-verify user two address', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification-webhook')
+        .send(receiveAddressVerificationNotVerifiedWebhookResponse(process.env.SEEDFI_USER_TWO_YOU_VERIFY_CANDIDATE_ID))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_VERIFICATION_FAILED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
   describe('Upload utility bill for user', () => {
     it('Should upload utility bill successfully for user one', (done) => {
       chai.request(app)
@@ -2465,7 +2535,7 @@ describe('User', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Details can not be updated');
+          expect(res.body.message).to.equal(enums.DETAILS_CAN_NOT_BE_UPDATED);
           expect(res.body.error).to.equal('BAD_REQUEST');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -3463,6 +3533,75 @@ describe('User', () => {
           expect(res.body.message).to.equal(enums.CANNOT_CHANGE_NEXT_OF_KIN);
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Fetch user loan tier value', () => {
+    it('Should throw error if no query is passed', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/tiers')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type is required');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if wrong type is passed', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/tiers')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({ type: 'tier' })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [tier_one, tier_two]');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch tier one loan value', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/tiers')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({ type: 'tier_one' })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.FETCH_LOAN_VALUE);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch tier two loan value', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/tiers')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .query({ type: 'tier_two' })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.FETCH_LOAN_VALUE);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });

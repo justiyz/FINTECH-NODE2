@@ -91,6 +91,7 @@ export const operations = {
   90: 'UPDTEMPDTS', // user updates employment type details
   91: 'ACTMXALLON', // user accepts system maximum allowable loan amount
   92: 'UPTMNACTID', // user mono account id is updated
-  93: 'UPTOKACTID' // user okra account id is updated
+  93: 'UPTOKACTID', // user okra account id is updated
+  94: 'INLNRSCDLN' // initiate loan rescheduling for summary
 };
   

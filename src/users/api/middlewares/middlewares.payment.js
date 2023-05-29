@@ -376,7 +376,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
           await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule, [
             schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
             schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount, 
-            schedule.post_payment_outstanding_amount, schedule.proposed_payment_date
+            schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
           ]);
           return schedule;
         });

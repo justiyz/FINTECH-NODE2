@@ -1012,13 +1012,13 @@ describe('Admin Users management', () => {
   describe('Approve/Decline User Uploaded utility bill', () => {
     it('Should flag if no id found successfully', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}po/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}po/approve-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          decision: 'decline'
+          decision: 'approve'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1031,7 +1031,7 @@ describe('Admin Users management', () => {
     });
     it('Should flag if admin dose not have update permission', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/approve-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
@@ -1043,14 +1043,14 @@ describe('Admin Users management', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Admin cannot perform "update" action on users module');
+          expect(res.body.message).to.equal('Admin cannot perform "approve" action on users module');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
     it('Should flag when decision is not sent', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/approve-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1067,26 +1067,26 @@ describe('Admin Users management', () => {
     });
     it('Should flag when invalid decision is sent', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/decline-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          decision: 'accept'
+          decision: 'approve'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('decision must be one of [approve, decline]');
+          expect(res.body.message).to.equal('decision must be [decline]');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
     it('Should approve user one uploaded utility bill', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/approve-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1110,7 +1110,7 @@ describe('Admin Users management', () => {
     });
     it('Should decline user two uploaded utility bill', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}/decline-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1134,7 +1134,7 @@ describe('Admin Users management', () => {
     });
     it('Should throw error coz user has not uploaded any utility bill', (done) => {
       chai.request(app)
-        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_THREE_USER_ID}/verify-utility-bill`)
+        .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_THREE_USER_ID}/decline-utility-bill`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1151,7 +1151,6 @@ describe('Admin Users management', () => {
           done();
         });
     });
-    // To later add success test cases when a user is able to upload utility bill successfully
   });
   describe('Admin upload file for user', () => {
     it('Should flag if no id found successfully', (done) => {
@@ -1655,6 +1654,23 @@ describe('Admin Users management', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.ADMIN_CHECK_IF_CLUSTER_EXIST);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully unblack an existing user bvn', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/bvn/unblacklist-bvn/6')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res).to.have.property('body');
+          expect(res.body.message).to.equal(enums.UNBLACKLIST_BVN);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });

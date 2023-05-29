@@ -168,6 +168,7 @@ export default {
       UPDATE user_bank_accounts
       SET 
         updated_at = NOW(),
+        mono_account_id = NULL,
         is_default = FALSE
       WHERE user_id = $1`,
 
@@ -271,7 +272,7 @@ export default {
       you_verify_address_verification_status,
       created_at
     FROM address_verification
-    WHERE user_id = $1`,
+    WHERE (user_id = $1 OR you_verify_candidate_id = $1)`,
 
   createUserAddressDetails: `
     INSERT INTO address_verification (
@@ -305,9 +306,20 @@ export default {
       you_verify_request_id = $11,
       you_verify_address_id = $12,
       you_verify_address_verification_status = $13,
-      you_verify_candidate_id = $14
+      you_verify_candidate_id = $14,
+      is_editable = FALSE
     WHERE user_id = $1
     RETURNING *`,
+
+  updateAddressVerificationStatus: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      you_verify_address_verification_status = $2,
+      is_editable = $3,
+      is_verified_address = $4
+    WHERE user_id = $1
+    `,
 
   updateUtilityBillDocument: `
     UPDATE address_verification
@@ -326,6 +338,13 @@ export default {
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
+
+  updateUserTierValue: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      tier = $2
+    WHERE user_id = $1`,
 
   updateUserProfile: `
      UPDATE users
@@ -502,5 +521,21 @@ export default {
     WHERE user_id = $1
     AND is_default = TRUE
     RETURNING id, user_id, bank_name, account_name, is_default, mono_account_id
-    `
+    `,
+  fetchTierOneLoanValue: `
+   SELECT 
+    name,
+    value
+   FROM admin_env_values_settings
+   WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
+   'tier_one_minimum_loan_amount', 'tier_one_maximum_loan_amount');
+  `,
+  fetchTierTwoLoanValue: `
+    SELECT 
+    name,
+    value
+    FROM admin_env_values_settings
+    WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
+    'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount');
+ `
 };

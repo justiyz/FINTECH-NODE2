@@ -29,6 +29,17 @@ export const operations = {
   28: 'ADDCLUTBIL', // admin declines user uploaded utility bill
   29: 'UPLBKBLBVN', // admin uploads bulk blacklisted bvns
   30: 'UPTSGBLBVN', // admin updates single blacklisted bvn
-  31: 'ADUPTENVAL' // admin updates environment variables values in settings
+  31: 'ADUPTENVAL', // admin updates environment variables values in settings
+  32: 'ANCECR', // admin create cluster
+  33: 'ANAECR', // admin activate cluster
+  34: 'ANDECR', // admin deactivate cluster
+  35: 'ANDTCR', // admin delete cluster
+  36: 'ANRECRNR', // admin remove cluster member
+  37: 'ANCRMRIR', // admin cluster member invite 
+  38: 'ANUTBN', // admin unblacklist bvn
+  39: 'ANAECRMR', // admin activate cluster member
+  40: 'ANDECRMR', // admin deactivate cluster member
+  41: 'IEDTET', // admin about to export data from the DB
+  42: 'ANVWAS' // admin views reports and analytics
 };
 

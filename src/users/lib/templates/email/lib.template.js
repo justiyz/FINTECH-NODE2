@@ -185,13 +185,13 @@ export const loanDisbursement = (data) => `
   `;
 
 export const loanClusterInvite = (data) => `
-    <tr  style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
            <span
            style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
            >You have been invited to join a cluster, <br />
            ${data.inviter_first_name} ${data.inviter_last_name}  is inviting you to join ${data.cluster_name} Cluster loan group <br />
-           Kindly click on <a href="${data.join_url}">link</a> to join cluster.
+           Kindly click <a href="${data.join_url}">here</a> to join cluster.
            </span>  
         </td>
     </tr>
@@ -292,6 +292,76 @@ export const successfulRepayment = (data) => `
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
     <td>
       <span>Thank you for being loyal and keeping to your promise of loan facility repayment</span>  
+    </td>
+  </tr>
+`;
+
+export const failedAddressVerification = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td>
+      <span>your address verification processing FAILED for address with the following details:</span>  
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+        <td>
+          <p>card details</p><br />
+          <span>
+            house_number: ${data.landmark},  <br />
+            landmark: ${data.house_number},  <br />
+            street: ${data.street},  <br />
+            city: ${data.city},  <br />
+            state: ${data.state}
+          </span>  
+        </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td style="padding-bottom: 20px">
+      <span>kindly update your valid address details. Thank you</span>  
+    </td>
+  </tr>
+`;
+
+export const successfulAddressVerification = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td>
+      <span>your address verification processing is SUCCESSFUL for address with the following details:</span>  
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+        <td>
+          <p>card details</p><br />
+          <span>
+            house_number: ${data.landmark},  <br />
+            landmark: ${data.house_number},  <br />
+            street: ${data.street},  <br />
+            city: ${data.city},  <br />
+            state: ${data.state}
+          </span>  
+        </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td style="padding-bottom: 20px">
+      <span>Thank you</span>  
     </td>
   </tr>
 `;

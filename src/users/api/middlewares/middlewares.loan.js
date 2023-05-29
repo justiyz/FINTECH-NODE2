@@ -98,6 +98,10 @@ export const checkSeedfiPaystackBalance = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: seedfi balance  could not be retrieved successfully checkSeedfiPaystackBalance.middlewares.loan.js`);
+    if (result.response.status !== 200) {
+      userActivityTracking(user.user_id, 44, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE);
+    }
   } catch (error) {
     userActivityTracking(req.user.user_id, 44, 'fail');
     error.label = enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE;
@@ -131,6 +135,10 @@ export const generateLoanDisbursementRecipient = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated 
     generateLoanDisbursementRecipient.middlewares.loan.js`);
+    if (result.response.status !== 200) {
+      userActivityTracking(user.user_id, 44, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
+    }
     userActivityTracking(req.user.user_id, 44, 'fail');
     return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
   } catch (error) {
@@ -443,6 +451,95 @@ export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE;
     logger.error(`checking if user bvn is not on blacklisted bvn lists in the DB failed::${enums.CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check loan reschedule extension id sent
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkRescheduleExtensionExists = async(req, res, next) => {
+  try {
+    const { query: { extension_id }, user } = req;
+    const [ existingRescheduleExtension ] = await processAnyData(loanQueries.fetchIndividualLoanReschedulingDurationById, [ extension_id.trim() ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan rescheduling extension exists checkRescheduleExtensionExists.middlewares.loan.js`);
+    if (existingRescheduleExtension) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling extension exists checkRescheduleExtensionExists.middlewares.loan.js`);
+      req.loanRescheduleExtensionDetails = existingRescheduleExtension;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling extension does not exists checkRescheduleExtensionExists.middlewares.loan.js`);
+    userActivityTracking(req.user.user_id, 94, 'fail');
+    return ApiResponse.error(res, enums.LOAN_RESCHEDULING_EXTENSION_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_RESCHEDULE_EXTENSION_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 94, 'fail');
+    error.label = enums.CHECK_RESCHEDULE_EXTENSION_EXISTS_MIDDLEWARE;
+    logger.error(`checking if loan rescheduling extension exists failed::${enums.CHECK_RESCHEDULE_EXTENSION_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check loan application status is currently ongoing or over due
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkIfOngoingLoanApplication = async(req, res, next) => {
+  try {
+    const { existingLoanApplication, user } = req;
+    if (existingLoanApplication.status === 'ongoing') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application is an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application is not an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), enums.HTTP_FORBIDDEN, 
+      enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE;
+    logger.error(`checking if loan application is an ongoing one failed::${enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check loan reschedule request exists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkLoanReschedulingRequest = async(req, res, next) => {
+  try {
+    const { params: { reschedule_id, loan_id }, user } = req;
+    const [ loanRescheduleRequest ] = await processAnyData(loanQueries.fetchLoanRescheduleRequest, [ reschedule_id, loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan reschedule request exists checkLoanReschedulingRequest.middlewares.loan.js`);
+    if (loanRescheduleRequest) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request exists checkLoanReschedulingRequest.middlewares.loan.js`);
+      if (loanRescheduleRequest.is_accepted) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request has been previously processed 
+        checkLoanReschedulingRequest.middlewares.loan.js`);
+        userActivityTracking(req.user.user_id, 75, 'fail');
+        return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
+      }
+      req.loanRescheduleRequest = loanRescheduleRequest;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request does not exists checkLoanReschedulingRequest.middlewares.loan.js`);
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    error.label = enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE;
+    logger.error(`checking if loan rescheduling request exists failed::${enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

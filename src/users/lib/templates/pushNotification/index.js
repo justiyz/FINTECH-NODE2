@@ -47,11 +47,11 @@ export const joinClusterRequestAccepted = (clusterName) => {
 };
 
 export const joinClusterRequestRejected = (clusterName) => {
-  return `You request to join ${clusterName} cluster has been declined`;
+  return `Your request to join ${clusterName} cluster has been declined`;
 };
 
 export const joinClusterRequestClusterJoiningClosed = (clusterName) => {
-  return `You request to join ${clusterName} cluster cannot be completed as cluster can no longer accept new members`;
+  return `Your request to join ${clusterName} cluster cannot be completed as cluster can no longer accept new members`;
 };
 
 export const clusterMemberInvitation = () => {
@@ -80,4 +80,16 @@ export const clusterNewAdminSelectionAccepted = (user, clusterName) => {
 
 export const clusterNewAdminSelectionDeclined = (user, clusterName) => {
   return `${user.first_name} ${user.last_name} declined your request to be the admin for ${clusterName} cluster`;
+};
+
+export const failedYouVerifyAddressVerification = () => {
+  return 'Your address verification processing failed';
+};
+
+export const successfulYouVerifyAddressVerification = () => {
+  return 'Your address verification processing is successful';
+};
+
+export const userTierUpgraded = () => {
+  return 'Your tier has been successfully upgraded to tier 2';
 };

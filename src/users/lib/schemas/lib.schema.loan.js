@@ -44,6 +44,15 @@ const paymentOtp = Joi.object().keys({
   otp: Joi.string().required()
 });
 
+const rescheduleExtensionId = Joi.object().keys({
+  extension_id: Joi.number().positive().required()
+});
+
+const loanRescheduleParams = Joi.object().keys({
+  loan_id: Joi.string().required(),
+  reschedule_id: Joi.string().required()
+});
+
 export default  {
   loanApplication,
   loanIdParams,
@@ -54,5 +63,7 @@ export default  {
   noCardOrBankLoanRepaymentType,
   loanRepaymentType,
   referenceIdParams,
-  paymentOtp
+  paymentOtp,
+  rescheduleExtensionId,
+  loanRescheduleParams
 }; 

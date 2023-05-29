@@ -36,12 +36,12 @@ export default {
 
   updateAddressVerification: (body, user, requestId, candidateId, userAddressVerificationRequestDetails) => [
     user.user_id,
-    body.street.trim().toLowerCase(),
-    body.state.trim().toLowerCase(),
-    body.city.trim().toLowerCase(),
-    body.house_number.trim().toLowerCase(),
-    body.landmark.trim().toLowerCase(),
-    body.lga.trim().toLowerCase(),
+    body.street.trim(),
+    body.state.trim(),
+    body.city.trim(),
+    body.house_number.trim(),
+    body.landmark.trim(),
+    body.lga.trim(),
     'nigeria',
     body.resident_type.trim().toLowerCase(),
     body.rent_amount || null,

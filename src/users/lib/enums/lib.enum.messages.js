@@ -14,6 +14,9 @@ export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
 export const INVALID_AUTHORIZATION = 'Invalid Authorization Token';
 export const NOT_SUCCESSFUL_TRANSACTION = 'Payment was not successful';
+export const INVALID_YOU_VERIFY_WEBHOOK_EVENT = 'Invalid webhook event sent';
+export const NON_EXISTING_USER_CANDIDATE_ID_SENT = 'User with candidate id does not exists on our platform';
+export const USER_ADDRESS_PREVIOUSLY_VERIFIED = 'User with candidate id has been previously verified';
 export const PAYMENT_RECORD_NOT_FOUND = 'Payment transaction record not found';
 export const REFUND_NOT_INITIATED_FOR_PAYMENT_TRANSACTION = 'Refund not initiated for payment transaction';
 export const PAYMENT_EARLIER_RECORDED = 'Payment transaction status has been previously recorded';
@@ -87,14 +90,16 @@ export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly con
 export const CHECK_USER_ADDRESS_VERIFICATION = 'User address already verified,  kindly contact support team if you want to update address info.';
 export const CHECK_USER_UTILITY_BILL_VERIFICATION = 'User uploaded utility bill already verified,  kindly contact support team if you want to update utility bill details';
 export const USER_UTILITY_BILL_VERIFICATION_PENDING = 'User uploaded utility bill is still being verified, kindly wait for the verification decision';
-export const USER_ADDRESS_VERIFICATION_STILL_PENDING = 'User address verification is still pending, you will ne informed once it is verified';
+export const USER_ADDRESS_VERIFICATION_STILL_PENDING = 'User address verification is still pending, you will be informed once it is verified';
 export const USER_ADDRESS_CANNOT_BE_UPDATED = 'User address cannot be updated, kindly contact admin';
 export const USER_VALID_ID_NOT_UPLOADED = 'User valid id not uploaded yet, kindly do this to continue.';
 export const USER_ADDRESS_NOT_VERIFIED = 'User address not verified yet, kindly do this to continue.';
 export const USER_UTILITY_BILL_NOT_VERIFIED = 'User uploaded utility bill not verified yet, kindly do this to continue.';
-export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated';
+export const DETAILS_CAN_NOT_BE_UPDATED = 'Details can not be updated, since BVN has been verified';
 export const USER_ADDRESS_UPDATED_SUCCESSFULLY = 'Updated user address successfully, kindly await verification';
 export const USER_UTILITY_BILL_UPDATED_SUCCESSFULLY = 'Updated user utility bill successfully, kindly await verification';
+export const USER_ADDRESS_VERIFICATION_FAILED = 'User address verification failed, kindly update your valid address';
+export const USER_ADDRESS_VERIFICATION_SUCCESSFUL = 'User address verification successful';
 export const UPDATED_USER_PROFILE_SUCCESSFULLY = 'Updated user profile successfully';
 export const FETCH_USER_PROFILE = 'User profile fetched successfully';
 export const CARD_CAN_NOT_BE_SET_AS_DEFAULT = 'Card can not be set as default';
@@ -128,6 +133,10 @@ export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subjec
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
+export const LOAN_RESCHEDULING_NOT_ALLOWED = (count) => `User has rescheduled this loan ${count} time(s), thus rescheduling not allowed`;
+export const LOAN_RESCHEDULING_EXTENSION_NOT_EXISTING = 'Invalid loan reschedule extension day sent';
+export const LOAN_RESCHEDULE_REQUEST_NOT_EXISTING = 'Loan reschedule request does not exists';
+export const LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING = 'Loan reschedule request has been previously processed';
 export const LOAN_AMOUNT_NOT_EQUAL_TO_SYSTEM_MAXIMUM_AMOUNT = 'System maximum loan amount needs to be accepted to process loan disbursement';
 export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still awaits approval, disbursement cannot be made';
 export const LOAN_APPLICATION_DECLINED = 'loan application declined, disbursement cannot be made';
@@ -144,6 +153,9 @@ export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application can
 export const USER_LOAN_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan details fetched successful`;
 export const USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payment details fetched successful`;
 export const USER_CURRENT_LOANS_FETCHED_SUCCESSFUL = 'User current loans fetched successful';
+export const LOAN_RESCHEDULING_EXTENSION_DURATIONS_FETCHED_SUCCESSFULLY = 'Loan rescheduling extension durations in days fetched successfully';
+export const LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY = 'Loan rescheduling summary returned successfully';
+export const LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY = 'Loan rescheduling processed successfully';
 export const CLUSTER_NOT_EXISTING = 'Cluster does not exist';
 export const CLUSTER_NO_LONGER_EXISTING = 'Cluster no longer exist';
 export const CLUSTER_DECISION_TICKET_NOT_EXISTING = 'Cluster decision ticket does not exist';
@@ -160,6 +172,9 @@ export const PAYMENT_OTP_REJECTED = 'payment OTP is invalid please check and inp
 export const PIN_RESET = 'Pin reset successful';
 export const CLUSTER_NAME_ALREADY_EXISTING = (name) => `A cluster with this name "${name}" already exists`;
 export const UPDATE_INCOME_FOR_ACTION_PERFORMANCE = 'kindly update income in employment details to perform action';
+export const CLUSTER_STATUS_SAME_AS_STATUS_ACTION = (status) => `Cluster status is currently "${status}" and cannot be changed again`;
+export const ACTIVE_CLUSTER_LOAN_OBLIGATIONS = 'Cluster still has active loan obligation and thus cannot be deactivated';
+export const ACTIVE_CLUSTER_MEMBER_LOAN_OBLIGATIONS = 'Cluster member still has active cluster loan obligation and thus cannot be deleted';
 export const NOT_CATERED_FOR_DECISION_TYPE = 'Decision ticket belongs to a type not catered for yet';
 export const CLUSTER_CLOSED_FOR_MEMBERSHIP = 'No member can join this cluster again';
 export const USER_NO_CLUSTER_INVITATION = (name) => `User has no active invitation from ${name} cluster`;
@@ -197,6 +212,7 @@ export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment ty
 export const BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION = 'You are not allowed to access loan facility at the moment';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
 export const UPDATE_USER_MONO_ID = 'User mono account id updated successfully';
+export const FETCH_LOAN_VALUE = 'successfully fetch loan user loan value';
 
 
 // admin module related messages
@@ -273,6 +289,17 @@ export const REPAID_LOANS_FETCHED_SUCCESSFULLY = 'Repaid loans fetched successfu
 export const FETCH_ENV_VALUES_SUCCESSFULLY = 'Fetched env values successfully';
 export const UPDATED_ENV_VALUES_SUCCESSFULLY = 'Updated env values successfully';
 export const BLACKLISTED_BVN = 'Blacklisted BVNs added';
-export const BLACKLIST_BVN_EXIST = 'Bvn already exist';
+export const BLACKLIST_BVN_EXIST = 'Bvn is already blacklisted';
+export const BLACKLIST_BVN_DOES_NOT_EXIST = 'Bvn does not exist';
 export const BLACKLIST_BVN_FETCHED_SUCCESSFULLY = 'Blacklisted bvn fetched successfully';
 export const BLACKLIST_BVN_NOT_EXIST = 'Bvn does not exist';
+export const SCORE_CARD_WEIGHTS_BREAKDOWN_FETCHED_SUCCESSFULLY = 'Score card weights breakdown fetched successfully';
+export const SUCCESSFULLY_FETCH_ACTIVITY_LOG = 'Activity logs fetched successfully';
+export const CLUSTERS_FETCHED_SUCCESSFULLY = 'Clusters fetched successfully';
+export const CLUSTER__DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched successfully';
+export const ADMIN_CLUSTER_MEMBER_INVITE = 'Admin Successfully invite cluster member';
+export const ADMIN_EDIT_CLUSTER_STATUS = (status, name) => `admin successfully ${status} ${name} cluster`;
+export const ADMIN_DELETES_CLUSTER_MEMBER = 'admin successfully deletes cluster member';
+export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
+export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';
+export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';

@@ -153,6 +153,13 @@ router.post(
   UserController.updateUploadedUtilityBill
 );
 
+router.post(
+  '/address-verification-webhook',
+  UserMiddleware.youVerifyWebhookVerification,
+  UserMiddleware.verifyUserAndAddressResponse,
+  UserController.updateUserAddressVerificationStatus
+);
+
 router.put(
   '/profile',
   AuthMiddleware.validateAuthToken,
@@ -230,6 +237,13 @@ router.patch(
   AuthMiddleware.validateAuthToken,
   Model(Schema.updateMonoId, 'payload'),
   UserController.updateMonoAccountId
+);
+
+router.get(
+  '/tiers',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.tierLoanValue, 'query'),
+  UserController.fetchLoanTierValue
 );
 
 

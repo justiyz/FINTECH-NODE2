@@ -1,0 +1,1 @@
+ALTER TABLE cluster_invitees DROP COLUMN IF EXISTS inviter_id;

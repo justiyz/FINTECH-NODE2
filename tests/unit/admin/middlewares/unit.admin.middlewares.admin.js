@@ -70,5 +70,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkAdminType', async() => {
+      const req = { adminUser: '' };
+      const data = await AdminAdminMiddleware.checkAdminType(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkAdminType', async() => {
+      const req = { body: '' };
+      const data = await BvnMiddleware.checkIfBvnExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
