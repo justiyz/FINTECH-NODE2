@@ -51,5 +51,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetcRescheduledLoans', async() => {
+      const req = { admin: '', query: ''};
+      const data = await AdminLoanController.fetchRescheduledLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchSingleUserRescheduledLoan ', async() => {
+      const req = { admin: '', params: ''};
+      const data = await AdminLoanController.fetchSingleUserRescheduledLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

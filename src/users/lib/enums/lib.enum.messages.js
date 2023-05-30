@@ -123,7 +123,7 @@ export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot
 export const USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan lesser than minimum allowable amount';
 export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration greater than maximum allowable tenor';
 export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE = (percentage) => 
+export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE = (percentage) =>
   `User cannot apply for a loan greater than ${percentage}% of maximum allowable amount`;
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE = 'Action not permitted on this loan application as there is no system maximum allowable amount';
@@ -145,8 +145,8 @@ export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `Us
 export const LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS = (type) => `Loan application is already ${type}, thus action cannot be performed`;
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
-export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON = 
-'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
+export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
+  'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL = 'User loan application disbursement initiated successful';
 export const SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED__SUCCESSFULLY = 'System maximum allowable loan amount updated successfully';
 export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application cancelled successful';
@@ -276,7 +276,7 @@ export const UPLOAD_DOCUMENT_VALIDATION = 'Please upload document';
 export const FILE_SIZE_TOO_BIG = 'Please upload a file less than 3MB';
 export const UPLOAD_PDF_DOCUMENT_VALIDATION = 'Please upload a .pdf extension document file';
 export const UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION = 'Please upload a .jpeg or .jpg or .png extension image file';
-export const GENERATE_ADMIN_RESET_PASSWORD_TOKEN =  'Password token Successfully generated';
+export const GENERATE_ADMIN_RESET_PASSWORD_TOKEN = 'Password token Successfully generated';
 export const LOAN_APPLICATION_NOT_EXISTING_IN_DB = 'loan application does not exist';
 export const LOAN_APPLICATION_STATUS = (status) => `loan application has status ${status}, thus action cannot be performed`;
 export const LOAN_APPLICATION_DECISION = (decision) => `Loan application ${decision} successfully`;
@@ -304,3 +304,5 @@ export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to th
 export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';
 export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';
 export const CLUSTER_MEMBER_ALREADY_EXIST = 'users already belong to this cluster';
+export const RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY = 'Rescheduled loans fetched successfully';
+export const RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY = 'Rescheduled loan details fetched successfully';
