@@ -1093,6 +1093,27 @@ describe('Admin Loan management', () => {
           done();
         });
     });
+    it('Should fetch all rescheduled loans if query type is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/rescheduled-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('rescheduledLoans');
+          expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/loan/rescheduled-loans')
@@ -1106,6 +1127,27 @@ describe('Admin Loan management', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('invalid signature');
           expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if export is not true', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/rescheduled-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'false',
+          search: 'rashidat sikiru'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('export must be [true]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -1127,6 +1169,28 @@ describe('Admin Loan management', () => {
           expect(res.body.data).to.have.property('total_count');
           expect(res.body.data).to.have.property('page');
           expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('rescheduledLoans');
+          expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch rescheduled loans by the loan applicant name where the query type is export', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/rescheduled-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          search: 'adeleye blaise'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
           expect(res.body.data).to.have.property('rescheduledLoans');
           expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
@@ -1210,10 +1274,32 @@ describe('Admin Loan management', () => {
         });
     });  
   });
+  it('Should filter rescheduled loans by the status if query is export', (done) => {
+    chai.request(app)
+      .get('/api/v1/admin/loan/rescheduled-loans')
+      .set({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+      })
+      .query({
+        export: 'true',
+        status: 'ongoing'
+      })
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('message');
+        expect(res.body).to.have.property('status');
+        expect(res.body.data).to.have.property('total_count');
+        expect(res.body.data).to.have.property('rescheduledLoans');
+        expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
+        expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+        done();
+      });
+  });
   describe('admin fetches single user rescheduled loan details on the platform', () => {
     it('Should fetch single user rescheduled loan details', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/rescheduled-loans`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/rescheduled-loan`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -1233,7 +1319,7 @@ describe('Admin Loan management', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/rescheduled-loans`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/rescheduled-loan`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -1250,7 +1336,7 @@ describe('Admin Loan management', () => {
     });
     it('Should return error if invalid loan id is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}ehfgr/rescheduled-loans`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}ehfgr/rescheduled-loan`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

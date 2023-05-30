@@ -209,15 +209,15 @@ export default {
         personal_loans.loan_id,
         personal_loans.user_id,
         TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
-        tier,
-        amount_requested AS loan_amount,
-        reschedule_extension_days AS loan_duration,
+        users.tier,
+        personal_loans.amount_requested AS loan_amount,
+        personal_loans.reschedule_extension_days AS loan_duration,
         personal_loans.status 
       FROM personal_loans
       LEFT JOIN users 
       ON personal_loans.user_id = users.user_id
-      WHERE reschedule_extension_days IS NOT NULL
-      AND is_rescheduled = true
+      WHERE personal_loans.reschedule_extension_days IS NOT NULL
+      AND personal_loans.is_rescheduled = true
       AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
@@ -237,8 +237,8 @@ export default {
   FROM personal_loans
   LEFT JOIN users
   ON personal_loans.user_id = users.user_id
-  WHERE reschedule_extension_days IS NOT NULL
-    AND is_rescheduled = true
+  WHERE personal_loans.reschedule_extension_days IS NOT NULL
+    AND personal_loans.is_rescheduled = true
     AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
@@ -249,21 +249,46 @@ export default {
     AND (personal_loans.status = $2 OR $2 IS NULL) 
   `,
 
+  fetchAllRescheduledLoans: `
+    SELECT 
+        personal_loans.loan_id,
+        personal_loans.user_id,
+        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
+        users.tier,
+        personal_loans.amount_requested AS loan_amount,
+        personal_loans.reschedule_extension_days AS loan_duration,
+        personal_loans.status 
+    FROM personal_loans
+    LEFT JOIN users 
+    ON personal_loans.user_id = users.user_id
+    WHERE personal_loans.reschedule_extension_days IS NOT NULL
+    AND personal_loans.is_rescheduled = true
+    AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+    OR $1 IS NULL) 
+    AND (personal_loans.status = $2 OR $2 IS NULL) 
+    ORDER BY personal_loans.created_at DESC 
+  `,
+
   fetchSingleRescheduledLoanDetails: `
       SELECT 
           personal_loans.loan_id,
           personal_loans.user_id,      
           TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
-          tier,
+          users.tier,
           users.status,
-          amount_requested AS loan_amount,
-          monthly_interest AS interest_rate,
-          total_repayment_amount AS total_repayment,
-          loan_tenor_in_months AS loan_duration,
-          reschedule_loan_tenor_in_months AS new_tenure,
-          to_char(DATE(loan_disbursed_at)::date, 'Mon DD YYYY') AS date_received,
-          monthly_repayment,
-          loan_reason
+          personal_loans.amount_requested AS loan_amount,
+          personal_loans.monthly_interest AS interest_rate,
+          personal_loans.total_repayment_amount AS total_repayment,
+          personal_loans.loan_tenor_in_months AS loan_duration,
+          personal_loans.reschedule_loan_tenor_in_months AS new_tenure,
+          to_char(DATE(personal_loans.loan_disbursed_at)::date, 'Mon DD YYYY') AS date_received,
+          personal_loans.monthly_repayment,
+          personal_loans.loan_reason
     FROM personal_loans
     LEFT JOIN users ON personal_loans.user_id = users.user_id
     WHERE loan_id = $1
@@ -277,6 +302,7 @@ export default {
         status
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
+    ORDER BY repayment_order
   `
 };
   

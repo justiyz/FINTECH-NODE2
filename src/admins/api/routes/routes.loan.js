@@ -63,7 +63,7 @@ router.get(
   LoanController.fetchRescheduledLoans
 );
 router.get(
-  '/:loan_id/rescheduled-loans',
+  '/:loan_id/rescheduled-loan',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.loanIdParams, 'params'),

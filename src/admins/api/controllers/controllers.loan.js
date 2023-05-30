@@ -222,7 +222,18 @@ export const fetchRepaidLoans = async(req, res, next) => {
 export const fetchRescheduledLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    const payload = loanPayload.fetchAllRescheduledLoans(query);
+    if (query.export) {
+      const payload = loanPayload.fetchAllRescheduledLoans(query);
+      const rescheduledLoans = await processAnyData(loanQueries.fetchAllRescheduledLoans, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched repaid loans from the DB
+      fetchRepaidLoans.admin.controllers.loan.js`);
+      const data = {
+        total_count: rescheduledLoans.length,
+        rescheduledLoans
+      };
+      return ApiResponse.success(res, enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    }
+    const payload = loanPayload.fetchRescheduledLoans(query);
     const [ rescheduledLoans, [ rescheduledLoansCount ] ] = await Promise.all([
       processAnyData(loanQueries.fetchRescheduledLoans, payload),
       processAnyData(loanQueries.fetchRescheduledLoansCount, payload)

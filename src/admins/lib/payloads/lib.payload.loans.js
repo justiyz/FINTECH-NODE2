@@ -29,11 +29,16 @@ export default {
     query.end_date
   ],
 
-  fetchAllRescheduledLoans: (query) => [
+  fetchRescheduledLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
+  ],
+
+  fetchAllRescheduledLoans: (query) => [
+    query.search ? `%${query.search}%` : null,
+    query.status
   ]
   
 };
