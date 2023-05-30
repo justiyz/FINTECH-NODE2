@@ -65,7 +65,7 @@ export const inviteClusterBulk = Joi.object().keys({
         phone_number: Joi.string()
           .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
           .messages({
-            'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+            'string.pattern.base': 'Phone number should contain +countryCode and extra required digits',
             'string.empty': 'Phone Number is not allowed to be empty'
           }).required()
       })
