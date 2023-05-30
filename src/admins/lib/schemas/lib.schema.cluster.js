@@ -48,6 +48,32 @@ export const inviteCluster = Joi.object().keys({
   })
 });
 
+export const inviteClusterBulk = Joi.object().keys({
+  type: Joi.string().required().valid('email', 'phone_number')
+}).when(Joi.object({ type: Joi.string().valid('email') }).unknown(), {
+  then: Joi.object({
+    data: Joi.array().min(1).items(
+      Joi.object({
+        email: Joi.string().email().required()
+      })
+    )
+  })
+}).when(Joi.object({ type: Joi.string().valid('phone_number') }).unknown(), {
+  then: Joi.object({
+    data: Joi.array().min(1).items(
+      Joi.object({
+        phone_number: Joi.string()
+          .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+          .messages({
+            'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+            'string.empty': 'Phone Number is not allowed to be empty'
+          }).required()
+      })
+    )
+  })
+});
+
+
 export const editClusterStatus = Joi.object().keys({
   status: Joi.string().required().valid('active', 'deactivated')
 });

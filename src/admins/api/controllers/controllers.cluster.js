@@ -214,8 +214,8 @@ export const deleteClusterMember = async(req, res, next) => {
 export const clusterMemberBulkInvite = async(req, res, next) => {
   try {
     const { admin, cluster, userInvite } = req;
-    const pp = {admin_id: admin.admin_id, cluster_id: cluster.cluster_id, unique_code: cluster.unique_code};
-    const link = await createShortLink(pp);
+    const inviteDetails = {admin_id: admin.admin_id, cluster_id: cluster.cluster_id, unique_code: cluster.unique_code};
+    const link = await createShortLink(inviteDetails);
     const userData = await Promise.all(
       userInvite.map(async(data) => {
         const payload = ClusterPayload.clusterInvite(data, cluster, admin, req.body.type);
@@ -231,6 +231,8 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
         return invitedMemberByEmail;
       })
     );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+    admin have successfully sent bulk invite to users. clusterMemberBulkInvite.admin.controllers.cluster.js`);
     return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, userData);
   } catch (error) {
     error.label = enums.CLUSTER_MEMBER_BULK_INVITE_CONTROLLER;
