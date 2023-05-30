@@ -76,6 +76,7 @@ router.post(
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('cluster', 'delete'),
   AdminClusterMiddleware.checkIfClusterExists,
+  Model(Schema.inviteClusterBulk, 'payload'),
   AdminClusterMiddleware.clusterMemberBulkInvite,
   AdminClusterController.clusterMemberBulkInvite
 );
