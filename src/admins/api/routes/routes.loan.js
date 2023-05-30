@@ -55,4 +55,20 @@ router.get(
   LoanController.fetchRepaidLoans
 );
 
+router.get(
+  '/rescheduled-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchRescheduledloans, 'query'),
+  LoanController.fetchRescheduledLoans
+);
+router.get(
+  '/:loan_id/rescheduled-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanController.fetchSingleUserRescheduledLoan
+);
+
 export default router;
