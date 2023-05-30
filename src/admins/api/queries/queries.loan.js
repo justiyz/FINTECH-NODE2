@@ -211,7 +211,7 @@ export default {
         TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
         users.tier,
         personal_loans.amount_requested AS loan_amount,
-        personal_loans.reschedule_extension_days AS loan_duration,
+        personal_loans.reschedule_extension_days AS loan_extention_duration,
         personal_loans.status 
       FROM personal_loans
       LEFT JOIN users 
