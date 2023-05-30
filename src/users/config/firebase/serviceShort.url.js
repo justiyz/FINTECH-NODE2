@@ -1,6 +1,6 @@
 const axios = require('axios');
 import config from '../../../users/config';
-const apiKey = config.SEEDFI_FIREBASE_DYNAMIC_LINK_PRIVATE_KEY;
+const apiKey = config.SEEDFI_FIREBASE_DYNAMIC_LINK_KEY;
 
 export const createShortLink = async(data) => {
   const clusterId = data.cluster_id;

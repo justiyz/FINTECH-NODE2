@@ -106,9 +106,8 @@ export const checkIfClusterExists = async(req, res, next) => {
 export const checkClusterMemberExist = (type) => async(req, res, next) => {
   try {
     const { params: { cluster_id, user_id }, cluster: { members }  } = req;
-    const userDetails = req.body.type === 'email' ?
-      await processOneOrNoneData(UserQueries.getUserByUserEmail, [ req.body.email ]) 
-      : await processOneOrNoneData(UserQueries.getUserByPhoneNumber, [ req.body.phone_number ]);
+    const userDetails = 
+      await processOneOrNoneData(UserQueries.getUserByUserEmailOrPhoneNumber, [ req.body.email || req.body.phone_number ]);
     const existingClusterMember = await processOneOrNoneData(AdminClusterQueries.fetchClusterMember, [ cluster_id, user_id ]);
 
     if (type === 'confirm' && members.find((data) => data.email === req.body.email)) {

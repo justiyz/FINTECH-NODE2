@@ -571,7 +571,7 @@ describe('Clusters', () => {
     });
     it('should successfully invite bulk members with email', (done) => {
       chai.request(app)
-        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/invite/bulk`)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/bulk-invite`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -603,7 +603,7 @@ describe('Clusters', () => {
     });
     it('should successfully invite bulk members with phone number', (done) => {
       chai.request(app)
-        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/invite/bulk`)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/bulk-invite`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -633,7 +633,7 @@ describe('Clusters', () => {
     });
     it('should successfully invite bulk members with phone number', (done) => {
       chai.request(app)
-        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite/bulk`)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/bulk-invite`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

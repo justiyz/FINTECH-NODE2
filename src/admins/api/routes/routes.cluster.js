@@ -72,11 +72,11 @@ router.delete(
 );
 
 router.post(
-  '/:cluster_id/invite/bulk',
+  '/:cluster_id/bulk-invite',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('cluster', 'delete'),
-  AdminClusterMiddleware.checkIfClusterExists,
   Model(Schema.inviteClusterBulk, 'payload'),
+  AdminClusterMiddleware.checkIfClusterExists,
   AdminClusterMiddleware.clusterMemberBulkInvite,
   AdminClusterController.clusterMemberBulkInvite
 );
