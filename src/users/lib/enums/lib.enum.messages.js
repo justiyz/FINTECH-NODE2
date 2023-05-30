@@ -303,3 +303,4 @@ export const ADMIN_DELETES_CLUSTER_MEMBER = 'admin successfully deletes cluster 
 export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
 export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';
 export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';
+export const CLUSTER_MEMBER_ALREADY_EXIST = 'users already belong to this cluster';

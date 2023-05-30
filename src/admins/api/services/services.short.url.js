@@ -7,7 +7,7 @@ export const createShortLink = async(data) => {
   const referralCode = data.admin_id;
   const uniqueClusterCode = data.unique_code;
 
-  const link = `https://cluster.theseedfi.com/?id=${clusterId}&ref=${referralCode}&code=${uniqueClusterCode}`; 
+  const link = `${config.SEEDFI_DOMAIN_URL_PREFIX}/?id=${clusterId}&ref=${referralCode}&code=${uniqueClusterCode}`; 
 
   const payload = {
     dynamicLinkInfo: {
