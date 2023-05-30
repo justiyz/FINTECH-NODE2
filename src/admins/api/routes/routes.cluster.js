@@ -14,7 +14,7 @@ const router = Router();
 router.post(
   '/create',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'create'),
+  RolesMiddleware.adminAccess('cluster management', 'create'),
   Model(Schema.createCluster, 'payload'),
   AdminClusterMiddleware.checkIfClusterNameUnique,
   AdminClusterMiddleware.generateClusterUniqueCode,
@@ -25,7 +25,7 @@ router.post(
 router.get(
   '/clusters',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'read'),
+  RolesMiddleware.adminAccess('cluster management', 'read'),
   Model(Schema.fetchClusters, 'query'),
   AdminClusterController.fetchAndFilterClusters
 );
@@ -34,7 +34,7 @@ router.get(
   '/:cluster_id/details',
   AuthMiddleware.validateAdminAuthToken,
   AdminClusterMiddleware.checkIfClusterExists,
-  RolesMiddleware.adminAccess('cluster', 'read'),
+  RolesMiddleware.adminAccess('cluster management', 'read'),
   Model(Schema.clusterId, 'params'),
   AdminClusterController.fetchSingleClusterDetails
 );
@@ -42,7 +42,7 @@ router.get(
 router.post(
   '/:cluster_id/invite',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'update'),
+  RolesMiddleware.adminAccess('cluster management', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
   Model(Schema.inviteCluster, 'payload'),
   AdminClusterMiddleware.checkClusterMemberExist('confirm'),
@@ -52,7 +52,7 @@ router.post(
 router.patch(
   '/:cluster_id/status',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'update'),
+  RolesMiddleware.adminAccess('cluster management', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
   Model(Schema.editClusterStatus, 'payload'),
   AdminClusterMiddleware.checkClusterCurrentStatus,
@@ -63,7 +63,7 @@ router.patch(
 router.delete(
   '/:cluster_id/member/:user_id',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'delete'),
+  RolesMiddleware.adminAccess('cluster management', 'delete'),
   AdminClusterMiddleware.checkIfClusterExists,
   AdminUserMiddleware.checkIfUserExists,
   AdminClusterMiddleware.checkClusterMemberExist('validate'),
@@ -74,7 +74,7 @@ router.delete(
 router.post(
   '/:cluster_id/bulk-invite',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster', 'delete'),
+  RolesMiddleware.adminAccess('cluster management', 'delete'),
   Model(Schema.inviteClusterBulk, 'payload'),
   AdminClusterMiddleware.checkIfClusterExists,
   AdminClusterMiddleware.clusterMemberBulkInvite,
