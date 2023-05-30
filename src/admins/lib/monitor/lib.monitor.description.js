@@ -42,7 +42,7 @@ export const create_cluster = (name, cluster) => `${name} creates cluster ${clus
 export const create_cluster_failed = (name) => `${name} failed to create cluster`;
 export const activate_cluster = (name, cluster) => `${name} activates ${cluster} cluster`;
 export const deactivate_cluster = (name, cluster) => `${name} deactivates cluster ${cluster}`;
-export const cluster_member_invite  = (name, userName) => `${name} invite a cluster member ${userName}`;
+export const cluster_member_invite  = (name) => `${name} invite a cluster member`;
 export const cluster_member_invite_failed  = (name) => `${name} failed to invite a cluster member`;
 export const delete_cluster_member = (name, clusterMemberName, clusterName) => `${name} deletes cluster member ${clusterMemberName} from cluster ${clusterName}`;
 export const unblacklist_bvn = (name) => `${name} unblacklist user bvn`;

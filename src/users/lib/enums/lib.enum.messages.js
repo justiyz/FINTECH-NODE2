@@ -305,3 +305,4 @@ export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be perform
 export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';
 export const RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY = 'Rescheduled loans fetched successfully';
 export const RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY = 'Rescheduled loan details fetched successfully';
+export const CLUSTER_MEMBER_ALREADY_EXIST = 'users already belong to this cluster';

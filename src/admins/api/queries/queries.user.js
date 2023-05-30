@@ -33,6 +33,24 @@ export default {
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
 
+  getUsers: `
+    SELECT 
+      id, 
+      user_id 
+      phone_number, 
+      email, 
+      title, 
+      first_name, 
+      middle_name, 
+      last_name, 
+      tier, 
+      gender
+    FROM users
+    WHERE is_verified_phone_number = TRUE
+    AND is_verified_email = TRUE 
+    AND is_verified_bvn = TRUE
+    AND status = 'active';`,
+      
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -54,6 +72,16 @@ export default {
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
     WHERE email = $1`,
+  getUserByPhoneNumber: `
+    SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
+    TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
+      to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
+      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
+      number_of_children, marital_status, loan_status,
+       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
+    FROM users
+    WHERE phone_number = $1`,
 
   getUserEmploymentDetails: `
     SELECT 

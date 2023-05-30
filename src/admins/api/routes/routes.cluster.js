@@ -71,4 +71,13 @@ router.delete(
   AdminClusterController.deleteClusterMember
 );
 
+router.post(
+  '/:cluster_id/invite/bulk',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('cluster', 'delete'),
+  AdminClusterMiddleware.checkIfClusterExists,
+  AdminClusterMiddleware.clusterMemberBulkInvite,
+  AdminClusterController.clusterMemberBulkInvite
+);
+
 export default router;
