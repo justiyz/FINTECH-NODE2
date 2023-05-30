@@ -33,11 +33,19 @@ const fetchRepaidloans = Joi.object().keys({
   per_page: Joi.number().positive().optional(),
   export: Joi.string().optional().valid('true') 
 });
+const fetchRescheduledloans = Joi.object().keys({
+  search: Joi.string().optional(),
+  status: Joi.string().optional(),
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  export: Joi.string().optional().valid('true') 
+});
 
 export default {
   manualLoanApproval,
   manualLoanRejection,
   loanIdParams,
   fetchLoans,
-  fetchRepaidloans
+  fetchRepaidloans,
+  fetchRescheduledloans
 };

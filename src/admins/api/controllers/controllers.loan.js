@@ -210,3 +210,78 @@ export const fetchRepaidLoans = async(req, res, next) => {
   }
 };
 
+
+/**
+ * fetches rescheduled loans on the platform
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+export const fetchRescheduledLoans = async(req, res, next) => {
+  try {
+    const { query, admin } = req;
+    if (query.export) {
+      const payload = loanPayload.fetchAllRescheduledLoans(query);
+      const rescheduledLoans = await processAnyData(loanQueries.fetchAllRescheduledLoans, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched repaid loans from the DB
+      fetchRepaidLoans.admin.controllers.loan.js`);
+      const data = {
+        total_count: rescheduledLoans.length,
+        rescheduledLoans
+      };
+      return ApiResponse.success(res, enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    }
+    const payload = loanPayload.fetchRescheduledLoans(query);
+    const [ rescheduledLoans, [ rescheduledLoansCount ] ] = await Promise.all([
+      processAnyData(loanQueries.fetchRescheduledLoans, payload),
+      processAnyData(loanQueries.fetchRescheduledLoansCount, payload)
+    ]);
+    
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched rescheduled loans from the DB 
+    fetchRescheduledLoans.admin.controllers.roles.js`);
+    const data = {
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(rescheduledLoansCount.total_count),
+      total_pages: Helpers.calculatePages(Number(rescheduledLoansCount.total_count), Number(req.query.per_page) || 10),
+      rescheduledLoans
+    };
+    return ApiResponse.success(res, enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+
+  } catch (error) {
+    error.label = enums.RESCHEDULED_LOANS_CONTROLLER;
+    logger.error(`fetching recheduled loans failed:::${enums.RESCHEDULED_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetches rescheduled loan of a single user on the platform
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+
+export const fetchSingleUserRescheduledLoan = async(req, res, next) => {
+  try {
+    const { params: {loan_id}, admin } = req;
+    const [ [ userRescheduledDetails ],  newRepaymentBreakdown  ] = await Promise.all([
+      processAnyData(loanQueries.fetchSingleRescheduledLoanDetails, loan_id),
+      processAnyData(loanQueries.fetchNewRepaymentBreakdown, loan_id)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched rescheduled loan of a particular user from the DB
+    fetchSingleUserRescheduledLoan.admin.controllers.loan.js`);
+    const data = {
+      userRescheduleDetails: userRescheduledDetails,
+      newRepayment: newRepaymentBreakdown
+    };
+    return ApiResponse.success(res, enums.RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data); 
+  } catch (error) {
+    error.label = enums.RESCHEDULED_LOAN_DETAILS_CONTROLLER;
+    logger.error(`fetching recheduled loan details failed:::${enums.RESCHEDULED_LOAN_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
