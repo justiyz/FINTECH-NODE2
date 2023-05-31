@@ -381,8 +381,8 @@ export default {
 
   totalObligation: `
     SELECT COUNT(id) AS total_obligation
-    FROM personal_loan_payments
-    WHERE status = 'paid'
+    FROM personal_loans
+    WHERE status = 'completed'
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
     OR ($1 IS NULL AND $2 IS NULL))
   `,
@@ -401,17 +401,24 @@ export default {
   customerBase: `
   SELECT 
     COUNT(CASE WHEN gender = 'male' THEN 1 END) AS male,
-    COUNT(CASE WHEN gender = 'female' THEN 1 END) AS female
+    COUNT(CASE WHEN gender = 'female' THEN 1 END) AS female,
+    COUNT(id) AS total_users
    FROM users
-   WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
-   OR ($1 IS NULL AND $2 IS NULL));
+   WHERE is_deleted = FALSE 
+   AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+     OR ($1 IS NULL AND $2 IS NULL))
+     AND is_completed_kyc = true;
   `,
 
   loanTenor: `
-    SELECT
-      MAX(loan_tenor_in_months) AS highest_month_tenure,
-      MIN(loan_tenor_in_months) AS lowest_month_tenure
-    FROM personal_loans
+  SELECT
+  MAX(loan_tenor_in_months) AS highest_month_tenure,
+  MIN(loan_tenor_in_months) AS lowest_month_tenure,
+  (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+  WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+  (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+  WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+ FROM personal_loans
     WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
     OR ($1 IS NULL AND $2 IS NULL));
 `

@@ -259,8 +259,8 @@ export const fetchPlatformOverview = async(req, res, next) => {
     const { admin, query: { type, from_date, to_date } } = req;
     const queryFromType = type === 'filter' ? from_date : null;
     const queryToType = type === 'filter' ? to_date : null;
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const currentYearFromDate = type === 'all' ? dayjs().format('2023-01-01 00:00:00') : from_date; // i.e first day of the current year project started 2023
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : to_date; // i.e current time stamp
     const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
     fetchPlatformOverview.controllers.admin.admin.js`);
@@ -383,14 +383,13 @@ export const fetchActivityLog = async(req, res, next) => {
  * @memberof AdminAdminController
  */
 export const loanRepaymentReport = async(req, res, next) => {
+  const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
   try {
     const { admin, query: { type, from_date, to_date } } = req;
-    const adminName = `${admin.first_name} ${admin.last_name}`;
     const queryFromType = type === 'filter' ? from_date : null;
     const queryToType = type === 'filter' ? to_date : null;
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date;
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date;
-    
+    const currentYearFromDate = type === 'all' ? dayjs().format('2023-01-01 00:00:00') : from_date; // i.e first day of the current year project started 2023
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : to_date; // i.e current time stamp
     const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, profit, customerBase, loanTenor ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
@@ -404,13 +403,13 @@ export const loanRepaymentReport = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
     successfully fetched loan repayment report and analytics from the DB loanRepaymentReport.controllers.admin.admin.js`);
     const data = {
-      totalLoanRejected,
-      totalDisbursedLoan,
-      averageOrrScore, 
-      totalLoanObligation,
-      profit,
-      customerBase,
-      loanTenor,
+      totalLoanRejected: parseFloat(totalLoanRejected) || 0,
+      totalDisbursedLoan: parseFloat(totalDisbursedLoan) || 0,
+      averageOrrScore: parseFloat(averageOrrScore)|| 0, 
+      totalLoanObligation: parseFloat(totalLoanObligation) || 0,
+      profit: profit,
+      customerBase: customerBase,
+      loanTenor: loanTenor,
       orrScore: [] // to be updated when endpoint is available
     };
     adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
@@ -418,6 +417,7 @@ export const loanRepaymentReport = async(req, res, next) => {
     loan payment report arranged and set to be returned loanRepaymentReport.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.LOAN_REPAYMENT_REPORT, enums.HTTP_OK, data);
   } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
     error.label = enums.LOAN_REPAYMENT_REPORT_CONTROLLER;
     logger.error(`fetching report and analytics in the DB failed:::${enums.LOAN_REPAYMENT_REPORT_CONTROLLER}`, error.message);
     return next(error);

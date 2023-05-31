@@ -111,6 +111,7 @@ export const HOMEPAGE_DETAILS_CONTROLLER = 'UserController::homepageDetails';
 export const CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
 export const CHECK_USER_LOAN_PAYMENT_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanPaymentExists';
 export const CHECK_RESCHEDULE_EXTENSION_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkRescheduleExtensionExists';
+export const VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE = 'LoanMiddleware::validateRenegotiationAmount';
 export const CHECK_IF_USER_HAS_ACTIVE_PERSONAL_LOAN_MIDDLEWARE = 'LoanMiddleware::checkIfUserHasActivePersonalLoan';
 export const CHECK_LOAN_APPLICATION_STATUS_IS_STILL_PENDING_MIDDLEWARE = 'LoanMiddleware::checkIfLoanApplicationStatusIsStillPending';
 export const CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE = 'LoanMiddleware::checkIfOngoingLoanApplication';

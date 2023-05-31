@@ -48,4 +48,5 @@ export const delete_cluster_member = (name, clusterMemberName, clusterName) => `
 export const unblacklist_bvn = (name) => `${name} unblacklist user bvn`;
 export const unblacklist_existing_user = (name) => `${name} unblacklist an existing user bvn`;
 export const initiate_document_type_export = (name, type) => `${name} successfully initiates selected ${type} file export`;
-export const loan_repayment = (name) => `${name} successfully fetch loan repayment report`;
+export const loan_repayment = (name) => `${name} viewed loan repayment report and analytics`;
+export const loan_failed_repayment = (name) => `${name} failed trying to viewed loan repayment report and analytics`;
