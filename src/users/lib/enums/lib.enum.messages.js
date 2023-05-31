@@ -127,6 +127,7 @@ export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWAB
   `User cannot apply for a loan greater than ${percentage}% of maximum allowable amount`;
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE = 'Action not permitted on this loan application as there is no system maximum allowable amount';
+export const RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT = 'renegotiating amount should not be greater than the allowable amount';
 export const LOAN_APPLICATION_DECLINED_DECISION = 'User loan application decline due to ineligibility, kindly try again some other time';
 export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a status of ${status}, thus repayment cannot be processed`;
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
@@ -137,7 +138,7 @@ export const LOAN_RESCHEDULING_NOT_ALLOWED = (count) => `User has rescheduled th
 export const LOAN_RESCHEDULING_EXTENSION_NOT_EXISTING = 'Invalid loan reschedule extension day sent';
 export const LOAN_RESCHEDULE_REQUEST_NOT_EXISTING = 'Loan reschedule request does not exists';
 export const LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING = 'Loan reschedule request has been previously processed';
-export const LOAN_AMOUNT_NOT_EQUAL_TO_SYSTEM_MAXIMUM_AMOUNT = 'System maximum loan amount needs to be accepted to process loan disbursement';
+export const LOAN_AMOUNT_GREATER_THAN_SYSTEM_MAXIMUM_AMOUNT = 'Loan amount cannot be greater than system allowable loan amount';
 export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still awaits approval, disbursement cannot be made';
 export const LOAN_APPLICATION_DECLINED = 'loan application declined, disbursement cannot be made';
 export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application status is ${type}, disbursement cannot be made again`;
@@ -148,7 +149,8 @@ export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON = 
 'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL = 'User loan application disbursement initiated successful';
-export const SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED__SUCCESSFULLY = 'System maximum allowable loan amount updated successfully';
+export const SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED_SUCCESSFULLY = 'System maximum allowable loan amount updated successfully';
+export const LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY = 'Loan renegotiation successful';
 export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application cancelled successful';
 export const USER_LOAN_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan details fetched successful`;
 export const USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payment details fetched successful`;
@@ -228,7 +230,7 @@ export const ADMIN_ALREADY_SET_NEW_PASSWORD = 'admin has previously set new pass
 export const ADMIN_ALREADY_COMPLETED_PROFILE = 'admin has previously completed profile, kindly do edit profile';
 export const ADMIN_ROLE_NAME_EXISTS = (name) => `A role withe the name "${name}" already exists in the DB`;
 export const ADMIN_CANNOT_PERFORM_ACTION = (action, resource) => `Admin cannot perform "${action}" action on ${resource} module`;
-export const ADMIN_RESOURCE_ACTION = (resource) => `Admin dose not have resource action ${resource}.`;
+export const ADMIN_NO_RESOURCE_ACCESS = (resource) => `Admin dose not have access to ${resource} resource.`;
 export const RESOURCE_ID_SENT_NOT_EXISTS = (resource_id) => `resource with resource id ${resource_id} does not exist`;
 export const RESOURCE_REPEATING_IN_PAYLOAD = (resource_name) => `resource "${resource_name}" is repeating more than once`;
 export const CANNOT_PERFORM_ACTION_BASED_ON_CURRENT_STATUS = (action, status) => `cannot ${action} a role with ${status} status`;

@@ -164,11 +164,11 @@ export const checkIfLoanApplicationStatusIsCurrentlyApproved = async(req, res, n
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is currently approved 
       checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
       if ((existingLoanApplication.max_possible_approval !== null) && 
-      (parseFloat(existingLoanApplication.amount_requested) !== parseFloat(existingLoanApplication.max_possible_approval))) {
+      (parseFloat(existingLoanApplication.amount_requested) > parseFloat(existingLoanApplication.max_possible_approval))) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: system allowable amount has not been accepted by user so disbursement cannot
         be processed checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
         userActivityTracking(req.user.user_id, 44, 'fail');
-        return ApiResponse.error(res, enums.LOAN_AMOUNT_NOT_EQUAL_TO_SYSTEM_MAXIMUM_AMOUNT, enums.HTTP_FORBIDDEN, 
+        return ApiResponse.error(res, enums.LOAN_AMOUNT_GREATER_THAN_SYSTEM_MAXIMUM_AMOUNT, enums.HTTP_FORBIDDEN, 
           enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
       }
       return next();

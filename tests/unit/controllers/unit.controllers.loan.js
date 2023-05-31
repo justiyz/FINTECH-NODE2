@@ -105,5 +105,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call processLoanRenegotiation', async() => {
+      const req = { user: '', existingLoanApplication: '', body: '' };
+      const data = await LoanController.processLoanRenegotiation(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
