@@ -1415,7 +1415,7 @@ describe('Admin', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.have.property('default_loans');
-          expect(res.body.data).to.have.property('average_loan_tenor');
+          expect(res.body.data).to.have.property('average_loan_tenor_in_months');
           expect(res.body.data).to.have.property('rescheduled_loans');
           expect(res.body.data).to.have.property('total_customer');
           expect(res.body.data).to.have.property('disbursed_loans');
@@ -1441,7 +1441,7 @@ describe('Admin', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.have.property('default_loans');
-          expect(res.body.data).to.have.property('average_loan_tenor');
+          expect(res.body.data).to.have.property('average_loan_tenor_in_months');
           expect(res.body.data).to.have.property('rescheduled_loans');
           expect(res.body.data).to.have.property('total_customer');
           expect(res.body.data).to.have.property('disbursed_loans');
