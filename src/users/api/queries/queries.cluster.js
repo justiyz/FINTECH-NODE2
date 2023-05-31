@@ -72,6 +72,7 @@ export default {
       cluster_members.loan_obligation,
       cluster_members.is_admin,
       users.email,
+      users.phone_number,
       cluster_members.is_left
     FROM cluster_members
     LEFT JOIN users ON users.user_id = cluster_members.user_id

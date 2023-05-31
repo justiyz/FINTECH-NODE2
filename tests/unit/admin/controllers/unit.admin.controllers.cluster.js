@@ -57,5 +57,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call clusterMemberBulkInvite', async() => {
+      const req = { admin: '', cluster: '', userInvite: ''};
+      const data = await AdminClusterController.clusterMemberBulkInvite(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

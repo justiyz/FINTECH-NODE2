@@ -10,19 +10,25 @@ export default {
   createClusterPayload: (body) => [ 
     body.name.trim().toLowerCase(), 
     body.description.trim(), 
-    body.type,
+    'private',
     body.maximum_members,
-    0, 
+    0,
     body.loan_goal_target || 0,
-    body.minimum_monthly_income,
+    0,
     true,
-    body.clusterCode
+    body.clusterCode,
+    body.company_name,
+    body.company_address,
+    body.company_type,
+    body.company_contact_number,
+    body.interest_type,
+    body.percentage_interest_type_value
   ],
-  clusterInvite: (body, cluster, admin, invitedUser) => [
+  clusterInvite: (body, cluster, admin, type, invitedUser) => [
     cluster.cluster_id,
     admin.admin_id,
-    body.email.trim().toLowerCase(),
-    'email',
+    body.email?.trim().toLowerCase() || body.phone_number?.trim(),
+    type,
     invitedUser?.user_id || null
   ]
 };

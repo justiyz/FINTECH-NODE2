@@ -260,7 +260,49 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
         advisory_fee_percentage: 0.01
       },
       monthly_repayment: parseFloat(parseFloat((((0.03) * parseFloat(payload.loan_amount)) / (1 - ((1 + (0.03))**(-Number(payload.loan_duration_in_month)))))).toFixed(2)),
-      max_approval: null
+      max_approval: parseFloat(parseFloat(payload.loan_amount) - parseFloat(payload.loan_amount * 0.25))
+    }
+  };
+  return data;
+};
+
+export const seedfiUnderwritingLoanRenegotiationTestResponse = (body, existingLoanApplication) => {
+  const data = {
+    status: 200,
+    statusText: 'OK',
+    data: {
+      loan_application_id: existingLoanApplication.loan_id,
+      pricing_band: 45,
+      monthly_interest: 0.04,
+      monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(body.new_loan_amount)) / (1 - ((1 + (0.04))**(-Number(body.new_loan_duration_in_month)))))).toFixed(2)),
+      fees: {
+        processing_fee: parseFloat(0.01 * parseFloat(body.new_loan_amount)),
+        insurance_fee: parseFloat(0.01 * parseFloat(body.new_loan_amount)),
+        advisory_fee: parseFloat(0.01 * parseFloat(body.new_loan_amount)),
+        processing_fee_percentage: 0.01,
+        insurance_fee_percentage: 0.01,
+        advisory_fee_percentage: 0.01
+      },
+      previous_loan_application_response: {
+        fees: {
+          advisory_fee: parseFloat(0.01 * parseFloat(existingLoanApplication.amount_requested)),
+          insurance_fee: parseFloat(0.01 * parseFloat(existingLoanApplication.amount_requested)),
+          processing_fee: parseFloat(0.01 * parseFloat(existingLoanApplication.amount_requested)),
+          advisory_fee_percentage: 0.01,
+          insurance_fee_percentage: 0.01,
+          processing_fee_percentage: 0.01
+        },
+        orr_score: parseFloat(existingLoanApplication.percentage_orr_score),
+        loan_amount: parseFloat(existingLoanApplication.amount_requested),
+        max_approval: parseFloat(existingLoanApplication.max_possible_approval),
+        pricing_band: 45,
+        final_decision: 'MANUAL',
+        monthly_interest: 0.04,
+        monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(existingLoanApplication.amount_requested)) / 
+        (1 - ((1 + (0.04))**(-Number(existingLoanApplication.initial_loan_tenor_in_months)))))).toFixed(2)),
+        loan_application_id: existingLoanApplication.loan_id,
+        loan_duration_in_month: parseFloat(existingLoanApplication.initial_loan_tenor_in_months)
+      }
     }
   };
   return data;
