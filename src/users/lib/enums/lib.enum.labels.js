@@ -274,3 +274,4 @@ export const UNBLACKLIST_BVN_CONTROLLER = 'AdminBvnController::unblacklistBvn';
 export const CLUSTER_MEMBER_BULK_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberBulkInvite';
 export const RESCHEDULED_LOANS_CONTROLLER = 'AdminBvnController::fetchRescheduledLoans';
 export const RESCHEDULED_LOAN_DETAILS_CONTROLLER = 'AdminBvnController::fetchSingleUserRescheduledLoan';
+export const LOAN_REPAYMENT_REPORT_CONTROLLER = 'AdminBvnController::loanRepaymentReport';
