@@ -105,7 +105,7 @@ router.get(
   '/loan-analytics',
   AuthMiddleware.validateAdminAuthToken,
   Model(RoleSchema.loanAndClusterAnalytics, 'query'),
-  RolesMiddleware.adminAccess('report-management', 'read'),
+  RolesMiddleware.adminAccess('report management', 'read'),
   AdminController.fetchLoanManagementAnalytics
 );
 
