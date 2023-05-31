@@ -51,7 +51,7 @@ router.get(
   '/repaid-loans',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.fetchRepaidloans, 'query'),
+  Model(Schema.fetchRepaidLoans, 'query'),
   LoanController.fetchRepaidLoans
 );
 
@@ -59,9 +59,10 @@ router.get(
   '/rescheduled-loans',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.fetchRescheduledloans, 'query'),
+  Model(Schema.fetchRescheduledLoans, 'query'),
   LoanController.fetchRescheduledLoans
 );
+
 router.get(
   '/:loan_id/rescheduled-loan',
   AuthMiddleware.validateAdminAuthToken,

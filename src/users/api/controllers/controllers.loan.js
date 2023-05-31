@@ -7,7 +7,7 @@ import enums from '../../lib/enums';
 import config from '../../config';
 import AdminMailService from '../../../admins/api/services/services.email';
 import LoanPayload from '../../lib/payloads/lib.payload.loan';
-import { personalLoanApplicationEligibilityCheck } from '../services/service.seedfiUnderwriting';
+import { personalLoanApplicationEligibilityCheck, personalLoanApplicationRenegotiation } from '../services/service.seedfiUnderwriting';
 import { userActivityTracking } from '../../lib/monitor';
 import { initiateTransfer, initializeCardPayment, initializeBankAccountChargeForLoanRepayment, 
   initializeDebitCarAuthChargeForLoanRepayment, submitPaymentOtpWithReference 
@@ -57,7 +57,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
     const { data } = result;
     if (data.final_decision === 'DECLINED') {
@@ -139,11 +139,74 @@ export const acceptSystemMaximumAllowableLoanAmount = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount updated for used in the DB 
     acceptSystemMaximumAllowableLoanAmount.controllers.loan.js`);
     userActivityTracking(user.user_id, 91, 'success');
-    return ApiResponse.success(res, enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED__SUCCESSFULLY, enums.HTTP_OK, updateLoanAmount);
+    return ApiResponse.success(res, enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updateLoanAmount);
   } catch (error) {
     userActivityTracking(req.user.user_id, 91, 'fail');
     error.label = enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER;
     logger.error(`updating loan amount with system allowable loan amount failed::${enums.ACCEPT_SYSTEM_MAXIMUM_ALLOWABLE_LOAN_AMOUNT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user renegotiates requesting loan amount and or tenor
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of cancelled loan
+ * @memberof LoanController
+ */
+export const processLoanRenegotiation = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, body } = req;
+    if (existingLoanApplication.max_possible_approval === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
+      processLoanRenegotiation.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 41, 'fail');
+      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
+        enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
+    }
+    if (parseFloat(existingLoanApplication.max_possible_approval) < parseFloat(body.new_loan_amount)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount in the DB is lesser than the renegotiation amount
+      processLoanRenegotiation.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 41, 'fail');
+      return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN, 
+        enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
+    }
+    const result = await personalLoanApplicationRenegotiation(body, user, existingLoanApplication);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing result returned processLoanRenegotiation.controllers.loan.js`);
+    if (result.status !== 200) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing does not return success response from underwriting service 
+      processLoanRenegotiation.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 41, 'fail');
+      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
+    }
+    const { data } = result;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing returns success response from underwriting service
+    processLoanRenegotiation.controllers.loan.js`);
+    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
+    const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month));
+    const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(body.new_loan_amount);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total interest amount and total amount repayable calculated 
+    processLoanRenegotiation.controllers.loan.js`);
+    const renegotiationPayload = await LoanPayload.loanRenegotiationPayload(user, body, existingLoanApplication, data);
+    const updateRenegotiationPayload = await LoanPayload.loanApplicationRenegotiationPayload(data, totalAmountRepayable, totalInterestAmount, body, existingLoanApplication);
+    const [ , updatedLoanDetails ] = await Promise.all([
+      processOneOrNoneData(loanQueries.createRenegotiationDetails, renegotiationPayload),
+      processOneOrNoneData(loanQueries.updateLoanApplicationWithRenegotiation, updateRenegotiationPayload)
+    ]);
+    const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated processLoanRenegotiation.controllers.loan.js`);
+    await processNoneData(loanQueries.updateOfferLetter, [ existingLoanApplication.loan_id, user.user_id, offerLetterData.Location.trim() ]);
+    const returningData = await LoanPayload.loanApplicationRenegotiationResponse(data, totalAmountRepayable, totalInterestAmount, user, 
+      updatedLoanDetails, offerLetterData.Location.trim(), body);
+    userActivityTracking(user.user_id, 41, 'success');
+    return ApiResponse.success(res, enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY, enums.HTTP_OK, returningData);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 41, 'fail');
+    error.label = enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER;
+    logger.error(`processing loan renegotiation failed::${enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };

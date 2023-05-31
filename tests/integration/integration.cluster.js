@@ -177,7 +177,7 @@ describe('Clusters', () => {
           done();
         });
     });
-    it('should throw error if user monthly income is lower than cluster minimum income 0', (done) => {
+    it('should throw error if user monthly income is lower than cluster minimum income', (done) => {
       chai.request(app)
         .post('/api/v1/cluster/create')
         .set({

@@ -35,7 +35,7 @@ export const adminAccess = (resource, action) => async(req, res, next) => {
       }
       return  ApiResponse.error(res, enums.ADMIN_CANNOT_PERFORM_ACTION(action, resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
     }
-    return  ApiResponse.error(res, enums.ADMIN_RESOURCE_ACTION(resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
+    return  ApiResponse.error(res, enums.ADMIN_NO_RESOURCE_ACCESS(resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.ADMIN_ACCESS_MIDDLEWARE;
     logger.error(`Validating if admin has resource access failed:::${enums.ADMIN_ACCESS_MIDDLEWARE}`, error.message);

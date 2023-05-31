@@ -1,23 +1,23 @@
 const axios = require('axios');
 import config from '../../../users/config';
-const apiKey = config.SEEDFI_FIREBASE_DYNAMIC_LINK_PRIVATE_KEY;
+const apiKey = config.SEEDFI_FIREBASE_WEB_API_KEY;
 
 export const createShortLink = async(data) => {
   const clusterId = data.cluster_id;
   const referralCode = data.admin_id;
   const uniqueClusterCode = data.unique_code;
 
-  const link = `https://cluster.theseedfi.com/?id=${clusterId}&ref=${referralCode}&code=${uniqueClusterCode}`; 
+  const link = `${config.SEEDFI_FIREBASE_DYNAMIC_LINK_DOMAIN_URI_PREFIX}/?id=${clusterId}&ref=${referralCode}&code=${uniqueClusterCode}`; 
 
   const payload = {
     dynamicLinkInfo: {
-      domainUriPrefix: config.SEEDFI_DOMAIN_URL_PREFIX,
+      domainUriPrefix: config.SEEDFI_FIREBASE_DYNAMIC_LINK_DOMAIN_URI_PREFIX,
       link: link,
       androidInfo: {
-        androidPackageName: config.SEEDFI_ANDROID_PACKAGE_NAME
+        androidPackageName: config.SEEDFI_FIREBASE_DYNAMIC_LINK_ANDROID_PACKAGE_NAME
       },
       iosInfo: {
-        iosBundleId: config.SEEDFI_IOS_BUNDLE_ID
+        iosBundleId: config.SEEDFI_FIREBASE_DYNAMIC_LINK_IOS_BUNDLE_ID
       }
     }
   };
