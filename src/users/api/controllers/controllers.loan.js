@@ -159,20 +159,6 @@ export const acceptSystemMaximumAllowableLoanAmount = async(req, res, next) => {
 export const processLoanRenegotiation = async(req, res, next) => {
   try {
     const { user, existingLoanApplication, body } = req;
-    if (existingLoanApplication.max_possible_approval === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
-      processLoanRenegotiation.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 41, 'fail');
-      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
-        enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
-    }
-    if (parseFloat(existingLoanApplication.max_possible_approval) < parseFloat(body.new_loan_amount)) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount in the DB is lesser than the renegotiation amount
-      processLoanRenegotiation.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 41, 'fail');
-      return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN, 
-        enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
-    }
     const result = await personalLoanApplicationRenegotiation(body, user, existingLoanApplication);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing result returned processLoanRenegotiation.controllers.loan.js`);
     if (result.status !== 200) {

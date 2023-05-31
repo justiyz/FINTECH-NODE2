@@ -279,8 +279,9 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
  * @memberof LoanMiddleware
  */
 export const validateLoanAmountAndTenor = async(req, res, next) => {
+  const { user, body } = req;
+  const activityType = body.amount ? 37 : 41;
   try {
-    const { user, body } = req;
     const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails, 
       maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
@@ -290,45 +291,45 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ])
     ]);
-    if ((Number(user.tier) === 1) && (parseFloat(body.amount) > (parseFloat(tierOneMaximumLoanAmountDetails.value)))) {
+    if ((Number(user.tier) === 1) && (parseFloat(body.amount || body.new_loan_amount) > (parseFloat(tierOneMaximumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount greater than maximum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if ((Number(user.tier) === 2) && (parseFloat(body.amount) > (parseFloat(tierTwoMaximumLoanAmountDetails.value)))) {
+    if ((Number(user.tier) === 2) && (parseFloat(body.amount || body.new_loan_amount) > (parseFloat(tierTwoMaximumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount greater than maximum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if ((Number(user.tier) === 1) && (parseFloat(body.amount) < (parseFloat(tierOneMinimumLoanAmountDetails.value)))) {
+    if ((Number(user.tier) === 1) && (parseFloat(body.amount || body.new_loan_amount) < (parseFloat(tierOneMinimumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount lesser than minimum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if ((Number(user.tier) === 2) && (parseFloat(body.amount) < (parseFloat(tierTwoMinimumLoanAmountDetails.value)))) {
+    if ((Number(user.tier) === 2) && (parseFloat(body.amount || body.new_loan_amount) < (parseFloat(tierTwoMinimumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount lesser than minimum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if (Number(body.duration_in_months) < Number(minimumLoanTenorDetails.value)) {
+    if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if (Number(body.duration_in_months) > Number(maximumLoanTenorDetails.value)) {
+    if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration greater than allowable maximum tenor 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
+      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, 37, 'fail');
+    userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE;
     logger.error(`validating loan application amount and tenor failed::${enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE}`, error.message);
     return next(error);
@@ -540,6 +541,40 @@ export const checkLoanReschedulingRequest = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 75, 'fail');
     error.label = enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE;
     logger.error(`checking if loan rescheduling request exists failed::${enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check renegotiation amount is less than or equal to allowable amount
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const validateRenegotiationAmount = async(req, res, next) => {
+  try {
+    const { body, existingLoanApplication, user } = req;
+    if (existingLoanApplication.max_possible_approval === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
+      validateRenegotiationAmount.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 41, 'fail');
+      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
+        enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
+    }
+    if (parseFloat(existingLoanApplication.max_possible_approval) < parseFloat(body.new_loan_amount)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount in the DB is lesser than the renegotiation amount
+      validateRenegotiationAmount.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 41, 'fail');
+      return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN, 
+        enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 41, 'fail');
+    error.label = enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE;
+    logger.error(`checking if loan renegotiation amount is acceptable failed::${enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

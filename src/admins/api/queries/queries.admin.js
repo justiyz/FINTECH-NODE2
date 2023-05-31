@@ -370,6 +370,58 @@ export default {
         WHERE (TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
         OR TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) OR $1 IS NULL)
         AND ((admin_activity_logs.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
-  `
+  `,
+  averageOrrScore: `
+    SELECT 
+      AVG(percentage_orr_score::numeric) AS average_value
+    FROM personal_loans
+    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+    OR ($1 IS NULL AND $2 IS NULL));
+  `,
+
+  totalObligation: `
+    SELECT COUNT(id) AS total_obligation
+    FROM personal_loans
+    WHERE status = 'completed'
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    OR ($1 IS NULL AND $2 IS NULL))
+  `,
+
+  profitReport: `
+    SELECT 
+      EXTRACT(MONTH FROM personal_loan_disbursements.created_at) AS month,
+      SUM(personal_loan_disbursements.amount - personal_loan_payments.amount) AS profit
+    FROM personal_loan_disbursements
+    LEFT JOIN personal_loan_payments 
+    ON  personal_loan_payments.loan_id = personal_loan_disbursements.loan_id
+    AND (personal_loan_disbursements.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    GROUP BY month
+  `,
+
+  customerBase: `
+  SELECT 
+    COUNT(CASE WHEN gender = 'male' THEN 1 END) AS male,
+    COUNT(CASE WHEN gender = 'female' THEN 1 END) AS female,
+    COUNT(id) AS total_users
+   FROM users
+   WHERE is_deleted = FALSE 
+   AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+     OR ($1 IS NULL AND $2 IS NULL))
+     AND is_completed_kyc = true;
+  `,
+
+  loanTenor: `
+  SELECT
+  MAX(loan_tenor_in_months) AS highest_month_tenure,
+  MIN(loan_tenor_in_months) AS lowest_month_tenure,
+  (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+  WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+  (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+  WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+ FROM personal_loans
+    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    OR ($1 IS NULL AND $2 IS NULL));
+`
+
 };
     

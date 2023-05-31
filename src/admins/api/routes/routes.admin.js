@@ -93,4 +93,12 @@ router.get(
   AdminController.fetchActivityLog
 );
 
+router.get(
+  '/loan_repayment',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(RoleSchema.overviewPage, 'query'),
+  RolesMiddleware.adminAccess('report management', 'read'), 
+  AdminController.loanRepaymentReport
+);
+
 export default router;

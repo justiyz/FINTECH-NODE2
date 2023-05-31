@@ -32,6 +32,8 @@ router.post(
   Model(Schema.loanRenegotiation, 'payload'),
   LoanMiddleware.checkUserLoanApplicationExists,
   LoanMiddleware.checkIfLoanApplicationStatusIsStillPending,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.validateRenegotiationAmount,
   LoanController.processLoanRenegotiation
 );
 

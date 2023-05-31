@@ -298,7 +298,7 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          amount: 50000,
+          amount: 120000,
           duration_in_months: 3,
           loan_reason: 'car loan'
         })
@@ -390,7 +390,27 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          new_loan_amount: 50000,
+          new_loan_amount: 500000,
+          new_loan_duration_in_month: 5
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT);
+          done();
+        });
+    });
+    it('should throw error when new renegotiation amount is greater than allowable amount', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 400000,
           new_loan_duration_in_month: 5
         })
         .end((err, res) => {
@@ -410,7 +430,7 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          new_loan_amount: 35000,
+          new_loan_amount: 70000,
           new_loan_duration_in_month: 5
         })
         .end((err, res) => {
@@ -434,7 +454,7 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          new_loan_amount: 30000,
+          new_loan_amount: 80000,
           new_loan_duration_in_month: 2
         })
         .end((err, res) => {
