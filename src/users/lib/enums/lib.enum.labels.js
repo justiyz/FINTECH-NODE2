@@ -271,6 +271,6 @@ export const CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE = 'AdminClusterController::ch
 export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminClusterController::checkAdminType';
 export const CHECK_IF_BVN_EXIST_MIDDLEWARE = 'AdminBvnMiddleware::checkIfBvnExist';
 export const UNBLACKLIST_BVN_CONTROLLER = 'AdminBvnController::unblacklistBvn';
+export const CLUSTER_MEMBER_BULK_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberBulkInvite';
 export const RESCHEDULED_LOANS_CONTROLLER = 'AdminBvnController::fetchRescheduledLoans';
 export const RESCHEDULED_LOAN_DETAILS_CONTROLLER = 'AdminBvnController::fetchSingleUserRescheduledLoan';
-export const CLUSTER_MEMBER_BULK_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberBulkInvite';
