@@ -51,6 +51,12 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call validateRenegotiationAmount', async() => {
+      const req = { user: '', body: '', existingLoanApplication: '' };
+      const data = await LoanMiddleware.validateRenegotiationAmount(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
     it('should call checkSeedfiPaystackBalance', async() => {
       const req = { user: '', existingLoanApplication: '' };
       const data = await LoanMiddleware.checkSeedfiPaystackBalance(req, res, next);
