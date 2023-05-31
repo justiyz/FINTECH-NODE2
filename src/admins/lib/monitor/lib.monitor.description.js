@@ -48,3 +48,8 @@ export const delete_cluster_member = (name, clusterMemberName, clusterName) => `
 export const unblacklist_bvn = (name) => `${name} unblacklist user bvn`;
 export const unblacklist_existing_user = (name) => `${name} unblacklist an existing user bvn`;
 export const initiate_document_type_export = (name, type) => `${name} successfully initiates selected ${type} file export`;
+export const loan_reports_and_analytics = (name, type) => `${name} successfully views ${type}`;
+export const loan_reports_and_analytics_failed = (name, type) => `${name} viewing ${type} failed`;
+export const cluster_reports_and_analytics = (name, type) => `${name} successfully views ${type}`;
+export const cluster_reports_and_analytics_failed = (name, type) => `${name} viewing ${type} failed`;
+

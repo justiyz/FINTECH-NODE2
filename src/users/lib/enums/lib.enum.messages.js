@@ -308,3 +308,5 @@ export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';
 export const CLUSTER_MEMBER_ALREADY_EXIST = 'users already belong to this cluster';
 export const RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY = 'Rescheduled loans fetched successfully';
 export const RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY = 'Rescheduled loan details fetched successfully';
+export const LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY = 'Loan management analytics fetched successfully';
+export const CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY = 'Cluster management analytics fetched successfully';
