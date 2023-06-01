@@ -100,5 +100,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchLoanManagementAnalytics', async() => {
+      const req = { admin: '', query: '' };
+      const data = await AdminController.fetchLoanManagementAnalytics(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchClusterManagementAnalytics', async() => {
+      const req = { admin: '', query: '' };
+      const data = await AdminController.fetchClusterManagementAnalytics(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

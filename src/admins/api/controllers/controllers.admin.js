@@ -343,6 +343,54 @@ export const fetchPlatformOverview = async(req, res, next) => {
   }
 };
 
+
+/**
+ * fetch and filter loan management analytics
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns loan management analytics details.
+ * @memberof AdminAdminController
+ */
+
+export const fetchLoanManagementAnalytics = async(req, res, next) => {
+  try {
+    const { admin, query: { type, from_date, to_date } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const loanReports = 'loan management reports and analytics';
+    const queryFromType = type === 'filter' ? from_date : null;
+    const queryToType = type === 'filter' ? to_date : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
+    fetchLoanManagementAnalytics.controllers.admin.admin.js`);
+    const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
+      processOneOrNoneData(adminQueries.defaultLoans,  [ Number(nplGraceDay.value) ]),
+      processOneOrNoneData(adminQueries.averageLoanTenor, [ ]),
+      processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalCustomers, [ ]),
+      processAnyData(adminQueries.fetchDetailsOfDisbursedLoans, [ currentYearFromDate, currentYearToDate ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan management analytics fetched from the DB
+     fetchLoanManagementAnalytics.controllers.admin.admin.js`);
+    const data = {
+      default_loans: parseFloat(parseFloat(totalDefaultLoans.sum).toFixed(2)) || 0,
+      average_loan_tenor: Number(avgLoanTenor.avg),
+      rescheduled_loans: parseFloat(parseFloat(rescheduledLoans.sum).toFixed(2)) || 0,
+      total_customer: Number(totalCustomer.count),
+      disbursed_loans: disbursedLoans
+    };
+    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_reports_and_analytics(adminName, loanReports));
+    return ApiResponse.success(res, enums.LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.loan_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    error.label = enums.FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER;
+    logger.error(`Fetching loan management analytic details failed:::${enums.FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 /**
  * fetch and filter activity log
  * @param {Request} req - The request from the endpoint.
@@ -420,6 +468,49 @@ export const loanRepaymentReport = async(req, res, next) => {
     adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
     error.label = enums.LOAN_REPAYMENT_REPORT_CONTROLLER;
     logger.error(`fetching report and analytics in the DB failed:::${enums.LOAN_REPAYMENT_REPORT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch and filter cluster management analytics
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns cluster management analytics details.
+ * @memberof AdminAdminController
+ */
+
+export const fetchClusterManagementAnalytics = async(req, res, next) => {
+  try {
+    const { admin, query: { type, from_date, to_date } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const clusterReports = 'cluster management reports and analytics';
+    const queryFromType = type === 'filter' ? from_date : null;
+    const queryToType = type === 'filter' ? to_date : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const [ totalClusterGroups, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
+      processOneOrNoneData(adminQueries.totalClusterGroups, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanDefaulters, [ ]),
+      processAnyData(adminQueries.fetchDetailsOftotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster management analytics fetched from the DB
+     fetchClusterManagementAnalytics.controllers.admin.admin.js`);
+    const data = {
+      total_cluster_group: Number(totalClusterGroups.count),
+      average_repayment_period: null, // will be implemented when cluster loan is implemented
+      total_cluster_loan_amount: parseFloat(parseFloat(totalClusterLoanAmount.sum).toFixed(2)) || 0,
+      total_loan_defaulters: Number(totalLoanDefaulters.count),
+      total_loan_disbursed: totalDisbursedClusterLoan
+    };
+    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.cluster_reports_and_analytics(adminName, clusterReports));
+    return ApiResponse.success(res, enums.CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.cluster_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    error.label = enums.FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER;
+    logger.error(`Fetching cluster management analytic details failed:::${enums.FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

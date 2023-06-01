@@ -50,3 +50,8 @@ export const unblacklist_existing_user = (name) => `${name} unblacklist an exist
 export const initiate_document_type_export = (name, type) => `${name} successfully initiates selected ${type} file export`;
 export const loan_repayment = (name) => `${name} viewed loan repayment report and analytics`;
 export const loan_failed_repayment = (name) => `${name} failed trying to viewed loan repayment report and analytics`;
+export const loan_reports_and_analytics = (name, type) => `${name} successfully views ${type}`;
+export const loan_reports_and_analytics_failed = (name, type) => `${name} viewing ${type} failed`;
+export const cluster_reports_and_analytics = (name, type) => `${name} successfully views ${type}`;
+export const cluster_reports_and_analytics_failed = (name, type) => `${name} viewing ${type} failed`;
+
