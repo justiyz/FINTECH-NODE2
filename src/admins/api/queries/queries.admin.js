@@ -450,18 +450,12 @@ export default {
   totalClusterGroups: `
     SELECT COUNT(cluster_id)
     FROM clusters
-    WHERE is_deleted = FALSE
-    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-    OR ($1 IS NULL AND $2 IS NULL)) 
-`,
+    WHERE is_deleted = FALSE`,
 
   totalClusterLoanAmount: `
     SELECT SUM(total_loan_obligation)
     FROM clusters
-    WHERE is_deleted = FALSE
-    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-    OR ($1 IS NULL AND $2 IS NULL)) 
-  `,
+    WHERE is_deleted = FALSE`,
 
   totalClusterLoanDefaulters: `
       SELECT COUNT(user_id)
@@ -469,7 +463,7 @@ export default {
       WHERE loan_status = 'over due'
   `,
 
-  fetchDetailsOftotalDisbursedClusterLoan: `
+  fetchDetailsOfTotalDisbursedClusterLoan: `
         SELECT
         cluster_id,
         name,

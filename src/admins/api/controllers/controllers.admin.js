@@ -483,15 +483,13 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
   try {
     const { admin, query: { type, from_date, to_date } } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`;
-    const queryFromType = type === 'filter' ? from_date : null;
-    const queryToType = type === 'filter' ? to_date : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
     const [ totalClusterGroups, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
-      processOneOrNoneData(adminQueries.totalClusterGroups, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalClusterGroups, [ ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ ]),
       processOneOrNoneData(adminQueries.totalClusterLoanDefaulters, [ ]),
-      processAnyData(adminQueries.fetchDetailsOftotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
+      processAnyData(adminQueries.fetchDetailsOfTotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster management analytics fetched from the DB
      fetchClusterManagementAnalytics.controllers.admin.admin.js`);
