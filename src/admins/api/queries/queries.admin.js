@@ -425,13 +425,13 @@ export default {
   averageLoanTenor: `
     SELECT AVG(loan_tenor_in_months::numeric)::numeric(10) 
     FROM personal_loans
-    WHERE is_loan_disbursed = 'true'
+    WHERE is_loan_disbursed = TRUE
   `,
 
   rescheduledLoans: `
     SELECT SUM(total_repayment_amount) 
     FROM personal_loans
-    WHERE is_rescheduled = 'true'`,
+    WHERE is_rescheduled = TRUE`,
 
   fetchDetailsOfDisbursedLoans: `
     SELECT 
@@ -450,7 +450,7 @@ export default {
   totalClusterGroups: `
     SELECT COUNT(cluster_id)
     FROM clusters
-    WHERE is_deleted = 'false'
+    WHERE is_deleted = FALSE
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
     OR ($1 IS NULL AND $2 IS NULL)) 
 `,
@@ -458,7 +458,7 @@ export default {
   totalClusterLoanAmount: `
     SELECT SUM(total_loan_obligation)
     FROM clusters
-    WHERE is_deleted = 'false'
+    WHERE is_deleted = FALSE
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
     OR ($1 IS NULL AND $2 IS NULL)) 
   `,
