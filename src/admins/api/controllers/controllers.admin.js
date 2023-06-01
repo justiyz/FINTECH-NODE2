@@ -358,8 +358,6 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
     const { admin, query: { type, from_date, to_date } } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const loanReports = 'loan management reports and analytics';
-    const queryFromType = type === 'filter' ? from_date : null;
-    const queryToType = type === 'filter' ? to_date : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
     const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
@@ -368,7 +366,7 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
     const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ Number(nplGraceDay.value) ]),
       processOneOrNoneData(adminQueries.averageLoanTenor, [ ]),
-      processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.rescheduledLoans, [ ]),
       processOneOrNoneData(adminQueries.totalActiveUsers, [ ]),
       processAnyData(adminQueries.fetchDetailsOfDisbursedLoans, [ currentYearFromDate, currentYearToDate ])
     ]);
@@ -465,7 +463,7 @@ export const loanRepaymentReport = async(req, res, next) => {
     loan payment report arranged and set to be returned loanRepaymentReport.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.LOAN_REPAYMENT_REPORT, enums.HTTP_OK, data);
   } catch (error) {
-    // adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
+    adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
     error.label = enums.LOAN_REPAYMENT_REPORT_CONTROLLER;
     logger.error(`fetching report and analytics in the DB failed:::${enums.LOAN_REPAYMENT_REPORT_CONTROLLER}`, error.message);
     return next(error);

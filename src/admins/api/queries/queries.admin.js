@@ -431,10 +431,7 @@ export default {
   rescheduledLoans: `
     SELECT SUM(total_repayment_amount) 
     FROM personal_loans
-    WHERE is_rescheduled = 'true'
-    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-    OR ($1 IS NULL AND $2 IS NULL))
-  `,
+    WHERE is_rescheduled = 'true'`,
 
   fetchDetailsOfDisbursedLoans: `
     SELECT 
