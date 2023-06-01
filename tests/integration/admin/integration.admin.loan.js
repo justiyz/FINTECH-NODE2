@@ -1364,7 +1364,6 @@ describe('Admin Loan management', () => {
           type: 'all'
         })
         .end((err, res) => {
-          console.log('******', res.body);
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
