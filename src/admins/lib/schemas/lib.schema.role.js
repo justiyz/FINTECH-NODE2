@@ -89,6 +89,15 @@ const fetchActivityLog = Joi.object().keys({
   per_page: Joi.number().positive().optional()
 });
 
+const loanAndClusterAnalytics = Joi.object().keys({
+  type: Joi.string().required().valid('filter', 'all')
+}).when(Joi.object({ type: Joi.string().valid('filter') }).unknown(), {
+  then: Joi.object({
+    from_date: Joi.date().required(),
+    to_date: Joi.date().required()
+  })
+});
+
 
 export default {
   createRole,
@@ -102,5 +111,6 @@ export default {
   fetchAdminsPerRole,
   roleType,
   overviewPage,
-  fetchActivityLog
+  fetchActivityLog,
+  loanAndClusterAnalytics
 };

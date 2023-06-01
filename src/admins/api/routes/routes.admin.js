@@ -101,4 +101,19 @@ router.get(
   AdminController.loanRepaymentReport
 );
 
+router.get(
+  '/loan-analytics',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(RoleSchema.loanAndClusterAnalytics, 'query'),
+  RolesMiddleware.adminAccess('report management', 'read'),
+  AdminController.fetchLoanManagementAnalytics
+);
+router.get(
+  '/cluster-analytics',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(RoleSchema.loanAndClusterAnalytics, 'query'),
+  RolesMiddleware.adminAccess('report management', 'read'),
+  AdminController.fetchClusterManagementAnalytics
+);
+
 export default router;

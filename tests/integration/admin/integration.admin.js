@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import dayjs from 'dayjs';
 import 'dotenv/config';
 import app from '../../../src/app';
 import enums from '../../../src/users/lib/enums';
@@ -1397,6 +1398,194 @@ describe('Admin', () => {
           done();
         });
     });
+  });
+  describe('admin fetches loan management analytics', () => {
+    it('Should fetch loan management analytics with no date filter', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('default_loans');
+          expect(res.body.data).to.have.property('average_loan_tenor_in_months');
+          expect(res.body.data).to.have.property('rescheduled_loans');
+          expect(res.body.data).to.have.property('total_customer');
+          expect(res.body.data).to.have.property('disbursed_loans');
+          expect(res.body.message).to.equal(enums.LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch loan management analytics with date filter', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'filter',
+          from_date: `${dayjs().subtract('1', 'month').format('YYYY-MM-DD 00:00:00')}`,
+          to_date: `${dayjs().format('YYYY-MM-DD 00:00:00')}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('default_loans');
+          expect(res.body.data).to.have.property('average_loan_tenor_in_months');
+          expect(res.body.data).to.have.property('rescheduled_loans');
+          expect(res.body.data).to.have.property('total_customer');
+          expect(res.body.data).to.have.property('disbursed_loans');
+          expect(res.body.message).to.equal(enums.LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .query({
+          type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid type is sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'export',
+          from_date: `${dayjs().subtract('1', 'month').format('YYYY-MM-DD 00:00:00')}`,
+          to_date: `${dayjs().format('YYYY-MM-DD 00:00:00')}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [filter, all]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    }); 
+  });
+  describe('admin fetches cluster management analytics', () => {
+    it('Should fetch cluster management analytics with no date filter', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/cluster-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_cluster_group');
+          expect(res.body.data).to.have.property('average_repayment_period');
+          expect(res.body.data).to.have.property('total_cluster_loan_amount');
+          expect(res.body.data).to.have.property('total_loan_defaulters');
+          expect(res.body.data).to.have.property('total_loan_disbursed');
+          expect(res.body.message).to.equal(enums.CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch loan management analytics with date filter', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/cluster-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'filter',
+          from_date: `${dayjs().subtract('1', 'month').format('YYYY-MM-DD 00:00:00')}`,
+          to_date: `${dayjs().format('YYYY-MM-DD 00:00:00')}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_cluster_group');
+          expect(res.body.data).to.have.property('average_repayment_period');
+          expect(res.body.data).to.have.property('total_cluster_loan_amount');
+          expect(res.body.data).to.have.property('total_loan_defaulters');
+          expect(res.body.data).to.have.property('total_loan_disbursed');
+          expect(res.body.message).to.equal(enums.CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/cluster-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .query({
+          type: 'all'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid type is sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/cluster-analytics')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'export',
+          from_date: `${dayjs().subtract('1', 'month').format('YYYY-MM-DD 00:00:00')}`,
+          to_date: `${dayjs().format('YYYY-MM-DD 00:00:00')}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type must be one of [filter, all]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    }); 
   });
 });
  

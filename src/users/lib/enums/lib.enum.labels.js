@@ -276,3 +276,5 @@ export const CLUSTER_MEMBER_BULK_INVITE_CONTROLLER = 'AdminClusterController::cl
 export const RESCHEDULED_LOANS_CONTROLLER = 'AdminBvnController::fetchRescheduledLoans';
 export const RESCHEDULED_LOAN_DETAILS_CONTROLLER = 'AdminBvnController::fetchSingleUserRescheduledLoan';
 export const LOAN_REPAYMENT_REPORT_CONTROLLER = 'AdminBvnController::loanRepaymentReport';
+export const FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminController::fetchLoanManagementAnalytics';
+export const FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminController::fetchClusterManagementAnalytics';
