@@ -366,17 +366,17 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
     fetchLoanManagementAnalytics.controllers.admin.admin.js`);
     const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
-      processOneOrNoneData(adminQueries.defaultLoans,  [ Number(nplGraceDay.value) ]),
+      processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ Number(nplGraceDay.value) ]),
       processOneOrNoneData(adminQueries.averageLoanTenor, [ ]),
       processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalCustomers, [ ]),
+      processOneOrNoneData(adminQueries.totalActiveUsers, [ ]),
       processAnyData(adminQueries.fetchDetailsOfDisbursedLoans, [ currentYearFromDate, currentYearToDate ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan management analytics fetched from the DB
      fetchLoanManagementAnalytics.controllers.admin.admin.js`);
     const data = {
       default_loans: parseFloat(parseFloat(totalDefaultLoans.sum).toFixed(2)) || 0,
-      average_loan_tenor: Number(avgLoanTenor.avg),
+      average_loan_tenor_in_months: Number(avgLoanTenor.avg),
       rescheduled_loans: parseFloat(parseFloat(rescheduledLoans.sum).toFixed(2)) || 0,
       total_customer: Number(totalCustomer.count),
       disbursed_loans: disbursedLoans
@@ -434,33 +434,36 @@ export const loanRepaymentReport = async(req, res, next) => {
   const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
   try {
     const { admin, query: { type, from_date, to_date } } = req;
-    const adminName = `${admin.first_name} ${admin.last_name}`;
     const queryFromType = type === 'filter' ? from_date : null;
     const queryToType = type === 'filter' ? to_date : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('2023-01-01 00:00:00') : from_date; // i.e first day of the current year project started 2023
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : to_date; // i.e current time stamp
-    const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
-    fetchLoanManagementAnalytics.controllers.admin.admin.js`);
-    const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
-      processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ Number(nplGraceDay.value) ]),
-      processOneOrNoneData(adminQueries.averageLoanTenor, [ ]),
-      processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalActiveUsers, [ ]),
-      processAnyData(adminQueries.fetchDetailsOfDisbursedLoans, [ currentYearFromDate, currentYearToDate ])
+    const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, profit, customerBase, loanTenor ] = await Promise.all([
+      processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.averageOrrScore, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalObligation, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.profitReport, [ currentYearFromDate, currentYearToDate ]),
+      processOneOrNoneData(adminQueries.customerBase, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.loanTenor, [ queryFromType, queryToType ])
     ]);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
     successfully fetched loan repayment report and analytics from the DB loanRepaymentReport.controllers.admin.admin.js`);
     const data = {
-      default_loans: parseFloat(parseFloat(totalDefaultLoans.sum).toFixed(2)) || 0,
-      average_loan_tenor_in_months: Number(avgLoanTenor.avg),
-      rescheduled_loans: parseFloat(parseFloat(rescheduledLoans.sum).toFixed(2)) || 0,
-      total_customer: Number(totalCustomer.count),
-      disbursed_loans: disbursedLoans
+      totalLoanRejected: parseFloat(totalLoanRejected) || 0,
+      totalDisbursedLoan: parseFloat(totalDisbursedLoan) || 0,
+      averageOrrScore: parseFloat(averageOrrScore)|| 0, 
+      totalLoanObligation: parseFloat(totalLoanObligation) || 0,
+      profit: profit,
+      customerBase: customerBase,
+      loanTenor: loanTenor,
+      orrScore: [] // to be updated when endpoint is available
     };
-    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_reports_and_analytics(adminName));
-    return ApiResponse.success(res, enums.LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+    loan payment report arranged and set to be returned loanRepaymentReport.controllers.admin.admin.js`);
+    return ApiResponse.success(res, enums.LOAN_REPAYMENT_REPORT, enums.HTTP_OK, data);
   } catch (error) {
     adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
     error.label = enums.LOAN_REPAYMENT_REPORT_CONTROLLER;
