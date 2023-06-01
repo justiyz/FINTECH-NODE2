@@ -423,13 +423,6 @@ export default {
     OR ($1 IS NULL AND $2 IS NULL));
 `,
 
-  defaultLoans: `
-      SELECT SUM(total_payment_amount) 
-      FROM personal_loan_payment_schedules 
-      WHERE status = 'over due'
-      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
- `,
- 
   averageLoanTenor: `
     SELECT AVG(loan_tenor_in_months::numeric)::numeric(10) 
     FROM personal_loans
@@ -443,12 +436,6 @@ export default {
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
     OR ($1 IS NULL AND $2 IS NULL))
   `,
-
-  totalCustomers: `
-    SELECT COUNT(user_id)
-    FROM users
-    WHERE is_deleted = FALSE AND is_completed_kyc = true
-`,
 
   fetchDetailsOfDisbursedLoans: `
     SELECT 
