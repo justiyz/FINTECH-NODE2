@@ -40,7 +40,7 @@ const personalLoanApplicationRenegotiation = async(body, user, existingLoanAppli
       },
       data: { 
         user_id: user.user_id,
-        loan_application_id: `${existingLoanApplication.loan_id}4789`,
+        loan_application_id: `${existingLoanApplication.loan_id}`,
         new_loan_duration_in_month: `${body.new_loan_duration_in_month}`,
         new_loan_amount: parseFloat(body.new_loan_amount)
       }

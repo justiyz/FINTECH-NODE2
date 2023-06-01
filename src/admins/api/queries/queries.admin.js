@@ -380,7 +380,7 @@ export default {
   `,
 
   totalObligation: `
-    SELECT COUNT(id) AS total_obligation
+    SELECT COUNT(id)
     FROM personal_loans
     WHERE status = 'completed'
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
@@ -395,8 +395,7 @@ export default {
     LEFT JOIN personal_loan_payments 
     ON  personal_loan_payments.loan_id = personal_loan_disbursements.loan_id
     AND (personal_loan_disbursements.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
-    GROUP BY month
-  `,
+    GROUP BY month`,
 
   customerBase: `
   SELECT 
@@ -411,14 +410,14 @@ export default {
   `,
 
   loanTenor: `
-  SELECT
-  MAX(loan_tenor_in_months) AS highest_month_tenure,
-  MIN(loan_tenor_in_months) AS lowest_month_tenure,
-  (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
-  WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
-  (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
-  WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
- FROM personal_loans
+    SELECT
+      MAX(loan_tenor_in_months) AS highest_month_tenure,
+      MIN(loan_tenor_in_months) AS lowest_month_tenure,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+      WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+      WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+    FROM personal_loans
     WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)
     OR ($1 IS NULL AND $2 IS NULL));
 `,
