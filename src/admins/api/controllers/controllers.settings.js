@@ -40,19 +40,20 @@ export const fetchEnvValues = async(req, res, next) => {
 export const updateEnvValues = async(req, res, next) => {
   try {
     const { admin, body } = req;
-    const existingEnvs= await processAnyData(settingsQueries.fetchEnvValues);
+    const existingEnvs = await processAnyData(settingsQueries.fetchEnvValues);
     const adminName = `${admin.first_name} ${admin.last_name}`;
-    const envToUpdate = body.map(async(env) => {
+    const envToUpdate = [];
+    for (const env of body) {
       const existingEnvValue = existingEnvs.find((existingEnv) => existingEnv.env_id === env.env_id);
       if (!existingEnvValue) {
         await adminActivityTracking(req.admin.admin_id, 31, 'fail', descriptions.updates_environment_failed(`${req.admin.first_name} ${req.admin.last_name}`));
-        return null;
+        continue;
       }
-      return {
+      envToUpdate.push({
         env_id: env.env_id,
         value: env.value || existingEnvValue.value
-      };
-    }).filter((env) => env !== null);
+      });
+    }
     await Promise.all(
       envToUpdate.map(async(env) => {
         const envId = env.env_id;
@@ -60,15 +61,15 @@ export const updateEnvValues = async(req, res, next) => {
         return await processOneOrNoneData(settingsQueries.updateEnvValues, [ envId, value ]);
       })
     );
-  
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated the env values settings 
-      in the DB updateEnvValues.admin.controllers.admin.js`);
+    logger.info(
+      `${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated the env values settings in the DB updateEnvValues.admin.controllers.admin.js`
+    );
     await adminActivityTracking(req.admin.admin_id, 31, 'success', descriptions.updates_environment(adminName));
     return ApiResponse.success(res, enums.UPDATED_ENV_VALUES_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_ENV_VALUES_CONTROLLER;
     logger.error(`updating env values failed:::${enums.UPDATE_ENV_VALUES_CONTROLLER}`, error.message);
-    return next(error); 
+    return next(error);
   }
 };
   

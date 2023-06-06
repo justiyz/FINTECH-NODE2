@@ -1371,7 +1371,8 @@ describe('Admin Loan management', () => {
           expect(res.body.data).to.have.property('totalDisbursedLoan');
           expect(res.body.data).to.have.property('averageOrrScore');
           expect(res.body.data).to.have.property('totalLoanObligation');
-          expect(res.body.data).to.have.property('profit');
+          expect(res.body.data).to.have.property('disbursementDetails');
+          expect(res.body.data).to.have.property('paymentDetails');
           expect(res.body.message).to.equal(enums.LOAN_REPAYMENT_REPORT);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -1397,7 +1398,8 @@ describe('Admin Loan management', () => {
           expect(res.body.data).to.have.property('totalDisbursedLoan');
           expect(res.body.data).to.have.property('averageOrrScore');
           expect(res.body.data).to.have.property('totalLoanObligation');
-          expect(res.body.data).to.have.property('profit');
+          expect(res.body.data).to.have.property('disbursementDetails');
+          expect(res.body.data).to.have.property('paymentDetails');
           expect(res.body.message).to.equal(enums.LOAN_REPAYMENT_REPORT);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

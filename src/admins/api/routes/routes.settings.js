@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
+import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import * as Schema from '../../../admins/lib/schemas/lib.schema.settings';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
@@ -16,8 +17,8 @@ router.get(
 router.put(
   '/env-settings',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('settings', 'update'),
   Model(Schema.updateEnvValues, 'payload'),
+  AdminMiddleware.checkAdminType,
   AdminSettingsController.updateEnvValues
 );
 
