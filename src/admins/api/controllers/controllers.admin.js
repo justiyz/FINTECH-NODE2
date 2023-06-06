@@ -257,10 +257,10 @@ export const getProfile = async(req, res, next) => {
 export const fetchPlatformOverview = async(req, res, next) => {
   try {
     const { admin, query: { type, from_date, to_date } } = req;
-    const queryFromType = type === 'filter' ? from_date : null;
-    const queryToType = type === 'filter' ? to_date : null;
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
     const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
     fetchPlatformOverview.controllers.admin.admin.js`);
@@ -358,16 +358,18 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
     const { admin, query: { type, from_date, to_date } } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const loanReports = 'loan management reports and analytics';
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
     const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
     fetchLoanManagementAnalytics.controllers.admin.admin.js`);
     const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ Number(nplGraceDay.value) ]),
-      processOneOrNoneData(adminQueries.averageLoanTenor, [ ]),
-      processOneOrNoneData(adminQueries.rescheduledLoans, [ ]),
-      processOneOrNoneData(adminQueries.totalActiveUsers, [ ]),
+      processOneOrNoneData(adminQueries.averageLoanTenor, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalSystemUsersPerTime, [ queryFromType, queryToType ]),
       processAnyData(adminQueries.fetchDetailsOfDisbursedLoans, [ currentYearFromDate, currentYearToDate ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan management analytics fetched from the DB
@@ -432,16 +434,17 @@ export const loanRepaymentReport = async(req, res, next) => {
   const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
   try {
     const { admin, query: { type, from_date, to_date } } = req;
-    const queryFromType = type === 'filter' ? from_date : null;
-    const queryToType = type === 'filter' ? to_date : null;
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
-    const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, profit, customerBase, loanTenor ] = await Promise.all([
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') :  dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
+    const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, paymentDetails, disbursementDetails, customerBase, loanTenor ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.averageOrrScore, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalObligation, [ queryFromType, queryToType ]),
-      processAnyData(adminQueries.profitReport, [ currentYearFromDate, currentYearToDate ]),
+      processOneOrNoneData(adminQueries.totalObligation, [ ]),
+      processAnyData(adminQueries.paymentDetails, [ currentYearFromDate, currentYearToDate ]),
+      processAnyData(adminQueries.disbursementDetails, [ currentYearFromDate, currentYearToDate ]),
       processOneOrNoneData(adminQueries.customerBase, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.loanTenor, [ queryFromType, queryToType ])
     ]);
@@ -453,9 +456,10 @@ export const loanRepaymentReport = async(req, res, next) => {
       totalDisbursedLoan: parseFloat(totalDisbursedLoan.sum) || 0,
       averageOrrScore: parseFloat(parseFloat(averageOrrScore.average_value).toFixed(2))|| 0, 
       totalLoanObligation: parseFloat(totalLoanObligation.count) || 0,
-      profit: profit,
-      customerBase: customerBase,
-      loanTenor: loanTenor,
+      paymentDetails,
+      disbursementDetails,
+      customerBase,
+      loanTenor,
       orrScore: [] // to be updated when endpoint is available
     };
     adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
@@ -483,10 +487,12 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
   try {
     const { admin, query: { type, from_date, to_date } } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`;
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
     const [ totalClusterGroups, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
-      processOneOrNoneData(adminQueries.totalClusterGroups, [ ]),
+      processOneOrNoneData(adminQueries.totalClusterGroups, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ ]),
       processOneOrNoneData(adminQueries.totalClusterLoanDefaulters, [ ]),
       processAnyData(adminQueries.fetchDetailsOfTotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
