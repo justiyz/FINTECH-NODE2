@@ -13,6 +13,7 @@ import config from '../../../users/config/index';
 import * as fetchAdminServices from '../services/services.admin';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import { loanCategoryOrrAverageMetrics } from '../services/services.seedfiUnderwriting';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -438,6 +439,9 @@ export const loanRepaymentReport = async(req, res, next) => {
     const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') :  dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
+    const orrCategoryAverageScores = await loanCategoryOrrAverageMetrics(queryFromType, queryToType);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched loan category orr average from from the underwriting DB 
+    loanRepaymentReport.controllers.admin.admin.js`);
     const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, paymentDetails, disbursementDetails, customerBase, loanTenor ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
@@ -460,7 +464,7 @@ export const loanRepaymentReport = async(req, res, next) => {
       disbursementDetails,
       customerBase,
       loanTenor,
-      orrScore: [] // to be updated when endpoint is available
+      orrScore: orrCategoryAverageScores.data || {}
     };
     adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
