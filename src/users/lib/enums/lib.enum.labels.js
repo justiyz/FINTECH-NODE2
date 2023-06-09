@@ -242,6 +242,7 @@ export const VERIFY_USER_UTILITY_BILL_CONTROLLER = 'AdminUserController::verifyU
 export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfLoanExists';
 export const USER_ORR_SCORE_BREAKDOWN_SERVICE = 'SeedfiUnderwritingService::userOrrScoreBreakdown';
 export const LOAN_SCORE_CARD_BREAKDOWN_WEIGHT_SERVICE = 'SeedfiUnderwritingService::loanScoreCardBreakdown';
+export const LOAN_CATEGORY_ORR_AVERAGE_METRICS_SERVICE = 'SeedfiUnderwritingService::loanCategoryOrrAverageMetrics';
 export const LOAN_ORR_SCORE_BREAKDOWN_SERVICE = 'SeedfiUnderwritingService::loanOrrScoreBreakdown';
 export const APPROVE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::approveLoanApplication';
 export const DECLINE_LOAN_APPLICATION_CONTROLLER = 'AdminLoanController::declineLoanApplication';

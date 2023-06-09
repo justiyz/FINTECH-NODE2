@@ -59,6 +59,7 @@ export default {
 
   fetchLoans: `
    SELECT
+    personal_loans.id,
     personal_loans.loan_id,
     personal_loans.user_id,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -104,6 +105,7 @@ export default {
 
   fetchAllLoans: `
    SELECT
+      personal_loans.id,
       personal_loans.loan_id,
       personal_loans.user_id,
       TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -130,6 +132,8 @@ export default {
       
   fetchRepaidLoans: `
       SELECT 
+          personal_loan_payment_schedules.id,
+          personal_loan_payment_schedules.loan_repayment_id,
           personal_loan_payment_schedules.loan_id,
           personal_loan_payment_schedules.user_id,
           TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -177,6 +181,8 @@ export default {
   
   fetchAllRepaidLoans: `
    SELECT 
+      personal_loan_payment_schedules.id,
+      personal_loan_payment_schedules.loan_repayment_id,
       personal_loan_payment_schedules.loan_id,
       personal_loan_payment_schedules.user_id,
       TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -206,6 +212,7 @@ export default {
 
   fetchRescheduledLoans: `
       SELECT 
+        personal_loans.id,
         personal_loans.loan_id,
         personal_loans.user_id,
         TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -251,6 +258,7 @@ export default {
 
   fetchAllRescheduledLoans: `
     SELECT 
+        personal_loans.id,
         personal_loans.loan_id,
         personal_loans.user_id,
         TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
