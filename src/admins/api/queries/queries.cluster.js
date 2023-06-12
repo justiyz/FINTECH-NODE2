@@ -32,7 +32,7 @@ export default {
           created_at
     FROM clusters 
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
-     AND is_deleted = false AND is_created_by_admin = true
+     AND is_deleted = false 
     ORDER BY created_at DESC
     OFFSET $4
     LIMIT $5
@@ -41,7 +41,7 @@ export default {
     SELECT COUNT(cluster_id) AS total_count
     FROM clusters
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
-    AND is_deleted = false AND is_created_by_admin = true
+    AND is_deleted = false 
 `,
   fetchSingleClusterDetails: `
     SELECT  
