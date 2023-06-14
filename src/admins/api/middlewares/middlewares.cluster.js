@@ -239,7 +239,7 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
   }
 };
 
-export const adminClusterRestriction = async(req, res, next) => {
+export const adminClusterRestriction = (req, res, next) => {
   try {
     if (!req.cluster.is_created_by_admin) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
