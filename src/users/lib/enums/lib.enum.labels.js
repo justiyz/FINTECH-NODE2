@@ -279,3 +279,4 @@ export const RESCHEDULED_LOAN_DETAILS_CONTROLLER = 'AdminBvnController::fetchSin
 export const LOAN_REPAYMENT_REPORT_CONTROLLER = 'AdminBvnController::loanRepaymentReport';
 export const FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminController::fetchLoanManagementAnalytics';
 export const FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminController::fetchClusterManagementAnalytics';
+export const ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE = 'AdminClusterMiddleware::adminClusterRestriction';

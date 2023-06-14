@@ -44,6 +44,7 @@ router.post(
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('cluster management', 'update'),
   AdminClusterMiddleware.checkIfClusterExists,
+  AdminClusterMiddleware.adminClusterRestriction,
   Model(Schema.inviteCluster, 'payload'),
   AdminClusterMiddleware.checkClusterMemberExist('confirm'),
   AdminClusterController.clusterMemberInvite
@@ -66,6 +67,7 @@ router.delete(
   RolesMiddleware.adminAccess('cluster management', 'delete'),
   AdminClusterMiddleware.checkIfClusterExists,
   AdminUserMiddleware.checkIfUserExists,
+  AdminClusterMiddleware.adminClusterRestriction,
   AdminClusterMiddleware.checkClusterMemberExist('validate'),
   AdminClusterMiddleware.checkUserClusterLoanStatus,
   AdminClusterController.deleteClusterMember
@@ -75,8 +77,9 @@ router.post(
   '/:cluster_id/bulk-invite',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('cluster management', 'delete'),
-  Model(Schema.inviteClusterBulk, 'payload'),
   AdminClusterMiddleware.checkIfClusterExists,
+  AdminClusterMiddleware.adminClusterRestriction,
+  Model(Schema.inviteClusterBulk, 'payload'),
   AdminClusterMiddleware.clusterMemberBulkInvite,
   AdminClusterController.clusterMemberBulkInvite
 );

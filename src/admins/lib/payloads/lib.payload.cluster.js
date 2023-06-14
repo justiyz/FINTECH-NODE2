@@ -3,6 +3,7 @@ export default {
     query.search ? `%${query.search}%` : null,
     query.status,
     query.loan_status,
+    query.type,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],

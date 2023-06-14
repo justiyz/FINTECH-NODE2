@@ -71,7 +71,7 @@ export const generateClusterUniqueCode = async(req, res, next) => {
 export const checkIfClusterExists = async(req, res, next) => {
   try {
     const { params: { cluster_id }, admin } = req;
-    const [ existingCluster ] = await processAnyData(ClusterQueries.checkIfClusterExists, [ cluster_id ]);
+    const [ existingCluster ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
@@ -235,6 +235,22 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CLUSTER_MEMBER_BULK_INVITE_MIDDLEWARE;
     logger.error(`checking if user has an active cluster loan status in the DB failed::${enums.CLUSTER_MEMBER_BULK_INVITE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const adminClusterRestriction = async(req, res, next) => {
+  try {
+    if (!req.cluster.is_created_by_admin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      admin is restricted from inviting/removing user on cluster not created by admin adminClusterRestriction.admin.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ADMIN_CLUSTER_RESTRICTED_ACTION, enums.HTTP_FORBIDDEN, enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE);
+    }
+
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_ADMIN_TYPE_MIDDLEWARE;
+    logger.error(`checking if queried admin is super admin failed::${enums.CHECK_ADMIN_TYPE_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
