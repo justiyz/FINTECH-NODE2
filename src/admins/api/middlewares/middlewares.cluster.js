@@ -1,5 +1,4 @@
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-import ClusterQueries from '../../../users/api/queries/queries.cluster';
 import AdminClusterQueries from '../../../admins/api/queries/queries.cluster';
 import UserQueries from '../queries/queries.user';
 import enums from '../../../users/lib/enums';
@@ -18,7 +17,7 @@ import { generateReferralCode } from '../../../users/lib/utils/lib.util.helpers'
 export const checkIfClusterNameUnique = async(req, res, next) => {
   const { body, admin } = req;
   try {
-    const [ existingCluster ] = await processAnyData(ClusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
+    const [ existingCluster ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ body.name?.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: checked if cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
@@ -45,7 +44,7 @@ export const generateClusterUniqueCode = async(req, res, next) => {
   const { body, admin } = req;
   try {
     const uniqueCode = await generateReferralCode(7);
-    const [ existingUniqueCode ] = await processAnyData(ClusterQueries.checkIfClusterIsUnique, [ uniqueCode ]);
+    const [ existingUniqueCode ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ uniqueCode ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: checked if cluster unique code is existing generateClusterUniqueCode.middlewares.cluster.js`);
     if (existingUniqueCode) {
       return generateClusterUniqueCode(req, res, next);
@@ -79,7 +78,7 @@ export const checkIfClusterExists = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster no longer exists in the DB checkIfClusterExists.middlewares.cluster.js`);
         return ApiResponse.error(res, enums.CLUSTER_NO_LONGER_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE);
       }
-      const clusterMembers = await processAnyData(ClusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
+      const clusterMembers = await processAnyData(AdminClusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: cluster active members fetched from the DB checkIfClusterExists.middlewares.cluster.js`);
       req.cluster = existingCluster;
       req.cluster.members = clusterMembers;
@@ -252,14 +251,14 @@ export const adminClusterRestriction = (req, res, next) => {
   try {
     if (!req.cluster.is_created_by_admin) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
-      admin is restricted from inviting/removing user on cluster not created by admin adminClusterRestriction.admin.middlewares.cluster.js`);
+      admin is restricted from performing this action adminClusterRestriction.admin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.ADMIN_CLUSTER_RESTRICTED_ACTION, enums.HTTP_FORBIDDEN, enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE);
     }
 
     return next();
   } catch (error) {
-    error.label = enums.CHECK_ADMIN_TYPE_MIDDLEWARE;
-    logger.error(`checking if queried admin is super admin failed::${enums.CHECK_ADMIN_TYPE_MIDDLEWARE}`, error.message);
+    error.label = enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE;
+    logger.error(`checking admin cluster restriction failed::${enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

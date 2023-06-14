@@ -42,7 +42,8 @@ export default {
     SELECT COUNT(cluster_id) AS total_count
     FROM clusters
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
-    AND is_deleted = false 
+    AND type = $4 OR $4 IS NULL
+    AND is_deleted = false
 `,
   fetchSingleClusterDetails: `
     SELECT  
@@ -150,7 +151,24 @@ export default {
       percentage_interest_type_value
   FROM clusters
   WHERE cluster_id = $1
-  OR unique_code = $1`
+  OR unique_code = $1`,
+  fetchActiveClusterMembers: `
+  SELECT 
+    cluster_members.id,
+    cluster_members.cluster_id,
+    cluster_members.user_id,
+    cluster_members.status,
+    cluster_members.loan_status,
+    cluster_members.loan_obligation,
+    cluster_members.is_admin,
+    users.email,
+    users.phone_number,
+    cluster_members.is_left
+  FROM cluster_members
+  LEFT JOIN users ON users.user_id = cluster_members.user_id
+  WHERE cluster_id = $1
+  AND is_left = FALSE;
+`
 };
 
 
