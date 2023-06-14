@@ -239,6 +239,15 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
   }
 };
 
+
+/**
+ * admin cluster restriction
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response)
+ * @memberof AdminClusterMiddleware
+ */
 export const adminClusterRestriction = (req, res, next) => {
   try {
     if (!req.cluster.is_created_by_admin) {
