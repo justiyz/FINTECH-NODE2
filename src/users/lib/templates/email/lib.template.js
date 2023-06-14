@@ -303,6 +303,36 @@ export const successfulRepayment = (data) => `
   </tr>
 `;
 
+export const completedRepayment = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td>
+      <span>You successfully repaid your ${data.loan_reason}, below is the loan breakdown</span>  
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+        <td>
+          <p>payment details</p><br />
+          <span>
+            Loan purpose: ${data.loan_reason}<br />
+            Loan amount: ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
+            Loan duration: ${parseFloat(data.loan_duration)}<br />
+            Interest rate: ${parseFloat(data.interest_rate)}%<br />
+            Total repayment: ₦${parseFloat(data.total_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
+            Monthly repayment: ₦${parseFloat(data.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+          </span>  
+        </td>
+    </tr>
+`;
+
 export const failedAddressVerification = (data) => `
 <tr>
   <td>

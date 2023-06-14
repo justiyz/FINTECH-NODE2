@@ -71,6 +71,9 @@ export default {
         CONCAT(first_name, ' ', last_name) as name,
         to_char(DATE (cluster_members.created_at)::date, 'Mon DD YYYY') As date_joined,
         cluster_members.user_id,
+        cluster_members.is_admin,
+        cluster_members.is_left,
+        cluster_members.loan_status,
         cluster_members.status
     FROM cluster_members
     LEFT JOIN users

@@ -290,23 +290,41 @@ export default {
           users.tier,
           users.status,
           personal_loans.amount_requested AS loan_amount,
-          personal_loans.monthly_interest AS interest_rate,
-          personal_loans.total_repayment_amount AS total_repayment,
+          personal_loans.loan_reason,
           personal_loans.loan_tenor_in_months AS loan_duration,
+          round(CAST(personal_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
+          round(CAST(personal_loans.total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
+          personal_loans.percentage_orr_score,
+          personal_loans.percentage_pricing_band,
+          round(CAST(personal_loans.monthly_interest AS NUMERIC), 2) AS monthly_interest,
+          round(CAST(personal_loans.monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
+          round(CAST(personal_loans.total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
+          round(CAST(personal_loans.extra_interests AS NUMERIC), 2) AS extra_interests,
+          personal_loans.status,
+          personal_loans.loan_decision,
+          personal_loans.is_loan_disbursed,
+          to_char(DATE(personal_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
+          to_char(DATE (personal_loans.created_at)::date, 'Mon DD YYYY') As application_date,
           personal_loans.reschedule_loan_tenor_in_months AS new_tenure,
-          to_char(DATE(personal_loans.loan_disbursed_at)::date, 'Mon DD YYYY') AS date_received,
-          personal_loans.monthly_repayment,
-          personal_loans.loan_reason
+          personal_loans.reschedule_extension_days AS reschedule_extension_days,
+          personal_loans.is_rescheduled,
+          personal_loans.reschedule_count,
+          to_char(DATE(personal_loans.reschedule_at)::date, 'Mon DD, YYYY') AS loan_rescheduled_at
     FROM personal_loans
     LEFT JOIN users ON personal_loans.user_id = users.user_id
-    WHERE loan_id = $1
+    WHERE personal_loans.loan_id = $1
   `,
 
   fetchNewRepaymentBreakdown: `
     SELECT 
+        id,
+        loan_repayment_id,
+        loan_id,
+        user_id,
         total_payment_amount AS repayment_amount,
         repayment_order AS repayment_schedule,
-        to_char(DATE(payment_at)::date, 'Mon DD YYYY') As repayment_date,
+        to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+        to_char(DATE(payment_at)::date, 'Mon DD YYYY') As payment_at,
         status
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
