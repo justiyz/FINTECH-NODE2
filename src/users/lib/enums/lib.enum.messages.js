@@ -311,3 +311,4 @@ export const RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY = 'Rescheduled loan d
 export const LOAN_REPAYMENT_REPORT = 'Successfully fetch loan repayment report';
 export const LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY = 'Loan management analytics fetched successfully';
 export const CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY = 'Cluster management analytics fetched successfully';
+export const ADMIN_CLUSTER_RESTRICTED_ACTION = 'admin cannot perform this action';

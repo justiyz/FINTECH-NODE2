@@ -63,5 +63,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call adminClusterRestriction', async() => {
+      const req = { cluster: '' };
+      const data = await AdminClusterMiddleware.adminClusterRestriction(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

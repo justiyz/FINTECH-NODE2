@@ -471,6 +471,26 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should throw error if not admin created cluster', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          phone_number: '+2349067749313'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_RESTRICTED_ACTION);
+          done();
+        });
+    });
     it('should successfully accept admin cluster invite', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/join`)
@@ -843,6 +863,22 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.CLUSTER_MEMBER_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if not admin created cluster', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_RESTRICTED_ACTION);
           done();
         });
     });

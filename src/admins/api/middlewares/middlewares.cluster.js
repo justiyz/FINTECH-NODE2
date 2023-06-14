@@ -1,5 +1,4 @@
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-import ClusterQueries from '../../../users/api/queries/queries.cluster';
 import AdminClusterQueries from '../../../admins/api/queries/queries.cluster';
 import UserQueries from '../queries/queries.user';
 import enums from '../../../users/lib/enums';
@@ -18,7 +17,7 @@ import { generateReferralCode } from '../../../users/lib/utils/lib.util.helpers'
 export const checkIfClusterNameUnique = async(req, res, next) => {
   const { body, admin } = req;
   try {
-    const [ existingCluster ] = await processAnyData(ClusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
+    const [ existingCluster ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ body.name?.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: checked if cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
@@ -45,7 +44,7 @@ export const generateClusterUniqueCode = async(req, res, next) => {
   const { body, admin } = req;
   try {
     const uniqueCode = await generateReferralCode(7);
-    const [ existingUniqueCode ] = await processAnyData(ClusterQueries.checkIfClusterIsUnique, [ uniqueCode ]);
+    const [ existingUniqueCode ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ uniqueCode ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: checked if cluster unique code is existing generateClusterUniqueCode.middlewares.cluster.js`);
     if (existingUniqueCode) {
       return generateClusterUniqueCode(req, res, next);
@@ -71,7 +70,7 @@ export const generateClusterUniqueCode = async(req, res, next) => {
 export const checkIfClusterExists = async(req, res, next) => {
   try {
     const { params: { cluster_id }, admin } = req;
-    const [ existingCluster ] = await processAnyData(ClusterQueries.checkIfClusterExists, [ cluster_id ]);
+    const [ existingCluster ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
@@ -79,7 +78,7 @@ export const checkIfClusterExists = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster no longer exists in the DB checkIfClusterExists.middlewares.cluster.js`);
         return ApiResponse.error(res, enums.CLUSTER_NO_LONGER_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE);
       }
-      const clusterMembers = await processAnyData(ClusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
+      const clusterMembers = await processAnyData(AdminClusterQueries.fetchActiveClusterMembers, [ existingCluster.cluster_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: cluster active members fetched from the DB checkIfClusterExists.middlewares.cluster.js`);
       req.cluster = existingCluster;
       req.cluster.members = clusterMembers;
@@ -235,6 +234,31 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CLUSTER_MEMBER_BULK_INVITE_MIDDLEWARE;
     logger.error(`checking if user has an active cluster loan status in the DB failed::${enums.CLUSTER_MEMBER_BULK_INVITE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+ * admin cluster restriction
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response)
+ * @memberof AdminClusterMiddleware
+ */
+export const adminClusterRestriction = (req, res, next) => {
+  try {
+    if (!req.cluster.is_created_by_admin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      admin is restricted from performing this action adminClusterRestriction.admin.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ADMIN_CLUSTER_RESTRICTED_ACTION, enums.HTTP_FORBIDDEN, enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE);
+    }
+
+    return next();
+  } catch (error) {
+    error.label = enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE;
+    logger.error(`checking admin cluster restriction failed::${enums.ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
