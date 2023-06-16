@@ -25,6 +25,18 @@ router.post(
   LoanController.checkUserLoanEligibility
 );
 
+router.post(
+  '/:loan_id/renegotiate',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  Model(Schema.loanRenegotiation, 'payload'),
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfLoanApplicationStatusIsStillPending,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.validateRenegotiationAmount,
+  LoanController.processLoanRenegotiation
+);
+
 router.patch(
   '/:loan_id/accept-allowable-amount',
   AuthMiddleware.validateAuthToken,

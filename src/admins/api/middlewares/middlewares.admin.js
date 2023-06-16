@@ -200,7 +200,7 @@ export const checkAdminType = async(req, res, next) => {
   try {
     if (req.admin.role_type !== 'SADM') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
-      the queried admin is not super admin and can not carrayout this operation checkAdminType.admin.middlewares.cluster.js`);
+      the queried admin is not super admin and can not carry out this operation checkAdminType.admin.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_ADMIN_TYPE_MIDDLEWARE);
     }
    

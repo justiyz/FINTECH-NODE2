@@ -497,6 +497,14 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         sendUserPersonalNotification(user, 'Part loan repayment successful', 
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+        if (statusType === 'completed') {
+          sendUserPersonalNotification(user, 'Full loan repayment successful', 
+            PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
+          await MailService('Loan successfully repaid', 'completedRepayment', 
+            { ...user, loan_reason: parseFloat(loanDetails.loan_reason), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2), 
+              loan_duration: (loanDetails.reschedule_loan_tenor_in_months || `${loanDetails.loan_tenor_in_months} months`), interest_rate: loanDetails.percentage_pricing_band,
+              total_repayment: loanDetails.total_repayment_amount, monthly_repayment: loanDetails.monthly_repayment });
+        }
         userActivityTracking(paymentRecord.user_id, activityType, 'success');
         return next();
       }
@@ -522,6 +530,10 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       sendUserPersonalNotification(user, 'Full loan repayment successful', 
         PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
       sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+      await MailService('Loan successfully repaid', 'completedRepayment', 
+        { ...user, loan_reason: parseFloat(loanDetails.loan_reason), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2), 
+          loan_duration: (loanDetails.reschedule_loan_tenor_in_months || `${loanDetails.loan_tenor_in_months} months`), interest_rate: loanDetails.percentage_pricing_band,
+          total_repayment: loanDetails.total_repayment_amount, monthly_repayment: loanDetails.monthly_repayment });
       userActivityTracking(paymentRecord.user_id, 72, 'success');
       return next();
     }

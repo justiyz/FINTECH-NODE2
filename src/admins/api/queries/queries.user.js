@@ -32,7 +32,7 @@ export default {
       SELECT id, bvn 
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
-
+      
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -44,7 +44,7 @@ export default {
     FROM users
     WHERE user_id = $1`,
 
-  getUserByUserEmail: `
+  getUserByUserEmailOrPhoneNumber: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
@@ -53,7 +53,7 @@ export default {
       number_of_children, marital_status, loan_status,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
-    WHERE email = $1`,
+    WHERE (email = $1 OR phone_number = $1)`,
 
   getUserEmploymentDetails: `
     SELECT 

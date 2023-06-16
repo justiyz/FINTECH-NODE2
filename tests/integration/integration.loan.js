@@ -122,7 +122,6 @@ describe('Individual loan', () => {
           done();
         });
     });
-
     it('should throw error if user has not verified email', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')
@@ -299,7 +298,7 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          amount: 50000,
+          amount: 120000,
           duration_in_months: 3,
           loan_reason: 'car loan'
         })
@@ -344,20 +343,154 @@ describe('Individual loan', () => {
         });
     });
   });
-  describe('user tries to accept maximum value when it is not available', () => {
-    it('should throw error when trying to accept system maximum allowable amount when it does not apply', (done) => {
+  describe('Renegotiate loan', () => {
+    it('should throw error when new renegotiation amount is not sent', (done) => {
       chai.request(app)
-        .patch(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/accept-allowable-amount`)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_duration_in_month: 5
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('new_loan_amount is required');
+          done();
+        });
+    });
+    it('should throw error when new renegotiation duration is not sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 30000
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('new_loan_duration_in_month is required');
+          done();
+        });
+    });
+    it('should throw error when new renegotiation amount is greater than allowable amount', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 500000,
+          new_loan_duration_in_month: 5
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE);
+          expect(res.body.message).to.equal(enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT);
+          done();
+        });
+    });
+    it('should throw error when new renegotiation amount is greater than allowable amount', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 400000,
+          new_loan_duration_in_month: 5
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT);
+          done();
+        });
+    });
+    it('should renegotiate user two loan application one for the first time successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 70000,
+          new_loan_duration_in_month: 5
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loan_id');
+          expect(res.body.data).to.have.property('fees');
+          expect(res.body.data.loan_duration_in_months).to.equal('5');
+          expect(res.body.message).to.equal(enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should renegotiate user two loan application two for the second time successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 80000,
+          new_loan_duration_in_month: 2
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loan_id');
+          expect(res.body.data).to.have.property('fees');
+          expect(res.body.data.loan_duration_in_months).to.equal('2');
+          expect(res.body.message).to.equal(enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should renegotiate user one loan application two for the second time successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/loan/${process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_LOAN_ID}/renegotiate`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          new_loan_amount: 150000,
+          new_loan_duration_in_month: 4
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loan_id');
+          expect(res.body.data).to.have.property('fees');
+          expect(res.body.data.loan_duration_in_months).to.equal('4');
+          expect(res.body.message).to.equal(enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });
@@ -466,7 +599,7 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          amount: 100000,
+          amount: 1000000,
           duration_in_months: 6,
           loan_reason: 'camera fixing loan'
         })
@@ -481,6 +614,24 @@ describe('Individual loan', () => {
           expect(res.body.message).to.equal(res.body.data.loan_decision === 'MANUAL' ? enums.LOAN_APPLICATION_MANUAL_DECISION : enums.LOAN_APPLICATION_APPROVED_DECISION);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID = res.body.data.loan_id;
+          done();
+        });
+    });
+    it('should accept the allowable loan amount with tenor', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/accept-allowable-amount`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('status');
+          expect(res.body.data).to.have.property('loan_decision');
+          expect(res.body.message).to.equal(enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });
@@ -791,7 +942,7 @@ describe('Individual loan', () => {
           expect(res.body.data).to.have.property('loanDetails');
           expect(res.body.data).to.have.property('nextLoanRepaymentDetails');
           expect(res.body.data.loanDetails.status).to.equal('ongoing');
-          expect(res.body.data.loanRepaymentDetails.length).to.equal(2);
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(4);
           expect(res.body.message).to.equal(enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -1393,7 +1544,7 @@ describe('Individual loan', () => {
           expect(res.body.data).to.have.property('loanDetails');
           expect(res.body.data).to.have.property('loanRepaymentDetails');
           expect(res.body.data.loanDetails.status).to.equal('completed');
-          expect(res.body.data.loanRepaymentDetails.length).to.equal(2);
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(4);
           expect(res.body.message).to.equal(enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('personal'));
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

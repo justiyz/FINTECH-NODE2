@@ -53,6 +53,11 @@ const loanRescheduleParams = Joi.object().keys({
   reschedule_id: Joi.string().required()
 });
 
+const loanRenegotiation = Joi.object().keys({
+  new_loan_amount: Joi.number().positive().required(),
+  new_loan_duration_in_month: Joi.number().positive().required()
+});
+
 export default  {
   loanApplication,
   loanIdParams,
@@ -65,5 +70,6 @@ export default  {
   referenceIdParams,
   paymentOtp,
   rescheduleExtensionId,
-  loanRescheduleParams
+  loanRescheduleParams,
+  loanRenegotiation
 }; 

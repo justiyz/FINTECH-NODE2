@@ -85,7 +85,8 @@ export default {
         status = $14,
         loan_decision = $15,
         total_outstanding_amount = $16,
-        max_possible_approval = $17
+        max_possible_approval = $17,
+        amount_requested = $18
     WHERE loan_id = $1
     RETURNING *`,
 
@@ -484,5 +485,33 @@ export default {
     SET
       updated_at = NOW(),
       is_accepted = TRUE
-    WHERE reschedule_id = $1`
+    WHERE reschedule_id = $1`,
+
+  createRenegotiationDetails: `
+    INSERT INTO personal_renegotiated_loan(
+      loan_id, user_id, previous_loan_amount, renegotiating_loan_amount, previous_loan_tenor_in_months, renegotiating_loan_tenor_in_month,
+      pricing_band, monthly_interest, monthly_repayment, processing_fee, advisory_fee, insurance_fee
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+
+  updateLoanApplicationWithRenegotiation: `
+    UPDATE personal_loans
+    SET
+      updated_at = NOW(),
+      percentage_pricing_band = $2, 
+      monthly_interest = $3, 
+      monthly_repayment = $4, 
+      processing_fee = $5, 
+      insurance_fee = $6,
+      advisory_fee = $7, 
+      percentage_processing_fee = $8,
+      percentage_insurance_fee = $9,
+      percentage_advisory_fee = $10,
+      amount_requested = $11,
+      loan_tenor_in_months = $12,
+      total_repayment_amount = $13,
+      total_interest_amount = $14,
+      total_outstanding_amount = $15,
+      renegotiation_count = $16
+    WHERE loan_id = $1
+    RETURNING *`
 };

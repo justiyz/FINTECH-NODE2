@@ -55,6 +55,9 @@ describe('Admin Settings management', () => {
           expect(res.body.data[0]).to.have.property('value');
           expect(res.body.message).to.equal(enums.FETCH_ENV_VALUES_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_ADMIN_SYSTEM_CARD_TOKENIZATION_ENV_VALUE = res.body.data[0].env_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_MAXIMUM_LOAN_TENOR_ENV_VALUE = res.body.data[1].env_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_MINIMUM_LOAN_TENOR_ENV_VALUE = res.body.data[2].env_id;
           done();
         });
     });
@@ -149,6 +152,29 @@ describe('Admin Settings management', () => {
           done();
         });
     });
+    it('Should return error if non super admin calls route', (done) => {
+      chai.request(app)
+        .put('/api/v1/admin/settings/env-settings')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_TWO_ACCESS_TOKEN}`
+        })
+        .send([
+          {
+            env_id: process.env.SEEDFI_ADMIN_SYSTEM_CARD_TOKENIZATION_ENV_VALUE,
+            value: 300
+          }
+        ])
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN);
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should update env value settings successfully', (done) => {
       chai.request(app)
         .put('/api/v1/admin/settings/env-settings')
@@ -156,10 +182,20 @@ describe('Admin Settings management', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
-        .send([ {
-          env_id: 'admin-env-2f4c57f2e9a711edb',
-          value: '20'
-        } ])
+        .send([
+          {
+            env_id: process.env.SEEDFI_ADMIN_SYSTEM_CARD_TOKENIZATION_ENV_VALUE,
+            value: 300
+          },
+          {
+            env_id: process.env.SEEDFI_ADMIN_SYSTEM_MAXIMUM_LOAN_TENOR_ENV_VALUE,
+            value: 30
+          },
+          {
+            env_id: process.env.SEEDFI_ADMIN_SYSTEM_MINIMUM_LOAN_TENOR_ENV_VALUE,
+            value: 2
+          }
+        ])
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');

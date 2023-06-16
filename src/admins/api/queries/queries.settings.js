@@ -8,7 +8,7 @@ export default {
             description,
             created_at
         FROM admin_env_values_settings
-    `,
+        ORDER BY id`,
 
   updateEnvValues: `
         UPDATE admin_env_values_settings

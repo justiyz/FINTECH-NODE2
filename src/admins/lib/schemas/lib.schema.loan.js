@@ -25,10 +25,17 @@ const fetchLoans = Joi.object().keys({
 
 });
 
-const fetchRepaidloans = Joi.object().keys({
+const fetchRepaidLoans = Joi.object().keys({
   search: Joi.string().optional(),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  export: Joi.string().optional().valid('true') 
+});
+const fetchRescheduledLoans = Joi.object().keys({
+  search: Joi.string().optional(),
+  status: Joi.string().optional(),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   export: Joi.string().optional().valid('true') 
@@ -39,5 +46,6 @@ export default {
   manualLoanRejection,
   loanIdParams,
   fetchLoans,
-  fetchRepaidloans
+  fetchRepaidLoans,
+  fetchRescheduledLoans
 };

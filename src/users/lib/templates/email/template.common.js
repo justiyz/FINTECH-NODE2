@@ -10,6 +10,7 @@ const heading = {
   failedCardDebit: 'Failed card debiting',
   rejectedDebitCard: 'Rejected Debit Card',
   successfulRepayment: 'Successful loan repayment',
+  completedRepayment: 'Loan successfully repaid',
   failedChargePayment: 'Failed Payment',
   failedAddressVerification: 'Address verification failed',
   successfulAddressVerification: 'Address verification successful'

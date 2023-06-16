@@ -318,7 +318,8 @@ export default {
   totalActiveUsers: `
     SELECT COUNT(user_id) 
     FROM users
-    WHERE is_deleted = FALSE AND is_completed_kyc = true`,
+    WHERE is_deleted = FALSE 
+    AND is_completed_kyc = true`,
 
   totalOverdueRepayment: `
     SELECT SUM(total_payment_amount) 
@@ -370,6 +371,133 @@ export default {
         WHERE (TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) 
         OR TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) ILIKE TRIM($1) OR $1 IS NULL)
         AND ((admin_activity_logs.created_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+  `,
+  averageOrrScore: `
+    SELECT 
+      AVG(percentage_orr_score::numeric) AS average_value
+    FROM personal_loans
+    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+    OR ($1 IS NULL AND $2 IS NULL));
+  `,
+
+  totalObligation: `
+    SELECT COUNT(id)
+    FROM personal_loans
+    WHERE status = 'completed'`,
+
+  paymentDetails: `
+    SELECT
+      id,
+      user_id,
+      loan_id,
+      payment_id,
+      amount AS payment_amount,
+      transaction_type,
+      status AS payment_status,
+      created_at AS payment_at
+    FROM personal_loan_payments
+    WHERE (personal_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    AND transaction_type = 'debit'`,
+
+  disbursementDetails: `
+    SELECT
+      id,
+      user_id,
+      loan_id,
+      payment_id,
+      amount AS disbursement_amount,
+      transaction_type,
+      status AS disbursement_status,
+      created_at AS disbursement_at
+    FROM personal_loan_payments
+    WHERE (personal_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    AND transaction_type = 'credit'`,
+
+  customerBase: `
+    SELECT 
+      COUNT(CASE WHEN gender = 'male' THEN 1 END) AS male,
+      COUNT(CASE WHEN gender = 'female' THEN 1 END) AS female,
+      COUNT(id) AS total_users
+    FROM users
+    WHERE is_deleted = FALSE 
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))
+    AND is_completed_kyc = true`,
+
+  loanTenor: `
+    SELECT
+      MAX(loan_tenor_in_months) AS highest_month_tenure,
+      MIN(loan_tenor_in_months) AS lowest_month_tenure,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+      WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+      WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+    FROM personal_loans
+    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)OR ($1 IS NULL AND $2 IS NULL))`,
+
+  averageLoanTenor: `
+    SELECT AVG(loan_tenor_in_months::numeric)::numeric(10) 
+    FROM personal_loans
+    WHERE is_loan_disbursed = TRUE
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+     OR ($1 IS NULL AND $2 IS NULL))`,
+
+  rescheduledLoans: `
+    SELECT SUM(total_repayment_amount) 
+    FROM personal_loans
+    WHERE is_rescheduled = TRUE
+    AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+     OR ($1 IS NULL AND $2 IS NULL))`,
+
+  totalSystemUsersPerTime: `
+    SELECT COUNT(user_id) 
+    FROM users
+    WHERE is_deleted = FALSE 
+    AND is_completed_kyc = true
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+     OR ($1 IS NULL AND $2 IS NULL))`,
+
+  fetchDetailsOfDisbursedLoans: `
+    SELECT 
+      disbursement_id,
+      user_id,
+      payment_id,
+      recipient_id,
+      status,
+      amount,
+      created_at   
+    FROM personal_loan_disbursements 
+    WHERE status = 'success'
+    AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+`,
+
+  totalClusterGroups: `
+    SELECT COUNT(cluster_id)
+    FROM clusters
+    WHERE is_deleted = FALSE
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+     OR ($1 IS NULL AND $2 IS NULL))`,
+
+  totalClusterLoanAmount: `
+    SELECT SUM(total_loan_obligation)
+    FROM clusters
+    WHERE is_deleted = FALSE`,
+
+  totalClusterLoanDefaulters: `
+      SELECT COUNT(user_id)
+      FROM cluster_members
+      WHERE loan_status = 'over due'`,
+
+  fetchDetailsOfTotalDisbursedClusterLoan: `
+        SELECT
+        cluster_id,
+        name,
+        type,
+        loan_amount
+      FROM clusters
+      WHERE loan_status = 'active'
+      AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
   `
 };
+
+
     

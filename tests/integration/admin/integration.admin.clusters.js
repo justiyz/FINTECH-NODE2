@@ -48,9 +48,13 @@ describe('Clusters', () => {
         })
         .send({
           description: 'group borrowing of money for small projects',
-          type: 'private',
           maximum_members: 2,
-          minimum_monthly_income: 45000
+          company_name: 'baba tunde',
+          company_address: 'enyata road off wire',
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -70,9 +74,13 @@ describe('Clusters', () => {
         })
         .send({
           name: 'Enyata admin cluster',
-          type: 'private',
           maximum_members: 2,
-          minimum_monthly_income: 45000
+          company_name: 'baba tunde',
+          company_address: 'enyata road off wire',
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -80,28 +88,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal('description is required');
-          done();
-        });
-    });
-    it('should throw error when cluster type is not sent', (done) => {
-      chai.request(app)
-        .post('/api/v1/admin/cluster/create')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          name: 'Enyata admin cluster',
-          description: 'group borrowing of money for small projects',
-          maximum_members: 2,
-          minimum_monthly_income: 45000
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('type is required');
           done();
         });
     });
@@ -115,8 +101,12 @@ describe('Clusters', () => {
         .send({
           name: 'Enyata admin cluster',
           description: 'group borrowing of money for small projects',
-          type: 'private',
-          minimum_monthly_income: 45000
+          company_name: 'baba tunde',
+          company_address: 'enyata road off wire',
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -124,29 +114,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal('maximum_members is required');
-          done();
-        });
-    });
-    it('should throw error when minimum monthly income is not sent', (done) => {
-      chai.request(app)
-        .post('/api/v1/admin/cluster/create')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          name: 'Enyata admin cluster',
-          description: 'group borrowing of money for small projects',
-          type: 'private',
-          loan_goal_target: '200000',
-          maximum_members: 2
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('minimum_monthly_income is required');
           done();
         });
     });
@@ -160,10 +127,14 @@ describe('Clusters', () => {
         .send({
           name: 'Enyata admin cluster',
           description: 'group borrowing of money for small projects',
-          type: 'private',
           maximum_members: 'seven',
           loan_goal_target: 500000,
-          minimum_monthly_income: 45000
+          company_name: 'baba tunde',
+          company_address: 'enyata road off wire',
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -171,30 +142,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal('maximum_members must be a number');
-          done();
-        });
-    });
-    it('should throw error when invalid cluster type is sent', (done) => {
-      chai.request(app)
-        .post('/api/v1/admin/cluster/create')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          name: 'Enyata admin cluster',
-          description: 'group borrowing of money for small projects',
-          type: 'open',
-          maximum_members: 3,
-          loan_goal_target: 500000,
-          minimum_monthly_income: 45000
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('type must be [private]');
           done();
         });
     });
@@ -208,10 +155,14 @@ describe('Clusters', () => {
         .send({
           name: 'Enyata admin cluster',
           description: 'group borrowing of money for small projects',
-          type: 'private',
           maximum_members: 3,
           loan_goal_target: 500000,
-          minimum_monthly_income: 45000
+          company_name: 'baba tunde',
+          company_address: 'enyata road off wire',
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -236,10 +187,14 @@ describe('Clusters', () => {
         .send({
           name: 'Enyata developers cluster',
           description: 'group borrowing of money for large projects',
-          type: 'private',
           maximum_members: 10,
           loan_goal_target: 600000,
-          minimum_monthly_income: 56000
+          company_name: 'rashidat ltd',
+          company_address: 'enyata road off wire',
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -249,8 +204,8 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('cluster_id');
           expect(res.body.data).to.have.property('loan_status');
           expect(res.body.data).to.have.property('name');
-          res.body.data.cluster_id = process.env.SEEDFI_ENYATA_DEVELOPERS_CLUSTER_ID;
           expect(res.body.message).to.equal('Cluster created successfully');
+          process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO = res.body.data.cluster_id;
           done();
         });
     });
@@ -451,8 +406,8 @@ describe('Clusters', () => {
         });
     });
   });
-  describe('Admin fetches single cluster details', () => {
-    it('should flag if try to invite none existing user', (done) => {
+  describe('Admin invite cluster member', () => {
+    it('should successfully invite none existing user', (done) => {
       chai.request(app)
         .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
         .set({
@@ -460,14 +415,15 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
+          type: 'email',
           email: 'miracle@enyata.com'
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('user'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
           done();
         });
     });
@@ -479,6 +435,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
+          type: 'email',
           email: process.env.SEEDFI_USER_TWO_EMAIL
         })
         .end((err, res) => {
@@ -489,6 +446,48 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('cluster_id');
           expect(res.body.data).to.have.property('invitee');
           expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should successfully invite an existing user by phone number', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          phone_number: '+2349067749313'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('cluster_id');
+          expect(res.body.data).to.have.property('invitee');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should throw error if not admin created cluster', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          phone_number: '+2349067749313'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_RESTRICTED_ACTION);
           done();
         });
     });
@@ -519,6 +518,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
+          type: 'email',
           email: 'test@gamil.com'
         })
         .end((err, res) => {
@@ -543,7 +543,7 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('email is required');
+          expect(res.body.message).to.equal('type is required');
           done();
         });
     });
@@ -555,6 +555,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
+          type: 'email',
           email: process.env.SEEDFI_USER_TWO_EMAIL
         })
         .end((err, res) => {
@@ -563,6 +564,139 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.USER_ALREADY_CLUSTER_MEMBER);
+          done();
+        });
+    });
+    it('should invite a cluster member successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          phone_number: '+234830180909'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('cluster_id');
+          expect(res.body.data).to.have.property('invitation_mode');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should successfully invite bulk members with email', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/bulk-invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'email',
+          data: [
+            {email: 'miracle1@enyata.com'},
+            {email: 'miracle2@enyata.com'},
+            {email: 'miracle3@enyata.com'},
+            {email: 'miracle4@enyata.com'},
+            {email: 'miracle5@enyata.com'},
+            {email: 'miracle6@enyata.com'},
+            {email: 'miracle7@enyata.com'},
+            {email: 'miracle8@enyata.com'},
+            {email: 'miracle12@enyata.com'},
+            {email: process.env.SEEDFI_USER_TWO_EMAIL}
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should successfully invite bulk members with phone number', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/bulk-invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          data: [
+            {phone_number: '+2348072132241'},
+            {phone_number: '+2348072132242'},
+            {phone_number: '+2348072132243'},
+            {phone_number: '+2348072132244'},
+            {phone_number: '+2348072132245'},
+            {phone_number: '+2348072132246'},
+            {phone_number: '+2348072132247'},
+            {phone_number: '+2348072132248'}
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should successfully invite bulk members with phone number', (done) => {
+      chai.request(app)
+        .post(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/bulk-invite`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'phone_number',
+          data: [
+            {phone_number: '+2348072132241'},
+            {phone_number: '+2348072132242'},
+            {phone_number: '+2348072132243'},
+            {phone_number: '+2348072132244'},
+            {phone_number: '+2348072132245'},
+            {phone_number: '+2348072132246'},
+            {phone_number: '+2348072132247'},
+            {phone_number: '+2348072132248'}
+          ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_MEMBER_INVITE);
+          done();
+        });
+    });
+    it('should throw error if user try to join uninvited', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/join`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'yes'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('User has no active invitation from enyata developers cluster cluster');
           done();
         });
     });
@@ -729,6 +863,22 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.CLUSTER_MEMBER_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if not admin created cluster', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/member/${process.env.SEEDFI_USER_TWO_USER_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_RESTRICTED_ACTION);
           done();
         });
     });

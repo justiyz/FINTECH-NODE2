@@ -13,6 +13,7 @@ import config from '../../../users/config/index';
 import * as fetchAdminServices from '../services/services.admin';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import { loanCategoryOrrAverageMetrics } from '../services/services.seedfiUnderwriting';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -257,10 +258,10 @@ export const getProfile = async(req, res, next) => {
 export const fetchPlatformOverview = async(req, res, next) => {
   try {
     const { admin, query: { type, from_date, to_date } } = req;
-    const queryFromType = type === 'filter' ? from_date : null;
-    const queryToType = type === 'filter' ? to_date : null;
-    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : from_date; // i.e first day of the current year
-    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : to_date; // i.e last day of the current year
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
     const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
     fetchPlatformOverview.controllers.admin.admin.js`);
@@ -343,6 +344,54 @@ export const fetchPlatformOverview = async(req, res, next) => {
   }
 };
 
+
+/**
+ * fetch and filter loan management analytics
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns loan management analytics details.
+ * @memberof AdminAdminController
+ */
+
+export const fetchLoanManagementAnalytics = async(req, res, next) => {
+  try {
+    const { admin, query: { type, from_date, to_date } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const loanReports = 'loan management reports and analytics';
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
+    const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
+    fetchLoanManagementAnalytics.controllers.admin.admin.js`);
+    const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
+      processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ Number(nplGraceDay.value) ]),
+      processOneOrNoneData(adminQueries.averageLoanTenor, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalSystemUsersPerTime, [ queryFromType, queryToType ]),
+      processAnyData(adminQueries.fetchDetailsOfDisbursedLoans, [ currentYearFromDate, currentYearToDate ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan management analytics fetched from the DB
+     fetchLoanManagementAnalytics.controllers.admin.admin.js`);
+    const data = {
+      default_loans: parseFloat(parseFloat(totalDefaultLoans.sum).toFixed(2)) || 0,
+      average_loan_tenor_in_months: Number(avgLoanTenor.avg),
+      rescheduled_loans: parseFloat(parseFloat(rescheduledLoans.sum).toFixed(2)) || 0,
+      total_customer: Number(totalCustomer.count),
+      disbursed_loans: disbursedLoans
+    };
+    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_reports_and_analytics(adminName, loanReports));
+    return ApiResponse.success(res, enums.LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.loan_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    error.label = enums.FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER;
+    logger.error(`Fetching loan management analytic details failed:::${enums.FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 /**
  * fetch and filter activity log
  * @param {Request} req - The request from the endpoint.
@@ -370,6 +419,103 @@ export const fetchActivityLog = async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_ACTIVITY_LOG_CONTROLLER;
     logger.error(`fetching activity log in the DB failed:::${enums.FETCH_ACTIVITY_LOG_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch and filter loan repayment report
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns loan repayment report.
+ * @memberof AdminAdminController
+ */
+export const loanRepaymentReport = async(req, res, next) => {
+  const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
+  try {
+    const { admin, query: { type, from_date, to_date } } = req;
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') :  dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
+    const orrCategoryAverageScores = await loanCategoryOrrAverageMetrics(queryFromType, queryToType);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched loan category orr average from from the underwriting DB 
+    loanRepaymentReport.controllers.admin.admin.js`);
+    const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, paymentDetails, disbursementDetails, customerBase, loanTenor ] = await Promise.all([
+      processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.averageOrrScore, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalObligation, [ ]),
+      processAnyData(adminQueries.paymentDetails, [ currentYearFromDate, currentYearToDate ]),
+      processAnyData(adminQueries.disbursementDetails, [ currentYearFromDate, currentYearToDate ]),
+      processOneOrNoneData(adminQueries.customerBase, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.loanTenor, [ queryFromType, queryToType ])
+    ]);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+    successfully fetched loan repayment report and analytics from the DB loanRepaymentReport.controllers.admin.admin.js`);
+    const data = {
+      totalLoanRejected: parseFloat(totalLoanRejected.count) || 0,
+      totalDisbursedLoan: parseFloat(totalDisbursedLoan.sum) || 0,
+      averageOrrScore: parseFloat(parseFloat(averageOrrScore.average_value).toFixed(2))|| 0, 
+      totalLoanObligation: parseFloat(totalLoanObligation.count) || 0,
+      paymentDetails,
+      disbursementDetails,
+      customerBase,
+      loanTenor,
+      orrScore: orrCategoryAverageScores.data || {}
+    };
+    adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+    loan payment report arranged and set to be returned loanRepaymentReport.controllers.admin.admin.js`);
+    return ApiResponse.success(res, enums.LOAN_REPAYMENT_REPORT, enums.HTTP_OK, data);
+  } catch (error) {
+    adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
+    error.label = enums.LOAN_REPAYMENT_REPORT_CONTROLLER;
+    logger.error(`fetching report and analytics in the DB failed:::${enums.LOAN_REPAYMENT_REPORT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch and filter cluster management analytics
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns cluster management analytics details.
+ * @memberof AdminAdminController
+ */
+
+export const fetchClusterManagementAnalytics = async(req, res, next) => {
+  try {
+    const { admin, query: { type, from_date, to_date } } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const queryFromType = type === 'filter' ? dayjs(from_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
+    const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
+    const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
+    const [ totalClusterGroups, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
+      processOneOrNoneData(adminQueries.totalClusterGroups, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanDefaulters, [ ]),
+      processAnyData(adminQueries.fetchDetailsOfTotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster management analytics fetched from the DB
+     fetchClusterManagementAnalytics.controllers.admin.admin.js`);
+    const data = {
+      total_cluster_group: Number(totalClusterGroups.count),
+      average_repayment_period: null, // will be implemented when cluster loan is implemented
+      total_cluster_loan_amount: parseFloat(parseFloat(totalClusterLoanAmount.sum).toFixed(2)) || 0,
+      total_loan_defaulters: Number(totalLoanDefaulters.count),
+      total_loan_disbursed: totalDisbursedClusterLoan
+    };
+    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.cluster_reports_and_analytics(adminName));
+    return ApiResponse.success(res, enums.CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.cluster_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    error.label = enums.FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER;
+    logger.error(`Fetching cluster management analytic details failed:::${enums.FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
