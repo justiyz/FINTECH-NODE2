@@ -56,3 +56,97 @@ export const sendUserPersonalNotification = async(user, title, content, type, ex
     created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
   });
 };
+
+// downTimePushNotification to be implemented later
+/**
+ * update a notifications is read status
+ * @param {Object} user_id - the user object for which the notification is being updated for
+ * @param {String} title - the title of the notification
+ * @param {String} type - the type of notification
+ * @param {String} content - the payload from the request
+ * @param {String} fcm_tokens - the fcm_tokens where notifications to be sent to
+ * @returns { JSON } - a response based on if the notification was updated or not
+ * @memberof FirebaseService
+ */
+export const downTimePushNotification = async(user_id, title, type, content, fcm_tokens) => {
+  try {
+    if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
+      return;
+    }
+    const payload = {
+      tokens: fcm_tokens,
+      notification: {
+        body: content
+      },
+      data: {
+        type,
+        title,
+        user_id,
+        created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
+      }
+    };
+    await admin.messaging().sendMulticast(payload);
+  } catch (error) {
+    logger.error(error);
+  }
+};
+
+/**
+ * update a single notification read status
+ * @param {Object} admin - the user object for which the notification is being updated for
+ * @param {String} params - the params from the request
+ * @param {String} body - the payload from the request
+ * @returns { JSON } - a response based on if the notification was updated or not
+ * @memberof FirebaseService
+ */
+export const updateAdminNotificationReadBoolean = async(admin, params) => {
+  if (config.SEEDFI_NODE_ENV === 'test') {
+    return;
+  }
+  const { adminNotificationId } = params;
+  const updateNotification =  dbFireStore
+    .collection('admin_notifications')
+    .doc(`${admin.admin_id}`)
+    .collection('messages-timestamp')
+    .where('is_read', '==', false)
+    .doc(adminNotificationId);
+
+  await updateNotification.update({
+    is_read: true
+  });
+  return updateNotification;
+};
+
+/**
+ * fetch and update multiple notifications
+ * @param {Object} docId - the admin document id for which the notification is being updated for
+ * @returns { JSON } - a response based on if the notification was updated or not
+ * @memberof FirebaseService
+ */
+export const fetchAndUpdateNotification = async(docId) => {
+  try {
+    const querySnapshot = await dbFireStore
+      .collection('admin_notifications')
+      .doc(`${docId}`)
+      .collection('messages-timestamp')
+      .where('is_read', '==', false)
+      .get();
+
+    const notifications = [];
+    const updateNotification = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      notifications.push(data);
+
+      const updatePromises = doc.ref.update({
+        is_read: true
+      });
+      updateNotification.push(updatePromises);
+    });
+    await Promise.all(updateNotification);
+  } catch (error) {
+    console.error('Error querying data:', error);
+    throw error;
+  }
+};

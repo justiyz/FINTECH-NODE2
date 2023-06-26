@@ -199,3 +199,38 @@ export const updateNotificationReadBoolean = async(user, params, body) => {
   });
   return updateNotification;
 };
+
+
+/**
+ * send notification to admin
+ * @param {Object} admin_id - the admin id receiving the notification
+ * @param {String} title - the title of the personal notification
+ * @param {String} message - the message content of the personal notification
+ * @param {String} customer_name - contains the customer name 
+ * @param {String} type - the type of notification sent to admin
+ * @param {Object} extra_data - an optional object containing extra needed data
+ * @returns { JSON } - a response based on if the notification was sent or not
+ * @memberof FirebaseService
+ */
+export const sendNotificationToAdmin = async(admin_id, title, message, customer_name, type, extra_data) => {
+  if (config.SEEDFI_NODE_ENV === 'test') {
+    return;
+  }
+
+  const chatId = generateElevenDigits();
+  const sendChat = await dbFireStore
+    .collection('admin_notifications')
+    .doc(`${admin_id}`)
+    .collection('messages-timestamp')
+    .doc(Date.now().toString());
+  await sendChat.set({
+    chatId,
+    Title: title,
+    message,
+    customer_name,
+    is_read: false,
+    chat_type: type,
+    extra_data: JSON.stringify(extra_data) || {},
+    created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
+  });
+};

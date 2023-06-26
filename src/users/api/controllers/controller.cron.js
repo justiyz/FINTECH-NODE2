@@ -11,6 +11,11 @@ import { sendUserPersonalNotification, sendPushNotification } from '../services/
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
+import notificationQueries from '../queries/queries.notification';
+import * as adminNotification from '../../lib/templates/adminNotification';
+import { sendNotificationToAdmin } from '../services/services.firebase';
+import config from '../../config';
+
 
 /**
  * update user loan status to overdue
@@ -91,6 +96,43 @@ export const initiateLoanRepayment = async(req, res, next) => {
   } catch (error) {
     error.label = enums.INITIATE_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating loan repayment for loan repayments which are due for repayment failed::${enums.INITIATE_LOAN_REPAYMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * notify admin and non performing users
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof CronController
+ */
+export const nonPerformingLoans = async(req, res, next) => {
+  try {
+    const [ admin ] = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+    const [ nonPerformingUsers ] = await processAnyData(notificationQueries.nonPerformingLoans, [ ]);
+    const maxIterations = Math.max(admin.length, nonPerformingUsers.length);
+
+    for (let i = 0; i < maxIterations; i++) {
+      const admin = admin[i] || null;
+      const users = nonPerformingUsers[i] || null;
+      
+      // should send notification to both users and admin for non performing users
+      if (users) {
+        sendPushNotification(users.user_id, PushNotifications.nonPerformingUsers(), users.fcm_token);
+      }
+    
+      if (admin) {
+        sendNotificationToAdmin(admin.admin_id, 'Non-Performing Loans', 
+          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'Non-Performing-Loans');
+      }
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
+    return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
+    logger.error(`Sending notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

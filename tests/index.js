@@ -41,3 +41,4 @@ import './integration/admin/integration.admin.user';
 import './integration/admin/integration.admin.loan';
 import './integration/admin/integration.admin.settings';
 import './integration/admin/integration.admin.clusters';
+import './integration/admin/integration.admin.notification';

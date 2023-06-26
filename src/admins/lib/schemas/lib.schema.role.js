@@ -98,6 +98,10 @@ const loanAndClusterAnalytics = Joi.object().keys({
   })
 });
 
+const adminNotificationIdParams = Joi.object().keys({
+  adminNotificationId: Joi.string().required()
+});
+
 
 export default {
   createRole,
@@ -112,5 +116,6 @@ export default {
   roleType,
   overviewPage,
   fetchActivityLog,
-  loanAndClusterAnalytics
+  loanAndClusterAnalytics,
+  adminNotificationIdParams
 };
