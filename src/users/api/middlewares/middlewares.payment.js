@@ -364,7 +364,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
   try {
     const { body, paymentRecord } = req;
     if (body.event.includes('transfer') && paymentRecord.payment_type === 'personal_loan_disbursement') {
-      const admin = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+      const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
       const [ loanDetails ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ paymentRecord.loan_id, paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan details fetched using loan identity 
       processPersonalLoanTransferPayments.middlewares.payment.js`);
@@ -399,7 +399,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         sendUserPersonalNotification(userDetails, 'Loan disbursement successful', 
           PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-disbursement', { });
         sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
-        admin.map((admin) => {
+        admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Loan Disbursement', adminNotification.loanDisbursement(), 
             `${paymentRecord.first_name} ${paymentRecord.last_name}`, 'Loan-Disbursement');
         });

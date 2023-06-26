@@ -57,7 +57,7 @@ describe('Admin Auth', () => {
     });
     it('Should successfully update multiply notification', (done) => {
       chai.request(app)
-        .put('/api/v1/admin/admin-notification')
+        .put('/api/v1/admin/admin-notifications')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

@@ -23,14 +23,8 @@ export default {
 
   nonPerformingLoans: `
     SELECT
-      personal_loans.id,
-      personal_loans.loan_id,
-      personal_loans.user_id,
-      CONCAT(users.first_name, users.last_name) AS name,
-      personal_loans.status,
-      users.fcm_token
-    FROM  personal_loans
-    LEFT JOIN users On users.user_id = personal_loans.user_id
-    WHERE personal_loans.status = 'over due';
+      id, loan_id, user_id, status
+    FROM  personal_loan_payment_schedules
+    WHERE status = 'over due';
     `
 };

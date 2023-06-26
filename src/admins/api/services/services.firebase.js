@@ -104,7 +104,7 @@ export const updateAdminNotificationReadBoolean = async(admin, params) => {
     return;
   }
   const { adminNotificationId } = params;
-  const updateNotification =  dbFireStore
+  const updateNotification = dbFireStore
     .collection('admin_notifications')
     .doc(`${admin.admin_id}`)
     .collection('messages-timestamp')
@@ -125,6 +125,10 @@ export const updateAdminNotificationReadBoolean = async(admin, params) => {
  */
 export const fetchAndUpdateNotification = async(docId) => {
   try {
+    if (config.SEEDFI_NODE_ENV === 'test') {
+      return;
+    }
+
     const querySnapshot = await dbFireStore
       .collection('admin_notifications')
       .doc(`${docId}`)

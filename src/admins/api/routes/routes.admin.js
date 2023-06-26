@@ -126,7 +126,7 @@ router.patch(
 );
 
 router.put(
-  '/admin-notification',
+  '/admin-notifications',
   AuthMiddleware.validateAdminAuthToken,
   NotificationController.updateAllNotificationsAsRead
 );

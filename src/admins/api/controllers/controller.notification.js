@@ -1,6 +1,5 @@
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import config from '../../../users/config/index';
 import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification } from '../services/services.firebase';
 
 
@@ -16,9 +15,6 @@ import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification } from '
 export const updateSingleNotification = async(req, res, next) => {
   try {
     const { user, params } = req;
-    if (config.SEEDFI_NODE_ENV === 'test') {
-      return  ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
-    }
     await updateAdminNotificationReadBoolean(user, params);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.controller.admin.admin.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
@@ -39,9 +35,6 @@ export const updateSingleNotification = async(req, res, next) => {
  */
 export const updateAllNotificationsAsRead = async(req, res, next) => {
   try {
-    if (config.SEEDFI_NODE_ENV === 'test') {
-      return  ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
-    }
     await fetchAndUpdateNotification(req.admin.admin_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.controller.admin.admin.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);

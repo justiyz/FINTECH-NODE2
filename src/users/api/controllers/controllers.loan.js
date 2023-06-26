@@ -29,7 +29,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
   try {
     const { user, body, userEmploymentDetails } = req;
     const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
-    const admin = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
     if ((user.status === 'inactive') || (user.status === 'blacklisted')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user status is inactive checkUserLoanEligibility.controllers.loan.js`);
@@ -93,7 +93,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 
         updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
         
-      admin.map((admin) => {
+      admins.map((admin) => {
         sendNotificationToAdmin(admin.admin_id, ' Manual Approval Required', adminNotification.loanApplicationApproval(), 
           `${user.first_name} ${user.last_name}`, 'MANUAL-APPROVAL');
       });

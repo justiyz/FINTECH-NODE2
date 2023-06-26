@@ -110,12 +110,14 @@ export const initiateLoanRepayment = async(req, res, next) => {
  */
 export const nonPerformingLoans = async(req, res, next) => {
   try {
-    const [ admin ] = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
-    const [ nonPerformingUsers ] = await processAnyData(notificationQueries.nonPerformingLoans, [ ]);
-    const maxIterations = Math.max(admin.length, nonPerformingUsers.length);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+    const nonPerformingUsers = await processAnyData(notificationQueries.nonPerformingLoans, [ ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non performing users from the db nonPerformingLoans.controllers.loan.js`);
+
+    const maxIterations = Math.max(admins.length, nonPerformingUsers.length);
 
     for (let i = 0; i < maxIterations; i++) {
-      const admin = admin[i] || null;
+      const admin = admins[i] || null;
       const users = nonPerformingUsers[i] || null;
       
       // should send notification to both users and admin for non performing users
