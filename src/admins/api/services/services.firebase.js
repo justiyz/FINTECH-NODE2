@@ -57,39 +57,6 @@ export const sendUserPersonalNotification = async(user, title, content, type, ex
   });
 };
 
-// downTimePushNotification to be implemented later
-/**
- * update a notifications is read status
- * @param {Object} user_id - the user object for which the notification is being updated for
- * @param {String} title - the title of the notification
- * @param {String} type - the type of notification
- * @param {String} content - the payload from the request
- * @param {String} fcm_tokens - the fcm_tokens where notifications to be sent to
- * @returns { JSON } - a response based on if the notification was updated or not
- * @memberof FirebaseService
- */
-export const downTimePushNotification = async(user_id, title, type, content, fcm_tokens) => {
-  try {
-    if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
-      return;
-    }
-    const payload = {
-      tokens: fcm_tokens,
-      notification: {
-        body: content
-      },
-      data: {
-        type,
-        title,
-        user_id,
-        created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
-      }
-    };
-    await admin.messaging().sendMulticast(payload);
-  } catch (error) {
-    logger.error(error);
-  }
-};
 
 /**
  * update a single notification read status
