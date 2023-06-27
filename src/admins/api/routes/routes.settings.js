@@ -84,7 +84,7 @@ router.patch(
 router.delete(
   '/delete-promo',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('settings', 'update'),
+  RolesMiddleware.adminAccess('settings', 'delete'),
   Model(Schema.promoIds, 'payload'),
   AdminSettingsMiddleware.checkIfAdminCreatedPromo,
   AdminSettingsMiddleware.checkIfPromoExists,
