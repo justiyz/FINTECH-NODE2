@@ -4,8 +4,8 @@ export default {
   createPromo: (body, document, admin) => [
     body.name.trim().toLowerCase(),
     body.description,
-    dayjs(body.start_date).format('T00:00:00.00Z'),
-    dayjs(body.end_date).format('T00:00:00.00Z'),
+    body.start_date + 'T00:00:00.00Z',
+    body.end_date + 'T00:00:00.00Z',
     document?.document_url,
     body.status = (dayjs(body.start_date).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')) ? 'active' : 'inactive',
     body.percentage_discount,
