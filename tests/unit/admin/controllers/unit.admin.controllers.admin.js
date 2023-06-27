@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import enums from '../../../../src/users/lib/enums';
 import * as AdminController from '../../../../src/admins/api/controllers/controllers.admin';
 import * as BvnController from '../../../../src/admins/api/controllers/controllers.bvn';
+import * as NotificationController from '../../../../src/admins/api/controllers/controller.notification';
 
 describe('', () => {
   let status,
@@ -109,6 +110,18 @@ describe('', () => {
     it('should call fetchClusterManagementAnalytics', async() => {
       const req = { admin: '', query: '' };
       const data = await AdminController.fetchClusterManagementAnalytics(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateSingleNotification', async() => {
+      const req = { admin: '', params: '' };
+      const data = await NotificationController.updateSingleNotification(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateAllNotificationsAsRead', async() => {
+      const req = { admin: '' };
+      const data = await NotificationController.updateAllNotificationsAsRead(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

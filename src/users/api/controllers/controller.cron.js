@@ -11,6 +11,11 @@ import { sendUserPersonalNotification, sendPushNotification } from '../services/
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
+import notificationQueries from '../queries/queries.notification';
+import * as adminNotification from '../../lib/templates/adminNotification';
+import { sendNotificationToAdmin } from '../services/services.firebase';
+import config from '../../config';
+
 
 /**
  * update user loan status to overdue
@@ -91,6 +96,91 @@ export const initiateLoanRepayment = async(req, res, next) => {
   } catch (error) {
     error.label = enums.INITIATE_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating loan repayment for loan repayments which are due for repayment failed::${enums.INITIATE_LOAN_REPAYMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * updates promo status to active
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof CronController
+ */
+
+export const updatesPromoStatusToActive = async(req, res, next) => {
+  try {
+    await processAnyData(cronQueries.updatePromoStatusToActive);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain inactive promos in the database has been made active
+      updatesPromoStatusToActive.controllers.cron.js`);
+    return ApiResponse.success(res, enums.PROMO_DUE_TO_START, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
+    logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+ * notify admin and non performing users
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof CronController
+ */
+export const nonPerformingLoans = async(req, res, next) => {
+  try {
+    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+    const nonPerformingUsers = await processAnyData(notificationQueries.nonPerformingLoans, [ Number(nplGraceDay.value) ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non performing users from the db nonPerformingLoans.controllers.loan.js`);
+
+    const maxIterations = Math.max(admins.length, nonPerformingUsers.length);
+
+    for (let i = 0; i < maxIterations; i++) {
+      const admin = admins[i] || null;
+      const users = nonPerformingUsers[i] || null;
+      
+      // should send notification to both users and admin for non performing users
+      if (users) {
+        sendPushNotification(users.user_id, PushNotifications.nonPerformingUsers(), users.fcm_token);
+      }
+    
+      if (admin) {
+        sendNotificationToAdmin(admin.admin_id, 'Non-Performing Loans', 
+          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'Non-Performing-Loans');
+      }
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
+    return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
+    logger.error(`Sending notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+}; 
+
+/**
+ * updates promo status to ended
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the initiated payments
+ * @memberof CronController
+ */
+
+export const updatesPromoStatusToEnded = async(req, res, next) => {
+  try {
+    await processAnyData(cronQueries.updatePromoStatusToEnded);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end
+      updatesPromoStatusToEnded.controllers.cron.js`);
+    return ApiResponse.success(res, enums.PROMO_DUE_TO_END, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
+    logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
     return next(error);
   }
 };

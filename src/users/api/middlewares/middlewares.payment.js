@@ -7,17 +7,18 @@ import enums from '../../lib/enums';
 import paymentQueries from '../queries/queries.payment';
 import userQueries from '../queries/queries.user';
 import loanQueries from '../queries/queries.loan';
+import notificationQueries from '../queries/queries.notification';
 import { processAnyData, processOneOrNoneData} from '../services/services.db';
 import { confirmPaystackPaymentStatusByReference, initiateTransfer, raiseARefundTickedForCardTokenizationTransaction } from '../services/service.paystack';
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import MailService from '../services/services.email';
-import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification, sendNotificationToAdmin } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
-
+import * as adminNotification from '../../lib/templates/adminNotification';
 /**
  * verify the legibility of the webhook response if from Paystack
  * @param {Request} req - The request from the endpoint.
@@ -363,6 +364,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
   try {
     const { body, paymentRecord } = req;
     if (body.event.includes('transfer') && paymentRecord.payment_type === 'personal_loan_disbursement') {
+      const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
       const [ loanDetails ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ paymentRecord.loan_id, paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan details fetched using loan identity 
       processPersonalLoanTransferPayments.middlewares.payment.js`);
@@ -397,6 +399,10 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         sendUserPersonalNotification(userDetails, 'Loan disbursement successful', 
           PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-disbursement', { });
         sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Loan Disbursement', adminNotification.loanDisbursement(), 
+            `${paymentRecord.first_name} ${paymentRecord.last_name}`, 'Loan-Disbursement');
+        });
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }

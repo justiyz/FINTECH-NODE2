@@ -6,6 +6,7 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as AdminController from '../controllers/controllers.admin';
+import * as NotificationController from '../controllers/controller.notification';
 
 const router = Router();
 
@@ -115,6 +116,19 @@ router.get(
   Model(RoleSchema.loanAndClusterAnalytics, 'query'),
   RolesMiddleware.adminAccess('report management', 'read'),
   AdminController.fetchClusterManagementAnalytics
+);
+
+router.patch(
+  '/:adminNotificationId/single-notification',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(RoleSchema.adminNotificationIdParams, 'params'),
+  NotificationController.updateSingleNotification
+);
+
+router.put(
+  '/admin-notifications',
+  AuthMiddleware.validateAdminAuthToken,
+  NotificationController.updateAllNotificationsAsRead
 );
 
 export default router;

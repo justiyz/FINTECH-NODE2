@@ -1,16 +1,18 @@
 import dayjs from 'dayjs';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
+import notificationQueries from '../queries/queries.notification';
 import { processOneOrNoneData, processAnyData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 import { createClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification,
-  sendClusterNotification, sendPushNotification } from '../services/services.firebase';
+  sendClusterNotification, sendPushNotification, sendNotificationToAdmin } from '../services/services.firebase';
 import MailService from '../services/services.email';
 import { collateUsersFcmTokens, collateUsersFcmTokensExceptAuthenticatedUser } from '../../lib/utils/lib.util.helpers';
 import * as PushNotifications from '../../lib/templates/pushNotification';
-import * as PersonalNotifications from '../../lib/templates//personalNotification';
+import * as PersonalNotifications from '../../lib/templates/personalNotification';
+import * as adminNotification from '../../lib/templates/adminNotification';
 import { userActivityTracking } from '../../lib/monitor';
 
 
@@ -98,6 +100,7 @@ export const joinClusterOnInvitation = async(req, res, next) => {
   try {
     const { params: { cluster_id }, body, cluster, user } = req;
     const [ formerClusterMember ] = await processAnyData(clusterQueries.fetchDeactivatedClusterMemberDetails, [ cluster_id, user.user_id ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'cluster management' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user was a one time cluster member joinClusterOnInvitation.controller.cluster.js`);
     const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fcm tokens of all cluster members fetched successfully joinClusterOnInvitation.controllers.cluster.js`);
@@ -116,6 +119,12 @@ export const joinClusterOnInvitation = async(req, res, next) => {
       sendUserPersonalNotification(adminUserDetails, `${cluster.name} cluster invitation accepted`, PersonalNotifications.clusterInvitationAcceptance(user, cluster), 
         'cluster-invitation-accepted', { ...cluster });
       sendMulticastPushNotification(PushNotifications.userJoinedYourCluster(user, cluster), clusterMembersToken, 'join-cluster', cluster_id);
+      if (cluster.is_created_by_admin) {
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Admin Cluster User Acceptance', adminNotification.joinClusterNotification(),
+            `${user.first_name} ${user.last_name}`, 'Cluster-Acceptance');
+        });
+      }        
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user added to new cluster and all notifications sent successfully 
       joinClusterOnInvitation.controllers.cluster.js`);
       userActivityTracking(req.user.user_id, 52, 'success');

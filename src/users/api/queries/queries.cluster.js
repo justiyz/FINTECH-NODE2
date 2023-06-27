@@ -57,7 +57,8 @@ export default {
         loan_status,
         total_loan_obligation,
         join_cluster_closes_at,
-        is_deleted
+        is_deleted,
+        is_created_by_admin
     FROM clusters
     WHERE cluster_id = $1
     OR unique_code = $1`,

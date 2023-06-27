@@ -699,6 +699,8 @@ export const homepageDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan repayment transactions fetched homepageDetails.controller.user.js`);
     const underProcessingClusterLoans = []; // to implement the query when cluster loan is implemented
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process cluster loans fetched from the DB homepageDetails.controller.user.js`);
+    const activePromos = await processAnyData(userQueries.fetchAllActivePromos);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all active promos fetched from the DB homepageDetails.controller.user.jss`);
     const data = {
       user_id: user.user_id,
       first_name: user.first_name,
@@ -719,7 +721,8 @@ export const homepageDetails = async(req, res, next) => {
       cluster_loan_transaction_history: {
         underProcessingClusterLoans,
         clusterLoanTransactions
-      }
+      },
+      allActivePromos: activePromos
     };
     return ApiResponse.success(res, enums.HOMEPAGE_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
