@@ -16,7 +16,7 @@ export const createPromo = Joi.object().keys({
   image_url: Joi.string().optional(),
   percentage_discount: Joi.number().optional(),
   customer_segment: Joi.string().optional().valid('student', 'employed', 'self employed', 'unemployed','retired'),
-  tier_category: Joi.string().optional().valid('0', '1', '2')
+  tier_category: Joi.string().optional().valid('1', '2')
 });
 
 export const promoId = Joi.object().keys({
@@ -37,5 +37,5 @@ export const editPromo = Joi.object().keys({
   image_url: Joi.string().optional(),
   percentage_discount: Joi.number().optional(),
   customer_segment: Joi.string().optional(),
-  tier_category: Joi.string().optional().valid('0', '1', '2')
+  tier_category: Joi.string().optional().valid('1', '2')
 });

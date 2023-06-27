@@ -8,9 +8,9 @@ export default {
     body.end_date + 'T00:00:00.00Z',
     document?.document_url,
     body.status = (dayjs(body.start_date).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')) ? 'active' : 'inactive',
-    body.percentage_discount,
-    body.customer_segment,
-    body.tier_category,
+    body.percentage_discount ? body.percentage_discount : null,
+    body.customer_segment ? body.customer_segment : null,
+    body.tier_category ? body.tier_category : null,
     admin.admin_id
   ],
 

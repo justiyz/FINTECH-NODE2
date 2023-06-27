@@ -216,14 +216,9 @@ export const cancelPromo = async(req, res, next) => {
     const cancelledPromos = [];
 
     for (const id of body) {
-      const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched promo details
       cancelPromo.admin.controllers.settings.js`);
-
-      const actualEndDate = dayjs(promo.end_date).format('YYYY-MM-DD') > dayjs().format('YYYY-MM-DD')
-        ? dayjs()
-        : null;
-
+      const actualEndDate = dayjs();
       const cancelledPromo = await processOneOrNoneData(settingsQueries.cancelPromo, [ id.promo_id, actualEndDate ]);
       cancelledPromos.push(cancelledPromo);
     }

@@ -63,7 +63,7 @@ export default {
         status,
         created_by
     FROM system_promos
-    WHERE is_deleted = 'false'
+    WHERE is_deleted = false
   `,
 
   fetchSinglePromoDetails: `
@@ -96,18 +96,18 @@ export default {
         percentage_discount = $7,
         customer_segment = $8,
         tier_category = $9,
-        is_edited = 'true'
-      WHERE promo_id = $1 AND is_deleted = 'false'
+        is_edited = true
+      WHERE promo_id = $1 AND is_deleted = false
       RETURNING*
   `,
   
   cancelPromo: `
-     UPDATE system_promos
+   UPDATE system_promos
      SET 
         updated_at = NOW(),
         status = 'cancelled',
-        actual_end_date = $2
-    WHERE promo_id = $1 AND is_deleted = 'false'
+        actual_end_date = NOW()
+    WHERE promo_id = $1 AND is_deleted = false AND status IN ('active', 'inactive', 'cancelled')
     RETURNING*
   `,
   
@@ -115,7 +115,7 @@ export default {
     UPDATE system_promos
     SET 
     updated_at = NOW(),
-    is_deleted = 'true'
+    is_deleted = true
     WHERE promo_id = $1
   `   
 };

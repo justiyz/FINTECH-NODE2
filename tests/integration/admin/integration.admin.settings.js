@@ -432,11 +432,11 @@ describe('Admin Settings management', () => {
         .field('percentage_discount', '20')
         .field('customer_segment', 'unemployed')
         .end((err, res) => {
-          expect(res.statusCode).to.equal(400);
+          expect(res.statusCode).to.equal(409);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('Promo name already exist');
-          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.error).to.equal('CONFLICT');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -703,11 +703,11 @@ describe('Admin Settings management', () => {
         .field('percentage_discount', '20')
         .field('customer_segment', 'unemployed')
         .end((err, res) => {
-          expect(res.statusCode).to.equal(400);
+          expect(res.statusCode).to.equal(409);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('Promo name already exist');
-          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.error).to.equal('CONFLICT');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -805,7 +805,6 @@ describe('Admin Settings management', () => {
           }
         ])
         .end((err, res) => {
-          console.log('=====>>>', res.body);
           expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
@@ -865,7 +864,7 @@ describe('Admin Settings management', () => {
   describe('delete promo', () => {
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/settings/delete-promo')
+        .delete('/api/v1/admin/settings/delete-promo')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -887,7 +886,7 @@ describe('Admin Settings management', () => {
     });
     it('Should return error if token is not sent', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/settings/delete-promo')
+        .delete('/api/v1/admin/settings/delete-promo')
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
           expect(res.body).to.have.property('message');
@@ -900,7 +899,7 @@ describe('Admin Settings management', () => {
     });
     it('Should return error if promo does not exist', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/settings/delete-promo')
+        .delete('/api/v1/admin/settings/delete-promo')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -911,7 +910,6 @@ describe('Admin Settings management', () => {
           }
         ])
         .end((err, res) => {
-          console.log('PPPPPPKSH', res.body);
           expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
@@ -923,7 +921,7 @@ describe('Admin Settings management', () => {
     });
     it('Should return error if body is not an array of object', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/settings/delete-promo')
+        .delete('/api/v1/admin/settings/delete-promo')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -943,7 +941,7 @@ describe('Admin Settings management', () => {
     });
     it('Should delete promo successfully', (done) => {
       chai.request(app)
-        .patch('/api/v1/admin/settings/delete-promo')
+        .delete('/api/v1/admin/settings/delete-promo')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

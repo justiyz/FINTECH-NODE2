@@ -76,7 +76,7 @@ export const checkIfPromoAlreadyExists = async(req, res, next) => {
     if (existingPromo) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms promo already exist in the db
          checkIfPromoAlreadyExists.middlewares.settings.js`);
-      return ApiResponse.error(res, enums.PROMO_ALREADY_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_PROMO_ALREADY_EXIST_MIDDLEWARE);
+      return ApiResponse.error(res, enums.PROMO_ALREADY_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_PROMO_ALREADY_EXIST_MIDDLEWARE);
     }
     return next();
   } catch (error) {
@@ -127,7 +127,6 @@ export const checkIfStartOrEndDateHasPassed = async(req, res, next) => {
 export const checkIfPromoExists = async(req, res, next) => {
   try {
     const { admin, params: { promo_id }, body } = req;
-    console.log(promo_id);
     if (promo_id) {
       const promoDetails = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, promo_id);
       if (!promoDetails) {

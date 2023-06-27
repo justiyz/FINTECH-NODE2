@@ -81,7 +81,7 @@ router.patch(
   AdminSettingsMiddleware.checkIfPromoExists,
   AdminSettingsController.cancelPromo
 );
-router.patch(
+router.delete(
   '/delete-promo',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('settings', 'update'),

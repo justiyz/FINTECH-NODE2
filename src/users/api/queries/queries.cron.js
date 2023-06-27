@@ -89,16 +89,6 @@ export default {
       details
     ) VALUES ($1, $2, $3)`,
     
-  // fetchAllPromos: `
-  //     SELECT 
-  //         id,
-  //         promo_id,
-  //         start_date,
-  //         end_date,
-  //         status
-  //     FROM system_promos
-  //   `,
-
   updatePromoStatusToActive: `
     UPDATE system_promos
     SET updated_at = NOW(),
