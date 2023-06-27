@@ -110,8 +110,9 @@ export const initiateLoanRepayment = async(req, res, next) => {
  */
 export const nonPerformingLoans = async(req, res, next) => {
   try {
+    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
-    const nonPerformingUsers = await processAnyData(notificationQueries.nonPerformingLoans, [ ]);
+    const nonPerformingUsers = await processAnyData(notificationQueries.nonPerformingLoans, [ Number(nplGraceDay.value) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non performing users from the db nonPerformingLoans.controllers.loan.js`);
 
     const maxIterations = Math.max(admins.length, nonPerformingUsers.length);

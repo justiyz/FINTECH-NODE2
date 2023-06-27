@@ -20,11 +20,19 @@ export default {
     WHERE status = 'in review'
     AND user_id = $1;
     `,
-
   nonPerformingLoans: `
     SELECT
       id, loan_id, user_id, status
     FROM  personal_loan_payment_schedules
-    WHERE status = 'over due';
-    `
+    WHERE status = 'over due'
+    AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
+    `,
+  fetchAdminSetEnvDetails: `
+    SELECT 
+      id,
+      env_id,
+      name,
+      value
+    FROM admin_env_values_settings
+    WHERE name = $1`
 };

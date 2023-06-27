@@ -3,7 +3,7 @@ export const joinClusterNotification = () =>{
 };
 
 export const loanApplicationApproval = () =>{
-  return 'A loan application requires manual approval. Please review and take appropriate action.';
+  return 'An individual loan application requires manual approval. Please review and take appropriate action.';
 };
 
 export const loanDisbursement = () =>{
