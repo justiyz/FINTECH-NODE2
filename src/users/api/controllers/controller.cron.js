@@ -101,6 +101,29 @@ export const initiateLoanRepayment = async(req, res, next) => {
 };
 
 /**
+ * updates promo status to active
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof CronController
+ */
+
+export const updatesPromoStatusToActive = async(req, res, next) => {
+  try {
+    await processAnyData(cronQueries.updatePromoStatusToActive);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain inactive promos in the database has been made active
+      updatesPromoStatusToActive.controllers.cron.js`);
+    return ApiResponse.success(res, enums.PROMO_DUE_TO_START, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
+    logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
  * notify admin and non performing users
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -136,6 +159,28 @@ export const nonPerformingLoans = async(req, res, next) => {
   } catch (error) {
     error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
     logger.error(`Sending notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+}; 
+
+/**
+ * updates promo status to ended
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the initiated payments
+ * @memberof CronController
+ */
+
+export const updatesPromoStatusToEnded = async(req, res, next) => {
+  try {
+    await processAnyData(cronQueries.updatePromoStatusToEnded);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end
+      updatesPromoStatusToEnded.controllers.cron.js`);
+    return ApiResponse.success(res, enums.PROMO_DUE_TO_END, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
+    logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
     return next(error);
   }
 };

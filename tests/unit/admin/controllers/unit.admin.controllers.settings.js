@@ -39,5 +39,41 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call createSystemPromo', async() => {
+      const req = { admin: '', body: '', document: '' };
+      const data = await AdminSettingsController.createSystemPromo(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchAllSystemPromos', async() => {
+      const req = { admin: ''};
+      const data = await AdminSettingsController.fetchAllSystemPromos(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchSinglePromo', async() => {
+      const req = { admin: '', params: ''};
+      const data = await AdminSettingsController.fetchSinglePromo(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call editPromoDetails', async() => {
+      const req = { admin: '', params: '', document: '', body: ''};
+      const data = await AdminSettingsController.editPromoDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call cancelPromo', async() => {
+      const req = { admin: '', params: ''};
+      const data = await AdminSettingsController.cancelPromo(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call deletePromo', async() => {
+      const req = { admin: '', params: ''};
+      const data = await AdminSettingsController.deletePromo(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

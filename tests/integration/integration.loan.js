@@ -820,6 +820,7 @@ describe('Individual loan', () => {
           expect(res.body.data).to.have.property('total_loan_obligation');
           expect(res.body.data).to.have.property('user_individual_loan');
           expect(res.body.data).to.have.property('user_loan_status');
+          expect(res.body.data).to.have.property('allActivePromos');
           expect(res.body.data.user_loan_status).to.equal('active');
           expect(res.body.data.user_cluster_loan.total_outstanding_loan).to.equal(0);
           expect(res.body.message).to.equal(enums.HOMEPAGE_FETCHED_SUCCESSFULLY);

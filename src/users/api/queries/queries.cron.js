@@ -87,7 +87,31 @@ export default {
       user_id,
       activity_type,
       details
-    ) VALUES ($1, $2, $3)`
+    ) VALUES ($1, $2, $3)`,
+    
+  // fetchAllPromos: `
+  //     SELECT 
+  //         id,
+  //         promo_id,
+  //         start_date,
+  //         end_date,
+  //         status
+  //     FROM system_promos
+  //   `,
+
+  updatePromoStatusToActive: `
+    UPDATE system_promos
+    SET updated_at = NOW(),
+        status = 'active'
+    WHERE start_date::DATE = NOW()::DATE AND NOT is_deleted AND status = 'inactive'
+
+    `,
+  updatePromoStatusToEnded: `
+    UPDATE system_promos
+    SET updated_at = NOW(),
+        status = 'ended'
+    WHERE end_date::DATE = NOW()::DATE AND NOT is_deleted AND status = 'active'
+    `
 };
   
   

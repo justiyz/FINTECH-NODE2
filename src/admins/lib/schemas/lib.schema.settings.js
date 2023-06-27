@@ -1,3 +1,4 @@
+
 const Joi = require('joi').extend(require('@joi/date'));
 
 export const updateEnvValues = Joi.array().min(1).items(
@@ -6,3 +7,35 @@ export const updateEnvValues = Joi.array().min(1).items(
     value: Joi.number().required()
   })
 );
+
+export const createPromo = Joi.object().keys({
+  name: Joi.string().required(),
+  description: Joi.string().required(),
+  start_date: Joi.date().required(),
+  end_date: Joi.date().required(),
+  image_url: Joi.string().optional(),
+  percentage_discount: Joi.number().optional(),
+  customer_segment: Joi.string().optional().valid('student', 'employed', 'self employed', 'unemployed','retired'),
+  tier_category: Joi.string().optional().valid('0', '1', '2')
+});
+
+export const promoId = Joi.object().keys({
+  promo_id: Joi.string().required()
+});
+
+export const promoIds = Joi.array().min(1).items(
+  Joi.object({
+    promo_id: Joi.string().required()
+  })
+);
+
+export const editPromo = Joi.object().keys({
+  name: Joi.string().optional(),
+  description: Joi.string().optional(),
+  start_date: Joi.date().optional(),
+  end_date: Joi.date().optional(),
+  image_url: Joi.string().optional(),
+  percentage_discount: Joi.number().optional(),
+  customer_segment: Joi.string().optional(),
+  tier_category: Joi.string().optional().valid('0', '1', '2')
+});

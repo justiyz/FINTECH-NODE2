@@ -537,5 +537,19 @@ export default {
     FROM admin_env_values_settings
     WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
     'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount');
+ `,
+  fetchAllActivePromos: `
+      SELECT
+          id,
+          promo_id,
+          name,
+          description,
+          start_date,
+          end_date,
+          image_url,
+          status,
+          created_by
+      FROM system_promos
+      WHERE status = 'active' 
  `
 };
