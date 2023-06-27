@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import loanQueries from '../queries/queries.loan';
+import notificationQueries from '../queries/queries.notification';
 import { processAnyData, processOneOrNoneData, processNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
@@ -8,11 +9,13 @@ import config from '../../config';
 import AdminMailService from '../../../admins/api/services/services.email';
 import LoanPayload from '../../lib/payloads/lib.payload.loan';
 import { personalLoanApplicationEligibilityCheck, personalLoanApplicationRenegotiation } from '../services/service.seedfiUnderwriting';
+import { sendNotificationToAdmin } from '../services/services.firebase';
 import { userActivityTracking } from '../../lib/monitor';
 import { initiateTransfer, initializeCardPayment, initializeBankAccountChargeForLoanRepayment, 
   initializeDebitCarAuthChargeForLoanRepayment, submitPaymentOtpWithReference 
 } from '../services/service.paystack';
 import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
+import * as adminNotification from '../../lib/templates/adminNotification';
 
 /**
  * check if user is eligible for loan
@@ -26,6 +29,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
   try {
     const { user, body, userEmploymentDetails } = req;
     const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db checkUserLoanEligibility.controllers.loan.js`);
     if ((user.status === 'inactive') || (user.status === 'blacklisted')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user status is inactive checkUserLoanEligibility.controllers.loan.js`);
@@ -88,6 +92,12 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 
         updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
+        
+      admins.map((admin) => {
+        sendNotificationToAdmin(admin.admin_id, ' Manual Approval Required', adminNotification.loanApplicationApproval(), 
+          `${user.first_name} ${user.last_name}`, 'MANUAL-APPROVAL');
+      });
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Notification sent to admin successfully checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'success');
       userActivityTracking(req.user.user_id, 38, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);

@@ -93,3 +93,7 @@ export const successfulYouVerifyAddressVerification = () => {
 export const userTierUpgraded = () => {
   return 'Your tier has been successfully upgraded to tier 2';
 };
+
+export const nonPerformingUsers = () => {
+  return 'Your loan is over due, kindly login to make your payment';
+};

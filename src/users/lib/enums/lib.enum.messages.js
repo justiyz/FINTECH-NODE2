@@ -215,7 +215,7 @@ export const BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION = 'You are not allowed
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
 export const UPDATE_USER_MONO_ID = 'User mono account id updated successfully';
 export const FETCH_LOAN_VALUE = 'successfully fetch loan user loan value';
-
+export const NON_PERFORMING_LOANS  = 'notification sent to non performing loans';
 
 // admin module related messages
 
