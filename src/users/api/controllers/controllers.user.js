@@ -687,17 +687,18 @@ export const homepageDetails = async(req, res, next) => {
     const [ userOutstandingPersonalLoanRepayment ] = await processAnyData(userQueries.userOutstandingPersonalLoan, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan outstanding fetched homepageDetails.controller.user.js`);
     const outstandingPersonalLoanAmount = !userOutstandingPersonalLoanRepayment ? 0 : parseFloat(userOutstandingPersonalLoanRepayment.total_outstanding_amount);
-    // to implement the query when cluster loan is implement
+    const [ userOutstandingClusterLoanRepayment ] = await processAnyData(userQueries.userOutstandingClusterLoan, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan outstanding fetched homepageDetails.controller.user.js`);
-    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount + 0).toFixed(2)); // to include for cluster loan when implemented
+    const outstandingClusterLoanAmount = !userOutstandingClusterLoanRepayment ? 0 : parseFloat(userOutstandingClusterLoanRepayment.total_outstanding_amount);
+    const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount) + parseFloat(outstandingClusterLoanAmount)).toFixed(2);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's total loan obligation calculated homepageDetails.controller.user.js`);
     const personalLoanTransactions = await processAnyData(userQueries.userPersonalLoanTransactions, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan repayment transactions fetched homepageDetails.controller.user.js`);
     const underProcessingPersonalLoans = await processAnyData(userQueries.userExistingProcessingLoans, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process personal loans fetched from the DB homepageDetails.controller.user.jss`);
-    const clusterLoanTransactions = []; // to later implement the query when cluster loan repayment is implemented
+    const clusterLoanTransactions = await processAnyData(userQueries.userClusterLoanTransactions, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's cluster loan repayment transactions fetched homepageDetails.controller.user.js`);
-    const underProcessingClusterLoans = []; // to implement the query when cluster loan is implemented
+    const underProcessingClusterLoans = await processAnyData(userQueries.userExistingClusterProcessingLoans, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's still in process cluster loans fetched from the DB homepageDetails.controller.user.js`);
     const activePromos = await processAnyData(userQueries.fetchAllActivePromos);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: all active promos fetched from the DB homepageDetails.controller.user.jss`);
@@ -710,8 +711,9 @@ export const homepageDetails = async(req, res, next) => {
         total_outstanding_loan: parseFloat(parseFloat(outstandingPersonalLoanAmount).toFixed(2))
       },
       user_cluster_loan: {
-        loan_id: '',
-        total_outstanding_loan: 0 // to implement when cluster loan is worked on
+        general_loan_id: !userOutstandingClusterLoanRepayment ? '' : userOutstandingClusterLoanRepayment.loan_id,
+        member_loan_id: !userOutstandingClusterLoanRepayment ? '' : userOutstandingClusterLoanRepayment.member_loan_id,
+        total_outstanding_loan: parseFloat(parseFloat(outstandingClusterLoanAmount).toFixed(2))
       },
       total_loan_obligation: totalLoanObligation,
       personal_loan_transaction_history: {

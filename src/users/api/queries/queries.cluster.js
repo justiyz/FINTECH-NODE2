@@ -57,8 +57,8 @@ export default {
         loan_status,
         total_loan_obligation,
         join_cluster_closes_at,
-        is_deleted,
-        is_created_by_admin
+        is_created_by_admin,
+        is_deleted
     FROM clusters
     WHERE cluster_id = $1
     OR unique_code = $1`,
@@ -73,13 +73,36 @@ export default {
       cluster_members.loan_obligation,
       cluster_members.is_admin,
       users.email,
+      users.user_id,
       users.phone_number,
+      users.fcm_token,
       cluster_members.is_left
     FROM cluster_members
     LEFT JOIN users ON users.user_id = cluster_members.user_id
     WHERE cluster_id = $1
-    AND is_left = FALSE;
-`,
+    AND is_left = FALSE`,
+
+  fetchUserClusterType: `
+    SELECT 
+      cluster_members.id,
+      cluster_members.user_id,
+      cluster_members.status AS member_status,
+      cluster_members.loan_status,
+      cluster_members.loan_obligation,
+      cluster_members.is_admin,
+      cluster_members.is_left,
+      clusters.cluster_id,
+      clusters.type,
+      clusters.is_created_by_admin,
+      clusters.status AS cluster_status
+    FROM cluster_members
+    LEFT JOIN clusters 
+    ON clusters.cluster_id = cluster_members.cluster_id
+    WHERE cluster_members.user_id = $1
+    AND cluster_members.is_left = FALSE
+    AND clusters.type = $2
+    AND clusters.is_created_by_admin = $3
+    LIMIT 1`,
 
   fetchActiveClusterMemberDetails: `
     SELECT 
@@ -507,8 +530,637 @@ export default {
       current_cluster_members,
       suggested_cluster_admin
     ) VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING ticket_id
-  `
+    RETURNING ticket_id`,
+
+  fetchUserActiveClusterLoans: `
+    SELECT 
+      id,
+      member_loan_id,
+      loan_id,
+      user_id,
+      cluster_id,
+      cluster_name,
+      amount_requested,
+      loan_tenor_in_months,
+      status,
+      loan_decision
+    FROM cluster_member_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+    LIMIT 1`,
+
+  initiateClusterLoanApplication: `
+    INSERT INTO cluster_loans(
+      cluster_id, cluster_name, initiator_id, total_amount_requested, loan_tenor_in_months, sharing_type, initial_total_amount_requested,
+      initial_loan_tenor_in_months 
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING *
+    `,
+
+  createClusterMemberLoanApplication: `
+    INSERT INTO cluster_member_loans(
+      loan_id, cluster_id, cluster_name, user_id, sharing_type, amount_requested, loan_tenor_in_months, initial_amount_requested, 
+      initial_loan_tenor_in_months, total_cluster_amount, is_loan_initiator
+    ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING *`,
+
+  deleteClusterMemberLoanApplication: `
+    DELETE FROM cluster_member_loans
+    WHERE member_loan_id = $1
+    AND user_id = $2`,
+
+  deleteGeneralClusterLoanApplication: `
+    DELETE FROM cluster_loans
+    WHERE loan_id = $1
+    AND initiator_id = $2`,
+
+  updateUserDeclinedDecisionClusterLoanApplication: `
+    UPDATE cluster_member_loans
+    SET 
+        updated_at = NOW(),
+        percentage_orr_score = $2,
+        status = $3,
+        loan_decision = $4,
+        rejection_reason = $5,
+        used_previous_eligibility_details = $6,
+        amount_requested = $7,
+        initial_amount_requested = $8
+    WHERE member_loan_id = $1`,
+
+  updateDeclinedDecisionGeneralClusterLoanApplication: `
+    UPDATE cluster_loans
+    SET 
+        updated_at = NOW(),
+        status = $2,
+        rejection_reason = $3,
+        initial_amount_requested = $4
+    WHERE loan_id = $1
+    RETURNING id, loan_id, user_id, status`,
+
+  updateClusterLoanApplicationClusterInterest: `
+    UPDATE cluster_loans
+    SET 
+        updated_at = NOW(),
+        percentage_interest_rate = $2
+    WHERE loan_id = $1`,
+
+  updateUserManualOrApprovedDecisionClusterLoanApplication: `
+    UPDATE cluster_member_loans
+    SET 
+        updated_at = NOW(),
+        total_repayment_amount = $2,
+        total_interest_amount = $3,
+        percentage_orr_score = $4,
+        percentage_pricing_band = $5,
+        percentage_processing_fee = $6,
+        percentage_insurance_fee = $7,
+        percentage_advisory_fee = $8,
+        monthly_interest = $9,
+        processing_fee = $10,
+        insurance_fee = $11,
+        advisory_fee = $12,
+        monthly_repayment = $13,
+        status = $14,
+        loan_decision = $15,
+        total_outstanding_amount = $16,
+        max_possible_approval = $17,
+        amount_requested = $18,
+        used_previous_eligibility_details = $19,
+        initial_amount_requested = $20
+    WHERE member_loan_id = $1
+    RETURNING *`,
+
+  updateClusterLoanOfferLetter: `
+    UPDATE cluster_member_loans
+    SET 
+      updated_at = NOW(),
+      offer_letter_url = $3
+    WHERE member_loan_id = $1
+    AND user_id = $2`,
+
+  fetchClusterActiveLoans: `
+    SELECT 
+      id,
+      loan_id,
+      cluster_id,
+      cluster_name,
+      initiator_id,
+      total_amount_requested,
+      loan_tenor_in_months,
+      sharing_type,
+      status
+    FROM cluster_loans
+    WHERE cluster_id = $1
+    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+    LIMIT 1`,
+
+  fetchClusterLoanDetails: `
+    SELECT 
+      id,
+      loan_id,
+      cluster_id,
+      cluster_name,
+      initiator_id,
+      total_amount_requested,
+      loan_tenor_in_months,
+      sharing_type,
+      percentage_interest_rate,
+      total_repayment_amount,
+      total_monthly_repayment,
+      status,
+      is_loan_disbursed,
+      loan_disbursed_at,
+      can_disburse_loan,
+      completed_at,
+      initial_total_amount_requested,
+      initial_loan_tenor_in_months,
+      created_at
+    FROM cluster_loans
+    WHERE cluster_id = $1
+    AND loan_id = $2`,
+
+  fetchClusterLoanDetailsByLoanInitiator: `
+    SELECT 
+      id,
+      loan_id,
+      cluster_id,
+      cluster_name,
+      initiator_id,
+      total_amount_requested,
+      loan_tenor_in_months,
+      sharing_type,
+      percentage_interest_rate,
+      total_repayment_amount,
+      total_monthly_repayment,
+      status,
+      is_loan_disbursed,
+      loan_disbursed_at,
+      can_disburse_loan,
+      completed_at,
+      initial_total_amount_requested,
+      initial_loan_tenor_in_months,
+      created_at
+    FROM cluster_loans
+    WHERE loan_id = $1
+    AND initiator_id = $2`,
+
+  fetchClusterMemberLoanDetailsByLoanId: `
+    SELECT 
+      id,
+      loan_id,
+      member_loan_id,
+      cluster_id,
+      cluster_name,
+      user_id,
+      sharing_type,
+      total_cluster_amount,
+      amount_requested,
+      initial_amount_requested,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      total_interest_amount,
+      percentage_orr_score,
+      percentage_pricing_band,
+      monthly_interest,
+      processing_fee,
+      insurance_fee,
+      advisory_fee,
+      monthly_repayment,
+      total_outstanding_amount,
+      extra_interests,
+      status,
+      loan_decision,
+      is_loan_initiator,
+      is_loan_disbursed,
+      loan_disbursed_at,
+      offer_letter_url,
+      max_possible_approval,
+      is_rescheduled,
+      is_renegotiated,
+      accepted_loan_request,
+      is_taken_loan_request_decision,
+      reschedule_extension_days,
+      reschedule_count,
+      renegotiation_count,
+      reschedule_loan_tenor_in_months,
+      reschedule_at,
+      completed_at
+    FROM cluster_member_loans
+    WHERE member_loan_id = $1
+    AND user_id = $2`,
+
+  createClusterLoanRenegotiationDetails: `
+    INSERT INTO cluster_member_renegotiated_loan(
+      member_loan_id, loan_id, cluster_id, user_id, previous_loan_amount, renegotiating_loan_amount, previous_loan_tenor_in_months, renegotiating_loan_tenor_in_month,
+      pricing_band, monthly_interest, monthly_repayment, processing_fee, advisory_fee, insurance_fee
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+
+  updateClusterLoanApplicationWithRenegotiation: `
+    UPDATE cluster_member_loans
+    SET
+      updated_at = NOW(),
+      is_renegotiated = TRUE,
+      percentage_pricing_band = $2, 
+      monthly_interest = $3, 
+      monthly_repayment = $4, 
+      processing_fee = $5, 
+      insurance_fee = $6,
+      advisory_fee = $7, 
+      percentage_processing_fee = $8,
+      percentage_insurance_fee = $9,
+      percentage_advisory_fee = $10,
+      amount_requested = $11,
+      loan_tenor_in_months = $12,
+      total_repayment_amount = $13,
+      total_interest_amount = $14,
+      total_outstanding_amount = $15,
+      renegotiation_count = $16
+    WHERE member_loan_id = $1
+    RETURNING *`,
+  
+  fetchSumOfAllocatedLoanAmount: `
+    SELECT SUM(amount_requested) AS total_allocated_amount
+    FROM cluster_member_loans
+    WHERE loan_id = $1`,
+
+  cancelGeneralLoanApplication: `
+    UPDATE cluster_loans
+    SET 
+      updated_at = NOW(),
+      status = 'cancelled'
+    WHERE loan_id = $1
+    AND initiator_id = $2`,
+
+  cancelAllClusterMembersLoanApplication: `
+    UPDATE cluster_member_loans
+    SET 
+      updated_at = NOW(),
+      status = 'cancelled',
+      is_taken_loan_request_decision = true
+    WHERE loan_id = $1`,
+
+  declineClusterMemberLoanApplicationDecision: `
+    UPDATE cluster_member_loans
+    SET 
+      updated_at = NOW(),
+      status = 'cancelled',
+      is_taken_loan_request_decision = true
+    WHERE member_loan_id = $1`,
+
+  checkForOutstandingClusterLoanDecision: `
+    SELECT * 
+    FROM cluster_member_loans 
+    WHERE loan_id = $1
+    AND (is_taken_loan_request_decision = false OR status = 'in review')`,
+
+  updateGeneralLoanApplicationCanDisburseLoan: `
+    UPDATE cluster_loans
+    SET 
+      updated_at = NOW(),
+      can_disburse_loan = true
+    WHERE loan_id = $1`,
+
+  acceptClusterMemberLoanApplication: `
+    UPDATE cluster_member_loans
+    SET 
+      updated_at = NOW(),
+      accepted_loan_request = true,
+      is_taken_loan_request_decision = true
+    WHERE member_loan_id = $1`,
+
+  getUpdatedLoanAmountValues: `
+    SELECT
+      SUM(amount_requested) AS actual_total_loan_amount,
+      SUM(total_repayment_amount) AS actual_total_loan_repayment_amount,
+      SUM(total_interest_amount) AS actual_total_loan_interest_amount,
+      SUM(monthly_repayment) AS actual_total_loan_monthly_repayment_amount
+    FROM cluster_member_loans
+    WHERE loan_id = $1
+    AND status = 'approved'
+    AND accepted_loan_request = TRUE`,
+
+  getCountOfQualifiedClusterMembers: `
+    SELECT
+      COUNT(id)
+    FROM cluster_member_loans
+    WHERE loan_id = $1
+    AND status = 'approved'
+    AND accepted_loan_request = TRUE`,
+
+  getCountOfRunningLoanClusterMembers: `
+    SELECT
+      COUNT(id)
+    FROM cluster_member_loans
+    WHERE loan_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'completed')
+    AND accepted_loan_request = TRUE`,
+
+  updateProcessingClusterLoanDetails: `
+    UPDATE cluster_loans
+    SET 
+      updated_at = NOW(),
+      total_amount_requested = $2,
+      total_repayment_amount = $3,
+      total_interest_amount = $4,
+      total_monthly_repayment = $5,
+      status = 'processing'
+    WHERE loan_id = $1
+    RETURNING *`,
+
+  updateClusterMembersProcessingLoanDetails: `
+    UPDATE cluster_member_loans
+    SET 
+      updated_at = NOW(),
+      total_cluster_amount = $2,
+      status = 'processing'
+    WHERE loan_id = $1`,
+
+  fetchQualifiedClusterMemberLoanDetails: `
+    SELECT 
+      id,
+      loan_id,
+      member_loan_id,
+      cluster_id,
+      cluster_name,
+      user_id,
+      sharing_type,
+      total_cluster_amount,
+      amount_requested,
+      initial_amount_requested,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      total_interest_amount,
+      percentage_orr_score,
+      percentage_pricing_band,
+      monthly_interest,
+      processing_fee,
+      insurance_fee,
+      advisory_fee,
+      monthly_repayment,
+      total_outstanding_amount,
+      extra_interests,
+      status,
+      loan_decision,
+      is_loan_initiator,
+      is_loan_disbursed,
+      loan_disbursed_at,
+      offer_letter_url,
+      max_possible_approval,
+      is_rescheduled,
+      is_renegotiated,
+      accepted_loan_request,
+      is_taken_loan_request_decision,
+      reschedule_extension_days,
+      reschedule_count,
+      renegotiation_count,
+      reschedule_loan_tenor_in_months,
+      reschedule_at,
+      completed_at
+    FROM cluster_member_loans
+    WHERE loan_id = $1
+    AND status = 'processing'
+    AND accepted_loan_request = TRUE`,
+
+  totalClusterOutstandingLoanAmount: `
+    SELECT 
+      SUM(total_outstanding_amount) AS cluster_total_outstanding_amount
+    FROM cluster_member_loans
+    WHERE loan_id = $1
+    AND status = 'processing'
+    AND accepted_loan_request = TRUE`, 
+
+  updateClusterLoanDisbursementTable: `
+    INSERT INTO cluster_member_loan_disbursements(
+      user_id,
+      cluster_id,
+      member_loan_id,
+      loan_id,
+      amount,
+      payment_id,
+      account_number,
+      account_name,
+      bank_name,
+      bank_code,
+      recipient_id,
+      transfer_code,
+      status
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+
+  updateClusterLoanPaymentTable: `
+    INSERT INTO cluster_member_loan_payments(
+      user_id,
+      cluster_id,
+      member_loan_id,
+      loan_id,
+      amount,
+      transaction_type,
+      loan_purpose,
+      payment_description,
+      payment_means
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+
+  updateDisbursedClusterLoanRepaymentSchedule: `
+    INSERT INTO cluster_member_loan_payment_schedules(
+      cluster_id, member_loan_id, loan_id, user_id, repayment_order, principal_payment, interest_payment, fees, 
+      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount, 
+      proposed_payment_date, pre_reschedule_proposed_payment_date
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+
+  updateActivatedClusterLoanDetails: `
+    UPDATE cluster_member_loans
+    SET
+      updated_at = NOW(),
+      status = 'ongoing',
+      is_loan_disbursed = true,
+      loan_disbursed_at = NOW()
+    WHERE loan_id = $1
+    AND status = 'processing'
+    AND accepted_loan_request = TRUE`,
+
+  updateActivatedGeneralLoanDetails: `
+    UPDATE cluster_loans
+    SET
+      updated_at = NOW(),
+      status = 'ongoing',
+      is_loan_disbursed = true,
+      loan_disbursed_at = NOW()
+    WHERE loan_id = $1`,
+
+  updateGeneralClusterLoanDetails: `
+    UPDATE clusters
+    SET
+      updated_at = NOW(),
+      loan_status = 'active',
+      total_loan_obligation = $2,
+      loan_amount = $3
+    WHERE cluster_id = $1`,
+
+  fetchClusterLoanRepaymentSchedule: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      cluster_id,
+      member_loan_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
+      status
+    FROM cluster_member_loan_payment_schedules
+    WHERE member_loan_id = $1
+    AND user_id = $2
+    ORDER BY repayment_order ASC`,
+
+  fetchClusterLoanNextRepaymentDetails: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      cluster_id,
+      member_loan_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
+      status
+    FROM cluster_member_loan_payment_schedules
+    WHERE member_loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL
+    ORDER BY proposed_payment_date ASC
+    LIMIT 1`,
+
+  updateClusterLoanStatus: `
+    UPDATE cluster_members
+    SET 
+      updated_at = NOW(),
+      loan_status = $3,
+      loan_obligation = $4
+    WHERE user_id = $1
+    AND cluster_id = $2`,
+
+  existingUnpaidClusterLoanRepayments: `
+    SELECT 
+      COUNT(id)
+    FROM cluster_member_loan_payment_schedules
+    WHERE member_loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL`,
+
+  fetchOtherLoanOverDueRepayments: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      cluster_id,
+      user_id,
+      member_loan_id,
+      loan_id,
+      status
+    FROM cluster_member_loan_payment_schedules
+    WHERE loan_id = $1
+    AND status = 'over due'
+    AND loan_repayment_id != $2`,
+
+  fetchOtherMembersLoanOverDueRepayments: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      cluster_id,
+      user_id,
+      member_loan_id,
+      loan_id,
+      status
+    FROM cluster_member_loan_payment_schedules
+    WHERE loan_id = $1
+    AND status = 'over due'
+    AND member_loan_id != $2`,
+
+  updateNextClusterLoanRepayment: `
+    UPDATE cluster_member_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      payment_at = Now(),
+      status = 'paid'
+    WHERE loan_repayment_id = $1`,
+
+  updateClusterLoanWithRepayment: `
+    UPDATE cluster_member_loans
+    SET
+      updated_at = NOW(),
+      status = $3,
+      total_outstanding_amount = total_outstanding_amount - $4::FLOAT,
+      completed_at = $5
+    WHERE member_loan_id = $1
+    AND user_id = $2`,
+
+  updateClusterMemberWithRepayment: `
+    UPDATE cluster_members
+    SET
+      updated_at = NOW(),
+      loan_status = $3,
+      loan_obligation = loan_obligation - $4::FLOAT
+    WHERE cluster_id = $1
+    AND user_id = $2`,
+
+  updateGeneralClusterWithRepayment: `
+    UPDATE clusters
+    SET
+      updated_at = NOW(),
+      total_loan_obligation = total_loan_obligation - $2::FLOAT,
+      loan_status = $3
+    WHERE cluster_id = $1`,
+
+  updateAllClusterLoanRepaymentOnFullPayment: `
+    UPDATE cluster_member_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      payment_at = Now(),
+      status = 'paid'
+    WHERE member_loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL`,
+
+  fetchClusterMembersCompletedLoanByClusterIs: `
+    SELECT 
+      id,
+      cluster_id,
+      loan_id,
+      user_id,
+      member_loan_id,
+      completed_at,
+      status
+    FROM cluster_member_loans
+    WHERE loan_id = $1
+    AND status = 'completed'`,
+
+  updateGeneralLoanCompletedAt: `
+    UPDATE cluster_loans
+    SET 
+      updated_at = NOW(),
+      status = 'completed',
+      completed_at = Now()
+    WHERE loan_id = $1
+    `,
+
+  updateGeneralClustersStatus: `
+    UPDATE clusters
+    SET 
+      updated_at = NOW(),
+      loan_status = 'inactive',
+      loan_amount = 0
+    WHERE cluster_id = $1`
 };
 
 

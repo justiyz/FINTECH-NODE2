@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
-const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId) => ({
+const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
   loan_duration_in_month: `${body.duration_in_months}`,
@@ -20,7 +20,11 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   address: '',
   phoneNumber: user.phone_number,
   gender: user.gender,
-  user_mono_account_id: userMonoId
+  user_mono_account_id: userMonoId,
+  loan_type: 'individual',
+  interest_rate_type: userLoanDiscount.interest_rate_type || null,
+  interest_rate_value: userLoanDiscount.interest_rate_value || null,
+  general_loan_id: null
 });
 
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
@@ -28,7 +32,8 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
   data.orr_score,
   'declined',
   data.final_decision,
-  'automatically declined because user failed loan eligibility check'
+  'automatically declined because user failed loan eligibility check',
+  data.is_stale ? true : false
 ];
 
 const loanApplicationDeclinedDecisionResponse = async(user, data, loan_status, loan_decision) => ({
@@ -56,7 +61,8 @@ const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInter
   data.final_decision,
   parseFloat(totalAmountRepayable).toFixed(2),
   data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : null,
-  data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : parseFloat(data.loan_amount).toFixed(2)
+  data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : parseFloat(data.loan_amount).toFixed(2),
+  data.is_stale ? true : false
 ];
 
 const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision, offer_letter_url) => ({
@@ -75,7 +81,7 @@ const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable
   next_repayment_date: dayjs().add(30, 'days').format('MMM DD, YYYY'),
   loan_status,
   loan_decision,
-  offer_letter_url ,
+  offer_letter_url,
   max_allowable_amount: data.max_approval !== null ? `${parseFloat(data.max_approval).toFixed(2)}` : null
 });
 

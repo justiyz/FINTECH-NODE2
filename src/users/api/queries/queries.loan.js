@@ -62,7 +62,8 @@ export default {
         percentage_orr_score = $2,
         status = $3,
         loan_decision = $4,
-        rejection_reason = $5 
+        rejection_reason = $5,
+        used_previous_eligibility_details = $6
     WHERE loan_id = $1
     RETURNING id, loan_id, user_id, status`,
 
@@ -86,7 +87,8 @@ export default {
         loan_decision = $15,
         total_outstanding_amount = $16,
         max_possible_approval = $17,
-        amount_requested = $18
+        amount_requested = $18,
+        used_previous_eligibility_details = $19
     WHERE loan_id = $1
     RETURNING *`,
 
@@ -117,11 +119,13 @@ export default {
       offer_letter_url,
       max_possible_approval,
       is_rescheduled,
+      is_renegotiated,
       reschedule_extension_days,
       reschedule_count,
       renegotiation_count,
       reschedule_loan_tenor_in_months,
-      reschedule_at
+      reschedule_at,
+      completed_at
     FROM personal_loans
     WHERE loan_id = $1
     AND user_id = $2`,
@@ -136,6 +140,7 @@ export default {
   fetchLoanRepaymentSchedule: `
     SELECT 
       id,
+      loan_repayment_id,
       loan_id,
       user_id,
       repayment_order,
@@ -224,7 +229,8 @@ export default {
     SET
       updated_at = NOW(),
       status = $3,
-      total_outstanding_amount = total_outstanding_amount - $4::FLOAT
+      total_outstanding_amount = total_outstanding_amount - $4::FLOAT,
+      completed_at = $5
     WHERE loan_id = $1
     AND user_id = $2`,
 
@@ -238,6 +244,18 @@ export default {
     WHERE user_id = $1
     AND is_left = FALSE
     AND loan_status != 'inactive'
+    LIMIT 1`,
+
+  checkUserOnPersonalLoan: `
+    SELECT 
+      id,
+      user_id,
+      loan_id,
+      amount_requested,
+      status
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due')
     LIMIT 1`,
 
   updateProcessingLoanDetails: `
@@ -295,15 +313,6 @@ export default {
       loan_status = $2
     WHERE user_id = $1`,
 
-  updateLoanAmountToSystemAllowableAmount: `
-    UPDATE personal_loans
-    SET
-      updated_at = NOW(),
-      amount_requested = $3
-    WHERE loan_id = $1
-    AND user_id = $2
-    RETURNING id, user_id, loan_id, amount_requested, status, loan_decision`,
-
   cancelUserLoanApplication: `
     UPDATE personal_loans
     SET
@@ -353,6 +362,24 @@ export default {
     AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
     ORDER BY created_at DESC`,
 
+  fetchUserCurrentClusterLoans: `
+    SELECT 
+      id,
+      loan_id,
+      member_loan_id,
+      user_id,
+      cluster_id,
+      cluster_name,
+      amount_requested,
+      loan_tenor_in_months,
+      status,
+      loan_decision,
+      to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+    FROM cluster_member_loans
+    WHERE user_id = $1
+    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+    ORDER BY created_at DESC`,
+
   updateLoanDisbursementTable: `
     INSERT INTO personal_loan_disbursements(
       user_id,
@@ -388,10 +415,30 @@ export default {
       amount,
       transaction_type,
       loan_purpose,
+      status,
       payment_description,
       payment_means,
       to_char(DATE (created_at)::date, 'Mon DDth, YYYY') AS payment_date
     FROM personal_loan_payments
+    WHERE user_id = $1
+    ORDER BY created_at DESC`,
+
+  fetchUserClusterLoanPayments: `
+    SELECT 
+      id,
+      payment_id,
+      loan_id,
+      member_loan_id,
+      user_id,
+      cluster_id,
+      amount,
+      transaction_type,
+      loan_purpose,
+      status,
+      payment_description,
+      payment_means,
+      to_char(DATE (created_at)::date, 'Mon DDth, YYYY') AS payment_date
+    FROM cluster_member_loan_payments
     WHERE user_id = $1
     ORDER BY created_at DESC`,
 
@@ -404,9 +451,28 @@ export default {
       amount,
       transaction_type,
       loan_purpose,
+      status,
       payment_description,
       to_char(DATE (created_at)::date, 'Mon DDth, YYYY') AS payment_date
     FROM personal_loan_payments
+    WHERE payment_id = $1
+    AND user_id = $2`,
+
+  fetchUserClusterLoanPaymentDetails: `
+    SELECT 
+      id,
+      payment_id,
+      cluster_id,
+      member_loan_id,
+      loan_id,
+      user_id,
+      amount,
+      transaction_type,
+      loan_purpose,
+      status,
+      payment_description,
+      to_char(DATE (created_at)::date, 'Mon DDth, YYYY') AS payment_date
+    FROM cluster_member_loan_payments
     WHERE payment_id = $1
     AND user_id = $2`,
 
@@ -422,6 +488,13 @@ export default {
     SELECT 
       COUNT(user_id)
     FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`,
+
+  fetchUserPreviousClusterLoanCounts: `
+    SELECT 
+      COUNT(user_id)
+    FROM cluster_member_loans
     WHERE user_id = $1
     AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`,
 
@@ -497,6 +570,7 @@ export default {
     UPDATE personal_loans
     SET
       updated_at = NOW(),
+      is_renegotiated = TRUE,
       percentage_pricing_band = $2, 
       monthly_interest = $3, 
       monthly_repayment = $4, 
@@ -513,5 +587,28 @@ export default {
       total_outstanding_amount = $15,
       renegotiation_count = $16
     WHERE loan_id = $1
-    RETURNING *`
+    RETURNING *`,
+
+  userAdminCreatedCluster: `
+    SELECT
+      clusters.id,
+      clusters.cluster_id,
+      clusters.name, 
+      clusters.type,
+      clusters.status,
+      clusters.loan_status,
+      clusters.is_created_by_admin,
+      clusters.company_name,
+      clusters.interest_type,
+      clusters.percentage_interest_type_value,
+      cluster_members.user_id,
+      cluster_members.is_admin,
+      cluster_members.is_left
+    FROM cluster_members
+    LEFT JOIN clusters
+    ON clusters.cluster_id = cluster_members.cluster_id
+    WHERE cluster_members.user_id = $1
+    AND cluster_members.is_left = false
+    AND clusters.is_created_by_admin = true
+    LIMIT 1`
 };

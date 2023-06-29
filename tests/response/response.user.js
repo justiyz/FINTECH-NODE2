@@ -271,7 +271,7 @@ export const seedfiUnderwritingLoanRenegotiationTestResponse = (body, existingLo
     status: 200,
     statusText: 'OK',
     data: {
-      loan_application_id: existingLoanApplication.loan_id,
+      loan_application_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
       pricing_band: 45,
       monthly_interest: 0.04,
       monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(body.new_loan_amount)) / (1 - ((1 + (0.04))**(-Number(body.new_loan_duration_in_month)))))).toFixed(2)),
@@ -300,7 +300,7 @@ export const seedfiUnderwritingLoanRenegotiationTestResponse = (body, existingLo
         monthly_interest: 0.04,
         monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(existingLoanApplication.amount_requested)) / 
         (1 - ((1 + (0.04))**(-Number(existingLoanApplication.initial_loan_tenor_in_months)))))).toFixed(2)),
-        loan_application_id: existingLoanApplication.loan_id,
+        loan_application_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
         loan_duration_in_month: parseFloat(existingLoanApplication.initial_loan_tenor_in_months)
       }
     }

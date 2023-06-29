@@ -49,7 +49,7 @@ export default {
     email: userDetails.email,
     loanAmount: `₦${parseFloat(loanDetails.amount_requested).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     loanDuration: Number(loanDetails.loan_tenor_in_months),
-    loanPurpose: loanDetails.loan_reason,
+    loanPurpose: `${loanDetails.cluster_name} group loan`,
     pricingBand: `${parseFloat(loanDetails.percentage_pricing_band).toFixed(2)}%`,
     monthlyInterest: `${(parseFloat(loanDetails.monthly_interest)).toFixed(2)}%`,
     totalInterestAmount: `₦${parseFloat(loanDetails.total_interest_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
@@ -59,5 +59,46 @@ export default {
     totalRepaymentAmount: `₦${parseFloat(loanDetails.total_repayment_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     monthlyRepayment: `₦${parseFloat(loanDetails.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     offerLetterUrl: loanDetails.offer_letter_url
-  })
+  }),
+  trackClusterLoanDisbursement: async(body, member, paymentRecord, status) => [ 
+    member.user_id,
+    member.cluster_id,
+    member.member_loan_id,
+    member.loan_id,
+    parseFloat(member.amount_requested),
+    paymentRecord.id,
+    body.data.recipient.details.account_number,
+    body.data.recipient.details.account_name,
+    body.data.recipient.details.bank_name,
+    body.data.recipient.details.bank_code,
+    body.data.recipient.recipient_code,
+    body.data.transfer_code,
+    status
+  ],
+  trackClusterLoanPayment: async(member) => [ 
+    member.user_id,
+    member.cluster_id,
+    member.member_loan_id,
+    member.loan_id,
+    parseFloat(member.amount_requested),
+    'credit',
+    `${member.cluster_name} group loan`,
+    'cluster loan disbursement',
+    'paystack transfer'
+  ],
+  createClusterLoanSchedulePayload: async(member, schedule) => [ 
+    member.cluster_id, 
+    member.member_loan_id, 
+    member.loan_id, 
+    schedule.user_id, 
+    schedule.repayment_order, 
+    schedule.principal_payment, 
+    schedule.interest_payment,
+    schedule.fees, 
+    schedule.total_payment_amount, 
+    schedule.pre_payment_outstanding_amount, 
+    schedule.post_payment_outstanding_amount,
+    schedule.proposed_payment_date, 
+    schedule.proposed_payment_date
+  ]
 };

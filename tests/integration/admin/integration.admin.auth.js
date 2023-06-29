@@ -660,7 +660,7 @@ describe('Admin Auth', () => {
           expect(res.body.message).to.equal(enums.ADMIN_RESOURCES_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.be.an('array');
-          expect(res.body.data.length).to.equal(8);
+          expect(res.body.data.length).to.equal(9);
           process.env.SEEDFI_ADMIN_USER_RESOURCE_ID = res.body.data[0].resource_id;
           process.env.SEEDFI_ADMIN_LOAN_APPLICATION_RESOURCE_ID = res.body.data[1].resource_id;
           process.env.SEEDFI_ADMIN_ADMINISTRATORS_RESOURCE_ID = res.body.data[2].resource_id;
@@ -669,6 +669,7 @@ describe('Admin Auth', () => {
           process.env.SEEDFI_ADMIN_SETTINGS_RESOURCE_ID = res.body.data[5].resource_id;
           process.env.SEEDFI_ADMIN_BVN_MANAGEMENT_RESOURCE_ID = res.body.data[6].resource_id;
           process.env.SEEDFI_ADMIN_REPORT_MANAGEMENT_RESOURCE_ID = res.body.data[7].resource_id;
+          process.env.SEEDFI_ADMIN_NOTIFICATIONS_RESOURCE_ID = res.body.data[8].resource_id;
           done();
         });
     });
