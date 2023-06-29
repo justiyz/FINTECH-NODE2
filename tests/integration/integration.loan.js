@@ -4,7 +4,7 @@ import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
-import { receiveTransferSuccessWebHookOne, receiveTransferFailedWebHookOne, receiveTransferReversedWebHookOne, 
+import { receiveTransferSuccessWebHookOne, receiveTransferFailedWebHookOne, 
   receiveTransferSuccessWebHookTwo, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookOne 
 } from '../payload/payload.payment';
 
@@ -54,6 +54,27 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal('amount must be a number');
+          done();
+        });
+    });
+    it('should throw error if negative loan amount is sent', (done) => {
+      chai.request(app)
+        .post('/api/v1/loan/application')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          amount: -50000,
+          duration_in_months: 3,
+          loan_reason: 'camera fixing loan'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('amount must be a positive number');
           done();
         });
     });
@@ -202,7 +223,7 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE(20));
+          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE);
           done();
         });
     });
@@ -617,24 +638,6 @@ describe('Individual loan', () => {
           done();
         });
     });
-    it('should accept the allowable loan amount with tenor', (done) => {
-      chai.request(app)
-        .patch(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/accept-allowable-amount`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.data).to.have.property('status');
-          expect(res.body.data).to.have.property('loan_decision');
-          expect(res.body.message).to.equal(enums.SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
     it('should disburse loan for user two successfully', (done) => {
       chai.request(app)
         .post(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/disbursement`)
@@ -771,22 +774,7 @@ describe('Individual loan', () => {
           done();
         });
     });
-    it('should receive user 1 loan 1 webhook transfer reversed response successfully', (done) => {
-      chai.request(app)
-        .post('/api/v1/payment/paystack-webhook')
-        .send(receiveTransferReversedWebHookOne(process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_DISBURSEMENT_REFERENCE))
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.be.an('array');
-          done();
-        });
-    });
-    it('should receive user 2 loan 2 webhook transfer success response successfully', (done) => {
+    it('should receive user 1 loan 1 webhook transfer success response successfully', (done) => {
       chai.request(app)
         .post('/api/v1/payment/paystack-webhook')
         .send(receiveTransferSuccessWebHookOne(process.env.SEEDFI_USER_ONE_LOAN_APPLICATION_ONE_RE_DISBURSEMENT_REFERENCE))
@@ -959,7 +947,8 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .query({
-          payment_type: 'full'
+          payment_type: 'full',
+          payment_channel: 'card'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -978,7 +967,8 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .query({
-          payment_type: 'all'
+          payment_type: 'all',
+          payment_channel: 'bank_transfer'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -997,7 +987,8 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .query({
-          payment_type: 'full'
+          payment_type: 'full',
+          payment_channel: 'card'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1016,7 +1007,8 @@ describe('Individual loan', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .query({
-          payment_type: 'part'
+          payment_type: 'part',
+          payment_channel: 'card'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

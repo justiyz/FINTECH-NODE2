@@ -118,3 +118,8 @@ export const userAddressVerificationSuccessful = (user, addressDetails) => {
 export const tierUpgradedSuccessfully = (first_name) => {
   return `Hi ${first_name}, You have been successfully upgraded to tier 2. We hope you will enjoy the benefits and privileges that comes with this upgrade. Cheers`;
 };
+
+export const initiateClusterLoan = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} loan group. 
+  Kindly accept or decline this request to be a part of this cluster loan.`;
+};

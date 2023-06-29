@@ -43,7 +43,7 @@ export default {
     WHERE phone_number = $1`,
 
   getAdminByAdminId: `
-    SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
+    SELECT id, admin_id, role_type, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender, image_url,
       is_verified_email, is_created_password, is_completed_profile, status, is_deleted
     FROM admins
     WHERE admin_id = $1`,
@@ -377,13 +377,15 @@ export default {
       AVG(percentage_orr_score::numeric) AS average_value
     FROM personal_loans
     WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-    OR ($1 IS NULL AND $2 IS NULL));
+    OR ($1 IS NULL AND $2 IS NULL))
   `,
 
-  totalObligation: `
+  totalObligationRepaid: `
     SELECT COUNT(id)
     FROM personal_loans
-    WHERE status = 'completed'`,
+    WHERE status = 'completed'
+    AND ((completed_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+    OR ($1 IS NULL AND $2 IS NULL))`,
 
   paymentDetails: `
     SELECT
@@ -492,6 +494,7 @@ export default {
         cluster_id,
         name,
         type,
+        total_loan_obligation,
         loan_amount
       FROM clusters
       WHERE loan_status = 'active'

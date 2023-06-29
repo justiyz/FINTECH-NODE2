@@ -945,6 +945,9 @@ export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
   try {
     const {user, userEmploymentDetails, body} = req;
     if (type === 'employment') {
+      if (!userEmploymentDetails) {
+        return ApiResponse.error(res, enums.EMPLOYMENT_DETAILS_NOT_PREVIOUSLY_SET, enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+      }
       const canUpdate = dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
       if (!canUpdate) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 

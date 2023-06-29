@@ -22,6 +22,7 @@ const createCluster = Joi.object().keys({
 const fetchClusters = Joi.object().keys({
   type: Joi.string().required().valid('explore', 'my cluster', 'created')
 });
+
 const clusterId = Joi.object().keys({
   cluster_id: Joi.string().required()
 });
@@ -74,6 +75,64 @@ const editCluster = Joi.object().keys({
   minimum_monthly_income: Joi.number().optional()
 });
 
+const initiateClusterLoan = Joi.object().keys({
+  total_amount: Joi.number().positive().required(),
+  duration_in_months: Joi.number().positive().required(),
+  sharing_type: Joi.string().required().valid('equal', 'self-allocate')
+}).when(Joi.object({ sharing_type: Joi.string().valid('self-allocate') }).unknown(), {
+  then: Joi.object({
+    amount: Joi.number().positive().required()
+  })
+});
+
+const clusterMemberLoanIdParams = Joi.object().keys({
+  member_loan_id: Joi.string().required()
+});
+
+const clusterLoanIdParams = Joi.object().keys({
+  cluster_id: Joi.string().required(),
+  loan_id: Joi.string().required()
+});
+
+const clusterLoanRenegotiation = Joi.object().keys({
+  new_loan_amount: Joi.number().positive().required()
+});
+
+const membersClusterLoanEligibilityCheck = Joi.object().keys({
+  amount: Joi.number().positive().required()
+});
+
+const membersClusterLoanDecision = Joi.object().keys({
+  decision: Joi.string().required().valid('accept', 'decline')
+});
+
+const userPinPayload = Joi.object().keys({
+  pin: Joi.string().length(4).required()
+});
+
+const noCardOrBankLoanRepaymentType = Joi.object().keys({
+  payment_type: Joi.string().required().valid('full', 'part'),
+  payment_channel: Joi.string().required().valid('card', 'bank_transfer')
+});
+
+const loanRepaymentParams = Joi.object().keys({
+  member_loan_id: Joi.string().required(),
+  payment_channel_id: Joi.string().required()
+});
+
+const loanRepaymentType = Joi.object().keys({
+  payment_type: Joi.string().required().valid('full', 'part'),
+  payment_channel: Joi.string().required().valid('card', 'bank')
+});
+
+const referenceIdParams = Joi.object().keys({
+  reference_id: Joi.string().required()
+});
+
+const paymentOtp = Joi.object().keys({
+  otp: Joi.string().required()
+});
+
 export default  {
   createCluster,
   fetchClusters,
@@ -84,5 +143,17 @@ export default  {
   inviteClusterMember,
   initiateDeleteCluster,
   selectNewAdminParams,
-  editCluster
+  editCluster,
+  initiateClusterLoan,
+  clusterMemberLoanIdParams,
+  clusterLoanIdParams,
+  clusterLoanRenegotiation,
+  membersClusterLoanEligibilityCheck,
+  membersClusterLoanDecision,
+  userPinPayload,
+  noCardOrBankLoanRepaymentType,
+  loanRepaymentParams,
+  loanRepaymentType,
+  referenceIdParams,
+  paymentOtp
 }; 

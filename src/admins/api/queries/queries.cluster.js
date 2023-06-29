@@ -52,6 +52,7 @@ export default {
         status,
         name as cluster_name,
         type,
+        total_loan_obligation, 
         loan_amount,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As created_date,
         description,
@@ -108,6 +109,13 @@ export default {
     WHERE cluster_id = $1 AND user_id = $2
     RETURNING cluster_id, user_id, status, is_left;
     `,
+    
+  reduceClusterMembersCount: `
+    UPDATE clusters
+    SET 
+      updated_at = NOW(),
+      current_members = current_members::int - 1
+    WHERE cluster_id = $1`,
 
   fetchClusterMember: `
       SELECT 

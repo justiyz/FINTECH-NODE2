@@ -135,5 +135,59 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkIfUserBelongsToTypeOfCluster', async() => {
+      const req = { cluster: '', user: '' };
+      const data = await ClusterMiddlewares.checkIfUserBelongsToTypeOfCluster(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkClusterMembersNumber', async() => {
+      const req = { cluster: '', user: '' };
+      const data = await ClusterMiddlewares.checkClusterMembersNumber(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfClusterHasActiveLoan', async() => {
+      const req = { cluster: '', user: '' };
+      const data = await ClusterMiddlewares.checkIfClusterHasActiveLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfUserHasActiveClusterLoan', async() => {
+      const req = { user: '' };
+      const data = await ClusterMiddlewares.checkIfUserHasActiveClusterLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call totalLoanAmountVerificationAndBreakdown', async() => {
+      const req = { user: '', cluster: '', body: '' };
+      const data = await ClusterMiddlewares.totalLoanAmountVerificationAndBreakdown(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfMemberClusterLoanApplicationExists', async() => {
+      const req = { user: '', params: '' };
+      const data = await ClusterMiddlewares.checkIfMemberClusterLoanApplicationExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfMemberClusterLoanApplicationStatusIsStillPending', async() => {
+      const req = { user: '', existingLoanApplication: '' };
+      const data = await ClusterMiddlewares.checkIfMemberClusterLoanApplicationStatusIsStillPending(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfClusterLoanApplicationExists', async() => {
+      const req = { user: '', params: '' };
+      const data = await ClusterMiddlewares.checkIfClusterLoanApplicationExists(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchGeneralClusterNewLoanAmountValues', async() => {
+      const req = { user: '', clusterLoanDetails: '' };
+      const data = await ClusterMiddlewares.fetchGeneralClusterNewLoanAmountValues(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

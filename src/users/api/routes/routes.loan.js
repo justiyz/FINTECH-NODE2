@@ -21,7 +21,10 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
   LoanMiddleware.checkIfUserBvnNotBlacklisted,
+  LoanMiddleware.checkIfUserHasClusterDiscount,
+  LoanMiddleware.additionalUserChecksForLoan,
   LoanController.checkUserLoanEligibility
 );
 
@@ -35,15 +38,6 @@ router.post(
   LoanMiddleware.validateLoanAmountAndTenor,
   LoanMiddleware.validateRenegotiationAmount,
   LoanController.processLoanRenegotiation
-);
-
-router.patch(
-  '/:loan_id/accept-allowable-amount',
-  AuthMiddleware.validateAuthToken,
-  Model(Schema.loanIdParams, 'params'),
-  LoanMiddleware.checkUserLoanApplicationExists,
-  LoanMiddleware.checkIfLoanApplicationStatusIsStillPending,
-  LoanController.acceptSystemMaximumAllowableLoanAmount
 );
 
 router.post(
@@ -93,8 +87,16 @@ router.get(
   '/:loan_payment_id/personal/payment-details',
   AuthMiddleware.validateAuthToken,
   Model(Schema.loanPaymentIdParams, 'params'),
-  LoanMiddleware.checkUserLoanPaymentExists,
+  LoanMiddleware.checkUserLoanPaymentExists('personal'),
   LoanController.fetchPersonalLoanPaymentDetails
+);
+
+router.get(
+  '/:loan_payment_id/cluster/payment-details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanPaymentIdParams, 'params'),
+  LoanMiddleware.checkUserLoanPaymentExists('cluster'),
+  LoanController.fetchClusterLoanPaymentDetails
 );
 
 router.get(

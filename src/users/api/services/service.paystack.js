@@ -81,6 +81,39 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
   }
 };
 
+const initializeBankTransferPayment = async(user, paystackAmountFormatting, reference) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
+    }
+    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting); 
+    // this is because paystack will not process transaction greater than 1 Million
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        email: user.email,
+        amount: parseFloat(amountRequestedType),
+        currency: 'NGN',
+        reference,
+        channels: [ 'bank_transfer' ],
+        metadata: { 
+          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is a paystack value "https://standard.paystack.co/close"
+        }
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to initialize bank transfer payment failed::${enums.PAYSTACK_INITIATE_BANK_TRANSFER_PAYMENT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
 const confirmPaystackPaymentStatusByReference = async(reference) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
@@ -301,6 +334,7 @@ export {
   fetchBanks, 
   resolveAccount, 
   initializeCardPayment,
+  initializeBankTransferPayment,
   confirmPaystackPaymentStatusByReference,
   raiseARefundTickedForCardTokenizationTransaction,
   fetchSeedfiPaystackBalance,

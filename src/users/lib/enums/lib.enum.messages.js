@@ -74,6 +74,7 @@ export const ACCOUNT_ALREADY_DEFAULT_ACCOUNT = 'Account is already default accou
 export const ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT = 'Account is already disbursement account';
 export const ACCOUNT_DETAILS_NOT_USERS = 'Account details does not belong to user';
 export const ACCOUNT_USER_NOT_OWNED_BY_USER = 'Account details does not belong to user';
+export const USER_PREVIOUSLY_ACCEPTED_LOAN_REQUEST = 'User has previously accepted the loan request';
 export const BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY = (type) => `Account details ${type} status updated successfully`;
 export const GENERATE_RESET_PASSWORD_TOKEN = (type) => `${type} token Successfully generated`;
 export const PASSWORD_TOKEN = 'Password reset token sent';
@@ -125,6 +126,8 @@ export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot 
 export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
 export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE = (percentage) =>
   `User cannot apply for a loan greater than ${percentage}% of maximum allowable amount`;
+export const USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a cluster loan greater than cluster maximum allowable amount';
+export const USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a cluster loan lessee than cluster minimum allowable amount';
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
 export const SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE = 'Action not permitted on this loan application as there is no system maximum allowable amount';
 export const RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT = 'renegotiating amount should not be greater than the allowable amount';
@@ -133,7 +136,15 @@ export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER = 'Loan application not existing for cluster';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
+export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_STATUS = 
+'loan application disbursement cannot be processed because cluster loan application status is no longer pending';
+export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_DECISIONS = 
+'loan application disbursement cannot be processed till all cluster members loan decisions are recorded';
+export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_NOT_MORE_THAN_ONE_QUALIFIED_MEMBER = 
+'loan application disbursement cannot be processed till all cluster members loan decisions are recorded';
+export const ALLOCATED_AMOUNT_EXCEEDING_TOTAL_AMOUNT = (amount) => `loan allocated amount will exceed cluster total loan, ${amount} is still available for allocation`;
 export const LOAN_RESCHEDULING_NOT_ALLOWED = (count) => `User has rescheduled this loan ${count} time(s), thus rescheduling not allowed`;
 export const LOAN_RESCHEDULING_EXTENSION_NOT_EXISTING = 'Invalid loan reschedule extension day sent';
 export const LOAN_RESCHEDULE_REQUEST_NOT_EXISTING = 'Loan reschedule request does not exists';
@@ -143,15 +154,22 @@ export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still aw
 export const LOAN_APPLICATION_DECLINED = 'loan application declined, disbursement cannot be made';
 export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application status is ${type}, disbursement cannot be made again`;
 export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `User currently have ${type}, thus cannot apply for another`;
+export const CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `Cluster currently have ${type}, thus cannot apply for another`;
 export const LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS = (type) => `Loan application is already ${type}, thus action cannot be performed`;
+export const CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_CURRENT_CLUSTER_STATUS = (type) => `Cluster has an ${type} loan, thus action cannot be performed`;
+export const CLUSTER_MEMBERS_NOT_MORE_THAN_ONE = 'Cluster loan cannot be initiated you need more than one cluster member to proceed';
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
   'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
+export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_CLUSTER_LOAN_REASON =
+  'User has an existing approved cluster loan, kindly cancel or proceed to disbursement for the approved existing loan application';
+export const CLUSTER_LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
+  'Cluster has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL = 'User loan application disbursement initiated successful';
-export const SYSTEM_ALLOWABLE_LOAN_AMOUNT_UPDATED_SUCCESSFULLY = 'System maximum allowable loan amount updated successfully';
 export const LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY = 'Loan renegotiation successful';
-export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application cancelled successful';
+export const LOAN_APPLICATION_CANCELLING_SUCCESSFUL = 'User loan application cancelled successfully';
+export const LOAN_APPLICATION_ACCEPTANCE_SUCCESSFUL = 'User loan application accepted successfully';
 export const USER_LOAN_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan details fetched successful`;
 export const USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payment details fetched successful`;
 export const USER_CURRENT_LOANS_FETCHED_SUCCESSFUL = 'User current loans fetched successful';
@@ -163,10 +181,14 @@ export const CLUSTER_NO_LONGER_EXISTING = 'Cluster no longer exist';
 export const CLUSTER_DECISION_TICKET_NOT_EXISTING = 'Cluster decision ticket does not exist';
 export const USER_NOT_CLUSTER_MEMBER = 'User does not belong to this cluster';
 export const USER_ALREADY_CLUSTER_MEMBER = 'User already belongs to this cluster';
+export const USER_ALREADY_BELONG_TO_THE_CLUSTER_TYPE = (type) => `User already belongs to another ${type} cluster type`;
 export const USER_HAS_PREVIOUSLY_RAISED_REQUEST_CLUSTER_TICKET = (type) => `User still has an open request to ${type} this cluster, kindly wait till a conclusion is reached`;
+export const USER_ALREADY_TAKEN_CLUSTER_LOAN_DECISION = 'User has previously taken cluster loan decision';
+export const USER_NO_ELIGIBILITY_CHECK_RESULT_CLUSTER_LOAN_DECISION = 'User needs to run eligibility check before accepting loan terms';
 export const USER_PREVIOUSLY_DECIDED = 'User has previously taken a decision on this ticket';
 export const VOTING_DECISION_ALREADY_CONCLUDED = 'Voting decision for this ticket has been concluded, therefore action cannot be performed anymore';
 export const CLUSTER_TYPE_NOT_PUBLIC_OR_PRIVATE = (type) => `Action cannot be performed on a ${type} cluster`;
+export const USER_CAN_ONLY_BE_IN_ONE_CLUSTER = (type) => `User cannot belong to more than one ${type} cluster`;
 export const USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL = (type) => `User ${type} loan payments fetched successful`;
 export const FORGOT_PIN_TOKEN = 'Pin reset token sent';
 export const PAYMENT_OTP_ACCEPTED = 'payment OTP is valid and transaction is successful';
@@ -210,6 +232,7 @@ export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfull
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
 export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
+export const EMPLOYMENT_DETAILS_NOT_PREVIOUSLY_SET = 'Kindly add employment details first before editing';
 export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment type';
 export const BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION = 'You are not allowed to access loan facility at the moment';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';

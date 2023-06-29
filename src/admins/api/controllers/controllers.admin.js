@@ -446,7 +446,7 @@ export const loanRepaymentReport = async(req, res, next) => {
       processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.averageOrrScore, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalObligation, [ ]),
+      processOneOrNoneData(adminQueries.totalObligationRepaid, [ queryFromType, queryToType ]),
       processAnyData(adminQueries.paymentDetails, [ currentYearFromDate, currentYearToDate ]),
       processAnyData(adminQueries.disbursementDetails, [ currentYearFromDate, currentYearToDate ]),
       processOneOrNoneData(adminQueries.customerBase, [ queryFromType, queryToType ]),

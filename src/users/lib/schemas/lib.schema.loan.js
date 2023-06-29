@@ -32,7 +32,8 @@ const referenceIdParams = Joi.object().keys({
 });
 
 const noCardOrBankLoanRepaymentType = Joi.object().keys({
-  payment_type: Joi.string().required().valid('full', 'part')
+  payment_type: Joi.string().required().valid('full', 'part'),
+  payment_channel: Joi.string().required().valid('card', 'bank_transfer')
 });
 
 const loanRepaymentType = Joi.object().keys({

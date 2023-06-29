@@ -39,16 +39,18 @@ export const checkUserLoanApplicationExists = async(req, res, next) => {
 
 /**
  * check loan payment exists by id
+ * @param {Request} type - The type of loan payment if personal or cluster.
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof LoanMiddleware
  */
-export const checkUserLoanPaymentExists = async(req, res, next) => {
+export const checkUserLoanPaymentExists  = (type = '') => async(req, res, next) => {
   try {
     const { params: { loan_payment_id }, user } = req;
-    const [ existingLoanPayment ] = await processAnyData(loanQueries.fetchUserPersonalLoanPaymentDetails, [ loan_payment_id, user.user_id ]);
+    const [ existingLoanPayment ] = type === 'personal' ? await processAnyData(loanQueries.fetchUserPersonalLoanPaymentDetails, [ loan_payment_id, user.user_id ]) :
+      await processAnyData(loanQueries.fetchUserClusterLoanPaymentDetails, [ loan_payment_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan payment exists in the db checkUserLoanPaymentExists.middlewares.loan.js`);
     if (existingLoanPayment) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment exists and belongs to authenticated user checkUserLoanPaymentExists.middlewares.loan.js`);
@@ -280,7 +282,6 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
  */
 export const validateLoanAmountAndTenor = async(req, res, next) => {
   const { user, body } = req;
-  const activityType = body.amount ? 37 : 41;
   try {
     const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails, 
       maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
@@ -294,42 +295,35 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
     if ((Number(user.tier) === 1) && (parseFloat(body.amount || body.new_loan_amount) > (parseFloat(tierOneMaximumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount greater than maximum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if ((Number(user.tier) === 2) && (parseFloat(body.amount || body.new_loan_amount) > (parseFloat(tierTwoMaximumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount greater than maximum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if ((Number(user.tier) === 1) && (parseFloat(body.amount || body.new_loan_amount) < (parseFloat(tierOneMinimumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 1 user applying for an amount lesser than minimum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if ((Number(user.tier) === 2) && (parseFloat(body.amount || body.new_loan_amount) < (parseFloat(tierTwoMinimumLoanAmountDetails.value)))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tier 2 user applying for an amount lesser than minimum allowable amount 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration greater than allowable maximum tenor 
       validateLoanAmountAndTenor.middleware.loan.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE;
     logger.error(`validating loan application amount and tenor failed::${enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE}`, error.message);
     return next(error);
@@ -349,7 +343,7 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
     const { userEmploymentDetails, user, body } = req;
     const userPreviousPersonalLoanCounts = await processAnyData(loanQueries.fetchUserPreviousPersonalLoanCounts, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: count of user past individual loans fetched checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-    const userPreviousClusterLoanCounts = { count: 0 }; // to later add the query when cluster loan is implemented
+    const userPreviousClusterLoanCounts = await processAnyData(loanQueries.fetchUserPreviousClusterLoanCounts, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: count of user past cluster loans fetched checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
     const totalPreviousLOanCount = (parseFloat(userPreviousPersonalLoanCounts.count) + parseFloat(userPreviousClusterLoanCounts.count));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total count of past loans estimated checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
@@ -559,22 +553,93 @@ export const validateRenegotiationAmount = async(req, res, next) => {
     if (existingLoanApplication.max_possible_approval === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
       validateRenegotiationAmount.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 41, 'fail');
       return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
         enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
     }
     if (parseFloat(existingLoanApplication.max_possible_approval) < parseFloat(body.new_loan_amount)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount in the DB is lesser than the renegotiation amount
       validateRenegotiationAmount.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 41, 'fail');
       return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN, 
         enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
     }
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, 41, 'fail');
     error.label = enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE;
     logger.error(`checking if loan renegotiation amount is acceptable failed::${enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if applying user has cluster loan discounts
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkIfUserHasClusterDiscount = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ userClusterDiscounts ] = await processAnyData(loanQueries.userAdminCreatedCluster, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user has admin cluster loan discounts returns 
+    checkIfUserHasClusterDiscount.middlewares.loan.js`);
+    if (!userClusterDiscounts) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user does not have any admin cluster loan discounts 
+      checkIfUserHasClusterDiscount.middlewares.loan.js`);
+      const userLoanDiscount = {
+        interest_rate_type: null,
+        interest_rate_value: null
+      };
+      req.userLoanDiscount = userLoanDiscount;
+      return next();
+    }
+    const userLoanDiscount = {
+      interest_rate_type: userClusterDiscounts.interest_type,
+      interest_rate_value: parseFloat(userClusterDiscounts.percentage_interest_type_value)
+    };
+    req.userLoanDiscount = userLoanDiscount;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user has admin cluster loan discounts checkIfUserHasClusterDiscount.middlewares.loan.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_HAS_CLUSTER_DISCOUNT_MIDDLEWARE;
+    logger.error(`checking if user has admin cluster loan discount failed::${enums.CHECK_IF_USER_HAS_CLUSTER_DISCOUNT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if applying user has cluster loan discounts
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const additionalUserChecksForLoan = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ userDefaultAccountDetails ] = await processAnyData(loanQueries.fetchUserDefaultBankAccount, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default bank account details from the db additionalUserChecksForLoan.middlewares.loan.js`);
+    if ((user.status === 'inactive') || (user.status === 'blacklisted')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user status is inactive checkUserLoanEligibility.controllers.loan.js`);
+      return ApiResponse.error(res, enums.USER_STATUS_INACTIVE_OR_BLACKLISTED(user.status), enums.HTTP_FORBIDDEN, enums.ADDITIONAL_USER_CHECKS_FOR_LOAN_MIDDLEWARE);
+    }
+    if (!userDefaultAccountDetails) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not set default account in the db additionalUserChecksForLoan.middlewares.loan.js`);
+      return ApiResponse.error(res, enums.NO_DEFAULT_BANK_ACCOUNT, enums.HTTP_FORBIDDEN, enums.ADDITIONAL_USER_CHECKS_FOR_LOAN_MIDDLEWARE);
+    }
+    const [ userDefaultDebitCardDetails ] = await processAnyData(loanQueries.fetchUserDefaultDebitCard, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user default debit card details from the db additionalUserChecksForLoan.middlewares.loan.js`);
+    if (!userDefaultDebitCardDetails) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not set default debit card in the db additionalUserChecksForLoan.middlewares.loan.js`);
+      return ApiResponse.error(res, enums.NO_DEFAULT_DEBIT_CARD, enums.HTTP_FORBIDDEN, enums.ADDITIONAL_USER_CHECKS_FOR_LOAN_MIDDLEWARE);
+    }
+    req.userDefaultAccountDetails = userDefaultAccountDetails;
+    return next();
+  } catch (error) {
+    error.label = enums.ADDITIONAL_USER_CHECKS_FOR_LOAN_MIDDLEWARE;
+    logger.error(`running additional checks on user for loan application failed::${enums.ADDITIONAL_USER_CHECKS_FOR_LOAN_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };
