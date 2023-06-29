@@ -102,6 +102,19 @@ const adminNotificationIdParams = Joi.object().keys({
   adminNotificationId: Joi.string().required()
 });
 
+const sendNotification = Joi.object({
+  type: Joi.string().required(),
+  title: Joi.string().optional(),
+  content: Joi.string().optional(),
+  sent_to: Joi.array()
+    .items(Joi.object({
+      user_id: Joi.string().required()
+    }))
+    .min(1)
+    .optional(),
+  end_at: Joi.date().required()
+});
+
 
 export default {
   createRole,
@@ -117,5 +130,6 @@ export default {
   overviewPage,
   fetchActivityLog,
   loanAndClusterAnalytics,
-  adminNotificationIdParams
+  adminNotificationIdParams,
+  sendNotification
 };

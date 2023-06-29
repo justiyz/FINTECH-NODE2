@@ -186,12 +186,14 @@ export const editPromoDetails = async(req, res, next) => {
   try {
     const { body, params: { promo_id }, document, admin  } = req;
     const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, promo_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched details promo 
-     editPromoDetails.admin.controllers.settings.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched details promo editPromoDetails.admin.controllers.settings.js`);
     const payload = settingsPayload.editPromo(body, document, promo, promo_id);
     const editedPromo = await processOneOrNoneData(settingsQueries.updatePromoDetails, payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully edits details of a promo 
-     editPromoDetails.admin.controllers.settings.js`); 
+    if (dayjs(body.start_date).isSame(dayjs(), 'day')) {
+      await processOneOrNoneData(settingsQueries.updatePromoStatus, [ promo_id ]);
+    }
+
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully edits details of a promo  editPromoDetails.admin.controllers.settings.js`); 
     return ApiResponse.success(res, enums.PROMO_EDITED_SUCCESSFULLY, enums.HTTP_OK, editedPromo);
   } catch (error) {
     error.label = enums.EDIT_PROMO_DETAILS_CONTROLLER;
@@ -208,8 +210,6 @@ export const editPromoDetails = async(req, res, next) => {
  * @returns {object} - Returns success response.
  * @memberof AdminSettingsController
  */
-
-
 export const cancelPromo = async(req, res, next) => {
   try {
     const { body, admin } = req;

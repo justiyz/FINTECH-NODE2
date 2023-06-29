@@ -350,3 +350,4 @@ export const PROMO_DELETED_SUCCESSFULLY= 'Promo deleted successfully';
 export const PROMO_DUE_TO_START = 'Certain promos due to start has been initiated';
 export const PROMO_DUE_TO_END = 'Certain promos due to end has been initiated';
 export const ADMIN_DID_NOT_CREATE_PROMO = 'Access denied!, you did not create this promo';
+export const SUCCESSFULLY_NOTIFICATION = 'Notification sent successfully.';

@@ -113,7 +113,6 @@ export const checkIfStartOrEndDateHasPassed = async(req, res, next) => {
     logger.error(`checking if start or end date has passed failed::${enums.CHECK_IF_START_OR_END_DATE_HAS_PASSED_MIDDLEWARE}`, error.message);
     return next(error);   
   }
-
 };
 
 /**

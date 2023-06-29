@@ -21,3 +21,7 @@ export const clusterMemberInvitation = () => {
 export const userTierUpgraded = () => {
   return 'Your tier has been successfully upgraded to tier 2';
 };
+
+export const downTimeNotification = () => {
+  return 'The system will be undergoing maintenance and will be temporarily unavailable for loan applications.';
+};

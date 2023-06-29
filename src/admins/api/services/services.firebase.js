@@ -52,7 +52,7 @@ export const sendUserPersonalNotification = async(user, title, content, type, ex
     content,
     chat_type: type,
     is_read: false,
-    extra_data: JSON.stringify(extra_data),
+    extra_data: JSON.stringify(extra_data) || {},
     created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
   });
 };
@@ -75,7 +75,6 @@ export const updateAdminNotificationReadBoolean = async(admin, params) => {
     .collection('admin_notifications')
     .doc(`${admin.admin_id}`)
     .collection('messages-timestamp')
-    .where('is_read', '==', false)
     .doc(adminNotificationId);
 
   await updateNotification.update({

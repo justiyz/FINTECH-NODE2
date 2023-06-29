@@ -323,5 +323,13 @@ export default {
     FROM clusters
     LEFT JOIN users ON users.user_id = clusters.created_by
     WHERE clusters.cluster_id =$1
+  `,
+  getUsersForNotifications: `
+    SELECT * 
+    FROM users
+    WHERE is_verified_bvn
+    and is_uploaded_identity_card
+    and is_completed_kyc
+    and is_deleted = false;
   `
 };

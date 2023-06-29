@@ -131,4 +131,11 @@ router.put(
   NotificationController.updateAllNotificationsAsRead
 );
 
+router.post(
+  '/:type/notifications',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(RoleSchema.sendNotification, 'payload'),
+  NotificationController.sendNotifications
+);
+
 export default router;
