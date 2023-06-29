@@ -1640,6 +1640,25 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('should throw error if eligibility check is not run and user wants to accept offer', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_LOAN_ID}/loan-decision`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'accept'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.USER_NO_ELIGIBILITY_CHECK_RESULT_CLUSTER_LOAN_DECISION);
+          done();
+        });
+    });
     it('should run cluster loan eligibility check for user nine successfully', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_LOAN_ID}/eligibility-check`)
@@ -1816,7 +1835,7 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          decision: 'decline'
+          decision: 'accept'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);

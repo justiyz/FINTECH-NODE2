@@ -813,13 +813,13 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
     const isAdmin = existingLoanApplication.is_loan_initiator ? true : false;
     const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster details fetched successfully clusterMemberLoanDecision.controllers.cluster.js`);
-    if (body.decision !== 'decline' && !isAdmin && existingLoanApplication.is_taken_loan_request_decision) {
+    if (body.decision !== 'decline' && existingLoanApplication.is_taken_loan_request_decision) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan decision previously taken lusterMemberLoanDecision.controllers.cluster.js`);
       return ApiResponse.error(res, enums.USER_ALREADY_TAKEN_CLUSTER_LOAN_DECISION, enums.HTTP_CONFLICT, enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER);
     }
     if (body.decision === 'accept' && existingLoanApplication.status === 'pending') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan eligibility has not run yet lusterMemberLoanDecision.controllers.cluster.js`);
-      return ApiResponse.error(res, enums.USER_NO_ELIGIBILITY_CHECK_RESULT_CLUSTER_LOAN_DECISION, enums.HTTP_CONFLICT, enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER);
+      return ApiResponse.error(res, enums.USER_NO_ELIGIBILITY_CHECK_RESULT_CLUSTER_LOAN_DECISION, enums.HTTP_BAD_REQUEST, enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER);
     }
     if (body.decision === 'decline') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan decision is decline clusterMemberLoanDecision.controllers.cluster.js`);
