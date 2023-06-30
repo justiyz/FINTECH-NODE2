@@ -24,13 +24,5 @@ export default {
     body.percentage_discount || promo.percentage_discount,
     body.customer_segment || promo.customer_segment,
     body.tier_category || promo.tier_category
-  ],
-  sendUserNotification: (admin, body) => [
-    admin.admin_id,
-    body.type,
-    body.title,
-    body.content,
-    body.sent_to,
-    body.end_at
   ]
 };

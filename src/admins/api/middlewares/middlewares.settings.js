@@ -18,7 +18,7 @@ import config from '../../../users/config';
 
 export const uploadPromoBanner =  async(req, res, next) => {
   try {
-    const { files, admin } = req;   
+    const { files, admin } = req;
     if (files || (files && files.document)) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: to be uploaded file is existing uploadPromoBanner.middlewares.settings.js`);
       const fileExt = path.extname(files.document.name);

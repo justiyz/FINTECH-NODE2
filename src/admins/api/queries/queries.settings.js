@@ -140,5 +140,36 @@ export default {
     is_ended
     ) VALUES ($1, $2, $3, $4, $5, $6, false)
     RETURNING*
-   `
+   `,
+
+      
+  fetchNotifications: `
+     SELECT 
+      notification_id,
+      sent_by,
+      type,
+      title,
+      content,
+      sent_to,
+      end_at,
+      is_ended,
+      to_char(created_at, 'DD Mon, YYYY HH:MI am') AS created_at
+      FROM admin_sent_notifications
+      WHERE is_ended = $1 
+      AND title ILIKE TRIM($2) OR $2 IS NULL
+      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
+      OR ($3 IS NULL AND $4 IS NULL))
+      ORDER BY created_at DESC
+      OFFSET $5
+      LIMIT $6;
+  `,
+  fetchNotificationCount: `
+    SELECT 
+      COUNT(notification_id) AS total_count
+    FROM admin_sent_notifications
+    WHERE is_ended = $1 
+    AND title ILIKE TRIM($2) OR $2 IS NULL
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
+    OR ($3 IS NULL AND $4 IS NULL));
+  `
 };

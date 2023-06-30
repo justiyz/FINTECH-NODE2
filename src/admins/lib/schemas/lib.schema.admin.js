@@ -64,11 +64,55 @@ const bulkBvn = Joi.object({
 
 const blacklistedBvn = Joi.alternatives().try(singleBvn, bulkBvn);
 
+const adminNotificationIdParams = Joi.object().keys({
+  adminNotificationId: Joi.string().required()
+});
+
+const sendNotification = Joi.object({
+  type: Joi.string().valid('alert', 'push', 'system').required(),
+  recipient: Joi.string().valid('all', 'select').required()
+}).when(Joi.object({ type: Joi.string().valid('alert') }).unknown(), {
+  then: Joi.object({
+    end_at: Joi.date().required(),
+    content: Joi.string().required()
+  })
+}).when(Joi.object({ type: Joi.string().valid('push') }).unknown(), {
+  then: Joi.object({
+    end_at: Joi.date().required(),
+    content: Joi.string().required(),
+    sent_to: Joi.array().items(Joi.object({
+      user_id: Joi.string().required(),
+      name: Joi.string().required()
+    })).min(1).optional()
+  })
+}).when(Joi.object({ type: Joi.string().valid('system') }).unknown(), {
+  then: Joi.object({
+    title: Joi.string().required(),
+    content: Joi.string().required(),
+    sent_to: Joi.array().items(Joi.object({
+      user_id: Joi.string().required(),
+      name: Joi.string().required()
+    })).min(1).required()
+  })
+});
+
+const fetchNotification = Joi.object().keys({
+  is_ended: Joi.boolean().optional(),
+  title: Joi.string().optional(),
+  start_date: Joi.date().optional(),
+  end_date: Joi.date().optional(),
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional()
+});
+
 export default {
   adminCompleteProfile,
   editAdminPermissions,
   adminIdParams,
   unblacklist_bvn,
   fetchBlacklistedBvn,
-  blacklistedBvn
+  blacklistedBvn,
+  adminNotificationIdParams,
+  sendNotification,
+  fetchNotification
 };
