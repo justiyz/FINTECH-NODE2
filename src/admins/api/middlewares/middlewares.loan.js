@@ -33,6 +33,35 @@ export const checkIfLoanExists = async(req, res, next) => {
 };
 
 /**
+ * check if cluster member loan application is existing in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminLoanMiddleware
+ */
+export const checkIfClusterMemberLoanExists = async(req, res, next) => {
+  try {
+    const { params: { member_loan_id }, admin } = req;
+    const [ loanApplication ] = await processAnyData(loanQueries.fetchClusterMemberLoanDetailsById, [ member_loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if cluster member loan application exists in the db 
+    checkIfClusterMemberLoanExists.admin.middlewares.loan.js`);
+    if (loanApplication) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application exists checkIfClusterMemberLoanExists.admin.middlewares.loan.js`);
+      req.loanApplication = loanApplication;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster member loan application does not exist 
+    checkIfClusterMemberLoanExists.admin.middlewares.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_IN_DB, enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_MEMBER_LOAN_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_CLUSTER_MEMBER_LOAN_EXISTS_MIDDLEWARE;
+    logger.error(`checking if cluster member loan application exists failed::${enums.CHECK_CLUSTER_MEMBER_LOAN_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check if loan application is of status in review in the DB
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

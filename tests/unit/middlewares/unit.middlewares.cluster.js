@@ -189,5 +189,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkClusterLoanReschedulingRequest', async() => {
+      const req = { user: '', params: '' };
+      const data = await ClusterMiddlewares.checkClusterLoanReschedulingRequest(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

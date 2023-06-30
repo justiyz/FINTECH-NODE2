@@ -1117,3 +1117,41 @@ export const fetchGeneralClusterNewLoanAmountValues = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * check cluster loan reschedule request exists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkClusterLoanReschedulingRequest = async(req, res, next) => {
+  try {
+    const { params: { reschedule_id, member_loan_id }, user } = req;
+    const [ clusterLoanRescheduleRequest ] = await processAnyData(clusterQueries.fetchClusterLoanRescheduleRequest, [ reschedule_id, member_loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster loan reschedule request exists 
+    checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+    if (clusterLoanRescheduleRequest) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request exists checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+      if (clusterLoanRescheduleRequest.is_accepted) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request has been previously processed 
+        checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+        userActivityTracking(req.user.user_id, 75, 'fail');
+        return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING, enums.HTTP_BAD_REQUEST, 
+          enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
+      }
+      req.loanRescheduleRequest = clusterLoanRescheduleRequest;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request does not exists 
+    checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    error.label = enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE;
+    logger.error(`checking if cluster loan rescheduling request exists failed::${enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

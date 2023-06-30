@@ -1867,6 +1867,212 @@ describe('Clusters', () => {
         });
     });
   });
+  describe('approve cluster member loan application', () => {
+    it('Should return error if non existing loan id is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}yr7u/approve`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'approve'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING_IN_DB);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if decision field missing', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/approve`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('decision is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid decision field is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/approve`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          decision: 'decline'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('decision must be [approve]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if admin without loan application module approve permission tries to perform approval action', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/approve`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .send({ 
+          decision: 'approve'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_CANNOT_PERFORM_ACTION('approve', 'loan application'));
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if loan status is not in review', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/approve`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'approve'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_STATUS('cancelled'));
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
+  describe('decline cluster member loan application', () => {
+    it('Should return error if non existing loan id is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}yr7u/reject`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'decline',
+          rejection_reason: 'low score'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING_IN_DB);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if rejection reason field missing', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/reject`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          decision: 'decline'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('rejection_reason is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid decision field is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/reject`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({ 
+          decision: 'approve',
+          rejection_reason: 'low score'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('decision must be [decline]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if admin without loan application module reject permission tries to perform approval action', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/reject`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .send({ 
+          decision: 'decline',
+          rejection_reason: 'low score'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ADMIN_CANNOT_PERFORM_ACTION('reject', 'loan application'));
+          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if loan status is not in review', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/reject`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          decision: 'decline',
+          rejection_reason: 'low score'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_STATUS('cancelled'));
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  }); 
   describe('User one sets up another cluster loan', () => {
     it('should initiate another cluster loan for user one private cluster successfully', (done) => {
       chai.request(app)
@@ -2653,6 +2859,282 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+  });
+  describe('Fetch cluster current loan application', () => {
+    it('should fetch general cluster loan details successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/current-loan`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('can_disburse_loan');
+          expect(res.body.data.status).to.equal('ongoing');
+          expect(res.body.message).to.equal(enums.CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should throw error if invalid cluster id', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}kfk/current-loan`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if not cluster member', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID}/current-loan`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.USER_NOT_CLUSTER_MEMBER);
+          done();
+        });
+    });
+    it('should throw error if public cluster', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/current-loan`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_TYPE_NOT_PUBLIC_OR_PRIVATE('public'));
+          done();
+        });
+    });
+  });
+  describe('User nine initiates loan rescheduling process', () => {
+    it('should throw error if invalid member loan id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}jdj5/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_THREE
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if no extension id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .query({ })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('extension_id is required');
+          done();
+        });
+    });
+    it('should throw error if invalid extension id is sent', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: 100
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_EXTENSION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if loan is not an ongoing loan', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_THREE
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('Loan application is already completed, thus action cannot be performed');
+          done();
+        });
+    });
+    it('should process loan rescheduling summary successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_THREE
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('reschedule_id');
+          expect(res.body.data).to.have.property('rescheduling_count');
+          expect(res.body.data).to.have.property('next_repayment_date');
+          expect(res.body.data.rescheduling_count).to.equal(0);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_RESCHEDULING_ID_ONE = res.body.data.reschedule_id;
+          done();
+        });
+    });
+  });
+  describe('User nine proceeds with loan rescheduling process', () => {
+    it('should throw error if invalid member loan id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}jdj5/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_RESCHEDULING_ID_ONE}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if invalid rescheduling id is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_RESCHEDULING_ID_ONE}67t/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULE_REQUEST_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should throw error if loan is not an ongoing loan', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_RESCHEDULING_ID_ONE}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('Loan application is already completed, thus action cannot be performed');
+          done();
+        });
+    });
+    it('should process loan rescheduling summary successfully', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_RESCHEDULING_ID_ONE}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('reschedule_extension_days');
+          expect(res.body.data).to.have.property('total_loan_extension_days');
+          expect(res.body.data).to.have.property('is_reschedule');
+          expect(res.body.data.is_reschedule).to.equal(true);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('should throw error if loan previously based on reschedule Id', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_RESCHEDULING_ID_ONE}/process-rescheduling`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('should throw error if user has exceeded rescheduling allowable', (done) => {
+      chai.request(app)
+        .get(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_NINE_MEMBER_LOAN_ID}/reschedule-summary`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .query({
+          extension_id: process.env.SEEDFI_LOAN_RESCHEDULING_DURATION_ID_THREE
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.LOAN_RESCHEDULING_NOT_ALLOWED(1));
           done();
         });
     });

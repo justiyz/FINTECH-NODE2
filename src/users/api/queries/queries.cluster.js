@@ -648,7 +648,15 @@ export default {
       total_amount_requested,
       loan_tenor_in_months,
       sharing_type,
-      status
+      percentage_interest_rate,
+      total_repayment_amount,
+      total_interest_amount,
+      total_monthly_repayment,
+      status,
+      is_loan_disbursed,
+      loan_disbursed_at,
+      can_disburse_loan,
+      created_at
     FROM cluster_loans
     WHERE cluster_id = $1
     AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
@@ -1160,7 +1168,74 @@ export default {
       updated_at = NOW(),
       loan_status = 'inactive',
       loan_amount = 0
-    WHERE cluster_id = $1`
+    WHERE cluster_id = $1`,
+
+  createClusterLoanRescheduleRequest: `
+    INSERT INTO cluster_member_rescheduled_loan(
+      cluster_id, member_loan_id, loan_id, user_id, extension_in_days
+    ) VALUES ($1, $2, $3, $4, $5)
+    RETURNING *`,
+
+  fetchClusterLoanRescheduleRequest: `
+    SELECT 
+      id,
+      reschedule_id,
+      cluster_id, 
+      member_loan_id,
+      loan_id, 
+      user_id, 
+      extension_in_days,
+      is_accepted
+    FROM cluster_member_rescheduled_loan
+    WHERE reschedule_id = $1
+    AND member_loan_id = $2`,
+
+  fetchUserUnpaidClusterLoanRepayments: `
+    SELECT 
+      id,
+      loan_repayment_id,
+      cluster_id,
+      member_loan_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      status
+    FROM cluster_member_loan_payment_schedules
+    WHERE member_loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL
+    ORDER BY proposed_payment_date ASC`,
+
+  updateNewClusterLoanRepaymentDate: `
+    UPDATE cluster_member_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      proposed_payment_date = $2,
+      status = 'not due'
+    WHERE id = $1`,
+
+  updateClusterLoanWithRescheduleDetails: `
+    UPDATE cluster_member_loans
+    SET
+      updated_at = NOW(),
+      is_rescheduled = TRUE,
+      reschedule_extension_days = $2,
+      reschedule_count = $3,
+      reschedule_loan_tenor_in_months = $4,
+      total_reschedule_extension_days = $5,
+      reschedule_at = NOW()
+    WHERE member_loan_id = $1`,
+
+  updateRescheduleClusterLoanRequestAccepted: `
+    UPDATE cluster_member_rescheduled_loan
+    SET
+      updated_at = NOW(),
+      is_accepted = TRUE
+    WHERE reschedule_id = $1`
 };
 
 

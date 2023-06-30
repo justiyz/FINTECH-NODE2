@@ -353,7 +353,7 @@ export const fetchClusterMembers = async(req, res, next) => {
   try {
     const { params: { cluster_id }, user } = req;
     const clusterMembers = await processAnyData(clusterQueries.fetchClusterMembers, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster members in the DB fetchClusterMembers.users.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster members in the DB fetchClusterMembers.users.controllers.cluster.js`);
     return ApiResponse.success(res, enums.CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterMembers);
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_MEMBERS_CONTROLLER;
@@ -1038,6 +1038,122 @@ export const initiateManualCardOrBankClusterLoanRepayment = async(req, res, next
     error.label = enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating cluster loan repayment manually using saved card or bank account 
     failed::${enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch a cluster's current active loan application
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the cluster members
+ * @memberof ClusterController
+ */
+export const fetchCurrentClusterLoan = async(req, res, next) => {
+  try {
+    const { params: { cluster_id }, user } = req;
+    const [ clusterLoan ] = await processAnyData(clusterQueries.fetchClusterActiveLoans, [ cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster active loan in the DB fetchCurrentClusterLoan.users.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterLoan);
+  } catch (error) {
+    error.label = enums.FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER;
+    logger.error(`fetching current cluster active loans failed::${enums.FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER}`, error.message);
+    return next(error);
+  }  
+};
+
+/**
+ * process the summary of rescheduled cluster loan and return
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof ClusterController
+ */
+export const clusterLoanReschedulingSummary = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, loanRescheduleExtensionDetails } = req;
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched clusterLoanReschedulingSummary.controllers.cluster.js`);
+    if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count 
+      clusterLoanReschedulingSummary.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 94, 'fail');
+      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN, 
+        enums.CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count is less than system allowable rescheduling count 
+      clusterLoanReschedulingSummary.controllers.cluster.js`);
+    const [ nextRepayment ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next cluster loan repayment details fetched 
+    clusterLoanReschedulingSummary.controllers.cluster.js`);
+    const returnData = await ClusterPayload.clusterLoanReschedulingRequestSummaryResponse(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment);
+    const rescheduleRequest = await processOneOrNoneData(clusterQueries.createClusterLoanRescheduleRequest, [ existingLoanApplication.cluster_id, 
+      existingLoanApplication.member_loan_id, existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request saved in the DB clusterLoanReschedulingSummary.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, 94, 'success');
+    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY, enums.HTTP_OK, { ...returnData, reschedule_id: rescheduleRequest.reschedule_id });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 94, 'fail');
+    error.label = enums.CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER;
+    logger.error(`fetching cluster loan rescheduling summary failed::${enums.CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * process the cluster loan rescheduling request
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof ClusterController
+ */
+export const processClusterLoanRescheduling = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, loanRescheduleRequest } = req;
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched processClusterLoanRescheduling.controllers.cluster.js`);
+    if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count 
+      processClusterLoanRescheduling.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 75, 'fail');
+      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN, 
+        enums.PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER);
+    }
+    const userUnpaidClusterRepayments = await processAnyData(clusterQueries.fetchUserUnpaidClusterLoanRepayments, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's unpaid repayments fetched processClusterLoanRescheduling.controllers.cluster.js`);
+    const totalExtensionDays = userUnpaidClusterRepayments.length * Number(loanRescheduleRequest.extension_in_days);
+    const newLoanDuration = `${existingLoanApplication.loan_tenor_in_months} month(s), ${totalExtensionDays} day(s)`;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: updated total loan tenor fetched processClusterLoanRescheduling.controllers.cluster.js`);
+    await Promise.all([
+      userUnpaidClusterRepayments.map((repayment) => {
+        processOneOrNoneData(clusterQueries.updateNewClusterLoanRepaymentDate, 
+          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+        return repayment;
+      }),
+      processOneOrNoneData(clusterQueries.updateClusterLoanWithRescheduleDetails, [ existingLoanApplication.member_loan_id, Number(loanRescheduleRequest.extension_in_days), 
+        parseFloat((existingLoanApplication.reschedule_count || 0) + 1), newLoanDuration, totalExtensionDays ]),
+      processOneOrNoneData(clusterQueries.updateRescheduleClusterLoanRequestAccepted, [ loanRescheduleRequest.reschedule_id ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan rescheduling details updated successfully 
+    processClusterLoanRescheduling.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, 75, 'success');
+    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, {
+      member_loan_id: existingLoanApplication.member_loan_id, 
+      loan_id: existingLoanApplication.loan_id, 
+      cluster_id: existingLoanApplication.cluster_id, 
+      user_id: user.user_id,
+      status: existingLoanApplication.status,
+      reschedule_extension_days: Number(loanRescheduleRequest.extension_in_days),
+      total_loan_extension_days: parseFloat(totalExtensionDays),
+      is_reschedule: true
+    });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    error.label = enums.PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER;
+    logger.error(`processing cluster loan rescheduling loan failed::${enums.PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER}`, error.message);
     return next(error);
   }
 };
