@@ -1,10 +1,11 @@
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
+import { collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import notificationQueries from '../queries/queries.settings';
 import usersQueries from '../queries/queries.user';
 import  notificationPayload from '../../lib/payloads/lib.payload.settings';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification, sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
+import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification,  sendUserPersonalNotification, sendMulticastPushNotification } from '../services/services.firebase';
 
 
 
@@ -63,20 +64,27 @@ export const sendNotifications = async(req, res, next) => {
     const users = await processAnyData(usersQueries.getUsersForNotifications, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Successfully fetched users for notification in sendNotifications.admin.controller.notification.js`);
     const payload =  notificationPayload.sendUserNotification(req.admin, body);
-    const notifyUsers = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+    const notifyUsers = [];
     
-    if (body.recipient === 'all') {
-      users.forEach((user) => {
-        sendPushNotification(user.user_id, body.content, user.fcm_token);
-      });
-      
-      return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, notifyUsers);
+    if (body.type === 'alert') {
+      const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+      notifyUsers.push(result);
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users alert notification sent successfully in sendNotifications.admin.controller.notification.js`);
     }
-    
-    body.sent_to.forEach((user) => {
-      sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
-    });
-    
+
+    if (body.recipient === 'all') {
+      const usersToken = await collateUsersFcmTokens(users);
+      sendMulticastPushNotification(body.content, usersToken, 'admin-notification', users.user_id);
+      const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+      notifyUsers.push(result);
+    }
+    if (body.recipient === 'select') {
+      body.sent_to.forEach((user) => {
+        sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
+      });
+      const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+      notifyUsers.push(result);
+    }    
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users notification sent successfully in sendNotifications.admin.controller.notification.js`);
     return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, notifyUsers);
   } catch (error) {

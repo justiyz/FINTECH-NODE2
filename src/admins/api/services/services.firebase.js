@@ -120,3 +120,35 @@ export const fetchAndUpdateNotification = async(docId) => {
     throw error;
   }
 };
+
+/**
+ * Send multiple users push notification
+ * @param {String} content - the message content of the push notification
+ * @param {Array} fcm_tokens - the unique tokens to deliver notification to all users
+ * @param {String} type - the type of multicast push notification // types should not be changed without informing mobile
+ * @param {String} user_id - an optional unique id of the cluster the push notification is for
+ * @returns { JSON } - a response based on if the notifications were sent or not
+ * @memberof FirebaseService
+ */
+export const sendMulticastPushNotification = async(content, fcm_tokens, type, user_id) => {
+  const userId = user_id ? user_id.toString() : '';
+  try {
+    if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
+      return;
+    }
+    const payload = {
+      tokens: fcm_tokens,
+      notification: {
+        body: content
+      },
+      data: {
+        type,
+        userId,
+        created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
+      }
+    };
+    await admin.messaging().sendMulticast(payload);
+  } catch (error) {
+    logger.error(error);
+  }
+};
