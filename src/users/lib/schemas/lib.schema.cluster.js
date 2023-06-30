@@ -133,6 +133,15 @@ const paymentOtp = Joi.object().keys({
   otp: Joi.string().required()
 });
 
+const rescheduleExtensionId = Joi.object().keys({
+  extension_id: Joi.number().positive().required()
+});
+
+const clusterLoanRescheduleParams = Joi.object().keys({
+  member_loan_id: Joi.string().required(),
+  reschedule_id: Joi.string().required()
+});
+
 export default  {
   createCluster,
   fetchClusters,
@@ -155,5 +164,7 @@ export default  {
   loanRepaymentParams,
   loanRepaymentType,
   referenceIdParams,
-  paymentOtp
+  paymentOtp,
+  rescheduleExtensionId,
+  clusterLoanRescheduleParams
 }; 

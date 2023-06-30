@@ -163,6 +163,7 @@ export default {
   FROM clusters
   WHERE cluster_id = $1
   OR unique_code = $1`,
+
   fetchActiveClusterMembers: `
   SELECT 
     cluster_members.id,
@@ -178,8 +179,20 @@ export default {
   FROM cluster_members
   LEFT JOIN users ON users.user_id = cluster_members.user_id
   WHERE cluster_id = $1
-  AND is_left = FALSE;
-`
+  AND is_left = FALSE`,
+
+  checkForOutstandingClusterLoanDecision: `
+    SELECT * 
+    FROM cluster_member_loans 
+    WHERE loan_id = $1
+    AND (is_taken_loan_request_decision = false OR status = 'in review')`,
+
+  updateGeneralLoanApplicationCanDisburseLoan: `
+    UPDATE cluster_loans
+    SET 
+      updated_at = NOW(),
+      can_disburse_loan = true
+    WHERE loan_id = $1`
 };
 
 

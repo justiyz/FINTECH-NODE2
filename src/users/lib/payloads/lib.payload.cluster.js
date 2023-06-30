@@ -178,5 +178,19 @@ export default {
     loan_decision: updatedClusterLoanDetails.loan_decision,
     offer_letter_url,
     max_allowable_amount: null
+  }),
+  clusterLoanReschedulingRequestSummaryResponse: async(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment) => ({
+    user_id: user.user_id,
+    cluster_id: existingLoanApplication.cluster_id,
+    member_loan_id: existingLoanApplication.member_loan_id,
+    loan_id: existingLoanApplication.loan_id,
+    loan_amount: `${parseFloat(existingLoanApplication.amount_requested)}`,
+    loan_duration_in_months: `${Number(existingLoanApplication.loan_tenor_in_months)}`,
+    total_interest: `${parseFloat(existingLoanApplication.total_interest_amount).toFixed(2)}`,
+    total_repayment: `${parseFloat(existingLoanApplication.total_repayment_amount).toFixed(2)}`,
+    monthly_payment: `${parseFloat(existingLoanApplication.monthly_repayment)}`,
+    next_repayment_date: dayjs(nextRepayment.proposed_payment_date).add(Number(loanRescheduleExtensionDetails.extension_in_days), 'days').format('MMM DD, YYYY'),
+    loan_status: existingLoanApplication.status,
+    rescheduling_count: existingLoanApplication.reschedule_count || 0
   })
 };

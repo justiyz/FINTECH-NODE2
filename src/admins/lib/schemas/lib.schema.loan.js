@@ -13,6 +13,10 @@ const loanIdParams = Joi.object().keys({
   loan_id: Joi.string().required()
 });
 
+const memberLoanIdParams = Joi.object().keys({
+  member_loan_id: Joi.string().required()
+});
+
 const fetchLoans = Joi.object().keys({
   search: Joi.string().optional(),
   status: Joi.string().optional().valid('pending', 'cancelled', 'in review', 'processing', 'declined', 'approved', 'ongoing',
@@ -45,6 +49,7 @@ export default {
   manualLoanApproval,
   manualLoanRejection,
   loanIdParams,
+  memberLoanIdParams,
   fetchLoans,
   fetchRepaidLoans,
   fetchRescheduledLoans

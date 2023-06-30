@@ -268,5 +268,36 @@ router.post(
   ClusterController.initiateManualCardOrBankClusterLoanRepayment
 );
 
+router.get(
+  '/:cluster_id/current-loan',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfPublicOrPrivateCluster('private'),
+  ClusterController.fetchCurrentClusterLoan
+);
+
+router.get(
+  '/loan/:member_loan_id/reschedule-summary',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  Model(Schema.rescheduleExtensionId, 'query'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  LoanMiddleware.checkIfOngoingLoanApplication,
+  LoanMiddleware.checkRescheduleExtensionExists,
+  ClusterController.clusterLoanReschedulingSummary
+);
+
+router.post(
+  '/loan/:member_loan_id/:reschedule_id/process-rescheduling',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterLoanRescheduleParams, 'params'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  LoanMiddleware.checkIfOngoingLoanApplication,
+  ClusterMiddleware.checkClusterLoanReschedulingRequest,
+  ClusterController.processClusterLoanRescheduling
+);
+
 
 export default router;

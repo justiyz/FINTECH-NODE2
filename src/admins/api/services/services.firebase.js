@@ -57,6 +57,41 @@ export const sendUserPersonalNotification = async(user, title, content, type, ex
   });
 };
 
+/**
+ * send notification to cluster
+ * @param {Object} user - the user object sending the notification
+ * @param {Object} cluster - the details of the cluster in question
+ * @param {Object} clusterMemberDetails - details of the admin cluster user
+ * @param {String} content - the message content of the cluster notification
+ * @param {String} type - the type of cluster notification // types should not be changed without informing mobile
+ * @param {Object} extra_data - an optional object containing extra needed data
+ * @returns { JSON } - a response based on if the notification was sent or not
+ * @memberof FirebaseService
+ */
+export const sendClusterNotification = async(user, cluster, clusterMemberDetails, content, type, extra_data) => {
+  if (config.SEEDFI_NODE_ENV === 'test') {
+    return;
+  }
+  const chatId = generateElevenDigits();
+  const sendChat = dbFireStore
+    .collection('clusters')
+    .doc(`${cluster.cluster_id}`)
+    .collection('messages-timestamp')
+    .doc(Date.now().toString());
+  await sendChat.set({
+    chatId,
+    cluster_id: cluster.cluster_id,
+    cluster_type: cluster.type,
+    cluster_name: cluster.name.trim().toLowerCase(),
+    sender_user_id: user.user_id,
+    is_sender_admin: clusterMemberDetails.is_admin,
+    content,
+    chat_type: type,
+    extra_data: JSON.stringify(extra_data),
+    created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
+  });
+};
+
 
 /**
  * update a single notification read status

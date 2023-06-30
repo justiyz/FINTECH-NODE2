@@ -144,5 +144,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchCurrentClusterLoan', async() => {
+      const req = { user: '', params: '' };
+      const data = await ClusterController.fetchCurrentClusterLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call clusterLoanReschedulingSummary', async() => {
+      const req = { user: '', loanRescheduleExtensionDetails: '', existingLoanApplication: '' };
+      const data = await ClusterController.clusterLoanReschedulingSummary(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call processClusterLoanRescheduling', async() => {
+      const req = { user: '', loanRescheduleRequest: '', existingLoanApplication: '' };
+      const data = await ClusterController.processClusterLoanRescheduling(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

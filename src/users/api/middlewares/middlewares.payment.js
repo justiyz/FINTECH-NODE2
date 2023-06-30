@@ -14,7 +14,7 @@ import { confirmPaystackPaymentStatusByReference, initiateTransfer, raiseARefund
 import PaymentPayload from '../../lib/payloads/lib.payload.payment';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import MailService from '../services/services.email';
-import { sendPushNotification, sendUserPersonalNotification, sendNotificationToAdmin } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification, sendNotificationToAdmin, sendClusterNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { userActivityTracking } from '../../lib/monitor';
@@ -574,6 +574,7 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
       const qualifiedClusterMembers = await processAnyData(clusterQueries.fetchQualifiedClusterMemberLoanDetails, [ paymentRecord.loan_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: details of all cluster member loans fetched from the db 
       processClusterLoanTransferPayments.middlewares.payment.js`);
+      const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ generalClusterLoanDetails.cluster_id ]);
       if (body.event === 'transfer.success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} 
         processClusterLoanTransferPayments.middlewares.payment.js`);
@@ -613,6 +614,7 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
             PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(member.amount_requested) }), 'successful-disbursement', { });
           sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
         });
+        sendClusterNotification(paymentRecord, cluster, { is_admin: true }, 'Cluster successfully disbursed', 'loan-application-disbursed', { ...generalClusterLoanDetails });
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }
@@ -687,6 +689,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
       const [ checkIfUserOnPersonalLoan ] = await processAnyData(loanQueries.checkUserOnPersonalLoan, [ paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user is on an active personal loan 
       processClusterLoanRepayments.middlewares.payment.js`);
+      const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ clusterLoanDetails.cluster_id ]);
+      const isClusterAdmin = clusterLoanDetails.is_loan_initiator ? true : false;
       if (paymentRecord.payment_type === 'part_cluster_loan_repayment' || paymentRecord.payment_type === 'automatic_cluster_loan_repayment') {
         const [ nextClusterLoanRepayment ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ paymentRecord.loan_id, paymentRecord.user_id ]);
         const outstandingClusterLoanRepaymentCount = await processOneOrNoneData(clusterQueries.existingUnpaidClusterLoanRepayments, 
@@ -737,6 +741,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         sendUserPersonalNotification(user, 'Part cluster loan repayment successful', 
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+        sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays part loan payment`, 
+          'cluster-loan-part-payment', { });
         if (statusType === 'completed') {
           sendUserPersonalNotification(user, 'Full cluster loan repayment successful', 
             PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
@@ -745,6 +751,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
               loan_duration: (clusterLoanDetails.reschedule_loan_tenor_in_months || `${clusterLoanDetails.loan_tenor_in_months} months`), 
               interest_rate: clusterLoanDetails.percentage_pricing_band, total_repayment: clusterLoanDetails.total_repayment_amount, 
               monthly_repayment: clusterLoanDetails.monthly_repayment });
+          sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays full loan payment`, 
+            'cluster-loan-full-payment', { });
         }
         userActivityTracking(paymentRecord.user_id, activityType, 'success');
         return next();
@@ -792,6 +800,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
           loan_duration: (clusterLoanDetails.reschedule_loan_tenor_in_months || `${clusterLoanDetails.loan_tenor_in_months} months`), 
           interest_rate: clusterLoanDetails.percentage_pricing_band, total_repayment: clusterLoanDetails.total_repayment_amount, 
           monthly_repayment: clusterLoanDetails.monthly_repayment });
+      sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays full loan payment`, 
+        'cluster-loan-full-payment', { });
       userActivityTracking(paymentRecord.user_id, 72, 'success');
       return next();
     }
