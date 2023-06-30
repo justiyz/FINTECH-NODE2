@@ -102,6 +102,22 @@ const adminNotificationIdParams = Joi.object().keys({
   adminNotificationId: Joi.string().required()
 });
 
+const sendNotification = Joi.object({
+  type: Joi.string().valid('alert', 'push', 'system').required(),
+  recipient: Joi.string().valid('all', 'select').required(),
+  title: Joi.string().required(),
+  content: Joi.string().required(),
+  end_at: Joi.date().required()
+}).when(Joi.object({ recipient: Joi.string().valid('select') }).unknown(), {
+  then: Joi.object({
+    sent_to: Joi.array().items(Joi.object({
+      user_id: Joi.string().required()
+    }))
+      .min(1)
+      .required()
+  })
+});
+
 
 export default {
   createRole,
@@ -117,5 +133,6 @@ export default {
   overviewPage,
   fetchActivityLog,
   loanAndClusterAnalytics,
-  adminNotificationIdParams
+  adminNotificationIdParams,
+  sendNotification
 };

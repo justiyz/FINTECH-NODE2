@@ -34,5 +34,13 @@ export default {
       name,
       value
     FROM admin_env_values_settings
-    WHERE name = $1`
+    WHERE name = $1`,
+    
+  fetchEndingPromo: `
+    SELECT id, promo_id, name, end_date
+    FROM system_promos
+    WHERE status IN ('cancelled', 'inactive')
+      AND is_deleted = false
+      AND current_date + interval '1 day' = end_date;
+ `
 };

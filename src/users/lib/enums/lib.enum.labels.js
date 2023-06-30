@@ -321,4 +321,5 @@ export const CHECK_IF_PROMO_IS_ACTIVE_MIDDLEWARE = 'AdminSettingsMiddleware::che
 export const CHECK_PROMO_STATUS_MIDDLEWARE = 'AdminSettingsMiddleware::checkPromoStatus ';
 export const CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE = 'AdminSettingsMiddleware::checkIfAdminCreatedPromo ';
 export const UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER = 'CronController::updatesPromoStatusToActive ';
+export const SEND_USERS_NOTIFICATIONS_CONTROLLER = 'AdminNotificationController::sendNotifications ';
 

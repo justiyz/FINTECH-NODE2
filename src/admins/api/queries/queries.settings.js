@@ -61,7 +61,11 @@ export default {
         end_date,
         image_url,
         status,
-        created_by
+        created_by,
+        customer_segment,
+        tier_category,
+        percentage_discount,
+        image_url
     FROM system_promos
     WHERE is_deleted = false
   `,
@@ -100,7 +104,15 @@ export default {
       WHERE promo_id = $1 AND is_deleted = false
       RETURNING*
   `,
-  
+  updatePromoStatus: `
+  UPDATE system_promos
+  SET 
+    updated_at = NOW(),
+    status = 'active'
+    WHERE promo_id = $1 AND is_deleted = false
+    RETURNING id, promo_id
+  `,
+
   cancelPromo: `
    UPDATE system_promos
      SET 
@@ -110,12 +122,23 @@ export default {
     WHERE promo_id = $1 AND is_deleted = false AND status IN ('active', 'inactive', 'cancelled')
     RETURNING*
   `,
-  
   deletePromo: `
     UPDATE system_promos
     SET 
     updated_at = NOW(),
     is_deleted = true
     WHERE promo_id = $1
-  `   
+  `,
+  sendNotification: `
+  INSERT INTO admin_sent_notifications(
+    sent_by,
+    type,
+    title, 
+    content, 
+    sent_to, 
+    end_at,
+    is_ended
+    ) VALUES ($1, $2, $3, $4, $5, $6, false)
+    RETURNING*
+   `
 };

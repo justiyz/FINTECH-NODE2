@@ -7,13 +7,12 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 import { initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
-import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import { sendUserPersonalNotification, sendPushNotification, sendNotificationToAdmin } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 import notificationQueries from '../queries/queries.notification';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import { sendNotificationToAdmin } from '../services/services.firebase';
 import config from '../../config';
 
 
@@ -262,12 +261,27 @@ export const nonPerformingLoans = async(req, res, next) => {
 export const updatesPromoStatusToEnded = async(req, res, next) => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToEnded);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end
-      updatesPromoStatusToEnded.controllers.cron.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end updatesPromoStatusToEnded.controllers.cron.js`);
     return ApiResponse.success(res, enums.PROMO_DUE_TO_END, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
     logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+
+export const promoNotification = async(req, res, next) => {
+  try {
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'settings' ]);
+    const [ promo ] = await processAnyData(notificationQueries.fetchEndingPromo, [ 'settings' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched promo and admins for notification promoNotification.controllers.cron.js`);
+    admins.map((admin) => {
+      sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoNotification(`${promo.name}`), 'ending-promo');
+    });
+  } catch (error) {
+    error.label = enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER;
+    logger.error(`promo notification failed:::${enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER}`, error.message);
     return next(error);
   }
 };

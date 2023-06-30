@@ -1,3 +1,5 @@
+import { processAnyData } from '../../api/services/services.db';
+import usersQueries from '../../api/queries/queries.user';
 export const generateRandomAlphabets = (length) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -49,4 +51,18 @@ export const processAdminBasedPermissions = async(admin_id, adminResources, admi
   });
   await Promise.all([ processFullPermissions ]);
   return adminPermissions;
+};
+
+
+export const collateUsersFcmTokens = async(users) => {
+  const tokens = [];
+  await Promise.all(users.map(async(user) => {
+    const userFcmToken = await processAnyData(usersQueries.getUsersForNotifications, [ user.user_id ]);
+    if (userFcmToken?.fcm_token) {
+      tokens.push(userFcmToken.fcm_token);
+    }
+    return user;
+  }));
+  await Promise.all([ tokens ]);
+  return tokens;
 };
