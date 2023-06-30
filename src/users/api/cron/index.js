@@ -26,7 +26,7 @@ const automaticallyDebitUserForLoanRepayment = CreateSchedule('0 4,18 * * *', ()
   timezone: 'Africa/Lagos'
 }); // runs every 04:00am and 06:00pm
 
-const nonPerformingUsersLoan = CreateSchedule('0 0,9 * * *', () => nonPerformingLoans(), {
+const nonPerformingUsersLoan = CreateSchedule('0 9 * * *', () => nonPerformingLoans(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
 }); // runs every 09:00am
@@ -36,10 +36,10 @@ const updatePromoStatusToActive = CreateSchedule('0 1, * * *', () => updatesProm
   timezone: 'Africa/Lagos'
 }); // runs every 01:00am 
 
-const PromoEndDateNotification = CreateSchedule('*/1 * * * *', () => promoNotification(), {
+const PromoEndDateNotification = CreateSchedule('0 9 * * *', () => promoNotification(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
-}); // runs every 01:00am 
+}); // runs every 09:00am 
 
 const updatePromoStatusToEnded = CreateSchedule('0 1, * * *', () => updatesPromoStatusToEnded(), {
   scheduled: true,
