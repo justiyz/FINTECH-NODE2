@@ -38,9 +38,8 @@ export default {
   fetchEndingPromo: `
     SELECT id, promo_id, name, end_date
     FROM system_promos
-    WHERE status = 'active'
+    WHERE status IN ('cancelled', 'inactive')
       AND is_deleted = false
-      AND ((current_date + interval '1 day' = end_date) 
-      OR (is_edited = true AND current_date + interval '1 day' = actual_end_date));
+      AND current_date + interval '1 day' = end_date;
  `
 };

@@ -73,13 +73,16 @@ describe('Admin Notification', () => {
     });
     it('Should successfully send down time notification', (done) => {
       chai.request(app)
-        .post('/api/v1/admin/downtime/notifications')
+        .post('/api/v1/admin/send-notifications')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          type: 'system',
+          type: 'alert',
+          recipient: 'all',
+          title: 'down time',
+          content: 'The system will be undergoing maintenance and will be temporarily unavailable for loan applications',
           end_at: '2025-07-08'
         })
         .end((err, res) => {
@@ -93,13 +96,14 @@ describe('Admin Notification', () => {
     });
     it('Should successfully send users notification', (done) => {
       chai.request(app)
-        .post('/api/v1/admin/users/notifications')
+        .post('/api/v1/admin/send-notifications')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
           type: 'system',
+          recipient: 'select',
           title: 'promo time',
           content: 'something to put here, working on something',
           sent_to: [
@@ -121,15 +125,39 @@ describe('Admin Notification', () => {
           done();
         });
     });
-    it('Should flag when a field is missing', (done) => {
+    it('Should successfully send users notification', (done) => {
       chai.request(app)
-        .post('/api/v1/admin/users/notifications')
+        .post('/api/v1/admin/send-notifications')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
           type: 'system',
+          recipient: 'all',
+          title: 'promo time',
+          content: 'something to put here, working on something',
+          end_at: '2025-07-08'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SUCCESSFULLY_NOTIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag when a field is missing', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/send-notifications')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'system',
+          recipient: 'select',
           title: 'promo time',
           content: 'something to put here, working on something',
           sent_to: [

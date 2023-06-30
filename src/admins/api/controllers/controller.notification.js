@@ -4,7 +4,6 @@ import notificationQueries from '../queries/queries.settings';
 import usersQueries from '../queries/queries.user';
 import  notificationPayload from '../../lib/payloads/lib.payload.settings';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification, sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
 
 
@@ -60,29 +59,26 @@ export const updateAllNotificationsAsRead = async(req, res, next) => {
  */
 export const sendNotifications = async(req, res, next) => {
   try {
-    const { body, params } = req;
+    const { body } = req;
     const users = await processAnyData(usersQueries.getUsersForNotifications, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Successfully fetched users for notification in sendNotifications.admin.controller.notification.js`);
-  
-    const payload = params.type === 'downtime'
-      ? notificationPayload.downtimeNotification(req.admin, body)
-      : notificationPayload.sendUserNotification(req.admin, body);
-    const promo = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+    const payload =  notificationPayload.sendUserNotification(req.admin, body);
+    const notifyUsers = await processOneOrNoneData(notificationQueries.sendNotification, payload);
     
-    if (users && params.type === 'downtime') {
+    if (body.recipient === 'all') {
       users.forEach((user) => {
-        sendPushNotification(user.user_id, PushNotifications.downTimeNotification(), user.fcm_token);
+        sendPushNotification(user.user_id, body.content, user.fcm_token);
       });
       
-      return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, promo);
+      return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, notifyUsers);
     }
     
     body.sent_to.forEach((user) => {
-      sendUserPersonalNotification(user, body.title, body.content, body.type);
+      sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
     });
     
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users notification sent successfully in sendNotifications.admin.controller.notification.js`);
-    return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, promo);
+    return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, notifyUsers);
   } catch (error) {
     error.label = enums.SEND_USERS_NOTIFICATIONS_CONTROLLER;
     logger.error(`Sending users notification failed:::${enums.SEND_USERS_NOTIFICATIONS_CONTROLLER}`, error.message);

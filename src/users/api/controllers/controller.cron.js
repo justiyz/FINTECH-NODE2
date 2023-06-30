@@ -7,13 +7,12 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 import { initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
-import { sendUserPersonalNotification, sendPushNotification, promoNotificationToAdmin } from '../services/services.firebase';
+import { sendUserPersonalNotification, sendPushNotification, sendNotificationToAdmin } from '../services/services.firebase';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 import notificationQueries from '../queries/queries.notification';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import { sendNotificationToAdmin } from '../services/services.firebase';
 import config from '../../config';
 
 
@@ -278,7 +277,7 @@ export const promoNotification = async(req, res, next) => {
     const [ promo ] = await processAnyData(notificationQueries.fetchEndingPromo, [ 'settings' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched promo and admins for notification promoNotification.controllers.cron.js`);
     admins.map((admin) => {
-      promoNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoNotification(`${promo.name}`),  'ending-promo');
+      sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoNotification(`${promo.name}`), 'ending-promo');
     });
   } catch (error) {
     error.label = enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER;

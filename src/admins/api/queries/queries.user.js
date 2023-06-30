@@ -325,11 +325,11 @@ export default {
     WHERE clusters.cluster_id =$1
   `,
   getUsersForNotifications: `
-    SELECT * 
+    SELECT 
+      id, 
+      user_id, 
+      CONCAT(first_name, ' ', middle_name, ' ', last_name) AS name
     FROM users
-    WHERE is_verified_bvn
-    and is_uploaded_identity_card
-    and is_completed_kyc
-    and is_deleted = false;
+    WHERE  is_completed_kyc;
   `
 };

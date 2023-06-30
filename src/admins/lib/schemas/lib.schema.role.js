@@ -103,16 +103,19 @@ const adminNotificationIdParams = Joi.object().keys({
 });
 
 const sendNotification = Joi.object({
-  type: Joi.string().required(),
-  title: Joi.string().optional(),
-  content: Joi.string().optional(),
-  sent_to: Joi.array()
-    .items(Joi.object({
+  type: Joi.string().valid('alert', 'push', 'system').required(),
+  recipient: Joi.string().valid('all', 'select').required(),
+  title: Joi.string().required(),
+  content: Joi.string().required(),
+  end_at: Joi.date().required()
+}).when(Joi.object({ recipient: Joi.string().valid('select') }).unknown(), {
+  then: Joi.object({
+    sent_to: Joi.array().items(Joi.object({
       user_id: Joi.string().required()
     }))
-    .min(1)
-    .optional(),
-  end_at: Joi.date().required()
+      .min(1)
+      .required()
+  })
 });
 
 

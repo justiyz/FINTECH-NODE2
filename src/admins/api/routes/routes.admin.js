@@ -132,7 +132,7 @@ router.put(
 );
 
 router.post(
-  '/:type/notifications',
+  '/send-notifications',
   AuthMiddleware.validateAdminAuthToken,
   Model(RoleSchema.sendNotification, 'payload'),
   NotificationController.sendNotifications

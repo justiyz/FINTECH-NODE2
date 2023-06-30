@@ -32,14 +32,5 @@ export default {
     body.content,
     body.sent_to,
     body.end_at
-  ],
-
-  downtimeNotification: (admin, body) => [ 
-    admin.admin_id, 
-    'push', 
-    'System Downtime for Loan Applications', 
-    'The system will be undergoing maintenance and will be temporarily unavailable for loan applications.',
-    [],
-    body.end_at
   ]
 };
