@@ -328,6 +328,7 @@ export default {
     SELECT 
       id, 
       user_id, 
+      fcm_token,
       CONCAT(first_name, ' ', middle_name, ' ', last_name) AS name
     FROM users
     WHERE  is_completed_kyc;
