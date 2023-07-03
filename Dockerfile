@@ -1,7 +1,4 @@
-FROM ubuntu:20.04
-
-RUN apt update
-RUN apt upgrade -y
+FROM node:16.17.1
 
 # Create app directory
 RUN mkdir -p /usr/src/seedfi-backend
