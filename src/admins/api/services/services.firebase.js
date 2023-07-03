@@ -165,8 +165,7 @@ export const fetchAndUpdateNotification = async(docId) => {
  * @returns { JSON } - a response based on if the notifications were sent or not
  * @memberof FirebaseService
  */
-export const sendMulticastPushNotification = async(content, fcm_tokens, type, user_id) => {
-  const userId = user_id ? user_id.toString() : '';
+export const sendMulticastPushNotification = async(content, fcm_tokens, type) => {
   try {
     if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
       return;
@@ -178,7 +177,6 @@ export const sendMulticastPushNotification = async(content, fcm_tokens, type, us
       },
       data: {
         type,
-        userId,
         created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
       }
     };

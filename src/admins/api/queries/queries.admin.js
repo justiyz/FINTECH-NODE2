@@ -426,15 +426,15 @@ export default {
     AND is_completed_kyc = true`,
 
   loanTenor: `
-    SELECT
-      MAX(loan_tenor_in_months) AS highest_month_tenure,
-      MIN(loan_tenor_in_months) AS lowest_month_tenure,
-      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
-      WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
-      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
-      WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
-    FROM personal_loans
-    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)OR ($1 IS NULL AND $2 IS NULL))`,
+      SELECT
+        MAX(loan_tenor_in_months) AS highest_month_tenure,
+        MIN(loan_tenor_in_months) AS lowest_month_tenure,
+        (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+        WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+        (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+        WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+      FROM personal_loans
+      WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)OR ($1 IS NULL AND $2 IS NULL))`,
 
   averageLoanTenor: `
     SELECT AVG(loan_tenor_in_months::numeric)::numeric(10) 
