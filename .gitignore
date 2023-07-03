@@ -122,3 +122,8 @@ pre-commit
 pre-push
 **/pre-commit
 **/pre-push
+
+#kubernetes
+kubernetes/production/secret.yml
+
+privatekey.txt
