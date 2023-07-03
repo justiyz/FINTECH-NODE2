@@ -85,19 +85,15 @@ describe('Admin Notification', () => {
           content: 'something to put here, working on something',
           sent_to: [
             { 
-              user_id: 'user-f664edd0168011ee8c518ff2b43a9cdc',
+              user_id: process.env.SEEDFI_USER_ONE_USER_ID,
               name: 'john doe' 
             },
             { 
-              user_id: 'user-f664edd0168011ee8c518ff2b43a9cdc',
+              user_id: process.env.SEEDFI_USER_TWO_USER_ID,
               name: 'john doe' 
             },
             { 
-              user_id: 'user-f664edd0168011ee8c518ff2b43a9cdc',
-              name: 'john doe' 
-            },
-            { 
-              user_id: 'user-f664edd0168011ee8c518ff2b43a9cdc',
+              user_id: process.env.SEEDFI_USER_THREE_USER_ID,
               name: 'john doe' 
             }
           ]

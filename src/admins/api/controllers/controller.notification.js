@@ -75,17 +75,20 @@ export const sendNotifications = async(req, res, next) => {
 
     if (body.type === 'system') {
       if (body.recipient === 'select') {
-        await Promise.all(body.sent_to.map(async(user) => {
-          await sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
-          await sendPushNotification(user.user_id, body.title, user.fcm_token);
+        await Promise.all(body.sent_to.map(async(el) => {
+          const [ user ]   = await processAnyData(usersQueries.getUsersFcToken, [ el.user_id ]);
+          sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
+          await sendPushNotification(user.user_id, body.title, user.fec_token);
         }));
       }
 
-      const usersToken = await collateUsersFcmTokens(users);
-      await sendMulticastPushNotification(body.content, usersToken, 'admin-notification');
-      await Promise.all(users.map(async(el) => {
-        await sendPushNotification(el.user_id, body.title, el.fcm_token);
-      }));
+      else {
+        const usersToken = await collateUsersFcmTokens(users);
+        await sendMulticastPushNotification(body.title, usersToken, 'admin-notification');
+        await Promise.all(users.map(async(el) => {
+          await sendPushNotification(el.user_id, body.title, el.fcm_token);
+        }));
+      }
     }
 
     const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);

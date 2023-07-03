@@ -332,5 +332,13 @@ export default {
       CONCAT(first_name, ' ', middle_name, ' ', last_name) AS name
     FROM users
     WHERE  is_completed_kyc;
-  `
+  `,
+  getUsersFcToken: `
+  SELECT 
+    id, 
+    user_id, 
+    fcm_token
+  FROM users
+  WHERE is_completed_kyc AND user_id = $1;
+`
 };

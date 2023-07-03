@@ -69,10 +69,11 @@ const adminNotificationIdParams = Joi.object().keys({
 });
 
 const sendNotification = Joi.object({
-  type: Joi.string().valid('alert', 'push', 'system').required(),
+  type: Joi.string().valid('alert', 'system').required(),
   recipient: Joi.string().valid('all', 'select').required()
 }).when(Joi.object({ type: Joi.string().valid('alert') }).unknown(), {
   then: Joi.object({
+    title: Joi.string().required(),
     end_at: Joi.date().required(),
     content: Joi.string().required()
   })
@@ -88,7 +89,6 @@ const sendNotification = Joi.object({
 });
 
 const fetchNotification = Joi.object().keys({
-  is_ended: Joi.boolean().optional(),
   title: Joi.string().optional(),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
