@@ -122,3 +122,11 @@ pre-commit
 pre-push
 **/pre-commit
 **/pre-push
+
+#kubernetes
+kubernetes/production/secret.yml
+
+privatekey.txt
+
+#datadog
+datadog/datadog-api-key-secret.yml

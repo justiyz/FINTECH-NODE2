@@ -52,6 +52,41 @@ export const sendUserPersonalNotification = async(user, title, content, type, ex
     content,
     chat_type: type,
     is_read: false,
+    extra_data: JSON.stringify(extra_data) || {},
+    created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
+  });
+};
+
+/**
+ * send notification to cluster
+ * @param {Object} user - the user object sending the notification
+ * @param {Object} cluster - the details of the cluster in question
+ * @param {Object} clusterMemberDetails - details of the admin cluster user
+ * @param {String} content - the message content of the cluster notification
+ * @param {String} type - the type of cluster notification // types should not be changed without informing mobile
+ * @param {Object} extra_data - an optional object containing extra needed data
+ * @returns { JSON } - a response based on if the notification was sent or not
+ * @memberof FirebaseService
+ */
+export const sendClusterNotification = async(user, cluster, clusterMemberDetails, content, type, extra_data) => {
+  if (config.SEEDFI_NODE_ENV === 'test') {
+    return;
+  }
+  const chatId = generateElevenDigits();
+  const sendChat = dbFireStore
+    .collection('clusters')
+    .doc(`${cluster.cluster_id}`)
+    .collection('messages-timestamp')
+    .doc(Date.now().toString());
+  await sendChat.set({
+    chatId,
+    cluster_id: cluster.cluster_id,
+    cluster_type: cluster.type,
+    cluster_name: cluster.name.trim().toLowerCase(),
+    sender_user_id: user.user_id,
+    is_sender_admin: clusterMemberDetails.is_admin,
+    content,
+    chat_type: type,
     extra_data: JSON.stringify(extra_data),
     created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
   });
@@ -75,7 +110,6 @@ export const updateAdminNotificationReadBoolean = async(admin, params) => {
     .collection('admin_notifications')
     .doc(`${admin.admin_id}`)
     .collection('messages-timestamp')
-    .where('is_read', '==', false)
     .doc(adminNotificationId);
 
   await updateNotification.update({
@@ -119,5 +153,37 @@ export const fetchAndUpdateNotification = async(docId) => {
   } catch (error) {
     console.error('Error querying data:', error);
     throw error;
+  }
+};
+
+/**
+ * Send multiple users push notification
+ * @param {String} content - the message content of the push notification
+ * @param {Array} fcm_tokens - the unique tokens to deliver notification to all users
+ * @param {String} type - the type of multicast push notification // types should not be changed without informing mobile
+ * @param {String} user_id - an optional unique id of the cluster the push notification is for
+ * @returns { JSON } - a response based on if the notifications were sent or not
+ * @memberof FirebaseService
+ */
+export const sendMulticastPushNotification = async(content, fcm_tokens, type, user_id) => {
+  const userId = user_id ? user_id.toString() : '';
+  try {
+    if (config.SEEDFI_NODE_ENV === 'test' || fcm_tokens.length < 1) {
+      return;
+    }
+    const payload = {
+      tokens: fcm_tokens,
+      notification: {
+        body: content
+      },
+      data: {
+        type,
+        userId,
+        created_at: dayjs().format('YYYY-MM-DDTHH:mm:ss[Z]')
+      }
+    };
+    await admin.messaging().sendMulticast(payload);
+  } catch (error) {
+    logger.error(error);
   }
 };

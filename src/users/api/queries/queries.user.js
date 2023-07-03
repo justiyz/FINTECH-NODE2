@@ -9,10 +9,9 @@ export default {
   WHERE phone_number = $1`,
 
   getUserByUserId: `
-    SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
-      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
-      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, device_token,
+    SELECT id, phone_number, user_id, email, title, INITCAP(first_name) AS first_name, INITCAP(middle_name) AS middle_name, INITCAP(last_name) AS last_name, 
+      tier, gender, date_of_birth, image_url, is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, number_of_children, marital_status, loan_status, device_token,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
    FROM users
    WHERE user_id = $1`,
@@ -406,6 +405,18 @@ export default {
       WHERE user_id = $1
       AND (status = 'ongoing' OR status = 'over due')`,
 
+  userOutstandingClusterLoan: `
+      SELECT 
+        id,
+        user_id,
+        loan_id,
+        member_loan_id,
+        cluster_id,
+        TRUNC(total_outstanding_amount::numeric, 2) AS total_outstanding_amount
+      FROM cluster_member_loans
+      WHERE user_id = $1
+      AND (status = 'ongoing' OR status = 'over due')`,
+
   userExistingProcessingLoans: `
       SELECT 
         id,
@@ -423,6 +434,24 @@ export default {
       AND (status = 'in review' OR status = 'approved')
       ORDER BY created_at DESC`,
 
+  userExistingClusterProcessingLoans: `
+      SELECT 
+        id,
+        loan_id,
+        member_loan_id,
+        user_id,
+        cluster_id,
+        TRUNC(amount_requested::numeric, 2) AS amount_requested,
+        loan_tenor_in_months,
+        status,
+        loan_decision,
+        created_at,
+        to_char(DATE (created_at)::date, 'Mon DD YYYY') AS requested_date
+      FROM cluster_member_loans
+      WHERE user_id = $1
+      AND (status = 'in review' OR status = 'approved' OR status = 'pending')
+      ORDER BY created_at DESC`,
+
   userPersonalLoanTransactions: `
       SELECT 
         id,
@@ -438,6 +467,26 @@ export default {
         created_at,
         to_char(DATE (created_at)::date, 'DDth Mon, YYYY') AS payment_date
       FROM personal_loan_payments
+      WHERE user_id = $1
+      ORDER BY created_at DESC`,
+
+  userClusterLoanTransactions: `
+      SELECT 
+        id,
+        payment_id,
+        loan_id,
+        member_loan_id,
+        cluster_id,
+        user_id,
+        TRUNC(amount::numeric, 2) AS amount_payed,
+        transaction_type,
+        loan_purpose,
+        status,
+        payment_description,
+        payment_means,
+        created_at,
+        to_char(DATE (created_at)::date, 'DDth Mon, YYYY') AS payment_date
+      FROM cluster_member_loan_payments
       WHERE user_id = $1
       ORDER BY created_at DESC`,
 
@@ -537,5 +586,19 @@ export default {
     FROM admin_env_values_settings
     WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
     'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount');
+ `,
+  fetchAllActivePromos: `
+      SELECT
+          id,
+          promo_id,
+          name,
+          description,
+          start_date,
+          end_date,
+          image_url,
+          status,
+          created_by
+      FROM system_promos
+      WHERE status = 'active' 
  `
 };

@@ -21,3 +21,4 @@ export const clusterMemberInvitation = () => {
 export const userTierUpgraded = () => {
   return 'Your tier has been successfully upgraded to tier 2';
 };
+

@@ -1887,7 +1887,8 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'retired',
+          employment_type: 'employed',
+          company_name: 'may ltd',
           monthly_income: '500000'
         })
         .end((err, res) => {
@@ -1927,8 +1928,7 @@ describe('User', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_FOUR_ACCESS_TOKEN}`
         })
         .send({
-          employment_type: 'employed',
-          company_name: 'may ltd',
+          employment_type: 'retired',
           monthly_income: '500000'
         })
         .end((err, res) => {

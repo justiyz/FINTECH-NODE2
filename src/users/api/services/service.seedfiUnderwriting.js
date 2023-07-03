@@ -5,7 +5,7 @@ import * as userMockedTestResponses from '../../../../tests/response/response.us
 
 const { SEEDFI_NODE_ENV } = config;
 
-const personalLoanApplicationEligibilityCheck = async(payload) => {
+const loanApplicationEligibilityCheck = async(payload) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
@@ -22,12 +22,12 @@ const personalLoanApplicationEligibilityCheck = async(payload) => {
     return data;
   } catch (error) {
     logger.error(`Connecting to seedfi underwriting service for loan personal eligibility check 
-    failed::${enums.PERSONAL_LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE}`, error.message);
+    failed::${enums.LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE}`, error.message);
     return error;
   }
 };
 
-const personalLoanApplicationRenegotiation = async(body, user, existingLoanApplication) => {
+const loanApplicationRenegotiation = async(body, user, existingLoanApplication) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.seedfiUnderwritingLoanRenegotiationTestResponse(body, existingLoanApplication);
@@ -40,7 +40,7 @@ const personalLoanApplicationRenegotiation = async(body, user, existingLoanAppli
       },
       data: { 
         user_id: user.user_id,
-        loan_application_id: `${existingLoanApplication.loan_id}`,
+        loan_application_id: existingLoanApplication.member_loan_id ? `${existingLoanApplication.member_loan_id}` : `${existingLoanApplication.loan_id}`,
         new_loan_duration_in_month: `${body.new_loan_duration_in_month}`,
         new_loan_amount: parseFloat(body.new_loan_amount)
       }
@@ -49,9 +49,9 @@ const personalLoanApplicationRenegotiation = async(body, user, existingLoanAppli
     return data;
   } catch (error) {
     logger.error(`Connecting to seedfi underwriting service for loan renegotiation 
-    failed::${enums.PERSONAL_LOAN_APPLICATION_RENEGOTIATION_SERVICE}`, error.message);
+    failed::${enums.LOAN_APPLICATION_RENEGOTIATION_SERVICE}`, error.message);
     return error;
   }
 };
 
-export { personalLoanApplicationEligibilityCheck, personalLoanApplicationRenegotiation };
+export { loanApplicationEligibilityCheck, loanApplicationRenegotiation };

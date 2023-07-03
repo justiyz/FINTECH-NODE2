@@ -71,7 +71,7 @@ describe('', () => {
     });
     it('should call checkUserLoanPaymentExists', async() => {
       const req = { user: '', params: '' };
-      const data = await LoanMiddleware.checkUserLoanPaymentExists(req, res, next);
+      const data = await LoanMiddleware.checkUserLoanPaymentExists('cluster')(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
@@ -102,6 +102,18 @@ describe('', () => {
     it('should call checkLoanReschedulingRequest', async() => {
       const req = {  user: '', query: '' };
       const data = await LoanMiddleware.checkLoanReschedulingRequest(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkIfUserHasClusterDiscount', async() => {
+      const req = {  user: '' };
+      const data = await LoanMiddleware.checkIfUserHasClusterDiscount(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call additionalUserChecksForLoan', async() => {
+      const req = {  user: '' };
+      const data = await LoanMiddleware.additionalUserChecksForLoan(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

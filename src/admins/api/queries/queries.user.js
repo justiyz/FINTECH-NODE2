@@ -323,5 +323,14 @@ export default {
     FROM clusters
     LEFT JOIN users ON users.user_id = clusters.created_by
     WHERE clusters.cluster_id =$1
+  `,
+  getUsersForNotifications: `
+    SELECT 
+      id, 
+      user_id, 
+      fcm_token,
+      CONCAT(first_name, ' ', middle_name, ' ', last_name) AS name
+    FROM users
+    WHERE  is_completed_kyc;
   `
 };

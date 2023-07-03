@@ -196,6 +196,7 @@ export const deleteClusterMember = async(req, res, next) => {
   try {
     const data = await processOneOrNoneData(ClusterQueries.deleteClusterMember, 
       [ cluster_id.trim(), user_id.trim() ]);
+    await processOneOrNoneData(ClusterQueries.reduceClusterMembersCount, [ cluster_id.trim() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
      admin have successfully remove cluster member in the DB. deleteClusterMember.admin.controllers.cluster.js`);
     await adminActivityTracking(admin.admin_id, 36, 'success', descriptions.delete_cluster_member(adminName, userClusterDetails.first_name, cluster.name));

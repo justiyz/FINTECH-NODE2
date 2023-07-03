@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
+import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
@@ -21,19 +22,17 @@ import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
  */
 export const checkIfClusterNameUnique = async(req, res, next) => {
   const { body, user } = req;
-  const activityType = body.type === 'public' ? 47 : 48;
   try {
     const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
       return ApiResponse.error(res, enums.CLUSTER_NAME_ALREADY_EXISTING(body.name), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster name does nor exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
+    req.cluster = body; // added this line so as to be able to use the middleware that checks that a user does not belong to multiple clusters 
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE;
     logger.error(`checking if cluster name already exists in the DB failed::${enums.CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE}`, error.message);
     return next(error);
@@ -334,6 +333,48 @@ export const checkIfPublicOrPrivateCluster = (type = '') => async(req, res, next
 };
 
 /**
+ * checks if user already belongs to type of cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with empty data field
+ * @memberof ClusterMiddleware
+ */
+export const checkIfUserBelongsToTypeOfCluster = async(req, res, next) => {
+  try {
+    const { cluster, user } = req;
+    const [ [ userPublicCLuster ], [ userPrivateCLuster ], [ userAdminCreatedCLuster ] ] = await Promise.all([
+      processAnyData(clusterQueries.fetchUserClusterType, [ user.user_id, 'public', false ]),
+      processAnyData(clusterQueries.fetchUserClusterType, [ user.user_id, 'private', false ]),
+      processAnyData(clusterQueries.fetchUserClusterType, [ user.user_id, 'private', true ])
+    ]);
+    if (cluster.type === 'public' && !cluster.is_created_by_admin && !userPublicCLuster) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to any public cluster yet 
+      checkIfUserBelongsToTypeOfCluster.middlewares.cluster.js`);
+      return next();
+    }
+    if (cluster.type === 'private' && !cluster.is_created_by_admin && !userPrivateCLuster) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to any private cluster yet 
+      checkIfUserBelongsToTypeOfCluster.middlewares.cluster.js`);
+      return next();
+    }
+    if (cluster.type === 'private' && cluster.is_created_by_admin && !userAdminCreatedCLuster) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belong to any admin created private cluster yet 
+      checkIfPublicOrPrivateCluster.middlewares.cluster.js`);
+      return next();
+    }
+    const clusterTypeValue = cluster.type === 'public' ? 'public' : cluster.type === 'private' && cluster.is_created_by_admin ? 'admin created' : 'private';
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user already belongs to one ${clusterTypeValue} cluster 
+    checkIfUserBelongsToTypeOfCluster.middlewares.cluster.js`);
+    return ApiResponse.error(res, enums.USER_CAN_ONLY_BE_IN_ONE_CLUSTER(clusterTypeValue), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_BELONGS_TO_TYPE_OF_CLUSTER_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_BELONGS_TO_TYPE_OF_CLUSTER_MIDDLEWARE;
+    logger.error(`checking if user already belong to a cluster type failed::${enums.CHECK_IF_BELONGS_TO_TYPE_OF_CLUSTER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * user takes voting decision on request to join cluster
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -364,6 +405,15 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
+      const [ requestingUsersCurrentClusterType ] = await processAnyData(clusterQueries.fetchUserClusterType, [ votingTicketDetails.ticket_raised_by, cluster.type, false ]);
+      if (requestingUsersCurrentClusterType) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting user already belongs to this cluster type
+        userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
+        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
+        userActivityTracking(req.user.user_id, activityType, 'fail');
+        return ApiResponse.error(res, enums.USER_ALREADY_BELONG_TO_THE_CLUSTER_TYPE(cluster.type), enums.HTTP_CONFLICT, 
+          enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
+      }
       const [ currentClusterMember ] = await processAnyData(clusterQueries.fetchActiveClusterMemberDetails, 
         [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if requesting member was a current cluster member 
@@ -372,8 +422,6 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting user already belongs to this cluster 
         userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
         await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member cannot be added and ticket is closed 
-        userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
@@ -743,6 +791,367 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
     userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.NEW_ADMIN_CLUSTER_ACCEPTANCE_MIDDLEWARE;
     logger.error(`new admin cluster acceptance failed::${enums.NEW_ADMIN_CLUSTER_ACCEPTANCE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check If cluster does not have an active cluster loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkIfClusterHasActiveLoan = async(req, res, next) => {
+  try {
+    const { user, cluster } = req;
+    if (cluster.loan_status !== 'inactive') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster has an active loan checkIfClusterHasActiveLoan.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_CURRENT_CLUSTER_STATUS(cluster.loan_status), 
+        enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_HAS_ACTIVE_LOAN_MIDDLEWARE);
+    }
+    const [ existingActiveClusterLoan ] = await processAnyData(clusterQueries.fetchClusterActiveLoans, [ cluster.cluster_id ]);
+    if (existingActiveClusterLoan) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster has an existing loan 
+      checkIfClusterHasActiveLoan.middlewares.cluster.js`);
+      if (existingActiveClusterLoan.status === 'approved') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster has an ${existingActiveClusterLoan.status} existing loan 
+        checkIfClusterHasActiveLoan.middlewares.cluster.js`);
+        return ApiResponse.error(res, enums.CLUSTER_LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON, 
+          enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_HAS_ACTIVE_LOAN_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster has ${existingActiveClusterLoan.status} existing loan 
+      checkIfClusterHasActiveLoan.middlewares.cluster.js`);
+      const statusType = existingActiveClusterLoan.status === 'processing' || existingActiveClusterLoan.status === 'pending' ? 
+        `a ${existingActiveClusterLoan.status} loan application` : 
+        `an ${existingActiveClusterLoan.status} loan`;
+      return ApiResponse.error(res, enums.CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN(statusType), 
+        enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_HAS_ACTIVE_LOAN_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms cluster has no active or in progress loan checkIfClusterHasActiveLoan.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_CLUSTER_HAS_ACTIVE_LOAN_MIDDLEWARE;
+    logger.error(`Check if cluster has an active loan failed::${enums.CHECK_IF_CLUSTER_HAS_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check If cluster has more than 1 cluster member to take a cluster loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkClusterMembersNumber = async(req, res, next) => {
+  try {
+    const { user, cluster } = req;
+    if (parseFloat(cluster.members.length) <= 1) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster does not have more than one active members 
+      checkClusterMembersNumber.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_MEMBERS_NOT_MORE_THAN_ONE, enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_MEMBERS_NUMBER_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster have more than one active members 
+    checkClusterMembersNumber.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_CLUSTER_MEMBERS_NUMBER_MIDDLEWARE;
+    logger.error(`Check if cluster has more than one member failed::${enums.CHECK_CLUSTER_MEMBERS_NUMBER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check If cluster member does not have an active cluster loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkIfUserHasActiveClusterLoan = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const  [ existingClusterLoan ]  = await processAnyData(clusterQueries.fetchUserActiveClusterLoans, [ user.user_id ]);
+    if (existingClusterLoan) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has an existing active cluster loan 
+      checkIfUserHasActiveClusterLoan.middlewares.cluster.js`);
+      if (existingClusterLoan.status === 'approved') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingClusterLoan.status} existing cluster loan 
+        checkIfUserHasActiveClusterLoan.middlewares.cluster.js`);
+        return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_CLUSTER_LOAN_REASON, 
+          enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_HAS_ACTIVE_CLUSTER_LOAN_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingClusterLoan.status} existing cluster loan 
+      checkIfUserHasActiveClusterLoan.middlewares.cluster.js`);
+      const statusType = existingClusterLoan.status === 'processing' || existingClusterLoan.status === 'pending' ? 
+        `a ${existingClusterLoan.status} cluster loan application` : 
+        `an ${existingClusterLoan.status} cluster loan`;
+      return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN(statusType), 
+        enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_HAS_ACTIVE_CLUSTER_LOAN_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms user has no active cluster loan checkIfUserHasActiveClusterLoan.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_HAS_ACTIVE_CLUSTER_LOAN_MIDDLEWARE;
+    logger.error(`Check if cluster member has an existing cluster loan failed::${enums.CHECK_IF_USER_HAS_ACTIVE_CLUSTER_LOAN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * validate total cluster amount and breakdown amount based on sharing type
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const totalLoanAmountVerificationAndBreakdown = async(req, res, next) => {
+  try {
+    const { user, cluster, body } = req;
+    const [ clusterMaximumLoanAmountDetails, clusterMinimumLoanAmountDetails ] = await Promise.all([
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'cluster_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'cluster_minimum_loan_amount' ])
+    ]);
+    if ((parseFloat(body.total_amount) > (parseFloat(parseFloat(clusterMaximumLoanAmountDetails.value))))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster loan request is greater than cluster maximum allowable amount
+      totalLoanAmountVerificationAndBreakdown.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, 
+        enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE);
+    }
+    if ((parseFloat(body.total_amount) < (parseFloat(parseFloat(clusterMinimumLoanAmountDetails.value))))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster loan request is lesser than cluster minimum allowable  amount
+      totalLoanAmountVerificationAndBreakdown.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, 
+        enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE);
+    }
+    if (body.sharing_type === 'equal') {
+      const assignedAmount = (parseFloat(body.total_amount)) / parseFloat(cluster.members.length);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms sharing type is equal and the sharing calculation done 
+      totalLoanAmountVerificationAndBreakdown.middlewares.cluster.js`);
+      body.amount = parseFloat(assignedAmount);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE;
+    logger.error(`Validating cluster total loan amount failed::${enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check cluster loan exists by id
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkIfClusterLoanApplicationExists = async(req, res, next) => {
+  try {
+    const { params: { cluster_id, loan_id }, user } = req;
+    const [ existingClusterLoanApplication ] = await processAnyData(clusterQueries.fetchClusterLoanDetails, [ cluster_id, loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster loan application exists in the db 
+    checkIfClusterLoanApplicationExists.middlewares.cluster.js`);
+    if (existingClusterLoanApplication) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan application exists and belongs to the stated cluster
+      checkIfClusterLoanApplicationExists.middlewares.cluster.js`);
+      req.clusterLoanDetails = existingClusterLoanApplication;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan application does not exist for stated cluster
+    checkIfClusterLoanApplicationExists.middlewares.cluster.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE;
+    logger.error(`checking if general cluster loan application exists failed::${enums.CHECK_IF_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check cluster member loan exists by id
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkIfMemberClusterLoanApplicationExists = async(req, res, next) => {
+  try {
+    const { params: { member_loan_id }, user } = req;
+    const [ existingClusterMemberLoanApplication ] = await processAnyData(clusterQueries.fetchClusterMemberLoanDetailsByLoanId, [ member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster loan application exists in the db 
+    checkIfMemberClusterLoanApplicationExists.middlewares.cluster.js`);
+    if (existingClusterMemberLoanApplication) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan application exists and belongs to authenticated user for the stated cluster
+      checkIfMemberClusterLoanApplicationExists.middlewares.cluster.js`);
+      req.existingLoanApplication = existingClusterMemberLoanApplication;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan application does not exist for authenticated user and/or the stated cluster
+    checkIfMemberClusterLoanApplicationExists.middlewares.cluster.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE;
+    logger.error(`checking if cluster loan application exists failed::${enums.CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check cluster loan application status is currently still pending
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkIfMemberClusterLoanApplicationStatusIsStillPending = async(req, res, next) => {
+  try {
+    const { existingLoanApplication, user } = req;
+    if (existingLoanApplication.status === 'pending' || existingLoanApplication.status === 'approved' || existingLoanApplication.status === 'in review') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: cluster loan application status is still pending 
+      checkIfMemberClusterLoanApplicationStatusIsStillPending.middlewares.cluster.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is no longer pending 
+    checkIfMemberClusterLoanApplicationStatusIsStillPending.middlewares.cluster.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), 
+      enums.HTTP_FORBIDDEN, enums.CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_STATUS_IS_STILL_PENDING_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_STATUS_IS_STILL_PENDING_MIDDLEWARE;
+    logger.error(`checking if cluster loan application status is still pending 
+    failed::${enums.CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_STATUS_IS_STILL_PENDING_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * sorting of loan amount based on loan sharing type
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const sortClusterLoanAmount = async(req, res, next) => {
+  try {
+    const { existingLoanApplication, user, body } = req;
+    body.amount = existingLoanApplication.sharing_type === 'equal' ? parseFloat(existingLoanApplication.amount_requested) : parseFloat(body.amount);
+    body.duration_in_months = Number(existingLoanApplication.loan_tenor_in_months);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application amount and tenor adjusted based on sharing type
+    sortClusterLoanAmount.middlewares.cluster.js`);
+    if (existingLoanApplication.sharing_type === 'equal') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application sharing type is on equal basis sortClusterLoanAmount.middlewares.cluster.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application sharing type is on self allocate basis sortClusterLoanAmount.middlewares.cluster.js`);
+    const [ totalAllocatedSum ] = await processAnyData(clusterQueries.fetchSumOfAllocatedLoanAmount, [ existingLoanApplication.loan_id ]);
+    const toBeTotalAllocatedSum = parseFloat(totalAllocatedSum.total_allocated_amount) + parseFloat(body.amount);
+    const amountAvailableForSharing = parseFloat(existingLoanApplication.total_cluster_amount) - parseFloat(totalAllocatedSum.total_allocated_amount);
+    if (parseFloat(toBeTotalAllocatedSum) > parseFloat(existingLoanApplication.total_cluster_amount)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application amount will cause total cluster loan amount to be exceeded 
+      sortClusterLoanAmount.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.ALLOCATED_AMOUNT_EXCEEDING_TOTAL_AMOUNT(`₦${parseFloat(amountAvailableForSharing).toFixed(2)}`), enums.HTTP_BAD_REQUEST, 
+        enums.SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application amount will not cause total cluster loan amount to be exceeded 
+      sortClusterLoanAmount.middlewares.cluster.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE;
+    logger.error(`sorting cluster loan application amount anf tenor based on sharing type failed
+    failed::${enums.SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch the new total loan amounts, repayments, and interests
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const fetchGeneralClusterNewLoanAmountValues = async(req, res, next) => {
+  try {
+    const { clusterLoanDetails, user } = req;
+    if (clusterLoanDetails.status !== 'pending') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application disbursement cannot be processed due to loan status not pending 
+      fetchGeneralClusterNewLoanAmountValues.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_STATUS, enums.HTTP_FORBIDDEN, 
+        enums.FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE);
+    }
+    if (!clusterLoanDetails.can_disburse_loan) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application disbursement cannot be processed yet due to incomplete members loan decision 
+      fetchGeneralClusterNewLoanAmountValues.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_DECISIONS, enums.HTTP_FORBIDDEN, 
+        enums.FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE);
+    }
+    const [ [ newClusterAmountValues ], [ qualifiedClusterMembersCount ] ] = await Promise.all([
+      processAnyData(clusterQueries.getUpdatedLoanAmountValues, [ clusterLoanDetails.loan_id ]),
+      processAnyData(clusterQueries.getCountOfQualifiedClusterMembers, [ clusterLoanDetails.loan_id ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: general loan application amount terms fetched successfully from the Db
+    fetchGeneralClusterNewLoanAmountValues.middlewares.cluster.js`);
+    if (Number(qualifiedClusterMembersCount.count) <= 1) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application disbursement cannot be processed due to number of qualified members not more than one
+      fetchGeneralClusterNewLoanAmountValues.middlewares.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_NOT_MORE_THAN_ONE_QUALIFIED_MEMBER, enums.HTTP_FORBIDDEN, 
+        enums.FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE);
+    }
+    req.newClusterAmountValues = newClusterAmountValues;
+    req.existingLoanApplication = {
+      amount_requested: parseFloat(newClusterAmountValues.actual_total_loan_amount)
+    };
+    return next();
+  } catch (error) {
+    error.label = enums.FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE;
+    logger.error(`fetching for new general loan amounts failed::${enums.FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check cluster loan reschedule request exists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof ClusterMiddleware
+ */
+export const checkClusterLoanReschedulingRequest = async(req, res, next) => {
+  try {
+    const { params: { reschedule_id, member_loan_id }, user } = req;
+    const [ clusterLoanRescheduleRequest ] = await processAnyData(clusterQueries.fetchClusterLoanRescheduleRequest, [ reschedule_id, member_loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster loan reschedule request exists 
+    checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+    if (clusterLoanRescheduleRequest) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request exists checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+      if (clusterLoanRescheduleRequest.is_accepted) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request has been previously processed 
+        checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+        userActivityTracking(req.user.user_id, 75, 'fail');
+        return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING, enums.HTTP_BAD_REQUEST, 
+          enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
+      }
+      req.loanRescheduleRequest = clusterLoanRescheduleRequest;
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request does not exists 
+    checkClusterLoanReschedulingRequest.middlewares.cluster.js`);
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    error.label = enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE;
+    logger.error(`checking if cluster loan rescheduling request exists failed::${enums.CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

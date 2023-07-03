@@ -1,19 +1,28 @@
 import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
 import notificationQueries from '../queries/queries.notification';
-import { processOneOrNoneData, processAnyData } from '../services/services.db';
+import loanQueries from '../queries/queries.loan';
+import { processOneOrNoneData, processAnyData, processNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
+import config from '../../config';
+import AdminMailService from '../../../admins/api/services/services.email';
 import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 import { createClusterNotification, sendUserPersonalNotification, sendMulticastPushNotification,
   sendClusterNotification, sendPushNotification, sendNotificationToAdmin } from '../services/services.firebase';
 import MailService from '../services/services.email';
+import { loanApplicationEligibilityCheck, loanApplicationRenegotiation } from '../services/service.seedfiUnderwriting';
+import { initiateTransfer, initializeCardPayment, initializeBankTransferPayment,
+  initializeDebitCarAuthChargeForLoanRepayment, initializeBankAccountChargeForLoanRepayment 
+} from '../services/service.paystack';
 import { collateUsersFcmTokens, collateUsersFcmTokensExceptAuthenticatedUser } from '../../lib/utils/lib.util.helpers';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import * as adminNotification from '../../lib/templates/adminNotification';
 import { userActivityTracking } from '../../lib/monitor';
+import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 
 
 /**
@@ -344,7 +353,7 @@ export const fetchClusterMembers = async(req, res, next) => {
   try {
     const { params: { cluster_id }, user } = req;
     const clusterMembers = await processAnyData(clusterQueries.fetchClusterMembers, cluster_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster members in the DB fetchClusterMembers.users.controllers.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster members in the DB fetchClusterMembers.users.controllers.cluster.js`);
     return ApiResponse.success(res, enums.CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterMembers);
   } catch (error) {
     error.label = enums.FETCH_CLUSTER_MEMBERS_CONTROLLER;
@@ -403,6 +412,12 @@ export const leaveCluster = async(req, res, next) => {
 export const editCluster = async(req, res, next) => {
   try {
     const { params, body, cluster, user  } = req;
+    const [ existingClusterName ] = await processAnyData(clusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster name already exists in the db editCluster.controllers.cluster.js`);
+    if (existingClusterName) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster name already exists in the db editCluster.controllers.cluster.js`);
+      return ApiResponse.error(res, enums.CLUSTER_NAME_ALREADY_EXISTING(body.name), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_NAME_UNIQUE_MIDDLEWARE);
+    }
     const payload = ClusterPayload.editCluster(body, cluster, params);
     const editedCluster = await processOneOrNoneData(clusterQueries.editCluster,  payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully edited the cluster editCluster.controllers.cluster.js`);
@@ -500,6 +515,645 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 64, 'fail');
     error.label = enums.SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER;
     logger.error(`selecting new cluster admin failed::${enums.SUGGEST_NEW_CLUSTER_ADMIN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+* check if cluster admin is eligible for loan
+* @param {Request} req - The request from the endpoint.
+* @param {Response} res - The response returned by the method.
+* @param {Next} next - Call the next operation.
+* @returns { JSON } - A JSON with no data
+* @memberof ClusterController
+*/
+export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => {
+  try {
+    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails } = req;
+    const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
+    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const generalLoanApplicationDetails = await processOneOrNoneData(clusterQueries.initiateClusterLoanApplication, 
+      [ cluster.cluster_id, cluster.name, user.user_id, parseFloat(body.total_amount), Number(body.duration_in_months), body.sharing_type, 
+        parseFloat(body.total_amount), Number(body.duration_in_months) ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated general loan application in the db 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const initiatorLoanApplicationDetails = await processOneOrNoneData(clusterQueries.createClusterMemberLoanApplication, [ generalLoanApplicationDetails.loan_id, 
+      cluster.cluster_id, cluster.name, user.user_id, body.sharing_type, parseFloat(body.amount), Number(body.duration_in_months), 
+      parseFloat(body.amount), Number(body.duration_in_months), parseFloat(body.total_amount), true ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated cluster loan initiator application in the db 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const userLoanDiscount = {
+      interest_rate_type: 'fixed',
+      interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
+    };
+    const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, initiatorLoanApplicationDetails, 
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+    const result = await loanApplicationEligibilityCheck(payload);
+    if (result.status !== 200) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
+      checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      await processNoneData(clusterQueries.deleteClusterMemberLoanApplication, [ initiatorLoanApplicationDetails.member_loan_id, user.user_id ]);
+      await processNoneData(clusterQueries.deleteGeneralClusterLoanApplication, [ initiatorLoanApplicationDetails.loan_id, user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated cluster loan application deleted 
+      checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+    }
+    const { data } = result;
+    if (data.final_decision === 'DECLINED') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiating user cluster loan eligibility status shows user is not eligible for loan 
+      checkClusterAdminClusterLoanEligibility.controllers.loan.js`);
+      const declinedDecisionPayload = ClusterPayload.processDeclinedClusterLoanDecisionUpdatePayload(data, body);
+      await processOneOrNoneData(clusterQueries.updateUserDeclinedDecisionClusterLoanApplication, declinedDecisionPayload);
+      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateDeclinedDecisionGeneralClusterLoanApplication, 
+        [ initiatorLoanApplicationDetails.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility' ]);
+      const returnData = await ClusterPayload.clusterLoanApplicationDeclinedDecisionResponse(user, initiatorLoanApplicationDetails, 
+        updatedClusterLoanDetails.status, 'DECLINED');
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} loan application declined`, 'loan-application-eligibility', {});
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan eligibility status shows user is eligible for loan 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const [ clusterMembersToken, otherClusterMembers ] = await collateUsersFcmTokensExceptAuthenticatedUser(cluster.members, user.user_id);
+    const memberLoanAmount = body.sharing_type === 'equal' ? (parseFloat(body.total_amount)) / parseFloat(cluster.members.length) : 0;
+    await otherClusterMembers.map(async(member) => {
+      const memberLoanApplication = await processOneOrNoneData(clusterQueries.createClusterMemberLoanApplication, [ generalLoanApplicationDetails.loan_id, cluster.cluster_id, 
+        cluster.name, member.user_id, body.sharing_type, parseFloat(memberLoanAmount), Number(body.duration_in_months), 
+        parseFloat(memberLoanAmount), Number(body.duration_in_months), parseFloat(body.total_amount), false ]);
+      sendUserPersonalNotification(member, `Cluster ${cluster.name} loan application request`, PersonalNotifications.initiateClusterLoan(user, cluster), 
+        'cluster-loan-request', { generalLoanApplicationDetails, memberLoanApplication });
+      return member;
+    });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: other cluster members loan created in the db and personal notification sent 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    sendMulticastPushNotification(PushNotifications.initiateClusterLoanApplication(user, cluster), clusterMembersToken, 'cluster-loan-request', cluster.cluster_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: multicast push notification sent to all cluster members successfully 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
+    const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
+    const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
+      parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    if (data.final_decision === 'MANUAL') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status would be subjected to manual approval 
+      checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      const manualDecisionPayload = ClusterPayload.processClusterLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'in review', body);
+      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateUserManualOrApprovedDecisionClusterLoanApplication, manualDecisionPayload);
+      await processOneOrNoneData(clusterQueries.updateClusterLoanApplicationClusterInterest, [ generalLoanApplicationDetails.loan_id, data.pricing_band ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest cluster loan details updated checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      const offerLetterData = await generateOfferLetterPDF(user, updatedClusterLoanDetails);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan offer letter generated checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
+      const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
+        updatedClusterLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} loan application subjected to manual approval`, 
+        'loan-application-eligibility', {});
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
+    }
+    if (data.final_decision === 'APPROVED') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan eligibility status passes and user is eligible for automatic loan approval
+      checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      const approvedDecisionPayload = ClusterPayload.processClusterLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'approved', body);
+      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateUserManualOrApprovedDecisionClusterLoanApplication, approvedDecisionPayload);
+      await processOneOrNoneData(clusterQueries.updateClusterLoanApplicationClusterInterest, [ generalLoanApplicationDetails.loan_id, data.pricing_band ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest cluster loan details updated checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      const offerLetterData = await generateOfferLetterPDF(user, updatedClusterLoanDetails);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan offer letter generated checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+      await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
+      const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
+        updatedClusterLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} loan application approved`, 'loan-application-eligibility', {});
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
+    }
+  } catch (error) {
+    error.label = enums.CHECK_CLUSTER_ADMIN_CLUSTER_LOAN_ELIGIBILITY_CONTROLLER;
+    logger.error(`checking cluster admin loan application eligibility failed::${enums.CHECK_CLUSTER_ADMIN_CLUSTER_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user renegotiates requesting cluster loan amount
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of cancelled loan
+ * @memberof ClusterController
+ */
+export const processClusterLoanRenegotiation = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, body } = req;
+    body.new_loan_duration_in_month = existingLoanApplication.loan_tenor_in_months;
+    const result = await loanApplicationRenegotiation(body, user, existingLoanApplication);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan renegotiation processing result returned 
+    processClusterLoanRenegotiation.controllers.cluster.js`);
+    if (result.status !== 200) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan renegotiation processing does not return success response from underwriting service 
+      processClusterLoanRenegotiation.controllers.cluster.js`);
+      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.PROCESS_CLUSTER_LOAN_RENEGOTIATION_CONTROLLER);
+    }
+    const { data } = result;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan renegotiation processing returns success response from underwriting service
+    processClusterLoanRenegotiation.controllers.cluster.js`);
+    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
+    const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month));
+    const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(body.new_loan_amount);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total interest amount and total amount repayable calculated 
+    processClusterLoanRenegotiation.controllers.cluster.js`);
+    const renegotiationPayload = await ClusterPayload.clusterLoanRenegotiationPayload(user, body, existingLoanApplication, data);
+    const updateRenegotiationPayload = await ClusterPayload.clusterLoanApplicationRenegotiationPayload(data, totalAmountRepayable, totalInterestAmount, 
+      body, existingLoanApplication);
+    const [ , updatedClusterLoanDetails ] = await Promise.all([
+      processOneOrNoneData(clusterQueries.createClusterLoanRenegotiationDetails, renegotiationPayload),
+      processOneOrNoneData(clusterQueries.updateClusterLoanApplicationWithRenegotiation, updateRenegotiationPayload)
+    ]);
+    const offerLetterData = await generateOfferLetterPDF(user, updatedClusterLoanDetails);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan offer letter generated processClusterLoanRenegotiation.controllers.cluster.js`);
+    await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
+    const returningData = await ClusterPayload.clusterLoanApplicationRenegotiationResponse(data, totalAmountRepayable, totalInterestAmount, user, 
+      updatedClusterLoanDetails, offerLetterData.Location.trim(), body);
+    return ApiResponse.success(res, enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY, enums.HTTP_OK, returningData);
+  } catch (error) {
+    error.label = enums.PROCESS_CLUSTER_LOAN_RENEGOTIATION_CONTROLLER;
+    logger.error(`processing cluster loan renegotiation failed::${enums.PROCESS_CLUSTER_LOAN_RENEGOTIATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch cluster member cluster loan details by member loan id
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof ClusterController
+ */
+export const fetchClusterMemberLoanDetails = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication } = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: details of user cluster member cluster loan prepared 
+    fetchClusterMemberLoanDetails.controllers.cluster.js`);
+    const [ nextRepaymentDetails ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
+    const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
+    const data = {
+      nextClusterLoanRepaymentDetails: nextRepaymentDetails,
+      clusterLoanDetails: existingLoanApplication,
+      clusterLoanRepaymentDetails
+    };
+    return ApiResponse.success(res, enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('cluster'), enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_CLUSTER_MEMBER_LOAN_DETAILS_CONTROLLER;
+    logger.error(`fetching details of a user cluster loan failed::${enums.FETCH_CLUSTER_MEMBER_LOAN_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+* check if cluster member is eligible for loan
+* @param {Request} req - The request from the endpoint.
+* @param {Response} res - The response returned by the method.
+* @param {Next} next - Call the next operation.
+* @returns { JSON } - A JSON with no data
+* @memberof ClusterController
+*/
+export const checkClusterMemberClusterLoanEligibility = async(req, res, next) => {
+  try {
+    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication } = req;
+    const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
+    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+    const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
+    const userLoanDiscount = {
+      interest_rate_type: 'fixed',
+      interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
+    };
+    const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, existingLoanApplication, 
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+    const result = await loanApplicationEligibilityCheck(payload);
+    if (result.status !== 200) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
+      checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+    }
+    const { data } = result;
+    if (data.final_decision === 'DECLINED') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiating user cluster loan eligibility status shows user is not eligible for loan 
+      checkClusterMemberClusterLoanEligibility.controllers.loan.js`);
+      const declinedDecisionPayload = ClusterPayload.processDeclinedClusterLoanDecisionUpdatePayload(data, body);
+      await processOneOrNoneData(clusterQueries.updateUserDeclinedDecisionClusterLoanApplication, declinedDecisionPayload);
+      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateDeclinedDecisionGeneralClusterLoanApplication, 
+        [ existingLoanApplication.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility', parseFloat(body.amount) ]);
+      const returnData = await ClusterPayload.clusterLoanApplicationDeclinedDecisionResponse(user, existingLoanApplication, 
+        updatedClusterLoanDetails.status, 'DECLINED');
+      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} loan application declined`, 'loan-application-eligibility', {});
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan eligibility status shows user is eligible for loan 
+    checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
+    const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
+    const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
+      parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    if (data.final_decision === 'MANUAL') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status would be subjected to manual approval 
+      checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      const manualDecisionPayload = ClusterPayload.processClusterLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'in review', body);
+      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateUserManualOrApprovedDecisionClusterLoanApplication, manualDecisionPayload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest cluster loan details updated checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      const offerLetterData = await generateOfferLetterPDF(user, updatedClusterLoanDetails);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan offer letter generated checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
+      const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
+        updatedClusterLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
+      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} loan application subjected to manual approval`, 
+        'loan-application-eligibility', {});
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
+    }
+    if (data.final_decision === 'APPROVED') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan eligibility status passes and user is eligible for automatic loan approval
+      checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      const approvedDecisionPayload = ClusterPayload.processClusterLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'approved', body);
+      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateUserManualOrApprovedDecisionClusterLoanApplication, approvedDecisionPayload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest cluster loan details updated checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      const offerLetterData = await generateOfferLetterPDF(user, updatedClusterLoanDetails);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan offer letter generated checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+      await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
+      const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
+        updatedClusterLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
+      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} loan application approved`, 'loan-application-eligibility', {});
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
+    }
+  } catch (error) {
+    error.label = enums.CHECK_CLUSTER_ADMIN_CLUSTER_LOAN_ELIGIBILITY_CONTROLLER;
+    logger.error(`checking cluster member loan application eligibility failed::${enums.CHECK_CLUSTER_ADMIN_CLUSTER_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * cluster member accepts or declines loan application
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof ClusterController
+ */
+export const clusterMemberLoanDecision = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, body } = req;
+    const isAdmin = existingLoanApplication.is_loan_initiator ? true : false;
+    const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster details fetched successfully clusterMemberLoanDecision.controllers.cluster.js`);
+    if (body.decision !== 'decline' && existingLoanApplication.is_taken_loan_request_decision) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan decision previously taken lusterMemberLoanDecision.controllers.cluster.js`);
+      return ApiResponse.error(res, enums.USER_ALREADY_TAKEN_CLUSTER_LOAN_DECISION, enums.HTTP_CONFLICT, enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER);
+    }
+    if (body.decision === 'accept' && existingLoanApplication.status === 'pending') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan eligibility has not run yet lusterMemberLoanDecision.controllers.cluster.js`);
+      return ApiResponse.error(res, enums.USER_NO_ELIGIBILITY_CHECK_RESULT_CLUSTER_LOAN_DECISION, enums.HTTP_BAD_REQUEST, enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER);
+    }
+    if (body.decision === 'decline') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan decision is decline clusterMemberLoanDecision.controllers.cluster.js`);
+      await processOneOrNoneData(clusterQueries.declineClusterMemberLoanApplicationDecision, [ existingLoanApplication.member_loan_id ]);
+      sendClusterNotification(user, cluster, { is_admin: isAdmin }, `${user.first_name} ${user.last_name} cancelled own loan application`, 'loan-application-decision', {});
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan cancelled by cluster member and cluster notification is sent 
+      clusterMemberLoanDecision.controllers.cluster.js`);
+      if (existingLoanApplication.is_loan_initiator) {
+        await Promise.all([
+          processAnyData(clusterQueries.cancelAllClusterMembersLoanApplication, [ existingLoanApplication.loan_id ]),
+          processAnyData(clusterQueries.cancelGeneralLoanApplication, [ existingLoanApplication.loan_id, user.user_id ])
+        ]);
+        sendClusterNotification(user, cluster, { is_admin: isAdmin }, `${user.first_name} ${user.last_name} cancelled cluster loan application for all cluster members`, 
+          'loan-application-decision', {});
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan cancelled for all cluster members and cluster notification is sent 
+        clusterMemberLoanDecision.controllers.cluster.js`);
+      }
+      const outstandingLoanDecision = await processAnyData(clusterQueries.checkForOutstandingClusterLoanDecision, [ existingLoanApplication.loan_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan can be disbursed by cluster admin clusterMemberLoanDecision.controllers.cluster.js`);
+      if (outstandingLoanDecision.length > 0) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan can not yet be disbursed by cluster admin clusterMemberLoanDecision.controllers.cluster.js`);
+        return ApiResponse.success(res, enums.LOAN_APPLICATION_CANCELLING_SUCCESSFUL, enums.HTTP_OK);
+      }
+      await processOneOrNoneData(clusterQueries.updateGeneralLoanApplicationCanDisburseLoan, [ existingLoanApplication.loan_id ]);
+      sendClusterNotification(user, cluster, { is_admin: isAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan', 
+        'loan-application-can-disburse', {});
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan can now be disbursed by cluster admin and notification sent 
+      clusterMemberLoanDecision.controllers.cluster.js`);
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_CANCELLING_SUCCESSFUL, enums.HTTP_OK);
+    }
+    await processOneOrNoneData(clusterQueries.acceptClusterMemberLoanApplication, [ existingLoanApplication.member_loan_id ]);
+    sendClusterNotification(user, cluster, { is_admin: isAdmin }, `${user.first_name} ${user.last_name} accepted own loan application`, 'loan-application-decision', {});
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan accepted by cluster member and cluster notification is sent 
+      clusterMemberLoanDecision.controllers.cluster.js`);
+    const outstandingLoanDecision = await processAnyData(clusterQueries.checkForOutstandingClusterLoanDecision, [ existingLoanApplication.loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan can be disbursed by cluster admin clusterMemberLoanDecision.controllers.cluster.js`);
+    if (outstandingLoanDecision.length > 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan can not yet be disbursed by cluster admin clusterMemberLoanDecision.controllers.cluster.js`);
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_ACCEPTANCE_SUCCESSFUL, enums.HTTP_OK);
+    }
+    await processOneOrNoneData(clusterQueries.updateGeneralLoanApplicationCanDisburseLoan, [ existingLoanApplication.loan_id ]);
+    sendClusterNotification(user, cluster, { is_admin: isAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan', 
+      'loan-application-can-disburse', {});
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan can now be disbursed by cluster admin and notification sent 
+      clusterMemberLoanDecision.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.LOAN_APPLICATION_ACCEPTANCE_SUCCESSFUL, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER;
+    logger.error(`taking cluster loan decision failed::${enums.CLUSTER_MEMBER_LOAN_DECISION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * initiate cluster loan disbursement to admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of newly activated ongoing loan
+ * @memberof ClusterController
+ */
+export const initiateClusterLoanDisbursement = async(req, res, next) => {
+  try {
+    const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication, newClusterAmountValues } = req;
+    const reference = uuidv4();
+    await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference, 
+      'cluster_loan_disbursement', 'requested group cluster loan facility disbursement', loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan payment initialized in the DB initiateClusterLoanDisbursement.controllers.cluster.js`);
+    const result = await initiateTransfer(userTransferRecipient, existingLoanApplication, reference);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: transfer initiate via paystack returns response initiateClusterLoanDisbursement.controllers.cluster.js`);
+    if (result.status === true && result.message === 'Transfer has been queued') {
+      const [ [ updatedLoanDetails ]  ] = await Promise.all([
+        processAnyData(clusterQueries.updateProcessingClusterLoanDetails, [ loan_id, newClusterAmountValues.actual_total_loan_amount,
+          newClusterAmountValues.actual_total_loan_repayment_amount, newClusterAmountValues.actual_total_loan_interest_amount, 
+          newClusterAmountValues.actual_total_loan_monthly_repayment_amount ]),
+        processAnyData(clusterQueries.updateClusterMembersProcessingLoanDetails, [ loan_id, newClusterAmountValues.actual_total_loan_amount ])
+      ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details status set to processing in the DB 
+      initiateClusterLoanDisbursement.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 44, 'success');
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL, enums.HTTP_OK, { ...updatedLoanDetails , reference });
+    }
+    if (result.response.status === 400 && result.response.data.message === 'Your balance is not enough to fulfil this request') {
+      const data = {
+        email: config.SEEDFI_ADMIN_EMAIL_ADDRESS,
+        currentBalance: 'Kindly login to confirm'
+      };
+      await AdminMailService('Insufficient Paystack Balance', 'insufficientBalance', { ...data });
+    }
+    if (result.response.data.message !== 'Your balance is not enough to fulfil this request') {
+      userActivityTracking(user.user_id, 44, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_CLUSTER_LOAN_DISBURSEMENT_CONTROLLER);
+    }
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_CLUSTER_LOAN_DISBURSEMENT_CONTROLLER);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    error.label = enums.INITIATE_CLUSTER_LOAN_DISBURSEMENT_CONTROLLER;
+    logger.error(`initiating loan disbursement failed::${enums.INITIATE_CLUSTER_LOAN_DISBURSEMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * initiate manual cluster loan repayment
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of an initiate paystack payment
+ * @memberof ClusterController
+ */
+export const initiateManualClusterLoanRepayment = async(req, res, next) => {
+  try {
+    const { user, params: { member_loan_id }, existingLoanApplication, query: { payment_type, payment_channel } } = req;
+    if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan has a status of ${existingLoanApplication.status} so repayment is possible 
+      initiateManualClusterLoanRepayment.controllers.cluster.js`);
+      const reference = uuidv4();
+      const [ nextRepaymentDetails ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ member_loan_id, user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan next repayment details fetched 
+      initiateManualClusterLoanRepayment.controllers.cluster.js`);
+      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount) : parseFloat(nextRepaymentDetails.total_payment_amount);
+      const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualClusterLoanRepayment.controllers.cluster.js`);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, 
+        `${payment_type}_cluster_loan_repayment`, `user repays out of or all of existing cluster loan facility via ${payment_channel}`, member_loan_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB 
+      initiateManualClusterLoanRepayment.controllers.cluster.js`);
+      const result = payment_channel === 'card' ? await initializeCardPayment(user, paystackAmountFormatting, reference) : 
+        await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response 
+      initiateManualClusterLoanRepayment.controllers.cluster.js`);
+      if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualClusterLoanRepayment.controllers.loan.js`);
+        userActivityTracking(req.user.user_id, 71, 'success');
+        return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized 
+      initiateManualClusterLoanRepayment.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 71, 'fail');
+      return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CLUSTER_LOAN_REPAYMENT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan has a status of ${existingLoanApplication.status} and repayment is not possible 
+    initiateManualClusterLoanRepayment.controllers.cluster.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), 
+      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CLUSTER_LOAN_REPAYMENT_CONTROLLER);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 71, 'fail');
+    error.label = enums.INITIATE_MANUAL_CLUSTER_LOAN_REPAYMENT_CONTROLLER;
+    logger.error(`initiating cluster loan repayment failed::${enums.INITIATE_MANUAL_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * initiate manual cluster loan repayment via existing card or bank account
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of an initiate paystack payment
+ * @memberof ClusterController
+ */
+export const initiateManualCardOrBankClusterLoanRepayment = async(req, res, next) => {
+  const { user, params: { member_loan_id }, existingLoanApplication, query: { payment_type, payment_channel }, userDebitCard, accountDetails } = req;
+  const activityType = payment_channel === 'card' ? 71: 73;
+  try {
+    if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan has a status of ${existingLoanApplication.status} so repayment is possible 
+      initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+      const reference = uuidv4();
+      const [ nextRepaymentDetails ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ member_loan_id, user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan next repayment details fetched 
+      initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount) : parseFloat(nextRepaymentDetails.total_payment_amount);
+      const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted 
+      initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, 
+        `${payment_type}_cluster_loan_repayment`, `user repays part of or all of existing cluster loan facility via ${payment_channel}`, member_loan_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB 
+      initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+      const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) : 
+        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response 
+      initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+      if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized 
+        initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+        userActivityTracking(req.user.user_id, activityType, 'success');
+        return ApiResponse.success(res, result.message, enums.HTTP_OK, { 
+          user_id: user.user_id, 
+          amount: parseFloat(paymentAmount).toFixed(2), 
+          payment_type, 
+          payment_channel,
+          reference: result.data.reference,
+          status: result.data.status,
+          display_text: result.data.display_text || ''
+        });
+      }
+      if (result.response && result.response.status === 400) {
+        userActivityTracking(req.user.user_id, activityType, 'fail');
+        return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized 
+      initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, activityType, 'fail');
+      return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan has a status of ${existingLoanApplication.status} and repayment is not possible 
+    initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, activityType, 'fail');
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status), 
+      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, activityType, 'fail');
+    error.label = enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER;
+    logger.error(`initiating cluster loan repayment manually using saved card or bank account 
+    failed::${enums.INITIATE_MANUAL_CARD_OR_BANK_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch a cluster's current active loan application
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the cluster members
+ * @memberof ClusterController
+ */
+export const fetchCurrentClusterLoan = async(req, res, next) => {
+  try {
+    const { params: { cluster_id }, user } = req;
+    const [ clusterLoan ] = await processAnyData(clusterQueries.fetchClusterActiveLoans, [ cluster_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster active loan in the DB fetchCurrentClusterLoan.users.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterLoan);
+  } catch (error) {
+    error.label = enums.FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER;
+    logger.error(`fetching current cluster active loans failed::${enums.FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER}`, error.message);
+    return next(error);
+  }  
+};
+
+/**
+ * process the summary of rescheduled cluster loan and return
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof ClusterController
+ */
+export const clusterLoanReschedulingSummary = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, loanRescheduleExtensionDetails } = req;
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched clusterLoanReschedulingSummary.controllers.cluster.js`);
+    if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count 
+      clusterLoanReschedulingSummary.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 94, 'fail');
+      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN, 
+        enums.CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count is less than system allowable rescheduling count 
+      clusterLoanReschedulingSummary.controllers.cluster.js`);
+    const [ nextRepayment ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next cluster loan repayment details fetched 
+    clusterLoanReschedulingSummary.controllers.cluster.js`);
+    const returnData = await ClusterPayload.clusterLoanReschedulingRequestSummaryResponse(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment);
+    const rescheduleRequest = await processOneOrNoneData(clusterQueries.createClusterLoanRescheduleRequest, [ existingLoanApplication.cluster_id, 
+      existingLoanApplication.member_loan_id, existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan reschedule request saved in the DB clusterLoanReschedulingSummary.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, 94, 'success');
+    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY, enums.HTTP_OK, { ...returnData, reschedule_id: rescheduleRequest.reschedule_id });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 94, 'fail');
+    error.label = enums.CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER;
+    logger.error(`fetching cluster loan rescheduling summary failed::${enums.CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * process the cluster loan rescheduling request
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof ClusterController
+ */
+export const processClusterLoanRescheduling = async(req, res, next) => {
+  try {
+    const { user, existingLoanApplication, loanRescheduleRequest } = req;
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched processClusterLoanRescheduling.controllers.cluster.js`);
+    if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count 
+      processClusterLoanRescheduling.controllers.cluster.js`);
+      userActivityTracking(req.user.user_id, 75, 'fail');
+      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN, 
+        enums.PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER);
+    }
+    const userUnpaidClusterRepayments = await processAnyData(clusterQueries.fetchUserUnpaidClusterLoanRepayments, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's unpaid repayments fetched processClusterLoanRescheduling.controllers.cluster.js`);
+    const totalExtensionDays = userUnpaidClusterRepayments.length * Number(loanRescheduleRequest.extension_in_days);
+    const newLoanDuration = `${existingLoanApplication.loan_tenor_in_months} month(s), ${totalExtensionDays} day(s)`;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: updated total loan tenor fetched processClusterLoanRescheduling.controllers.cluster.js`);
+    await Promise.all([
+      userUnpaidClusterRepayments.map((repayment) => {
+        processOneOrNoneData(clusterQueries.updateNewClusterLoanRepaymentDate, 
+          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+        return repayment;
+      }),
+      processOneOrNoneData(clusterQueries.updateClusterLoanWithRescheduleDetails, [ existingLoanApplication.member_loan_id, Number(loanRescheduleRequest.extension_in_days), 
+        parseFloat((existingLoanApplication.reschedule_count || 0) + 1), newLoanDuration, totalExtensionDays ]),
+      processOneOrNoneData(clusterQueries.updateRescheduleClusterLoanRequestAccepted, [ loanRescheduleRequest.reschedule_id ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan rescheduling details updated successfully 
+    processClusterLoanRescheduling.controllers.cluster.js`);
+    userActivityTracking(req.user.user_id, 75, 'success');
+    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, {
+      member_loan_id: existingLoanApplication.member_loan_id, 
+      loan_id: existingLoanApplication.loan_id, 
+      cluster_id: existingLoanApplication.cluster_id, 
+      user_id: user.user_id,
+      status: existingLoanApplication.status,
+      reschedule_extension_days: Number(loanRescheduleRequest.extension_in_days),
+      total_loan_extension_days: parseFloat(totalExtensionDays),
+      is_reschedule: true
+    });
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 75, 'fail');
+    error.label = enums.PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER;
+    logger.error(`processing cluster loan rescheduling loan failed::${enums.PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER}`, error.message);
     return next(error);
   }
 };

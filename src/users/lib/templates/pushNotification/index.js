@@ -97,3 +97,7 @@ export const userTierUpgraded = () => {
 export const nonPerformingUsers = () => {
   return 'Your loan is over due, kindly login to make your payment';
 };
+
+export const initiateClusterLoanApplication = (user, cluster) => {
+  return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} cluster.`;
+};

@@ -63,5 +63,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call approveClusterMemberLoanApplication', async() => {
+      const req = { admin: '', loanApplication: '', params: '' };
+      const data = await AdminLoanController.approveClusterMemberLoanApplication(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call declineClusterMemberLoanApplication', async() => {
+      const req = { body: '', admin: '', loanApplication: '', params: '' };
+      const data = await AdminLoanController.declineClusterMemberLoanApplication(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

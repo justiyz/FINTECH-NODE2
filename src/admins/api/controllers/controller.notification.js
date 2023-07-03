@@ -1,6 +1,11 @@
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification } from '../services/services.firebase';
+import { collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
+import notificationQueries from '../queries/queries.settings';
+import usersQueries from '../queries/queries.user';
+import  notificationPayload from '../../lib/payloads/lib.payload.settings';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification,  sendUserPersonalNotification, sendMulticastPushNotification } from '../services/services.firebase';
 
 
 
@@ -14,9 +19,9 @@ import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification } from '
  */
 export const updateSingleNotification = async(req, res, next) => {
   try {
-    const { user, params } = req;
-    await updateAdminNotificationReadBoolean(user, params);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.controller.admin.admin.js`);
+    const { admin, params } = req;
+    await updateAdminNotificationReadBoolean(admin, params);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.admin.controller.notification.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_SINGLE_NOTIFICATION_CONTROLLER;
@@ -36,11 +41,55 @@ export const updateSingleNotification = async(req, res, next) => {
 export const updateAllNotificationsAsRead = async(req, res, next) => {
   try {
     await fetchAndUpdateNotification(req.admin.admin_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.controller.admin.admin.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.admin.controller.notification.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER;
     logger.error(`updating all notifications as read failed:::${enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/** 
+ * sending users notification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof NotificationController
+ */
+export const sendNotifications = async(req, res, next) => {
+  try {
+    const { body } = req;
+    const users = await processAnyData(usersQueries.getUsersForNotifications, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Successfully fetched users for notification in sendNotifications.admin.controller.notification.js`);
+    const payload =  notificationPayload.sendUserNotification(req.admin, body);
+    const notifyUsers = [];
+    
+    if (body.type === 'alert') {
+      const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+      notifyUsers.push(result);
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users alert notification sent successfully in sendNotifications.admin.controller.notification.js`);
+    }
+
+    if (body.recipient === 'all') {
+      const usersToken = await collateUsersFcmTokens(users);
+      sendMulticastPushNotification(body.content, usersToken, 'admin-notification', users.user_id);
+      const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+      notifyUsers.push(result);
+    }
+    if (body.recipient === 'select') {
+      body.sent_to.forEach((user) => {
+        sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
+      });
+      const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
+      notifyUsers.push(result);
+    }    
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users notification sent successfully in sendNotifications.admin.controller.notification.js`);
+    return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, notifyUsers);
+  } catch (error) {
+    error.label = enums.SEND_USERS_NOTIFICATIONS_CONTROLLER;
+    logger.error(`Sending users notification failed:::${enums.SEND_USERS_NOTIFICATIONS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

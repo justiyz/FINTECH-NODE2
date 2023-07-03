@@ -1,4 +1,6 @@
+import dayjs from 'dayjs';
 import settingsQueries from '../queries/queries.settings';
+import  settingsPayload from '../../lib/payloads/lib.payload.settings';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
@@ -103,3 +105,153 @@ export const scoreCardBreakdown = async(req, res, next) => {
   }
 };
 
+/**
+ * creates system promos
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+
+export const createSystemPromo = async(req, res, next) => {
+  try {
+    const { body, document, admin } = req;
+    const payload = settingsPayload.createPromo(body, document, admin);
+    const promo =  await processOneOrNoneData(settingsQueries.createPromo, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully creates a promo createSystemPromo.admin.controllers.settings.js`);
+    return ApiResponse.success(res, enums.PROMO_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, promo);
+  } catch (error) {
+    error.label = enums.CREATE_PROMO_CONTROLLER;
+    logger.error(`creating system promo failed:::${enums.CREATE_PROMO_CONTROLLER}`, error.message);
+    return next(error);  
+  }
+};
+
+/**
+ * fetches all system promos
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+
+export const fetchAllSystemPromos = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    const promos = await processAnyData(settingsQueries.fetchAllPromos);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetches all system promos fetchAllSystemPromos.admin.controllers.settings.js`);
+    return ApiResponse.success(res, enums.PROMOS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, promos);
+  } catch (error) {
+    error.label = enums.FETCH_PROMOS_CONTROLLER;
+    logger.error(`fetching system promos failed:::${enums.FETCH_PROMOS_CONTROLLER}`, error.message);
+    return next(error);  
+  }
+};
+
+/**
+ * fetches details of a particular promo
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+
+export const fetchSinglePromo = async(req, res, next) => {
+  try {
+    const { params: { promo_id }, admin } = req;
+    const promoDetails = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, promo_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetches details of a particular promo 
+    fetchSinglePromo.admin.controllers.settings.js`);
+    return ApiResponse.success(res, enums.PROMO_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, promoDetails);   
+  } catch (error) {
+    error.label = enums.FETCH_PROMO_DETAILS_CONTROLLER;
+    logger.error(`fetching a promo details failed:::${enums.FETCH_PROMO_DETAILS_CONTROLLER}`, error.message);
+    return next(error);  
+  }
+};
+
+/**
+ * edits a particular promo
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+
+export const editPromoDetails = async(req, res, next) => {
+  try {
+    const { body, params: { promo_id }, document, admin  } = req;
+    const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, promo_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched details promo editPromoDetails.admin.controllers.settings.js`);
+    const payload = settingsPayload.editPromo(body, document, promo, promo_id);
+    const editedPromo = await processOneOrNoneData(settingsQueries.updatePromoDetails, payload);
+    if (dayjs(body.start_date).isSame(dayjs(), 'day')) {
+      await processOneOrNoneData(settingsQueries.updatePromoStatus, [ promo_id ]);
+    }
+
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully edits details of a promo  editPromoDetails.admin.controllers.settings.js`); 
+    return ApiResponse.success(res, enums.PROMO_EDITED_SUCCESSFULLY, enums.HTTP_OK, editedPromo);
+  } catch (error) {
+    error.label = enums.EDIT_PROMO_DETAILS_CONTROLLER;
+    logger.error(`editing a promo's details failed:::${enums.EDIT_PROMO_DETAILS_CONTROLLER}`, error.message);
+    return next(error);  
+  }
+};
+
+/**
+ * cancels a particular promo
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+export const cancelPromo = async(req, res, next) => {
+  try {
+    const { body, admin } = req;
+    const cancelledPromos = [];
+
+    for (const id of body) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched promo details
+      cancelPromo.admin.controllers.settings.js`);
+      const actualEndDate = dayjs();
+      const cancelledPromo = await processOneOrNoneData(settingsQueries.cancelPromo, [ id.promo_id, actualEndDate ]);
+      cancelledPromos.push(cancelledPromo);
+    }
+
+    return ApiResponse.success(res, enums.PROMO_CANCELLED_SUCCESSFULLY, enums.HTTP_OK, cancelledPromos);
+  } catch (error) {
+    error.label = enums.CANCEL_PROMO_CONTROLLER;
+    logger.error(`cancelling promo failed:::${enums.CANCEL_PROMO_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * deletes a particular promo
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+
+export const deletePromo = async(req, res, next) => {
+  try {
+    const { body, admin }  = req;
+    for (const id of body) {
+      await processOneOrNoneData(settingsQueries.deletePromo, id.promo_id);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully deletes a promo
+     deletePromo.admin.controllers.settings.js`);
+    }
+    return ApiResponse.success(res, enums.PROMO_DELETED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.DELETE_PROMO_CONTROLLER;
+    logger.error(`deleting promo failed:::${enums.DELETE_PROMO_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

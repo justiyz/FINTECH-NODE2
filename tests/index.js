@@ -18,6 +18,7 @@ import './unit/admin/middlewares/unit.admin.middlewares.roles';
 import './unit/admin/middlewares/unit.admin.middlewares.admin';
 import './unit/admin/middlewares/unit.admin.middlewares.user';
 import './unit/admin/middlewares/unit.admin.middlewares.loan';
+import './unit/admin/middlewares/unit.admin.middlewares.settings';
 import './unit/admin/controllers/unit.admin.controllers.auth';
 import './unit/admin/controllers/unit.admin.controllers.roles';
 import './unit/admin/controllers/unit.admin.controllers.admin';

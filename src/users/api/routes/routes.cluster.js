@@ -4,6 +4,7 @@ import Schema from '../../lib/schemas/lib.schema.cluster';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as ClusterMiddleware from '../middlewares/middlewares.cluster';
+import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as ClusterController from '../controllers/controllers.cluster';
 
 const router = Router();
@@ -15,7 +16,9 @@ router.post(
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
   ClusterMiddleware.checkIfClusterNameUnique,
+  ClusterMiddleware.checkIfUserBelongsToTypeOfCluster,
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterMiddleware.generateClusterUniqueCode,
   ClusterController.createCluster
@@ -43,10 +46,12 @@ router.post(
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('request'),
   ClusterMiddleware.checkIfPublicOrPrivateCluster('public'),
+  ClusterMiddleware.checkIfUserBelongsToTypeOfCluster,
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterController.requestToJoinCluster
 );
@@ -74,9 +79,11 @@ router.post(
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
   ClusterMiddleware.confirmUserClusterInvitation,
+  ClusterMiddleware.checkIfUserBelongsToTypeOfCluster,
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('join'),
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterController.joinClusterOnInvitation
@@ -122,7 +129,6 @@ router.patch(
   ClusterMiddleware.checkIfClusterIsOnActiveLoan,
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterMiddleware.checkIfThereIsMoreThanOnePersonInTheCluster,
-  ClusterMiddleware.checkIfClusterNameUnique,
   ClusterController.editCluster
 );
 
@@ -145,6 +151,152 @@ router.post(
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
   ClusterController.suggestNewClusterAdmin
+);
+
+router.post(
+  '/loan/:cluster_id/initiation',
+  AuthMiddleware.validateAuthToken,
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfPublicOrPrivateCluster('private'),
+  Model(Schema.clusterIdParams, 'params'),
+  Model(Schema.initiateClusterLoan, 'payload'),
+  ClusterMiddleware.checkClusterMembersNumber,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
+  UserMiddleware.checkUserAdvancedKycUpdate,
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  AuthMiddleware.isPinCreated('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  LoanMiddleware.checkIfUserBvnNotBlacklisted,
+  ClusterMiddleware.checkIfUserHasActiveClusterLoan,
+  ClusterMiddleware.totalLoanAmountVerificationAndBreakdown,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.additionalUserChecksForLoan,
+  ClusterController.checkClusterAdminClusterLoanEligibility
+);
+
+router.post(
+  '/loan/:member_loan_id/renegotiate',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  Model(Schema.clusterLoanRenegotiation, 'payload'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationStatusIsStillPending,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.validateRenegotiationAmount,
+  ClusterController.processClusterLoanRenegotiation
+);
+
+router.get(
+  '/loan/:member_loan_id/details',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  ClusterController.fetchClusterMemberLoanDetails
+);
+
+router.post(
+  '/loan/:member_loan_id/eligibility-check',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  Model(Schema.membersClusterLoanEligibilityCheck, 'payload'),
+  UserMiddleware.checkUserAdvancedKycUpdate,
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  AuthMiddleware.isPinCreated('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  LoanMiddleware.checkIfUserBvnNotBlacklisted,
+  ClusterMiddleware.checkIfUserHasActiveClusterLoan,
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationStatusIsStillPending,
+  ClusterMiddleware.sortClusterLoanAmount,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.additionalUserChecksForLoan,
+  ClusterController.checkClusterMemberClusterLoanEligibility
+);
+
+router.post(
+  '/loan/:member_loan_id/loan-decision',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  Model(Schema.membersClusterLoanDecision, 'payload'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationStatusIsStillPending,
+  ClusterController.clusterMemberLoanDecision
+);
+
+router.post(
+  '/loan/:cluster_id/:loan_id/disbursement',
+  AuthMiddleware.validateAuthToken,
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfPublicOrPrivateCluster('private'),
+  Model(Schema.clusterLoanIdParams, 'params'),
+  Model(Schema.userPinPayload, 'payload'),
+  ClusterMiddleware.checkIfClusterLoanApplicationExists,
+  AuthMiddleware.comparePin,
+  ClusterMiddleware.fetchGeneralClusterNewLoanAmountValues,
+  LoanMiddleware.checkSeedfiPaystackBalance,
+  LoanMiddleware.generateLoanDisbursementRecipient,
+  ClusterController.initiateClusterLoanDisbursement
+);
+
+router.get(
+  '/loan/:member_loan_id/initiate-repayment',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  Model(Schema.noCardOrBankLoanRepaymentType, 'query'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  ClusterController.initiateManualClusterLoanRepayment
+);
+
+router.post(
+  '/loan/:member_loan_id/:payment_channel_id/initiate-repayment',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.loanRepaymentParams, 'params'),
+  Model(Schema.loanRepaymentType, 'query'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkIfCardOrUserExist,
+  ClusterController.initiateManualCardOrBankClusterLoanRepayment
+);
+
+router.get(
+  '/:cluster_id/current-loan',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterIdParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfPublicOrPrivateCluster('private'),
+  ClusterController.fetchCurrentClusterLoan
+);
+
+router.get(
+  '/loan/:member_loan_id/reschedule-summary',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterMemberLoanIdParams, 'params'),
+  Model(Schema.rescheduleExtensionId, 'query'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  LoanMiddleware.checkIfOngoingLoanApplication,
+  LoanMiddleware.checkRescheduleExtensionExists,
+  ClusterController.clusterLoanReschedulingSummary
+);
+
+router.post(
+  '/loan/:member_loan_id/:reschedule_id/process-rescheduling',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterLoanRescheduleParams, 'params'),
+  ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
+  LoanMiddleware.checkIfOngoingLoanApplication,
+  ClusterMiddleware.checkClusterLoanReschedulingRequest,
+  ClusterController.processClusterLoanRescheduling
 );
 
 

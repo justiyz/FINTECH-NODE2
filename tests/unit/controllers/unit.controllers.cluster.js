@@ -96,5 +96,71 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call checkClusterAdminClusterLoanEligibility', async() => {
+      const req = { user: '', body: '', userEmploymentDetails: '', cluster: '', userDefaultAccountDetails: '' };
+      const data = await ClusterController.checkClusterAdminClusterLoanEligibility(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call processClusterLoanRenegotiation', async() => {
+      const req = { user: '', body: '', existingLoanApplication: '' };
+      const data = await ClusterController.processClusterLoanRenegotiation(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchClusterMemberLoanDetails', async() => {
+      const req = { user: '', existingLoanApplication: '' };
+      const data = await ClusterController.fetchClusterMemberLoanDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call checkClusterMemberClusterLoanEligibility', async() => {
+      const req = { user: '', body: '', userEmploymentDetails: '', existingLoanApplication: '', userDefaultAccountDetails: '' };
+      const data = await ClusterController.checkClusterMemberClusterLoanEligibility(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call clusterMemberLoanDecision', async() => {
+      const req = { user: '', body: '', existingLoanApplication: '' };
+      const data = await ClusterController.clusterMemberLoanDecision(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call initiateClusterLoanDisbursement', async() => {
+      const req = { user: '', params: '', userTransferRecipient: '', existingLoanApplication: '', newClusterAmountValues: '' };
+      const data = await ClusterController.initiateClusterLoanDisbursement(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call initiateManualClusterLoanRepayment', async() => {
+      const req = { user: '', params: '', query: '', existingLoanApplication: '' };
+      const data = await ClusterController.initiateManualClusterLoanRepayment(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call initiateManualCardOrBankClusterLoanRepayment', async() => {
+      const req = { user: '', params: '', query: '', existingLoanApplication: '', userDebitCard: '' };
+      const data = await ClusterController.initiateManualCardOrBankClusterLoanRepayment(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchCurrentClusterLoan', async() => {
+      const req = { user: '', params: '' };
+      const data = await ClusterController.fetchCurrentClusterLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call clusterLoanReschedulingSummary', async() => {
+      const req = { user: '', loanRescheduleExtensionDetails: '', existingLoanApplication: '' };
+      const data = await ClusterController.clusterLoanReschedulingSummary(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call processClusterLoanRescheduling', async() => {
+      const req = { user: '', loanRescheduleRequest: '', existingLoanApplication: '' };
+      const data = await ClusterController.processClusterLoanRescheduling(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

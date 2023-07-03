@@ -30,6 +30,28 @@ router.patch(
   LoanController.declineLoanApplication
 );
 
+router.patch(
+  '/cluster/:member_loan_id/approve',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'approve'),
+  Model(Schema.memberLoanIdParams, 'params'),
+  Model(Schema.manualLoanApproval, 'payload'),
+  LoanMiddleware.checkIfClusterMemberLoanExists,
+  LoanMiddleware.checkIfLoanStatusIsInReview,
+  LoanController.approveClusterMemberLoanApplication
+);
+
+router.patch(
+  '/cluster/:member_loan_id/reject',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'reject'),
+  Model(Schema.memberLoanIdParams, 'params'),
+  Model(Schema.manualLoanRejection, 'payload'),
+  LoanMiddleware.checkIfClusterMemberLoanExists,
+  LoanMiddleware.checkIfLoanStatusIsInReview,
+  LoanController.declineClusterMemberLoanApplication
+);
+
 router.get(
   '/:loan_id/details',
   AuthMiddleware.validateAdminAuthToken,

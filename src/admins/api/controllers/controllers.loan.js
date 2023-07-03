@@ -1,12 +1,13 @@
 import loanQueries from '../queries/queries.loan';
 import userQueries from '../queries/queries.user';
+import clusterQueries from '../queries/queries.cluster';
 import loanPayload from '../../lib/payloads/lib.payload.loans';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import MailService from '../services/services.email';
-import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
+import { sendPushNotification, sendUserPersonalNotification, sendClusterNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { adminActivityTracking } from '../../lib/monitor';
@@ -19,7 +20,7 @@ import * as descriptions from '../../lib/monitor/lib.monitor.description';
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns success response.
- * @memberof AdminUserController
+ * @memberof AdminLoanController
  */
 export const approveLoanApplication = async(req, res, next) => {
   try {
@@ -46,12 +47,59 @@ export const approveLoanApplication = async(req, res, next) => {
 };
 
 /**
+ * approve cluster member loan applications manually by admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+export const approveClusterMemberLoanApplication = async(req, res, next) => {
+  try {
+    const { admin, params: { member_loan_id }, loanApplication } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
+    const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ loanApplication.cluster_id ]);
+    const isClusterAdmin = loanApplication.is_loan_initiator ? true : false;
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched approveClusterMemberLoanApplication.admin.controllers.loan.js`);
+    const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus, [ member_loan_id, 'approved', null ]);
+    // await processOneOrNoneData(loanQueries.updateAdminLoanApprovalTrail, [ member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin approval recorded 
+    // approveClusterMemberLoanApplication.admin.controllers.loan.js`); // To later include this when the table has been added
+    const outstandingLoanDecision = await processAnyData(clusterQueries.checkForOutstandingClusterLoanDecision, [ loanApplication.loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if loan can be disbursed by cluster admin 
+    approveClusterMemberLoanApplication.admin.controllers.loan.js`);
+    if (outstandingLoanDecision.length <= 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan can now be disbursed by cluster admin 
+      approveClusterMemberLoanApplication.admin.controllers.loan.js`);
+      await processOneOrNoneData(clusterQueries.updateGeneralLoanApplicationCanDisburseLoan, [ loanApplication.loan_id ]);
+      sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan', 
+        'loan-application-can-disburse', {});
+    }
+    await MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
+    await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval(), loanApplicant.fcm_token);
+    sendUserPersonalNotification(loanApplicant, 'Approved loan application', 
+      PersonalNotifications.approvedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'approved-loan', { ...loanApplication });
+    sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan approved by admin`, 
+      'loan-application-approved', {});
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveClusterMemberLoanApplication.admin.controllers.loan.js`);
+    await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName));
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    error.label = enums.APPROVE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`approving a cluster member loan application manually failed:::${enums.APPROVE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * decline loan applications manually by admin
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns success response.
- * @memberof AdminUserController
+ * @memberof AdminLoanController
  */
 export const declineLoanApplication = async(req, res, next) => {
   try {
@@ -77,12 +125,49 @@ export const declineLoanApplication = async(req, res, next) => {
 };
 
 /**
+ * decline loan applications manually by admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+export const declineClusterMemberLoanApplication = async(req, res, next) => {
+  try {
+    const { admin, body: { rejection_reason }, params: { member_loan_id }, loanApplication } = req;
+    const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
+    const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ loanApplication.cluster_id ]);
+    const isClusterAdmin = loanApplication.is_loan_initiator ? true : false;
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched declineClusterMemberLoanApplication.admin.controllers.loan.js`);
+    const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus, 
+      [ member_loan_id, 'declined', rejection_reason.trim().toLowerCase() ]);
+    // await processOneOrNoneData(loanQueries.updateAdminLoanApprovalTrail, [ member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin rejection recorded 
+    // declineClusterMemberLoanApplication.admin.controllers.loan.js`); // To later include this when the table has been added
+    await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
+    await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval(), loanApplicant.fcm_token);
+    sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
+      PersonalNotifications.declinedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'declined-loan', { ...loanApplication });
+    sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan declined by admin`, 
+      'loan-application-declined', {});
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineClusterMemberLoanApplication.admin.controllers.loan.js`);
+    await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_approval(req.admin.first_name));
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_approval_failed(req.admin.first_name));
+    error.label = enums.DECLINE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`declining a cluster member loan application manually failed:::${enums.DECLINE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * details of a single loan Application
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns success response.
- * @memberof AdminUserController
+ * @memberof AdminLoanController
  */
 export const loanApplicationDetails = async(req, res, next) => {
   try {
@@ -121,7 +206,7 @@ export const loanApplicationDetails = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns success response.
- * @memberof AdminUserController
+ * @memberof AdminLoanController
  */
 
 export const fetchLoans = async(req, res, next) => {
@@ -168,7 +253,7 @@ export const fetchLoans = async(req, res, next) => {
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns success response.
- * @memberof AdminUserController
+ * @memberof AdminLoanController
  */
 
 export const fetchRepaidLoans = async(req, res, next) => {
