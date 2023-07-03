@@ -76,15 +76,6 @@ const sendNotification = Joi.object({
     end_at: Joi.date().required(),
     content: Joi.string().required()
   })
-}).when(Joi.object({ type: Joi.string().valid('push') }).unknown(), {
-  then: Joi.object({
-    end_at: Joi.date().required(),
-    content: Joi.string().required(),
-    sent_to: Joi.array().items(Joi.object({
-      user_id: Joi.string().required(),
-      name: Joi.string().required()
-    })).min(1).optional()
-  })
 }).when(Joi.object({ type: Joi.string().valid('system') }).unknown(), {
   then: Joi.object({
     title: Joi.string().required(),

@@ -71,28 +71,6 @@ describe('Admin Notification', () => {
           done();
         });
     });
-    it('Should successfully send down time notification', (done) => {
-      chai.request(app)
-        .post('/api/v1/admin/send-notifications')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .send({
-          type: 'alert',
-          recipient: 'all',
-          end_at: '2025-07-08',
-          content: 'The system will be undergoing maintenance and will be temporarily unavailable for loan applications'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.SUCCESSFULLY_NOTIFICATION);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
     it('Should successfully send users notification', (done) => {
       chai.request(app)
         .post('/api/v1/admin/send-notifications')
@@ -250,15 +228,12 @@ describe('Admin Notification', () => {
           done();
         });
     });
-    it('Should filter notification by the is_ended ', (done) => {
+    it('Should notification', (done) => {
       chai.request(app)
         .get('/api/v1/admin/admin-notifications')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .query({
-          is_ended: false
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);

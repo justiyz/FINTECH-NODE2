@@ -33,7 +33,6 @@ export default {
   ],
 
   fetchNotifications: (query) => [
-    query.is_ended || false,
     query.title ? `%${query.title}%` : null,
     query.start_date,
     query.end_date,

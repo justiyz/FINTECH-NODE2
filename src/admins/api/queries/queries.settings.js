@@ -155,21 +155,19 @@ export default {
       is_ended,
       to_char(created_at, 'DD Mon, YYYY HH:MI am') AS created_at
       FROM admin_sent_notifications
-      WHERE is_ended = $1 
-      AND title ILIKE TRIM($2) OR $2 IS NULL
-      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
-      OR ($3 IS NULL AND $4 IS NULL))
+      WHERE  title ILIKE TRIM($1) OR $1 IS NULL
+      AND ((created_at::DATE BETWEEN $2::DATE AND $3::DATE) 
+      OR ($2 IS NULL AND $3 IS NULL))
       ORDER BY created_at DESC
-      OFFSET $5
-      LIMIT $6;
+      OFFSET $4
+      LIMIT $5;
   `,
   fetchNotificationCount: `
     SELECT 
       COUNT(notification_id) AS total_count
     FROM admin_sent_notifications
-    WHERE is_ended = $1 
-    AND title ILIKE TRIM($2) OR $2 IS NULL
-    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
-    OR ($3 IS NULL AND $4 IS NULL));
+    WHERE title ILIKE TRIM($1) OR $1 IS NULL
+    AND ((created_at::DATE BETWEEN $2::DATE AND $3::DATE) 
+    OR ($2 IS NULL AND $3 IS NULL));
   `
 };

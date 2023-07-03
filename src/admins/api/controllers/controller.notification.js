@@ -64,40 +64,33 @@ export const sendNotifications = async(req, res, next) => {
   try {
     const { body } = req;
     const users = await processAnyData(usersQueries.getUsersForNotifications, []);
-
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Successfully fetched users for notification in sendNotifications.admin.controller.notification.js`);
-
     const payload = notificationPayload.sendUserNotification(req.admin, body);
-    const notifyUsers = [];
 
     if (body.type === 'alert') {
       const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
-      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users alert notification sent successfully.
-       sendNotifications.admin.controller.notification.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users alert notification sent successfully. sendNotifications.admin.controller.notification.js`);
       return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, result);
     }
 
-    if (body.type === 'push') {
-      if (body.recipient === 'select') {
-        users.forEach((user) => {
-          sendPushNotification(user.user_id, body.content, user.fcm_token);
-        });
-      }
-      const usersToken = await collateUsersFcmTokens(users);
-      sendMulticastPushNotification(body.content, usersToken, 'admin-notification');
-    }
-
     if (body.type === 'system') {
-      body.sent_to.forEach((user) => {
-        sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
-      });
+      if (body.recipient === 'select') {
+        await Promise.all(body.sent_to.map(async(user) => {
+          await sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
+          await sendPushNotification(user.user_id, body.title, user.fcm_token);
+        }));
+      }
+
+      const usersToken = await collateUsersFcmTokens(users);
+      await sendMulticastPushNotification(body.content, usersToken, 'admin-notification');
+      await Promise.all(users.map(async(el) => {
+        await sendPushNotification(el.user_id, body.title, el.fcm_token);
+      }));
     }
 
     const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
-    notifyUsers.push(result);
-
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users notification sent successfully in sendNotifications.admin.controller.notification.js`);
-    return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, notifyUsers);
+    return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, result);
   } catch (error) {
     error.label = enums.SEND_USERS_NOTIFICATIONS_CONTROLLER;
     logger.error(`Sending users notification failed:::${enums.SEND_USERS_NOTIFICATIONS_CONTROLLER}`, error.message);
