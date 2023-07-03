@@ -155,7 +155,7 @@ export default {
       is_ended,
       to_char(created_at, 'DD Mon, YYYY HH:MI am') AS created_at
       FROM admin_sent_notifications
-      WHERE type = $1 
+      WHERE type = $1 OR $1 IS NULL
       AND title ILIKE TRIM($2) OR $2 IS NULL
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
       OR ($3 IS NULL AND $4 IS NULL))
