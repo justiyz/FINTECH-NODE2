@@ -131,7 +131,7 @@ export const joinClusterOnInvitation = async(req, res, next) => {
       if (cluster.is_created_by_admin) {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Admin Cluster User Acceptance', adminNotification.joinClusterNotification(),
-            `${user.first_name} ${user.last_name}`, 'Cluster-Acceptance');
+            `${user.first_name} ${user.last_name}`, 'cluster-acceptance');
         });
       }        
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user added to new cluster and all notifications sent successfully 
@@ -562,7 +562,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       if (result.response.data.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
-            `${user.first_name} ${user.last_name}`, 'Failed-Loan-Application');
+            `${user.first_name} ${user.last_name}`, 'failed-loan-application');
         });
       }
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
@@ -752,7 +752,7 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       if (result.response.data.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
-            `${user.first_name} ${user.last_name}`, 'Failed-loan-application');
+            `${user.first_name} ${user.last_name}`, 'failed-loan-application');
         });
       }
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);

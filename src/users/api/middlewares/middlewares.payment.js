@@ -403,7 +403,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Loan Disbursement', adminNotification.loanDisbursement(), 
-            `${paymentRecord.first_name} ${paymentRecord.last_name}`, 'Loan-Disbursement');
+            `${paymentRecord.first_name} ${paymentRecord.last_name}`, 'loan-Disbursement');
         });
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);

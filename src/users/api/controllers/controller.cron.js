@@ -236,7 +236,7 @@ export const nonPerformingLoans = async(req, res, next) => {
     
       if (admin) {
         sendNotificationToAdmin(admin.admin_id, 'Non-Performing Loans', 
-          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'Non-Performing-Loans');
+          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'non-performing-loans');
       }
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
