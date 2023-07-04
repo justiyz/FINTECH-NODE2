@@ -34,21 +34,22 @@ export default {
     `,
 
   fetchPromoByName: `
-     SELECT
-        id,
-        promo_id,
-        name,
-        description,
-        start_date,
-        end_date,
-        image_url,
-        status,
-        percentage_discount,
-        customer_segment,
-        tier_category,
-        created_by
-     FROM system_promos
-     WHERE name = $1
+    SELECT
+      id,
+      promo_id,
+      name,
+      description,
+      start_date,
+      end_date,
+      image_url,
+      status,
+      percentage_discount,
+      customer_segment,
+      tier_category,
+      created_by
+    FROM system_promos
+    WHERE name = $1 
+    AND is_deleted = false
   `,
 
   fetchAllPromos: `
