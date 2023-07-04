@@ -72,7 +72,7 @@ export const uploadPromoBanner =  async(req, res, next) => {
 export const checkIfPromoAlreadyExists = async(req, res, next) => {
   try {
     const { admin, body } = req;
-    const existingPromo = await processOneOrNoneData(settingsQueries.fetchPromoByName, [ body.name ]);
+    const existingPromo = await processOneOrNoneData(settingsQueries.fetchPromoByName, [ body.name.toLowerCase() ]);
     if (existingPromo) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms promo already exist in the db
          checkIfPromoAlreadyExists.middlewares.settings.js`);
