@@ -562,7 +562,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       if (result.response.data.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
-            `${user.first_name} ${user.last_name}`, 'FAILED-LOAN-APPLICATION');
+            `${user.first_name} ${user.last_name}`, 'Failed-Loan-Application');
         });
       }
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
@@ -752,7 +752,7 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       if (result.response.data.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
-            `${user.first_name} ${user.last_name}`, 'FAILED-LOAN-APPLICATION');
+            `${user.first_name} ${user.last_name}`, 'Failed-loan-application');
         });
       }
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);

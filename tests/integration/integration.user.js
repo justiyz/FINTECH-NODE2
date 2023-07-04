@@ -3607,7 +3607,7 @@ describe('User', () => {
     });
     it('Should fetch alert notification', (done) => {
       chai.request(app)
-        .get('/api/v1/user/alert')
+        .get('/api/v1/user/alert-notifications')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`

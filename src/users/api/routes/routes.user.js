@@ -247,7 +247,7 @@ router.get(
 );
 
 router.get(
-  '/alert',
+  '/alert-notifications',
   AuthMiddleware.validateAuthToken,
   UserController.fetchAlertNotification
 );

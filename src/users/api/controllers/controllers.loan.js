@@ -45,7 +45,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       if (result.response.data.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
-            `${user.first_name} ${user.last_name}`, 'FAILED-LOAN-APPLICATION');
+            `${user.first_name} ${user.last_name}`, 'Failed-Loan-Application');
         });
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);

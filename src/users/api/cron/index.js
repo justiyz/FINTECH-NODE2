@@ -46,10 +46,10 @@ const updatePromoStatusToEnded = CreateSchedule('0 1, * * *', () => updatesPromo
   timezone: 'Africa/Lagos'
 }); // runs every 01:00am 
 
-const updateAlertNotifications = CreateSchedule('0 0, * * *', () => updateAlertNotification(), {
+const updateAlertNotifications = CreateSchedule('0 2, * * *', () => updateAlertNotification(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
-}); // runs every 12:00am 
+}); // runs every 02:00am 
 
 
 export const scheduleList = [ updateUsersPersonalLoanToOverdue, automaticallyDebitUserForLoanRepayment, nonPerformingUsersLoan,
