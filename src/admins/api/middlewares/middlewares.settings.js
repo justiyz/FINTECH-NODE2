@@ -18,7 +18,7 @@ import config from '../../../users/config';
 
 export const uploadPromoBanner =  async(req, res, next) => {
   try {
-    const { files, admin } = req;   
+    const { files, admin } = req;
     if (files || (files && files.document)) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: to be uploaded file is existing uploadPromoBanner.middlewares.settings.js`);
       const fileExt = path.extname(files.document.name);
@@ -72,7 +72,7 @@ export const uploadPromoBanner =  async(req, res, next) => {
 export const checkIfPromoAlreadyExists = async(req, res, next) => {
   try {
     const { admin, body } = req;
-    const existingPromo = await processOneOrNoneData(settingsQueries.fetchPromoByName, [ body.name ]);
+    const existingPromo = await processOneOrNoneData(settingsQueries.fetchPromoByName, [ body.name.toLowerCase() ]);
     if (existingPromo) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms promo already exist in the db
          checkIfPromoAlreadyExists.middlewares.settings.js`);

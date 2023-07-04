@@ -21,5 +21,23 @@ export default {
     query.to_date,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
+  ],
+
+  sendUserNotification: (admin, body) => [
+    admin.admin_id,
+    body.type,
+    body.title,
+    body.content,
+    body.sent_to,
+    body.end_at
+  ],
+
+  fetchNotifications: (query) => [
+    query.type ? query.type : null,
+    query.title ? `%${query.title}%` : null,
+    query.start_date,
+    query.end_date,
+    query.page ? (query.page - 1) * (query.per_page || 10) : 0,
+    query.per_page ? query.per_page : '10'
   ]
 };

@@ -121,7 +121,7 @@ router.get(
 router.patch(
   '/:adminNotificationId/single-notification',
   AuthMiddleware.validateAdminAuthToken,
-  Model(RoleSchema.adminNotificationIdParams, 'params'),
+  Model(Schema.adminNotificationIdParams, 'params'),
   NotificationController.updateSingleNotification
 );
 
@@ -134,8 +134,15 @@ router.put(
 router.post(
   '/send-notifications',
   AuthMiddleware.validateAdminAuthToken,
-  Model(RoleSchema.sendNotification, 'payload'),
+  Model(Schema.sendNotification, 'payload'),
   NotificationController.sendNotifications
+);
+
+router.get(
+  '/admin-notifications',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.fetchNotification, 'payload'),
+  NotificationController.fetchNotifications
 );
 
 export default router;
