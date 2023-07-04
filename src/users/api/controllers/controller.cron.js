@@ -194,7 +194,6 @@ export const initiateLoanRepayment = async(req, res, next) => {
  * @returns { JSON } - A JSON successful response
  * @memberof CronController
  */
-
 export const updatesPromoStatusToActive = async(req, res, next) => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToActive);
@@ -257,7 +256,6 @@ export const nonPerformingLoans = async(req, res, next) => {
  * @returns { JSON } - A JSON with the initiated payments
  * @memberof CronController
  */
-
 export const updatesPromoStatusToEnded = async(req, res, next) => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToEnded);
