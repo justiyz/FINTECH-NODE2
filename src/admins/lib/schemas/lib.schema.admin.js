@@ -84,7 +84,7 @@ const sendNotification = Joi.object({
     sent_to: Joi.array().items(Joi.object({
       user_id: Joi.string().required(),
       name: Joi.string().required()
-    })).min(1).required()
+    })).min(1).optional()
   })
 });
 

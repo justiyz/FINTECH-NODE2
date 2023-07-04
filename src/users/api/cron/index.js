@@ -1,5 +1,5 @@
 import cron from 'node-cron';import { updateLoanStatusToOverdue, initiateLoanRepayment, nonPerformingLoans,
-  updatesPromoStatusToActive, updatesPromoStatusToEnded, updateClusterLoanStatusToOverdue, initiateClusterLoanRepayment, promoNotification
+  updatesPromoStatusToActive, updatesPromoStatusToEnded, updateClusterLoanStatusToOverdue, initiateClusterLoanRepayment, promoNotification, updateAlertNotification
 } from '../../api/controllers/controller.cron';
 
 function CreateSchedule(time, task, zone) {
@@ -46,9 +46,15 @@ const updatePromoStatusToEnded = CreateSchedule('0 1, * * *', () => updatesPromo
   timezone: 'Africa/Lagos'
 }); // runs every 01:00am 
 
+const updateAlertNotifications = CreateSchedule('0 0, * * *', () => updateAlertNotification(), {
+  scheduled: true,
+  timezone: 'Africa/Lagos'
+}); // runs every 12:00am 
+
 
 export const scheduleList = [ updateUsersPersonalLoanToOverdue, automaticallyDebitUserForLoanRepayment, nonPerformingUsersLoan,
-  updatePromoStatusToActive, updatePromoStatusToEnded, updateUsersClusterLoanToOverdue, automaticallyDebitUserForClusterLoanRepayment, PromoEndDateNotification ];
+  updatePromoStatusToActive, updatePromoStatusToEnded, updateUsersClusterLoanToOverdue, 
+  automaticallyDebitUserForClusterLoanRepayment, PromoEndDateNotification, updateAlertNotifications ];
 
 export const RunSchedules = async(schedules = []) => {
   const promises = [];

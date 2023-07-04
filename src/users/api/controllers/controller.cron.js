@@ -270,7 +270,14 @@ export const updatesPromoStatusToEnded = async(req, res, next) => {
   }
 };
 
-
+/**
+ * admin ending promo notification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with success response 
+ * @memberof CronController
+ */
 export const promoNotification = async(req, res, next) => {
   try {
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'settings' ]);
@@ -279,9 +286,30 @@ export const promoNotification = async(req, res, next) => {
     admins.map((admin) => {
       sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoNotification(`${promo.name}`), 'ending-promo');
     });
+    return ApiResponse.success(res, enums.PROMO_NOTIFICATION, enums.HTTP_OK);
   } catch (error) {
-    error.label = enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER;
-    logger.error(`promo notification failed:::${enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER}`, error.message);
+    error.label = enums.PROMO_NOTIFICATION_CONTROLLER;
+    logger.error(`promo notification failed:::${enums.PROMO_NOTIFICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update alert notification 
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with success response 
+ * @memberof CronController
+ */
+export const updateAlertNotification = async(req, res, next) => {
+  try {
+    const data = await processAnyData(userQueries.updateAlertNotification, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.user.js`);
+    return ApiResponse.success(res, enums.UPDATE_ALERT_NOTIFICATION, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER;
+    logger.error(`Fetching alert notification failed:::${enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };

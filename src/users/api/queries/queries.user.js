@@ -600,5 +600,23 @@ export default {
           created_by
       FROM system_promos
       WHERE status = 'active' 
- `
+ `,
+ 
+  fetchAlert: `
+     SELECT 
+        notification_id,  
+        title, 
+        content, 
+        created_at 
+      FROM admin_sent_notifications 
+      WHERE type = 'alert' AND is_ended IS FALSE;
+  `,
+  
+  updateAlertNotification: `
+      UPDATE admin_sent_notifications
+      SET 
+      updated_at = NOW(),
+      is_ended = TRUE
+      WHERE DATE(end_at) = CURRENT_DATE;
+  `
 };

@@ -246,5 +246,11 @@ router.get(
   UserController.fetchLoanTierValue
 );
 
+router.get(
+  '/alert',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchAlertNotification
+);
+
 
 export default router;

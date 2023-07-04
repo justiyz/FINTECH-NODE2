@@ -68,7 +68,6 @@ export const uploadPromoBanner =  async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminSettingsMiddleware
  */
-
 export const checkIfPromoAlreadyExists = async(req, res, next) => {
   try {
     const { admin, body } = req;
