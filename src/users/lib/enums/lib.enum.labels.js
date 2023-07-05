@@ -209,6 +209,8 @@ export const USER_PROFILE_NEXT_UPDATE_MIDDLEWARE = 'UserMiddleware::userProfileN
 export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::createUserEmploymentDetails';
 export const UPDATE_EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::updateEmploymentDetails';
 export const UPDATE_MONO_ACCOUNT_ID_CONTROLLER = 'UserMiddleware::updateMonoAccountId';
+export const FETCH_ALERT_NOTIFICATION_CONTROLLER = 'UserController::fetchAlertNotification';
+export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'UserController::updateeAlertNotification';
 
 
 // Admin related labels
@@ -314,6 +316,7 @@ export const FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminControll
 export const ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE = 'AdminClusterMiddleware::adminClusterRestriction';
 export const UPDATE_SINGLE_NOTIFICATION_CONTROLLER = 'NotificationController::updateSingleNotification';
 export const UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER = 'NotificationController::updateAdminNotificationIsRead';
+export const PROMO_NOTIFICATION_CONTROLLER = 'NotificationController::promoNotification';
 export const UPLOAD_PROMO_BANNER_MIDDLEWARE = 'AdminSettingsMiddleware::uploadPromoBanner';
 export const CREATE_PROMO_CONTROLLER = 'AdminSettingsController::createSystemPromo';
 export const FETCH_PROMOS_CONTROLLER = 'AdminSettingsController::fetchAllSystemPromos';

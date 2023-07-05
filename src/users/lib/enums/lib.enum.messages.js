@@ -240,6 +240,7 @@ export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been update
 export const UPDATE_USER_MONO_ID = 'User mono account id updated successfully';
 export const FETCH_LOAN_VALUE = 'successfully fetch loan user loan value';
 export const NON_PERFORMING_LOANS  = 'notification sent to non performing loans';
+export const FETCH_ALERT_NOTIFICATION= 'successfully fetch alert notification';
 
 // admin module related messages
 
@@ -353,3 +354,5 @@ export const PROMO_DUE_TO_END = 'Certain promos due to end has been initiated';
 export const ADMIN_DID_NOT_CREATE_PROMO = 'Access denied!, you did not create this promo';
 export const SUCCESSFULLY_NOTIFICATION = 'Notification sent successfully.';
 export const FETCHED_NOTIFICATIONS = 'Notifications fetched successfully';
+export const UPDATE_ALERT_NOTIFICATION = 'Notifications updated successfully';
+export const PROMO_NOTIFICATION = 'Promo notification sent successfully';
