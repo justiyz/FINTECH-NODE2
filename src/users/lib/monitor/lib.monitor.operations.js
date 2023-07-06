@@ -92,6 +92,13 @@ export const operations = {
   91: 'ACTMXALLON', // user accepts system maximum allowable loan amount
   92: 'UPTMNACTID', // user mono account id is updated
   93: 'UPTOKACTID', // user okra account id is updated
-  94: 'INLNRSCDLN' // initiate loan rescheduling for summary
+  94: 'INLNRSCDLN', // initiate loan rescheduling for summary
+  95: 'INCLLNAPP', // Initiate cluster loan application
+  96: 'ACCLLNAPP', // Accept cluster loan
+  97: 'DCCLLNAPP', // Decline/cancel cluster loan
+  98: 'CLMBRLNEL', // cluster member run loan eligibility check
+  99: 'CLLNDCD', // cluster loan application declined
+  100: 'CLLNMNAP', // cluster loan application subjected to manual approval
+  101: 'CLLNAPP' // cluster loan application approved automatically
 };
   

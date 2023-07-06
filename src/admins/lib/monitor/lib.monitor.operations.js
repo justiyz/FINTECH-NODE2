@@ -40,6 +40,14 @@ export const operations = {
   39: 'ANAECRMR', // admin activate cluster member
   40: 'ANDECRMR', // admin deactivate cluster member
   41: 'IEDTET', // admin about to export data from the DB
-  42: 'ANVWAS' // admin views reports and analytics
+  42: 'ANVWAS', // admin views reports and analytics
+  43: 'CRTPROMO', // admin creates a promo
+  44: 'EDTPROMO', // admin edits a promo
+  45: 'DLTPROMO', // admin deletes one or more promos
+  46: 'CNLPROMO', // admin cancels one or more promos
+  47: 'RDANTF', // admin reads a notification and it is marked as read
+  48: 'MKASRD', // admin marks all notifications as read
+  49: 'SSTNTFTUSR', // admin sends system type notification to users
+  50: 'SATNTFTUSR' // admin sends alert type notification to users
 };
 

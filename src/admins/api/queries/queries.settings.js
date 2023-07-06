@@ -129,6 +129,7 @@ export default {
     updated_at = NOW(),
     is_deleted = true
     WHERE promo_id = $1
+    RETURNING *
   `,
   sendNotification: `
   INSERT INTO admin_sent_notifications(

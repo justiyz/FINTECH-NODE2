@@ -26,7 +26,7 @@ export const uploadPromoBanner =  async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.user_id}:::Info: file size is greater than 3MB uploadPromoBanner.middlewares.user.js`);
         return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_PROMO_BANNER_MIDDLEWARE);
       }
-      const acceptedImageFileTypes = [ '.png', '.jpg' ];
+      const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
       if (!acceptedImageFileTypes.includes(fileExt)) {
         logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: document type is not a jpeg, jpg or png file uploadPromoBanner.middlewares.settings.js`);
         return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_PROMO_BANNER_MIDDLEWARE);
@@ -132,13 +132,14 @@ export const checkIfPromoExists = async(req, res, next) => {
          checkIfPromoExists.middlewares.settings.js`); 
         return ApiResponse.error(res, enums.PROMO_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST); 
       }
+      req.promoDetails = promoDetails;
       return next();
     }
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: about to check if promos exists in the DB
+     checkIfPromoExists.middlewares.settings.js`); 
     for (const id of body) {
       const promoDetails = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       if (!promoDetails) {
-        logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms promo does not exist in the DB
-         checkIfPromoExists.middlewares.settings.js`); 
         return ApiResponse.error(res, enums.PROMO_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST); 
       }
     }
@@ -188,11 +189,11 @@ export const checkPromoStatus = async(req, res, next) => {
 export const checkIfPromoIsActive = async(req, res, next) => {
   try {
     const {   admin, body } = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: about to check through each promos if still of active status
+    checkIfPromoIsActive.middlewares.settings.js`); 
     for (const id of body) {
       const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       if (promo.status === 'active') {
-        logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms promo is currently active
-        checkIfPromoIsActive .middlewares.settings.js`); 
         return ApiResponse.error(res, enums.PROMO_CAN_NOT_BE_DELETED, enums.HTTP_BAD_REQUEST);
       }   
     }
@@ -221,14 +222,16 @@ export const checkIfAdminCreatedPromo = async(req, res, next) => {
       if (admin.role_type === 'SADM' || admin.admin_id === promo.created_by) {
         return next();
       }
-      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO, enums.HTTP_BAD_REQUEST);
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: confirms that admin is not the creator of the promo and not the super admin
+      checkIfAdminCreatedPromo.middlewares.settings.js`); 
+      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO(promo.name), enums.HTTP_BAD_REQUEST);
     }
     for (const id of body) {
       const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       if (admin.role_type === 'SADM' || admin.admin_id === promo.created_by) {
         return next();
       }
-      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO, enums.HTTP_BAD_REQUEST);
+      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO(promo.name), enums.HTTP_BAD_REQUEST);
     }
   } catch (error) {
     error.label = enums.CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE;

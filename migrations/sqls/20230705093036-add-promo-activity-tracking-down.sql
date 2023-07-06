@@ -1,0 +1,9 @@
+DROP INDEX IF EXISTS admin_sent_notifications_notification_id_index;
+DROP INDEX IF EXISTS admin_sent_notifications_type_index;
+DROP INDEX IF EXISTS admin_sent_notifications_is_ended_index;
+DROP INDEX IF EXISTS admin_sent_notifications_created_at_index;
+DROP INDEX IF EXISTS manual_cluster_loan_approval_trail_id_index;
+DROP INDEX IF EXISTS manual_cluster_loan_approval_trail_member_loan_id_index;
+DROP INDEX IF EXISTS manual_cluster_loan_approval_trail_decided_by_index;
+
+DROP TABLE IF EXISTS manual_cluster_loan_approval_trail CASCADE;

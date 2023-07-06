@@ -13,7 +13,8 @@ const heading = {
   completedRepayment: 'Loan successfully repaid',
   failedChargePayment: 'Failed Payment',
   failedAddressVerification: 'Address verification failed',
-  successfulAddressVerification: 'Address verification successful'
+  successfulAddressVerification: 'Address verification successful',
+  loanRescheduled: 'Loan Facility Rescheduled',
 };
 
 export const commonTemplate = (messageType, data) => {
