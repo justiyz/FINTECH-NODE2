@@ -82,7 +82,6 @@ export const sendNotifications = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: system notification type about to be sent sendNotifications.admin.controller.notification.js`);
     const [ usersToken, userNames ] = await collateUsersFcmTokens(body.sent_to);
-    console.log('usersToken', usersToken, 'userNames', userNames);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: recipient tokens and names sorted sendNotifications.admin.controller.notification.js`);
     await Promise.all(body.sent_to.map(async(user) => {
       sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
