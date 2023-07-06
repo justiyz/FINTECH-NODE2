@@ -86,8 +86,8 @@ export const cardTokenizationAmountRefundProcessingFailed = () => {
 export const failedCardDebit = (data) => {
   return `Your card could not be debited for the loan repayment of
     ₦${parseFloat(data.total_payment_amount).toFixed(2)}, \n
-    card details \n
-    Last 4 digits: ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, \n
+    Card Details \n
+    Last 4 Digits: ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, \n
     Card Type: ${data.card_type} \n
     Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment.
   `;
@@ -95,11 +95,11 @@ export const failedCardDebit = (data) => {
 
 export const userAddressVerificationFailed = (user, addressDetails) => {
   return `Hello ${user.first_name} ${user.last_name} your address verification processing FAILED for address with the following details:\n
-  house_number: ${addressDetails.landmark}\n,
-  landmark: ${addressDetails.house_number}\n,
-  street: ${addressDetails.street}\n,
-  city: ${addressDetails.city}\n,
-  state: ${addressDetails.state}\n
+  House Number: ${addressDetails.landmark}\n,
+  Landmark: ${addressDetails.house_number}\n,
+  Street: ${addressDetails.street}\n,
+  City: ${addressDetails.city}\n,
+  State: ${addressDetails.state}\n
   
   kindly update your valid address details. 
   Thank you`;
@@ -107,11 +107,11 @@ export const userAddressVerificationFailed = (user, addressDetails) => {
 
 export const userAddressVerificationSuccessful = (user, addressDetails) => {
   return `Hello ${user.first_name} ${user.last_name} your address verification processing is SUCCESSFUL for address with the following details:\n
-  house_number: ${addressDetails.landmark}\n,
-  landmark: ${addressDetails.house_number}\n,
-  street: ${addressDetails.street}\n,
-  city: ${addressDetails.city}\n,
-  state: ${addressDetails.state}\n
+  House Number: ${addressDetails.landmark}\n,
+  Landmark: ${addressDetails.house_number}\n,
+  Street: ${addressDetails.street}\n,
+  City: ${addressDetails.city}\n,
+  State: ${addressDetails.state}\n
   Thank you`;
 };
 

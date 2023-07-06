@@ -86,8 +86,8 @@ export const  adminInviteMail = (data) => `
       All you need to do is log in via the link and the credentials provided below.
       <br>
       <br>
-      Email Address - ${data.email}  <br>
-      <br> Default Password - ${data.password}
+      <b>Email Address</b> - ${data.email}<br><br>g
+      <b>Default Password</b> - ${data.password}
       <br>
       <br>
       Kindly change your password and update your profile on your first log in.

@@ -32,7 +32,9 @@ const { SEEDFI_NODE_ENV } = config;
 export const updateFcmToken = async(req, res, next) => {
   try {
     const { user, body } = req;
-    await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token ]);
+    await processAnyData(authQueries.setSameFcmTokenNull, [ body.fcm_token.trim() ]); // this is done to prevent two fcm tokens being attached to multiple accounts
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully set other accounts with same fcm token to null updateFcmToken.controllers.user.js`);
+    await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token.trim() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user fcm token to the database updateFcmToken.controllers.user.js`);
     const data = {
       user_id: user.user_id,

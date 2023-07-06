@@ -39,6 +39,13 @@ export default {
       referrer_user_id, referred_user_id
     ) VALUES ($1, $2)`,
 
+  setSameFcmTokenNull: `
+    UPDATE users
+    SET
+      updated_at = NOW(),
+      fcm_token = null
+    WHERE fcm_token = $1`,
+
   verifyUserAccountAfterSignup: `
     UPDATE users
     SET

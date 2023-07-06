@@ -222,7 +222,7 @@ export const failedCardDebit = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>card details</p><br />
+          <p>Card Details</p><br />
           <span>
             <b>Last 4 Digits:</b> ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, <br />
             <b>Card Type:</b> ${data.card_type}
@@ -254,11 +254,11 @@ export const failedChargePayment = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>card details</p><br />
+          <p>Card Details</p><br />
           <span>
             <b>Last 4 Digits:</b> ${data.last4Digits}, <br />
             <b>Card Type:</b> ${data.cardType}, <br />
-            <b>bank:</b> ${data.bank}
+            <b>Bank:</b> ${data.bank}
           </span>  
         </td>
   </tr>
@@ -288,7 +288,7 @@ export const successfulRepayment = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>payment details</p><br />
+          <p>Payment Details</p><br />
           <span>
             <b>Total Loan Amount:</b> ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
             <b>Amount Repaid:</b> ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
@@ -320,7 +320,7 @@ export const completedRepayment = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>payment details</p><br />
+          <p>Payment Details</p><br />
           <span>
             <b>Loan Purpose:</b> ${data.loan_reason}<br />
             <b>Loan Amount:</b> ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
@@ -350,7 +350,7 @@ export const failedAddressVerification = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>card details</p><br />
+          <p>Address Details</p><br />
           <span>
           <b>House Number:</b> ${data.landmark},  <br />
             <b>Landmark:</b> ${data.house_number},  <br />
@@ -385,7 +385,7 @@ export const successfulAddressVerification = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>card details</p><br />
+          <p>Address Details</p><br />
           <span>
           <b>House Number:</b> ${data.landmark},  <br />
             <b>Landmark:</b> ${data.house_number},  <br />
@@ -420,7 +420,7 @@ export const loanRescheduled = (data) => `
 
   <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
-          <p>payment details</p><br />
+          <p>Payment Details</p><br />
           <span>
             <b>Loan Purpose:</b> ${data.loan_reason}<br />
             <b>Loan Amount:</b> ₦${parseFloat(data.amount_requested).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
