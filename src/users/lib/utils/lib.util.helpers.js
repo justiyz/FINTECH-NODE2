@@ -98,11 +98,15 @@ export const collateUsersFcmTokensExceptAuthenticatedUser = async(users, user_id
 };
 
 export const generateOfferLetterPDF = async(user, loanDetails) => {
-  
   const [ userOfferLetterDetail ] = await processAnyData(userQueries.userOfferLetterDetails, [ user.user_id ]);
-  const genderType = userOfferLetterDetail.gender === 'male' ? 'sir' : 'ma';
+  const [ userOfferLetterAddressDetail ] = await processAnyData(userQueries.fetchUserOfferLetterAddressDetails, [ user.user_id ]);
+  const genderType = userOfferLetterDetail.gender === 'male' ? 'Sir' : 'Ma';
+  const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
+  const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} group loan` : loanDetails.loan_reason;
+  const houseAddressStreet = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.house_number} ${userOfferLetterAddressDetail.street} Street,` || '';
+  const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
 
-  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType);
+  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState);
 
   if (config.SEEDFI_NODE_ENV === 'test') {
     const data = {

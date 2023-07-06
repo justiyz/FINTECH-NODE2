@@ -553,17 +553,20 @@ export const validateRenegotiationAmount = async(req, res, next) => {
     if (existingLoanApplication.max_possible_approval === null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
       validateRenegotiationAmount.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 74, 'fail');
       return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
         enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
     }
     if (parseFloat(existingLoanApplication.max_possible_approval) < parseFloat(body.new_loan_amount)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount in the DB is lesser than the renegotiation amount
       validateRenegotiationAmount.controllers.loan.js`);
+      userActivityTracking(req.user.user_id, 74, 'fail');
       return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN, 
         enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
     }
     return next();
   } catch (error) {
+    userActivityTracking(req.user.user_id, 74, 'fail');
     error.label = enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE;
     logger.error(`checking if loan renegotiation amount is acceptable failed::${enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE}`, error.message);
     return next(error);

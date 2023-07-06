@@ -920,12 +920,14 @@ export const totalLoanAmountVerificationAndBreakdown = async(req, res, next) => 
     if ((parseFloat(body.total_amount) > (parseFloat(parseFloat(clusterMaximumLoanAmountDetails.value))))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster loan request is greater than cluster maximum allowable amount
       totalLoanAmountVerificationAndBreakdown.middlewares.cluster.js`);
+      userActivityTracking(req.user.user_id, 95, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, 
         enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE);
     }
     if ((parseFloat(body.total_amount) < (parseFloat(parseFloat(clusterMinimumLoanAmountDetails.value))))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster loan request is lesser than cluster minimum allowable  amount
       totalLoanAmountVerificationAndBreakdown.middlewares.cluster.js`);
+      userActivityTracking(req.user.user_id, 95, 'fail');
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, 
         enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE);
     }
@@ -937,6 +939,7 @@ export const totalLoanAmountVerificationAndBreakdown = async(req, res, next) => 
     }
     return next();
   } catch (error) {
+    userActivityTracking(req.user.user_id, 95, 'fail');
     error.label = enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE;
     logger.error(`Validating cluster total loan amount failed::${enums.TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE}`, error.message);
     return next(error);
@@ -1057,6 +1060,7 @@ export const sortClusterLoanAmount = async(req, res, next) => {
     if (parseFloat(toBeTotalAllocatedSum) > parseFloat(existingLoanApplication.total_cluster_amount)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application amount will cause total cluster loan amount to be exceeded 
       sortClusterLoanAmount.middlewares.cluster.js`);
+      userActivityTracking(req.user.user_id, 98, 'fail');
       return ApiResponse.error(res, enums.ALLOCATED_AMOUNT_EXCEEDING_TOTAL_AMOUNT(`₦${parseFloat(amountAvailableForSharing).toFixed(2)}`), enums.HTTP_BAD_REQUEST, 
         enums.SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE);
     }
@@ -1064,6 +1068,7 @@ export const sortClusterLoanAmount = async(req, res, next) => {
       sortClusterLoanAmount.middlewares.cluster.js`);
     return next();
   } catch (error) {
+    userActivityTracking(req.user.user_id, 98, 'fail');
     error.label = enums.SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE;
     logger.error(`sorting cluster loan application amount anf tenor based on sharing type failed
     failed::${enums.SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE}`, error.message);

@@ -73,8 +73,9 @@ export const checkIfLoanStatusIsInReview = async(req, res, next) => {
   const { loanApplication, admin, body: { decision } } = req;
   const adminName = `${admin.first_name} ${admin.last_name}`;
   const activityType = decision === 'approve' ? 21 : 22;
+  const loanType = loanApplication.member_loan_id ? 'cluster' : 'individual';
   const descriptionType = decision === 'approve' ? 
-    descriptions.manually_loan_approval_failed(adminName) : descriptions.manually_loan_disapproval_failed(adminName);
+    descriptions.manually_loan_approval_failed(adminName, loanType) : descriptions.manually_loan_disapproval_failed(adminName, loanType);
   try {
     if (loanApplication.status === 'in review') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application is of status ${loanApplication.status} 

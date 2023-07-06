@@ -6,6 +6,8 @@ import usersQueries from '../queries/queries.user';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import  notificationPayload from '../../lib/payloads/lib.payload.admin';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import { adminActivityTracking } from '../../lib/monitor';
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import { updateAdminNotificationReadBoolean, fetchAndUpdateNotification,  
   sendUserPersonalNotification, sendMulticastPushNotification, sendPushNotification } from '../services/services.firebase';
 
@@ -23,9 +25,12 @@ export const updateSingleNotification = async(req, res, next) => {
   try {
     const { admin, params } = req;
     await updateAdminNotificationReadBoolean(admin, params);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.admin.controller.notification.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully updated notification read status 
+    updateNotificationIsRead.admin.controller.notification.js`);
+    await adminActivityTracking(req.admin.admin_id, 47, 'success', descriptions.marks_a_notification_read());
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 47, 'fail', descriptions.marks_a_notification_read_failed());
     error.label = enums.UPDATE_SINGLE_NOTIFICATION_CONTROLLER;
     logger.error(`updating admin existing notification read status failed:::${enums.UPDATE_SINGLE_NOTIFICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -43,9 +48,12 @@ export const updateSingleNotification = async(req, res, next) => {
 export const updateAllNotificationsAsRead = async(req, res, next) => {
   try {
     await fetchAndUpdateNotification(req.admin.admin_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully updated notification read status updateNotificationIsRead.admin.controller.notification.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: successfully updated notification read status 
+    updateNotificationIsRead.admin.controller.notification.js`);
+    await adminActivityTracking(req.admin.admin_id, 48, 'success', descriptions.marks_all_notifications_read());
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 48, 'fail', descriptions.marks_all_notifications_read_failed());
     error.label = enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER;
     logger.error(`updating all notifications as read failed:::${enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER}`, error.message);
     return next(error);
@@ -61,40 +69,43 @@ export const updateAllNotificationsAsRead = async(req, res, next) => {
  * @memberof NotificationController
  */
 export const sendNotifications = async(req, res, next) => {
+  const { body, admin } = req;
+  const activityType = body.type === 'alert' ? 50 : 49;
   try {
-    const { body } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const users = await processAnyData(usersQueries.getUsersForNotifications, []);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Successfully fetched users for notification in sendNotifications.admin.controller.notification.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: Successfully fetched users for notification in 
+    sendNotifications.admin.controller.notification.js`);
     const payload = notificationPayload.sendUserNotification(req.admin, body);
 
     if (body.type === 'alert') {
       const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
-      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users alert notification sent successfully. sendNotifications.admin.controller.notification.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: Users alert notification sent successfully. sendNotifications.admin.controller.notification.js`);
+      await adminActivityTracking(req.admin.admin_id, 50, 'success', descriptions.sends_alert_notification(adminName));
       return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, result);
     }
-
-    if (body.type === 'system') {
-      if (body.recipient === 'select') {
-        await Promise.all(body.sent_to.map(async(el) => {
-          const [ user ]   = await processAnyData(usersQueries.getUsersFcToken, [ el.user_id ]);
-          sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
-          await sendPushNotification(user.user_id, body.title, user.fec_token);
-        }));
-      }
-
-      else {
-        const usersToken = await collateUsersFcmTokens(users);
-        await sendMulticastPushNotification(body.title, usersToken, 'admin-notification');
-        await Promise.all(users.map(async(el) => {
-          await sendPushNotification(el.user_id, body.title, el.fcm_token);
-        }));
-      }
+    if (body.recipient === 'select') {
+      await Promise.all(body.sent_to.map(async(el) => {
+        const [ user ]   = await processAnyData(usersQueries.getUsersFcToken, [ el.user_id ]);
+        sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
+        await sendPushNotification(user.user_id, `${body.title} \n ${body.content}`, user.fcm_token);
+      }));
     }
-
+    if (body.recipient === 'all') {
+      const usersToken = await collateUsersFcmTokens(users);
+      await Promise.all(users.map(async(user) => {
+        sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
+      }));
+      sendMulticastPushNotification(`${body.title} \n ${body.content}`, usersToken, 'admin-notification');
+    }
     const result = await processOneOrNoneData(notificationQueries.sendNotification, payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: Users notification sent successfully in sendNotifications.admin.controller.notification.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: Users notification sent successfully in sendNotifications.admin.controller.notification.js`);
+    await adminActivityTracking(req.admin.admin_id, 49, 'success', descriptions.sends_system_notification(adminName));
     return ApiResponse.success(res, enums.SUCCESSFULLY_NOTIFICATION, enums.HTTP_OK, result);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, activityType, 'fail', body.type === 'system' ? 
+      descriptions.sends_system_notification_failed(`${admin.first_name} ${admin.last_name}`) : 
+      descriptions.sends_alert_notification_failed(`${admin.first_name} ${admin.last_name}`));
     error.label = enums.SEND_USERS_NOTIFICATIONS_CONTROLLER;
     logger.error(`Sending users notification failed:::${enums.SEND_USERS_NOTIFICATIONS_CONTROLLER}`, error.message);
     return next(error);
@@ -117,7 +128,7 @@ export const fetchNotifications = async(req, res, next) => {
       processAnyData(notificationQueries.fetchNotifications, payload),
       processAnyData(notificationQueries.fetchNotificationCount, payload)
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched notifications from the DB.
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched notifications from the DB.
      fetchNotifications.admin.controller.notification.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,

@@ -273,6 +273,22 @@ export default {
     FROM address_verification
     WHERE (user_id = $1 OR you_verify_candidate_id = $1)`,
 
+  fetchUserOfferLetterAddressDetails: `
+    SELECT 
+      id,
+      user_id,
+      INITCAP(street) AS street,
+      INITCAP(state) AS state,
+      INITCAP(city) AS city,
+      house_number,
+      INITCAP(lga) AS lga,
+      landmark,
+      INITCAP(country) AS country,
+      type_of_residence,
+      created_at
+    FROM address_verification
+    WHERE user_id = $1`,
+
   createUserAddressDetails: `
     INSERT INTO address_verification (
       user_id,

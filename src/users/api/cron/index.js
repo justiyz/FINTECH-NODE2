@@ -1,5 +1,5 @@
 import cron from 'node-cron';import { updateLoanStatusToOverdue, initiateLoanRepayment, nonPerformingLoans,
-  updatesPromoStatusToActive, updatesPromoStatusToEnded, updateClusterLoanStatusToOverdue, initiateClusterLoanRepayment, promoNotification, updateAlertNotification
+  updatesPromoStatusToActive, updatesPromoStatusToEnded, updateClusterLoanStatusToOverdue, initiateClusterLoanRepayment, promoEndingSoonNotification, updateAlertNotification
 } from '../../api/controllers/controller.cron';
 
 function CreateSchedule(time, task, zone) {
@@ -36,7 +36,7 @@ const updatePromoStatusToActive = CreateSchedule('0 1, * * *', () => updatesProm
   timezone: 'Africa/Lagos'
 }); // runs every 01:00am 
 
-const PromoEndDateNotification = CreateSchedule('0 9 * * *', () => promoNotification(), {
+const PromoEndDateNotification = CreateSchedule('0 9 * * *', () => promoEndingSoonNotification(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
 }); // runs every 09:00am 

@@ -42,6 +42,15 @@ export default {
         decided_by
     ) VALUES ($1, $2, $3, $4)`,
 
+  updateAdminClusterLoanApprovalTrail: `
+    INSERT INTO manual_cluster_loan_approval_trail(
+        loan_id,
+        member_loan_id,
+        loan_applicant,
+        decision,
+        decided_by
+    ) VALUES ($1, $2, $3, $4, $5)`,
+
   fetchClusterMemberLoanDetailsById: `
     SELECT 
         id,
