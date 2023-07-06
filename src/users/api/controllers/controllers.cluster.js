@@ -562,6 +562,10 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       if (result.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
+            `${user.first_name} ${user.last_name}`, 'failed-loan-application');
+        });
         userActivityTracking(req.user.user_id, 95, 'fail');
         return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
       }
@@ -775,6 +779,10 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       if (result.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
+            `${user.first_name} ${user.last_name}`, 'failed-loan-application');
+        });
         userActivityTracking(req.user.user_id, 98, 'fail');
         return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
       }
