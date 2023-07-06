@@ -69,8 +69,7 @@ const adminNotificationIdParams = Joi.object().keys({
 });
 
 const sendNotification = Joi.object({
-  type: Joi.string().valid('alert', 'system').required(),
-  recipient: Joi.string().valid('all', 'select').required()
+  type: Joi.string().valid('alert', 'system').required()
 }).when(Joi.object({ type: Joi.string().valid('alert') }).unknown(), {
   then: Joi.object({
     title: Joi.string().required(),
@@ -82,13 +81,13 @@ const sendNotification = Joi.object({
     title: Joi.string().required(),
     content: Joi.string().required(),
     sent_to: Joi.array().items(Joi.object({
-      user_id: Joi.string().required(),
-      name: Joi.string().required()
+      user_id: Joi.string().required()
     })).min(1).required()
   })
 });
 
 const fetchNotification = Joi.object().keys({
+  type: Joi.string().optional().valid('alert', 'system'),
   title: Joi.string().optional(),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
