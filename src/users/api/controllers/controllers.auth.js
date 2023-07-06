@@ -127,6 +127,10 @@ export const verifyAccount = async(req, res, next) => {
     const myDate = new Date(tokenExpiration * 1000);
     const tokenExpireAt = dayjs(myDate);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully converted time from epoch time to a readable format verifyAccount.controllers.auth.js`);
+    if (body.fcm_token && body.fcm_token.length > 0) {
+      await processAnyData(authQueries.setSameFcmTokenNull, [ body.fcm_token.trim() ]); // this is done to prevent two fcm tokens being attached to multiple accounts
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully set other accounts with same fcm token to null verifyAccount.controllers.auth.js`);
+    } 
     const payload = !referralCode ? AuthPayload.verifyUserAccountOnNewDevice(user, refreshToken, body) : 
       AuthPayload.verifyUserAccountAfterSignup(user, refreshToken, body, referralCode);
     !referralCode ? await processAnyData(authQueries.verifyUserAccountOnNewDevice, payload) : await processAnyData(authQueries.verifyUserAccountAfterSignup, payload);

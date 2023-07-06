@@ -10,7 +10,7 @@ export default {
   verifyUserAccountOnNewDevice: (user, refreshToken, body) => [ 
     user.user_id, 
     refreshToken?.trim(), 
-    body.fcm_token || null, 
+    body.fcm_token?.trim() || null, 
     body.device_token?.trim() || null 
   ],
   completeProfile: (user, body, hashed) => [ 
