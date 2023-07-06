@@ -1,9 +1,9 @@
 export default {
   fetchClusters: (query) => [
     query.search ? `%${query.search}%` : null,
-    query.status,
-    query.loan_status,
-    query.type,
+    query.status || null,
+    query.loan_status || null,
+    query.type || null,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],

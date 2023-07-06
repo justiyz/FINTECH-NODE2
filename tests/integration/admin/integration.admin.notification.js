@@ -3,6 +3,7 @@ import chaiHttp from 'chai-http';
 import 'dotenv/config';
 import app from '../../../src/app';
 import enums from '../../../src/users/lib/enums';
+import dayjs from 'dayjs';
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -71,7 +72,7 @@ describe('Admin Notification', () => {
           done();
         });
     });
-    it('Should successfully send users notification', (done) => {
+    it('Should successfully send users system notification', (done) => {
       chai.request(app)
         .post('/api/v1/admin/send-notifications')
         .set({
@@ -80,23 +81,41 @@ describe('Admin Notification', () => {
         })
         .send({
           type: 'system',
-          recipient: 'select',
           title: 'promo time',
           content: 'something to put here, working on something',
           sent_to: [
             { 
-              user_id: process.env.SEEDFI_USER_ONE_USER_ID,
-              name: 'john doe' 
+              user_id: process.env.SEEDFI_USER_ONE_USER_ID
             },
             { 
-              user_id: process.env.SEEDFI_USER_TWO_USER_ID,
-              name: 'john doe' 
+              user_id: process.env.SEEDFI_USER_TWO_USER_ID
             },
             { 
-              user_id: process.env.SEEDFI_USER_THREE_USER_ID,
-              name: 'john doe' 
+              user_id: process.env.SEEDFI_USER_THREE_USER_ID
             }
           ]
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.SUCCESSFULLY_NOTIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should successfully send users alert notification', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/send-notifications')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          type: 'alert',
+          title: 'Happy Holidays',
+          content: 'something to put here, working on something',
+          end_at: dayjs().add(1, 'months')
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -116,7 +135,6 @@ describe('Admin Notification', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .send({
-          recipient: 'select',
           title: 'promo time',
           content: 'something to put here, working on something',
           sent_to: [

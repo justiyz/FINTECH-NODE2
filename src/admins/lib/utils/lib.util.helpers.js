@@ -56,13 +56,15 @@ export const processAdminBasedPermissions = async(admin_id, adminResources, admi
 
 export const collateUsersFcmTokens = async(users) => {
   const tokens = [];
+  const userNames = [];
   await Promise.all(users.map(async(user) => {
-    const userFcmToken = await processAnyData(usersQueries.getUsersForNotifications, [ user.user_id ]);
-    if (userFcmToken?.fcm_token) {
-      tokens.push(userFcmToken.fcm_token);
+    const [ userDetails ] = await processAnyData(usersQueries.getUsersForNotifications, [ user.user_id ]);
+    if (userDetails) {
+      tokens.push(userDetails.fcm_token);
+      userNames.push(userDetails.name);
     }
     return user;
   }));
-  await Promise.all([ tokens ]);
-  return tokens;
+  await Promise.all([ tokens, userNames ]);
+  return [ tokens, userNames ];
 };

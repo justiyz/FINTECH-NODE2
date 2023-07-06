@@ -141,7 +141,7 @@ router.post(
 router.get(
   '/admin-notifications',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.fetchNotification, 'payload'),
+  Model(Schema.fetchNotification, 'query'),
   NotificationController.fetchNotifications
 );
 
