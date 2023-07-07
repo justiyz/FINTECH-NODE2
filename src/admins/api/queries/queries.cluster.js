@@ -208,7 +208,7 @@ export default {
       is_declined,
       inviter_id 
     FROM  cluster_invitees
-    WHERE cluster_id = $1;
+    WHERE cluster_id = $1 AND is_joined = false;
     `
 };
 
