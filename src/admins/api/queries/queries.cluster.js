@@ -196,7 +196,20 @@ export default {
     SET 
       updated_at = NOW(),
       can_disburse_loan = true
-    WHERE loan_id = $1`
+    WHERE loan_id = $1`,
+    
+  fetchClustersInvitees: `
+    SELECT 
+      cluster_id,
+      invitee,
+      invitation_mode,
+      to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
+      is_joined,
+      is_declined,
+      inviter_id 
+    FROM  cluster_invitees
+    WHERE cluster_id = $1;
+    `
 };
 
 
