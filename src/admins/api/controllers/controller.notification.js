@@ -134,3 +134,26 @@ export const fetchNotifications = async(req, res, next) => {
     return next(error);
   }
 };
+
+
+/** 
+ * delete notification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof NotificationController
+ */
+export const deleteNotification = async(req, res, next) => {
+  try {
+    const { params, admin } = req;
+    await processOneOrNoneData(notificationQueries.deleteNotification, [ params.adminNotificationId ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully delete notifications from the DB.
+    deleteNotification.admin.controller.notification.js`);
+    return ApiResponse.success(res, enums.DELETE_NOTIFICATION, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.DELETE_NOTIFICATION_CONTROLLER;
+    logger.error(`delete notifications failed:::${enums.DELETE_NOTIFICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

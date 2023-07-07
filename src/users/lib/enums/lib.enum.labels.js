@@ -304,7 +304,7 @@ export const CLUSTER_MEMBER_INVITE_CONTROLLER = 'AdminClusterController::cluster
 export const ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER = 'AdminClusterController::activateAndDeactivateCluster';
 export const DELETE_CLUSTER_MEMBER_CONTROLLER = 'AdminClusterController::deleteClusterMember';
 export const CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE = 'AdminClusterController::checkClusterMemberExist';
-export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminClusterController::checkAdminType';
+export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminAdminMiddleware:::checkAdminType';
 export const CHECK_IF_BVN_EXIST_MIDDLEWARE = 'AdminBvnMiddleware::checkIfBvnExist';
 export const UNBLACKLIST_BVN_CONTROLLER = 'AdminBvnController::unblacklistBvn';
 export const CLUSTER_MEMBER_BULK_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberBulkInvite';
@@ -333,4 +333,6 @@ export const CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE = 'AdminSettingsMiddleware:
 export const UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER = 'CronController::updatesPromoStatusToActive ';
 export const SEND_USERS_NOTIFICATIONS_CONTROLLER = 'AdminNotificationController::sendNotifications ';
 export const FETCH_NOTIFICATIONS_CONTROLLER = 'AdminNotificationController::fetchNotifications ';
+export const DELETE_NOTIFICATION_CONTROLLER = 'AdminNotificationController::deleteNotifications ';
+export const GET_NOTIFICATION_BY_ID_MIDDLEWARE = 'AdminAdminMiddleware:::getNotificationById ';
 

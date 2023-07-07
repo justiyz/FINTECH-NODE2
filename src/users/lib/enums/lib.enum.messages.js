@@ -356,3 +356,6 @@ export const SUCCESSFULLY_NOTIFICATION = 'Notification sent successfully.';
 export const FETCHED_NOTIFICATIONS = 'Notifications fetched successfully';
 export const UPDATE_ALERT_NOTIFICATION = 'Notifications updated successfully';
 export const PROMO_NOTIFICATION = 'Promo notification sent successfully';
+export const NOTIFICATION_DOES_NOT_EXIST = 'Notification id dose not exist';
+export const NOT_ALLOWED_TO_DELETE_NOTIFICATION = 'Admin cannot delete this notification';
+export const DELETE_NOTIFICATION = 'Notification successfully deleted';

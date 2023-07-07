@@ -76,9 +76,15 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkAdminType', async() => {
+    it('should call checkIfBvnExist', async() => {
       const req = { body: '' };
       const data = await BvnMiddleware.checkIfBvnExist(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call getNotificationById', async() => {
+      const req = { params: '' };
+      const data = await AdminAdminMiddleware.getNotificationById(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

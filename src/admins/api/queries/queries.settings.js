@@ -173,5 +173,18 @@ export default {
     AND (title ILIKE TRIM($2) OR $2 IS NULL)
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
       OR ($3 IS NULL AND $4 IS NULL))
-  `
+  `,
+  getNotificationById: `
+    SELECT 
+      notification_id,
+      sent_by,
+      type,
+      title
+    FROM admin_sent_notifications
+    WHERE notification_id = $1;
+  `,
+  deleteNotification: `
+    DELETE FROM admin_sent_notifications
+    WHERE notification_id = $1
+    `
 };
