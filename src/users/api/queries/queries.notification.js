@@ -8,7 +8,7 @@ export default {
     FROM admins
     LEFT JOIN admin_user_permissions ON admin_user_permissions.admin_id = admins.admin_id
     LEFT JOIN admin_resources ON admin_resources.resource_id = admin_user_permissions.resource_id
-    WHERE admin_resources.name = $1
+    WHERE admin_resources.name = $1 OR admins.role_type = 'SADM'
     `,
   fetchInViewLoanApplication: `
     SELECT
