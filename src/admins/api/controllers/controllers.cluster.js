@@ -86,15 +86,17 @@ export const fetchAndFilterClusters = async(req, res, next) => {
 export const fetchSingleClusterDetails = async(req, res, next) => {
   try {
     const { params: { cluster_id }, admin }  = req;
-    const [ clusterDetails, membersDetails ]  = await Promise.all([
+    const [ clusterDetails, membersDetails, clustersInvitees ]  = await Promise.all([
       processOneOrNoneData(ClusterQueries.fetchSingleClusterDetails, cluster_id),
-      processAnyData(ClusterQueries.fetchClusterMembersDetails, cluster_id)
+      processAnyData(ClusterQueries.fetchClusterMembersDetails, cluster_id),
+      processAnyData(ClusterQueries.fetchClustersInvitees, cluster_id)
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched single cluster details and its members 
     from the DB fetchSingleClusterDetails.admin.controllers.cluster.js`);
     const data = {
       cluster: clusterDetails,
-      members: membersDetails
+      members: membersDetails,
+      clustersInvitees
     };
     return ApiResponse.success(res, enums.CLUSTER__DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {

@@ -239,10 +239,11 @@ describe('Admin Notification', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.FETCHED_NOTIFICATIONS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_NOTIFICATION_ID = res.body.data.notifications[0].notification_id;
           done();
         });
     });
-    it('Should notification', (done) => {
+    it('Should fetch notification', (done) => {
       chai.request(app)
         .get('/api/v1/admin/admin-notifications')
         .set({
@@ -254,6 +255,56 @@ describe('Admin Notification', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.FETCHED_NOTIFICATIONS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('delete notification', () => {
+    it('Should flag when admin is not a super admin and did create the notification', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/admin-notification/${process.env.SEEDFI_NOTIFICATION_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NOT_ALLOWED_TO_DELETE_NOTIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should delete notification by id', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/admin-notification/${process.env.SEEDFI_NOTIFICATION_ID}`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.DELETE_NOTIFICATION);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should flag when id des not exist', (done) => {
+      chai.request(app)
+        .delete(`/api/v1/admin/admin-notification/${process.env.SEEDFI_NOTIFICATION_ID}0`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NOTIFICATION_DOES_NOT_EXIST);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
