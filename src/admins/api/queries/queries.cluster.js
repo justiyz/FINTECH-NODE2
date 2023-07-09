@@ -199,16 +199,18 @@ export default {
     WHERE loan_id = $1`,
     
   fetchClustersInvitees: `
-    SELECT 
-      cluster_id,
-      invitee,
-      invitation_mode,
-      to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
-      is_joined,
-      is_declined,
-      inviter_id 
-    FROM  cluster_invitees
-    WHERE cluster_id = $1 AND is_joined = false;
+  SELECT 
+    cluster_id,
+    invitee,
+    invitation_mode,
+    to_char(DATE(created_at)::date, 'Mon DD YYYY') AS date,
+    is_joined,
+    is_declined,
+    inviter_id 
+  FROM cluster_invitees
+  WHERE cluster_id = $1
+  AND is_joined = false
+  ORDER BY is_declined;
     `
 };
 
