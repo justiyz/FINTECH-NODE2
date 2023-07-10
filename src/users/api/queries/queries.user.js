@@ -273,6 +273,22 @@ export default {
     FROM address_verification
     WHERE (user_id = $1 OR you_verify_candidate_id = $1)`,
 
+  fetchUserOfferLetterAddressDetails: `
+    SELECT 
+      id,
+      user_id,
+      INITCAP(street) AS street,
+      INITCAP(state) AS state,
+      INITCAP(city) AS city,
+      house_number,
+      INITCAP(lga) AS lga,
+      landmark,
+      INITCAP(country) AS country,
+      type_of_residence,
+      created_at
+    FROM address_verification
+    WHERE user_id = $1`,
+
   createUserAddressDetails: `
     INSERT INTO address_verification (
       user_id,
@@ -600,5 +616,23 @@ export default {
           created_by
       FROM system_promos
       WHERE status = 'active' 
- `
+ `,
+ 
+  fetchAlert: `
+     SELECT 
+        notification_id,  
+        title, 
+        content, 
+        created_at 
+      FROM admin_sent_notifications 
+      WHERE type = 'alert' AND is_ended IS FALSE;
+  `,
+  
+  updateAlertNotification: `
+      UPDATE admin_sent_notifications
+      SET 
+      updated_at = NOW(),
+      is_ended = TRUE
+      WHERE DATE(end_at) = CURRENT_DATE;
+  `
 };

@@ -209,6 +209,8 @@ export const USER_PROFILE_NEXT_UPDATE_MIDDLEWARE = 'UserMiddleware::userProfileN
 export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::createUserEmploymentDetails';
 export const UPDATE_EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::updateEmploymentDetails';
 export const UPDATE_MONO_ACCOUNT_ID_CONTROLLER = 'UserMiddleware::updateMonoAccountId';
+export const FETCH_ALERT_NOTIFICATION_CONTROLLER = 'UserController::fetchAlertNotification';
+export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'UserController::updateeAlertNotification';
 
 
 // Admin related labels
@@ -302,7 +304,7 @@ export const CLUSTER_MEMBER_INVITE_CONTROLLER = 'AdminClusterController::cluster
 export const ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER = 'AdminClusterController::activateAndDeactivateCluster';
 export const DELETE_CLUSTER_MEMBER_CONTROLLER = 'AdminClusterController::deleteClusterMember';
 export const CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE = 'AdminClusterController::checkClusterMemberExist';
-export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminClusterController::checkAdminType';
+export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminAdminMiddleware:::checkAdminType';
 export const CHECK_IF_BVN_EXIST_MIDDLEWARE = 'AdminBvnMiddleware::checkIfBvnExist';
 export const UNBLACKLIST_BVN_CONTROLLER = 'AdminBvnController::unblacklistBvn';
 export const CLUSTER_MEMBER_BULK_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberBulkInvite';
@@ -314,6 +316,7 @@ export const FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminControll
 export const ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE = 'AdminClusterMiddleware::adminClusterRestriction';
 export const UPDATE_SINGLE_NOTIFICATION_CONTROLLER = 'NotificationController::updateSingleNotification';
 export const UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER = 'NotificationController::updateAdminNotificationIsRead';
+export const PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER = 'NotificationController::promoEndingSoonNotification';
 export const UPLOAD_PROMO_BANNER_MIDDLEWARE = 'AdminSettingsMiddleware::uploadPromoBanner';
 export const CREATE_PROMO_CONTROLLER = 'AdminSettingsController::createSystemPromo';
 export const FETCH_PROMOS_CONTROLLER = 'AdminSettingsController::fetchAllSystemPromos';
@@ -330,4 +333,6 @@ export const CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE = 'AdminSettingsMiddleware:
 export const UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER = 'CronController::updatesPromoStatusToActive ';
 export const SEND_USERS_NOTIFICATIONS_CONTROLLER = 'AdminNotificationController::sendNotifications ';
 export const FETCH_NOTIFICATIONS_CONTROLLER = 'AdminNotificationController::fetchNotifications ';
+export const DELETE_NOTIFICATION_CONTROLLER = 'AdminNotificationController::deleteNotifications ';
+export const GET_NOTIFICATION_BY_ID_MIDDLEWARE = 'AdminAdminMiddleware:::getNotificationById ';
 

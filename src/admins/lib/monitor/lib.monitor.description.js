@@ -23,10 +23,10 @@ export const edit_role = (name) => `${name}, edits admin role type`;
 export const edit_role_failed = (name) => `${name}, failed to edit admin role type`;
 export const verify_reset_pass_otp = () => 'verify reset password otp';
 export const verify_reset_pass_otp_failed = () => 'verify reset password otp';
-export const manually_loan_approval = (name) => `${name}, approves loan application manually`;
-export const manually_loan_approval_failed = (name) => `${name}, approving loan application manually failed`;
-export const manually_loan_disapproval = (name) => `${name}, disapproves loan application manually`;
-export const manually_loan_disapproval_failed = (name) => `${name}, disapproving loan application manually failed`;
+export const manually_loan_approval = (name, type) => `${name}, approves ${type} loan application manually`;
+export const manually_loan_approval_failed = (name, type) => `${name}, approving ${type} loan application manually failed`;
+export const manually_loan_disapproval = (name, type) => `${name}, disapproves ${type} loan application manually`;
+export const manually_loan_disapproval_failed = (name, type) => `${name}, disapproving ${type} loan application manually failed`;
 export const uploads_document = (name, user_name) => `${name} uploads document for user ${user_name}`;
 export const uploads_document_failed = (name, user_name) => `${name} uploading document for user ${user_name} failed`;
 export const user_status = (name, action, user_name) => `${name} successfully ${action} a user ${user_name}`;
@@ -54,4 +54,21 @@ export const loan_reports_and_analytics = (name) => `${name} successfully views 
 export const loan_reports_and_analytics_failed = (name) => `${name} viewing loan management reports and analytics failed`;
 export const cluster_reports_and_analytics = (name) => `${name} successfully views cluster management reports and analytics`;
 export const cluster_reports_and_analytics_failed = (name) => `${name} viewing cluster management reports and analytics failed`;
+export const marks_a_notification_read = () => 'admin reads a notification and thus is marked as read';
+export const marks_a_notification_read_failed = () => 'admin could not read a notification and thus could not mark it as read';
+export const marks_all_notifications_read = () => 'admin marked all unread notifications as read';
+export const marks_all_notifications_read_failed = () => 'admin could not mark all unread notifications as read';
+export const sends_alert_notification = (name) => `${name} sent alert notification type to users`;
+export const sends_alert_notification_failed = (name) => `${name} failed in sending alert notification type to users`;
+export const sends_system_notification = (name) => `${name} sent system notification type to users`;
+export const sends_system_notification_failed = (name) => `${name} failed in sending system notification type to users`;
+
+export const create_promo = (name, promoName) => `${name} created promo with name ${promoName} successfully`;
+export const create_promo_failed = (name, promoName) => `${name} failed to create promo with name ${promoName}`;
+export const edit_promo = (name, promoName) => `${name} edited promo with name ${promoName} successfully`;
+export const edit_promo_failed = (name, promoName) => `${name} failed in editing promo with name ${promoName}`;
+export const cancel_promo = (name, promoName) => `${name} cancelled promo with name ${promoName} successfully`;
+export const cancel_promo_failed = (name) => `${name} failed in cancelling one or more promos`;
+export const delete_promo = (name, promoName) => `${name} deleted promo with name ${promoName} successfully`;
+export const delete_promo_failed = (name) => `${name} failed in deleting one or more promos`;
 

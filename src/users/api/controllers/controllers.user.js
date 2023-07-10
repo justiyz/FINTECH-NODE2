@@ -32,7 +32,9 @@ const { SEEDFI_NODE_ENV } = config;
 export const updateFcmToken = async(req, res, next) => {
   try {
     const { user, body } = req;
-    await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token ]);
+    await processAnyData(authQueries.setSameFcmTokenNull, [ body.fcm_token.trim() ]); // this is done to prevent two fcm tokens being attached to multiple accounts
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully set other accounts with same fcm token to null updateFcmToken.controllers.user.js`);
+    await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token.trim() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user fcm token to the database updateFcmToken.controllers.user.js`);
     const data = {
       user_id: user.user_id,
@@ -879,12 +881,32 @@ export const fetchLoanTierValue = async(req, res, next) => {
   try {
     const query = (req.query.type === 'tier_one') ? userQueries.fetchTierOneLoanValue : userQueries.fetchTierTwoLoanValue;
     const data = await processAnyData(query, []);
-    
+
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched loan tiers value from the DB. fetchTierLoanValue.controller.user.js`);
     return ApiResponse.success(res, enums.FETCH_LOAN_VALUE, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_LOAN_TIER_CONTROLLER;
     logger.error(`Fetch tier loan value failed:::${enums.FETCH_LOAN_TIER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch alert notifications
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns loan tier value
+ * @memberof UserController
+ */
+export const fetchAlertNotification = async(req, res, next) => {
+  try {
+    const data = await processAnyData(userQueries.fetchAlert, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.user.js`);
+    return ApiResponse.success(res, enums.FETCHED_NOTIFICATIONS, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_ALERT_NOTIFICATION_CONTROLLER;
+    logger.error(`Fetching alert notification failed:::${enums.FETCH_ALERT_NOTIFICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };

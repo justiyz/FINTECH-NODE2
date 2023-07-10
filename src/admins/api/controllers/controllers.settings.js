@@ -115,13 +115,16 @@ export const scoreCardBreakdown = async(req, res, next) => {
  */
 
 export const createSystemPromo = async(req, res, next) => {
+  const { body, document, admin } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
-    const { body, document, admin } = req;
     const payload = settingsPayload.createPromo(body, document, admin);
     const promo =  await processOneOrNoneData(settingsQueries.createPromo, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully creates a promo createSystemPromo.admin.controllers.settings.js`);
+    await adminActivityTracking(req.admin.admin_id, 43, 'success', descriptions.create_promo(adminName, body.name.trim()));
     return ApiResponse.success(res, enums.PROMO_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, promo);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 43, 'fail', descriptions.create_promo_failed(adminName, body.name));
     error.label = enums.CREATE_PROMO_CONTROLLER;
     logger.error(`creating system promo failed:::${enums.CREATE_PROMO_CONTROLLER}`, error.message);
     return next(error);  
@@ -161,8 +164,7 @@ export const fetchAllSystemPromos = async(req, res, next) => {
 
 export const fetchSinglePromo = async(req, res, next) => {
   try {
-    const { params: { promo_id }, admin } = req;
-    const promoDetails = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, promo_id);
+    const { admin, promoDetails } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetches details of a particular promo 
     fetchSinglePromo.admin.controllers.settings.js`);
     return ApiResponse.success(res, enums.PROMO_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, promoDetails);   
@@ -183,19 +185,20 @@ export const fetchSinglePromo = async(req, res, next) => {
  */
 
 export const editPromoDetails = async(req, res, next) => {
+  const { body, params: { promo_id }, document, admin, promoDetails  } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
-    const { body, params: { promo_id }, document, admin  } = req;
-    const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, promo_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched details promo editPromoDetails.admin.controllers.settings.js`);
-    const payload = settingsPayload.editPromo(body, document, promo, promo_id);
+    const payload = settingsPayload.editPromo(body, document, promoDetails, promo_id);
     const editedPromo = await processOneOrNoneData(settingsQueries.updatePromoDetails, payload);
     if (dayjs(body.start_date).isSame(dayjs(), 'day')) {
       await processOneOrNoneData(settingsQueries.updatePromoStatus, [ promo_id ]);
     }
 
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully edits details of a promo  editPromoDetails.admin.controllers.settings.js`); 
+    await adminActivityTracking(req.admin.admin_id, 44, 'success', descriptions.edit_promo(adminName, promoDetails.name.trim()));
     return ApiResponse.success(res, enums.PROMO_EDITED_SUCCESSFULLY, enums.HTTP_OK, editedPromo);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 44, 'fail', descriptions.edit_promo_failed(adminName, promoDetails.name));
     error.label = enums.EDIT_PROMO_DETAILS_CONTROLLER;
     logger.error(`editing a promo's details failed:::${enums.EDIT_PROMO_DETAILS_CONTROLLER}`, error.message);
     return next(error);  
@@ -211,20 +214,21 @@ export const editPromoDetails = async(req, res, next) => {
  * @memberof AdminSettingsController
  */
 export const cancelPromo = async(req, res, next) => {
+  const { body, admin } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
-    const { body, admin } = req;
     const cancelledPromos = [];
-
     for (const id of body) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched promo details
-      cancelPromo.admin.controllers.settings.js`);
       const actualEndDate = dayjs();
       const cancelledPromo = await processOneOrNoneData(settingsQueries.cancelPromo, [ id.promo_id, actualEndDate ]);
+      await adminActivityTracking(req.admin.admin_id, 46, 'success', descriptions.cancel_promo(adminName, cancelledPromo.name.trim()));
       cancelledPromos.push(cancelledPromo);
     }
-
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully cancelled one or more promos on the system
+    cancelPromo.admin.controllers.settings.js`);
     return ApiResponse.success(res, enums.PROMO_CANCELLED_SUCCESSFULLY, enums.HTTP_OK, cancelledPromos);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 46, 'fail', descriptions.cancel_promo_failed(adminName));
     error.label = enums.CANCEL_PROMO_CONTROLLER;
     logger.error(`cancelling promo failed:::${enums.CANCEL_PROMO_CONTROLLER}`, error.message);
     return next(error);
@@ -241,15 +245,18 @@ export const cancelPromo = async(req, res, next) => {
  */
 
 export const deletePromo = async(req, res, next) => {
+  const { body, admin }  = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
-    const { body, admin }  = req;
     for (const id of body) {
-      await processOneOrNoneData(settingsQueries.deletePromo, id.promo_id);
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully deletes a promo
-     deletePromo.admin.controllers.settings.js`);
+      const deletedPromos = await processOneOrNoneData(settingsQueries.deletePromo, id.promo_id);
+      await adminActivityTracking(req.admin.admin_id, 45, 'success', descriptions.delete_promo(adminName, deletedPromos.name.trim()));
     }
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully deletes one or more promos on the system
+    deletePromo.admin.controllers.settings.js`);
     return ApiResponse.success(res, enums.PROMO_DELETED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 45, 'fail', descriptions.delete_promo_failed(adminName));
     error.label = enums.DELETE_PROMO_CONTROLLER;
     logger.error(`deleting promo failed:::${enums.DELETE_PROMO_CONTROLLER}`, error.message);
     return next(error);

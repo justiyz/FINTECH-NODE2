@@ -129,6 +129,7 @@ export default {
     updated_at = NOW(),
     is_deleted = true
     WHERE promo_id = $1
+    RETURNING *
   `,
   sendNotification: `
   INSERT INTO admin_sent_notifications(
@@ -155,21 +156,35 @@ export default {
       end_at,
       is_ended,
       to_char(created_at, 'DD Mon, YYYY HH:MI am') AS created_at
-      FROM admin_sent_notifications
-      WHERE type = $1 OR $1 IS NULL
-      AND title ILIKE TRIM($2) OR $2 IS NULL
-      AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
+    FROM admin_sent_notifications
+    WHERE (type = $1 OR $1 IS NULL)
+    AND (title ILIKE TRIM($2) OR $2 IS NULL)
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
       OR ($3 IS NULL AND $4 IS NULL))
-      ORDER BY created_at DESC
-      OFFSET $5
-      LIMIT $6;
-  `,
+    ORDER BY created_at DESC
+    OFFSET $5
+    LIMIT $6`,
+
   fetchNotificationCount: `
     SELECT 
       COUNT(notification_id) AS total_count
     FROM admin_sent_notifications
-    WHERE type = $1 AND title ILIKE TRIM($2) OR $2 IS NULL
+    WHERE (type = $1 OR $1 IS NULL) 
+    AND (title ILIKE TRIM($2) OR $2 IS NULL)
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
-    OR ($3 IS NULL AND $4 IS NULL));
-  `
+      OR ($3 IS NULL AND $4 IS NULL))
+  `,
+  getNotificationById: `
+    SELECT 
+      notification_id,
+      sent_by,
+      type,
+      title
+    FROM admin_sent_notifications
+    WHERE notification_id = $1;
+  `,
+  deleteNotification: `
+    DELETE FROM admin_sent_notifications
+    WHERE notification_id = $1
+    `
 };

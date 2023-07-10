@@ -194,12 +194,12 @@ export const initiateLoanRepayment = async(req, res, next) => {
  * @returns { JSON } - A JSON successful response
  * @memberof CronController
  */
-
 export const updatesPromoStatusToActive = async(req, res, next) => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToActive);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain inactive promos in the database has been made active
       updatesPromoStatusToActive.controllers.cron.js`);
+    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'UPRMSTACT', 'update promo status to active' ]);
     return ApiResponse.success(res, enums.PROMO_DUE_TO_START, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
@@ -237,10 +237,11 @@ export const nonPerformingLoans = async(req, res, next) => {
     
       if (admin) {
         sendNotificationToAdmin(admin.admin_id, 'Non-Performing Loans', 
-          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'Non-Performing-Loans');
+          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'non-performing-loans');
       }
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
+    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non performing loan notifications to admins' ]);
     return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
@@ -257,11 +258,11 @@ export const nonPerformingLoans = async(req, res, next) => {
  * @returns { JSON } - A JSON with the initiated payments
  * @memberof CronController
  */
-
 export const updatesPromoStatusToEnded = async(req, res, next) => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToEnded);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end updatesPromoStatusToEnded.controllers.cron.js`);
+    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'UPRMSTAEND', 'update promo status to ended' ]);
     return ApiResponse.success(res, enums.PROMO_DUE_TO_END, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
@@ -270,18 +271,48 @@ export const updatesPromoStatusToEnded = async(req, res, next) => {
   }
 };
 
-
-export const promoNotification = async(req, res, next) => {
+/**
+ * promo ending soon admin notification
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with success response 
+ * @memberof CronController
+ */
+export const promoEndingSoonNotification = async(req, res, next) => {
   try {
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'settings' ]);
     const [ promo ] = await processAnyData(notificationQueries.fetchEndingPromo, [ 'settings' ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched promo and admins for notification promoNotification.controllers.cron.js`);
-    admins.map((admin) => {
-      sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoNotification(`${promo.name}`), 'ending-promo');
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched promo and admins for notification promoEndingSoonNotification.controllers.cron.js`);
+    await admins.map((admin) => {
+      sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoEndingSoonNotification(`${promo.name}`), 'ending-promo');
     });
+    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SPESNTADM', 'send promo ending soon notification to admins' ]);
+    return ApiResponse.success(res, enums.PROMO_NOTIFICATION, enums.HTTP_OK);
   } catch (error) {
-    error.label = enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER;
-    logger.error(`promo notification failed:::${enums.UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER}`, error.message);
+    error.label = enums.PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER;
+    logger.error(`promo notification failed:::${enums.PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * update alert notification 
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with success response 
+ * @memberof CronController
+ */
+export const updateAlertNotification = async(req, res, next) => {
+  try {
+    const data = await processAnyData(userQueries.updateAlertNotification, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.cron.js`);
+    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SANTEND', 'set alert notifications to ended' ]);
+    return ApiResponse.success(res, enums.UPDATE_ALERT_NOTIFICATION, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER;
+    logger.error(`Fetching alert notification failed:::${enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER}`, error.message);
     return next(error);
   }
 };

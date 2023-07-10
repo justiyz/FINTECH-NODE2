@@ -8,6 +8,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
 import AdminMailService from '../../../admins/api/services/services.email';
+import MailService from '../services/services.email';
 import LoanPayload from '../../lib/payloads/lib.payload.loan';
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import { loanApplicationEligibilityCheck, loanApplicationRenegotiation } from '../services/service.seedfiUnderwriting';
@@ -42,6 +43,22 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
+      if (result.status >= 500) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
+        checkUserLoanEligibility.controllers.loan.js`);
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
+            `${user.first_name} ${user.last_name}`, 'failed-loan-application');
+        });
+        userActivityTracking(req.user.user_id, 37, 'fail');
+        return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+      }
+      if (result.response.data.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(), 
+            `${user.first_name} ${user.last_name}`, 'failed-loan-application');
+        });
+      }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
@@ -78,7 +95,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
         
       admins.map((admin) => {
         sendNotificationToAdmin(admin.admin_id, ' Manual Approval Required', adminNotification.loanApplicationApproval(), 
-          `${user.first_name} ${user.last_name}`, 'MANUAL-APPROVAL');
+          `${user.first_name} ${user.last_name}`, 'manual-approval');
       });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Notification sent to admin successfully checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'success');
@@ -124,7 +141,13 @@ export const processLoanRenegotiation = async(req, res, next) => {
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing does not return success response from underwriting service 
       processLoanRenegotiation.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 41, 'fail');
+      if (result.status >= 500) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
+        processLoanRenegotiation.controllers.loan.js`);
+        userActivityTracking(req.user.user_id, 74, 'fail');
+        return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
+      }
+      userActivityTracking(req.user.user_id, 74, 'fail');
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER);
     }
     const { data } = result;
@@ -147,10 +170,10 @@ export const processLoanRenegotiation = async(req, res, next) => {
     await processNoneData(loanQueries.updateOfferLetter, [ existingLoanApplication.loan_id, user.user_id, offerLetterData.Location.trim() ]);
     const returningData = await LoanPayload.loanApplicationRenegotiationResponse(data, totalAmountRepayable, totalInterestAmount, user, 
       updatedLoanDetails, offerLetterData.Location.trim(), body);
-    userActivityTracking(user.user_id, 41, 'success');
+    userActivityTracking(user.user_id, 74, 'success');
     return ApiResponse.success(res, enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY, enums.HTTP_OK, returningData);
   } catch (error) {
-    userActivityTracking(req.user.user_id, 41, 'fail');
+    userActivityTracking(req.user.user_id, 74, 'fail');
     error.label = enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER;
     logger.error(`processing loan renegotiation failed::${enums.PROCESS_LOAN_RENEGOTIATION_CONTROLLER}`, error.message);
     return next(error);
@@ -593,6 +616,8 @@ export const processLoanRescheduling = async(req, res, next) => {
     }
     const userUnpaidRepayments = await processAnyData(loanQueries.fetchUserUnpaidRepayments, [ existingLoanApplication.loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's unpaid repayments fetched processLoanRescheduling.controllers.loan.js`);
+    const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next loan repayment details fetched processLoanRescheduling.controllers.loan.js`);
     const totalExtensionDays = userUnpaidRepayments.length * Number(loanRescheduleRequest.extension_in_days);
     const newLoanDuration = `${existingLoanApplication.loan_tenor_in_months} month(s), ${totalExtensionDays} day(s)`;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: updated total loan tenor fetched processLoanRescheduling.controllers.loan.js`);
@@ -607,15 +632,25 @@ export const processLoanRescheduling = async(req, res, next) => {
       processOneOrNoneData(loanQueries.updateRescheduleRequestAccepted, [ loanRescheduleRequest.reschedule_id ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling details updated successfully processLoanRescheduling.controllers.loan.js`);
-    userActivityTracking(req.user.user_id, 75, 'success');
-    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, {
+    const data = {
       loan_id: existingLoanApplication.loan_id, 
       user_id: user.user_id,
+      email: user.email,
+      first_name: user.first_name,
+      loan_reason: existingLoanApplication.loan_reason,
+      amount_requested: existingLoanApplication.amount_requested,
+      monthly_repayment: existingLoanApplication.monthly_repayment,
+      initial_loan_duration: existingLoanApplication.loan_tenor_in_months,
+      current_loan_duration: newLoanDuration,
+      next_repayment_date: dayjs(nextRepayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days').format('MMM DD, YYYY'),
       status: existingLoanApplication.status,
       reschedule_extension_days: Number(loanRescheduleRequest.extension_in_days),
       total_loan_extension_days: parseFloat(totalExtensionDays),
       is_reschedule: true
-    });
+    };
+    await MailService('Loan Facility Rescheduled', 'loanRescheduled',  data);
+    userActivityTracking(req.user.user_id, 75, 'success');
+    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     userActivityTracking(req.user.user_id, 75, 'fail');
     error.label = enums.PROCESS_LOAN_RESCHEDULING_CONTROLLER;

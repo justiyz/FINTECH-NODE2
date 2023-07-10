@@ -36,10 +36,10 @@ export const approveLoanApplication = async(req, res, next) => {
     sendUserPersonalNotification(loanApplicant, 'Approved loan application', 
       PersonalNotifications.approvedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'approved-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveLoanApplication.admin.controllers.loan.js`);
-    await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName));
+    await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName, 'individual'));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval_failed(`${req.admin.first_name} ${req.admin.last_name}`, 'individual'));
     error.label = enums.APPROVE_LOAN_APPLICATION_CONTROLLER;
     logger.error(`approving a loan application manually failed:::${enums.APPROVE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -56,16 +56,17 @@ export const approveLoanApplication = async(req, res, next) => {
  */
 export const approveClusterMemberLoanApplication = async(req, res, next) => {
   try {
-    const { admin, params: { member_loan_id }, loanApplication } = req;
+    const { admin, params: { member_loan_id }, body: { decision }, loanApplication } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
     const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ loanApplication.cluster_id ]);
     const isClusterAdmin = loanApplication.is_loan_initiator ? true : false;
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched approveClusterMemberLoanApplication.admin.controllers.loan.js`);
     const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus, [ member_loan_id, 'approved', null ]);
-    // await processOneOrNoneData(loanQueries.updateAdminLoanApprovalTrail, [ member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
-    // logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin approval recorded 
-    // approveClusterMemberLoanApplication.admin.controllers.loan.js`); // To later include this when the table has been added
+    await processOneOrNoneData(loanQueries.updateAdminClusterLoanApprovalTrail, 
+      [ loanApplication.loan_id, member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: cluster loan status updated and admin approval recorded 
+    approveClusterMemberLoanApplication.admin.controllers.loan.js`);
     const outstandingLoanDecision = await processAnyData(clusterQueries.checkForOutstandingClusterLoanDecision, [ loanApplication.loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if loan can be disbursed by cluster admin 
     approveClusterMemberLoanApplication.admin.controllers.loan.js`);
@@ -83,10 +84,10 @@ export const approveClusterMemberLoanApplication = async(req, res, next) => {
     sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan approved by admin`, 
       'loan-application-approved', {});
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveClusterMemberLoanApplication.admin.controllers.loan.js`);
-    await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName));
+    await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName, 'cluster'));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('approved'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await adminActivityTracking(req.admin.admin_id, 21, 'fail', descriptions.manually_loan_approval_failed(`${req.admin.first_name} ${req.admin.last_name}`, 'cluster'));
     error.label = enums.APPROVE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER;
     logger.error(`approving a cluster member loan application manually failed:::${enums.APPROVE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -104,6 +105,7 @@ export const approveClusterMemberLoanApplication = async(req, res, next) => {
 export const declineLoanApplication = async(req, res, next) => {
   try {
     const { admin, body: { decision, rejection_reason }, params: { loan_id }, loanApplication } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched declineLoanApplication.admin.controllers.loan.js`);
     const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateLoanStatus, [ loan_id, 'declined', rejection_reason.trim().toLowerCase() ]);
@@ -114,10 +116,10 @@ export const declineLoanApplication = async(req, res, next) => {
     sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
       PersonalNotifications.declinedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'declined-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineLoanApplication.admin.controllers.loan.js`);
-    await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_approval(req.admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_disapproval(adminName, 'individual'));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_approval_failed(req.admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_disapproval_failed(`${req.admin.first_name} ${req.admin.last_name}`, 'individual'));
     error.label = enums.DECLINE_LOAN_APPLICATION_CONTROLLER;
     logger.error(`declining a loan application manually failed:::${enums.DECLINE_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);
@@ -134,16 +136,18 @@ export const declineLoanApplication = async(req, res, next) => {
  */
 export const declineClusterMemberLoanApplication = async(req, res, next) => {
   try {
-    const { admin, body: { rejection_reason }, params: { member_loan_id }, loanApplication } = req;
+    const { admin, body: { rejection_reason, decision }, params: { member_loan_id }, loanApplication } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const [ loanApplicant ] = await processAnyData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
     const [ cluster ] = await processAnyData(clusterQueries.checkIfClusterExists, [ loanApplication.cluster_id ]);
     const isClusterAdmin = loanApplication.is_loan_initiator ? true : false;
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched declineClusterMemberLoanApplication.admin.controllers.loan.js`);
     const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus, 
       [ member_loan_id, 'declined', rejection_reason.trim().toLowerCase() ]);
-    // await processOneOrNoneData(loanQueries.updateAdminLoanApprovalTrail, [ member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
-    // logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin rejection recorded 
-    // declineClusterMemberLoanApplication.admin.controllers.loan.js`); // To later include this when the table has been added
+    await processOneOrNoneData(loanQueries.updateAdminClusterLoanApprovalTrail, 
+      [ loanApplication.loan_id, member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: cluster loan status updated and admin rejection recorded 
+    declineClusterMemberLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval(), loanApplicant.fcm_token);
     sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
@@ -151,10 +155,10 @@ export const declineClusterMemberLoanApplication = async(req, res, next) => {
     sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan declined by admin`, 
       'loan-application-declined', {});
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineClusterMemberLoanApplication.admin.controllers.loan.js`);
-    await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_approval(req.admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_disapproval(adminName, 'cluster'));
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DECISION('declined'), enums.HTTP_OK, updatedLoanApplication);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_approval_failed(req.admin.first_name));
+    await adminActivityTracking(req.admin.admin_id, 22, 'fail', descriptions.manually_loan_disapproval_failed(`${req.admin.first_name} ${req.admin.last_name}`, 'cluster'));
     error.label = enums.DECLINE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER;
     logger.error(`declining a cluster member loan application manually failed:::${enums.DECLINE_CLUSTER_MEMBER_LOAN_APPLICATION_CONTROLLER}`, error.message);
     return next(error);

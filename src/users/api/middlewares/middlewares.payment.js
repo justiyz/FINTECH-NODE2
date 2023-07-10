@@ -364,7 +364,7 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
  */
 export const processPersonalLoanTransferPayments = async(req, res, next) => {
   try {
-    const { body, paymentRecord } = req;
+    const { body, paymentRecord, user } = req;
     if (body.event.includes('transfer') && paymentRecord.payment_type === 'personal_loan_disbursement') {
       const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
       const [ loanDetails ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ paymentRecord.loan_id, paymentRecord.user_id ]);
@@ -403,7 +403,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Loan Disbursement', adminNotification.loanDisbursement(), 
-            `${paymentRecord.first_name} ${paymentRecord.last_name}`, 'Loan-Disbursement');
+            `${user.first_name} ${user.last_name}`, 'loan-disbursement');
         });
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);

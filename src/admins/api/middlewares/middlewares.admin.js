@@ -1,5 +1,6 @@
 import adminQueries from '../queries/queries.admin';
-import { processAnyData } from '../services/services.db';
+import settingsQueries from '../queries/queries.settings';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 
@@ -208,6 +209,37 @@ export const checkAdminType = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CHECK_ADMIN_TYPE_MIDDLEWARE;
     logger.error(`checking if queried admin is super admin failed::${enums.CHECK_ADMIN_TYPE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user is super admin in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAdminMiddleware
+ */
+export const getNotificationById = async(req, res, next) => {
+  try {
+    const notification = await processOneOrNoneData(settingsQueries.getNotificationById, [ req.params.adminNotificationId ]);
+    if (!notification) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id does not exist from the DB.
+      getNotificationById.admin.middlewares.cluster.js`);
+      return ApiResponse.success(res, enums.NOTIFICATION_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
+    }
+    if (notification && (req.admin.admin_id === notification.sent_by) || (req.admin.role_type === 'SADM')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id exist and can be deleted from the DB.
+        getNotificationById.admin.middlewares.cluster.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin is not allow to delete notification from the DB.
+    getNotificationById.admin.middlewares.cluster.js`);
+    return ApiResponse.success(res, enums.NOT_ALLOWED_TO_DELETE_NOTIFICATION, enums.HTTP_BAD_REQUEST);
+  } catch (error) {
+    error.label = enums.GET_NOTIFICATION_BY_ID_MIDDLEWARE;
+    logger.error(`Get notification by id failed::${enums.GET_NOTIFICATION_BY_ID_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

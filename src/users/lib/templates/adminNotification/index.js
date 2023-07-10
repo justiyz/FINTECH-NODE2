@@ -14,6 +14,10 @@ export const nonPerformingLoans = () =>{
   return 'The following loans are classified as non-performing. Take necessary actions to resolve the issue.';
 };
 
-export const promoNotification = (promo) => {
+export const promoEndingSoonNotification = (promo) => {
   return `The promotion ${promo} is ending soon. Please review its performance and consider extending or deactivating it.`;
+};
+
+export const loanApplicationDownTime = () => {
+  return 'Please be aware of the system downtime time for loan application and ensure that appropriate measures are taken.';
 };

@@ -28,15 +28,15 @@ export default {
     body.type,
     body.title,
     body.content,
-    body.sent_to,
-    body.end_at
+    body.end_at ? [ 'All Users' ] : body.sent_to,
+    body.end_at || null
   ],
 
   fetchNotifications: (query) => [
     query.type ? query.type : null,
     query.title ? `%${query.title}%` : null,
-    query.start_date,
-    query.end_date,
+    query.start_date || null,
+    query.end_date || null,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ]

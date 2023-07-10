@@ -141,8 +141,16 @@ router.post(
 router.get(
   '/admin-notifications',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.fetchNotification, 'payload'),
+  Model(Schema.fetchNotification, 'query'),
   NotificationController.fetchNotifications
+);
+
+router.delete(
+  '/admin-notification/:adminNotificationId',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.adminNotificationIdParams, 'params'),
+  AdminMiddleware.getNotificationById,
+  NotificationController.deleteNotification
 );
 
 export default router;

@@ -31,8 +31,10 @@ export default {
           status,
           created_at
     FROM clusters 
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
-    AND type = $4 OR $4 IS NULL
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
+    AND (status = $2 OR $2 IS NULL) 
+    AND (loan_status = $3 OR $3 IS NULL)
+    AND (type = $4 OR $4 IS NULL)
     AND is_deleted = false 
     ORDER BY created_at DESC
     OFFSET $5
@@ -41,8 +43,10 @@ export default {
   fetchClusterCount: `
     SELECT COUNT(cluster_id) AS total_count
     FROM clusters
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
-    AND type = $4 OR $4 IS NULL
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
+    AND (status = $2 OR $2 IS NULL) 
+    AND (loan_status = $3 OR $3 IS NULL)
+    AND (type = $4 OR $4 IS NULL)
     AND is_deleted = false
 `,
   fetchSingleClusterDetails: `
@@ -192,7 +196,22 @@ export default {
     SET 
       updated_at = NOW(),
       can_disburse_loan = true
-    WHERE loan_id = $1`
+    WHERE loan_id = $1`,
+    
+  fetchClustersInvitees: `
+  SELECT 
+    cluster_id,
+    invitee,
+    invitation_mode,
+    to_char(DATE(created_at)::date, 'Mon DD YYYY') AS date,
+    is_joined,
+    is_declined,
+    inviter_id 
+  FROM cluster_invitees
+  WHERE cluster_id = $1
+  AND is_joined = false
+  ORDER BY is_declined;
+    `
 };
 
 
