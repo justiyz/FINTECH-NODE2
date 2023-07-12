@@ -456,7 +456,7 @@ export const fetchDetailsOfMembersOfACluster= async(req, res, next) => {
 export const fetchSingleMemberClusterLoanDetails = async(req, res, next) => {
   try {
     const { admin, params: { member_loan_id } } = req;
-    const memberDetails = await processOneOrNoneData(loanQueries.fetchAClusterLoanMemberDetails, [ member_loan_id ]);
+    const memberDetails = await processOneOrNoneData(loanQueries.fetchMembersDetailsOfAClusterLoan, [ member_loan_id ]);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
     const loanId = loanDetails.loan_id;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
@@ -529,29 +529,6 @@ export const fetchInReviewClusterLoans = async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_CONTROLLER;
     logger.error(`fetching in review cluster loan applications failed:::${enums.FETCH_IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_CONTROLLER}`, error.message);
-    return next(error);
-  }
-};
-
-/**
- * fetches in review cluster loan members of a particular cluster
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns success response.
- * @memberof AdminLoanController
- */
-
-export const fetchInReviewClusterLoanMembers= async(req, res, next) => {
-  try {
-    const {params: { loan_id }, admin} = req;
-    const inReviewMemberDetails = await processAnyData(loanQueries.fetchInReviewClusterLoanMembers, loan_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched in review cluster loan members from the DB 
-    fetchInReviewClusterLoanMembers.admin.controllers.loan.js`);
-    return ApiResponse.success(res, enums.IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, inReviewMemberDetails);
-  } catch (error) {
-    error.label = enums.FETCH_IN_REVIEW_CLUSTER_LOAN_MEMBERS_CONTROLLER;
-    logger.error(`fetching in review cluster loan members failed:::${enums.FETCH_IN_REVIEW_CLUSTER_LOAN_MEMBERS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

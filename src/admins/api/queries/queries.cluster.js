@@ -31,24 +31,51 @@ export default {
           status,
           created_at
     FROM clusters 
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
-    AND (status = $2 OR $2 IS NULL) 
-    AND (loan_status = $3 OR $3 IS NULL)
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
     AND (type = $4 OR $4 IS NULL)
-    AND is_deleted = false 
+    AND is_deleted = false  AND is_created_by_admin = false
     ORDER BY created_at DESC
     OFFSET $5
     LIMIT $6
 `,
+
   fetchClusterCount: `
     SELECT COUNT(cluster_id) AS total_count
     FROM clusters
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
-    AND (status = $2 OR $2 IS NULL) 
-    AND (loan_status = $3 OR $3 IS NULL)
-    AND (type = $4 OR $4 IS NULL)
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
+    AND (type = $4 OR $4 IS NULL) AND is_created_by_admin = false
     AND is_deleted = false
 `,
+
+  fetchAdminCreatedClustersDetails: `
+      SELECT
+          id,
+          cluster_id,
+          name,
+          status,
+          description,
+          type,
+          maximum_members,
+          loan_status,
+          status,
+          created_at
+    FROM clusters 
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
+    AND (type = $4 OR $4 IS NULL)
+    AND is_deleted = false  AND is_created_by_admin = true
+    ORDER BY created_at DESC
+    OFFSET $5
+    LIMIT $6
+`,
+
+  fetchAdminCreatedClustersCount: `
+    SELECT COUNT(cluster_id) AS total_count
+    FROM clusters
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
+    AND (type = $4 OR $4 IS NULL) AND is_created_by_admin = true
+    AND is_deleted = false
+`,
+
   fetchSingleClusterDetails: `
     SELECT  
         id,

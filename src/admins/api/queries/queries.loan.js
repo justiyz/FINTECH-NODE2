@@ -437,46 +437,23 @@ export default {
             users.id,
             users.user_id,
             users.tier,
+            CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
             users.status As users_status,
             cluster_member_loans.loan_id,
             cluster_member_loans.member_loan_id,
-            CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
-            cluster_member_loans.amount_requested As loan_amount,
-            cluster_member_loans.monthly_interest As interest_rate,
-            cluster_member_loans.total_repayment_amount As total_repayment,
-            cluster_member_loans.loan_disbursed_at As date_received,
-            cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
-            cluster_member_loans.status As loan_status,
-            CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
-        FROM cluster_member_loans
-        LEFT JOIN users
-        ON cluster_member_loans.user_id = users.user_id
-        WHERE cluster_member_loans.is_loan_disbursed = true AND cluster_member_loans.loan_id = $1
-        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
-`,
-
-  fetchAClusterLoanMemberDetails: `
-        SELECT 
-            users.id,
-            users.user_id,
-            users.tier,
-            users.status As users_status,
-            cluster_member_loans.loan_id,
-            cluster_member_loans.member_loan_id,
-            CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
             cluster_member_loans.amount_requested As loan_amount,
             cluster_member_loans.monthly_interest As interest_rate,
             round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
             cluster_member_loans.loan_disbursed_at As date_received,
             cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
+            cluster_member_loans.loan_tenor_in_months As duration,
             cluster_member_loans.status As loan_status,
-        CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
+            CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
         FROM cluster_member_loans
         LEFT JOIN users
         ON cluster_member_loans.user_id = users.user_id
-        WHERE cluster_member_loans.is_loan_disbursed = true AND cluster_member_loans.member_loan_id = $1
+        WHERE cluster_member_loans.loan_id = $1
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
-
 `,
 
   fetchClusterLoanRepaymentBreakdown: `
@@ -554,82 +531,84 @@ export default {
 `,
 
   fetchInReviewClusterLoans: `
-        SELECT
-            cluster_loans.id,
-            cluster_loans.loan_id,
-            cluster_loans.cluster_id,      
-            cluster_loans.cluster_name,
-            cluster_loans.total_repayment_amount As Loan_amount,
-            COUNT(cluster_member_loans.member_loan_id) As total_member,
-            to_char(DATE(cluster_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS date_received,
-            cluster_loans.status,
-            cluster_loans.loan_tenor_in_months As duration,
-            cluster_loans.created_at
-        FROM cluster_loans
-        LEFT JOIN cluster_member_loans
-        ON cluster_loans.loan_id = cluster_member_loans.loan_id
-        WHERE cluster_loans.status = 'in review' 
-        AND (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
-        AND ((cluster_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-        GROUP BY 1, 2
-        ORDER BY cluster_loans.created_at DESC
+    SELECT
+            users.id,
+            users.user_id,
+            users.tier,
+            CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
+            cluster_member_loans.loan_id,
+            cluster_member_loans.member_loan_id,
+            cluster_member_loans.amount_requested As loan_amount,
+            cluster_member_loans.loan_tenor_in_months AS loan_duration,
+            cluster_member_loans.loan_disbursed_at As date_received,
+            cluster_member_loans.status As loan_status,
+            cluster_member_loans.cluster_name
+    FROM cluster_member_loans
+    LEFT JOIN users
+    ON cluster_member_loans.user_id = users.user_id
+    WHERE cluster_member_loans.status = 'in review' 
+        AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+        OR $1 IS NULL)
+        AND (cluster_member_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_member_loans.status = $2 OR $2 IS NULL)
+        AND ((cluster_member_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+        ORDER BY cluster_member_loans.created_at DESC
         OFFSET $5
         LIMIT $6
    `,
 
   fetchInReviewClusterLoanCount: `
     SELECT COUNT(cluster_id) AS total_count
-    FROM cluster_loans
-    WHERE cluster_loans.status = 'in review'
-    AND (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
-    AND ((cluster_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-
-`,
-
-  fetchAllInReviewClusterLoans: `
-      SELECT
-          cluster_loans.id,
-          cluster_loans.loan_id,
-          cluster_loans.cluster_id,      
-          cluster_loans.cluster_name,
-          cluster_loans.total_repayment_amount As Loan_amount,
-          COUNT(cluster_member_loans.member_loan_id) As total_member,
-          to_char(DATE(cluster_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS date_received,
-          cluster_loans.status,
-          cluster_loans.loan_tenor_in_months As duration,
-          cluster_loans.created_at
-      FROM cluster_loans
-      LEFT JOIN cluster_member_loans
-      ON cluster_loans.loan_id = cluster_member_loans.loan_id
-      WHERE cluster_loans.status = 'in review' 
-      AND (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
-      AND ((cluster_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-      GROUP BY 1, 2
-      ORDER BY cluster_loans.created_at DESC
-  `,
-
-  fetchInReviewClusterLoanMembers: `
-    SELECT 
-        users.id,
-        users.user_id,
-        users.tier,
-        users.status As users_status,
-        cluster_member_loans.loan_id,
-        cluster_member_loans.member_loan_id,
-        CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
-        cluster_member_loans.amount_requested As loan_amount,
-        cluster_member_loans.monthly_interest As interest_rate,
-        cluster_member_loans.total_repayment_amount As total_repayment,
-        cluster_member_loans.loan_disbursed_at As date_received,
-        cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
-        cluster_member_loans.status As loan_status,
-        CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
     FROM cluster_member_loans
     LEFT JOIN users
     ON cluster_member_loans.user_id = users.user_id
-    WHERE cluster_member_loans.loan_id = $1 
-    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+    WHERE cluster_member_loans.status = 'in review'
+    AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+    OR $1 IS NULL)
+    AND (cluster_member_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_member_loans.status = $2 OR $2 IS NULL)
+    AND ((cluster_member_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
 `,
+
+  fetchAllInReviewClusterLoans: `
+          SELECT
+              users.id,
+              users.user_id,
+              users.tier,
+              CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
+              cluster_member_loans.loan_id,
+              cluster_member_loans.member_loan_id,
+              cluster_member_loans.amount_requested As loan_amount,
+              cluster_member_loans.loan_tenor_in_months AS loan_duration,
+              cluster_member_loans.loan_disbursed_at As date_received,
+              cluster_member_loans.status As loan_status,
+              cluster_member_loans.cluster_name
+        FROM cluster_member_loans
+        LEFT JOIN users
+        ON cluster_member_loans.user_id = users.user_id
+        WHERE cluster_member_loans.status = 'in review' 
+        AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+        OR $1 IS NULL)
+        AND (cluster_member_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_member_loans.status = $2 OR $2 IS NULL)
+        AND ((cluster_member_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+        ORDER BY cluster_member_loans.created_at DESC
+  `,
+
 
   fetchAClusterInReviewLoanMemberDetails: `
           SELECT 

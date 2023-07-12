@@ -117,12 +117,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call fetchInReviewClusterLoanMembers', async() => {
-      const req = { params: '', admin: '' };
-      const data = await AdminLoanController.fetchInReviewClusterLoanMembers(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call fetchSingleMemberInReviewLoanDetails', async() => {
       const req = { params: '', admin: '' };
       const data = await AdminLoanController.fetchSingleMemberInReviewLoanDetails(req, res, next);

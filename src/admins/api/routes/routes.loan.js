@@ -125,16 +125,9 @@ router.get(
   Model(Schema.fetchInReviewClusterLoans, 'query'),
   LoanController.fetchInReviewClusterLoans
 );
+
 router.get(
-  '/:loan_id/in-review-cluster-loans-members',
-  AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.loanIdParams, 'params'),
-  LoanMiddleware.checkIfClusterLoanExists,
-  LoanController.fetchInReviewClusterLoanMembers
-);
-router.get(
-  '/:member_loan_id/in-review-cluster-loans-member',
+  '/:member_loan_id/in-review-cluster-loan',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
