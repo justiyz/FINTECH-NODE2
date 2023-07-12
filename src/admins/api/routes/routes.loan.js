@@ -115,6 +115,7 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
+  LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleMemberClusterLoanDetails
 );
 
@@ -131,6 +132,7 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
+  LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleMemberInReviewLoanDetails
 );
 
@@ -155,6 +157,7 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
+  LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleClusterMemberRescheduledLoan
 );
 export default router;
