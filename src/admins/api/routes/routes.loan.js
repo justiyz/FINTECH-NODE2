@@ -94,4 +94,74 @@ router.get(
   LoanController.fetchSingleUserRescheduledLoan
 );
 
+router.get(
+  '/cluster-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchClusterLoans, 'query'),
+  LoanController.fetchClusterLoans
+);
+
+router.get(
+  '/:loan_id/cluster-members',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkIfClusterLoanExists,
+  LoanController.fetchDetailsOfMembersOfACluster
+);
+router.get(
+  '/:member_loan_id/cluster-member',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.memberLoanId, 'params'),
+  LoanController.fetchSingleMemberClusterLoanDetails
+);
+
+router.get(
+  '/in-review-cluster-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchInReviewClusterLoans, 'query'),
+  LoanController.fetchInReviewClusterLoans
+);
+router.get(
+  '/:loan_id/in-review-cluster-loans-members',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkIfClusterLoanExists,
+  LoanController.fetchInReviewClusterLoanMembers
+);
+router.get(
+  '/:member_loan_id/in-review-cluster-loans-member',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.memberLoanId, 'params'),
+  LoanController.fetchSingleMemberInReviewLoanDetails
+);
+
+router.get(
+  '/cluster-repayments',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchRepaidClusterLoans, 'query'),
+  LoanController.fetchClusterMembersLoanRepayment
+);
+
+router.get(
+  '/rescheduled-cluster-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.fetchRescheduledClusterLoans, 'query'),
+  LoanController.fetchRescheduledClusterLoans
+);
+
+router.get(
+  '/:member_loan_id/rescheduled-cluster-loan',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.memberLoanId, 'params'),
+  LoanController.fetchSingleClusterMemberRescheduledLoan
+);
 export default router;
