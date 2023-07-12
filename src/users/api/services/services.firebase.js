@@ -227,7 +227,7 @@ export const sendNotificationToAdmin = async(admin_id, title, message, customer_
     chatId,
     title,
     message,
-    customer_name: customer_name || '',
+    customer_name: customer_name || [],
     is_read: false,
     chat_type: type,
     extra_data: JSON.stringify(extra_data) || {},

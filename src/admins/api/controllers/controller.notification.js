@@ -146,8 +146,10 @@ export const fetchNotifications = async(req, res, next) => {
  */
 export const deleteNotification = async(req, res, next) => {
   try {
-    const { params, admin } = req;
-    await processOneOrNoneData(notificationQueries.deleteNotification, [ params.adminNotificationId ]);
+    const { body, admin } = req;
+    for (const id of body) {
+      await processOneOrNoneData(notificationQueries.deleteNotification, [ id.adminNotificationId ]);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully delete notifications from the DB.
     deleteNotification.admin.controller.notification.js`);
     return ApiResponse.success(res, enums.DELETE_NOTIFICATION, enums.HTTP_OK);

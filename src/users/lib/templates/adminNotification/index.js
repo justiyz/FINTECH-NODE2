@@ -10,8 +10,12 @@ export const loanDisbursement = () =>{
   return 'Loan amount has been disbursed to the customer\'s account. Please update the system and inform the customer.';
 };
 
-export const nonPerformingLoans = () =>{
-  return 'The following loans are classified as non-performing. Take necessary actions to resolve the issue.';
+export const nonPerformingPersonalLoans = (users) =>{
+  return `The following users loan are classified as non-performing. Take necessary actions to resolve the issue. ${users}`;
+};
+
+export const nonPerformingClusterLoans = (cluster_name) =>{
+  return `The following cluster loans are classified as non-performing. Take necessary actions to resolve the issue. ${cluster_name}`;
 };
 
 export const promoEndingSoonNotification = (promo) => {

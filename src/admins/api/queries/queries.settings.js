@@ -147,32 +147,35 @@ export default {
       
   fetchNotifications: `
      SELECT 
-      notification_id,
-      sent_by,
-      type,
-      title,
-      content,
-      sent_to,
-      end_at,
-      is_ended,
-      to_char(created_at, 'DD Mon, YYYY HH:MI am') AS created_at
+     admin_sent_notifications.notification_id,
+     admin_sent_notifications.sent_by,
+     admin_sent_notifications.type,
+     admin_sent_notifications.title,
+     admin_sent_notifications.content,
+     admin_sent_notifications.sent_to,
+     admin_sent_notifications.end_at,
+     admin_sent_notifications.is_ended,
+      CONCAT(admins.first_name, ' ', admins.last_name) AS name,
+      to_char(admin_sent_notifications.created_at, 'DD Mon, YYYY HH:MI am') AS created_at
     FROM admin_sent_notifications
-    WHERE (type = $1 OR $1 IS NULL)
-    AND (title ILIKE TRIM($2) OR $2 IS NULL)
-    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
+    LEFT JOIN admins ON admins.admin_id = admin_sent_notifications.sent_by
+    WHERE (admin_sent_notifications.type = $1 OR $1 IS NULL)
+    AND (admin_sent_notifications.title ILIKE TRIM($2) OR $2 IS NULL)
+    AND ((admin_sent_notifications.created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
       OR ($3 IS NULL AND $4 IS NULL))
-    ORDER BY created_at DESC
+    ORDER BY admin_sent_notifications.created_at DESC
     OFFSET $5
     LIMIT $6`,
 
   fetchNotificationCount: `
     SELECT 
       COUNT(notification_id) AS total_count
-    FROM admin_sent_notifications
-    WHERE (type = $1 OR $1 IS NULL) 
-    AND (title ILIKE TRIM($2) OR $2 IS NULL)
-    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
-      OR ($3 IS NULL AND $4 IS NULL))
+      FROM admin_sent_notifications
+      LEFT JOIN admins ON admins.admin_id = admin_sent_notifications.sent_by
+      WHERE (admin_sent_notifications.type = $1 OR $1 IS NULL)
+      AND (admin_sent_notifications.title ILIKE TRIM($2) OR $2 IS NULL)
+      AND ((admin_sent_notifications.created_at::DATE BETWEEN $3::DATE AND $4::DATE) 
+        OR ($3 IS NULL AND $4 IS NULL))
   `,
   getNotificationById: `
     SELECT 

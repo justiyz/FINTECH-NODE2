@@ -121,7 +121,7 @@ router.get(
 router.patch(
   '/:adminNotificationId/single-notification',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.adminNotificationIdParams, 'params'),
+  Model(Schema.adminNotifzicationIdParams, 'params'),
   NotificationController.updateSingleNotification
 );
 
@@ -146,9 +146,9 @@ router.get(
 );
 
 router.delete(
-  '/admin-notification/:adminNotificationId',
+  '/admin-notification',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.adminNotificationIdParams, 'params'),
+  Model(Schema.adminNotificationId, 'payload'),
   AdminMiddleware.getNotificationById,
   NotificationController.deleteNotification
 );

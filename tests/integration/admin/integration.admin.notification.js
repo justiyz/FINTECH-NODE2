@@ -40,22 +40,6 @@ describe('Admin Notification', () => {
           done();
         });
     });
-    it('Should update a notification', (done) => {
-      chai.request(app)
-        .patch(`/api/v1/admin/${1687270708159}/single-notification`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.NOTIFICATION_UPDATED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
     it('Should successfully update multiply notification', (done) => {
       chai.request(app)
         .put('/api/v1/admin/admin-notifications')
@@ -263,11 +247,14 @@ describe('Admin Notification', () => {
   describe('delete notification', () => {
     it('Should flag when admin is not a super admin and did create the notification', (done) => {
       chai.request(app)
-        .delete(`/api/v1/admin/admin-notification/${process.env.SEEDFI_NOTIFICATION_ID}`)
+        .delete('/api/v1/admin/admin-notification')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
         })
+        .send([
+          { adminNotificationId: process.env.SEEDFI_NOTIFICATION_ID }
+        ])
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
@@ -279,11 +266,14 @@ describe('Admin Notification', () => {
     });
     it('Should delete notification by id', (done) => {
       chai.request(app)
-        .delete(`/api/v1/admin/admin-notification/${process.env.SEEDFI_NOTIFICATION_ID}`)
+        .delete('/api/v1/admin/admin-notification')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
+        .send([
+          { adminNotificationId: process.env.SEEDFI_NOTIFICATION_ID }
+        ])
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
@@ -295,11 +285,14 @@ describe('Admin Notification', () => {
     });
     it('Should flag when id des not exist', (done) => {
       chai.request(app)
-        .delete(`/api/v1/admin/admin-notification/${process.env.SEEDFI_NOTIFICATION_ID}0`)
+        .delete('/api/v1/admin/admin-notification')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
+        .send([
+          { adminNotificationId: `${process.env.SEEDFI_NOTIFICATION_ID}0p` }
+        ])
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');

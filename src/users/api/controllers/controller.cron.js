@@ -13,7 +13,6 @@ import * as PersonalNotifications from '../../lib/templates//personalNotificatio
 import MailService from '../services/services.email';
 import notificationQueries from '../queries/queries.notification';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import config from '../../config';
 
 
 /**
@@ -217,7 +216,7 @@ export const updatesPromoStatusToActive = async(req, res, next) => {
  * @returns { JSON } - A JSON successful response
  * @memberof CronController
  */
-export const nonPerformingLoans = async(req, res, next) => {
+export const nonPerformingPersonalLoans = async(req, res, next) => {
   try {
     const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
@@ -229,6 +228,7 @@ export const nonPerformingLoans = async(req, res, next) => {
     for (let i = 0; i < maxIterations; i++) {
       const admin = admins[i] || null;
       const users = nonPerformingUsers[i] || null;
+      const results = users.map(q => `${q.first_name}, ${q.last_name}`);
       
       // should send notification to both users and admin for non performing users
       if (users) {
@@ -237,7 +237,7 @@ export const nonPerformingLoans = async(req, res, next) => {
     
       if (admin) {
         sendNotificationToAdmin(admin.admin_id, 'Non-Performing Loans', 
-          adminNotification.nonPerformingLoans(), `${config.SEEDFI_ADMIN_WEB_BASE_URL}/to_add_path_from_frontend`, 'non-performing-loans');
+          adminNotification.nonPerformingPersonalLoans(), results, 'non-performing-loans');
       }
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
@@ -249,6 +249,39 @@ export const nonPerformingLoans = async(req, res, next) => {
     return next(error);
   }
 }; 
+
+/**
+ * notify admin for non performing clusters
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON successful response
+ * @memberof CronController
+ */
+export const nonPerformingClusterLoans = async(req, res, next) => {
+  try {
+    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+    const nonPerformingClusters = await processAnyData(notificationQueries.nonPerformingClusterLoans, [ Number(nplGraceDay.value) ]);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non-performing users from the db nonPerformingLoans.controllers.loan.js`);
+
+    for (const [ admin, cluster ] of admins) {
+      const adminId = [ admin.admin_id ];
+      const clusterNames = nonPerformingClusters[cluster].names;
+      sendNotificationToAdmin(adminId, 'Non-Performing Cluster Loans', adminNotification.nonPerformingPersonalLoans(), clusterNames, 'non-performing-loans');
+    }
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingLoans.controllers.cron.js`);
+    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non-performing loan notifications to admins' ]);
+    return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
+    logger.error(`Sending notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 
 /**
  * updates promo status to ended

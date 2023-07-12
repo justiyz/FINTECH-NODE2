@@ -222,17 +222,19 @@ export const checkAdminType = async(req, res, next) => {
  * @memberof AdminAdminMiddleware
  */
 export const getNotificationById = async(req, res, next) => {
-  try {
-    const notification = await processOneOrNoneData(settingsQueries.getNotificationById, [ req.params.adminNotificationId ]);
-    if (!notification) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id does not exist from the DB.
+  try { 
+    for (let id of req.body) {
+      const notification = await processOneOrNoneData(settingsQueries.getNotificationById, [ id.adminNotificationId ]);
+      if (!notification) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id does not exist from the DB.
       getNotificationById.admin.middlewares.cluster.js`);
-      return ApiResponse.success(res, enums.NOTIFICATION_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
-    }
-    if (notification && (req.admin.admin_id === notification.sent_by) || (req.admin.role_type === 'SADM')) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id exist and can be deleted from the DB.
+        return ApiResponse.success(res, enums.NOTIFICATION_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST);
+      }
+      if (notification && (req.admin.admin_id === notification.sent_by) || (req.admin.role_type === 'SADM')) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id exist and can be deleted from the DB.
         getNotificationById.admin.middlewares.cluster.js`);
-      return next();
+        return next();
+      }
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: admin is not allow to delete notification from the DB.
     getNotificationById.admin.middlewares.cluster.js`);
