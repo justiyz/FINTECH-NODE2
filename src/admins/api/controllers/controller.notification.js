@@ -129,9 +129,8 @@ export const fetchNotifications = async(req, res, next) => {
     };
     return ApiResponse.success(res, enums.FETCHED_NOTIFICATIONS, enums.HTTP_OK, data);
   } catch (error) {
-    console.log(error.message);
-    // error.label = enums.FETCH_NOTIFICATIONS_CONTROLLER;
-    // logger.error(`fetching notifications failed:::${enums.FETCH_NOTIFICATIONS_CONTROLLER}`, error.message);
+    error.label = enums.FETCH_NOTIFICATIONS_CONTROLLER;
+    logger.error(`fetching notifications failed:::${enums.FETCH_NOTIFICATIONS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
