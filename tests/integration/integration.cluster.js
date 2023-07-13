@@ -1287,7 +1287,8 @@ describe('Clusters', () => {
       chai.request(app)
         .post('/api/v1/auth/signup')
         .send({
-          phone_number: '+2349067749313'
+          phone_number: '+2349067749313',
+          referral_code: process.env.SEEDFI_USER_ONE_REFERRAL_CODE
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CREATED);

@@ -1418,7 +1418,7 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal('Cluster currently have a pending loan application, thus cannot apply for another');
+          expect(res.body.message).to.equal('Cluster currently have a pending loan application, thus action cannot be performed');
           done();
         });
     });
@@ -4604,6 +4604,54 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('memberDetails');
           expect(res.body.data).to.have.property('loan_details');
           expect(res.body.data).to.have.property('orr_break_down');
+          done();
+        });
+    });
+  });
+  describe('Fetch user one referral details and history', () => {
+    it('Should fetch user referral details successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-details')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('unclaimed_referral_bonus_points');
+          expect(res.body.data).to.have.property('claimed_referral_bonus_points');
+          expect(res.body.data).to.have.property('cumulative_referral_bonus_points');
+          expect(res.body.data.unclaimed_referral_bonus_points).to.equal('80');
+          expect(res.body.data.claimed_referral_bonus_points).to.equal('20');
+          expect(res.body.data.cumulative_referral_bonus_points).to.equal('100');
+          expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user referral details successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-history')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.data.length).to.equal(4);
+          expect(res.body.data[0]).to.have.property('referral_code');
+          expect(res.body.data[0]).to.have.property('point_reward');
+          expect(res.body.data[0]).to.have.property('reward_description');
+          expect(res.body.data[0]).to.have.property('date');
+          expect(res.body.data[0].point_reward).to.equal('30');
+          expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_HISTORY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });
