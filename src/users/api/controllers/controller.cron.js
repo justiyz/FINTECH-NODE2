@@ -232,7 +232,7 @@ export const nonPerformingPersonalLoans = async(req, res, next) => {
         sendUserPersonalNotification(user, 'Loan Overdue', PushNotifications.nonPerformingUser(), 'non-performing-user');
       }
       if (adminUsers) {
-        sendNotificationToAdmin(adminUsers.admin_id, 'Non-Performing Users Loan',
+        sendNotificationToAdmin(adminUsers.admin_id, 'Non-performing Individual loans',
           adminNotification.nonPerformingPersonalLoans(userName), userName, 'non-performing-loans');
       }
     });
@@ -246,9 +246,6 @@ export const nonPerformingPersonalLoans = async(req, res, next) => {
   }
 };
 
-
-
-
 /**
  * notify admin for non performing clusters
  * @param {Request} req - The request from the endpoint.
@@ -261,22 +258,31 @@ export const nonPerformingClusterLoans = async(req, res, next) => {
   try {
     const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
-    const nonPerformingClusters = await processAnyData(notificationQueries.nonPerformingClusterLoans, [ Number(nplGraceDay.value) ]);
+    const clusterMembers = await processAnyData(notificationQueries.nonPerformingClusterLoans, [ Number(nplGraceDay.value) ]);
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non-performing users from the db nonPerformingLoans.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non-performing users from 
+    the db. nonPerformingClusterLoans.controllers.loan.js`);
 
-    for (const [ admin, cluster ] of admins) {
-      const adminId = [ admin.admin_id ];
-      const clusterNames = nonPerformingClusters[cluster].names;
-      sendNotificationToAdmin(adminId, 'Non-Performing Cluster Loans', adminNotification.nonPerformingPersonalLoans(), clusterNames, 'non-performing-loans');
-    }
+    const userName = [];
+    await clusterMembers.map((user, admin) => {
+      const adminUsers = admins[admin];
+      userName.push(user.user_name);
+      if (userName) {
+        sendPushNotification(user.user_id, PushNotifications.nonPerformingUsers(), user.fcm_token);
+        sendUserPersonalNotification(user, 'Overdue Loan', PushNotifications.nonPerformingClusterMember(), 'non-performing-user');
+      }
+      if (adminUsers) {
+        sendNotificationToAdmin(adminUsers.admin_id, 'Non-Performing cluster members Loan',
+          adminNotification.nonPerformingClusterLoans(userName), userName, 'non-performing-loans');
+      }
+    });
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingLoans.controllers.cron.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingClusterLoans.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non-performing loan notifications to admins' ]);
     return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
   } catch (error) {
-    error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
-    logger.error(`Sending notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
+    error.label = enums.NON_PERFORMING_CLUSTER_LOANS_CONTROLLER;
+    logger.error(`Sending non Performing cluster loan notification failed::${enums.NON_PERFORMING_CLUSTER_LOANS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
