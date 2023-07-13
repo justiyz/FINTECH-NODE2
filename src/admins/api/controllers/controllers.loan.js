@@ -458,28 +458,27 @@ export const fetchDetailsOfMembersOfACluster= async(req, res, next) => {
 export const fetchSingleMemberClusterLoanDetails = async(req, res, next) => {
   try {
     const { admin, params: { member_loan_id } } = req;
-    const memberDetails = await processOneOrNoneData(loanQueries.fetchMembersDetailsOfAClusterLoan, [ member_loan_id ]);
+    const memberDetails = await processOneOrNoneData(loanQueries.fetchMembersDetailsOfAClusterLoanByMemberId, [ member_loan_id ]);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
-    const loanId = loanDetails.member_loan_id;
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
+    const memberLoanId = loanDetails.member_loan_id;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB
       fetchSingleMemberClusterLoanDetails.admin.controllers.loan.js`);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched loanApplicationDetails.admin.controllers.loan.js`);
-    const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, loanId);
+    const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, memberLoanId);
     const orrScoreBreakdown = (result.status === 200) && (result.data.customer_id === loanDetails.user_id) ? result.data : {};
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched loanApplicationDetails.admin.controllers.loan.js`);
-    const loanRepaymentBreakdown = (loanDetails.status === 'completed' || loanDetails.status === 'ongoing' || 
+    const loanRepaymentBreakdown = (loanDetails.status === 'completed' || loanDetails.status === 'ongoing' ||
       loanDetails.status === 'over due') ?
       await processAnyData(loanQueries.fetchClusterLoanRepaymentBreakdown, [ member_loan_id ]) : [  ];
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan repayment breakdown fetched loanApplicationDetails.admin.controllers.loan.js`);
     const data = {
-      loanId,
+      memberLoanId,
       memberDetails,
       loan_details: loanDetails,
       orr_break_down: orrScoreBreakdown,
       loan_repayments: loanRepaymentBreakdown || []
     };
-    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data); 
-    
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_DETAILS_OF_A_CLUSTER_MEMBER_CONTROLLER;
     logger.error(`fetching details of a cluster member failed:::${enums.FETCH_DETAILS_OF_A_CLUSTER_MEMBER_CONTROLLER}`, error.message);

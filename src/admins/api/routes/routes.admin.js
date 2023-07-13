@@ -145,10 +145,10 @@ router.get(
   NotificationController.fetchNotifications
 );
 
-router.delete(
-  '/admin-notification/:adminNotificationId',
+router.put(
+  '/sent-notification',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.adminNotificationIdParams, 'params'),
+  Model(Schema.adminNotificationId, 'payload'),
   AdminMiddleware.getNotificationById,
   NotificationController.deleteNotification
 );

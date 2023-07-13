@@ -22,11 +22,28 @@ export default {
     `,
   nonPerformingLoans: `
     SELECT
-      id, loan_id, user_id, status
+      personal_loan_payment_schedules.id,
+      personal_loan_payment_schedules.loan_id, 
+      personal_loan_payment_schedules.user_id, 
+      personal_loan_payment_schedules.status,
+      users.fcm_token,
+      CONCAT(users.first_name, ' ', users.last_name) AS user_name
     FROM  personal_loan_payment_schedules
-    WHERE status = 'over due'
-    AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
+    LEFT JOIN users ON users.user_id = personal_loan_payment_schedules.user_id
+    WHERE personal_loan_payment_schedules.status = 'over due'
+    AND NOW()::DATE > (personal_loan_payment_schedules.proposed_payment_date + interval '$1 day')::DATE
     `,
+
+  nonPerformingClusterLoans: `
+    SELECT
+    cluster_member_loan_payment_schedules.id, cluster_member_loan_payment_schedules.loan_id, users.user_id,  users.fcm_token,
+    cluster_member_loan_payment_schedules.status, CONCAT(users.first_name, ' ', users.last_name) AS user_name
+    FROM  cluster_member_loan_payment_schedules
+    LEFT JOIN users ON users.user_id = cluster_member_loan_payment_schedules.user_id
+    WHERE cluster_member_loan_payment_schedules.status = 'over due'
+    AND NOW()::DATE > (cluster_member_loan_payment_schedules.proposed_payment_date + interval '$1 day')::DATE
+    `,
+  
   fetchAdminSetEnvDetails: `
     SELECT 
       id,

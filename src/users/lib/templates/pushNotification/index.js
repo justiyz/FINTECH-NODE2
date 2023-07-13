@@ -98,6 +98,14 @@ export const nonPerformingUsers = () => {
   return 'Your loan is over due, kindly login to make your payment';
 };
 
+export const nonPerformingUser = () => {
+  return 'Your loan is over due, kindly make your payment to clear your over due loan';
+};
+
+export const nonPerformingClusterMember = () => {
+  return 'Your cluster loan is over due, kindly make your payment to clear your over due loan';
+};
+
 export const initiateClusterLoanApplication = (user, cluster) => {
   return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} cluster.`;
 };

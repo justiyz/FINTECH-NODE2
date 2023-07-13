@@ -29,6 +29,7 @@ export default {
           maximum_members,
           loan_status,
           status,
+          is_created_by_admin,
           created_at
     FROM clusters 
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
@@ -58,6 +59,7 @@ export default {
           maximum_members,
           loan_status,
           status,
+          is_created_by_admin,
           created_at
     FROM clusters 
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)

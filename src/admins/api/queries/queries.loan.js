@@ -860,6 +860,31 @@ export default {
         OR $1 IS NULL) 
         AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
         ORDER BY cluster_member_loan_payment_schedules.repayment_order
+`,
+  fetchMembersDetailsOfAClusterLoanByMemberId: `
+        SELECT
+            users.id,
+            users.user_id,
+            users.tier,
+            CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
+            users.status As users_status,
+            cluster_member_loans.loan_id,
+            cluster_member_loans.member_loan_id,
+            cluster_member_loans.cluster_id,
+            cluster_member_loans.cluster_name,
+            cluster_member_loans.amount_requested As loan_amount,
+            cluster_member_loans.percentage_pricing_band As interest_rate,
+            round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
+            cluster_member_loans.loan_disbursed_at As date_received,
+            cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
+            cluster_member_loans.loan_tenor_in_months As duration,
+            cluster_member_loans.status As loan_status,
+            CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
+        FROM cluster_member_loans
+        LEFT JOIN users
+        ON cluster_member_loans.user_id = users.user_id
+        WHERE cluster_member_loans.member_loan_id = $1
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
 `
 };
 

@@ -70,5 +70,7 @@ export const edit_promo_failed = (name, promoName) => `${name} failed in editing
 export const cancel_promo = (name, promoName) => `${name} cancelled promo with name ${promoName} successfully`;
 export const cancel_promo_failed = (name) => `${name} failed in cancelling one or more promos`;
 export const delete_promo = (name, promoName) => `${name} deleted promo with name ${promoName} successfully`;
+export const delete_notification = (name, title) => `${name} deleted ${title} notification successfully`;
 export const delete_promo_failed = (name) => `${name} failed in deleting one or more promos`;
+export const delete_notification_failed = (name) => `${name} failed in deleting notifications`;
 
