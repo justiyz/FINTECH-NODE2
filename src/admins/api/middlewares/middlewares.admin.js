@@ -233,6 +233,7 @@ export const getNotificationById = async(req, res, next) => {
       if (notification && (req.admin.admin_id === notification.sent_by) || (req.admin.role_type === 'SADM')) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: decoded that notifications id exist and can be deleted from the DB.
         getNotificationById.admin.middlewares.cluster.js`);
+        req.notification = notification;
         return next();
       }
     }

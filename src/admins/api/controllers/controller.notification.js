@@ -145,15 +145,19 @@ export const fetchNotifications = async(req, res, next) => {
  * @memberof NotificationController
  */
 export const deleteNotification = async(req, res, next) => {
+  const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
   try {
-    const { body, admin } = req;
+    const { body, admin, notification } = req;
     for (const id of body) {
       await processOneOrNoneData(notificationQueries.deleteNotification, [ id.adminNotificationId ]);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully delete notifications from the DB.
     deleteNotification.admin.controller.notification.js`);
+    await adminActivityTracking(req.admin.admin_id, 51, 'success', descriptions.delete_notification(adminName, notification.title));
+
     return ApiResponse.success(res, enums.DELETE_NOTIFICATION, enums.HTTP_OK);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 51, 'fail', descriptions.delete_notification_failed(adminName));
     error.label = enums.DELETE_NOTIFICATION_CONTROLLER;
     logger.error(`delete notifications failed:::${enums.DELETE_NOTIFICATION_CONTROLLER}`, error.message);
     return next(error);
