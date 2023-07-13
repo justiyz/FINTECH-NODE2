@@ -121,7 +121,7 @@ router.get(
 router.patch(
   '/:adminNotificationId/single-notification',
   AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.adminNotifzicationIdParams, 'params'),
+  Model(Schema.adminNotificationIdParams, 'params'),
   NotificationController.updateSingleNotification
 );
 
