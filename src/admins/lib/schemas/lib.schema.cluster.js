@@ -4,7 +4,7 @@ export const fetchClusters = Joi.object().keys({
   search: Joi.string().optional(),
   status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended'),
   loan_status: Joi.string().optional().valid('active', 'inactive'),
-  type: Joi.string().optional().valid('public', 'private'),
+  type: Joi.string().optional().valid('public', 'private', 'admin_cluster'),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional()
 });
