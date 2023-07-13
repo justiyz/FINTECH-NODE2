@@ -58,8 +58,7 @@ const fetchClusterLoans = Joi.object().keys({
 
 const fetchInReviewClusterLoans = Joi.object().keys({
   search: Joi.string().optional(),
-  status: Joi.string().optional().valid('pending', 'in review', 'processing', 'declined', 'approved',
-    'over due', 'completed'),
+  status: Joi.string().optional().valid('in review'),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
   page: Joi.number().positive().optional(),

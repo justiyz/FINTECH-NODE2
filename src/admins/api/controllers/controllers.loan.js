@@ -226,7 +226,7 @@ export const fetchLoans = async(req, res, next) => {
         total_count: loans.length,
         loans
       };
-      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'loan applications'));
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'individual loan applications'));
       return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
       
     }
@@ -273,7 +273,7 @@ export const fetchRepaidLoans = async(req, res, next) => {
         total_count: repaidLoans.length,
         repaidLoans
       };
-      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid loans'));
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid individual loans'));
       return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchRepaidLoans(query);
@@ -311,6 +311,7 @@ export const fetchRepaidLoans = async(req, res, next) => {
 export const fetchRescheduledLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = loanPayload.fetchAllRescheduledLoans(query);
       const rescheduledLoans = await processAnyData(loanQueries.fetchAllRescheduledLoans, payload);
@@ -320,6 +321,7 @@ export const fetchRescheduledLoans = async(req, res, next) => {
         total_count: rescheduledLoans.length,
         rescheduledLoans
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'rescheduled individual loans'));
       return ApiResponse.success(res, enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchRescheduledLoans(query);
@@ -397,7 +399,7 @@ export const fetchClusterLoans = async(req, res, next) => {
         total_count: clusterLoans.length,
         clusterLoans
       };
-      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'loan applications'));
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'cluster loan applications'));
       return ApiResponse.success(res, enums.CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
       
     }
@@ -458,7 +460,7 @@ export const fetchSingleMemberClusterLoanDetails = async(req, res, next) => {
     const { admin, params: { member_loan_id } } = req;
     const memberDetails = await processOneOrNoneData(loanQueries.fetchMembersDetailsOfAClusterLoan, [ member_loan_id ]);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
-    const loanId = loanDetails.loan_id;
+    const loanId = loanDetails.member_loan_id;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
       fetchSingleMemberClusterLoanDetails.admin.controllers.loan.js`);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched loanApplicationDetails.admin.controllers.loan.js`);
@@ -508,7 +510,7 @@ export const fetchInReviewClusterLoans = async(req, res, next) => {
         total_count: inReviewClusterLoans.length,
         inReviewClusterLoans
       };
-      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'loan applications'));
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'in-review cluster loan applications'));
       return ApiResponse.success(res, enums.IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
       
     }
@@ -549,7 +551,7 @@ export const fetchSingleMemberInReviewLoanDetails = async(req, res, next) => {
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
     fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
-    const loanId = loanDetails.loan_id;
+    const loanId = loanDetails.member_loan_id;
     const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, loanId);
     const orrScoreBreakdown = (result.status === 200) && (result.data.customer_id === loanDetails.user_id) ? result.data : {};
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
@@ -590,7 +592,7 @@ export const fetchClusterMembersLoanRepayment = async(req, res, next) => {
         total_count: repaidClusterLoans.length,
         repaidClusterLoans
       };
-      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid loans'));
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid cluster loans'));
       return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchRepaidLoans(query);
@@ -628,6 +630,7 @@ export const fetchClusterMembersLoanRepayment = async(req, res, next) => {
 export const fetchRescheduledClusterLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    const adminName = `${req.admin.first_name} ${req.admin.last_name}`;
     if (query.export) {
       const payload = loanPayload.fetchAllRescheduledClusterLoans(query);
       const rescheduledClusterLoans = await processAnyData(loanQueries.fetchAllClusterRescheduledLoans, payload);
@@ -637,6 +640,7 @@ export const fetchRescheduledClusterLoans = async(req, res, next) => {
         total_count: rescheduledClusterLoans.length,
         rescheduledClusterLoans
       };
+      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'rescheduled cluster loans'));
       return ApiResponse.success(res, enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
     const payload = loanPayload.fetchRescheduledClusterLoans(query);

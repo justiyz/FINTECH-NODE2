@@ -10,8 +10,8 @@ export default {
         round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
         round(CAST(total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
         percentage_orr_score,
-        percentage_pricing_band,
-        round(CAST(monthly_interest AS NUMERIC), 2) AS monthly_interest,
+        percentage_pricing_band AS interest_rate,
+        round(CAST(monthly_interest AS NUMERIC), 2),
         round(CAST(monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
         round(CAST(total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
         round(CAST(extra_interests AS NUMERIC), 2) AS extra_interests,
@@ -64,8 +64,8 @@ export default {
         round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
         round(CAST(total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
         percentage_orr_score,
-        percentage_pricing_band,
-        round(CAST(monthly_interest AS NUMERIC), 2) AS monthly_interest,
+        percentage_pricing_band AS interest_rate,
+        round(CAST(monthly_interest AS NUMERIC), 2),
         round(CAST(monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
         round(CAST(total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
         round(CAST(extra_interests AS NUMERIC), 2) AS extra_interests,
@@ -342,8 +342,8 @@ export default {
           round(CAST(personal_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
           round(CAST(personal_loans.total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
           personal_loans.percentage_orr_score,
-          personal_loans.percentage_pricing_band,
-          round(CAST(personal_loans.monthly_interest AS NUMERIC), 2) AS monthly_interest,
+          personal_loans.percentage_pricing_band AS interest_rate,
+          round(CAST(personal_loans.monthly_interest AS NUMERIC), 2),
           round(CAST(personal_loans.monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
           round(CAST(personal_loans.total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
           round(CAST(personal_loans.extra_interests AS NUMERIC), 2) AS extra_interests,
@@ -393,8 +393,7 @@ export default {
       FROM cluster_loans
       LEFT JOIN cluster_member_loans
       ON cluster_loans.loan_id = cluster_member_loans.loan_id
-      WHERE cluster_loans.is_loan_disbursed = true
-      AND (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
+      WHERE (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
       AND ((cluster_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
       GROUP BY 1, 2, 3, 4, 5, 7, 8, 9
       ORDER BY cluster_loans.created_at DESC
@@ -405,8 +404,7 @@ export default {
   fetchClusterLoanCount: `
     SELECT COUNT(cluster_id) AS total_count
     FROM cluster_loans
-    WHERE cluster_loans.is_loan_disbursed = true 
-    AND (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
+    WHERE (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
     AND ((cluster_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
 
 `,
@@ -426,7 +424,7 @@ export default {
       FROM cluster_loans
       LEFT JOIN cluster_member_loans
       ON cluster_loans.loan_id = cluster_member_loans.loan_id
-      WHERE cluster_loans.is_loan_disbursed = true AND (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
+      WHERE (cluster_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_loans.status = $2 OR $2 IS NULL)
       AND ((cluster_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
       GROUP BY 1, 2, 3, 4, 5, 7, 8, 9
       ORDER BY cluster_loans.created_at DESC
@@ -441,8 +439,10 @@ export default {
             users.status As users_status,
             cluster_member_loans.loan_id,
             cluster_member_loans.member_loan_id,
+            cluster_member_loans.cluster_id,
+            cluster_member_loans.cluster_name,
             cluster_member_loans.amount_requested As loan_amount,
-            cluster_member_loans.monthly_interest As interest_rate,
+            cluster_member_loans.percentage_pricing_band As interest_rate,
             round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
             cluster_member_loans.loan_disbursed_at As date_received,
             cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
@@ -467,9 +467,10 @@ export default {
             cluster_member_loan_payment_schedules.user_id,
             cluster_loans.cluster_name,
             cluster_member_loan_payment_schedules.total_payment_amount AS repayment_amount,
-            cluster_member_loan_payment_schedules.repayment_order AS repayment_schedule,
+            cluster_member_loan_payment_schedules.repayment_order AS repayment_order,
             cluster_loans.loan_tenor_in_months AS loan_duration,
             to_char(DATE(cluster_member_loan_payment_schedules.payment_at)::date, 'Mon DD YYYY') AS repayment_date,
+            to_char(DATE(cluster_member_loan_payment_schedules.proposed_payment_date)::date, 'Mon DD YYYY') AS proposed_payment_date,
             cluster_member_loan_payment_schedules.status
       FROM cluster_member_loan_payment_schedules
       LEFT JOIN cluster_loans ON cluster_member_loan_payment_schedules.loan_id = cluster_loans.loan_id
@@ -481,6 +482,7 @@ export default {
   fetchClusterLoanDetailsById: `
       SELECT 
           id,
+          cluster_id,
           loan_id,
           user_id,
           round(CAST(amount_requested AS NUMERIC), 2) AS amount_requested,
@@ -488,8 +490,8 @@ export default {
           round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
           round(CAST(total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
           percentage_orr_score,
-          percentage_pricing_band,
-          round(CAST(monthly_interest AS NUMERIC), 2) AS monthly_interest,
+          percentage_pricing_band AS interest_rate,
+          round(CAST(monthly_interest AS NUMERIC), 2),
           round(CAST(monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
           round(CAST(total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
           round(CAST(extra_interests AS NUMERIC), 2) AS extra_interests,
@@ -506,6 +508,7 @@ export default {
   fetchClusterLoanDetailsOfEachUser: `
       SELECT 
           id,
+          cluster_id,
           loan_id,
           user_id,
           member_loan_id,
@@ -514,8 +517,8 @@ export default {
           round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
           round(CAST(total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
           percentage_orr_score,
-          percentage_pricing_band,
-          round(CAST(monthly_interest AS NUMERIC), 2) AS monthly_interest,
+          percentage_pricing_band AS interest_rate,
+          round(CAST(monthly_interest AS NUMERIC), 2),
           round(CAST(monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
           round(CAST(total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
           round(CAST(extra_interests AS NUMERIC), 2) AS extra_interests,
@@ -538,6 +541,7 @@ export default {
             CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
             cluster_member_loans.loan_id,
             cluster_member_loans.member_loan_id,
+            cluster_member_loans.cluster_id,
             cluster_member_loans.amount_requested As loan_amount,
             cluster_member_loans.loan_tenor_in_months AS loan_duration,
             cluster_member_loans.loan_disbursed_at As date_received,
@@ -620,7 +624,7 @@ export default {
               cluster_member_loans.member_loan_id,
               CONCAT(users.first_name,' ', users.middle_name, ' ',  users.last_name) As name,
               cluster_member_loans.amount_requested As loan_amount,
-              cluster_member_loans.monthly_interest As interest_rate,
+              cluster_member_loans.percentage_pricing_band As interest_rate,
               round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
               cluster_member_loans.loan_disbursed_at As date_received,
               cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
@@ -743,8 +747,8 @@ export default {
           round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
           round(CAST(cluster_member_loans.total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
           cluster_member_loans.percentage_orr_score,
-          cluster_member_loans.percentage_pricing_band,
-          round(CAST(cluster_member_loans.monthly_interest AS NUMERIC), 2) AS monthly_interest,
+          cluster_member_loans.percentage_pricing_band AS interest_rate,
+          round(CAST(cluster_member_loans.monthly_interest AS NUMERIC), 2),
           round(CAST(cluster_member_loans.monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
           round(CAST(cluster_member_loans.total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
           round(CAST(cluster_member_loans.extra_interests AS NUMERIC), 2) AS extra_interests,

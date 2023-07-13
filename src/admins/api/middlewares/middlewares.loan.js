@@ -93,6 +93,15 @@ export const checkIfLoanStatusIsInReview = async(req, res, next) => {
   }
 };
 
+
+/**
+ * checks if a particular cluster loan exists in the DB
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminLoanMiddleware
+ */
 export const checkIfClusterLoanExists = async(req, res, next) => {
   try {
     const { params: { loan_id }, admin } = req;

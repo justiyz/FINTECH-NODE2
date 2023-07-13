@@ -2489,7 +2489,7 @@ describe('Clusters', () => {
   describe('admin fetches cluster loan applications on the platform', () => {
     it('Should fetch all loans', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2505,7 +2505,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all in review loans without pagination if export is true and status is in review', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2525,7 +2525,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all loan applications without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2544,7 +2544,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all loan applications without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2563,7 +2563,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -2580,7 +2580,7 @@ describe('Clusters', () => {
     });
     it('Should fetch cluster loan applications by the name of cluster', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2599,7 +2599,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan applications by the name of cluster if export is true ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2620,7 +2620,7 @@ describe('Clusters', () => {
     });
     it('Should fetch cluster loan applications by the name of cluster without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2640,7 +2640,7 @@ describe('Clusters', () => {
     });
     it('Should fetch cluster loan applications by the name of cluster without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2661,7 +2661,7 @@ describe('Clusters', () => {
 
     it('Should throw error if export is not true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2683,7 +2683,7 @@ describe('Clusters', () => {
     
     it('Should filter cluster loans by the loan status ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-loans')
+        .get('/api/v1/admin/loan/clusters')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2703,7 +2703,7 @@ describe('Clusters', () => {
 
       it('Should filter loans by the loan status with pagination ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2722,7 +2722,7 @@ describe('Clusters', () => {
 
         it('Should throw error if status is not pending, cancelled, in review, processing, declined, approved, ongoing, over due, completed', (done) => {
           chai.request(app)
-            .get('/api/v1/admin/loan/cluster-loans')
+            .get('/api/v1/admin/loan/clusters')
             .set({
               'Content-Type': 'application/json',
               Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2745,7 +2745,7 @@ describe('Clusters', () => {
       
       it('Should filter loans by the date they were created ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2765,7 +2765,7 @@ describe('Clusters', () => {
       });
       it('Should filter cluster loans by the date they were created if export is true ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2786,7 +2786,7 @@ describe('Clusters', () => {
       });
       it('Should filter cluster loans by the date they were created without pagination export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2808,7 +2808,7 @@ describe('Clusters', () => {
      
       it('Should throw error if in invalid cluster loan application date is entered', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2829,7 +2829,7 @@ describe('Clusters', () => {
       });
       it('Should filter cluster loans by the date they were created and status ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2850,7 +2850,7 @@ describe('Clusters', () => {
       });
       it('Should filter cluster loans by the date they were created and status if export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/cluster-loans')
+          .get('/api/v1/admin/loan/clusters')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2875,7 +2875,7 @@ describe('Clusters', () => {
   describe('Fetch details of members of a loan', () => {
     it('Should return error if token is not set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/cluster-members`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/members_loans`)
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
           expect(res.body).to.have.property('message');
@@ -2888,7 +2888,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/cluster-members`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/members_loans`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -2905,7 +2905,7 @@ describe('Clusters', () => {
     });
     it('Should return error if non existing loan id is sent', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}yr7u/cluster-members`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}rgegsff/members_loans`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2922,7 +2922,7 @@ describe('Clusters', () => {
     });
     it('Should fetch cluster loan member details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/cluster-members`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/members_loans`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2945,7 +2945,7 @@ describe('Clusters', () => {
   describe('Fetch details of each member of a cluster loan', () => {
     it('Should return error if token is not set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/cluster-member`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/members-loan-details`)
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
           expect(res.body).to.have.property('message');
@@ -2958,7 +2958,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/cluster-member`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/members-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -2975,7 +2975,7 @@ describe('Clusters', () => {
     });
     it('Should fetch cluster loan member details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/cluster-member`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/members-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3671,7 +3671,7 @@ describe('Clusters', () => {
   describe('admin fetches reschduled cluster loans on the platform', () => {
     it('Should fetch all rescheduled cluster loans with pages', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3695,7 +3695,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all rescheduled cluster loans if query type is export', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3716,7 +3716,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -3733,7 +3733,7 @@ describe('Clusters', () => {
     });
     it('Should throw error if export is not true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3754,7 +3754,7 @@ describe('Clusters', () => {
     });
     it('Should fetch rescheduled cluster loans by the name of the loan applicant', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3777,7 +3777,7 @@ describe('Clusters', () => {
     });
     it('Should fetch rescheduled cluster loans by the loan applicant name where the query type is export', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3799,7 +3799,7 @@ describe('Clusters', () => {
     });
     it('Should fetch rescheduled cluster loans by the loan applicant name with pages', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3824,7 +3824,7 @@ describe('Clusters', () => {
     });
     it('Should filter rescheduled cluster loans by the status ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3849,7 +3849,7 @@ describe('Clusters', () => {
     
     it('Should filter resheduled cluster loans by the status with pages ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/rescheduled-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3877,7 +3877,7 @@ describe('Clusters', () => {
   describe('admin fetches single user rescheduled cluster loan details on the platform', () => {
     it('Should fetch single user rescheduled cluster loan details', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-cluster-loan`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3897,7 +3897,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/rescheduled-cluster-loan`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -3916,7 +3916,7 @@ describe('Clusters', () => {
   describe('admin fetches repaid cluster loans on the platform', () => {
     it('Should fetch all repaid loans with pages', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3940,7 +3940,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all repaid cluster loans if query type is export', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3965,7 +3965,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -3982,7 +3982,7 @@ describe('Clusters', () => {
     });
     it('Should fetch repaid cluster loans by the name of the loan applicant', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4005,7 +4005,7 @@ describe('Clusters', () => {
     });
     it('Should throw error if export is not true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4026,7 +4026,7 @@ describe('Clusters', () => {
     });
     it('Should fetch repaid cluster loans by the loan applicant name where the query type is export', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4050,7 +4050,7 @@ describe('Clusters', () => {
     });
     it('Should fetch repaid cluster loans by the loan applicant name with pages', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4075,7 +4075,7 @@ describe('Clusters', () => {
     });
     it('Should filter repaid cluster loans by the date they were paid ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4100,7 +4100,7 @@ describe('Clusters', () => {
     });
     it('Should filter repaid cluster loans by the date they were paid if query is export', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4123,7 +4123,7 @@ describe('Clusters', () => {
     });
     it('Should filter repaid cluster loans by the date they were paid with pages ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/cluster-repayments')
+        .get('/api/v1/admin/loan/cluster/repayments')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4152,7 +4152,7 @@ describe('Clusters', () => {
   describe('admin fetches in review cluster loan applications on the platform', () => {
     it('Should fetch all in review cluster loans', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4168,7 +4168,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all in review loans without pagination if export is true and status is in review', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4188,7 +4188,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all in review loan applications without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4207,7 +4207,7 @@ describe('Clusters', () => {
     });
     it('Should fetch all in review loan applications without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4226,7 +4226,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -4243,7 +4243,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan applications by the name of cluster', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4262,7 +4262,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan applications by the name of cluster if export is true ', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4283,7 +4283,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan applications by the name of cluster without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4303,7 +4303,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan applications by the name of cluster without pagination if export is true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4324,7 +4324,7 @@ describe('Clusters', () => {
 
     it('Should throw error if export is not true', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4343,10 +4343,9 @@ describe('Clusters', () => {
           done();
         });
     });
-    
-    it('Should filter in review cluster loans by the loan status ', (done) => {
+    it('Should throw error if status is not in review', (done) => {
       chai.request(app)
-        .get('/api/v1/admin/loan/in-review-cluster-loans')
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4354,6 +4353,28 @@ describe('Clusters', () => {
         .query({
           export: 'true',
           status: 'approved'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('status must be [in review]');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    
+    it('Should filter in review cluster loans by the loan status ', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/cluster/in-review-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          export: 'true',
+          status: 'in review'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -4366,7 +4387,7 @@ describe('Clusters', () => {
 
       it('Should filter in review loans by the loan status with pagination ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4385,7 +4406,7 @@ describe('Clusters', () => {
 
         it('Should throw error if status is not pending, cancelled, in review, processing, declined, approved, ongoing, over due, completed', (done) => {
           chai.request(app)
-            .get('/api/v1/admin/loan/in-review-cluster-loans')
+            .get('/api/v1/admin/loan/cluster/in-review-loans')
             .set({
               'Content-Type': 'application/json',
               Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4408,7 +4429,7 @@ describe('Clusters', () => {
       
       it('Should in review filter loans by the date they were created ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4428,7 +4449,7 @@ describe('Clusters', () => {
       });
       it('Should filter in review cluster loans by the date they were created if export is true ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4449,7 +4470,7 @@ describe('Clusters', () => {
       });
       it('Should filter in review cluster loans by the date they were created without pagination export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4471,7 +4492,7 @@ describe('Clusters', () => {
      
       it('Should throw error if in invalid cluster loan application date is entered', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4492,7 +4513,7 @@ describe('Clusters', () => {
       });
       it('Should filter cluster loans by the date they were created and status ', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4513,7 +4534,7 @@ describe('Clusters', () => {
       });
       it('Should filter cluster loans by the date they were created and status if export is true', (done) => {
         chai.request(app)
-          .get('/api/v1/admin/loan/in-review-cluster-loans')
+          .get('/api/v1/admin/loan/cluster/in-review-loans')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4538,7 +4559,7 @@ describe('Clusters', () => {
   describe('admin fetches details of each member of an in review cluster loan', () => {
     it('Should return error if token is not set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-cluster-loan`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
           expect(res.body).to.have.property('message');
@@ -4551,7 +4572,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-cluster-loan`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -4568,7 +4589,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan member details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-cluster-loan`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

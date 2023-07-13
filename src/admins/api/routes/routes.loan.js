@@ -95,7 +95,7 @@ router.get(
 );
 
 router.get(
-  '/cluster-loans',
+  '/clusters',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchClusterLoans, 'query'),
@@ -103,7 +103,7 @@ router.get(
 );
 
 router.get(
-  '/:loan_id/cluster-members',
+  '/cluster/:loan_id/members_loans',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.loanIdParams, 'params'),
@@ -111,7 +111,7 @@ router.get(
   LoanController.fetchDetailsOfMembersOfACluster
 );
 router.get(
-  '/:member_loan_id/cluster-member',
+  '/cluster/:member_loan_id/members-loan-details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
@@ -120,7 +120,7 @@ router.get(
 );
 
 router.get(
-  '/in-review-cluster-loans',
+  '/cluster/in-review-loans',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchInReviewClusterLoans, 'query'),
@@ -128,7 +128,7 @@ router.get(
 );
 
 router.get(
-  '/:member_loan_id/in-review-cluster-loan',
+  '/cluster/:member_loan_id/in-review-loan-details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
@@ -137,7 +137,7 @@ router.get(
 );
 
 router.get(
-  '/cluster-repayments',
+  '/cluster/repayments',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchRepaidClusterLoans, 'query'),
@@ -145,7 +145,7 @@ router.get(
 );
 
 router.get(
-  '/rescheduled-cluster-loans',
+  '/cluster/rescheduled-loans',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchRescheduledClusterLoans, 'query'),
@@ -153,7 +153,7 @@ router.get(
 );
 
 router.get(
-  '/:member_loan_id/rescheduled-cluster-loan',
+  '/cluster/:member_loan_id/rescheduled-loan-details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.memberLoanId, 'params'),
