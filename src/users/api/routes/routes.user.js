@@ -252,5 +252,23 @@ router.get(
   UserController.fetchAlertNotification
 );
 
+router.get(
+  '/referral-details',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserReferralDetails
+);
+
+router.get(
+  '/referral-history',
+  AuthMiddleware.validateAuthToken,
+  UserController.fetchUserReferralHistory
+);
+
+router.post(
+  '/claim-referral-points',
+  AuthMiddleware.validateAuthToken,
+  UserController.userClaimsReferralPoints
+);
+
 
 export default router;

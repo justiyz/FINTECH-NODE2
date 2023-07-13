@@ -95,6 +95,7 @@ router.post(
   Model(Schema.inviteClusterMember, 'payload'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('invite'),
   ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
   ClusterController.inviteClusterMember
@@ -115,6 +116,7 @@ router.post(
   Model(Schema.clusterIdParams, 'params'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfUserHasActiveClusterLoan,
   ClusterMiddleware.checkIfUserCanLeaveCluster,
   ClusterController.leaveCluster
 );
@@ -126,7 +128,7 @@ router.patch(
   Model(Schema.editCluster, 'body'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
-  ClusterMiddleware.checkIfClusterIsOnActiveLoan,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterMiddleware.checkIfThereIsMoreThanOnePersonInTheCluster,
   ClusterController.editCluster
@@ -140,6 +142,7 @@ router.post(
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterController.initiateDeleteCluster
 );
 
@@ -150,6 +153,7 @@ router.post(
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterController.suggestNewClusterAdmin
 );
 

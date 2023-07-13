@@ -39,6 +39,28 @@ export default {
       referrer_user_id, referred_user_id
     ) VALUES ($1, $2)`,
 
+  checkIfUserWasReferred: `
+    SELECT 
+      id, 
+      referrer_user_id, 
+      referred_user_id,
+      created_at
+    FROM referral_trail
+    WHERE referred_user_id = $1`,
+
+  updateReferralReward: `
+    INSERT INTO referral_rewards_tracking(
+      user_id, referral_code, point_reward, reward_description, referred_user_id
+    ) VALUES ($1, $2, $3, $4, $5)`,
+
+  updateUserPoints: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      unclaimed_referral_bonus_points = unclaimed_referral_bonus_points + $2,
+      cumulative_referral_bonus_points = cumulative_referral_bonus_points + $3
+    WHERE user_id = $1`,
+
   setSameFcmTokenNull: `
     UPDATE users
     SET

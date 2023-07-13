@@ -99,6 +99,10 @@ export const operations = {
   98: 'CLMBRLNEL', // cluster member run loan eligibility check
   99: 'CLLNDCD', // cluster loan application declined
   100: 'CLLNMNAP', // cluster loan application subjected to manual approval
-  101: 'CLLNAPP' // cluster loan application approved automatically
+  101: 'CLLNAPP', // cluster loan application approved automatically
+  102: 'RCVOBRFBN', // user receives referral bonus
+  103: 'RCVLDRFBN', // user receives loan disbursement referral bonus
+  104: 'RCVLRRFBN', // user receives loan repayment referral bonus
+  105: 'CLRWDPTS' // user claim referral reward points
 };
   

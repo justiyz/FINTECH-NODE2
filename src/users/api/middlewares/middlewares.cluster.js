@@ -560,7 +560,7 @@ export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
 export const checkIfUserCanLeaveCluster =  async(req, res, next) => {
   try {
     const { cluster, clusterMember, user } = req;
-    if (clusterMember.loan_status === 'active') {
+    if (clusterMember.loan_status !== 'inactive') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan in the cluster 
       checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE);
@@ -601,31 +601,6 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
     error.label = enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE;
     logger.error(`Check if cluster member is admin failed::${enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE}`, error.message);
     return next(error);
-  }
-};
-
-/**
- * check If cluster is on active loan
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof ClusterMiddleware
- */
-
-export const checkIfClusterIsOnActiveLoan = async(req, res, next) => {
-  try {
-    const { user, cluster } = req;
-    if (cluster.loan_status === 'active') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster on an active loan in the cluster 
-      checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.CLUSTER_IS_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE;
-    logger.error(`Check if cluster is on active loan failed::${enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
-    return next(error); 
   }
 };
 

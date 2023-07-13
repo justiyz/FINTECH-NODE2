@@ -5,6 +5,7 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import config from '../../config';
 import enums from '../../lib/enums';
 import paymentQueries from '../queries/queries.payment';
+import authQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
 import loanQueries from '../queries/queries.loan';
 import notificationQueries from '../queries/queries.notification';
@@ -29,7 +30,6 @@ import * as adminNotification from '../../lib/templates/adminNotification';
  * @returns {object} - Returns an object (error or response).
  * @memberof PaymentMiddleware
  */
-
 export const paystackWebhookVerification = async(req, res, next) => {
   try {
     const secret = config.SEEDFI_PAYSTACK_SECRET_KEY;
@@ -355,6 +355,35 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
 };
 
 /**
+ * processing of repayment and disbursement types of referrals
+ * @param {Request} user - The details of the user processing loan disbursement/repayment.
+ * @param {Response} rewardDescription - The decryption of the referral reward point.
+ * @param {Next} rewardPoint - The actual rewarding point.
+ * @param {Next} type - the type which could be disbursement or repayment.
+ * @returns {object} - Returns to the loan repayment/disbursement processing flow
+ * @memberof PaymentMiddleware
+ */
+const processUserReferralBonus = async(user, rewardDescription, rewardPoint, type) => {
+  const [ userWasReferred ] = await processAnyData(authQueries.checkIfUserWasReferred, [ user.user_id ]);
+  logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: check if user was referred to the platform returns 
+  processUserReferralBonus.middlewares.payment.js`);
+  if (userWasReferred) {
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user was referred to the platform processUserReferralBonus.middlewares.payment.js`);
+    const referenceUserDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ userWasReferred.referrer_user_id ]);
+    await processOneOrNoneData(authQueries.updateReferralReward, 
+      [ userWasReferred.referrer_user_id, referenceUserDetails.referral_code, rewardPoint, rewardDescription, user.user_id ]);
+    await processOneOrNoneData(authQueries.updateUserPoints, [ userWasReferred.referrer_user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+    sendUserPersonalNotification(referenceUserDetails, 'Disbursement point', 
+      PersonalNotifications.inviterUserPlatformUserReferralPointMessage(rewardPoint, type), 'referral-rewards', {});
+    const activityType = type === 'repayment' ? 104 : 103;
+    userActivityTracking(referenceUserDetails.user_id, activityType, 'success');
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: referred user awarded referral reward point and notified 
+    processUserReferralBonus.middlewares.payment.js`);
+  }
+  logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user was not referred to the platform processUserReferralBonus.middlewares.payment.js`);
+};
+
+/**
  * process everything personal loan transfer related
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -394,6 +423,10 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
           processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ])
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB 
+        processPersonalLoanTransferPayments.middlewares.payment.js`);
+        const rewardPoint = 30; // to later refactor and make flexible once implemented on admin side
+        await processUserReferralBonus(user, 'Disbursement point', rewardPoint, 'disbursement');
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
         processPersonalLoanTransferPayments.middlewares.payment.js`);
         const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
         const data = await PaymentPayload.loanDisbursementPayload(userDetails, loanDetails);
@@ -507,6 +540,10 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
         if (statusType === 'completed') {
+          const rewardPoint = 40; // to later refactor and make flexible once implemented on admin side
+          await processUserReferralBonus(user, 'Repayment point', rewardPoint, 'repayment');
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
+          processPersonalLoanRepayments.middlewares.payment.js`);
           sendUserPersonalNotification(user, 'Full loan repayment successful', 
             PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
           await MailService('Loan successfully repaid', 'completedRepayment', 
@@ -535,6 +572,10 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
       }
+      const rewardPoint = 40; // to later refactor and make flexible once implemented on admin side
+      await processUserReferralBonus(user, 'Repayment point', rewardPoint, 'repayment');
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
+      processPersonalLoanRepayments.middlewares.payment.js`);
       await MailService('Successful loan repayment', 'successfulRepayment', 
         { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
       sendUserPersonalNotification(user, 'Full loan repayment successful', 
@@ -607,6 +648,8 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB 
         processClusterLoanTransferPayments.middlewares.payment.js`);
         await qualifiedClusterMembers.map(async(member) => {
+          const rewardPoint = 30; // to later refactor and make flexible once implemented on admin side
+          await processUserReferralBonus(member, 'Disbursement point', rewardPoint, 'disbursement');
           const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ member.user_id ]);
           const data = await PaymentPayload.loanDisbursementPayload(userDetails, member);
           await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
@@ -744,6 +787,10 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays part loan payment`, 
           'cluster-loan-part-payment', { });
         if (statusType === 'completed') {
+          const rewardPoint = 40; // to later refactor and make flexible once implemented on admin side
+          await processUserReferralBonus(user, 'Repayment point', rewardPoint, 'repayment');
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
+          processClusterLoanRepayments.middlewares.payment.js`);
           sendUserPersonalNotification(user, 'Full cluster loan repayment successful', 
             PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
           await MailService('Loan successfully repaid', 'completedRepayment', 
@@ -790,6 +837,10 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         await processOneOrNoneData(clusterQueries.updateGeneralLoanCompletedAt, [ clusterLoanDetails.loan_id ]);
         await processOneOrNoneData(clusterQueries.updateGeneralClustersStatus, [ clusterLoanDetails.cluster_id ]);
       }
+      const rewardPoint = 40; // to later refactor and make flexible once implemented on admin side
+      await processUserReferralBonus(user, 'Repayment point', rewardPoint, 'repayment');
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
+      processClusterLoanRepayments.middlewares.payment.js`);
       await MailService('Successful loan repayment', 'successfulRepayment', 
         { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2) });
       sendUserPersonalNotification(user, 'Full loan repayment successful', 
