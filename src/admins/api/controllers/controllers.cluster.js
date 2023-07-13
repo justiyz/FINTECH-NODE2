@@ -55,6 +55,22 @@ export const createCluster = async(req, res, next) => {
 export const fetchAndFilterClusters = async(req, res, next) => {
   try {
     const { query, admin } = req;
+    if (query.type === 'admin_cluster') {
+      const payload = ClusterPayload.fetchClusters(query);
+      const [ adminClusters, [ adminClustersCount ] ] = await Promise.all([
+        processAnyData(ClusterQueries.fetchAdminCreatedClustersDetails, payload),
+        processAnyData(ClusterQueries.fetchAdminCreatedClustersCount, payload)
+      ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched admin created clusters from the DB 
+      fetchAndFilterClusters.admin.controllers.cluster.js`);
+      const data = {
+        page: parseFloat(req.query.page) || 1,
+        total_count: Number(adminClustersCount.total_count),
+        total_pages: Helpers.calculatePages(Number(adminClustersCount.total_count), Number(req.query.per_page) || 10),
+        adminClusters
+      };
+      return ApiResponse.success(res, enums.CLUSTERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    }
     const payload = ClusterPayload.fetchClusters(query);
     const [ clusters, [ clusterCount ] ] = await Promise.all([
       processAnyData(ClusterQueries.fetchClustersDetails, payload),
