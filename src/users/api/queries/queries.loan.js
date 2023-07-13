@@ -489,14 +489,14 @@ export default {
       COUNT(user_id)
     FROM personal_loans
     WHERE user_id = $1
-    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`,
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'completed')`,
 
   fetchUserPreviousClusterLoanCounts: `
     SELECT 
       COUNT(user_id)
     FROM cluster_member_loans
     WHERE user_id = $1
-    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed')`,
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'completed')`,
 
   fetchIndividualLoanReschedulingDurations: `
     SELECT 

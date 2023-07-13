@@ -186,7 +186,6 @@ export const CHECK_IF_CLUSTER_HAS_ACTIVE_LOAN_MIDDLEWARE = 'ClusterMiddleware::c
 export const CHECK_CLUSTER_MEMBERS_NUMBER_MIDDLEWARE = 'ClusterMiddleware::checkClusterMembersNumber';
 export const CHECK_IF_USER_HAS_ACTIVE_CLUSTER_LOAN_MIDDLEWARE = 'ClusterMiddleware::checkIfUserHasActiveClusterLoan';
 export const TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE = 'ClusterMiddleware::totalLoanAmountVerificationAndBreakdown';
-export const CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterIsOnActiveLoan';
 export const CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfThereIsMoreThanOnePersonInTheCluster';
 export const FETCH_CLUSTER_MEMBERS_CONTROLLER = 'ClusterController::fetchClusterMembers';
 export const FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER = 'ClusterController::fetchCurrentClusterLoan';
@@ -210,7 +209,10 @@ export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::createUserEmployme
 export const UPDATE_EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::updateEmploymentDetails';
 export const UPDATE_MONO_ACCOUNT_ID_CONTROLLER = 'UserMiddleware::updateMonoAccountId';
 export const FETCH_ALERT_NOTIFICATION_CONTROLLER = 'UserController::fetchAlertNotification';
-export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'UserController::updateeAlertNotification';
+export const FETCH_USER_REFERRAL_DETAILS_CONTROLLER = 'UserController::fetchUserReferralDetails';
+export const FETCH_USER_REFERRAL_HISTORY_CONTROLLER = 'UserController::fetchUserReferralHistory';
+export const USER_CLAIMS_REFERRAL_POINTS_CONTROLLER = 'UserController::userClaimsReferralPoints';
+export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlertNotification';
 
 
 // Admin related labels
@@ -322,7 +324,7 @@ export const FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER = 'AdminAdminControll
 export const ADMIN_CLUSTER_RESTRICTED_ACTION_MIDDLEWARE = 'AdminClusterMiddleware::adminClusterRestriction';
 export const UPDATE_SINGLE_NOTIFICATION_CONTROLLER = 'NotificationController::updateSingleNotification';
 export const UPDATE_ALL_NOTIFICATIONS_AS_READ_CONTROLLER = 'NotificationController::updateAdminNotificationIsRead';
-export const PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER = 'NotificationController::promoEndingSoonNotification';
+export const PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER = 'CronController::promoEndingSoonNotification';
 export const UPLOAD_PROMO_BANNER_MIDDLEWARE = 'AdminSettingsMiddleware::uploadPromoBanner';
 export const CREATE_PROMO_CONTROLLER = 'AdminSettingsController::createSystemPromo';
 export const FETCH_PROMOS_CONTROLLER = 'AdminSettingsController::fetchAllSystemPromos';

@@ -211,5 +211,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchUserReferralDetails', async() => {
+      const req = { user: '' };
+      const data = await UserController.fetchUserReferralDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchUserReferralHistory', async() => {
+      const req = { user: '' };
+      const data = await UserController.fetchUserReferralHistory(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call userClaimsReferralPoints', async() => {
+      const req = { user: '' };
+      const data = await UserController.userClaimsReferralPoints(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });
