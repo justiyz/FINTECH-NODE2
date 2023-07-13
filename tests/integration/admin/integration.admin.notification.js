@@ -247,7 +247,7 @@ describe('Admin Notification', () => {
   describe('delete notification', () => {
     it('Should flag when admin is not a super admin and did create the notification', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/admin-notification')
+        .put('/api/v1/admin/sent-notification')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_ADMIN_THREE_ACCESS_TOKEN}`
@@ -260,13 +260,13 @@ describe('Admin Notification', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.NOT_ALLOWED_TO_DELETE_NOTIFICATION);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });
     it('Should delete notification by id', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/admin-notification')
+        .put('/api/v1/admin/sent-notification')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -285,7 +285,7 @@ describe('Admin Notification', () => {
     });
     it('Should flag when id des not exist', (done) => {
       chai.request(app)
-        .delete('/api/v1/admin/admin-notification')
+        .put('/api/v1/admin/sent-notification')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -298,7 +298,7 @@ describe('Admin Notification', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.NOTIFICATION_DOES_NOT_EXIST);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
     });

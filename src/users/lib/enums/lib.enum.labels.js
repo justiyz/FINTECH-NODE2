@@ -48,6 +48,7 @@ export const UPDATE_CLUSTER_LOAN_STATUS_TO_OVERDUE_CONTROLLER = 'CronController:
 export const INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER = 'CronController::initiateClusterLoanRepayment';
 export const INITIATE_LOAN_REPAYMENT_CONTROLLER = 'CronController::initiateLoanRepayment';
 export const NON_PERFORMING_LOANS_CONTROLLER = 'CronController::nonPerformingLoans';
+export const NON_PERFORMING_CLUSTER_LOANS_CONTROLLER = 'CronController::nonPerformingClusterLoans';
 export const PAYSTACK_WEBHOOK_VERIFICATION_MIDDLEWARE = 'PaymentMiddleware::paystackWebhookVerification';
 export const YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE = 'UserMiddleware::youVerifyWebhookVerification';
 export const VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE = 'UserMiddleware::verifyUserAndAddressResponse';

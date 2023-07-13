@@ -11,11 +11,11 @@ export const loanDisbursement = () =>{
 };
 
 export const nonPerformingPersonalLoans = (users) =>{
-  return `The following users loan are classified as non-performing. Take necessary actions to resolve the issue. ${users}`;
+  return `The following individual loans are classified as non-performing. Take necessary actions to resolve the issue. ${users}`;
 };
 
 export const nonPerformingClusterLoans = (cluster_name) =>{
-  return `The following cluster loans are classified as non-performing. Take necessary actions to resolve the issue. ${cluster_name}`;
+  return `The following cluster member loans are classified as non-performing. Take necessary actions to resolve the issue. ${cluster_name}`;
 };
 
 export const promoEndingSoonNotification = (promo) => {

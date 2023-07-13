@@ -29,7 +29,7 @@ export const updateLoanStatusToOverdue = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
     updateLoanStatusToOverdue.controllers.cron.js`);
     const key = 'loan_id';
-    const distinctLoanApplications  = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
+    const distinctLoanApplications = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
     await Promise.all([ distinctLoanApplications ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the unique values have been filtered apart updateLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
@@ -37,7 +37,7 @@ export const updateLoanStatusToOverdue = async(req, res, next) => {
         const [ nextRepayment ] = await processAnyData(cronQueries.fetchLoanNextRepayment, [ application.loan_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateNextLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
         await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus, [ application.loan_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue,  [ application.user_id ]);
+        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [ application.user_id ]);
         await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user loan repayment is past and loan status set to over due' ]);
         userActivityTracking(application.user_id, 78, 'success');
         return application;
@@ -66,7 +66,7 @@ export const updateClusterLoanStatusToOverdue = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all cluster loan repayments that have passed the current date fetched from the database 
     updateClusterLoanStatusToOverdue.controllers.cron.js`);
     const key = 'member_loan_id';
-    const distinctLoanApplications  = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
+    const distinctLoanApplications = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
     await Promise.all([ distinctLoanApplications ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the unique values have been filtered apart updateClusterLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
@@ -74,9 +74,9 @@ export const updateClusterLoanStatusToOverdue = async(req, res, next) => {
         const [ nextRepayment ] = await processAnyData(cronQueries.fetchClusterLoanNextRepayment, [ application.member_loan_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateNextClusterLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
         await processOneOrNoneData(cronQueries.updateClusterLoanWithOverDueStatus, [ application.member_loan_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue,  [ application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateClusterMemberClusterLoanStatusOverDue,  [ application.cluster_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateGeneralClusterLoanStatusOverDue,  [ application.cluster_id ]);
+        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [ application.user_id ]);
+        await processOneOrNoneData(cronQueries.updateClusterMemberClusterLoanStatusOverDue, [ application.cluster_id, application.user_id ]);
+        await processOneOrNoneData(cronQueries.updateGeneralClusterLoanStatusOverDue, [ application.cluster_id ]);
         await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user cluster loan repayment is past and loan status set to over due' ]);
         userActivityTracking(application.user_id, 78, 'success');
         return application;
@@ -112,9 +112,9 @@ export const initiateClusterLoanRepayment = async(req, res, next) => {
         const [ userDebitCardDetails ] = await processAnyData(cronQueries.fetchUserSavedDebitCardsToken, [ clusterRepayment.user_id ]);
         const reference = uuidv4();
         const paystackAmountFormatting = parseFloat(clusterRepayment.total_payment_amount) * 100; // Paystack requires amount to be in kobo for naira payment
-        await processAnyData(loanQueries.initializeBankTransferPayment, [ clusterRepayment.user_id, parseFloat(clusterRepayment.total_payment_amount), 'paystack', reference, 
+        await processAnyData(loanQueries.initializeBankTransferPayment, [ clusterRepayment.user_id, parseFloat(clusterRepayment.total_payment_amount), 'paystack', reference,
           'automatic_cluster_loan_repayment', 'user repays part of or all of existing cluster loan facility automatically via card', clusterRepayment.member_loan_id ]);
-        const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails); 
+        const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails);
         // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan repayment via paystack initialized 
@@ -125,8 +125,8 @@ export const initiateClusterLoanRepayment = async(req, res, next) => {
         }
         await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...clusterRepayment }),
         sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
-        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...clusterRepayment }), 
-          'failed-card-debit', { ...clusterRepayment});
+        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...clusterRepayment }),
+          'failed-card-debit', { ...clusterRepayment });
         return clusterRepayment;
       })
     ]);
@@ -159,9 +159,9 @@ export const initiateLoanRepayment = async(req, res, next) => {
         const [ userDebitCardDetails ] = await processAnyData(cronQueries.fetchUserSavedDebitCardsToken, [ repayment.user_id ]);
         const reference = uuidv4();
         const paystackAmountFormatting = parseFloat(repayment.total_payment_amount) * 100; // Paystack requires amount to be in kobo for naira payment
-        await processAnyData(loanQueries.initializeBankTransferPayment, [ repayment.user_id, parseFloat(repayment.total_payment_amount), 'paystack', reference, 
+        await processAnyData(loanQueries.initializeBankTransferPayment, [ repayment.user_id, parseFloat(repayment.total_payment_amount), 'paystack', reference,
           'automatic_loan_repayment', 'user repays part of or all of existing personal loan facility automatically via card', repayment.loan_id ]);
-        const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails); 
+        const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails);
         // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized 
@@ -172,8 +172,8 @@ export const initiateLoanRepayment = async(req, res, next) => {
         }
         await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment }),
         sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
-        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...repayment }), 
-          'failed-card-debit', { ...repayment});
+        sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...repayment }),
+          'failed-card-debit', { ...repayment });
         return repayment;
       })
     ]);
@@ -223,32 +223,31 @@ export const nonPerformingPersonalLoans = async(req, res, next) => {
     const nonPerformingUsers = await processAnyData(notificationQueries.nonPerformingLoans, [ Number(nplGraceDay.value) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non performing users from the db nonPerformingLoans.controllers.loan.js`);
 
-    const maxIterations = Math.max(admins.length, nonPerformingUsers.length);
-
-    for (let i = 0; i < maxIterations; i++) {
-      const admin = admins[i] || null;
-      const users = nonPerformingUsers[i] || null;
-      const results = users.map(q => `${q.first_name}, ${q.last_name}`);
-      
-      // should send notification to both users and admin for non performing users
-      if (users) {
-        sendPushNotification(users.user_id, PushNotifications.nonPerformingUsers(), users.fcm_token);
+    const userName = [];
+    await nonPerformingUsers.map((user, admin) => {
+      const adminUsers = admins[admin];
+      userName.push(user.user_name);
+      if (user) {
+        sendPushNotification(user.user_id, PushNotifications.nonPerformingUsers(), user.fcm_token);
+        sendUserPersonalNotification(user, 'Loan Overdue', PushNotifications.nonPerformingUser(), 'non-performing-user');
       }
-    
-      if (admin) {
-        sendNotificationToAdmin(admin.admin_id, 'Non-Performing Loans', 
-          adminNotification.nonPerformingPersonalLoans(), results, 'non-performing-loans');
+      if (adminUsers) {
+        sendNotificationToAdmin(adminUsers.admin_id, 'Non-Performing Users Loan',
+          adminNotification.nonPerformingPersonalLoans(userName), userName, 'non-performing-loans');
       }
-    }
+    });
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non performing loan notifications to admins' ]);
     return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
-    logger.error(`Sending notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
+    logger.error(`Sending non performing personal loans notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
     return next(error);
   }
-}; 
+};
+
+
+
 
 /**
  * notify admin for non performing clusters
@@ -318,7 +317,7 @@ export const promoEndingSoonNotification = async(req, res, next) => {
     const [ promo ] = await processAnyData(notificationQueries.fetchEndingPromo, [ 'settings' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched promo and admins for notification promoEndingSoonNotification.controllers.cron.js`);
     await admins.map((admin) => {
-      sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon',   adminNotification.promoEndingSoonNotification(`${promo.name}`), 'ending-promo');
+      sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon', adminNotification.promoEndingSoonNotification(`${promo.name}`), 'ending-promo');
     });
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SPESNTADM', 'send promo ending soon notification to admins' ]);
     return ApiResponse.success(res, enums.PROMO_NOTIFICATION, enums.HTTP_OK);

@@ -97,6 +97,11 @@ const fetchNotification = Joi.object().keys({
   per_page: Joi.number().positive().optional()
 });
 
+const adminNotificationIdParams = Joi.object().keys({
+  adminNotificationId: Joi.string().required()
+});
+
+
 export default {
   adminCompleteProfile,
   editAdminPermissions,
@@ -104,7 +109,8 @@ export default {
   unblacklist_bvn,
   fetchBlacklistedBvn,
   blacklistedBvn,
-  adminNotificationId,
   sendNotification,
-  fetchNotification
+  fetchNotification,
+  adminNotificationIdParams,
+  adminNotificationId
 };

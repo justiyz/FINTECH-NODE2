@@ -26,8 +26,8 @@ export default {
       personal_loan_payment_schedules.loan_id, 
       personal_loan_payment_schedules.user_id, 
       personal_loan_payment_schedules.status,
-      users.first_name,
-      users.last_name
+      users.fcm_token,
+      CONCAT(users.first_name, ' ', users.last_name) AS user_name
     FROM  personal_loan_payment_schedules
     LEFT JOIN users ON users.user_id = personal_loan_payment_schedules.user_id
     WHERE personal_loan_payment_schedules.status = 'over due'
@@ -36,10 +36,10 @@ export default {
 
   nonPerformingClusterLoans: `
     SELECT
-    cluster_member_loan_payment_schedules.id, cluster_member_loan_payment_schedules.loan_id, 
-    cluster_member_loan_payment_schedules.status, clusters.name
+    cluster_member_loan_payment_schedules.id, cluster_member_loan_payment_schedules.loan_id, users.user_id,  users.fcm_token,
+    cluster_member_loan_payment_schedules.status, CONCAT(users.first_name, ' ', users.last_name) AS user_name
     FROM  cluster_member_loan_payment_schedules
-    LEFT JOIN clusters ON clusters.cluster_id = cluster_member_loan_payment_schedules.cluster_id
+    LEFT JOIN users ON users.user_id = cluster_member_loan_payment_schedules.user_id
     WHERE cluster_member_loan_payment_schedules.status = 'over due'
     AND NOW()::DATE > (cluster_member_loan_payment_schedules.proposed_payment_date + interval '$1 day')::DATE
     `,
