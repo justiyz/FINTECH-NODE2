@@ -124,6 +124,6 @@ export const initiateClusterLoan = (user, cluster) => {
   Kindly accept or decline this request to be a part of this cluster loan.`;
 };
 
-export const inviterUserPlatformUserReferralPointMessage = (point, type) => {
+export const userEarnedRewardPointMessage = (point, type) => {
   return `Congratulations you just received ${point} points ${type} bonus`;
 };

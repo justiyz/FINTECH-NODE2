@@ -1,4 +1,5 @@
-import cron from 'node-cron';import { updateLoanStatusToOverdue, initiateLoanRepayment, nonPerformingPersonalLoans, nonPerformingClusterLoans,
+import cron from 'node-cron';
+import { updateLoanStatusToOverdue, initiateLoanRepayment, nonPerformingPersonalLoans, nonPerformingClusterLoans,
   updatesPromoStatusToActive, updatesPromoStatusToEnded, updateClusterLoanStatusToOverdue, initiateClusterLoanRepayment, promoEndingSoonNotification, updateAlertNotification
 } from '../../api/controllers/controller.cron';
 

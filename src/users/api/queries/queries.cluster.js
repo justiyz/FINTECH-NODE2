@@ -58,6 +58,8 @@ export default {
         total_loan_obligation,
         join_cluster_closes_at,
         is_created_by_admin,
+        created_by,
+        cluster_creator_received_membership_count_reward,
         is_deleted
     FROM clusters
     WHERE cluster_id = $1
@@ -242,6 +244,13 @@ export default {
     AND is_declined = FALSE
     ORDER BY created_at DESC
     LIMIT 1`,
+
+  updateClusterCreatorReceivedMembershipRewardPoints: `
+    UPDATE clusters
+    SET 
+      updated_at = NOW(),
+      cluster_creator_received_membership_count_reward = true
+    WHERE cluster_id = $1`,
 
   updateClusterInvitationStatus: `
     UPDATE cluster_invitees

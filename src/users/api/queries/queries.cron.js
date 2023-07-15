@@ -172,6 +172,15 @@ export default {
       activity_type,
       details
     ) VALUES ($1, $2, $3)`,
+
+  recordLoanDefaulting: `
+    INSERT INTO loan_repayment_defaulters_trail(
+      user_id,
+      loan_id,
+      loan_repayment_id,
+      cluster_loan_id,
+      type
+    ) VALUES ($1, $2, $3, $4)`,
     
   updatePromoStatusToActive: `
     UPDATE system_promos

@@ -46,7 +46,7 @@ describe('', () => {
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call validateLoanAmountAndTenor', async() => {
-      const req = { user: '', body: '' };
+      const req = { user: null, body: null };
       const data = await LoanMiddleware.validateLoanAmountAndTenor(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');

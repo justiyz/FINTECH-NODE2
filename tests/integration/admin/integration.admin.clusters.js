@@ -1471,30 +1471,11 @@ describe('Clusters', () => {
           new_loan_amount: 7000000
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE);
-          done();
-        });
-    });
-    it('should throw error if renegotiation amount is lesser than user tier allowable', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/renegotiate`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
-        })
-        .send({
-          new_loan_amount: 20000
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE);
+          expect(res.body.message).to.equal(enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT);
           done();
         });
     });
@@ -4621,18 +4602,18 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.have.property('referral_code');
-          expect(res.body.data).to.have.property('unclaimed_referral_bonus_points');
-          expect(res.body.data).to.have.property('claimed_referral_bonus_points');
-          expect(res.body.data).to.have.property('cumulative_referral_bonus_points');
-          expect(res.body.data.unclaimed_referral_bonus_points).to.equal('80');
-          expect(res.body.data.claimed_referral_bonus_points).to.equal('20');
-          expect(res.body.data.cumulative_referral_bonus_points).to.equal('100');
+          expect(res.body.data).to.have.property('unclaimed_reward_points');
+          expect(res.body.data).to.have.property('claimed_reward_points');
+          expect(res.body.data).to.have.property('cumulative_reward_points');
+          expect(res.body.data.unclaimed_reward_points).to.equal('24');
+          expect(res.body.data.claimed_reward_points).to.equal('20');
+          expect(res.body.data.cumulative_reward_points).to.equal('44');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });
-    it('Should fetch user referral details successfully', (done) => {
+    it('Should fetch user referral history successfully', (done) => {
       chai.request(app)
         .get('/api/v1/user/referral-history')
         .set({
@@ -4644,12 +4625,12 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.be.an('array');
-          expect(res.body.data.length).to.equal(4);
+          expect(res.body.data.length).to.equal(5);
           expect(res.body.data[0]).to.have.property('referral_code');
           expect(res.body.data[0]).to.have.property('point_reward');
           expect(res.body.data[0]).to.have.property('reward_description');
           expect(res.body.data[0]).to.have.property('date');
-          expect(res.body.data[0].point_reward).to.equal('30');
+          expect(res.body.data[0].point_reward).to.equal('15');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_HISTORY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

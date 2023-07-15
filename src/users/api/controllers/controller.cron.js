@@ -38,6 +38,7 @@ export const updateLoanStatusToOverdue = async(req, res, next) => {
         await processOneOrNoneData(cronQueries.updateNextLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
         await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus, [ application.loan_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [ application.user_id ]);
+        await processOneOrNoneData(cronQueries.recordLoanDefaulting, [ application.user_id, application.loan_id, application.loan_repayment_id, null, 'individual loan' ]);
         await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user loan repayment is past and loan status set to over due' ]);
         userActivityTracking(application.user_id, 78, 'success');
         return application;
@@ -77,6 +78,8 @@ export const updateClusterLoanStatusToOverdue = async(req, res, next) => {
         await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [ application.user_id ]);
         await processOneOrNoneData(cronQueries.updateClusterMemberClusterLoanStatusOverDue, [ application.cluster_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateGeneralClusterLoanStatusOverDue, [ application.cluster_id ]);
+        await processOneOrNoneData(cronQueries.recordLoanDefaulting, [ application.user_id, application.member_loan_id, application.loan_repayment_id, 
+          application._loan_id, 'cluster loan' ]);
         await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user cluster loan repayment is past and loan status set to over due' ]);
         userActivityTracking(application.user_id, 78, 'success');
         return application;

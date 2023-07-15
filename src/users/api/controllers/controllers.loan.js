@@ -29,16 +29,19 @@ import * as adminNotification from '../../lib/templates/adminNotification';
  */
 export const checkUserLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails } = req;
+    const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, cluster_type, user_allowable_amount, previous_loan_count } = req;
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
+    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const previouslyDefaulted = userPreviouslyDefaulted ? true : false;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, 
       [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, cluster_type, user_allowable_amount, previous_loan_count, previouslyDefaulted);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);

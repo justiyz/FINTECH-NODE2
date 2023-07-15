@@ -29,6 +29,19 @@ export default {
     AND is_default = true
     LIMIT 1`,
 
+  checkIfUserHasPreviouslyDefaultedInLoanRepayment: `
+    SELECT
+      id,
+      defaulting_id,
+      user_id,
+      loan_id,
+      loan_repayment_id,
+      cluster_loan_id,
+      type
+    FROM loan_repayment_defaulters_trail
+    WHERE user_id = $1
+    LIMIT 1`,
+
   initiatePersonalLoanApplication: `
     INSERT INTO personal_loans(
         user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months, reschedule_count, renegotiation_count
@@ -610,5 +623,29 @@ export default {
     WHERE cluster_members.user_id = $1
     AND cluster_members.is_left = false
     AND clusters.is_created_by_admin = true
+    LIMIT 1`,
+
+  userNonAdminCreatedCluster: `
+    SELECT
+      clusters.id,
+      clusters.cluster_id,
+      clusters.name, 
+      clusters.type,
+      clusters.status,
+      clusters.loan_status,
+      clusters.is_created_by_admin,
+      clusters.company_name,
+      clusters.interest_type,
+      clusters.percentage_interest_type_value,
+      cluster_members.user_id,
+      cluster_members.is_admin,
+      cluster_members.is_left
+    FROM cluster_members
+    LEFT JOIN clusters
+    ON clusters.cluster_id = cluster_members.cluster_id
+    WHERE cluster_members.user_id = $1
+    AND cluster_members.is_left = false
+    AND clusters.type = $2
+    AND clusters.is_created_by_admin = false
     LIMIT 1`
 };

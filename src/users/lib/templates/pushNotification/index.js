@@ -109,3 +109,7 @@ export const nonPerformingClusterMember = () => {
 export const initiateClusterLoanApplication = (user, cluster) => {
   return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} cluster.`;
 };
+
+export const rewardPointPushNotification = (point, type) => {
+  return  `Congratulations you just received ${point} points ${type} bonus`;
+};

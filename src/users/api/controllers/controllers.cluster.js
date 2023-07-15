@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
+import authQueries from '../queries/queries.auth';
 import notificationQueries from '../queries/queries.notification';
 import loanQueries from '../queries/queries.loan';
 import { processOneOrNoneData, processAnyData, processNoneData } from '../services/services.db';
@@ -133,7 +134,20 @@ export const joinClusterOnInvitation = async(req, res, next) => {
           sendNotificationToAdmin(admin.admin_id, 'Admin Cluster User Acceptance', adminNotification.joinClusterNotification(),
             [ `${user.first_name} ${user.last_name}` ], 'cluster-acceptance');
         });
-      }        
+      }
+      if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
+        const rewardPoint = 5; // to later refactor and make flexible once implemented on admin side
+        const rewardDescription = 'Cluster membership increase point';
+        await processOneOrNoneData(authQueries.updateRewardPoints, 
+          [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+        await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+        const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
+        await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster_id ]);
+        sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point', 
+          PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
+        sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`), 
+          clusterCreator.fcm_token);
+      }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user added to new cluster and all notifications sent successfully 
       joinClusterOnInvitation.controllers.cluster.js`);
       userActivityTracking(req.user.user_id, 52, 'success');
@@ -179,6 +193,14 @@ export const createCluster = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster created successfully successfully createCluster.controllers.cluster.js`);
     const clusterMemberDetails = await processOneOrNoneData(clusterQueries.createClusterMember, [ newClusterDetails.cluster_id, user.user_id, true ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin member created successfully successfully createCluster.controllers.cluster.js`);
+    const rewardPoint = 3; // to later refactor and make flexible once implemented on admin side
+    const rewardDescription = 'Create cluster point';
+    await processOneOrNoneData(authQueries.updateRewardPoints, 
+      [ user.user_id, null, rewardPoint, rewardDescription, null, 'cluster creation' ]);
+    await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+    sendUserPersonalNotification(user, 'Welcome point', 
+      PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'cluster creation'), 'point-rewards', {});
+    sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'cluster creation'), user.fcm_token);
     createClusterNotification(user, body, newClusterDetails, clusterMemberDetails, 
       `${user.first_name} ${user.last_name} created ${body.type} cluster ${body.name}`, 'create-cluster', {});
     userActivityTracking(req.user.user_id, activityType, 'success');
@@ -529,12 +551,16 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
 */
 export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails } = req;
+    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails, user_allowable_amount, previous_loan_count } = req;
     const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const previouslyDefaulted = userPreviouslyDefaulted ? true : false;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
     const generalLoanApplicationDetails = await processOneOrNoneData(clusterQueries.initiateClusterLoanApplication, 
       [ cluster.cluster_id, cluster.name, user.user_id, parseFloat(body.total_amount), Number(body.duration_in_months), body.sharing_type, 
         parseFloat(body.total_amount), Number(body.duration_in_months) ]);
@@ -550,7 +576,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
     };
     const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, initiatorLoanApplicationDetails, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 'private', user_allowable_amount, previous_loan_count, previouslyDefaulted);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
@@ -759,19 +785,23 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
 */
 export const checkClusterMemberClusterLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication } = req;
+    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication, user_allowable_amount, previous_loan_count } = req;
     const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const previouslyDefaulted = userPreviouslyDefaulted ? true : false;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment 
+    checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
     const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
     const userLoanDiscount = {
       interest_rate_type: 'fixed',
       interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
     };
     const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, existingLoanApplication, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 'private', user_allowable_amount, previous_loan_count, previouslyDefaulted);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 

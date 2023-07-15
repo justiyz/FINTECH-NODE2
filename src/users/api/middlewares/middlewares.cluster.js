@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
+import authQueries from '../queries/queries.auth';
 import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
@@ -461,6 +462,19 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
           `${requestingNMemberDetails.first_name} ${requestingNMemberDetails.last_name} joined your cluster`, 'join-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member 
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+        if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
+          const rewardPoint = 5; // to later refactor and make flexible once implemented on admin side
+          const rewardDescription = 'Cluster membership increase point';
+          await processOneOrNoneData(authQueries.updateRewardPoints, 
+            [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+          await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+          const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
+          await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster.cluster_id ]);
+          sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point', 
+            PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
+          sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`), 
+            clusterCreator.fcm_token);
+        }
         userActivityTracking(req.user.user_id, activityType, 'success');
         userActivityTracking(req.user.user_id, 52, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);

@@ -120,12 +120,8 @@ export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfull
 export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account as default to proceed';
 export const USER_STATUS_INACTIVE_OR_BLACKLISTED = (type) => `User status is ${type} and so cannot apply for loan`;
 export const NO_DEFAULT_DEBIT_CARD = 'Kindly add a debit card and set as default to proceed';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan greater than maximum allowable amount';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan lesser than minimum allowable amount';
 export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration greater than maximum allowable tenor';
 export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE = (percentage) =>
-  `User cannot apply for a loan greater than ${percentage}% of maximum allowable amount`;
 export const USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a cluster loan greater than cluster maximum allowable amount';
 export const USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a cluster loan lessee than cluster minimum allowable amount';
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
