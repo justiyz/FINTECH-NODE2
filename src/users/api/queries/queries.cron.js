@@ -181,6 +181,15 @@ export default {
       cluster_loan_id,
       type
     ) VALUES ($1, $2, $3, $4)`,
+
+  recordLoanAsNpl: `
+    INSERT INTO non_performing_loan_trail(
+      user_id,
+      loan_id,
+      loan_repayment_id,
+      cluster_loan_id,
+      type
+    ) VALUES ($1, $2, $3, $4)`,
     
   updatePromoStatusToActive: `
     UPDATE system_promos

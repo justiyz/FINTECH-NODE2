@@ -2,12 +2,12 @@ export const userCompleteProfile = () => {
   return 'Kindly login to SeedFi app to complete profile and enjoy great benefits';
 };
 
-export const userLoanApplicationApproval = () => {
-  return 'Your loan application previously subjected to manual approval has been approved, kindly login to complete disbursement';
+export const userLoanApplicationApproval = (type) => {
+  return `Your ${type} loan application previously subjected to manual approval has been approved, kindly login to complete disbursement`;
 };
 
-export const userLoanApplicationDisapproval = () => {
-  return 'Your loan application previously subjected to manual approval has been declined, kindly try again some other time or contact our support team';
+export const userLoanApplicationDisapproval = (type) => {
+  return `Your ${type} loan application previously subjected to manual approval has been declined, kindly try again some other time or contact our support team`;
 };
 
 export const userUtilityBillNotification = (decision) => {

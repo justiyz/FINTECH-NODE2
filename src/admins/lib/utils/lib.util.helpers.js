@@ -1,4 +1,4 @@
-import { processAnyData } from '../../api/services/services.db';
+import { processAnyData, processOneOrNoneData } from '../../api/services/services.db';
 import usersQueries from '../../api/queries/queries.user';
 export const generateRandomAlphabets = (length) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -67,4 +67,18 @@ export const collateUsersFcmTokens = async(users) => {
   }));
   await Promise.all([ tokens, userNames ]);
   return [ tokens, userNames ];
+};
+
+export const collateUsersFcmTokensExceptConcernedUser = async(users, user_id) => {
+  const otherClusterMembers = await users.filter(user => user.user_id != user_id);
+  const tokens = [];
+  await Promise.all(otherClusterMembers.map(async(user) => {
+    const userFcmToken = await processOneOrNoneData(usersQueries.fetchUserFcmTOken, [ user.user_id ]);
+    if (userFcmToken?.fcm_token) {
+      tokens.push(userFcmToken.fcm_token);
+    }
+    return user;
+  }));
+  await Promise.all([ tokens ]);
+  return [ tokens, otherClusterMembers ];
 };

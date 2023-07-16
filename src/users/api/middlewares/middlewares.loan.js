@@ -300,13 +300,13 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(user.tier) === 1) {
-      req.user_allowable_amount = parseFloat(tierOneMaximumLoanAmountDetails.value);
+      req.userAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 1 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
     }
     if (Number(user.tier) === 2) {
-      req.user_allowable_amount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
+      req.userAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 2 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
@@ -337,7 +337,7 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total count of past loans estimated checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
     if (parseFloat(totalPreviousLoanCount) >= 2) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has taken 2 or more loans previously checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-      req.previous_loan_count = parseFloat(totalPreviousLoanCount);
+      req.previousLoanCount = parseFloat(totalPreviousLoanCount);
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to take up to 2 previous loans checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
@@ -361,36 +361,36 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
     if (userEmploymentDetails.employment_type === 'employed') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: employed user is applying for a loan greater than ${parseFloat(employedUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-      req.previous_loan_count = parseFloat(totalPreviousLoanCount);
-      req.user_allowable_amount = parseFloat(employedUserAllowableAmount);
+      req.previousLoanCount = parseFloat(totalPreviousLoanCount);
+      req.userAllowableAmount = parseFloat(employedUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'self employed') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: self employed user is applying for a loan greater than 
       ${parseFloat(selfEmployedUserLoanAmountLimit.value)}% of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-      req.previous_loan_count = parseFloat(totalPreviousLoanCount);
-      req.user_allowable_amount = parseFloat(selfEmployedUserAllowableAmount);
+      req.previousLoanCount = parseFloat(totalPreviousLoanCount);
+      req.userAllowableAmount = parseFloat(selfEmployedUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'unemployed') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: unemployed user is applying for a loan greater than ${parseFloat(unemployedUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-      req.previous_loan_count = parseFloat(totalPreviousLoanCount);
-      req.user_allowable_amount = parseFloat(unemployedUserAllowableAmount);
+      req.previousLoanCount = parseFloat(totalPreviousLoanCount);
+      req.userAllowableAmount = parseFloat(unemployedUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'retired') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: retired user is applying for a loan greater than ${parseFloat(retiredUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-      req.previous_loan_count = parseFloat(totalPreviousLoanCount);
-      req.user_allowable_amount = parseFloat(retiredUserAllowableAmount);
+      req.previousLoanCount = parseFloat(totalPreviousLoanCount);
+      req.userAllowableAmount = parseFloat(retiredUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'student') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: student user is applying for a loan greater than ${parseFloat(studentUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-      req.previous_loan_count = parseFloat(totalPreviousLoanCount);
-      req.user_allowable_amount = parseFloat(studentUserAllowableAmount);
+      req.previousLoanCount = parseFloat(totalPreviousLoanCount);
+      req.userAllowableAmount = parseFloat(studentUserAllowableAmount);
       return next();
     }
     return next();
@@ -585,7 +585,7 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
         interest_rate_type: null,
         interest_rate_value: null
       };
-      req.cluster_type = userHasNonAdminCreatedClusterType ? 'public' : 'none';
+      req.clusterType = userHasNonAdminCreatedClusterType ? 'public' : 'none';
       req.userLoanDiscount = userLoanDiscount;
       return next();
     }
@@ -593,7 +593,7 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
       interest_rate_type: userClusterDiscounts.interest_type,
       interest_rate_value: parseFloat(userClusterDiscounts.percentage_interest_type_value)
     };
-    req.cluster_type = 'admin_cluster';
+    req.clusterType = 'admin_cluster';
     req.userLoanDiscount = userLoanDiscount;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user has admin cluster loan discounts checkIfUserHasClusterDiscount.middlewares.loan.js`);
     return next();

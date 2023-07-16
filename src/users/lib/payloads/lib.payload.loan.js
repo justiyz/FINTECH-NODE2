@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
 const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, 
-  userLoanDiscount, cluster_type, user_allowable_amount, previous_loan_count, has_previously_defaulted) => ({
+  userLoanDiscount, clusterType, userAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
   loan_duration_in_month: `${body.duration_in_months}`,
@@ -26,10 +26,10 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   interest_rate_type: userLoanDiscount.interest_rate_type || null,
   interest_rate_value: userLoanDiscount.interest_rate_value || null,
   general_loan_id: null,
-  cluster_type,
-  user_allowable_amount,
-  previous_loan_count,
-  has_previously_defaulted
+  cluster_type: clusterType,
+  user_allowable_amount: userAllowableAmount,
+  previous_loan_count: previousLoanCount,
+  previous_loan_defaulted_count: previouslyDefaultedCount
 });
 
 const processDeclinedLoanDecisionUpdatePayload = (data) => [

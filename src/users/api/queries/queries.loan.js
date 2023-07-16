@@ -30,17 +30,10 @@ export default {
     LIMIT 1`,
 
   checkIfUserHasPreviouslyDefaultedInLoanRepayment: `
-    SELECT
-      id,
-      defaulting_id,
-      user_id,
-      loan_id,
-      loan_repayment_id,
-      cluster_loan_id,
-      type
-    FROM loan_repayment_defaulters_trail
-    WHERE user_id = $1
-    LIMIT 1`,
+    SELECT 
+      COUNT(DISTINCT(loan_repayment_id))
+    FROM non_performing_loan_trail
+    WHERE user_id = $1`,
 
   initiatePersonalLoanApplication: `
     INSERT INTO personal_loans(

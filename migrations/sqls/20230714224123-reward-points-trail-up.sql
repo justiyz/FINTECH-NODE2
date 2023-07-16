@@ -37,3 +37,34 @@ CREATE TABLE IF NOT EXISTS loan_repayment_defaulters_trail(
 );
 
 CREATE INDEX loan_repayment_defaulters_trail_user_id_index ON loan_repayment_defaulters_trail(user_id);
+
+CREATE TABLE IF NOT EXISTS non_performing_loan_trail(
+    id SERIAL,
+    npl_id VARCHAR PRIMARY KEY DEFAULT 'npl-' || LOWER(
+        REPLACE(
+            CAST(uuid_generate_v1mc() AS VARCHAR(50))
+            , '-',''
+        )
+    ),
+    user_id VARCHAR REFERENCES users(user_id),
+    loan_id VARCHAR NOT NULL,
+    loan_repayment_id VARCHAR NOT NULL,
+    cluster_loan_id VARCHAR,
+    type VARCHAR,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX non_performing_loan_trail_user_id_index ON non_performing_loan_trail(user_id);
+
+INSERT INTO activity_types
+    (code, name, description) 
+VALUES
+    ('RCVCLCTBN', 'received cluster creation bonus points', 'user receives cluster creation bonus points'),
+    ('RCVCLMIBN', 'received cluster membership increment bonus points', 'user receives cluster membership increment bonus points');
+
+UPDATE activity_types
+SET 
+    name = 'received onboarding welcome bonus points',
+    description = 'user receives onboarding welcome bonus points'
+WHERE code = 'RCVOBRFBN';

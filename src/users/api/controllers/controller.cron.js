@@ -227,7 +227,7 @@ export const nonPerformingPersonalLoans = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non performing users from the db nonPerformingLoans.controllers.loan.js`);
 
     const userName = [];
-    await nonPerformingUsers.map((user, admin) => {
+    await nonPerformingUsers.map(async(user, admin) => {
       const adminUsers = admins[admin];
       userName.push(user.user_name);
       if (user) {
@@ -238,6 +238,7 @@ export const nonPerformingPersonalLoans = async(req, res, next) => {
         sendNotificationToAdmin(adminUsers.admin_id, 'Non-performing Individual loans',
           adminNotification.nonPerformingPersonalLoans(userName), userName, 'non-performing-loans');
       }
+      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [ user.user_id, user.loan_id, user.loan_repayment_id, null, 'individual loan' ]); 
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non performing loan notifications to admins' ]);
@@ -267,7 +268,7 @@ export const nonPerformingClusterLoans = async(req, res, next) => {
     the db. nonPerformingClusterLoans.controllers.loan.js`);
 
     const userName = [];
-    await clusterMembers.map((user, admin) => {
+    await clusterMembers.map(async(user, admin) => {
       const adminUsers = admins[admin];
       userName.push(user.user_name);
       if (userName) {
@@ -278,6 +279,7 @@ export const nonPerformingClusterLoans = async(req, res, next) => {
         sendNotificationToAdmin(adminUsers.admin_id, 'Non-Performing cluster members Loan',
           adminNotification.nonPerformingClusterLoans(userName), userName, 'non-performing-loans');
       }
+      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [ user.user_id, user.member_loan_id, user.loan_repayment_id, user.loan_id, 'cluster loan' ]); 
     });
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingClusterLoans.controllers.cron.js`);

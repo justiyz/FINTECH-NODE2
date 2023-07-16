@@ -474,6 +474,7 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
             PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
           sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`), 
             clusterCreator.fcm_token);
+          userActivityTracking(clusterCreator.user_id, 107, 'success');
         }
         userActivityTracking(req.user.user_id, activityType, 'success');
         userActivityTracking(req.user.user_id, 52, 'success');

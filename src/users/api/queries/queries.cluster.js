@@ -604,7 +604,7 @@ export default {
         rejection_reason = $3,
         initial_amount_requested = $4
     WHERE loan_id = $1
-    RETURNING id, loan_id, user_id, status`,
+    RETURNING id, loan_id, initiator_id, status`,
 
   updateClusterLoanApplicationClusterInterest: `
     UPDATE cluster_loans

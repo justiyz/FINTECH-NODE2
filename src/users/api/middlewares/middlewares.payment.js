@@ -686,7 +686,8 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
             PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(member.amount_requested) }), 'successful-disbursement', { });
           sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
         });
-        sendClusterNotification(paymentRecord, cluster, { is_admin: true }, 'Cluster successfully disbursed', 'loan-application-disbursed', { ...generalClusterLoanDetails });
+        sendClusterNotification(paymentRecord, cluster, { is_admin: true }, 'Cluster loan successfully disbursed', 
+          'loan-application-disbursed', { ...generalClusterLoanDetails });
         userActivityTracking(paymentRecord.user_id, 42, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
       }

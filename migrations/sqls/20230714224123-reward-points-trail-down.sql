@@ -5,6 +5,7 @@ ALTER TABLE referral_rewards_tracking DROP COLUMN IF EXISTS referred_user_id;
 ALTER TABLE referral_rewards_tracking DROP COLUMN IF EXISTS type;
 
 DROP INDEX IF EXISTS loan_repayment_defaulters_trail_user_id_index;
+DROP INDEX IF EXISTS non_performing_loan_trail_user_id_index;
 
 ALTER TABLE users RENAME COLUMN unclaimed_reward_points TO unclaimed_referral_bonus_points;
 ALTER TABLE users RENAME COLUMN claimed_reward_points TO claimed_referral_bonus_points;
@@ -15,3 +16,4 @@ ALTER TABLE clusters DROP COLUMN IF EXISTS cluster_creator_received_membership_c
 
 
 DROP TABLE IF EXISTS loan_repayment_defaulters_trail CASCADE;
+DROP TABLE IF EXISTS non_performing_loan_trail CASCADE;
