@@ -23,6 +23,7 @@ export default {
   nonPerformingLoans: `
     SELECT
       personal_loan_payment_schedules.id,
+      personal_loan_payment_schedules.loan_repayment_id,
       personal_loan_payment_schedules.loan_id, 
       personal_loan_payment_schedules.user_id, 
       personal_loan_payment_schedules.status,
@@ -36,8 +37,15 @@ export default {
 
   nonPerformingClusterLoans: `
     SELECT
-    cluster_member_loan_payment_schedules.id, cluster_member_loan_payment_schedules.loan_id, users.user_id,  users.fcm_token,
-    cluster_member_loan_payment_schedules.status, CONCAT(users.first_name, ' ', users.last_name) AS user_name
+      cluster_member_loan_payment_schedules.id, 
+      cluster_member_loan_payment_schedules.loan_repayment_id,
+      cluster_member_loan_payment_schedules.member_loan_id, 
+      cluster_member_loan_payment_schedules.loan_id,
+      cluster_member_loan_payment_schedules.user_id, 
+      cluster_member_loan_payment_schedules.cluster_id,
+      users.fcm_token,
+      cluster_member_loan_payment_schedules.status, 
+      CONCAT(users.first_name, ' ', users.last_name) AS user_name
     FROM  cluster_member_loan_payment_schedules
     LEFT JOIN users ON users.user_id = cluster_member_loan_payment_schedules.user_id
     WHERE cluster_member_loan_payment_schedules.status = 'over due'

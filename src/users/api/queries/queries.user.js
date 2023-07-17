@@ -641,9 +641,9 @@ export default {
         id,  
         user_id, 
         referral_code, 
-        unclaimed_referral_bonus_points,
-        claimed_referral_bonus_points,
-        cumulative_referral_bonus_points 
+        unclaimed_reward_points,
+        claimed_reward_points,
+        cumulative_reward_points 
       FROM users 
       WHERE user_id = $1
   `,
@@ -656,8 +656,9 @@ export default {
         referral_code, 
         point_reward,
         reward_description,
-        to_char(DATE (created_at)::date, 'DD Mon, YYYY') AS date
-      FROM referral_rewards_tracking 
+        to_char(DATE (created_at)::date, 'DD Mon, YYYY') AS date,
+        type
+      FROM reward_points_tracking 
       WHERE user_id = $1
       ORDER BY created_at DESC
   `,
@@ -666,10 +667,10 @@ export default {
     UPDATE users
     SET 
       updated_at = NOW(),
-      unclaimed_referral_bonus_points = unclaimed_referral_bonus_points - $2,
-      claimed_referral_bonus_points = claimed_referral_bonus_points + $2
+      unclaimed_reward_points = unclaimed_reward_points - $2,
+      claimed_reward_points = claimed_reward_points + $2
     WHERE user_id = $1
-    RETURNING id, user_id, unclaimed_referral_bonus_points, claimed_referral_bonus_points, cumulative_referral_bonus_points
+    RETURNING id, user_id, unclaimed_reward_points, claimed_reward_points, cumulative_reward_points
   `,
 
   trackPointClaiming: `

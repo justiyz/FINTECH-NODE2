@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
+import authQueries from '../queries/queries.auth';
 import notificationQueries from '../queries/queries.notification';
 import loanQueries from '../queries/queries.loan';
 import { processOneOrNoneData, processAnyData, processNoneData } from '../services/services.db';
@@ -133,7 +134,21 @@ export const joinClusterOnInvitation = async(req, res, next) => {
           sendNotificationToAdmin(admin.admin_id, 'Admin Cluster User Acceptance', adminNotification.joinClusterNotification(),
             [ `${user.first_name} ${user.last_name}` ], 'cluster-acceptance');
         });
-      }        
+      }
+      if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
+        const rewardPoint = 5; // to later refactor and make flexible once implemented on admin side
+        const rewardDescription = 'Cluster membership increase point';
+        await processOneOrNoneData(authQueries.updateRewardPoints, 
+          [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+        await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+        const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
+        await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster_id ]);
+        sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point', 
+          PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
+        sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`), 
+          clusterCreator.fcm_token);
+        userActivityTracking(req.user.user_id, 107, 'success');
+      }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user added to new cluster and all notifications sent successfully 
       joinClusterOnInvitation.controllers.cluster.js`);
       userActivityTracking(req.user.user_id, 52, 'success');
@@ -179,9 +194,18 @@ export const createCluster = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster created successfully successfully createCluster.controllers.cluster.js`);
     const clusterMemberDetails = await processOneOrNoneData(clusterQueries.createClusterMember, [ newClusterDetails.cluster_id, user.user_id, true ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin member created successfully successfully createCluster.controllers.cluster.js`);
+    const rewardPoint = 3; // to later refactor and make flexible once implemented on admin side
+    const rewardDescription = 'Create cluster point';
+    await processOneOrNoneData(authQueries.updateRewardPoints, 
+      [ user.user_id, null, rewardPoint, rewardDescription, null, 'cluster creation' ]);
+    await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+    sendUserPersonalNotification(user, 'Welcome point', 
+      PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'cluster creation'), 'point-rewards', {});
+    sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'cluster creation'), user.fcm_token);
     createClusterNotification(user, body, newClusterDetails, clusterMemberDetails, 
       `${user.first_name} ${user.last_name} created ${body.type} cluster ${body.name}`, 'create-cluster', {});
     userActivityTracking(req.user.user_id, activityType, 'success');
+    userActivityTracking(req.user.user_id, 106, 'success');
     return ApiResponse.success(res, enums.CLUSTER_CREATED_SUCCESSFULLY, enums.HTTP_OK, { ...newClusterDetails, user_referral_code: user.referral_code });
   } catch (error) {
     userActivityTracking(req.user.user_id, activityType, 'fail');
@@ -529,12 +553,16 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
 */
 export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails } = req;
+    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails, userAllowableAmount, previousLoanCount } = req;
     const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
+    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment 
+    checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
     const generalLoanApplicationDetails = await processOneOrNoneData(clusterQueries.initiateClusterLoanApplication, 
       [ cluster.cluster_id, cluster.name, user.user_id, parseFloat(body.total_amount), Number(body.duration_in_months), body.sharing_type, 
         parseFloat(body.total_amount), Number(body.duration_in_months) ]);
@@ -550,7 +578,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
     };
     const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, initiatorLoanApplicationDetails, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 'private', userAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
@@ -629,8 +657,10 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
         updatedClusterLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
       sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
-      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} loan application subjected to manual approval`, 
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, 
         'loan-application-eligibility', {});
+      sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, clusterMembersToken, 
+        'cluster-loan-decision', cluster.cluster_id);
       userActivityTracking(req.user.user_id, 95, 'success');
       userActivityTracking(req.user.user_id, 100, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
@@ -648,7 +678,9 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
         updatedClusterLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
       sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
-      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} loan application approved`, 'loan-application-eligibility', {});
+      sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} cluster loan application approved`, 'loan-application-eligibility', {});
+      sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application approved`, clusterMembersToken, 
+        'cluster-loan-decision', cluster.cluster_id);
       userActivityTracking(req.user.user_id, 95, 'success');
       userActivityTracking(req.user.user_id, 101, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
@@ -759,19 +791,24 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
 */
 export const checkClusterMemberClusterLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication } = req;
+    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication, userAllowableAmount, previousLoanCount } = req;
     const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
+    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment 
+    checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
     const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
+    const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster.cluster_id ]);
     const userLoanDiscount = {
       interest_rate_type: 'fixed',
       interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
     };
     const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, existingLoanApplication, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount);
+      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 'private', userAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
@@ -795,6 +832,7 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       userActivityTracking(req.user.user_id, 98, 'fail');
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
+    const [ clusterMembersToken ] = await collateUsersFcmTokensExceptAuthenticatedUser(clusterMembers, user.user_id);
     const { data } = result;
     if (data.final_decision === 'DECLINED') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiating user cluster loan eligibility status shows user is not eligible for loan 
@@ -805,7 +843,10 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
         [ existingLoanApplication.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility', parseFloat(body.amount) ]);
       const returnData = await ClusterPayload.clusterLoanApplicationDeclinedDecisionResponse(user, existingLoanApplication, 
         updatedClusterLoanDetails.status, 'DECLINED');
-      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} loan application declined`, 'loan-application-eligibility', {});
+      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} cluster loan application declined`, 
+        'loan-application-eligibility', {});
+      sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application declined`, clusterMembersToken, 
+        'cluster-loan-decision', cluster.cluster_id);
       userActivityTracking(req.user.user_id, 98, 'fail');
       userActivityTracking(req.user.user_id, 99, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
@@ -828,8 +869,10 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
       const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
         updatedClusterLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
-      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} loan application subjected to manual approval`, 
+      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, 
         'loan-application-eligibility', {});
+      sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, clusterMembersToken, 
+        'cluster-loan-decision', cluster.cluster_id);
       userActivityTracking(req.user.user_id, 98, 'success');
       userActivityTracking(req.user.user_id, 100, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
@@ -845,7 +888,10 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       await processNoneData(clusterQueries.updateClusterLoanOfferLetter, [ updatedClusterLoanDetails.member_loan_id, user.user_id, offerLetterData.Location.trim() ]);
       const returnData = await ClusterPayload.clusterLoanApplicationApprovalDecisionResponse(data, updatedClusterLoanDetails, totalAmountRepayable, totalInterestAmount, user, 
         updatedClusterLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
-      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} loan application approved`, 'loan-application-eligibility', {});
+      sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} cluster loan application approved`, 
+        'loan-application-eligibility', {});
+      sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application approved`, clusterMembersToken, 
+        'cluster-loan-decision', cluster.cluster_id);
       userActivityTracking(req.user.user_id, 98, 'success');
       userActivityTracking(req.user.user_id, 101, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
@@ -872,6 +918,9 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
   try {
     const isAdmin = existingLoanApplication.is_loan_initiator ? true : false;
     const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
+    const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster.cluster_id ]);
+    const [ clusterMembersToken ] = await collateUsersFcmTokensExceptAuthenticatedUser(clusterMembers, user.user_id);
+    const allClusterMembersToken = await collateUsersFcmTokens(clusterMembers);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster details fetched successfully clusterMemberLoanDecision.controllers.cluster.js`);
     if (body.decision !== 'decline' && existingLoanApplication.is_taken_loan_request_decision) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan decision previously taken lusterMemberLoanDecision.controllers.cluster.js`);
@@ -887,6 +936,8 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan decision is decline clusterMemberLoanDecision.controllers.cluster.js`);
       await processOneOrNoneData(clusterQueries.declineClusterMemberLoanApplicationDecision, [ existingLoanApplication.member_loan_id ]);
       sendClusterNotification(user, cluster, { is_admin: isAdmin }, `${user.first_name} ${user.last_name} cancelled own loan application`, 'loan-application-decision', {});
+      sendMulticastPushNotification(`${user.first_name} ${user.last_name} cancelled own loan application`, clusterMembersToken, 
+        'cancel-cluster-loan', cluster.cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan cancelled by cluster member and cluster notification is sent 
       clusterMemberLoanDecision.controllers.cluster.js`);
       if (existingLoanApplication.is_loan_initiator) {
@@ -896,6 +947,8 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
         ]);
         sendClusterNotification(user, cluster, { is_admin: isAdmin }, `${user.first_name} ${user.last_name} cancelled cluster loan application for all cluster members`, 
           'loan-application-decision', {});
+        sendMulticastPushNotification(`${user.first_name} ${user.last_name} cancelled cluster loan application for all cluster members`, clusterMembersToken, 
+          'cancel-cluster-loan', cluster.cluster_id);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan cancelled for all cluster members and cluster notification is sent 
         clusterMemberLoanDecision.controllers.cluster.js`);
       }
@@ -909,6 +962,8 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
       await processOneOrNoneData(clusterQueries.updateGeneralLoanApplicationCanDisburseLoan, [ existingLoanApplication.loan_id ]);
       sendClusterNotification(user, cluster, { is_admin: isAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan', 
         'loan-application-can-disburse', {});
+      sendMulticastPushNotification('Cluster loan decisions concluded, admin can proceed to disburse loan', allClusterMembersToken, 
+        'conclude-cluster-loan', cluster.cluster_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan can now be disbursed by cluster admin and notification sent 
       clusterMemberLoanDecision.controllers.cluster.js`);
       userActivityTracking(req.user.user_id, activityType, 'success');
@@ -916,6 +971,8 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
     }
     await processOneOrNoneData(clusterQueries.acceptClusterMemberLoanApplication, [ existingLoanApplication.member_loan_id ]);
     sendClusterNotification(user, cluster, { is_admin: isAdmin }, `${user.first_name} ${user.last_name} accepted own loan application`, 'loan-application-decision', {});
+    sendMulticastPushNotification(`${user.first_name} ${user.last_name} accepted own loan application`, clusterMembersToken, 
+      'accept-cluster-loan', cluster.cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan accepted by cluster member and cluster notification is sent 
       clusterMemberLoanDecision.controllers.cluster.js`);
     const outstandingLoanDecision = await processAnyData(clusterQueries.checkForOutstandingClusterLoanDecision, [ existingLoanApplication.loan_id ]);
@@ -928,6 +985,8 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
     await processOneOrNoneData(clusterQueries.updateGeneralLoanApplicationCanDisburseLoan, [ existingLoanApplication.loan_id ]);
     sendClusterNotification(user, cluster, { is_admin: isAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan', 
       'loan-application-can-disburse', {});
+    sendMulticastPushNotification('Cluster loan decisions concluded, admin can proceed to disburse loan', allClusterMembersToken, 
+      'conclude-cluster-loan', cluster.cluster_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan can now be disbursed by cluster admin and notification sent 
       clusterMemberLoanDecision.controllers.cluster.js`);
     userActivityTracking(req.user.user_id, activityType, 'success');
@@ -951,6 +1010,9 @@ export const clusterMemberLoanDecision = async(req, res, next) => {
 export const initiateClusterLoanDisbursement = async(req, res, next) => {
   try {
     const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication, newClusterAmountValues } = req;
+    const cluster = await processAnyData(clusterQueries.checkIfClusterExists, [ existingLoanApplication.cluster_id ]);
+    const clusterMembers = await processAnyData(clusterQueries.fetchActiveClusterMembers, [ cluster.cluster_id ]);
+    const allClusterMembersToken = await collateUsersFcmTokens(clusterMembers);
     const reference = uuidv4();
     await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference, 
       'cluster_loan_disbursement', 'requested group cluster loan facility disbursement', loan_id ]);
@@ -966,6 +1028,10 @@ export const initiateClusterLoanDisbursement = async(req, res, next) => {
       ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details status set to processing in the DB 
       initiateClusterLoanDisbursement.controllers.cluster.js`);
+      sendClusterNotification(user, cluster, { is_admin: true }, 'Cluster loan disbursement initiated by cluster admin', 
+        'loan-application-initiate-disburse', {});
+      sendMulticastPushNotification('Cluster loan disbursement initiated by cluster admin', allClusterMembersToken, 
+        'initiate-cluster-loan-disbursement', cluster.cluster_id);
       userActivityTracking(req.user.user_id, 44, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL, enums.HTTP_OK, { ...updatedLoanDetails , reference });
     }

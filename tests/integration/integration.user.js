@@ -3663,12 +3663,12 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.have.property('referral_code');
-          expect(res.body.data).to.have.property('unclaimed_referral_bonus_points');
-          expect(res.body.data).to.have.property('claimed_referral_bonus_points');
-          expect(res.body.data).to.have.property('cumulative_referral_bonus_points');
-          expect(res.body.data.unclaimed_referral_bonus_points).to.equal('20');
-          expect(res.body.data.claimed_referral_bonus_points).to.equal('0');
-          expect(res.body.data.cumulative_referral_bonus_points).to.equal('20');
+          expect(res.body.data).to.have.property('unclaimed_reward_points');
+          expect(res.body.data).to.have.property('claimed_reward_points');
+          expect(res.body.data).to.have.property('cumulative_reward_points');
+          expect(res.body.data.unclaimed_reward_points).to.equal('20');
+          expect(res.body.data.claimed_reward_points).to.equal('0');
+          expect(res.body.data.cumulative_reward_points).to.equal('20');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -3704,7 +3704,7 @@ describe('User', () => {
           done();
         });
     });
-    it('Should fetch user referral details successfully', (done) => {
+    it('Should fetch user referral history successfully', (done) => {
       chai.request(app)
         .get('/api/v1/user/referral-history')
         .set({
@@ -3768,12 +3768,12 @@ describe('User', () => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.data).to.have.property('unclaimed_referral_bonus_points');
-          expect(res.body.data).to.have.property('claimed_referral_bonus_points');
-          expect(res.body.data).to.have.property('cumulative_referral_bonus_points');
-          expect(res.body.data.unclaimed_referral_bonus_points).to.equal('0');
-          expect(res.body.data.claimed_referral_bonus_points).to.equal('20');
-          expect(res.body.data.cumulative_referral_bonus_points).to.equal('20');
+          expect(res.body.data).to.have.property('unclaimed_reward_points');
+          expect(res.body.data).to.have.property('claimed_reward_points');
+          expect(res.body.data).to.have.property('cumulative_reward_points');
+          expect(res.body.data.unclaimed_reward_points).to.equal('0');
+          expect(res.body.data.claimed_reward_points).to.equal('20');
+          expect(res.body.data.cumulative_reward_points).to.equal('20');
           expect(res.body.message).to.equal(enums.CLAIMED_REFERRAL_POINTS_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

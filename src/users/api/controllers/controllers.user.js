@@ -967,14 +967,14 @@ export const userClaimsReferralPoints = async(req, res, next) => {
     const { user } = req;
     const [ referralDetails ] = await processAnyData(userQueries.fetchUserReferralDetails, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully fetched user referral details from the DB. userClaimsReferralPoints.controller.user.js`);
-    if (parseFloat(referralDetails.unclaimed_referral_bonus_points) <= 0) {
+    if (parseFloat(referralDetails.unclaimed_reward_points) <= 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: user has no unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
       return ApiResponse.error(res, enums.NO_UNCLAIMED_POINTS_TO_CLAIM, enums.HTTP_FORBIDDEN, enums.USER_CLAIMS_REFERRAL_POINTS_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user has unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
     const [ updatedReferralValues  ] = await Promise.all([
-      processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_referral_bonus_points) ]),
-      processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_referral_bonus_points) ])
+      processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
+      processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
     ]);
     userActivityTracking(req.user.user_id, 105, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user claimed points tracked in the DB userClaimsReferralPoints.controller.user.js`);
