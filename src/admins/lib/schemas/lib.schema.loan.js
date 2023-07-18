@@ -92,6 +92,7 @@ const memberLoanId = Joi.object().keys({
   member_loan_id: Joi.string().required()
 });
 
+
 export default {
   manualLoanApproval,
   manualLoanRejection,

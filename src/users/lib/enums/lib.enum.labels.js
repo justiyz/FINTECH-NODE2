@@ -291,6 +291,7 @@ export const ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE = 'ClusterMiddl
 export const CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserBelongsToCluster';
 export const FETCH_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchLoans';
 export const FETCH_CLUSTER_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchClusterLoans';
+export const FETCH_CLUSTER_LOAN_DETAILS_CONTROLLER = 'AdminLoanController::fetchAClusterLoanDetails';
 export const FETCH_IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_CONTROLLER = 'AdminLoanController::fetchInReviewClusterLoans';
 export const FETCH_IN_REVIEW_CLUSTER_LOAN_MEMBERS_CONTROLLER = 'AdminLoanController::fetchInReviewClusterLoanMembers';
 export const FETCH_DETAILS_OF_MEMBERS_OF_A_CLUSTER_CONTROLLER = 'AdminLoanController::fetchDetailsOfMembersOfACluster';
@@ -345,6 +346,7 @@ export const FETCH_NOTIFICATIONS_CONTROLLER = 'AdminNotificationController::fetc
 export const DELETE_NOTIFICATION_CONTROLLER = 'AdminNotificationController::deleteNotifications ';
 export const GET_NOTIFICATION_BY_ID_MIDDLEWARE = 'AdminAdminMiddleware:::getNotificationById ';
 export const FETCH_CLUSTER_LOAN_REPAYMENT_CONTROLLER = 'AdminNotificationController::fetchClusterMemberLoanRepayment ';
+export const FETCH_CLUSTER_LOAN_REPAYMENT_DETAILS_CONTROLLER = 'AdminNotificationController::fetchUserClusterLoanRepaymentDetails ';
 export const FETCH_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificationController::fetchRescheduledClusterLoans ';
 export const FETCH_SINGLE_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificationController::fetchSingleClusterMemberRescheduledLoan ';
 

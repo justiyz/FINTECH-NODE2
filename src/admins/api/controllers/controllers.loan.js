@@ -435,23 +435,31 @@ export const fetchClusterLoans = async(req, res, next) => {
 };
 
 /**
- * fetches the details of members of a particular cluster
+ * fetches details of a cluster loan on the platform
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns success response.
  * @memberof AdminLoanController
  */
-export const fetchDetailsOfMembersOfACluster= async(req, res, next) => {
+
+export const fetchAClusterLoanDetails = async(req, res, next) => {
   try {
-    const { admin, params: { loan_id } } = req;
-    const membersDetails = await processAnyData(loanQueries.fetchMembersDetailsOfAClusterLoan, loan_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details of members of a particular cluster loans from the DB 
-    fetchDetailsOfAClusterMembers.admin.controllers.loan.js`);
-    return ApiResponse.success(res, enums.CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, membersDetails);
+    const {params: {loan_id}, admin} = req;
+    const [ clusterLoanDetails, clusterMemberDetails ] = await Promise.all([
+      processOneOrNoneData(loanQueries.fetchClusterLoanDetails, loan_id),
+      processAnyData(loanQueries.fetchClusterLoanMembersDetails, loan_id)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched details of a cluster loan from the DB
+    fetchAClusterLoanDetails.admin.controllers.loan.js`);
+    const data = {
+      clusterDetails: clusterLoanDetails,
+      clusterMembers: clusterMemberDetails
+    };
+    return ApiResponse.success(res, enums.CLUSTER_LOAN_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    error.label = enums.FETCH_DETAILS_OF_MEMBERS_OF_A_CLUSTER_CONTROLLER;
-    logger.error(`fetching details of members of a particular cluster failed:::${enums.FETCH_DETAILS_OF_MEMBERS_OF_A_CLUSTER_CONTROLLER}`, error.message);
+    error.label = enums.FETCH_CLUSTER_LOAN_DETAILS_CONTROLLER;
+    logger.error(`fetching cluster loan details failed:::${enums.FETCH_CLUSTER_LOAN_DETAILS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
@@ -555,19 +563,18 @@ export const fetchInReviewClusterLoans = async(req, res, next) => {
 
 export const fetchSingleMemberInReviewLoanDetails = async(req, res, next) => {
   try {
-    const { admin, params: { member_loan_id} } = req;
-    const memberDetails = await processOneOrNoneData(loanQueries.fetchAClusterInReviewLoanMemberDetails, [ member_loan_id ]);
+    const { admin, params: { member_loan_id, loan_id} } = req;
+    const clusterDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetails, [ loan_id ]);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
     fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
-    const loanId = loanDetails.member_loan_id;
-    const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, loanId);
+    const memberLoanId = loanDetails.member_loan_id;
+    const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, memberLoanId);
     const orrScoreBreakdown = (result.status === 200) && (result.data.customer_id === loanDetails.user_id) ? result.data : {};
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
     const data = {
-      loanId,
-      memberDetails,
-      loan_details: loanDetails,
+      memberLoanId,
+      clusterDetails,
       orr_break_down: orrScoreBreakdown
     };
     return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data); 
@@ -627,6 +634,41 @@ export const fetchClusterMembersLoanRepayment = async(req, res, next) => {
   }
 };
 
+/**
+ * fetches user's repayment details 
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+
+export const fetchUserClusterLoanRepaymentDetails = async(req, res, next) => {
+  try {
+    const { params: { member_loan_id }, admin } = req;
+    const clusterLoanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanRepaymentDetailsOfAUser, member_loan_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched cluster loan details of a user successfully 
+     fetchUserClusterLoanRepaymentDetails.admin.controllers.loan.js`);
+    const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
+    const memberLoanId = loanDetails.member_loan_id;
+    const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, memberLoanId);
+    const orrScoreBreakdown = (result.status === 200) && (result.data.customer_id === loanDetails.user_id) ? result.data : {};
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched fetchUserClusterLoanRepaymentDetails.admin.controllers.loan.js`);
+    const repaymentHistory = await processAnyData(loanQueries.fetchMemberClusterLoanRepaymentHistory, member_loan_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched user repayment history
+     fetchUserClusterLoanRepaymentDetails.admin.controllers.loan.js`);
+    const data = {
+      clusterDetails: clusterLoanDetails,
+      orr_break_down: orrScoreBreakdown,
+      repaymentBreakdown: repaymentHistory
+    };
+    return ApiResponse.success(res, enums.LOAN_REPAYMENT_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_CLUSTER_LOAN_REPAYMENT_DETAILS_CONTROLLER;
+    logger.error(`fetching cluster loan repayment details failed:::${enums.FETCH_CLUSTER_LOAN_REPAYMENT_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
 
 /**
  * fetches rescheduled cluster loans on the platform
@@ -686,14 +728,16 @@ export const fetchRescheduledClusterLoans = async(req, res, next) => {
 
 export const fetchSingleClusterMemberRescheduledLoan = async(req, res, next) => {
   try {
-    const { params: {member_loan_id}, admin } = req;
-    const [ [ memberRescheduledDetails ],  newRepaymentBreakdown  ] = await Promise.all([
+    const { params: {member_loan_id, loan_id}, admin } = req;
+    const [ clusterDetails, [ memberRescheduledDetails ],  newRepaymentBreakdown  ] = await Promise.all([
+      processAnyData(loanQueries.fetchClusterLoanDetails, loan_id),
       processAnyData(loanQueries.fetchSingleRescheduledClusterLoanDetails, member_loan_id),
       processAnyData(loanQueries.fetchNewClusterRepaymentBreakdown, member_loan_id)
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched rescheduled cluster loan of a particular member from the DB
     fetchSingleClusterMemberRescheduledLoan.admin.controllers.loan.js`);
     const data = {
+      clusterLoanDetails: clusterDetails,
       userRescheduleDetails: memberRescheduledDetails,
       newRepayment: newRepaymentBreakdown
     };
