@@ -167,6 +167,7 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchSingleMemberDetails, 'params'),
+  LoanMiddleware.checkIfClusterLoanExists,
   LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleClusterMemberRescheduledLoan
 );
