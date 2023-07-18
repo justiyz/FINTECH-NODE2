@@ -141,10 +141,10 @@ export const validateAdminAuthToken = async(req, res, next) => {
     if (!token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that no authentication token was sent with the headers
       validateAdminAuthToken.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.NO_TOKEN, enums.HTTP_UNAUTHORIZED, enums.GET_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.NO_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     if (!token.startsWith('Bearer ')) {
-      return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.GET_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     if (token.startsWith('Bearer ')) {
       token = token.slice(7, token.length);
