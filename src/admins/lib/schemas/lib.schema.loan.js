@@ -92,6 +92,12 @@ const memberLoanId = Joi.object().keys({
   member_loan_id: Joi.string().required()
 });
 
+const fetchClusterDetails = Joi.object().keys({
+  cluster_id: Joi.string().required(),
+  loan_id: Joi.string().required()
+});
+
+
 export default {
   manualLoanApproval,
   manualLoanRejection,
@@ -105,5 +111,6 @@ export default {
   fetchSingleMemberDetails,
   memberLoanId,
   fetchRescheduledClusterLoans,
-  fetchRepaidClusterLoans
+  fetchRepaidClusterLoans,
+  fetchClusterDetails
 };

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.loan';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
+import * as AdminClusterMiddleware from '../middlewares/middlewares.cluster';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as LoanController from '../controllers/controllers.loan';
@@ -103,13 +104,15 @@ router.get(
 );
 
 router.get(
-  '/cluster/:loan_id/members_loans',
+  '/:cluster_id/:loan_id/cluster',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.loanIdParams, 'params'),
+  Model(Schema.fetchClusterDetails, 'params'),
+  AdminClusterMiddleware.checkIfClusterExists,
   LoanMiddleware.checkIfClusterLoanExists,
-  LoanController.fetchDetailsOfMembersOfACluster
+  LoanController.fetchAClusterLoanDetails
 );
+
 router.get(
   '/cluster/:member_loan_id/members-loan-details',
   AuthMiddleware.validateAdminAuthToken,
@@ -142,6 +145,14 @@ router.get(
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchRepaidClusterLoans, 'query'),
   LoanController.fetchClusterMembersLoanRepayment
+);
+
+router.get(
+  '/cluster/:member_loan_id/repayment',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  Model(Schema.memberLoanId, 'params'),
+  LoanController.fetchUserClusterLoanRepaymentDetails
 );
 
 router.get(
