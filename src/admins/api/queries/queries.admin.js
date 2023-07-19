@@ -155,7 +155,7 @@ export default {
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
     OR ($1 IS NULL AND $2 IS NULL))
     UNION ALL 
-    SELECT status FROM cluster_loans 
+    SELECT status FROM cluster_member_loans 
     WHERE ((status = 'approved') 
     OR (status = 'processing') 
     OR (status = 'ongoing') 
@@ -174,7 +174,7 @@ export default {
   AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
     OR ($1 IS NULL AND $2 IS NULL))
   UNION ALL 
-   SELECT status FROM cluster_loans
+   SELECT status FROM cluster_member_loans
     WHERE status = 'declined'
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
     OR ($1 IS NULL AND $2 IS NULL))
@@ -450,9 +450,16 @@ export default {
     `,
   
   totalExpectedRepayment: `
-    SELECT SUM(total_payment_amount) 
-    FROM personal_loan_payment_schedules 
-    WHERE (status = 'paid' OR status = 'over due')`,
+      SELECT SUM(total_payment_amount) 
+      FROM(
+      SELECT total_payment_amount 
+      FROM personal_loan_payment_schedules
+      WHERE (status = 'paid' OR status = 'over due')
+      UNION ALL
+      SELECT total_payment_amount 
+      FROM cluster_member_loan_payment_schedules 
+      WHERE (status = 'paid' OR status = 'over due')
+      ) AS totalExpectedRepayment`,
 
   fetchAdminSetEnvDetails: `
     SELECT 
