@@ -365,10 +365,11 @@ export default {
       OR ($1 IS NULL AND $2 IS NULL))`,
 
   fetchPrivateClusterCount: `
-    SELECT COUNT(cluster_id) 
+    SELECT COUNT(cluster_id)
     FROM clusters
     WHERE type = 'private'
-    AND is_deleted = FALSE 
+    AND is_deleted = FALSE
+    AND is_created_by_admin = FALSE
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
       OR ($1 IS NULL AND $2 IS NULL))`,
 
