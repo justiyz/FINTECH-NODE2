@@ -477,25 +477,25 @@ export default {
   `,
 
   fetchClusterLoanMembersDetails: `
-        SELECT
-            cluster_member_loans.loan_id,
-            cluster_member_loans.member_loan_id,
-            cluster_member_loans.cluster_id,
-            CONCAT(users.first_name, ' ', users.last_name) AS name,
-            cluster_member_loans.amount_requested AS loan_amount,
-            cluster_member_loans.percentage_orr_score,
-            to_char(
-                (SELECT MAX(proposed_payment_date)
-                FROM cluster_member_loan_payment_schedules
-                WHERE user_id = cluster_members.user_id),
-                'Mon DD YYYY'
-            ) AS repayment_date,
-            cluster_member_loans.status
-      FROM cluster_members
-      LEFT JOIN users ON cluster_members.user_id = users.user_id
-      LEFT JOIN cluster_member_loans ON cluster_members.user_id = cluster_member_loans.user_id
-      WHERE cluster_member_loans.loan_id = $1 AND cluster_member_loans.cluster_id = $2
-      GROUP BY 1, 2, 3, 4, 5, 6, 7, 8;
+       SELECT
+              cluster_member_loans.loan_id,
+              cluster_member_loans.member_loan_id,
+              cluster_member_loans.cluster_id,
+              CONCAT(users.first_name, ' ', users.last_name) AS name,
+              cluster_member_loans.amount_requested AS loan_amount,
+              cluster_member_loans.percentage_orr_score,
+              to_char(
+                  (SELECT MAX(proposed_payment_date)
+                  FROM cluster_member_loan_payment_schedules
+                  WHERE user_id = cluster_member_loans.user_id AND cluster_id = cluster_member_loans.cluster_id),
+                  'Mon DD YYYY'
+              ) AS repayment_date,
+              cluster_member_loans.status
+        FROM cluster_members
+        LEFT JOIN users ON cluster_members.user_id = users.user_id
+        LEFT JOIN cluster_member_loans ON cluster_members.user_id = cluster_member_loans.user_id
+        WHERE cluster_member_loans.loan_id = $1 AND cluster_member_loans.cluster_id = $2
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
 `,
 
   fetchMembersDetailsOfAClusterLoan: `
