@@ -356,10 +356,10 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
 
 /**
  * processing of repayment and disbursement types of referrals
- * @param {Request} user - The details of the user processing loan disbursement/repayment.
- * @param {Response} rewardDescription - The decryption of the referral reward point.
- * @param {Next} rewardPoint - The actual rewarding point.
- * @param {Next} type - the type which could be disbursement or repayment.
+ * @param {Object} user - The details of the user processing loan disbursement/repayment.
+ * @param {String} rewardDescription - The decryption of the referral reward point.
+ * @param {Number} rewardPoint - The actual rewarding point.
+ * @param {String} type - the type which could be disbursement or repayment.
  * @returns {object} - Returns to the loan repayment/disbursement processing flow
  * @memberof PaymentMiddleware
  */
@@ -429,8 +429,8 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount, 
           [ rewardDetails.reward_id, parseFloat(paymentRecord.amount) ]);
         const actualPoint = rewardRangeDetails.point;
-        if (actualPoint && parseFloat(actualPoint) > 0) {
-          await processUserRewardPointBonus(user, 'Disbursement point', actualPoint, 'disbursement');
+        if (parseFloat(actualPoint) > 0) {
+          processUserRewardPointBonus(user, 'Disbursement point', actualPoint, 'disbursement'); // process reward awarding, function is written above
         }
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
         processPersonalLoanTransferPayments.middlewares.payment.js`);
@@ -548,7 +548,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         if (statusType === 'completed') {
           const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
-          await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
+          processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
           processPersonalLoanRepayments.middlewares.payment.js`);
           sendUserPersonalNotification(user, 'Full loan repayment successful', 
@@ -581,7 +581,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       }
       const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
       const rewardPoint = parseFloat(rewardDetails.point);
-      await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
+      processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
       processPersonalLoanRepayments.middlewares.payment.js`);
       await MailService('Successful loan repayment', 'successfulRepayment', 
@@ -660,8 +660,8 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
           const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount, 
             [ rewardDetails.reward_id, parseFloat(member.amount_requested) ]);
           const actualPoint = rewardRangeDetails.point;
-          if (actualPoint && parseFloat(actualPoint) > 0) {
-            await processUserRewardPointBonus(member, 'Disbursement point', actualPoint, 'disbursement');
+          if (parseFloat(actualPoint) > 0) {
+            processUserRewardPointBonus(member, 'Disbursement point', actualPoint, 'disbursement'); // process reward awarding, function is written above
           }
           const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ member.user_id ]);
           const data = await PaymentPayload.loanDisbursementPayload(userDetails, member);
@@ -803,7 +803,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         if (statusType === 'completed') {
           const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
-          await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
+          processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
           processClusterLoanRepayments.middlewares.payment.js`);
           sendUserPersonalNotification(user, 'Full cluster loan repayment successful', 
@@ -854,7 +854,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
       }
       const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
       const rewardPoint = parseFloat(rewardDetails.point);
-      await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
+      processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
       processClusterLoanRepayments.middlewares.payment.js`);
       await MailService('Successful loan repayment', 'successfulRepayment', 

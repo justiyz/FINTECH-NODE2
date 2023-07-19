@@ -18,12 +18,11 @@ import { loanApplicationEligibilityCheck, loanApplicationRenegotiation } from '.
 import { initiateTransfer, initializeCardPayment, initializeBankTransferPayment,
   initializeDebitCarAuthChargeForLoanRepayment, initializeBankAccountChargeForLoanRepayment 
 } from '../services/service.paystack';
-import { collateUsersFcmTokens, collateUsersFcmTokensExceptAuthenticatedUser } from '../../lib/utils/lib.util.helpers';
+import { collateUsersFcmTokens, collateUsersFcmTokensExceptAuthenticatedUser, generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import * as adminNotification from '../../lib/templates/adminNotification';
 import { userActivityTracking } from '../../lib/monitor';
-import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 
 
 /**
