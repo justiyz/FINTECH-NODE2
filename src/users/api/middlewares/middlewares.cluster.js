@@ -463,7 +463,8 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member 
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
-          const rewardPoint = 5; // to later refactor and make flexible once implemented on admin side
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_member_increase' ]);
+          const rewardPoint = parseFloat(rewardDetails.point);
           const rewardDescription = 'Cluster membership increase point';
           await processOneOrNoneData(authQueries.updateRewardPoints, 
             [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);

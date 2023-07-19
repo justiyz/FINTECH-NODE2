@@ -4572,9 +4572,9 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('unclaimed_reward_points');
           expect(res.body.data).to.have.property('claimed_reward_points');
           expect(res.body.data).to.have.property('cumulative_reward_points');
-          expect(res.body.data.unclaimed_reward_points).to.equal('24');
+          expect(res.body.data.unclaimed_reward_points).to.equal('10');
           expect(res.body.data.claimed_reward_points).to.equal('20');
-          expect(res.body.data.cumulative_reward_points).to.equal('44');
+          expect(res.body.data.cumulative_reward_points).to.equal('30');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
@@ -4597,7 +4597,7 @@ describe('Clusters', () => {
           expect(res.body.data[0]).to.have.property('point_reward');
           expect(res.body.data[0]).to.have.property('reward_description');
           expect(res.body.data[0]).to.have.property('date');
-          expect(res.body.data[0].point_reward).to.equal('15');
+          expect(res.body.data[0].point_reward).to.equal('2');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_HISTORY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();

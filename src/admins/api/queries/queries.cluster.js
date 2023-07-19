@@ -18,6 +18,7 @@ export default {
     percentage_interest_type_value
   ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
   RETURNING *`,
+
   fetchClustersDetails:
     `SELECT
           id,
@@ -34,7 +35,7 @@ export default {
     FROM clusters 
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
     AND (type = $4 OR $4 IS NULL)
-    AND is_deleted = false  AND is_created_by_admin = false
+    AND is_deleted = false
     ORDER BY created_at DESC
     OFFSET $5
     LIMIT $6
@@ -44,7 +45,7 @@ export default {
     SELECT COUNT(cluster_id) AS total_count
     FROM clusters
     WHERE (name ILIKE TRIM($1) OR $1 IS NULL) AND (status = $2 OR $2 IS NULL) AND (loan_status = $3 OR $3 IS NULL)
-    AND (type = $4 OR $4 IS NULL) AND is_created_by_admin = false
+    AND (type = $4 OR $4 IS NULL)
     AND is_deleted = false
 `,
 

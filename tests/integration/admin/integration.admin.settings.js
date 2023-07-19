@@ -959,5 +959,321 @@ describe('Admin Settings management', () => {
         });
     });
   });
+
+  describe('Fetch reward points details in settings', () => {
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/reward-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .query({
+          type: 'general'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if token is not sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/reward-points')
+        .query({
+          type: 'general'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(401);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('Please provide a token');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if type is not sent', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/reward-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({  })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('type is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch general reward point details successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/reward-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'general'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data[0]).to.have.property('id');
+          expect(res.body.data[0]).to.have.property('reward_id');
+          expect(res.body.data[0]).to.have.property('name');
+          expect(res.body.data[0]).to.have.property('point');
+          expect(res.body.data[2].point_range.length).to.equals(5);
+          expect(res.body.message).to.equal(enums.FETCH_REWARD_POINT_DETAILS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_ADMIN_SYSTEM_SIGN_UP_REWARD_ID = res.body.data[0].reward_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_COMPLETE_LOAN_REPAYMENT_REWARD_ID = res.body.data[1].reward_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID = res.body.data[2].reward_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_ONE_ID = res.body.data[2].point_range[0].range_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_ONE_LOWER_BOUND = res.body.data[2].point_range[0].lower_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_ONE_UPPER_BOUND = res.body.data[2].point_range[0].upper_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_TWO_ID = res.body.data[2].point_range[1].range_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_TWO_LOWER_BOUND = res.body.data[2].point_range[1].lower_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_TWO_UPPER_BOUND = res.body.data[2].point_range[1].upper_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_THREE_ID = res.body.data[2].point_range[2].range_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_THREE_LOWER_BOUND = res.body.data[2].point_range[2].lower_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_THREE_UPPER_BOUND = res.body.data[2].point_range[2].upper_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FOUR_ID = res.body.data[2].point_range[3].range_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FOUR_LOWER_BOUND = res.body.data[2].point_range[3].lower_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FOUR_UPPER_BOUND = res.body.data[2].point_range[3].upper_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FIVE_ID = res.body.data[2].point_range[4].range_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FIVE_LOWER_BOUND = res.body.data[2].point_range[4].lower_bound;
+          process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FIVE_UPPER_BOUND = res.body.data[2].point_range[4].upper_bound;
+          done();
+        });
+    });
+    it('Should fetch cluster related reward point details successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/settings/reward-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          type: 'cluster'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data[0]).to.have.property('id');
+          expect(res.body.data[0]).to.have.property('reward_id');
+          expect(res.body.data[0]).to.have.property('name');
+          expect(res.body.data[0]).to.have.property('point');
+          expect(res.body.message).to.equal(enums.FETCH_REWARD_POINT_DETAILS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_ADMIN_SYSTEM_CLUSTER_CREATION_REWARD_ID = res.body.data[0].reward_id;
+          process.env.SEEDFI_ADMIN_SYSTEM_CLUSTER_MEMBERSHIP_INCREASE_REWARD_ID = res.body.data[1].reward_id;
+          done();
+        });
+    });
+  });
+  describe('Should update cluster related reward points in settings', () => {
+    it('Should return error if body is not an array of object', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/cluster-rewards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('value must be an array');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should update env value settings successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/cluster-rewards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send([
+          {
+            reward_id: process.env.SEEDFI_ADMIN_SYSTEM_CLUSTER_CREATION_REWARD_ID,
+            point: 10
+          },
+          {
+            reward_id: process.env.SEEDFI_ADMIN_SYSTEM_CLUSTER_MEMBERSHIP_INCREASE_REWARD_ID,
+            point: 25
+          }
+        ])
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.UPDATED_CLUSTER_RELATED_REWARDS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Should update general reward points not having range in settings', () => {
+    it('Should return error if reward id is not sent', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/general-rewards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          {
+            point: 80
+          }
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('reward_id is required');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if reward to be edited is type having range', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/general-rewards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          {
+            reward_id: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID,
+            point: 80
+          }
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.REWARD_POINT_RANGE_TO_BE_UPDATED);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid reward to be edited', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/general-rewards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          {
+            reward_id: `${process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID}9ke`,
+            point: 80
+          }
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(400);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.REWARD_DOES_NOT_EXISTS);
+          expect(res.body.error).to.equal('BAD_REQUEST');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should update env value settings successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/general-rewards')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send(
+          {
+            reward_id: process.env.SEEDFI_ADMIN_SYSTEM_SIGN_UP_REWARD_ID,
+            point: 40
+          }
+        )
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.UPDATED_GENERAL_REWARDS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Should update general reward points range in settings', () => {
+    it('Should return error if body is not an array of object', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/general-reward-ranges')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(422);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('value must be an array');
+          expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should update env value settings successfully', (done) => {
+      chai.request(app)
+        .patch('/api/v1/admin/settings/general-reward-ranges')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send([
+          {
+            range_id: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_ONE_ID,
+            lower_bound: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_ONE_LOWER_BOUND,
+            upper_bound: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_ONE_UPPER_BOUND,
+            point: 2
+          },
+          {
+            range_id: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_TWO_ID,
+            lower_bound: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_TWO_LOWER_BOUND,
+            upper_bound: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_TWO_UPPER_BOUND,
+            point: 5
+          },
+          {
+            range_id: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FIVE_ID,
+            lower_bound: process.env.SEEDFI_ADMIN_SYSTEM_SUCCESSFUL_LOAN_REQUEST_REWARD_ID_RANGE_FIVE_LOWER_BOUND,
+            upper_bound: 90000000,
+            point: 45
+          }
+        ])
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.UPDATED_GENERAL_REWARD_RANGES_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
 });
 

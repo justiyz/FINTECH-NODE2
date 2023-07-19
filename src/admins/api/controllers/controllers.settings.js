@@ -21,7 +21,7 @@ export const fetchEnvValues = async(req, res, next) => {
   try { 
     const { admin } = req;
     const envValues = await processAnyData(settingsQueries.fetchEnvValues);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched env values from the DB fetchEnvValues.admin.controllers.admin.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched env values from the DB fetchEnvValues.admin.controllers.settings.js`);
     return ApiResponse.success(res, enums.FETCH_ENV_VALUES_SUCCESSFULLY, enums.HTTP_OK, envValues);
   } catch (error) {
     error.label = enums.FETCH_ENV_VALUES_CONTROLLER;
@@ -64,7 +64,7 @@ export const updateEnvValues = async(req, res, next) => {
       })
     );
     logger.info(
-      `${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated the env values settings in the DB updateEnvValues.admin.controllers.admin.js`
+      `${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated the env values settings in the DB updateEnvValues.admin.controllers.settings.js`
     );
     await adminActivityTracking(req.admin.admin_id, 31, 'success', descriptions.updates_environment(adminName));
     return ApiResponse.success(res, enums.UPDATED_ENV_VALUES_SUCCESSFULLY, enums.HTTP_OK);
@@ -89,10 +89,10 @@ export const scoreCardBreakdown = async(req, res, next) => {
     const { admin } = req;
     const individualLoanScoreCardResult = await loanScoreCardBreakdown();
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the individual loan scorecard weights
-        from seedfi underwriting service scoreCardBreakdown.admin.controllers.admin.js`);
+        from seedfi underwriting service scoreCardBreakdown.admin.controllers.settings.js`);
     const clusterLoanScoreCardResult = { data: {} }; // to later implement for cluster loan scoreCard
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched the cluster loan scorecard weights
-        from seedfi underwriting service scoreCardBreakdown.admin.controllers.admin.js`);
+        from seedfi underwriting service scoreCardBreakdown.admin.controllers.settings.js`);
     const data = {
       individualLoanScoreCardResult: individualLoanScoreCardResult.data,
       clusterLoanScoreCardResult: clusterLoanScoreCardResult.data
@@ -260,5 +260,125 @@ export const deletePromo = async(req, res, next) => {
     error.label = enums.DELETE_PROMO_CONTROLLER;
     logger.error(`deleting promo failed:::${enums.DELETE_PROMO_CONTROLLER}`, error.message);
     return next(error);
+  }
+};
+
+/**
+ * fetches admin reward points details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+export const fetchRewardPointDetails = async(req, res, next) => {
+  try { 
+    const { admin, query: { type } } = req;
+    if (type === 'general') {
+      const generalRewards =  await processAnyData(settingsQueries.fetchGeneralRewardPointDetails, []);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched general reward point details from the DB 
+      fetchRewardPointDetails.admin.settings.admin.js`);
+      await Promise.all(
+        generalRewards.map(async(reward) => {
+          const range = await processAnyData(settingsQueries.fetchGeneralRewardRangePointDetails, [ reward.reward_id ]);
+          reward.point_range = range;
+          return reward;
+        })
+      );
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully set the point range for general rewards from the DB 
+      fetchRewardPointDetails.admin.settings.admin.js`);
+      return ApiResponse.success(res, enums.FETCH_REWARD_POINT_DETAILS_SUCCESSFULLY, enums.HTTP_OK, generalRewards);
+    }
+    const clusterRewards = await processAnyData(settingsQueries.fetchClusterRewardPointDetails, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully fetched cluster related reward point details from the DB 
+    fetchRewardPointDetails.admin.settings.admin.js`);
+    return ApiResponse.success(res, enums.FETCH_REWARD_POINT_DETAILS_SUCCESSFULLY, enums.HTTP_OK, clusterRewards);
+  } catch (error) {
+    error.label = enums.FETCH_REWARD_POINT_DETAILS_CONTROLLER;
+    logger.error(`fetching reward point details failed:::${enums.FETCH_REWARD_POINT_DETAILS_CONTROLLER}`, error.message);
+    return next(error); 
+  }
+};
+
+/**
+ * update cluster related rewards
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+export const updateClusterRelatedRewards = async(req, res, next) => {
+  try { 
+    const { admin, body } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    await Promise.all(
+      body.map(async(reward) => {
+        await processOneOrNoneData(settingsQueries.updateClusterRelatedRewardPoints, [ reward.reward_id, parseFloat(reward.point) ]);
+        return reward;
+      })
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated cluster related reward point in the DB 
+    updateClusterRelatedRewards.admin.settings.admin.js`);
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.updates_reward_points(adminName, 'cluster related'));
+    return ApiResponse.success(res, enums.UPDATED_CLUSTER_RELATED_REWARDS_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_CLUSTER_RELATED_REWARDS_CONTROLLER;
+    logger.error(`updating cluster related reward points failed:::${enums.UPDATE_CLUSTER_RELATED_REWARDS_CONTROLLER}`, error.message);
+    return next(error); 
+  }
+};
+
+/**
+ * update general rewards
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+export const updateGeneralRewards = async(req, res, next) => {
+  try { 
+    const { admin, body } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    await processOneOrNoneData(settingsQueries.updateGeneralRewardPoints, [ body.reward_id, parseFloat(body.point) ]); 
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated specified general reward point in the DB 
+    updateGeneralRewards.admin.settings.admin.js`);
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.updates_reward_points(adminName, 'general'));
+    return ApiResponse.success(res, enums.UPDATED_GENERAL_REWARDS_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_GENERAL_REWARDS_CONTROLLER;
+    logger.error(`updating general reward points failed:::${enums.UPDATE_GENERAL_REWARDS_CONTROLLER}`, error.message);
+    return next(error); 
+  }
+};
+
+/**
+ * update general reward ranges and points
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminSettingsController
+ */
+export const updateGeneralRewardRanges = async(req, res, next) => {
+  try { 
+    const { admin, body } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    await Promise.all(
+      body.map(async(range) => {
+        await processOneOrNoneData(settingsQueries.updateGeneralRewardPointRanges, 
+          [ range.range_id, parseFloat(range.lower_bound), parseFloat(range.upper_bound), parseFloat(range.point) ]);
+        return range;
+      })
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin successfully updated general reward point ranges in the DB 
+    updateGeneralRewardRanges.admin.settings.admin.js`);
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.updates_reward_point_ranges(adminName, 'general'));
+    return ApiResponse.success(res, enums.UPDATED_GENERAL_REWARD_RANGES_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_GENERAL_REWARD_RANGES_CONTROLLER;
+    logger.error(`updating general reward ranges and points failed:::${enums.UPDATE_GENERAL_REWARD_RANGES_CONTROLLER}`, error.message);
+    return next(error); 
   }
 };

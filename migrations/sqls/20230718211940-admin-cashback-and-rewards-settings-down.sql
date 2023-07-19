@@ -1,0 +1,12 @@
+DROP INDEX IF EXISTS general_reward_points_settings_name_index;
+DROP INDEX IF EXISTS general_reward_points_settings_reward_id_index;
+
+DROP INDEX IF EXISTS general_reward_points_range_settings_range_id_index;
+DROP INDEX IF EXISTS general_reward_points_range_settings_reward_id_index;
+
+DROP INDEX IF EXISTS cluster_related_reward_points_settings_name_index;
+DROP INDEX IF EXISTS cluster_related_reward_points_settings_reward_id_index;
+
+DROP TABLE IF EXISTS general_reward_points_settings CASCADE;
+DROP TABLE IF EXISTS general_reward_points_range_settings CASCADE;
+DROP TABLE IF EXISTS cluster_related_reward_points_settings CASCADE;

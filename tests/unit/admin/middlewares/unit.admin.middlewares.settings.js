@@ -39,21 +39,21 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkPromoStatus ', async() => {
+    it('should call checkPromoStatus', async() => {
       const req = { admin: '', params: '' };
       const data = await AdminSettingsMiddleware.checkPromoStatus(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfPromoIsActive ', async() => {
+    it('should call checkIfPromoIsActive', async() => {
       const req = { admin: '', params: '' };
       const data = await AdminSettingsMiddleware.checkIfPromoIsActive(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call checkIfAdminCreatedPromo ', async() => {
-      const req = { admin: null, params: null, body: null };
-      const data = await AdminSettingsMiddleware.checkIfAdminCreatedPromo(req, res, next);
+    it('should call checkGeneralRewardBeforeEditing', async() => {
+      const req = { admin: null, body: null };
+      const data = await AdminSettingsMiddleware.checkGeneralRewardBeforeEditing(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
