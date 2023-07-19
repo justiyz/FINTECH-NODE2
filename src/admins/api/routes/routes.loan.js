@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.loan';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
+import * as AdminClusterMiddleware from '../middlewares/middlewares.cluster';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as LoanController from '../controllers/controllers.loan';
@@ -103,10 +104,11 @@ router.get(
 );
 
 router.get(
-  '/:loan_id/cluster',
+  '/:cluster_id/:loan_id/cluster',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.loanIdParams, 'params'),
+  Model(Schema.fetchClusterDetails, 'params'),
+  AdminClusterMiddleware.checkIfClusterExists,
   LoanMiddleware.checkIfClusterLoanExists,
   LoanController.fetchAClusterLoanDetails
 );
@@ -129,11 +131,10 @@ router.get(
 );
 
 router.get(
-  '/cluster/:loan_id/:member_loan_id/in-review-loan-details',
+  '/cluster/:member_loan_id/in-review-loan-details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.fetchSingleMemberDetails, 'params'),
-  LoanMiddleware.checkIfClusterLoanExists,
+  Model(Schema.memberLoanId, 'params'),
   LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleMemberInReviewLoanDetails
 );
@@ -163,11 +164,10 @@ router.get(
 );
 
 router.get(
-  '/cluster/:loan_id/:member_loan_id/rescheduled-loan-details',
+  '/cluster/:member_loan_id/rescheduled-loan-details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
-  Model(Schema.fetchSingleMemberDetails, 'params'),
-  LoanMiddleware.checkIfClusterLoanExists,
+  Model(Schema.memberLoanId, 'params'),
   LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleClusterMemberRescheduledLoan
 );

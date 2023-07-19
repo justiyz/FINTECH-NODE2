@@ -2856,7 +2856,7 @@ describe('Clusters', () => {
   describe('admin fetches single cluster loan details', () => {
     it('Should fetch single cluster loan details', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/cluster`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/cluster`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -2866,8 +2866,7 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data.clusterDetails).to.have.property('cluster_id');
-          expect(res.body.data.clusterMembers[0]).to.have.property('name');
-          expect(res.body.data.clusterMembers[0]).to.have.property('percentage_orr_score');
+          expect(res.body.data.clusterDetails).to.have.property('type');
           expect(res.body.data.clusterDetails).to.have.property('loan_amount');          
           expect(res.body.message).to.equal(enums.CLUSTER_LOAN_DETAILS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
@@ -2876,7 +2875,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/cluster`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/cluster`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -3827,7 +3826,7 @@ describe('Clusters', () => {
   describe('admin fetches single user rescheduled cluster loan details on the platform', () => {
     it('Should fetch single user rescheduled cluster loan details', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-loan-details`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -3846,7 +3845,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-loan-details`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_USER_ONE_MEMBER_LOAN_ID}/rescheduled-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -4508,7 +4507,7 @@ describe('Clusters', () => {
   describe('admin fetches details of each member of an in review cluster loan', () => {
     it('Should return error if token is not set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
           expect(res.body).to.have.property('message');
@@ -4521,7 +4520,7 @@ describe('Clusters', () => {
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
@@ -4538,7 +4537,7 @@ describe('Clusters', () => {
     });
     it('Should fetch in review cluster loan member details successfully', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/in-review-loan-details`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

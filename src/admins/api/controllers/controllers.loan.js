@@ -445,10 +445,10 @@ export const fetchClusterLoans = async(req, res, next) => {
 
 export const fetchAClusterLoanDetails = async(req, res, next) => {
   try {
-    const {params: {loan_id}, admin} = req;
+    const {params: { loan_id, cluster_id}, admin} = req;
     const [ clusterLoanDetails, clusterMemberDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchClusterLoanDetails, loan_id),
-      processAnyData(loanQueries.fetchClusterLoanMembersDetails, loan_id)
+      processOneOrNoneData(loanQueries.fetchClusterLoanDetailsByLoanId, loan_id),
+      processAnyData(loanQueries.fetchClusterLoanMembersDetails, [ loan_id, cluster_id ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched details of a cluster loan from the DB
     fetchAClusterLoanDetails.admin.controllers.loan.js`);
@@ -563,8 +563,8 @@ export const fetchInReviewClusterLoans = async(req, res, next) => {
 
 export const fetchSingleMemberInReviewLoanDetails = async(req, res, next) => {
   try {
-    const { admin, params: { member_loan_id, loan_id} } = req;
-    const clusterDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetails, [ loan_id ]);
+    const { admin, params: { member_loan_id } } = req;
+    const clusterDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetails, [ member_loan_id ]);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
     fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
@@ -574,6 +574,7 @@ export const fetchSingleMemberInReviewLoanDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan application ORR score fetched fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
     const data = {
       memberLoanId,
+      loanDetails,
       clusterDetails,
       orr_break_down: orrScoreBreakdown
     };
@@ -659,6 +660,7 @@ export const fetchUserClusterLoanRepaymentDetails = async(req, res, next) => {
      fetchUserClusterLoanRepaymentDetails.admin.controllers.loan.js`);
     const data = {
       clusterDetails: clusterLoanDetails,
+      loan_details: loanDetails,
       orr_break_down: orrScoreBreakdown,
       repaymentBreakdown: repaymentHistory
     };
@@ -728,9 +730,9 @@ export const fetchRescheduledClusterLoans = async(req, res, next) => {
 
 export const fetchSingleClusterMemberRescheduledLoan = async(req, res, next) => {
   try {
-    const { params: {member_loan_id, loan_id}, admin } = req;
+    const { params: {member_loan_id}, admin } = req;
     const [ clusterDetails, [ memberRescheduledDetails ],  newRepaymentBreakdown  ] = await Promise.all([
-      processAnyData(loanQueries.fetchClusterLoanDetails, loan_id),
+      processAnyData(loanQueries.fetchClusterLoanDetails, member_loan_id),
       processAnyData(loanQueries.fetchSingleRescheduledClusterLoanDetails, member_loan_id),
       processAnyData(loanQueries.fetchNewClusterRepaymentBreakdown, member_loan_id)
     ]);

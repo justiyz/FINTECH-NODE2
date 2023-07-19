@@ -384,7 +384,7 @@ export default {
         cluster_loans.loan_id,
         cluster_loans.cluster_id,      
         cluster_loans.cluster_name,
-        cluster_loans.total_repayment_amount As loan_amount,
+        cluster_loans.total_amount_requested As loan_amount,
         COUNT(cluster_member_loans.member_loan_id) As total_member,
         to_char(DATE(cluster_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS date_received,
         cluster_loans.status,
@@ -432,21 +432,48 @@ export default {
 
   fetchClusterLoanDetails: `
       SELECT 
-        clusters.id,
-        clusters.cluster_id,      
-        clusters.name,
-        clusters.type,
-        clusters.current_members AS total_member,
-        to_char(DATE(clusters.created_at)::date, 'Mon DD YYYY') AS created_date,
-        clusters.minimum_monthly_income,
-        clusters.description,
-        cluster_loans.sharing_type AS type_of_repayment,
-        cluster_loans.total_repayment_amount AS loan_amount
+            clusters.id,
+            clusters.cluster_id,      
+            clusters.name,
+            clusters.type,
+            cluster_member_loans.member_loan_id,
+            cluster_member_loans.user_id,
+            cluster_member_loans.loan_id,
+            clusters.current_members AS total_member,
+            to_char(DATE(clusters.created_at)::date, 'Mon DD YYYY') AS created_date,
+            clusters.minimum_monthly_income,
+            clusters.description,
+            cluster_member_loans.sharing_type AS type_of_repayment,
+            cluster_member_loans.total_cluster_amount AS loan_amount
       FROM clusters
-      LEFT JOIN cluster_loans
+      LEFT JOIN cluster_member_loans
+      ON clusters.cluster_id = cluster_member_loans.cluster_id
+      LEFT JOIN cluster_loans 
       ON clusters.cluster_id = cluster_loans.cluster_id
-      WHERE cluster_loans.loan_id = $1
-      GROUP BY 1, 2, 3, 4, 6, 7, 8, 9, 10
+      WHERE cluster_member_loans.member_loan_id = $1 
+      GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+
+  `,
+  fetchClusterLoanDetailsByLoanId: `
+        SELECT 
+          clusters.id,
+          clusters.cluster_id,      
+          clusters.name,
+          clusters.type,
+          cluster_loans.loan_id,
+          clusters.current_members AS total_member,
+          to_char(DATE(clusters.created_at)::date, 'Mon DD YYYY') AS created_date,
+          clusters.minimum_monthly_income,
+          clusters.description,
+          cluster_loans.sharing_type AS type_of_repayment,
+          cluster_loans.total_amount_requested AS loan_amount
+      FROM clusters
+      LEFT JOIN cluster_loans 
+      ON clusters.cluster_id = cluster_loans.cluster_id
+      WHERE cluster_loans.loan_id = $1 
+      GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+
+
   `,
 
   fetchClusterLoanMembersDetails: `
@@ -467,7 +494,7 @@ export default {
       FROM cluster_members
       LEFT JOIN users ON cluster_members.user_id = users.user_id
       LEFT JOIN cluster_member_loans ON cluster_members.user_id = cluster_member_loans.user_id
-      WHERE cluster_member_loans.loan_id = $1
+      WHERE cluster_member_loans.loan_id = $1 AND cluster_member_loans.cluster_id = $2
       GROUP BY 1, 2, 3, 4, 5, 6, 7, 8;
 `,
 
@@ -547,31 +574,37 @@ export default {
       WHERE loan_id = $1
 `,
   fetchClusterLoanDetailsOfEachUser: `
-      SELECT 
-          id,
-          cluster_id,
-          loan_id,
-          user_id,
-          member_loan_id,
-          round(CAST(amount_requested AS NUMERIC), 2) AS amount_requested,
-          loan_tenor_in_months,
-          round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
-          round(CAST(total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
-          percentage_orr_score,
-          percentage_pricing_band AS interest_rate,
-          round(CAST(monthly_interest AS NUMERIC), 2) AS monthly_interest,
-          round(CAST(monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
-          round(CAST(total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
-          round(CAST(extra_interests AS NUMERIC), 2) AS extra_interests,
-          status,
-          loan_decision,
-          is_loan_disbursed,
-          to_char(DATE(loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
-          to_char(DATE (created_at)::date, 'Mon DD YYYY') As application_date,
-          rejection_reason,
-          offer_letter_url
-      FROM cluster_member_loans
-      WHERE member_loan_id = $1
+        SELECT 
+            cluster_member_loans.id,
+            cluster_member_loans.cluster_id,
+            cluster_member_loans.loan_id,
+            cluster_member_loans.user_id,
+            cluster_member_loans.member_loan_id,
+            round(CAST(cluster_member_loans.amount_requested AS NUMERIC), 2) AS amount_requested,
+            cluster_member_loans.loan_tenor_in_months,
+            round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
+            round(CAST(cluster_member_loans.total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
+            cluster_member_loans.percentage_orr_score,
+            cluster_member_loans.percentage_pricing_band AS interest_rate,
+            round(CAST(cluster_member_loans.monthly_interest AS NUMERIC), 2) AS monthly_interest,
+            round(CAST(cluster_member_loans.monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
+            round(CAST(cluster_member_loans.total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
+            round(CAST(cluster_member_loans.extra_interests AS NUMERIC), 2) AS extra_interests,
+            cluster_member_loans.status,
+            cluster_member_loans.loan_decision,
+            cluster_member_loans.is_loan_disbursed,
+            to_char(DATE(cluster_member_loans.loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
+            to_char(DATE (cluster_member_loans.created_at)::date, 'Mon DD YYYY') As application_date,
+            cluster_member_loans.rejection_reason,
+            cluster_member_loans.offer_letter_url,
+            clusters.current_members AS total_member,
+            cluster_member_loans.sharing_type AS type_of_repayment
+        FROM cluster_member_loans
+        LEFT JOIN clusters
+        ON clusters.cluster_id = cluster_member_loans.cluster_id
+        WHERE member_loan_id = $1
+
+
 `,
 
   fetchInReviewClusterLoans: `
@@ -884,7 +917,7 @@ export default {
           cluster_member_loans.cluster_name,
           cluster_member_loans.user_id,
           cluster_member_loans.cluster_id,
-          clusters.current_members,
+          clusters.current_members AS total_members,
           cluster_member_loans.percentage_pricing_band AS interest_rate,
           cluster_member_loans.sharing_type,
           cluster_member_loans.total_outstanding_amount AS outstanding_amount,
