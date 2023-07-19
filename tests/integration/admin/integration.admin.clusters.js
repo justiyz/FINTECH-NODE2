@@ -2853,72 +2853,40 @@ describe('Clusters', () => {
       });
     });
   });
-  describe('Fetch details of members of a loan', () => {
-    it('Should return error if token is not set', (done) => {
+  describe('admin fetches single cluster loan details', () => {
+    it('Should fetch single cluster loan details', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/members_loans`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/cluster`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.NO_TOKEN);
-          expect(res.body.error).to.equal('UNAUTHORIZED');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.data.clusterDetails).to.have.property('cluster_id');
+          expect(res.body.data.clusterDetails).to.have.property('type');
+          expect(res.body.data.clusterDetails).to.have.property('loan_amount');          
+          expect(res.body.message).to.equal(enums.CLUSTER_LOAN_DETAILS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/members_loans`)
+        .get(`/api/v1/admin/loan/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_LOAN_ID}/cluster`)
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.statusCode).to.equal(401);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal('invalid signature');
           expect(res.body.error).to.equal('UNAUTHORIZED');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should return error if non existing loan id is sent', (done) => {
-      chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}rgegsff/members_loans`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING_IN_DB);
-          expect(res.body.error).to.equal('BAD_REQUEST');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should fetch cluster loan member details successfully', (done) => {
-      chai.request(app)
-        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_TWO_LOAN_ID}/members_loans`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data[0]).to.have.property('users_status');
-          expect(res.body.data[0]).to.have.property('user_id');
-          expect(res.body.data[0]).to.have.property('name');
-          expect(res.body.data).to.be.an('array');
           done();
         });
     });
@@ -3868,7 +3836,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.data.userRescheduleDetails).to.have.property('loan_id');
-          expect(res.body.data.userRescheduleDetails).to.have.property('name');
           expect(res.body.data.userRescheduleDetails).to.have.property('user_id');
           expect(res.body.data.newRepayment[0]).to.have.property('repayment_amount');          
           expect(res.body.message).to.equal(enums.RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY);
@@ -4582,8 +4549,8 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('data');
           expect(res.body.message).to.equal(enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          expect(res.body.data).to.have.property('memberDetails');
-          expect(res.body.data).to.have.property('loan_details');
+          expect(res.body.data).to.have.property('clusterDetails');
+          expect(res.body.data).to.have.property('memberLoanId');
           expect(res.body.data).to.have.property('orr_break_down');
           done();
         });
@@ -4633,6 +4600,57 @@ describe('Clusters', () => {
           expect(res.body.data[0].point_reward).to.equal('15');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_HISTORY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('admin fetches user cluster loan repayment details', () => {
+    it('Should return error if token is not set', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/repayment`)
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if invalid token is set', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}6t7689`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.error).to.equal('UNAUTHORIZED');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user cluster loan repayment details successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/admin/loan/cluster/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_ONE_MEMBER_LOAN_ID}/repayment`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.LOAN_REPAYMENT_DETAILS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('clusterDetails');
+          expect(res.body.data).to.have.property('orr_break_down');
           done();
         });
     });
