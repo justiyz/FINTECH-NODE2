@@ -8,6 +8,7 @@ import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as  AdminSettingsController from '../controllers/controllers.settings';
 
 const router = Router();
+
 router.get(
   '/env-settings',
   AuthMiddleware.validateAdminAuthToken,
@@ -90,6 +91,42 @@ router.patch(
   AdminSettingsMiddleware.checkIfPromoExists,
   AdminSettingsMiddleware.checkIfPromoIsActive,
   AdminSettingsController.deletePromo
+);
+
+router.get(
+  '/reward-points',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.rewardsType, 'query'),
+  RolesMiddleware.adminAccess('settings', 'read'),
+  AdminSettingsController.fetchRewardPointDetails
+);
+
+router.patch(
+  '/cluster-rewards',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.clusterRewardIds, 'payload'),
+  RolesMiddleware.adminAccess('settings', 'update'),
+  AdminMiddleware.checkAdminType,
+  AdminSettingsController.updateClusterRelatedRewards
+);
+
+router.patch(
+  '/general-rewards',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.generalRewardIds, 'payload'),
+  RolesMiddleware.adminAccess('settings', 'update'),
+  AdminMiddleware.checkAdminType,
+  AdminSettingsMiddleware.checkGeneralRewardBeforeEditing,
+  AdminSettingsController.updateGeneralRewards
+);
+
+router.patch(
+  '/general-reward-ranges',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.generalRewardRangeIds, 'payload'),
+  RolesMiddleware.adminAccess('settings', 'update'),
+  AdminMiddleware.checkAdminType,
+  AdminSettingsController.updateGeneralRewardRanges
 );
 
 

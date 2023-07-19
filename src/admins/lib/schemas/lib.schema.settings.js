@@ -39,3 +39,29 @@ export const editPromo = Joi.object().keys({
   customer_segment: Joi.string().optional(),
   tier_category: Joi.string().optional().valid('1', '2')
 });
+
+export const rewardsType = Joi.object().keys({
+  type: Joi.string().required().valid('general', 'cluster')
+});
+
+export const clusterRewardIds = Joi.array().min(1).items(
+  Joi.object({
+    reward_id: Joi.string().required(),
+    point: Joi.number().required()
+  })
+);
+
+export const generalRewardIds = Joi.object({
+  reward_id: Joi.string().required(),
+  point: Joi.number().required()
+});
+
+export const generalRewardRangeIds = Joi.array().min(1).items(
+  Joi.object({
+    range_id: Joi.string().required(),
+    lower_bound: Joi.number().required(),
+    upper_bound: Joi.number().required(),
+    point: Joi.number().required()
+  })
+);
+

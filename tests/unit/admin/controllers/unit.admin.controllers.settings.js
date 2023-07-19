@@ -75,5 +75,29 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchRewardPointDetails', async() => {
+      const req = { admin: '', query: ''};
+      const data = await AdminSettingsController.fetchRewardPointDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateClusterRelatedRewards', async() => {
+      const req = { admin: '', body: ''};
+      const data = await AdminSettingsController.updateClusterRelatedRewards(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateGeneralRewards', async() => {
+      const req = { admin: '', body: ''};
+      const data = await AdminSettingsController.updateGeneralRewards(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call updateGeneralRewardRanges', async() => {
+      const req = { admin: '', body: ''};
+      const data = await AdminSettingsController.updateGeneralRewardRanges(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

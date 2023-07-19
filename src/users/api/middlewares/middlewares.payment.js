@@ -425,22 +425,13 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB 
         processPersonalLoanTransferPayments.middlewares.payment.js`);
-        const totalPoints = 30; // to later refactor and make flexible once implemented on admin side and consider the % to award part
-        let point = 0;
-        if ((parseFloat(paymentRecord.amount) >= 50000) && (parseFloat(paymentRecord.amount) <= 100000)) {
-          point = (10 / 100) * parseFloat(totalPoints);
-        } else if ((parseFloat(paymentRecord.amount) > 100000) && (parseFloat(paymentRecord.amount) <= 300000)) {
-          point = (20 / 100) * parseFloat(totalPoints);
-        } else if ((parseFloat(paymentRecord.amount) > 300000) && (parseFloat(paymentRecord.amount) <= 500000)) {
-          point = (50 / 100) * parseFloat(totalPoints);
-        } else if ((parseFloat(paymentRecord.amount) > 500000) && (parseFloat(paymentRecord.amount) <= 900000)) {
-          point = (70 / 100) * parseFloat(totalPoints);
-        } else if (parseFloat(paymentRecord.amount) > 900000) {
-          point = (100 / 100) * parseFloat(totalPoints);
-        } else {
-          point = 0;
+        const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'successful_loan_request_point' ]);
+        const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount, 
+          [ rewardDetails.reward_id, parseFloat(paymentRecord.amount) ]);
+        const actualPoint = rewardRangeDetails.point;
+        if (actualPoint && parseFloat(actualPoint) > 0) {
+          await processUserRewardPointBonus(user, 'Disbursement point', actualPoint, 'disbursement');
         }
-        await processUserRewardPointBonus(user, 'Disbursement point', point, 'disbursement');
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
         processPersonalLoanTransferPayments.middlewares.payment.js`);
         const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
@@ -555,7 +546,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
         if (statusType === 'completed') {
-          const rewardPoint = 50; // to later refactor and make flexible once implemented on admin side
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
+          const rewardPoint = parseFloat(rewardDetails.point);
           await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
           processPersonalLoanRepayments.middlewares.payment.js`);
@@ -587,7 +579,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
       }
-      const rewardPoint = 50; // to later refactor and make flexible once implemented on admin side
+      const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
+      const rewardPoint = parseFloat(rewardDetails.point);
       await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
       processPersonalLoanRepayments.middlewares.payment.js`);
@@ -662,23 +655,14 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB 
         processClusterLoanTransferPayments.middlewares.payment.js`);
+        const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'successful_loan_request_point' ]);
         await qualifiedClusterMembers.map(async(member) => {
-          const totalPoints = 30; // to later refactor and make flexible once implemented on admin side and consider the % to award part
-          let point = 0;
-          if ((parseFloat(paymentRecord.amount) >= 50000) && (parseFloat(paymentRecord.amount) <= 100000)) {
-            point = (10 / 100) * parseFloat(totalPoints);
-          } else if ((parseFloat(paymentRecord.amount) > 100000) && (parseFloat(paymentRecord.amount) <= 300000)) {
-            point = (20 / 100) * parseFloat(totalPoints);
-          } else if ((parseFloat(paymentRecord.amount) > 300000) && (parseFloat(paymentRecord.amount) <= 500000)) {
-            point = (50 / 100) * parseFloat(totalPoints);
-          } else if ((parseFloat(paymentRecord.amount) > 500000) && (parseFloat(paymentRecord.amount) <= 900000)) {
-            point = (70 / 100) * parseFloat(totalPoints);
-          } else if (parseFloat(paymentRecord.amount) > 900000) {
-            point = (100 / 100) * parseFloat(totalPoints);
-          } else {
-            point = 0;
+          const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount, 
+            [ rewardDetails.reward_id, parseFloat(member.amount_requested) ]);
+          const actualPoint = rewardRangeDetails.point;
+          if (actualPoint && parseFloat(actualPoint) > 0) {
+            await processUserRewardPointBonus(member, 'Disbursement point', actualPoint, 'disbursement');
           }
-          await processUserRewardPointBonus(member, 'Disbursement point', point, 'disbursement');
           const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ member.user_id ]);
           const data = await PaymentPayload.loanDisbursementPayload(userDetails, member);
           await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
@@ -817,7 +801,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays part loan payment`, 
           'cluster-loan-part-payment', { });
         if (statusType === 'completed') {
-          const rewardPoint = 50; // to later refactor and make flexible once implemented on admin side
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
+          const rewardPoint = parseFloat(rewardDetails.point);
           await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
           processClusterLoanRepayments.middlewares.payment.js`);
@@ -867,7 +852,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         await processOneOrNoneData(clusterQueries.updateGeneralLoanCompletedAt, [ clusterLoanDetails.loan_id ]);
         await processOneOrNoneData(clusterQueries.updateGeneralClustersStatus, [ clusterLoanDetails.cluster_id ]);
       }
-      const rewardPoint = 50; // to later refactor and make flexible once implemented on admin side
+      const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
+      const rewardPoint = parseFloat(rewardDetails.point);
       await processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
       processClusterLoanRepayments.middlewares.payment.js`);

@@ -49,6 +49,7 @@ export const operations = {
   48: 'MKASRD', // admin marks all notifications as read
   49: 'SSTNTFTUSR', // admin sends system type notification to users
   50: 'SATNTFTUSR', // admin sends alert type notification to users
-  51: 'DELSTNTFS' // admin deletes admin sent notifications
+  51: 'DELSTNTFS', // admin deletes admin sent notifications
+  52: 'EDTRWDPNTS' // admin edits reward points
 };
 

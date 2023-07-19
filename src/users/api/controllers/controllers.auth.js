@@ -229,7 +229,8 @@ export const completeProfile = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 81, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }
-    const rewardPoint = 20; // to later refactor and make flexible once implemented on admin side
+    const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'sign_up_point' ]);
+    const rewardPoint = parseFloat(rewardDetails.point);
     const rewardDescription = 'Welcome point';
     await processOneOrNoneData(authQueries.updateRewardPoints, 
       [ user.user_id, null, rewardPoint, rewardDescription, null, 'welcome' ]);

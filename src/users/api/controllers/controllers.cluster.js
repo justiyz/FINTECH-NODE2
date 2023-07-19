@@ -136,7 +136,8 @@ export const joinClusterOnInvitation = async(req, res, next) => {
         });
       }
       if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
-        const rewardPoint = 5; // to later refactor and make flexible once implemented on admin side
+        const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_member_increase' ]);
+        const rewardPoint = parseFloat(rewardDetails.point);
         const rewardDescription = 'Cluster membership increase point';
         await processOneOrNoneData(authQueries.updateRewardPoints, 
           [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
@@ -194,7 +195,8 @@ export const createCluster = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster created successfully successfully createCluster.controllers.cluster.js`);
     const clusterMemberDetails = await processOneOrNoneData(clusterQueries.createClusterMember, [ newClusterDetails.cluster_id, user.user_id, true ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin member created successfully successfully createCluster.controllers.cluster.js`);
-    const rewardPoint = 3; // to later refactor and make flexible once implemented on admin side
+    const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_creation' ]);
+    const rewardPoint = parseFloat(rewardDetails.point);
     const rewardDescription = 'Create cluster point';
     await processOneOrNoneData(authQueries.updateRewardPoints, 
       [ user.user_id, null, rewardPoint, rewardDescription, null, 'cluster creation' ]);

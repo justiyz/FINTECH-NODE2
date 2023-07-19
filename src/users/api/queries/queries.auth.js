@@ -220,5 +220,39 @@ export default {
     SET
       updated_at = NOW(),
       invitee_id = $2
-    WHERE id = $1`
+    WHERE id = $1`,
+
+  fetchGeneralRewardPointDetails: `
+    SELECT
+      id,
+      reward_id,
+      name,
+      point
+    FROM general_reward_points_settings
+    WHERE name = $1`,
+
+  fetchClusterRelatedRewardPointDetails: `
+    SELECT
+      id,
+      reward_id,
+      name,
+      point
+    FROM cluster_related_reward_points_settings
+    WHERE name = $1`,
+
+  fetchLoanRequestPointDetailsBasedOnAmount: `
+    SELECT
+      general_reward_points_settings.id,
+      general_reward_points_settings.reward_id,
+      general_reward_points_settings.name,
+      general_reward_points_range_settings.range_id,
+      general_reward_points_range_settings.lower_bound,
+      general_reward_points_range_settings.upper_bound,
+      general_reward_points_range_settings.point
+    FROM general_reward_points_settings
+    LEFT JOIN general_reward_points_range_settings
+    ON general_reward_points_range_settings.reward_id = general_reward_points_settings.reward_id
+    WHERE general_reward_points_range_settings.reward_id = $1
+    AND $2::FLOAT >= general_reward_points_range_settings.lower_bound::FLOAT
+    AND $2::FLOAT <= general_reward_points_range_settings.upper_bound::FLOAT`
 };
