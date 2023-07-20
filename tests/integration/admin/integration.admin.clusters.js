@@ -186,6 +186,35 @@ describe('Clusters', () => {
           done();
         });
     });
+
+    it('should throw error when cluster name already exists', (done) => {
+      chai.request(app)
+        .post('/api/v1/admin/cluster/create')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          name: 'Enyata admin cluster',
+          description: 'group borrowing of money for large projects',
+          maximum_members: 2,
+          company_name: 'baba tunde',
+          company_address: 'enyata road off wire',
+          loan_goal_target: 500000,
+          company_type: 'ltd',
+          company_contact_number: '+2349073751133',
+          interest_type: 'fixed',
+          percentage_interest_type_value: '3'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('A cluster with this name "Enyata admin cluster" already exists');
+          done();
+        });
+    });
     it('should create cluster two successfully', (done) => {
       chai.request(app)
         .post('/api/v1/admin/cluster/create')
