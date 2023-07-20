@@ -602,7 +602,7 @@ export default {
         updated_at = NOW(),
         status = $2,
         rejection_reason = $3,
-        initial_amount_requested = $4
+        initial_total_amount_requested = $4
     WHERE loan_id = $1
     RETURNING id, loan_id, initiator_id, status`,
 

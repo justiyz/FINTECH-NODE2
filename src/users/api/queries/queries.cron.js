@@ -180,7 +180,7 @@ export default {
       loan_repayment_id,
       cluster_loan_id,
       type
-    ) VALUES ($1, $2, $3, $4)`,
+    ) VALUES ($1, $2, $3, $4, $5)`,
 
   recordLoanAsNpl: `
     INSERT INTO non_performing_loan_trail(
@@ -189,20 +189,24 @@ export default {
       loan_repayment_id,
       cluster_loan_id,
       type
-    ) VALUES ($1, $2, $3, $4)`,
+    ) VALUES ($1, $2, $3, $4, $5)`,
     
   updatePromoStatusToActive: `
     UPDATE system_promos
     SET updated_at = NOW(),
         status = 'active'
-    WHERE start_date::DATE = NOW()::DATE AND NOT is_deleted AND status = 'inactive'
+    WHERE start_date::DATE = NOW()::DATE 
+    AND NOT is_deleted 
+    AND status = 'inactive'
 
     `,
   updatePromoStatusToEnded: `
     UPDATE system_promos
     SET updated_at = NOW(),
         status = 'ended'
-    WHERE end_date::DATE = NOW()::DATE AND NOT is_deleted AND status = 'active'
+    WHERE end_date::DATE = NOW()::DATE 
+    AND NOT is_deleted 
+    AND status = 'active'
     `
 };
   

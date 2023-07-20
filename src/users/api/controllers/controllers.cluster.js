@@ -614,7 +614,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       const declinedDecisionPayload = ClusterPayload.processDeclinedClusterLoanDecisionUpdatePayload(data, body);
       await processOneOrNoneData(clusterQueries.updateUserDeclinedDecisionClusterLoanApplication, declinedDecisionPayload);
       const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateDeclinedDecisionGeneralClusterLoanApplication, 
-        [ initiatorLoanApplicationDetails.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility' ]);
+        [ initiatorLoanApplicationDetails.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility', parseFloat(body.total_amount) ]);
       const returnData = await ClusterPayload.clusterLoanApplicationDeclinedDecisionResponse(user, initiatorLoanApplicationDetails, 
         updatedClusterLoanDetails.status, 'DECLINED');
       sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
@@ -840,10 +840,8 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       checkClusterMemberClusterLoanEligibility.controllers.loan.js`);
       const declinedDecisionPayload = ClusterPayload.processDeclinedClusterLoanDecisionUpdatePayload(data, body);
       await processOneOrNoneData(clusterQueries.updateUserDeclinedDecisionClusterLoanApplication, declinedDecisionPayload);
-      const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateDeclinedDecisionGeneralClusterLoanApplication, 
-        [ existingLoanApplication.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility', parseFloat(body.amount) ]);
       const returnData = await ClusterPayload.clusterLoanApplicationDeclinedDecisionResponse(user, existingLoanApplication, 
-        updatedClusterLoanDetails.status, 'DECLINED');
+        'declined', 'DECLINED');
       sendClusterNotification(user, cluster, { is_admin: false }, `${user.first_name} ${user.last_name} cluster loan application declined`, 
         'loan-application-eligibility', {});
       sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application declined`, clusterMembersToken, 
