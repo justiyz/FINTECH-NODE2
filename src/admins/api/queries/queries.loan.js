@@ -848,7 +848,7 @@ export default {
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
       OR $1 IS NULL)
       AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
-      ORDER BY cluster_member_loan_payment_schedules.repayment_order
+      ORDER BY cluster_member_loan_payment_schedules.payment_at
       OFFSET $4
       LIMIT $5
 `,
