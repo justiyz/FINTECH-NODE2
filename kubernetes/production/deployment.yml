@@ -113,17 +113,12 @@ spec:
         - name: SEEDFI_PROD_MONO_APP_SECRET_KEY
           valueFrom:
             secretKeyRef:
+              key: monoappsecretkey
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_FIREBASE_WEB_API_KEY
+          valueFrom:
+            secretKeyRef:
               key: firebasewebapikey
-              name: seedfi-api-config
-        - name: SEEDFI_PROD_FIREBASE_WEB_API_KEY
-          valueFrom:
-            secretKeyRef:
-              key: monoappsecretkey
-              name: seedfi-api-config
-        - name: SEEDFI_PROD_FIREBASE_WEB_API_KEY
-          valueFrom:
-            secretKeyRef:
-              key: monoappsecretkey
               name: seedfi-api-config
         - name: SEEDFI_NODE_ENV
           value: 'production'
