@@ -61,20 +61,21 @@ export const generateClusterUniqueCode = async(req, res, next) => {
   
 /**
  * admin check if cluster exists
+ * @param {String} type - The type to run.
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns single cluster details.
  * @memberof AdminClusterMiddleware
  */
-export const checkIfClusterExists = async(req, res, next) => {
+export const checkIfClusterExists = (type) => async(req, res, next) => {
   try {
     const { params: { cluster_id }, admin } = req;
     const [ existingCluster ] = await processAnyData(AdminClusterQueries.checkIfClusterExists, [ cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
-      if (existingCluster.is_deleted) {
+      if ((type === 'active') && existingCluster.is_deleted) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster no longer exists in the DB checkIfClusterExists.middlewares.cluster.js`);
         return ApiResponse.error(res, enums.CLUSTER_NO_LONGER_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE);
       }

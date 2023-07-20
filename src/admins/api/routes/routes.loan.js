@@ -108,7 +108,7 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   Model(Schema.fetchClusterDetails, 'params'),
-  AdminClusterMiddleware.checkIfClusterExists,
+  AdminClusterMiddleware.checkIfClusterExists('all'),
   LoanMiddleware.checkIfClusterLoanExists,
   LoanController.fetchAClusterLoanDetails
 );
