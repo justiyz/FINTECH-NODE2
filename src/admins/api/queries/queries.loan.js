@@ -461,6 +461,7 @@ export default {
           clusters.name,
           clusters.type,
           cluster_loans.loan_id,
+          cluster_loans.status,
           clusters.current_members AS total_member,
           to_char(DATE(clusters.created_at)::date, 'Mon DD YYYY') AS created_date,
           clusters.minimum_monthly_income,
