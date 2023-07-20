@@ -3,7 +3,6 @@ import cronQueries from '../queries/queries.cron';
 import loanQueries from '../queries/queries.loan';
 import userQueries from '../queries/queries.user';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
-import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 import { initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
@@ -17,23 +16,17 @@ import * as adminNotification from '../../lib/templates/adminNotification';
 
 /**
  * update user loan status to overdue
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with the updated statuses
+ * @returns { Return } -
  * @memberof CronController
  */
-export const updateLoanStatusToOverdue = async(req, res, next) => {
+export const updateLoanStatusToOverdue = async() => {
   try {
     const overDueLoanRepayments = await processAnyData(cronQueries.fetchAllOverdueLoanRepayments, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
     updateLoanStatusToOverdue.controllers.cron.js`);
-    const key = 'loan_id';
-    const distinctLoanApplications = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
-    await Promise.all([ distinctLoanApplications ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the unique values have been filtered apart updateLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
-      distinctLoanApplications.map(async(application) => {
+      overDueLoanRepayments.map(async(application) => {
         const [ nextRepayment ] = await processAnyData(cronQueries.fetchLoanNextRepayment, [ application.loan_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateNextLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
         await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus, [ application.loan_id, application.user_id ]);
@@ -45,33 +38,27 @@ export const updateLoanStatusToOverdue = async(req, res, next) => {
       })
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully updated loans that are over due to over due in the database updateLoanStatusToOverdue.controllers.cron.js`);
-    return ApiResponse.success(res, enums.USER_LOAN_STATUS_OVERDUE, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.UPDATE_LOAN_STATUS_TO_OVERDUE_CONTROLLER;
     logger.error(`updating users loan status to over due failed::${enums.UPDATE_LOAN_STATUS_TO_OVERDUE_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * update user cluster loan status to overdue
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with the updated statuses
+  * @returns { Return } -
  * @memberof CronController
  */
-export const updateClusterLoanStatusToOverdue = async(req, res, next) => {
+export const updateClusterLoanStatusToOverdue = async() => {
   try {
     const overDueLoanRepayments = await processAnyData(cronQueries.fetchAllOverdueClusterLoanRepayments, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all cluster loan repayments that have passed the current date fetched from the database 
     updateClusterLoanStatusToOverdue.controllers.cron.js`);
-    const key = 'member_loan_id';
-    const distinctLoanApplications = [ ...new Map(overDueLoanRepayments.map(repayment => [ repayment[key], repayment ])).values() ];
-    await Promise.all([ distinctLoanApplications ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the unique values have been filtered apart updateClusterLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
-      distinctLoanApplications.map(async(application) => {
+      overDueLoanRepayments.map(async(application) => {
         const [ nextRepayment ] = await processAnyData(cronQueries.fetchClusterLoanNextRepayment, [ application.member_loan_id, application.user_id ]);
         await processOneOrNoneData(cronQueries.updateNextClusterLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
         await processOneOrNoneData(cronQueries.updateClusterLoanWithOverDueStatus, [ application.member_loan_id, application.user_id ]);
@@ -87,23 +74,20 @@ export const updateClusterLoanStatusToOverdue = async(req, res, next) => {
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully updated cluster loans that are over due to over due in the database 
     updateClusterLoanStatusToOverdue.controllers.cron.js`);
-    return ApiResponse.success(res, enums.USER_LOAN_STATUS_OVERDUE, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.UPDATE_CLUSTER_LOAN_STATUS_TO_OVERDUE_CONTROLLER;
     logger.error(`updating users cluster loan status to over due failed::${enums.UPDATE_CLUSTER_LOAN_STATUS_TO_OVERDUE_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * initiate cluster loan repayment for user
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with the initiated payments
+ * @returns { Return } -
  * @memberof CronController
  */
-export const initiateClusterLoanRepayment = async(req, res, next) => {
+export const initiateClusterLoanRepayment = async() => {
   try {
     const dueForPaymentClusterLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedClusterLoanRepayments, [ Number(7) ]);
     // still try to automatically debit until after 7 days proposed loan repayment date passes
@@ -126,31 +110,28 @@ export const initiateClusterLoanRepayment = async(req, res, next) => {
           userActivityTracking(user.user_id, 79, 'success');
           return clusterRepayment;
         }
-        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...clusterRepayment }),
+        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...clusterRepayment });
         sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
         sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...clusterRepayment }),
           'failed-card-debit', { ...clusterRepayment });
         return clusterRepayment;
       })
     ]);
-    return ApiResponse.success(res, enums.DUE_FOR_PAYMENT_LOAN_REPAYMENT_INITIATED, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating cluster loan repayment for loan repayments which are due for repayment 
     failed::${enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * initiate loan repayment for user
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with the initiated payments
+ * @returns { Return } -
  * @memberof CronController
  */
-export const initiateLoanRepayment = async(req, res, next) => {
+export const initiateLoanRepayment = async() => {
   try {
     const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]);
     // still try to automatically debit until after 7 days proposed loan repayment date passes
@@ -173,53 +154,47 @@ export const initiateLoanRepayment = async(req, res, next) => {
           userActivityTracking(user.user_id, 79, 'success');
           return repayment;
         }
-        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment }),
+        await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment });
         sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
         sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...repayment }),
           'failed-card-debit', { ...repayment });
         return repayment;
       })
     ]);
-    return ApiResponse.success(res, enums.DUE_FOR_PAYMENT_LOAN_REPAYMENT_INITIATED, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.INITIATE_LOAN_REPAYMENT_CONTROLLER;
     logger.error(`initiating loan repayment for loan repayments which are due for repayment failed::${enums.INITIATE_LOAN_REPAYMENT_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * updates promo status to active
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON successful response
+ * @returns { Return } -
  * @memberof CronController
  */
-export const updatesPromoStatusToActive = async(req, res, next) => {
+export const updatesPromoStatusToActive = async() => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToActive);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain inactive promos in the database has been made active
       updatesPromoStatusToActive.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'UPRMSTACT', 'update promo status to active' ]);
-    return ApiResponse.success(res, enums.PROMO_DUE_TO_START, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
     logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 
 /**
  * notify admin and non performing users
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON successful response
+ * @returns { Return } -
  * @memberof CronController
  */
-export const nonPerformingPersonalLoans = async(req, res, next) => {
+export const nonPerformingPersonalLoans = async() => {
   try {
     const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
@@ -242,23 +217,20 @@ export const nonPerformingPersonalLoans = async(req, res, next) => {
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non performing loan notifications to admins' ]);
-    return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
     logger.error(`Sending non performing personal loans notification failed::${enums.NON_PERFORMING_LOANS_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * notify admin for non performing clusters
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON successful response
+ * @returns { Return } -
  * @memberof CronController
  */
-export const nonPerformingClusterLoans = async(req, res, next) => {
+export const nonPerformingClusterLoans = async() => {
   try {
     const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
@@ -284,45 +256,39 @@ export const nonPerformingClusterLoans = async(req, res, next) => {
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingClusterLoans.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non-performing loan notifications to admins' ]);
-    return ApiResponse.success(res, enums.NON_PERFORMING_LOANS, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.NON_PERFORMING_CLUSTER_LOANS_CONTROLLER;
     logger.error(`Sending non Performing cluster loan notification failed::${enums.NON_PERFORMING_CLUSTER_LOANS_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 
 /**
  * updates promo status to ended
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with the initiated payments
+  * @returns { Return } -
  * @memberof CronController
  */
-export const updatesPromoStatusToEnded = async(req, res, next) => {
+export const updatesPromoStatusToEnded = async() => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToEnded);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end updatesPromoStatusToEnded.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'UPRMSTAEND', 'update promo status to ended' ]);
-    return ApiResponse.success(res, enums.PROMO_DUE_TO_END, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
     logger.error(`updating promo status to active failed::${enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * promo ending soon admin notification
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with success response 
+ * @returns { Return } -
  * @memberof CronController
  */
-export const promoEndingSoonNotification = async(req, res, next) => {
+export const promoEndingSoonNotification = async() => {
   try {
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'settings' ]);
     const [ promo ] = await processAnyData(notificationQueries.fetchEndingPromo, [ 'settings' ]);
@@ -331,31 +297,28 @@ export const promoEndingSoonNotification = async(req, res, next) => {
       sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon', adminNotification.promoEndingSoonNotification(`${promo.name}`), 'ending-promo');
     });
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SPESNTADM', 'send promo ending soon notification to admins' ]);
-    return ApiResponse.success(res, enums.PROMO_NOTIFICATION, enums.HTTP_OK);
+    return;
   } catch (error) {
     error.label = enums.PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER;
     logger.error(`promo notification failed:::${enums.PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };
 
 /**
  * update alert notification 
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with success response 
+ * @returns { Return } -
  * @memberof CronController
  */
-export const updateAlertNotification = async(req, res, next) => {
+export const updateAlertNotification = async() => {
   try {
-    const data = await processAnyData(userQueries.updateAlertNotification, []);
+    await processAnyData(userQueries.updateAlertNotification, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SANTEND', 'set alert notifications to ended' ]);
-    return ApiResponse.success(res, enums.UPDATE_ALERT_NOTIFICATION, enums.HTTP_OK, data);
+    return;
   } catch (error) {
     error.label = enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER;
     logger.error(`Fetching alert notification failed:::${enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER}`, error.message);
-    return next(error);
+    return;
   }
 };

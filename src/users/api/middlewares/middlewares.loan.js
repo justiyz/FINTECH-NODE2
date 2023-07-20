@@ -575,17 +575,28 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
     const [ userClusterDiscounts ] = await processAnyData(loanQueries.userAdminCreatedCluster, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user has admin cluster loan discounts returns 
     checkIfUserHasClusterDiscount.middlewares.loan.js`);
-    const [ userHasNonAdminCreatedClusterType ] = await processAnyData(loanQueries.userNonAdminCreatedCluster, [ user.user_id, 'public' ]);
+    const [ userBelongsToAPublicClusterType ] = await processAnyData(loanQueries.userNonAdminCreatedCluster, [ user.user_id, 'public' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user belongs to a public cluster returns 
     checkIfUserHasClusterDiscount.middlewares.loan.js`);
     if (!userClusterDiscounts) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user does not have any admin cluster loan discounts 
       checkIfUserHasClusterDiscount.middlewares.loan.js`);
+      if (userBelongsToAPublicClusterType) {
+        const [ fetchPublicClusterLoanDiscount ] = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'public_cluster_discount_interest_rate' ]);
+        const interestRateValue =  parseFloat(fetchPublicClusterLoanDiscount.value);
+        const userLoanDiscount = {
+          interest_rate_type: 'discount',
+          interest_rate_value: interestRateValue
+        };
+        req.clusterType = 'public';
+        req.userLoanDiscount = userLoanDiscount;
+        return next();
+      }
       const userLoanDiscount = {
         interest_rate_type: null,
         interest_rate_value: null
       };
-      req.clusterType = userHasNonAdminCreatedClusterType ? 'public' : 'none';
+      req.clusterType = 'none';
       req.userLoanDiscount = userLoanDiscount;
       return next();
     }
