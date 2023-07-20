@@ -151,7 +151,7 @@ export const fetchAndUpdateNotification = async(docId) => {
     });
     await Promise.all(updateNotification);
   } catch (error) {
-    console.error('Error querying data:', error);
+    logger.error('Error querying data:', error);
     throw error;
   }
 };

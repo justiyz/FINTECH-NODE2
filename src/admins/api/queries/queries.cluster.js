@@ -196,7 +196,7 @@ export default {
       percentage_interest_type_value
   FROM clusters
   WHERE cluster_id = $1
-  OR unique_code = $1`,
+  OR unique_code = $1 OR name = $1`,
 
   fetchActiveClusterMembers: `
   SELECT 

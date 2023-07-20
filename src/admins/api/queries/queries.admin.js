@@ -72,7 +72,7 @@ export default {
     admins.status
     FROM admins
     LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-    WHERE (admins.status = $1 OR $1 is null)
+    WHERE admins.status = $1 OR $1 IS NULL
     AND (admins.created_at::date BETWEEN $2 AND $3)
     ORDER BY admins.created_at DESC
     OFFSET $4 LIMIT $5
@@ -89,7 +89,7 @@ export default {
     admins.status
     FROM admins
     LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-    WHERE (admins.status = $1 OR $1 is null)
+    WHERE admins.status = $1 OR $1 IS NULL
     AND  admins.created_at::date BETWEEN $2 AND $3
   `,
 
