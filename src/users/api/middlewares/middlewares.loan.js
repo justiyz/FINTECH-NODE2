@@ -283,9 +283,12 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
 export const validateLoanAmountAndTenor = async(req, res, next) => {
   const { user, body } = req;
   try {
-    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
+    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails, 
+      maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
       processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ])
     ]);
@@ -300,13 +303,15 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(user.tier) === 1) {
-      req.userAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
+      req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails.value);
+      req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 1 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
     }
     if (Number(user.tier) === 2) {
-      req.userAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
+      req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails.value);
+      req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 2 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
@@ -362,35 +367,35 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: employed user is applying for a loan greater than ${parseFloat(employedUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
       req.previousLoanCount = parseFloat(totalPreviousLoanCount);
-      req.userAllowableAmount = parseFloat(employedUserAllowableAmount);
+      req.userMaximumAllowableAmount = parseFloat(employedUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'self employed') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: self employed user is applying for a loan greater than 
       ${parseFloat(selfEmployedUserLoanAmountLimit.value)}% of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
       req.previousLoanCount = parseFloat(totalPreviousLoanCount);
-      req.userAllowableAmount = parseFloat(selfEmployedUserAllowableAmount);
+      req.userMaximumAllowableAmount = parseFloat(selfEmployedUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'unemployed') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: unemployed user is applying for a loan greater than ${parseFloat(unemployedUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
       req.previousLoanCount = parseFloat(totalPreviousLoanCount);
-      req.userAllowableAmount = parseFloat(unemployedUserAllowableAmount);
+      req.userMaximumAllowableAmount = parseFloat(unemployedUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'retired') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: retired user is applying for a loan greater than ${parseFloat(retiredUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
       req.previousLoanCount = parseFloat(totalPreviousLoanCount);
-      req.userAllowableAmount = parseFloat(retiredUserAllowableAmount);
+      req.userMaximumAllowableAmount = parseFloat(retiredUserAllowableAmount);
       return next();
     }
     if (userEmploymentDetails.employment_type === 'student') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: student user is applying for a loan greater than ${parseFloat(studentUserLoanAmountLimit.value)}%
       of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
       req.previousLoanCount = parseFloat(totalPreviousLoanCount);
-      req.userAllowableAmount = parseFloat(studentUserAllowableAmount);
+      req.userMaximumAllowableAmount = parseFloat(studentUserAllowableAmount);
       return next();
     }
     return next();

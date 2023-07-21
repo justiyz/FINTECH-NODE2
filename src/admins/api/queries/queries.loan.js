@@ -791,17 +791,24 @@ export default {
 `,
 
   fetchSingleRescheduledClusterLoanDetails: `
-      SELECT
-        cluster_id,
-        loan_id,
-        user_id,
-        member_loan_id,
-        round(CAST(cluster_member_loans.monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
-        loan_tenor_in_months AS old_tenure,
-        cluster_member_loans.reschedule_loan_tenor_in_months AS new_tenure,
-        round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount
-      FROM cluster_member_loans
-      WHERE member_loan_id = $1
+        SELECT
+              cluster_id,
+              cluster_member_loans.loan_id,
+              cluster_member_loans.user_id,
+              cluster_member_loans.member_loan_id,
+              round(CAST(cluster_member_loans.monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
+              cluster_member_loans.loan_tenor_in_months AS old_tenure,
+              cluster_member_loans.reschedule_loan_tenor_in_months AS new_tenure,
+              cluster_member_loans.total_outstanding_amount AS outstanding_amount,
+              cluster_member_loans.percentage_pricing_band AS interest_rate,
+              round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
+              CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name) AS name,
+              users.tier,
+              users.status     
+        FROM cluster_member_loans
+        LEFT JOIN users
+        ON cluster_member_loans.user_id = users.user_id
+        WHERE member_loan_id = $1
       `,
 
   fetchNewClusterRepaymentBreakdown: `
@@ -822,7 +829,7 @@ export default {
   `,
 
   fetchClusterLoanRepayments: `
-      SELECT DISTINCT
+      SELECT 
           TRIM(CONCAT(users.first_name, ' ', users.last_name)) As name,
           cluster_member_loan_payment_schedules.id,
           cluster_member_loan_payment_schedules.loan_repayment_id,
@@ -848,7 +855,7 @@ export default {
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
       OR $1 IS NULL)
       AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
-      ORDER BY cluster_member_loan_payment_schedules.repayment_order
+      ORDER BY cluster_member_loan_payment_schedules.payment_at DESC
       OFFSET $4
       LIMIT $5
 `,
