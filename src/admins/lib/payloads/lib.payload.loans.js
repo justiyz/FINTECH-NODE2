@@ -4,6 +4,7 @@ export default {
     query.status,
     query.start_date,
     query.end_date,
+    query.tier,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
@@ -12,13 +13,15 @@ export default {
     query.search ? `%${query.search}%` : null,
     query.status,
     query.start_date,
-    query.end_date
+    query.end_date,
+    query.tier
   ],
 
   fetchRepaidLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.start_date,
     query.end_date,
+    query.tier,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
@@ -26,8 +29,18 @@ export default {
   fetchAllRepaidLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.start_date,
-    query.end_date
+    query.end_date,
+    query.tier
   ],
+
+  fetchRepaidClusterLoans: (query) => [
+    query.search ? `%${query.search}%` : null,
+    query.start_date,
+    query.end_date,
+    query.page ? (query.page - 1) * (query.per_page || 10) : 0,
+    query.per_page ? query.per_page : '10'
+  ],
+
   fetchAllRepaidClusterLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.start_date,
@@ -37,25 +50,35 @@ export default {
   fetchRescheduledLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,
+    query.start_date,
+    query.end_date,
+    query.tier,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
 
   fetchAllRescheduledLoans: (query) => [
     query.search ? `%${query.search}%` : null,
-    query.status
+    query.status,
+    query.start_date,
+    query.end_date,
+    query.tier
   ],
 
   fetchRescheduledClusterLoans: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,
+    query.start_date,
+    query.end_date,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
 
   fetchAllRescheduledClusterLoans: (query) => [
     query.search ? `%${query.search}%` : null,
-    query.status
+    query.status,
+    query.start_date,
+    query.end_date
   ],
 
   fetchClusterLoans: (query) => [

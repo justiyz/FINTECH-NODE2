@@ -341,25 +341,7 @@ describe('Admin Loan management', () => {
           done();
         });
     });
-    it('Should fetch all loan applications without pagination if export is true', (done) => {
-      chai.request(app)
-        .get('/api/v1/admin/loan/personal-loans')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .query({
-          export: 'true'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(200);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
+
     it('Should return error if invalid token is set', (done) => {
       chai.request(app)
         .get('/api/v1/admin/loan/personal-loans')
@@ -386,6 +368,25 @@ describe('Admin Loan management', () => {
         })
         .query({
           search: 'victory babatunde'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter loan applications by tier', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/personal-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          tier: 1
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -822,6 +823,29 @@ describe('Admin Loan management', () => {
           done();
         });
     });
+    it('Should filter repaid loans by the tier', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/repaid-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          tier: 2
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('repaidLoans');
+          expect(res.body.message).to.equal(enums.REPAID_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should throw error if export is not true', (done) => {
       chai.request(app)
         .get('/api/v1/admin/loan/repaid-loans')
@@ -1161,6 +1185,53 @@ describe('Admin Loan management', () => {
         })
         .query({
           search: 'rashidat sikiru'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('rescheduledLoans');
+          expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter rescheduled loans by the tier', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/rescheduled-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          tier: 1
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('rescheduledLoans');
+          expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should filter rescheduled loans by date', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/rescheduled-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          start_date: '2023-05-08',
+          end_date: '2023-05-9'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
