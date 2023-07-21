@@ -8,11 +8,11 @@ export default {
     query.per_page ? query.per_page : '10'
   ],
 
-  createClusterPayload: (body) => [ 
+  createClusterPayload: (body, admin) => [ 
     body.name.trim().toLowerCase(), 
     body.description.trim(), 
     'private',
-    body.maximum_members,
+    body.maximum_members, 
     0,
     body.loan_goal_target || 0,
     0,
@@ -23,7 +23,8 @@ export default {
     body.company_type,
     body.company_contact_number,
     body.interest_type,
-    body.percentage_interest_type_value
+    body.percentage_interest_type_value,
+    admin.admin_id
   ],
   clusterInvite: (body, cluster, admin, type, invitedUser) => [
     cluster.cluster_id,

@@ -29,7 +29,7 @@ export const createCluster = async(req, res, next) => {
   const { body, admin } = req;
   const adminName = `${admin.first_name} ${admin.last_name}`;
   try {
-    const createClusterPayload = ClusterPayload.createClusterPayload(body);
+    const createClusterPayload = ClusterPayload.createClusterPayload(body, admin);
     const newClusterDetails = await processOneOrNoneData(ClusterQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: cluster created successfully createCluster.controllers.cluster.js`);
     await adminActivityTracking(admin.admin_id, 32, 'success', descriptions.create_cluster(adminName, newClusterDetails.name));
