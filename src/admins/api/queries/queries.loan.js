@@ -286,7 +286,8 @@ export default {
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL) 
       AND (personal_loans.status = $2 OR $2 IS NULL) 
-      AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) AND (users.tier = $5 OR $5 IS NULL)
+      AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+      AND (users.tier = $5 OR $5 IS NULL)
       ORDER BY personal_loans.created_at DESC
       OFFSET $6
       LIMIT $7
@@ -308,7 +309,8 @@ export default {
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
     OR $1 IS NULL) 
   AND (personal_loans.status = $2 OR $2 IS NULL) 
-  AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) AND (users.tier = $5 OR $5 IS NULL)
+  AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+  AND (users.tier = $5 OR $5 IS NULL)
   `,
 
   fetchAllRescheduledLoans: `
@@ -334,7 +336,8 @@ export default {
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
       OR $1 IS NULL) 
     AND (personal_loans.status = $2 OR $2 IS NULL) 
-    AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) AND (users.tier = $5 OR $5 IS NULL)
+    AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    AND (users.tier = $5 OR $5 IS NULL)
     ORDER BY personal_loans.created_at DESC 
   `,
 
