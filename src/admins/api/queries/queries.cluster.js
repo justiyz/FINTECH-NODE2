@@ -15,8 +15,9 @@ export default {
     company_type,
     company_contact_number,
     interest_type,
-    percentage_interest_type_value
-  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    percentage_interest_type_value,
+    created_by
+  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
   RETURNING *`,
 
   fetchClustersDetails:

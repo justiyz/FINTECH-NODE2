@@ -1,0 +1,3 @@
+ALTER TABLE clusters DROP COLUMN IF EXISTS created_by; 
+
+ALTER TABLE clusters ADD COLUMN IF NOT EXISTS created_by VARCHAR;

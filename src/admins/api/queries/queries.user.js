@@ -252,16 +252,19 @@ export default {
       clusters.id,
       clusters.cluster_id,
       clusters.name,
-      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS created_by,
+      TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS created_by,
+      TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) AS created_by_admin,
       clusters.minimum_monthly_income,
       clusters.current_members,
       clusters.type
     FROM clusters
     LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
     LEFT JOIN users ON users.user_id = clusters.created_by
-    WHERE cluster_members.user_id =$1
+    LEFT JOIN admins ON clusters.created_by = admins.admin_id
+    WHERE cluster_members.user_id = $1
     AND clusters.is_deleted = FALSE 
-    AND cluster_members.is_left = FALSE`,
+    AND cluster_members.is_left = FALSE;
+`,
 
   fetchClusterMemberDetails: `
     SELECT 
