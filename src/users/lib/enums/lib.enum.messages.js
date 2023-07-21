@@ -120,12 +120,8 @@ export const CONFIRM_CREDENTIALS = (type) => `User ${type} confirmed successfull
 export const NO_DEFAULT_BANK_ACCOUNT = 'Kindly add a bank account as default to proceed';
 export const USER_STATUS_INACTIVE_OR_BLACKLISTED = (type) => `User status is ${type} and so cannot apply for loan`;
 export const NO_DEFAULT_DEBIT_CARD = 'Kindly add a debit card and set as default to proceed';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan greater than maximum allowable amount';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan lesser than minimum allowable amount';
 export const USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration greater than maximum allowable tenor';
 export const USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE = 'User cannot apply for a loan for duration lesser than minimum allowable tenor';
-export const USER_REQUESTS_FOR_LOAN_AMOUNT_GREATER_THAN_EMPLOYMENT_LIMIT_ALLOWABLE = (percentage) =>
-  `User cannot apply for a loan greater than ${percentage}% of maximum allowable amount`;
 export const USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_GREATER_THAN_ALLOWABLE = 'User cannot apply for a cluster loan greater than cluster maximum allowable amount';
 export const USER_REQUESTS_FOR_CLUSTER_LOAN_AMOUNT_LESSER_THAN_ALLOWABLE = 'User cannot apply for a cluster loan lessee than cluster minimum allowable amount';
 export const UNDERWRITING_SERVICE_NOT_AVAILABLE = 'Loan application not available at the moment kindly try again later';
@@ -153,8 +149,8 @@ export const LOAN_AMOUNT_GREATER_THAN_SYSTEM_MAXIMUM_AMOUNT = 'Loan amount canno
 export const LOAN_APPLICATION_STILL_AWAITS_APPROVAL = 'loan application still awaits approval, disbursement cannot be made';
 export const LOAN_APPLICATION_DECLINED = 'loan application declined, disbursement cannot be made';
 export const LOAN_APPLICATION_PREVIOUSLY_DISBURSED = (type) => `Loan application status is ${type}, disbursement cannot be made again`;
-export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `User currently have ${type}, thus cannot apply for another`;
-export const CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `Cluster currently have ${type}, thus cannot apply for another`;
+export const LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `User currently have ${type}, thus action cannot be performed`;
+export const CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN = (type) => `Cluster currently have ${type}, thus action cannot be performed`;
 export const LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS = (type) => `Loan application is already ${type}, thus action cannot be performed`;
 export const CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_CURRENT_CLUSTER_STATUS = (type) => `Cluster has an ${type} loan, thus action cannot be performed`;
 export const CLUSTER_MEMBERS_NOT_MORE_THAN_ONE = 'Cluster loan cannot be initiated you need more than one cluster member to proceed';
@@ -212,7 +208,7 @@ export const CLUSTER_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched suc
 export const INVITE_CLUSTER_MEMBER = 'Cluster member invited successfully';
 export const CLUSTER_MEMBER_INVITATION = (type) => `Successfully invite cluster member through ${type}`;
 export const CLUSTER_MEMBER_NOT_ADMIN = 'Cluster member is not an admin and can not perform this action';
-export const CLUSTER_IS_ON_ACTIVE_LOAN = 'Cluster is on an active loan, hence you can not edit this field';
+export const CLUSTER_IS_ON_ACTIVE_LOAN = 'Cluster is on an active loan, hence action cannot be performed';
 export const USER_CANNOT_TAKE_DECISION_ON_THIS_TICKET = 'User cannot take a decisions on this delete cluster ticket being the author';
 export const USER_CAN_NOT_EDIT = (type) => `you can not edit ${type}`;
 export const CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY = 'Cluster members fetched successfully';
@@ -312,8 +308,16 @@ export const ADMIN_FETCH_CLUSTER_DETAILS = 'Admin fetched user clusters successf
 export const ADMIN_FETCH_MEMBER_CLUSTER_DETAILS = 'Admin fetched cluster member details successfully';
 export const ADMIN_CHECK_IF_CLUSTER_EXIST = 'Cluster does not exist';
 export const LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'loan applications fetched successfully';
+export const CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'Cluster loan applications fetched successfully';
+export const CLUSTER_LOAN_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster loan details fetched successfully';
+export const IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY = 'In review cluster loan applications fetched successfully';
 export const REPAID_LOANS_FETCHED_SUCCESSFULLY = 'Repaid loans fetched successfully';
+export const LOAN_REPAYMENT_DETAILS_FETCHED_SUCCESSFULLY = 'Loan repayment details fetched successfully';
 export const FETCH_ENV_VALUES_SUCCESSFULLY = 'Fetched env values successfully';
+export const FETCH_REWARD_POINT_DETAILS_SUCCESSFULLY = 'Fetched reward point details successfully';
+export const UPDATED_CLUSTER_RELATED_REWARDS_SUCCESSFULLY = 'Cluster related reward points updated successfully';
+export const UPDATED_GENERAL_REWARDS_SUCCESSFULLY = 'General reward points updated successfully';
+export const UPDATED_GENERAL_REWARD_RANGES_SUCCESSFULLY = 'General reward point ranges updated successfully';
 export const UPDATED_ENV_VALUES_SUCCESSFULLY = 'Updated env values successfully';
 export const BLACKLISTED_BVN = 'Blacklisted BVNs added';
 export const BLACKLIST_BVN_EXIST = 'Bvn is already blacklisted';
@@ -353,9 +357,16 @@ export const PROMO_DUE_TO_START = 'Certain promos due to start has been initiate
 export const PROMO_DUE_TO_END = 'Certain promos due to end has been initiated';
 export const ADMIN_DID_NOT_CREATE_PROMO = (promoName) => `Access denied!, you did not create promo with name ${promoName}`;
 export const SUCCESSFULLY_NOTIFICATION = 'Notification sent successfully.';
+export const REWARD_DOES_NOT_EXISTS = 'Reward does not exist';
+export const REWARD_POINT_RANGE_TO_BE_UPDATED = 'Reward range points should be updated instead';
 export const FETCHED_NOTIFICATIONS = 'Notifications fetched successfully';
+export const FETCHED_REFERRAL_DETAILS = 'Referral details fetched successfully';
+export const FETCHED_REFERRAL_HISTORY = 'Referral history fetched successfully';
+export const CLAIMED_REFERRAL_POINTS_SUCCESSFULLY = 'Referral points claimed successfully';
+export const NO_UNCLAIMED_POINTS_TO_CLAIM = 'User has no unclaimed points to claim';
 export const UPDATE_ALERT_NOTIFICATION = 'Notifications updated successfully';
 export const PROMO_NOTIFICATION = 'Promo notification sent successfully';
 export const NOTIFICATION_DOES_NOT_EXIST = 'Notification id dose not exist';
 export const NOT_ALLOWED_TO_DELETE_NOTIFICATION = 'Admin cannot delete this notification';
 export const DELETE_NOTIFICATION = 'Notification successfully deleted';
+export const CLUSTER_LOAN_REPAYMENTS_FETCHED_SUCCESSFULLY = 'Cluster loan repayment(s) fetched successfully.';

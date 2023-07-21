@@ -267,7 +267,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
     fetchPlatformOverview.controllers.admin.admin.js`);
     const [ totalLoanApproved, totalLoanRejected, totalLoanDisbursed, totalRegisteredCustomers, 
       unpaidLoans, paidLoans, totalLoanRepayment, totalLoanOverDue, appliedLoans, approvedLoans, 
-      totalClusters, totalPrivateClusters, totalPublicClusters, recentClusters, totalTierOneUsers, 
+      totalClusters, totalPrivateClusters, totalPublicClusters, totalAdminClusters, recentClusters, totalTierOneUsers, 
       totalTierTwoUsers, totalTierZeroUsers, totalActiveLoanUsers, totalActiveUsers,
       totalOverdueRepayment, totalExpectedRepayment ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalLoanApproved, [ queryFromType, queryToType ]),
@@ -283,6 +283,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       processOneOrNoneData(adminQueries.fetchTotalClusterCount, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.fetchPrivateClusterCount, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.fetchPublicClusterCount, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.fetchAdminClusterCount, [ queryFromType, queryToType ]),
       processAnyData(adminQueries.fetchRecentClusters, [  ]),
       processOneOrNoneData(adminQueries.totalTierOneUsers, [  ]),
       processOneOrNoneData(adminQueries.totalTierTwoUsers, [  ]),
@@ -317,6 +318,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
         total_cluster_group: Number(totalClusters.count),
         total_private_cluster: Number(totalPrivateClusters.count),
         total_public_cluster: Number(totalPublicClusters.count),
+        total_admin_cluster: Number(totalAdminClusters.count),
         recent_clusters: recentClusters
       },
       others: {
@@ -442,7 +444,8 @@ export const loanRepaymentReport = async(req, res, next) => {
     const orrCategoryAverageScores = await loanCategoryOrrAverageMetrics(queryFromType, queryToType);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched loan category orr average from from the underwriting DB 
     loanRepaymentReport.controllers.admin.admin.js`);
-    const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, paymentDetails, disbursementDetails, customerBase, loanTenor ] = await Promise.all([
+    const [ totalLoanRejected, totalDisbursedLoan, averageOrrScore, totalLoanObligation, paymentDetails, 
+      disbursementDetails, customerBase, loanTenor ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.averageOrrScore, [ queryFromType, queryToType ]),
@@ -450,7 +453,7 @@ export const loanRepaymentReport = async(req, res, next) => {
       processAnyData(adminQueries.paymentDetails, [ currentYearFromDate, currentYearToDate ]),
       processAnyData(adminQueries.disbursementDetails, [ currentYearFromDate, currentYearToDate ]),
       processOneOrNoneData(adminQueries.customerBase, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.loanTenor, [ queryFromType, queryToType ])
+      processAnyData(adminQueries.loanTenor, [ queryFromType, queryToType ])
     ]);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 

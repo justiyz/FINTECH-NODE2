@@ -1,4 +1,5 @@
-import cron from 'node-cron';import { updateLoanStatusToOverdue, initiateLoanRepayment, nonPerformingLoans,
+import cron from 'node-cron';
+import { updateLoanStatusToOverdue, initiateLoanRepayment, nonPerformingPersonalLoans, nonPerformingClusterLoans,
   updatesPromoStatusToActive, updatesPromoStatusToEnded, updateClusterLoanStatusToOverdue, initiateClusterLoanRepayment, promoEndingSoonNotification, updateAlertNotification
 } from '../../api/controllers/controller.cron';
 
@@ -26,7 +27,12 @@ const automaticallyDebitUserForLoanRepayment = CreateSchedule('0 4,18 * * *', ()
   timezone: 'Africa/Lagos'
 }); // runs every 04:00am and 06:00pm
 
-const nonPerformingUsersLoan = CreateSchedule('0 9 * * *', () => nonPerformingLoans(), {
+const nonPerformingUsersLoan = CreateSchedule('0 9 * * *', () => nonPerformingPersonalLoans(), {
+  scheduled: true,
+  timezone: 'Africa/Lagos'
+}); // runs every 09:00am
+
+const nonPerformingClusterLoan = CreateSchedule('0 9 * * *', () => nonPerformingClusterLoans(), {
   scheduled: true,
   timezone: 'Africa/Lagos'
 }); // runs every 09:00am
@@ -52,7 +58,7 @@ const updateAlertNotifications = CreateSchedule('0 2, * * *', () => updateAlertN
 }); // runs every 02:00am 
 
 
-export const scheduleList = [ updateUsersPersonalLoanToOverdue, automaticallyDebitUserForLoanRepayment, nonPerformingUsersLoan,
+export const scheduleList = [ updateUsersPersonalLoanToOverdue, automaticallyDebitUserForLoanRepayment, nonPerformingUsersLoan, nonPerformingClusterLoan,
   updatePromoStatusToActive, updatePromoStatusToEnded, updateUsersClusterLoanToOverdue, 
   automaticallyDebitUserForClusterLoanRepayment, PromoEndDateNotification, updateAlertNotifications ];
 

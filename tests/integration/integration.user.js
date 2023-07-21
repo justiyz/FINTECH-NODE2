@@ -3622,4 +3622,178 @@ describe('User', () => {
         });
     });
   });
+  describe('Fetch user referral details', () => {
+    it('Should throw error if no token is passed', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-details')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid token is passed', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-details')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}8I`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user referral details successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-details')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('unclaimed_reward_points');
+          expect(res.body.data).to.have.property('claimed_reward_points');
+          expect(res.body.data).to.have.property('cumulative_reward_points');
+          expect(res.body.data.unclaimed_reward_points).to.equal('20');
+          expect(res.body.data.claimed_reward_points).to.equal('0');
+          expect(res.body.data.cumulative_reward_points).to.equal('20');
+          expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('Fetch user referral history', () => {
+    it('Should throw error if no token is passed', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-history')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid token is passed', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-history')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}8I`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should fetch user referral history successfully', (done) => {
+      chai.request(app)
+        .get('/api/v1/user/referral-history')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.be.an('array');
+          expect(res.body.data.length).to.equal(1);
+          expect(res.body.data[0]).to.have.property('referral_code');
+          expect(res.body.data[0]).to.have.property('point_reward');
+          expect(res.body.data[0]).to.have.property('reward_description');
+          expect(res.body.data[0]).to.have.property('date');
+          expect(res.body.data[0].point_reward).to.equal('20');
+          expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_HISTORY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+  });
+  describe('User claims referral rewards points', () => {
+    it('Should throw error if no token is passed', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/claim-referral-points')
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_TOKEN);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if invalid token is passed', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/claim-referral-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}8I`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('invalid signature');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should claim user referral points successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/claim-referral-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('unclaimed_reward_points');
+          expect(res.body.data).to.have.property('claimed_reward_points');
+          expect(res.body.data).to.have.property('cumulative_reward_points');
+          expect(res.body.data.unclaimed_reward_points).to.equal('0');
+          expect(res.body.data.claimed_reward_points).to.equal('20');
+          expect(res.body.data.cumulative_reward_points).to.equal('20');
+          expect(res.body.message).to.equal(enums.CLAIMED_REFERRAL_POINTS_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
+    it('Should throw error if no reward points to claim', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/claim-referral-points')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.NO_UNCLAIMED_POINTS_TO_CLAIM);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+  });
 });

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import clusterQueries from '../queries/queries.cluster';
 import userQueries from '../queries/queries.user';
+import authQueries from '../queries/queries.auth';
 import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
@@ -461,6 +462,21 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
           `${requestingNMemberDetails.first_name} ${requestingNMemberDetails.last_name} joined your cluster`, 'join-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member 
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
+        if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_member_increase' ]);
+          const rewardPoint = parseFloat(rewardDetails.point);
+          const rewardDescription = 'Cluster membership increase point';
+          await processOneOrNoneData(authQueries.updateRewardPoints, 
+            [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+          await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+          const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
+          await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster.cluster_id ]);
+          sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point', 
+            PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
+          sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`), 
+            clusterCreator.fcm_token);
+          userActivityTracking(clusterCreator.user_id, 107, 'success');
+        }
         userActivityTracking(req.user.user_id, activityType, 'success');
         userActivityTracking(req.user.user_id, 52, 'success');
         return ApiResponse.success(res, enums.REQUEST_TO_JOIN_CLUSTER_DECISION(decisionType), enums.HTTP_OK);
@@ -560,7 +576,7 @@ export const checkIfInviteeAlreadyClusterMember = async(req, res, next) => {
 export const checkIfUserCanLeaveCluster =  async(req, res, next) => {
   try {
     const { cluster, clusterMember, user } = req;
-    if (clusterMember.loan_status === 'active') {
+    if (clusterMember.loan_status !== 'inactive') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms user is on an active loan in the cluster 
       checkIfUserIsOnActiveLoan.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE);
@@ -601,31 +617,6 @@ export const checkIfClusterMemberIsAdmin = async(req, res, next) => {
     error.label = enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE;
     logger.error(`Check if cluster member is admin failed::${enums.CHECK_IF_CLUSTER_MEMBER_IS_ADMIN_MIDDLEWARE}`, error.message);
     return next(error);
-  }
-};
-
-/**
- * check If cluster is on active loan
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof ClusterMiddleware
- */
-
-export const checkIfClusterIsOnActiveLoan = async(req, res, next) => {
-  try {
-    const { user, cluster } = req;
-    if (cluster.loan_status === 'active') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms cluster on an active loan in the cluster 
-      checkIfClusterIsOnActiveLoan.middlewares.cluster.js`);
-      return ApiResponse.error(res, enums.CLUSTER_IS_ON_ACTIVE_LOAN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE;
-    logger.error(`Check if cluster is on active loan failed::${enums.CHECK_IF_CLUSTER_IS_ON_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
-    return next(error); 
   }
 };
 

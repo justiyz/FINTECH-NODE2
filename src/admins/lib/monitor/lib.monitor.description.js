@@ -62,7 +62,6 @@ export const sends_alert_notification = (name) => `${name} sent alert notificati
 export const sends_alert_notification_failed = (name) => `${name} failed in sending alert notification type to users`;
 export const sends_system_notification = (name) => `${name} sent system notification type to users`;
 export const sends_system_notification_failed = (name) => `${name} failed in sending system notification type to users`;
-
 export const create_promo = (name, promoName) => `${name} created promo with name ${promoName} successfully`;
 export const create_promo_failed = (name, promoName) => `${name} failed to create promo with name ${promoName}`;
 export const edit_promo = (name, promoName) => `${name} edited promo with name ${promoName} successfully`;
@@ -70,5 +69,9 @@ export const edit_promo_failed = (name, promoName) => `${name} failed in editing
 export const cancel_promo = (name, promoName) => `${name} cancelled promo with name ${promoName} successfully`;
 export const cancel_promo_failed = (name) => `${name} failed in cancelling one or more promos`;
 export const delete_promo = (name, promoName) => `${name} deleted promo with name ${promoName} successfully`;
+export const delete_notification = (name, title) => `${name} deleted ${title} notification successfully`;
 export const delete_promo_failed = (name) => `${name} failed in deleting one or more promos`;
+export const delete_notification_failed = (name) => `${name} failed in deleting notifications`;
+export const updates_reward_point_ranges = (name, type) => `${name} updates ${type} reward point ranges values in settings`;
+export const updates_reward_points = (name, type) => `${name} updates ${type} reward point in settings`;
 

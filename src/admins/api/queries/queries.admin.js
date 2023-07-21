@@ -72,7 +72,7 @@ export default {
     admins.status
     FROM admins
     LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-    WHERE (admins.status = $1 OR $1 is null)
+    WHERE admins.status = $1 OR $1 IS NULL
     AND (admins.created_at::date BETWEEN $2 AND $3)
     ORDER BY admins.created_at DESC
     OFFSET $4 LIMIT $5
@@ -89,7 +89,7 @@ export default {
     admins.status
     FROM admins
     LEFT JOIN admin_roles ON admin_roles.code = admins.role_type
-    WHERE (admins.status = $1 OR $1 is null)
+    WHERE admins.status = $1 OR $1 IS NULL
     AND  admins.created_at::date BETWEEN $2 AND $3
   `,
 
@@ -144,28 +144,55 @@ export default {
     WHERE admin_id = $1`,
 
   totalLoanApproved: `
-    SELECT COUNT(status) 
-    FROM personal_loans 
-    WHERE ((status = 'approved') 
-      OR (status = 'processing') 
-      OR (status = 'ongoing') 
-      OR (status = 'over due') 
-      OR (status = 'completed')) 
+  SELECT COUNT(status) 
+  FROM ( 
+   SELECT status FROM personal_loans 
+  WHERE ((status = 'approved') 
+    OR (status = 'processing') 
+    OR (status = 'ongoing') 
+    OR (status = 'over due') 
+    OR (status = 'completed'))
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+    OR ($1 IS NULL AND $2 IS NULL))
+    UNION ALL 
+    SELECT status FROM cluster_member_loans 
+    WHERE ((status = 'approved') 
+    OR (status = 'processing') 
+    OR (status = 'ongoing') 
+    OR (status = 'over due') 
+    OR (status = 'completed'))
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+    OR ($1 IS NULL AND $2 IS NULL))
+  ) AS combineTotalLoanApproved;
+`,
 
   totalLoanRejected: `
-    SELECT COUNT(status) 
-    FROM personal_loans 
+  SELECT COUNT(status) 
+  FROM (
+   SELECT status FROM personal_loans 
+  WHERE status = 'declined'
+  AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+    OR ($1 IS NULL AND $2 IS NULL))
+  UNION ALL 
+   SELECT status FROM cluster_member_loans
     WHERE status = 'declined'
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+    OR ($1 IS NULL AND $2 IS NULL))
+  ) AS combineTotalLoanRejectedTable;`,
 
   totalDisbursedLoan: `
-    SELECT SUM(amount) 
-    FROM personal_loan_disbursements 
-    WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+    SELECT SUM(amount)
+    FROM (
+      SELECT amount
+      FROM personal_loan_disbursements
+      WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))
+      UNION ALL
+      SELECT amount
+      FROM cluster_member_loan_disbursements
+      WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))
+      ) AS combinedTotalDisbursedLoanTable;`,
 
 
   totalRegisteredCustomers: `
@@ -177,19 +204,34 @@ export default {
 
   fetchDetailsOfPaidLoans: `
     SELECT 
-      id,
-      loan_repayment_id,
-      loan_id,
-      user_id,
-      repayment_order,
-      total_payment_amount,
-      payment_at,
-      status,
-      proposed_payment_date,
-      created_at
-    FROM personal_loan_payment_schedules
-    WHERE status = 'paid'
-    AND (payment_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
+        id,
+        loan_repayment_id,
+        loan_id,
+        user_id,
+        repayment_order,
+        total_payment_amount,
+        payment_at,
+        status,
+        proposed_payment_date,
+        created_at
+      FROM personal_loan_payment_schedules
+      WHERE status = 'paid'
+      AND (payment_at::DATE BETWEEN $1::DATE AND $2::DATE)
+      UNION
+      SELECT 
+        id,
+        loan_repayment_id,
+        loan_id,
+        user_id,
+        repayment_order,
+        total_payment_amount,
+        payment_at,
+        status,
+        proposed_payment_date,
+        created_at
+      FROM cluster_member_loan_payment_schedules
+      WHERE status = 'paid'
+      AND (payment_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
 
   fetchDetailsOfUnpaidLoans: `
     SELECT 
@@ -204,22 +246,52 @@ export default {
       proposed_payment_date,
       created_at
     FROM personal_loan_payment_schedules
+    WHERE status != 'paid' 
+    AND (proposed_payment_date::DATE BETWEEN $1::DATE AND $2::DATE)
+    UNION 
+    SELECT 
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      payment_at,
+      status,
+      proposed_payment_date,
+      created_at
+    FROM cluster_member_loan_payment_schedules
     WHERE status != 'paid'
     AND (proposed_payment_date::DATE BETWEEN $1::DATE AND $2::DATE)`,
 
   totalLoanRepayment: `
     SELECT SUM(total_payment_amount) 
-    FROM personal_loan_payment_schedules 
+    FROM ( 
+    SELECT total_payment_amount 
+    FROM personal_loan_payment_schedules
+    WHERE status = 'paid'
+    AND ((payment_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))
+    UNION ALL
+    SELECT total_payment_amount 
+    FROM cluster_member_loan_payment_schedules
     WHERE status = 'paid'
     AND ((payment_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+    OR ($1 IS NULL AND $2 IS NULL))) AS totalLoanRepayment`,
 
   totalLoanOverDue: `
     SELECT SUM(total_payment_amount) 
+    FROM (
+    SELECT total_payment_amount
     FROM personal_loan_payment_schedules 
     WHERE status = 'over due'
     AND ((proposed_payment_date::DATE BETWEEN $1::DATE AND $2::DATE) 
-      OR ($1 IS NULL AND $2 IS NULL))`,
+    OR ($1 IS NULL AND $2 IS NULL))
+    UNION ALL
+    SELECT total_payment_amount
+    FROM cluster_member_loan_payment_schedules 
+    WHERE status = 'over due'
+    AND ((proposed_payment_date::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))) AS totalSum;`,
 
   fetchDetailsOfAppliedLoans: `
     SELECT 
@@ -233,6 +305,19 @@ export default {
       loan_decision,
       created_at
     FROM personal_loans
+    WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    UNION
+    SELECT
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      status,
+      loan_decision,
+      created_at
+    FROM cluster_member_loans
     WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
 
   fetchDetailsOfApprovedLoans: `
@@ -252,6 +337,24 @@ export default {
       OR (status = 'ongoing') 
       OR (status = 'over due') 
       OR (status = 'completed')) 
+    AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    UNION
+    SELECT 
+        id,
+        loan_id,
+        user_id,
+        amount_requested,
+        loan_tenor_in_months,
+        total_repayment_amount,
+        status,
+        loan_decision,
+        created_at
+    FROM cluster_member_loans
+    WHERE ((status = 'approved') 
+      OR (status = 'processing') 
+      OR (status = 'ongoing') 
+      OR (status = 'over due') 
+      OR (status = 'completed'))
     AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)`,
 
   fetchTotalClusterCount: `
@@ -262,10 +365,11 @@ export default {
       OR ($1 IS NULL AND $2 IS NULL))`,
 
   fetchPrivateClusterCount: `
-    SELECT COUNT(cluster_id) 
+    SELECT COUNT(cluster_id)
     FROM clusters
     WHERE type = 'private'
-    AND is_deleted = FALSE 
+    AND is_deleted = FALSE
+    AND is_created_by_admin = FALSE
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
       OR ($1 IS NULL AND $2 IS NULL))`,
 
@@ -277,6 +381,15 @@ export default {
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
       OR ($1 IS NULL AND $2 IS NULL))`,
 
+  fetchAdminClusterCount: `
+    SELECT COUNT(cluster_id) 
+    FROM clusters
+    WHERE type = 'private'
+    AND is_deleted = FALSE 
+    AND is_created_by_admin = TRUE
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+      OR ($1 IS NULL AND $2 IS NULL))`,
+
   fetchRecentClusters: `
     SELECT
       id,
@@ -285,6 +398,7 @@ export default {
       description,
       type,
       current_members,
+      is_created_by_admin,
       created_at
     FROM clusters
     WHERE is_deleted = FALSE
@@ -322,15 +436,31 @@ export default {
     AND is_completed_kyc = true`,
 
   totalOverdueRepayment: `
-    SELECT SUM(total_payment_amount) 
-    FROM personal_loan_payment_schedules 
-    WHERE status = 'over due'
-    AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE`,
+      SELECT SUM(total_payment_amount) 
+      FROM (
+      SELECT total_payment_amount
+      FROM personal_loan_payment_schedules 
+      WHERE status = 'over due'
+      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
+      UNION ALL
+      SELECT total_payment_amount
+      FROM cluster_member_loan_payment_schedules 
+      WHERE status = 'over due'
+      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
+      ) AS totalOverdueRepayment;
+    `,
   
   totalExpectedRepayment: `
-    SELECT SUM(total_payment_amount) 
-    FROM personal_loan_payment_schedules 
-    WHERE (status = 'paid' OR status = 'over due')`,
+      SELECT SUM(total_payment_amount) 
+      FROM(
+      SELECT total_payment_amount 
+      FROM personal_loan_payment_schedules
+      WHERE (status = 'paid' OR status = 'over due')
+      UNION ALL
+      SELECT total_payment_amount 
+      FROM cluster_member_loan_payment_schedules 
+      WHERE (status = 'paid' OR status = 'over due')
+      ) AS totalExpectedRepayment`,
 
   fetchAdminSetEnvDetails: `
     SELECT 
@@ -381,11 +511,17 @@ export default {
   `,
 
   totalObligationRepaid: `
-    SELECT COUNT(id)
-    FROM personal_loans
-    WHERE status = 'completed'
-    AND ((completed_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-    OR ($1 IS NULL AND $2 IS NULL))`,
+  SELECT COUNT(id)
+  FROM ( 
+  SELECT id FROM personal_loans
+  WHERE status = 'completed'
+  AND ((completed_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))
+  UNION ALL
+  SELECT id FROM cluster_member_loans
+  WHERE status = 'completed'
+  AND ((completed_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))
+ ) AS totalObligationRepaid;
+`,
 
   paymentDetails: `
     SELECT
@@ -397,9 +533,23 @@ export default {
       transaction_type,
       status AS payment_status,
       created_at AS payment_at
-    FROM personal_loan_payments
-    WHERE (personal_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
-    AND transaction_type = 'debit'`,
+   FROM personal_loan_payments
+   WHERE (personal_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+   AND transaction_type = 'debit'
+   UNION
+   SELECT
+      id,
+      user_id,
+      loan_id,
+      payment_id,
+      amount AS payment_amount,
+      transaction_type,
+      status AS payment_status,
+      created_at AS payment_at
+  FROM cluster_member_loan_payments
+  WHERE (cluster_member_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+  AND transaction_type = 'debit';
+`,
 
   disbursementDetails: `
     SELECT
@@ -413,6 +563,19 @@ export default {
       created_at AS disbursement_at
     FROM personal_loan_payments
     WHERE (personal_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+    AND transaction_type = 'credit'
+    UNION 
+    SELECT
+      id,
+      user_id,
+      loan_id,
+      payment_id,
+      amount AS disbursement_amount,
+      transaction_type,
+      status AS disbursement_status,
+      created_at AS disbursement_at
+    FROM cluster_member_loan_payments
+    WHERE (cluster_member_loan_payments.created_at::DATE BETWEEN $1::DATE AND $2::DATE)
     AND transaction_type = 'credit'`,
 
   customerBase: `
@@ -427,14 +590,25 @@ export default {
 
   loanTenor: `
       SELECT
-        MAX(loan_tenor_in_months) AS highest_month_tenure,
-        MIN(loan_tenor_in_months) AS lowest_month_tenure,
-        (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
-        WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
-        (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
-        WHERE created_at::DATE BETWEEN $1::DATE AND $2::DATE OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+      MAX(loan_tenor_in_months) AS highest_month_tenure,
+      MIN(loan_tenor_in_months) AS lowest_month_tenure,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+      WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+      WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
       FROM personal_loans
-      WHERE ((created_at::DATE BETWEEN $1::DATE AND $2::DATE)OR ($1 IS NULL AND $2 IS NULL))`,
+      WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL)
+      UNION ALL
+      SELECT
+      MAX(loan_tenor_in_months) AS highest_month_tenure,
+      MIN(loan_tenor_in_months) AS lowest_month_tenure,
+      (SELECT COUNT(id) FROM cluster_member_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM cluster_member_loans 
+      WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
+      (SELECT COUNT(id) FROM cluster_member_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM cluster_member_loans 
+      WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
+      FROM cluster_member_loans
+      WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL);
+`,
 
   averageLoanTenor: `
     SELECT AVG(loan_tenor_in_months::numeric)::numeric(10) 
@@ -444,11 +618,17 @@ export default {
      OR ($1 IS NULL AND $2 IS NULL))`,
 
   rescheduledLoans: `
-    SELECT SUM(total_repayment_amount) 
-    FROM personal_loans
-    WHERE is_rescheduled = TRUE
-    AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
-     OR ($1 IS NULL AND $2 IS NULL))`,
+  SELECT SUM(total_repayment_amount) 
+  FROM (
+  SELECT total_repayment_amount FROM personal_loans
+  WHERE is_rescheduled = TRUE
+  AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+   OR ($1 IS NULL AND $2 IS NULL))
+  UNION ALL
+  SELECT total_repayment_amount FROM cluster_member_loans
+  WHERE is_rescheduled = TRUE
+  AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
+   OR ($1 IS NULL AND $2 IS NULL))) AS rescheduledLoans;`,
 
   totalSystemUsersPerTime: `
     SELECT COUNT(user_id) 
@@ -460,16 +640,28 @@ export default {
 
   fetchDetailsOfDisbursedLoans: `
     SELECT 
-      disbursement_id,
-      user_id,
-      payment_id,
-      recipient_id,
-      status,
-      amount,
-      created_at   
-    FROM personal_loan_disbursements 
-    WHERE status = 'success'
-    AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+        disbursement_id,
+        user_id,
+        payment_id,
+        recipient_id,
+        status,
+        amount,
+        created_at   
+      FROM personal_loan_disbursements 
+      WHERE status = 'success'
+      AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+      UNION
+      SELECT 
+        disbursement_id,
+        user_id,
+        payment_id,
+        recipient_id,
+        status,
+        amount,
+        created_at   
+      FROM cluster_member_loan_disbursements 
+      WHERE status = 'success'
+      AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
 `,
 
   totalClusterGroups: `

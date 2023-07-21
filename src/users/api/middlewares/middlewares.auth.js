@@ -55,7 +55,7 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: referral code is part of signup payload middlewares.auth.js`);
-    const [ referringUserDetails ] = await processAnyData(authQueries.checkIfExistingReferralCode, [ body.referral_code.trim() ]);
+    const [ referringUserDetails ] = await processAnyData(authQueries.checkIfExistingReferralCode, [ body.referral_code.trim().toUpperCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if referral code previously existed in the db checkIfReferralCodeExists.middlewares.auth.js`);
     if (!referringUserDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that referral code does not belongs to an existing user 

@@ -64,9 +64,11 @@ const bulkBvn = Joi.object({
 
 const blacklistedBvn = Joi.alternatives().try(singleBvn, bulkBvn);
 
-const adminNotificationIdParams = Joi.object().keys({
-  adminNotificationId: Joi.string().required()
-});
+const adminNotificationId = Joi.array().min(1).items(
+  Joi.object({
+    adminNotificationId: Joi.string().required()
+  })
+);
 
 const sendNotification = Joi.object({
   type: Joi.string().valid('alert', 'system').required()
@@ -95,6 +97,11 @@ const fetchNotification = Joi.object().keys({
   per_page: Joi.number().positive().optional()
 });
 
+const adminNotificationIdParams = Joi.object().keys({
+  adminNotificationId: Joi.string().required()
+});
+
+
 export default {
   adminCompleteProfile,
   editAdminPermissions,
@@ -102,7 +109,8 @@ export default {
   unblacklist_bvn,
   fetchBlacklistedBvn,
   blacklistedBvn,
-  adminNotificationIdParams,
   sendNotification,
-  fetchNotification
+  fetchNotification,
+  adminNotificationIdParams,
+  adminNotificationId
 };

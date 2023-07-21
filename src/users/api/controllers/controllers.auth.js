@@ -229,6 +229,16 @@ export const completeProfile = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 81, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }
+    const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'sign_up_point' ]);
+    const rewardPoint = parseFloat(rewardDetails.point);
+    const rewardDescription = 'Welcome point';
+    await processOneOrNoneData(authQueries.updateRewardPoints, 
+      [ user.user_id, null, rewardPoint, rewardDescription, null, 'welcome' ]);
+    await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+    sendUserPersonalNotification(user, 'Welcome point', 
+      PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'welcome'), 'point-rewards', {});
+    sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'welcome'), user.fcm_token);
+    userActivityTracking(user.user_id, 102, 'success');
     userActivityTracking(user.user_id, 7, 'success');
     return ApiResponse.success(res, enums.USER_PROFILE_COMPLETED, enums.HTTP_OK, data);
   } catch (error) {

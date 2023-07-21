@@ -75,5 +75,59 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchClusterLoans', async() => {
+      const req = { query: '', admin: '' };
+      const data = await AdminLoanController.fetchClusterLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchSingleMemberClusterLoanDetails', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminLoanController.fetchSingleMemberClusterLoanDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchClusterMembersLoanRepayment', async() => {
+      const req = { query: '', admin: '' };
+      const data = await AdminLoanController.fetchClusterMembersLoanRepayment(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchUserClusterLoanRepaymentDetails', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminLoanController.fetchUserClusterLoanRepaymentDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchAClusterLoanDetails', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminLoanController.fetchAClusterLoanDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchRescheduledClusterLoans', async() => {
+      const req = { query: '', admin: '' };
+      const data = await AdminLoanController.fetchRescheduledClusterLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchSingleClusterMemberRescheduledLoan', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminLoanController.fetchSingleClusterMemberRescheduledLoan(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchInReviewClusterLoans', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminLoanController.fetchInReviewClusterLoans(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call fetchSingleMemberInReviewLoanDetails', async() => {
+      const req = { params: '', admin: '' };
+      const data = await AdminLoanController.fetchSingleMemberInReviewLoanDetails(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

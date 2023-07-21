@@ -2,7 +2,7 @@ import path from 'path';
 import enums from '../../../users/lib/enums';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as S3 from '../../api/services/services.s3';
-import {  processOneOrNoneData } from '../services/services.db';
+import {  processAnyData, processOneOrNoneData } from '../services/services.db';
 import settingsQueries from '../queries/queries.settings';
 import dayjs from 'dayjs';
 import config from '../../../users/config';
@@ -99,12 +99,12 @@ export const checkIfStartOrEndDateHasPassed = async(req, res, next) => {
     if (body.start_date < dayjs().format('YYYY-MM-DD') || body.end_date < dayjs().format('YYYY-MM-DD')) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms start or end date has passed
       checkIfStartOrEndDateHasPassed.middlewares.settings.js`); 
-      return ApiResponse.error(res, enums.PAST_END_OR_START_DATE, enums.HTTP_BAD_REQUEST);
+      return ApiResponse.error(res, enums.PAST_END_OR_START_DATE, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_START_OR_END_DATE_HAS_PASSED_MIDDLEWARE);
     }
     if (body.start_date > body.end_date) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms start date is greater than end date
       checkIfStartOrEndDateHasPassed.middlewares.settings.js`); 
-      return ApiResponse.error(res, enums.START_DATE_CAN_NOT_BE_AHEAD_OF_HEAD_DATE, enums.HTTP_BAD_REQUEST);
+      return ApiResponse.error(res, enums.START_DATE_CAN_NOT_BE_AHEAD_OF_HEAD_DATE, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_START_OR_END_DATE_HAS_PASSED_MIDDLEWARE);
     }
     return next();
   } catch (error) {
@@ -130,7 +130,7 @@ export const checkIfPromoExists = async(req, res, next) => {
       if (!promoDetails) {
         logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms promo does not exist in the DB
          checkIfPromoExists.middlewares.settings.js`); 
-        return ApiResponse.error(res, enums.PROMO_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST); 
+        return ApiResponse.error(res, enums.PROMO_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_PROMO_EXISTS_MIDDLEWARE); 
       }
       req.promoDetails = promoDetails;
       return next();
@@ -140,7 +140,7 @@ export const checkIfPromoExists = async(req, res, next) => {
     for (const id of body) {
       const promoDetails = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       if (!promoDetails) {
-        return ApiResponse.error(res, enums.PROMO_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST); 
+        return ApiResponse.error(res, enums.PROMO_DOES_NOT_EXIST, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_PROMO_EXISTS_MIDDLEWARE); 
       }
     }
     return next();
@@ -167,7 +167,7 @@ export const checkPromoStatus = async(req, res, next) => {
     if (promo.status !== 'inactive') {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully checks promo status
       checkPromoStatus .middlewares.settings.js`); 
-      return ApiResponse.error(res, enums.PROMO_CAN_NOT_BE_EDITED, enums.HTTP_BAD_REQUEST);
+      return ApiResponse.error(res, enums.PROMO_CAN_NOT_BE_EDITED, enums.HTTP_BAD_REQUEST, enums.CHECK_PROMO_STATUS_MIDDLEWARE);
     }
     return next();
   } catch (error) {
@@ -194,7 +194,7 @@ export const checkIfPromoIsActive = async(req, res, next) => {
     for (const id of body) {
       const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       if (promo.status === 'active') {
-        return ApiResponse.error(res, enums.PROMO_CAN_NOT_BE_DELETED, enums.HTTP_BAD_REQUEST);
+        return ApiResponse.error(res, enums.PROMO_CAN_NOT_BE_DELETED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_PROMO_IS_ACTIVE_MIDDLEWARE);
       }   
     }
     return next(); 
@@ -224,19 +224,51 @@ export const checkIfAdminCreatedPromo = async(req, res, next) => {
       }
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: confirms that admin is not the creator of the promo and not the super admin
       checkIfAdminCreatedPromo.middlewares.settings.js`); 
-      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO(promo.name), enums.HTTP_BAD_REQUEST);
+      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO(promo.name), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE);
     }
     for (const id of body) {
       const promo = await processOneOrNoneData(settingsQueries.fetchSinglePromoDetails, id.promo_id);
       if (admin.role_type === 'SADM' || admin.admin_id === promo.created_by) {
         return next();
       }
-      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO(promo.name), enums.HTTP_BAD_REQUEST);
+      return ApiResponse.error(res, enums.ADMIN_DID_NOT_CREATE_PROMO(promo.name), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE);
     }
   } catch (error) {
     error.label = enums.CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE;
-    logger.error(`checking if admin created promo failed::${enums.CHECK_IF_ADMIN_CREATED_PROMO_MIDDLEWARE}`, error.message);
+    logger.error(`checking if admin created promo failed::${enums.enums.HTTP_BAD_REQUEST}`, error.message);
     return next(error);       
   }
 };
 
+/**
+ * checks reward details before editing
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminSettingsMiddleware
+ */
+
+export const checkGeneralRewardBeforeEditing = async(req, res, next) => {
+  try {
+    const { body, admin } = req;
+    const [ rewardDetails ] = await processAnyData(settingsQueries.fetchSingleGeneralRewardDetails, body.reward_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: reward detail fetched successfully checkGeneralRewardBeforeEditing.admin.middlewares.settings.js`);
+    if (!rewardDetails) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: reward detail does not exist
+      checkGeneralRewardBeforeEditing.admin.middlewares.settings.js`); 
+      return ApiResponse.error(res, enums.REWARD_DOES_NOT_EXISTS, enums.HTTP_BAD_REQUEST, enums.CHECK_GENERAL_REWARD_BEFORE_EDITING_MIDDLEWARE);
+    }
+    if (rewardDetails.point === null) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: reward details point is null
+      checkGeneralRewardBeforeEditing.admin.middlewares.settings.js`); 
+      return ApiResponse.error(res, enums.REWARD_POINT_RANGE_TO_BE_UPDATED, enums.HTTP_BAD_REQUEST, enums.CHECK_GENERAL_REWARD_BEFORE_EDITING_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: reward detail exists checkGeneralRewardBeforeEditing.admin.middlewares.settings.js`); 
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_GENERAL_REWARD_BEFORE_EDITING_MIDDLEWARE;
+    logger.error(`checking reward details before editing failed::${enums.CHECK_GENERAL_REWARD_BEFORE_EDITING_MIDDLEWARE}`, error.message);
+    return next(error);    
+  }
+};

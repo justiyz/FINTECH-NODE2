@@ -123,3 +123,7 @@ export const initiateClusterLoan = (user, cluster) => {
   return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} loan group. 
   Kindly accept or decline this request to be a part of this cluster loan.`;
 };
+
+export const userEarnedRewardPointMessage = (point, type) => {
+  return `Congratulations you just received ${point} points ${type} bonus`;
+};

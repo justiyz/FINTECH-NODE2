@@ -879,10 +879,10 @@ export const updateMonoAccountId = async(req, res, next) => {
  */
 export const fetchLoanTierValue = async(req, res, next) => {
   try {
+    const { user } = req;
     const query = (req.query.type === 'tier_one') ? userQueries.fetchTierOneLoanValue : userQueries.fetchTierTwoLoanValue;
     const data = await processAnyData(query, []);
-
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched loan tiers value from the DB. fetchTierLoanValue.controller.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::::::Info:: successfully fetched loan tiers value from the DB. fetchTierLoanValue.controller.user.js`);
     return ApiResponse.success(res, enums.FETCH_LOAN_VALUE, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_LOAN_TIER_CONTROLLER;
@@ -901,12 +901,88 @@ export const fetchLoanTierValue = async(req, res, next) => {
  */
 export const fetchAlertNotification = async(req, res, next) => {
   try {
+    const { user } = req;
     const data = await processAnyData(userQueries.fetchAlert, []);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::::::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.user.js`);
     return ApiResponse.success(res, enums.FETCHED_NOTIFICATIONS, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_ALERT_NOTIFICATION_CONTROLLER;
     logger.error(`Fetching alert notification failed:::${enums.FETCH_ALERT_NOTIFICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch user referral details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user referral details
+ * @memberof UserController
+ */
+export const fetchUserReferralDetails = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ referralDetails ] = await processAnyData(userQueries.fetchUserReferralDetails, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully fetched user referral details from the DB. fetchUserReferralDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.FETCHED_REFERRAL_DETAILS, enums.HTTP_OK, referralDetails);
+  } catch (error) {
+    error.label = enums.FETCH_USER_REFERRAL_DETAILS_CONTROLLER;
+    logger.error(`Fetching user referral details failed:::${enums.FETCH_USER_REFERRAL_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch user referral history
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user referral history
+ * @memberof UserController
+ */
+export const fetchUserReferralHistory = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const referralHistory = await processAnyData(userQueries.fetchUserReferralHistory, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully fetched user referral history from the DB. fetchUserReferralHistory.controller.user.js`);
+    return ApiResponse.success(res, enums.FETCHED_REFERRAL_HISTORY, enums.HTTP_OK, referralHistory);
+  } catch (error) {
+    error.label = enums.FETCH_USER_REFERRAL_HISTORY_CONTROLLER;
+    logger.error(`Fetching user referral history failed:::${enums.FETCH_USER_REFERRAL_HISTORY_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * user claims referral points
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response
+ * @memberof UserController
+ */
+export const userClaimsReferralPoints = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const [ referralDetails ] = await processAnyData(userQueries.fetchUserReferralDetails, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully fetched user referral details from the DB. userClaimsReferralPoints.controller.user.js`);
+    if (parseFloat(referralDetails.unclaimed_reward_points) <= 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: user has no unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
+      return ApiResponse.error(res, enums.NO_UNCLAIMED_POINTS_TO_CLAIM, enums.HTTP_FORBIDDEN, enums.USER_CLAIMS_REFERRAL_POINTS_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user has unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
+    const [ updatedReferralValues  ] = await Promise.all([
+      processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
+      processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
+    ]);
+    userActivityTracking(req.user.user_id, 105, 'success');
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user claimed points tracked in the DB userClaimsReferralPoints.controller.user.js`);
+    return ApiResponse.success(res, enums.CLAIMED_REFERRAL_POINTS_SUCCESSFULLY, enums.HTTP_OK, updatedReferralValues);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 105, 'fail');
+    error.label = enums.USER_CLAIMS_REFERRAL_POINTS_CONTROLLER;
+    logger.error(`FClaiming user unclaimed points failed:::${enums.USER_CLAIMS_REFERRAL_POINTS_CONTROLLER}`, error.message);
     return next(error);
   }
 };

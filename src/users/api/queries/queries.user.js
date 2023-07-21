@@ -601,7 +601,7 @@ export default {
     value
     FROM admin_env_values_settings
     WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
-    'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount');
+    'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount')
  `,
   fetchAllActivePromos: `
       SELECT
@@ -625,7 +625,7 @@ export default {
         content, 
         created_at 
       FROM admin_sent_notifications 
-      WHERE type = 'alert' AND is_ended IS FALSE;
+      WHERE type = 'alert' AND is_ended IS FALSE
   `,
   
   updateAlertNotification: `
@@ -633,6 +633,49 @@ export default {
       SET 
       updated_at = NOW(),
       is_ended = TRUE
-      WHERE DATE(end_at) = CURRENT_DATE;
-  `
+      WHERE DATE(end_at) = CURRENT_DATE
+  `,
+
+  fetchUserReferralDetails: `
+     SELECT 
+        id,  
+        user_id, 
+        referral_code, 
+        unclaimed_reward_points,
+        claimed_reward_points,
+        cumulative_reward_points 
+      FROM users 
+      WHERE user_id = $1
+  `,
+
+  fetchUserReferralHistory: `
+     SELECT 
+        id,
+        reward_id,  
+        user_id, 
+        referral_code, 
+        point_reward,
+        reward_description,
+        to_char(DATE (created_at)::date, 'DD Mon, YYYY') AS date,
+        type
+      FROM reward_points_tracking 
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+  `,
+
+  updateUserClaimedPoints: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      unclaimed_reward_points = unclaimed_reward_points - $2,
+      claimed_reward_points = claimed_reward_points + $2
+    WHERE user_id = $1
+    RETURNING id, user_id, unclaimed_reward_points, claimed_reward_points, cumulative_reward_points
+  `,
+
+  trackPointClaiming: `
+  INSERT INTO claimed_rewards_tracking(
+    user_id,
+    point
+  ) VALUES ($1, $2)`
 };

@@ -95,6 +95,7 @@ router.post(
   Model(Schema.inviteClusterMember, 'payload'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterMiddleware.confirmClusterIsStillOpenForJoining('invite'),
   ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
   ClusterController.inviteClusterMember
@@ -115,6 +116,7 @@ router.post(
   Model(Schema.clusterIdParams, 'params'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfUserHasActiveClusterLoan,
   ClusterMiddleware.checkIfUserCanLeaveCluster,
   ClusterController.leaveCluster
 );
@@ -126,7 +128,7 @@ router.patch(
   Model(Schema.editCluster, 'body'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
-  ClusterMiddleware.checkIfClusterIsOnActiveLoan,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterMiddleware.checkIfThereIsMoreThanOnePersonInTheCluster,
   ClusterController.editCluster
@@ -140,6 +142,7 @@ router.post(
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterController.initiateDeleteCluster
 );
 
@@ -150,6 +153,7 @@ router.post(
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterController.suggestNewClusterAdmin
 );
 
@@ -163,18 +167,18 @@ router.post(
   Model(Schema.clusterIdParams, 'params'),
   Model(Schema.initiateClusterLoan, 'payload'),
   ClusterMiddleware.checkClusterMembersNumber,
-  ClusterMiddleware.checkIfClusterHasActiveLoan,
-  UserMiddleware.checkUserAdvancedKycUpdate,
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('confirm'),
-  LoanMiddleware.checkIfUserBvnNotBlacklisted,
+  UserMiddleware.checkUserAdvancedKycUpdate,
+  ClusterMiddleware.checkIfClusterHasActiveLoan,
   ClusterMiddleware.checkIfUserHasActiveClusterLoan,
   ClusterMiddleware.totalLoanAmountVerificationAndBreakdown,
-  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  LoanMiddleware.checkIfUserBvnNotBlacklisted,
   LoanMiddleware.additionalUserChecksForLoan,
   ClusterController.checkClusterAdminClusterLoanEligibility
 );
@@ -204,19 +208,19 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.clusterMemberLoanIdParams, 'params'),
   Model(Schema.membersClusterLoanEligibilityCheck, 'payload'),
-  UserMiddleware.checkUserAdvancedKycUpdate,
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('confirm'),
-  LoanMiddleware.checkIfUserBvnNotBlacklisted,
+  UserMiddleware.checkUserAdvancedKycUpdate,
   ClusterMiddleware.checkIfUserHasActiveClusterLoan,
   ClusterMiddleware.checkIfMemberClusterLoanApplicationExists,
   ClusterMiddleware.checkIfMemberClusterLoanApplicationStatusIsStillPending,
   ClusterMiddleware.sortClusterLoanAmount,
-  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  LoanMiddleware.checkIfUserBvnNotBlacklisted,
   LoanMiddleware.additionalUserChecksForLoan,
   ClusterController.checkClusterMemberClusterLoanEligibility
 );

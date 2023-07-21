@@ -334,5 +334,10 @@ export default {
     FROM users
     WHERE user_id = $1
     AND is_completed_kyc
-  `
+  `,
+
+  fetchUserFcmTOken: `
+      SELECT fcm_token
+      FROM users
+      WHERE user_id = $1`
 };

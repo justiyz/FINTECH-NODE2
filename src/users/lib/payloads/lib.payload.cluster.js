@@ -37,8 +37,9 @@ export default {
     cluster.members[0]?.is_admin || false,
     body.decision
   ],
-  // eslint-disable-next-line max-len
-  checkClusterUserEligibilityPayload: async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount) => ({
+  
+  checkClusterUserEligibilityPayload: async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 
+    clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
     user_id: user.user_id,
     loan_application_id: loanApplicationDetails.member_loan_id,
     loan_duration_in_month: `${body.duration_in_months}`,
@@ -61,7 +62,12 @@ export default {
     loan_type: 'cluster',
     interest_rate_type: userLoanDiscount.interest_rate_type || null,
     interest_rate_value: userLoanDiscount.interest_rate_value || null,
-    general_loan_id: loanApplicationDetails.loan_id
+    general_loan_id: loanApplicationDetails.loan_id,
+    cluster_type: clusterType,
+    user_maximum_allowable_amount: userMaximumAllowableAmount,
+    user_minimum_allowable_amount: userMinimumAllowableAMount,
+    previous_loan_count: previousLoanCount,
+    previous_loan_defaulted_count: previouslyDefaultedCount
   }),
   processDeclinedClusterLoanDecisionUpdatePayload: (data, body) => [
     data.loan_application_id,
