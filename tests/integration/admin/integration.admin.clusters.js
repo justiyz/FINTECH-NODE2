@@ -3753,6 +3753,30 @@ describe('Clusters', () => {
           done();
         });
     });
+    it('Should filter rescheduled cluster loans by date', (done) => {
+      chai.request(app)
+        .get('/api/v1/admin/loan/cluster/rescheduled-loans')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .query({
+          start_date: '2023-06-10',
+          end_date: '2023-06-11'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.data).to.have.property('total_count');
+          expect(res.body.data).to.have.property('page');
+          expect(res.body.data).to.have.property('total_pages');
+          expect(res.body.data).to.have.property('rescheduledClusterLoans');
+          expect(res.body.message).to.equal(enums.RESCHEDULED_LOANS_FETCHED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('Should fetch rescheduled cluster loans by the loan applicant name where the query type is export', (done) => {
       chai.request(app)
         .get('/api/v1/admin/loan/cluster/rescheduled-loans')
