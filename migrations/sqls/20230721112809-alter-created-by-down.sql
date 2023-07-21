@@ -1,1 +1,1 @@
-ALTER TABLE clusters ADD COLUMN IF NOT EXISTS created_by VARCHAR REFERENCES users(user_id); 
+ALTER TABLE clusters ADD CONSTRAINT clusters_created_by_fkey;

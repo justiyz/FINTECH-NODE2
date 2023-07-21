@@ -1199,26 +1199,6 @@ describe('Clusters', () => {
           done();
         });
     });
-    // it.skip('should reject request to join user two public cluster two', (done) => {
-    //   chai.request(app)
-    //     .post(`/api/v1/cluster/${process.env.SEEDFI_USER_ONE_JOIN_USER_TWO_PUBLIC_CLUSTER_TWO_TICKET_ID}/voting-decision`)
-    //     .set({
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-    //     })
-    //     .send({
-    //       decision: 'no'
-    //     })
-    //     .end((err, res) => {
-    //       expect(res.statusCode).to.equal(enums.HTTP_OK);
-    //       expect(res.body).to.have.property('message');
-    //       expect(res.body).to.have.property('status');
-    //       expect(res.body).to.have.property('data');
-    //       expect(res.body.message).to.equal(enums.REQUEST_TO_JOIN_CLUSTER_DECISION('declined'));
-    //       expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-    //       done();
-    //     });
-    // });
     it('should throw error if request to join cluster ticket has been concluded', (done) => {
       chai.request(app)
         .post(`/api/v1/cluster/${process.env.SEEDFI_USER_THREE_JOIN_USER_TWO_PUBLIC_CLUSTER_ONE_TICKET_ID}/voting-decision`)

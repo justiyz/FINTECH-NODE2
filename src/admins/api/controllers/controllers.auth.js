@@ -26,6 +26,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
   try {
     const { admin } = req;
     const token = UserHelpers.generateOtp();
+    console.log(token);
     const adminName = `${admin.first_name} ${admin.last_name}`;
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random token generated completeAdminLoginRequest.admin.controllers.auth.js`);
     const [ existingToken ] = await processAnyData(authQueries.fetchAdminByVerificationToken, [ token ]);
