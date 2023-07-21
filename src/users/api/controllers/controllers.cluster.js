@@ -554,7 +554,7 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
 */
 export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails, userAllowableAmount, previousLoanCount } = req;
+    const { user, body, userEmploymentDetails, cluster, userDefaultAccountDetails, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
     const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
@@ -578,8 +578,8 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       interest_rate_type: 'fixed',
       interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
     };
-    const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, initiatorLoanApplicationDetails, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 'private', userAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, initiatorLoanApplicationDetails, userEmploymentDetails, 
+      userBvn, userMonoId, userLoanDiscount, 'private', userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
@@ -792,7 +792,8 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
 */
 export const checkClusterMemberClusterLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication, userAllowableAmount, previousLoanCount } = req;
+    const { user, body, userEmploymentDetails, userDefaultAccountDetails, existingLoanApplication, 
+      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
     const privateClusterFixedInterestRateDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'private_cluster_fixed_interest_rate' ]);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
@@ -808,8 +809,8 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
       interest_rate_type: 'fixed',
       interest_rate_value: parseFloat(privateClusterFixedInterestRateDetails.value)
     };
-    const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, existingLoanApplication, 
-      userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, 'private', userAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    const payload = await ClusterPayload.checkClusterUserEligibilityPayload(user, body, userDefaultAccountDetails, existingLoanApplication, userEmploymentDetails, 
+      userBvn, userMonoId, userLoanDiscount, 'private', userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 

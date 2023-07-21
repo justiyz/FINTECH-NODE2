@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
 const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, 
-  userLoanDiscount, clusterType, userAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
+  userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
   loan_duration_in_month: `${body.duration_in_months}`,
@@ -27,7 +27,8 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   interest_rate_value: userLoanDiscount.interest_rate_value || null,
   general_loan_id: null,
   cluster_type: clusterType,
-  user_allowable_amount: userAllowableAmount,
+  user_maximum_allowable_amount: userMaximumAllowableAmount,
+  user_minimum_allowable_amount: userMinimumAllowableAMount,
   previous_loan_count: previousLoanCount,
   previous_loan_defaulted_count: previouslyDefaultedCount
 });
