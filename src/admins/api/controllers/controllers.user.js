@@ -434,18 +434,12 @@ export const userClusters = async(req, res, next) => {
     const { admin, params } = req;
     const [ userClusterDetails, userClusterAdminDetails ] = await Promise.all([
       processAnyData(userQueries.fetchUserClusterDetails, [ params.user_id ]),
-      processOneOrNoneData(userQueries.fetchUserClusterDetailsForAdmin, [ params.user_id ])
+      processAnyData(userQueries.fetchUserClusterDetailsForAdmin, [ params.user_id ])
     ]);
-    const modifiedUserClusterDetails = userClusterDetails.map((user) => {
-      if (!user.created_by) {
-        return { ...user, created_by: 'admin' + ' ' + userClusterAdminDetails.created_by };
-      }
-      return { ...user };
-    });
-
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: cluster details fetched from the DB fetchCluster.admin.controllers.user.js`
     );
-    return ApiResponse.success(res, enums.ADMIN_FETCH_CLUSTER_DETAILS, enums.HTTP_OK, modifiedUserClusterDetails);
+    const data = [ ...userClusterDetails, ...userClusterAdminDetails ];
+    return ApiResponse.success(res, enums.ADMIN_FETCH_CLUSTER_DETAILS, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_ADMIN_CLUSTER_DETAILS_CONTROLLER;
     logger.error(`fetching cluster details failed:::${enums.FETCH_ADMIN_CLUSTER_DETAILS_CONTROLLER}`, error.message);

@@ -262,14 +262,15 @@ export default {
     LEFT JOIN admins ON clusters.created_by = admins.admin_id
     WHERE cluster_members.user_id = $1
     AND clusters.is_deleted = FALSE 
-    AND cluster_members.is_left = FALSE;
+    AND cluster_members.is_left = FALSE
+    AND clusters.is_created_by_admin = FALSE;
 `,
   fetchUserClusterDetailsForAdmin: `
     SELECT
       clusters.id,
       clusters.cluster_id,
       clusters.name,
-      TRIM(CONCAT(admins.first_name, ' ', admins.last_name)) AS created_by,
+      TRIM(CONCAT('admin', ' ', admins.first_name, ' ', admins.last_name)) AS created_by,
       clusters.minimum_monthly_income,
       clusters.current_members,
       clusters.type
