@@ -612,7 +612,7 @@ export const fetchClusterMembersLoanRepayment = async(req, res, next) => {
       await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'repaid cluster loans'));
       return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     }
-    const payload = loanPayload.fetchRepaidLoans(query);
+    const payload = loanPayload.fetchRepaidClusterLoans(query);
     const [ repaidClusterLoans, [ repaidClusterLoansCount ] ] = await Promise.all([
       processAnyData(loanQueries.fetchClusterLoanRepayments, payload),
       processAnyData(loanQueries.fetchClusterLoanRepaymentCount, payload)

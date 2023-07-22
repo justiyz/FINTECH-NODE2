@@ -128,9 +128,10 @@ export default {
     OR $1 IS NULL) 
   AND (personal_loans.status = $2 OR $2 IS NULL) 
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+  AND (users.tier = $5 OR $5 IS NULL)
   ORDER BY personal_loans.created_at DESC
-  OFFSET $5
-  LIMIT $6
+  OFFSET $6
+  LIMIT $7
    `,
 
   getLoansCount: `
@@ -148,6 +149,7 @@ export default {
       OR $1 IS NULL) 
     AND (personal_loans.status = $2 OR $2 IS NULL) 
     AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    AND (users.tier = $5 OR $5 IS NULL)
   `,
 
   fetchAllLoans: `
@@ -174,6 +176,7 @@ export default {
     OR $1 IS NULL)
   AND (personal_loans.status = $2 OR $2 IS NULL) 
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+  AND (users.tier = $5 OR $5 IS NULL)
   ORDER BY personal_loans.created_at DESC
    `,
       
@@ -204,9 +207,10 @@ export default {
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL)  
       AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+      AND (users.tier = $4 OR $4 IS NULL)
       ORDER BY personal_loan_payment_schedules.payment_at DESC
-      OFFSET $4
-      LIMIT $5
+      OFFSET $5
+      LIMIT $6
   `,
 
   getRepaidLoansCount: `
@@ -224,6 +228,7 @@ export default {
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1))
       OR $1 IS NULL)  
     AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+    AND (users.tier = $4 OR $4 IS NULL)
   `,
   
   fetchAllRepaidLoans: `
@@ -254,6 +259,7 @@ export default {
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)))
     OR $1 IS NULL) 
   AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
+  AND (users.tier = $4 OR $4 IS NULL)
   ORDER BY personal_loan_payment_schedules.payment_at DESC 
   `,
 
@@ -280,9 +286,11 @@ export default {
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL) 
       AND (personal_loans.status = $2 OR $2 IS NULL) 
+      AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+      AND (users.tier = $5 OR $5 IS NULL)
       ORDER BY personal_loans.created_at DESC
-      OFFSET $3
-      LIMIT $4
+      OFFSET $6
+      LIMIT $7
   `,
 
   fetchRescheduledLoansCount: `
@@ -301,6 +309,8 @@ export default {
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
     OR $1 IS NULL) 
   AND (personal_loans.status = $2 OR $2 IS NULL) 
+  AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+  AND (users.tier = $5 OR $5 IS NULL)
   `,
 
   fetchAllRescheduledLoans: `
@@ -326,6 +336,8 @@ export default {
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
       OR $1 IS NULL) 
     AND (personal_loans.status = $2 OR $2 IS NULL) 
+    AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    AND (users.tier = $5 OR $5 IS NULL)
     ORDER BY personal_loans.created_at DESC 
   `,
 
@@ -473,8 +485,6 @@ export default {
       ON clusters.cluster_id = cluster_loans.cluster_id
       WHERE cluster_loans.loan_id = $1 
       GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
-
-
   `,
 
   fetchClusterLoanMembersDetails: `
@@ -735,11 +745,12 @@ export default {
         OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL) 
-        AND ( cluster_member_loans.status = $2 OR $2 IS NULL)
+        AND ( cluster_member_loans.status = $2 OR $2 IS NULL) AND 
+        ((cluster_member_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
         GROUP BY 1,2,3,4,5,6,7,8,9,10 
         ORDER BY cluster_member_loans.created_at DESC
-        OFFSET $3
-        LIMIT $4
+        OFFSET $5
+        LIMIT $6
  `,
 
   rescheduledClusterLoansCount: `
@@ -757,6 +768,8 @@ export default {
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL) 
         AND ( cluster_member_loans.status = $2 OR $2 IS NULL) 
+        AND 
+        ((cluster_member_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
  `,
 
   fetchAllClusterRescheduledLoans: `
@@ -786,6 +799,8 @@ export default {
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL) 
         AND ( cluster_member_loans.status = $2 OR $2 IS NULL)
+        AND 
+        ((cluster_member_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
         GROUP BY 1,2,3,4,5,6,7,8,9,10 
         ORDER BY cluster_member_loans.created_at DESC
 `,

@@ -23,6 +23,7 @@ const fetchLoans = Joi.object().keys({
     'over due', 'completed'),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
+  tier: Joi.number().optional().valid(1, 2),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   export: Joi.string().optional().valid('true')
@@ -33,6 +34,7 @@ const fetchRepaidLoans = Joi.object().keys({
   search: Joi.string().optional(),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
+  tier: Joi.number().optional().valid(1, 2),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   export: Joi.string().optional().valid('true') 
@@ -40,6 +42,9 @@ const fetchRepaidLoans = Joi.object().keys({
 const fetchRescheduledLoans = Joi.object().keys({
   search: Joi.string().optional(),
   status: Joi.string().optional(),
+  start_date: Joi.date().optional(),
+  end_date: Joi.date().optional(),
+  tier: Joi.number().optional().valid(1, 2),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   export: Joi.string().optional().valid('true') 
