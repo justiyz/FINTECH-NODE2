@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 export const CURRENT_TIME_STAMP = `${dayjs().format('DD-MMM-YYYY, HH:mm:ss')}`;
+// User related labels
 export const VALIDATE_DATA_MIDDLEWARE = 'ModelMiddleware::validateData';
 export const VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE = 'UserMiddleware::validateUnAuthenticatedUser';
 export const SIGNUP_CONTROLLER = 'AuthController::signup';

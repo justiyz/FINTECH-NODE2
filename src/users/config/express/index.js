@@ -11,7 +11,7 @@ import routes from '../routes/index';
 const expressConfig = app => {
   let logger;
 
-  switch (process.env.SEEDFI_NODE_ENV === '') {
+  switch (app.get('env')) {
   case 'development':
     logger = loggerInit('development');
     break;
