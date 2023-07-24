@@ -1,3 +1,4 @@
+// user module related messages
 export const ERROR_STATUS = 'Error';
 export const SUCCESS_STATUS = 'Success';
 export const SERVER_ERROR = 'Server Error';
@@ -239,7 +240,6 @@ export const NON_PERFORMING_LOANS  = 'notification sent to non performing loans'
 export const FETCH_ALERT_NOTIFICATION= 'successfully fetch alert notification';
 
 // admin module related messages
-
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
 export const ADMIN_HAS_NO_PERMISSIONS = 'Admin has no active permissions';
 export const ADMIN_LOGIN_SUCCESSFULLY = 'Admin logged in successfully';

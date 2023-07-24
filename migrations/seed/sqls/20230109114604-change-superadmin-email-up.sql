@@ -20,7 +20,7 @@ INSERT INTO admins (
     status
 ) VALUES (
     'SADM',
-    'dayor@enyata.com',
+    'pelumi.alli@theseedfi.com',
     '$2b$10$QFJnosYyoCGiLM43T1OK.uq81faIHle/4AJfr8diyRI/tik5MmrCC',
     false,
     true,

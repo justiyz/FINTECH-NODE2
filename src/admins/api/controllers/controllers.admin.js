@@ -307,8 +307,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       },
       loanRepayment: {
         total_loan_repayment: parseFloat(parseFloat(totalLoanRepayment.sum).toFixed(2)) || 0,
-        total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0,
-        total_loan_rescheduled: 0 // to later include the value once loan rescheduling is implemented
+        total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0
       },
       loanSchedule: {
         applied_loans: appliedLoans,
@@ -498,9 +497,10 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
     const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
-    const [ totalClusterGroups, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
+    const [ totalClusterGroups, averageClusterLoanApplicationTenor, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalClusterGroups, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ ]),
+      processOneOrNoneData(adminQueries.averageClusterLoanApplicationTenor, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalClusterLoanDefaulters, [ ]),
       processAnyData(adminQueries.fetchDetailsOfTotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
     ]);
@@ -508,7 +508,7 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
      fetchClusterManagementAnalytics.controllers.admin.admin.js`);
     const data = {
       total_cluster_group: Number(totalClusterGroups.count),
-      average_repayment_period: null, // will be implemented when cluster loan is implemented
+      average_repayment_period: Number(averageClusterLoanApplicationTenor.avg),
       total_cluster_loan_amount: parseFloat(parseFloat(totalClusterLoanAmount.sum).toFixed(2)) || 0,
       total_loan_defaulters: Number(totalLoanDefaulters.count),
       total_loan_disbursed: totalDisbursedClusterLoan

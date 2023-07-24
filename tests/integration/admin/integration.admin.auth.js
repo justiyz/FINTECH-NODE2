@@ -13,7 +13,7 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/login')
         .send({
-          email: 'dayor@enyata.com',
+          email: 'pelumi.alli@theseedfi.com',
           password: 'Akintunde@02'
         })
         .end((err, res) => {
@@ -52,7 +52,7 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/login')
         .send({
-          email: 'dayor@enyata.com',
+          email: 'pelumi.alli@theseedfi.com',
           password: 'Akinpelumi89%'
         })
         .end((err, res) => {
@@ -85,7 +85,7 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/login')
         .send({
-          email: 'dayor@enyata.com'
+          email: 'pelumi.alli@theseedfi.com'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -191,7 +191,7 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/forgot-password')
         .send({
-          email: 'dayor@enyata.com'
+          email: 'pelumi.alli@theseedfi.com'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -434,7 +434,7 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/forgot-password')
         .send({
-          email: 'dayor@enyata.com'
+          email: 'pelumi.alli@theseedfi.com'
         })
         .set({
           'Content-Type': 'application/json',

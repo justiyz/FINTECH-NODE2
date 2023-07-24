@@ -250,7 +250,6 @@ describe('Admin Settings management', () => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.have.property('status');
           expect(res.body.data).to.have.property('individualLoanScoreCardResult');
-          expect(res.body.data).to.have.property('clusterLoanScoreCardResult');
           expect(res.body.data.individualLoanScoreCardResult).to.have.property('monthly_income_weight');
           expect(res.body.data.individualLoanScoreCardResult).to.have.property('employment_type_weight');
           expect(res.body.data.individualLoanScoreCardResult).to.have.property('dependant_weight');

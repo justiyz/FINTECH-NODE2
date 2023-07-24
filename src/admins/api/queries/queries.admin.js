@@ -671,25 +671,34 @@ export default {
     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) 
      OR ($1 IS NULL AND $2 IS NULL))`,
 
+  averageClusterLoanApplicationTenor: `
+     SELECT AVG(loan_tenor_in_months::numeric)::numeric(10)
+     FROM cluster_loans
+     WHERE (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'completed')
+     AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))`,
+
   totalClusterLoanAmount: `
-    SELECT SUM(total_loan_obligation)
-    FROM clusters
-    WHERE is_deleted = FALSE`,
+    SELECT SUM(amount_requested)
+    FROM cluster_member_loans
+    WHERE is_loan_disbursed = TRUE
+    AND ((created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))`,
 
   totalClusterLoanDefaulters: `
       SELECT COUNT(user_id)
-      FROM cluster_members
-      WHERE loan_status = 'over due'`,
+      FROM cluster_member_loan_payment_schedules
+      WHERE status = 'over due'`,
 
   fetchDetailsOfTotalDisbursedClusterLoan: `
-        SELECT
+      SELECT
+        id,
+        disbursement_id,
         cluster_id,
-        name,
-        type,
-        total_loan_obligation,
-        loan_amount
-      FROM clusters
-      WHERE loan_status = 'active'
+        member_loan_id,
+        loan_id,
+        amount AS loan_amount,
+        created_at
+      FROM cluster_member_loan_disbursements
+      WHERE status = 'success'
       AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
   `
 };
