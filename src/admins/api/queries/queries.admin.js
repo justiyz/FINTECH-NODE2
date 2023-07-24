@@ -441,12 +441,10 @@ export default {
       SELECT total_payment_amount
       FROM personal_loan_payment_schedules 
       WHERE status = 'over due'
-      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
       UNION ALL
       SELECT total_payment_amount
       FROM cluster_member_loan_payment_schedules 
       WHERE status = 'over due'
-      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
       ) AS totalOverdueRepayment;
     `,
   
@@ -461,6 +459,21 @@ export default {
       FROM cluster_member_loan_payment_schedules 
       WHERE (status = 'paid' OR status = 'over due')
       ) AS totalExpectedRepayment`,
+
+  totalNplOverdueRepayment: `
+      SELECT SUM(total_payment_amount) 
+      FROM (
+      SELECT total_payment_amount
+      FROM personal_loan_payment_schedules 
+      WHERE status = 'over due'
+      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
+      UNION ALL
+      SELECT total_payment_amount
+      FROM cluster_member_loan_payment_schedules 
+      WHERE status = 'over due'
+      AND NOW()::DATE > (proposed_payment_date + interval '$1 day')::DATE
+      ) AS totalOverdueRepayment;
+    `,
 
   fetchAdminSetEnvDetails: `
     SELECT 
