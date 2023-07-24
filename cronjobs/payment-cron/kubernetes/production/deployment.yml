@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: seedfi-payment-cron
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: seedfi-payment-cron
+        spec:
+          imagePullSecrets:
+            - name: registrypullsecret
+          restartPolicy: OnFailure
+          containers:
+            - env:
+              - name: NODE_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
+              - name: POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              - name: SEEDFI_PROD_DATABASE_URL
+                valueFrom:
+                  secretKeyRef:
+                    key: databaseurl
+                    name: seedfi-api-config
+              - name: SEEDFI_PROD_PAYSTACK_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: paystacksecretkey
+                    name: seedfi-api-config
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    key: accountprivatekeyid
+                    name: seedfi-api-config
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: privatekey
+                    name: seedfi-config-map
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_CLIENT_CERT_URL
+                valueFrom:
+                  secretKeyRef:
+                    key: clientcerturl
+                    name: seedfi-api-config
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    key: firebaseclientid
+                    name: seedfi-api-config
+              - name: SEEDFI_PROD_FIREBASE_WEB_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: firebasewebapikey
+                    name: seedfi-api-config
+              - name: SEEDFI_PROD_SENDGRID_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: sendgridapikey
+                    name: seedfi-api-config
+              - name: SEEDFI_NODE_ENV
+                value: 'production' 
+              - name: SEEDFI_PROD_PAYSTACK_APIS_BASE_URL
+                value: 'https://api.paystack.co'
+              - name: SEEDFI_PROD_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL
+                value: 'https://standard.paystack.co/close'
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_TYPE
+                value: 'service_account'
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_PROJECT_ID
+                value: 'seedfi-1f4cc'
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL 
+                value: 'firebase-adminsdk-wqjyv@seedfi-1f4cc.iam.gserviceaccount.com'
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_AUTH_URI
+                value: 'https://accounts.google.com/o/oauth2/auth'
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_TOKEN_URI
+                value: 'https://oauth2.googleapis.com/token'
+              - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL
+                value: 'https://www.googleapis.com/oauth2/v1/certs'
+              - name: SEEDFI_PROD_ADMIN_WEB_BASE_URL
+                value: 'https://admin.theseedfi.com'
+              - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_DOMAIN_URI_PREFIX
+                value: 'https://cluster.theseedfi.com' 
+              - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_ANDROID_PACKAGE_NAME
+                value: 'com.theseedfi.app'   
+              - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_IOS_BUNDLE_ID
+                value: 'com.theseedfi.app' 
+              - name: SEEDFI_PROD_SENDGRID_FROM
+                value: 'hello@theseedfi.com'
+              name: seedfi-cronjob
+              image: seedfidevops/seedfi-payment-cron:production0001
