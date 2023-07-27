@@ -283,6 +283,17 @@ router.get(
 );
 
 router.get(
+  '/:cluster_id/:loan_id/loan-summary',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.clusterLoanIdParams, 'params'),
+  ClusterMiddleware.checkIfClusterExists,
+  ClusterMiddleware.checkIfAlreadyClusterMember('authenticate'),
+  ClusterMiddleware.checkIfPublicOrPrivateCluster('private'),
+  ClusterMiddleware.checkIfClusterLoanApplicationExists,
+  ClusterController.fetchClusterLoanSummary
+);
+
+router.get(
   '/loan/:member_loan_id/reschedule-summary',
   AuthMiddleware.validateAuthToken,
   Model(Schema.clusterMemberLoanIdParams, 'params'),

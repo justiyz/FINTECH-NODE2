@@ -1181,18 +1181,40 @@ export const initiateManualCardOrBankClusterLoanRepayment = async(req, res, next
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns { JSON } - A JSON with the cluster members
+ * @returns { JSON } - A JSON with the cluster current loans
  * @memberof ClusterController
  */
 export const fetchCurrentClusterLoan = async(req, res, next) => {
   try {
     const { params: { cluster_id }, user } = req;
-    const [ clusterLoan ] = await processAnyData(clusterQueries.fetchClusterActiveLoans, [ cluster_id ]);
+    const clusterLoans = await processAnyData(clusterQueries.fetchClusterActiveLoans, [ cluster_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster active loan in the DB fetchCurrentClusterLoan.users.controllers.cluster.js`);
-    return ApiResponse.success(res, enums.CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterLoan);
+    return ApiResponse.success(res, enums.CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterLoans);
   } catch (error) {
     error.label = enums.FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER;
     logger.error(`fetching current cluster active loans failed::${enums.FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER}`, error.message);
+    return next(error);
+  }  
+};
+
+/**
+ * fetch a cluster loan summary
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the cluster loan summary
+ * @memberof ClusterController
+ */
+export const fetchClusterLoanSummary = async(req, res, next) => {
+  try {
+    const { params: { cluster_id, loan_id }, user } = req;
+    const clusterLoanSummary = await processAnyData(clusterQueries.fetchClusterLoanSummary, [ cluster_id, loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id} Info: successfully fetched cluster loan summary from the DB 
+    fetchClusterLoanSummary.users.controllers.cluster.js`);
+    return ApiResponse.success(res, enums.CLUSTER_LOAN_SUMMARY_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, clusterLoanSummary);
+  } catch (error) {
+    error.label = enums.FETCH_CLUSTER_LOAN_SUMMARY_CONTROLLER;
+    logger.error(`fetching cluster loan summary details failed::${enums.FETCH_CLUSTER_LOAN_SUMMARY_CONTROLLER}`, error.message);
     return next(error);
   }  
 };
@@ -1202,7 +1224,7 @@ export const fetchCurrentClusterLoan = async(req, res, next) => {
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns {object} - Returns details of a personal loan
+ * @returns {object} - Returns details of a cluster loan
  * @memberof ClusterController
  */
 export const clusterLoanReschedulingSummary = async(req, res, next) => {
@@ -1241,7 +1263,7 @@ export const clusterLoanReschedulingSummary = async(req, res, next) => {
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
- * @returns {object} - Returns details of a personal loan
+ * @returns {object} - Returns details of a cluster loan
  * @memberof ClusterController
  */
 export const processClusterLoanRescheduling = async(req, res, next) => {
