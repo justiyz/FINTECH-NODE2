@@ -269,7 +269,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       unpaidLoans, paidLoans, totalLoanRepayment, totalLoanOverDue, appliedLoans, approvedLoans, 
       totalClusters, totalPrivateClusters, totalPublicClusters, totalAdminClusters, recentClusters, totalTierOneUsers, 
       totalTierTwoUsers, totalTierZeroUsers, totalActiveLoanUsers, totalActiveUsers,
-      totalOverdueRepayment, totalExpectedRepayment ] = await Promise.all([
+      totalNplOverdueRepayment, totalExpectedRepayment ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalLoanApproved, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalLoanRejected, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalDisbursedLoan, [ queryFromType, queryToType ]),
@@ -290,7 +290,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       processOneOrNoneData(adminQueries.totalTierZeroUsers, [  ]),
       processOneOrNoneData(adminQueries.totalActiveLoanUsers, [  ]),
       processOneOrNoneData(adminQueries.totalActiveUsers, [  ]),
-      processOneOrNoneData(adminQueries.totalOverdueRepayment, [ Number(nplGraceDay.value) ]),
+      processOneOrNoneData(adminQueries.totalNplOverdueRepayment, [ Number(nplGraceDay.value) ]),
       processOneOrNoneData(adminQueries.totalExpectedRepayment, [  ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: all platform overview details fetched from the DB fetchPlatformOverview.controllers.admin.admin.js`);
@@ -307,8 +307,7 @@ export const fetchPlatformOverview = async(req, res, next) => {
       },
       loanRepayment: {
         total_loan_repayment: parseFloat(parseFloat(totalLoanRepayment.sum).toFixed(2)) || 0,
-        total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0,
-        total_loan_rescheduled: 0 // to later include the value once loan rescheduling is implemented
+        total_loan_over_due: parseFloat(parseFloat(totalLoanOverDue.sum).toFixed(2)) || 0
       },
       loanSchedule: {
         applied_loans: appliedLoans,
@@ -331,9 +330,9 @@ export const fetchPlatformOverview = async(req, res, next) => {
           percentage: parseFloat(parseFloat((Number(totalActiveLoanUsers.count) / Number(totalActiveUsers.count)) * 100).toFixed(2)) || 0
         },
         npl_ratio: {
-          total_over_due_repayment: parseFloat(parseFloat(totalOverdueRepayment.sum).toFixed(2)) || 0,
+          total_over_due_repayment: parseFloat(parseFloat(totalNplOverdueRepayment.sum).toFixed(2)) || 0,
           total_expected_repayment: parseFloat(parseFloat(totalExpectedRepayment.sum).toFixed(2)) || 0,
-          percentage: parseFloat(parseFloat((parseFloat(totalOverdueRepayment.sum) / parseFloat(totalExpectedRepayment.sum)) * 100).toFixed(2)) || 0
+          percentage: parseFloat(parseFloat((parseFloat(totalNplOverdueRepayment.sum) / parseFloat(totalExpectedRepayment.sum)) * 100).toFixed(2)) || 0
         }
       }
     };
@@ -365,11 +364,10 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
     const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
-    const nplGraceDay = await processOneOrNoneData(adminQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: query types set based on query type and parameters sent 
     fetchLoanManagementAnalytics.controllers.admin.admin.js`);
     const [ totalDefaultLoans, avgLoanTenor, rescheduledLoans, totalCustomer, disbursedLoans ] = await Promise.all([
-      processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ Number(nplGraceDay.value) ]),
+      processOneOrNoneData(adminQueries.totalOverdueRepayment,  [ ]),
       processOneOrNoneData(adminQueries.averageLoanTenor, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.rescheduledLoans, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalSystemUsersPerTime, [ queryFromType, queryToType ]),
@@ -498,9 +496,10 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
     const queryToType = type === 'filter' ? dayjs(to_date).format('YYYY-MM-DD HH:mm:ss') : null;
     const currentYearFromDate = type === 'all' ? dayjs().format('YYYY-01-01 00:00:00') : dayjs(from_date).format('YYYY-MM-DD HH:mm:ss'); // i.e first day of the current year
     const currentYearToDate = type === 'all' ? dayjs().format('YYYY-12-31 23:59:59') : dayjs(to_date).format('YYYY-MM-DD HH:mm:ss'); // i.e last day of the current year
-    const [ totalClusterGroups, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
+    const [ totalClusterGroups, averageClusterLoanApplicationTenor, totalClusterLoanAmount, totalLoanDefaulters, totalDisbursedClusterLoan ] = await Promise.all([
       processOneOrNoneData(adminQueries.totalClusterGroups, [ queryFromType, queryToType ]),
-      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ ]),
+      processOneOrNoneData(adminQueries.averageClusterLoanApplicationTenor, [ queryFromType, queryToType ]),
+      processOneOrNoneData(adminQueries.totalClusterLoanAmount, [ queryFromType, queryToType ]),
       processOneOrNoneData(adminQueries.totalClusterLoanDefaulters, [ ]),
       processAnyData(adminQueries.fetchDetailsOfTotalDisbursedClusterLoan, [ currentYearFromDate, currentYearToDate ])
     ]);
@@ -508,7 +507,7 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
      fetchClusterManagementAnalytics.controllers.admin.admin.js`);
     const data = {
       total_cluster_group: Number(totalClusterGroups.count),
-      average_repayment_period: null, // will be implemented when cluster loan is implemented
+      average_repayment_period: Number(averageClusterLoanApplicationTenor.avg),
       total_cluster_loan_amount: parseFloat(parseFloat(totalClusterLoanAmount.sum).toFixed(2)) || 0,
       total_loan_defaulters: Number(totalLoanDefaulters.count),
       total_loan_disbursed: totalDisbursedClusterLoan

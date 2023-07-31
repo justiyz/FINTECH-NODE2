@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 export const CURRENT_TIME_STAMP = `${dayjs().format('DD-MMM-YYYY, HH:mm:ss')}`;
+// User related labels
 export const VALIDATE_DATA_MIDDLEWARE = 'ModelMiddleware::validateData';
 export const VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE = 'UserMiddleware::validateUnAuthenticatedUser';
 export const SIGNUP_CONTROLLER = 'AuthController::signup';
@@ -190,6 +191,7 @@ export const TOTAL_LOAN_AMOUNT_VERIFICATION_AND_BREAKDOWN_MIDDLEWARE = 'ClusterM
 export const CHECK_IF_MORE_THAN_ONE_PERSON_IS_IN_THE_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfThereIsMoreThanOnePersonInTheCluster';
 export const FETCH_CLUSTER_MEMBERS_CONTROLLER = 'ClusterController::fetchClusterMembers';
 export const FETCH_CURRENT_CLUSTER_LOAN_CONTROLLER = 'ClusterController::fetchCurrentClusterLoan';
+export const FETCH_CLUSTER_LOAN_SUMMARY_CONTROLLER = 'ClusterController::fetchClusterLoanSummary';
 export const CHECK_IF_USER_IS_ON_ACTIVE_LOAN_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
 export const CHECK_IF_USER_CAN_LEAVE_A_CLUSTER_MIDDLEWARE = 'ClusterMiddleware::checkIfUserIsOnActiveLoan';
 export const LEAVE_CLUSTER_CONTROLLER = 'ClusterController::leaveCluster';

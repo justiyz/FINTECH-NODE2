@@ -1,3 +1,4 @@
+// user module related messages
 export const ERROR_STATUS = 'Error';
 export const SUCCESS_STATUS = 'Success';
 export const SERVER_ERROR = 'Server Error';
@@ -212,7 +213,8 @@ export const CLUSTER_IS_ON_ACTIVE_LOAN = 'Cluster is on an active loan, hence ac
 export const USER_CANNOT_TAKE_DECISION_ON_THIS_TICKET = 'User cannot take a decisions on this delete cluster ticket being the author';
 export const USER_CAN_NOT_EDIT = (type) => `you can not edit ${type}`;
 export const CLUSTER_MEMBERS_FETCHED_SUCCESSFULLY = 'Cluster members fetched successfully';
-export const CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY = 'Cluster current loan application details fetched successfully';
+export const CLUSTER_CURRENT_LOAN_FETCHED_SUCCESSFULLY = 'Cluster current loan applications details fetched successfully';
+export const CLUSTER_LOAN_SUMMARY_DETAILS_FETCHED_SUCCESSFULLY = 'Cluster loan summary details fetched successfully';
 export const USER_ON_ACTIVE_LOAN = 'You still have active loan on this cluster, kindly pay all for you to leave';
 export const USER_IS_AN_ADMIN = 'You are currently the admin, you cannot leave the cluster, kindly assign someone as admin before leaving';
 export const USER_IS_NOT_AN_ADMIN = 'You can not perform this action because you are not an admin';
@@ -239,7 +241,6 @@ export const NON_PERFORMING_LOANS  = 'notification sent to non performing loans'
 export const FETCH_ALERT_NOTIFICATION= 'successfully fetch alert notification';
 
 // admin module related messages
-
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';
 export const ADMIN_HAS_NO_PERMISSIONS = 'Admin has no active permissions';
 export const ADMIN_LOGIN_SUCCESSFULLY = 'Admin logged in successfully';

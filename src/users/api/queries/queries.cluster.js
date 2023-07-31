@@ -448,7 +448,7 @@ export default {
   fetchClusterMembers: `
     SELECT 
       cluster_members.user_id,
-      TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
+      INITCAP(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name))) AS name,
       to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined,
       cluster_members.is_admin,
       cluster_members.loan_status,
@@ -661,6 +661,8 @@ export default {
       total_repayment_amount,
       total_interest_amount,
       total_monthly_repayment,
+      (SELECT SUM(total_outstanding_amount) FROM cluster_member_loans WHERE cluster_id = cluster_loans.cluster_id 
+      AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'pending')) AS cluster_total_outstanding_amount,
       status,
       is_loan_disbursed,
       loan_disbursed_at,
@@ -668,8 +670,32 @@ export default {
       created_at
     FROM cluster_loans
     WHERE cluster_id = $1
-    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
-    LIMIT 1`,
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'pending')`,
+
+  fetchClusterLoanSummary: `
+    SELECT 
+      cluster_member_loans.id,
+      cluster_member_loans.loan_id,
+      cluster_member_loans.cluster_id,
+      cluster_member_loans.cluster_name,
+      cluster_member_loans.member_loan_id,
+      cluster_member_loans.user_id,
+      INITCAP(TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name))) AS member_name,
+      cluster_member_loans.sharing_type,
+      cluster_member_loans.amount_requested,
+      cluster_member_loans.loan_tenor_in_months,
+      cluster_member_loans.total_repayment_amount,
+      cluster_member_loans.total_interest_amount,
+      cluster_member_loans.monthly_repayment,
+      cluster_member_loans.status,
+      cluster_member_loans.total_outstanding_amount,
+      cluster_member_loans.is_rescheduled
+    FROM cluster_member_loans
+    LEFT JOIN users
+    ON cluster_member_loans.user_id = users.user_id
+    WHERE cluster_member_loans.cluster_id = $1
+    AND cluster_member_loans.loan_id = $2
+    ORDER BY cluster_member_loans.total_outstanding_amount DESC`,
 
   fetchClusterLoanDetails: `
     SELECT 
