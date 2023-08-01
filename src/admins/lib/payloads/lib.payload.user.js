@@ -23,6 +23,12 @@ export default {
     userDetails.last_name,
     userDetails.date_of_birth,
     userDetails.bvn
+  ],
+
+  fetchUserRewards: (user_id, query) => [
+    user_id,
+    query.page ? (query.page - 1) * (query.per_page || 10) : 0,
+    query.per_page ? query.per_page : '10'
   ]
 };
     
