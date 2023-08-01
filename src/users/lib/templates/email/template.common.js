@@ -15,6 +15,7 @@ const heading = {
   failedAddressVerification: 'Address verification failed',
   successfulAddressVerification: 'Address verification successful',
   loanRescheduled: 'Loan Facility Rescheduled',
+  rewardPointsClaiming: 'Reward points claimed'
 };
 
 export const commonTemplate = (messageType, data) => {

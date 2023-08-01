@@ -976,6 +976,8 @@ export const userClaimsReferralPoints = async(req, res, next) => {
       processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
       processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
     ]);
+    await MailService('Reward points claimed', 'rewardPointsClaiming', { ...user, just_claimed_points: referralDetails.unclaimed_reward_points, 
+      claimed_points: updatedReferralValues.claimed_reward_points });
     userActivityTracking(req.user.user_id, 105, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user claimed points tracked in the DB userClaimsReferralPoints.controller.user.js`);
     return ApiResponse.success(res, enums.CLAIMED_REFERRAL_POINTS_SUCCESSFULLY, enums.HTTP_OK, updatedReferralValues);

@@ -3665,10 +3665,12 @@ describe('User', () => {
           expect(res.body.data).to.have.property('referral_code');
           expect(res.body.data).to.have.property('unclaimed_reward_points');
           expect(res.body.data).to.have.property('claimed_reward_points');
+          expect(res.body.data).to.have.property('total_available_reward_points');
           expect(res.body.data).to.have.property('cumulative_reward_points');
           expect(res.body.data.unclaimed_reward_points).to.equal('20');
           expect(res.body.data.claimed_reward_points).to.equal('0');
           expect(res.body.data.cumulative_reward_points).to.equal('20');
+          expect(res.body.data.total_available_reward_points).to.equal('20');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
