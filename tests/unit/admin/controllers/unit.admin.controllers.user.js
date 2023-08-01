@@ -93,5 +93,23 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchUserRewards', async() => {
+      const req = { admin: '', params: null };
+      const data = await AdminUserController.fetchUserRewards(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call setUserPointsToZero', async() => {
+      const req = { admin: '', params: null };
+      const data = await AdminUserController.setUserPointsToZero(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call setAllUsersPointsToZero', async() => {
+      const req = { admin: '' };
+      const data = await AdminUserController.setAllUsersPointsToZero(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -134,4 +134,27 @@ router.get(
   UserController.fetchingUserClusterDetails
 );
 
+router.get(
+  '/:user_id/rewards',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.fetchUserRewards
+);
+router.patch(
+  '/:user_id/reset-rewards',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.setUserPointsToZero
+);
+router.put(
+  '/reset-rewards',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  UserController.setAllUsersPointsToZero
+);
+
 export default router;

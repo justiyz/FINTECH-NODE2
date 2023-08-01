@@ -40,7 +40,8 @@ export default {
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
       number_of_children, marital_status, loan_status,
-       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
+       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created, (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points
+
     FROM users
     WHERE user_id = $1`,
 
@@ -358,5 +359,38 @@ export default {
   fetchUserFcmTOken: `
       SELECT fcm_token
       FROM users
-      WHERE user_id = $1`
+      WHERE user_id = $1`,
+
+  fetchUserRewardHistory: `
+        SELECT 
+            user_id,
+            reward_id,
+            reward_description,
+            created_at,
+            type,
+            point_reward
+        FROM reward_points_tracking
+        WHERE user_id = $1
+        ORDER BY created_at DESC          
+  `,
+
+  setUserPointsToZero: `
+      UPDATE users
+      SET 
+        updated_at = NOW(),
+        claimed_reward_points = 0,
+        unclaimed_reward_points = 0
+      WHERE user_id = $1
+  `,
+  setAllUsersPointsToZero: `
+      UPDATE users
+      SET 
+        updated_at = NOW(),
+        claimed_reward_points = 0,
+        unclaimed_reward_points = 0
+  `
+
+  
 };
+
+  

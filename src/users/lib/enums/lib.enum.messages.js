@@ -371,3 +371,5 @@ export const NOTIFICATION_DOES_NOT_EXIST = 'Notification id dose not exist';
 export const NOT_ALLOWED_TO_DELETE_NOTIFICATION = 'Admin cannot delete this notification';
 export const DELETE_NOTIFICATION = 'Notification successfully deleted';
 export const CLUSTER_LOAN_REPAYMENTS_FETCHED_SUCCESSFULLY = 'Cluster loan repayment(s) fetched successfully.';
+export const USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY = 'User Rewards fetched successfully.';
+export const REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY = 'Claimed points set to zero successfully';

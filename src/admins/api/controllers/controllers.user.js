@@ -11,7 +11,7 @@ import * as PushNotifications from '../../../admins/lib/templates/pushNotificati
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { userActivityTracking } from '../../../users/lib/monitor';
-import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import { processAnyData, processNoneData, processOneOrNoneData } from '../services/services.db';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 /**
@@ -471,3 +471,84 @@ export const fetchingUserClusterDetails = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * fetches user Rewards
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminUserController
+ */
+export const fetchUserRewards = async(req, res, next) => {
+  try {
+    const { params: { user_id }, admin } = req;
+    const [ user,  rewardHistory  ] = await Promise.all([
+      processOneOrNoneData(userQueries.getUserByUserId, user_id),
+      processAnyData(userQueries.fetchUserRewardHistory, user_id)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user debit cards fetched from the DB 
+     fetchUserRewards.admin.controllers.user.js`);
+    const data ={
+      userDetails: user,
+      rewardHistory: rewardHistory
+    };
+    return ApiResponse.success(res, enums.USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.ADMIN_FETCH_USER_REWARDS_CONTROLLER;
+    logger.error(`Admin fetching user rewards failed:::${enums.ADMIN_FETCH_USER_REWARDS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * sets user points to zero
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminUserController
+ */
+
+export const setUserPointsToZero = async(req, res, next) => {
+  try {
+    const {params: { user_id }, admin, userDetails } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`; 
+    const userName = `${userDetails.first_name} ${userDetails.last_name}`;   
+    await processNoneData(userQueries.setUserPointsToZero, user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully sets user  points to zero setUserPointsToZero.admin.controllers.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.set_user_reward_points_to_zero(adminName, userName)); 
+    // to later change the activity tracking code when the migration is added
+    return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER;
+    logger.error(`setting user reward points to zero failed:::${enums.ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+/**
+ * sets all users points to zero
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminUserController
+ */
+
+export const setAllUsersPointsToZero = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`; 
+    await processNoneData(userQueries.setAllUsersPointsToZero);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully sets users points to zero setAllUsersPointsToZero.admin.controllers.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.set_users_reward_points_to_zero(adminName)); 
+    // to later change the activity tracking code when the migration is added
+    return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER;
+    logger.error(`setting userS points to zero failed:::${enums.ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+

@@ -356,4 +356,7 @@ export const FETCH_CLUSTER_LOAN_REPAYMENT_CONTROLLER = 'AdminNotificationControl
 export const FETCH_CLUSTER_LOAN_REPAYMENT_DETAILS_CONTROLLER = 'AdminNotificationController::fetchUserClusterLoanRepaymentDetails';
 export const FETCH_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificationController::fetchRescheduledClusterLoans';
 export const FETCH_SINGLE_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificationController::fetchSingleClusterMemberRescheduledLoan';
+export const ADMIN_FETCH_USER_REWARDS_CONTROLLER = 'AdminUserController::fetchUserRewards';
+export const ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminUserController::setUserClaimedPointToZero';
+export const ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminUserController::setUsersClaimedPointToZero';
 
