@@ -500,8 +500,8 @@ export const fetchUserRewards = async(req, res, next) => {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(rewardsCount.total_count),
       total_pages: Helpers.calculatePages(Number(rewardsCount.total_count), Number(req.query.per_page) || 10),
-      rewardHistory,
-      user
+      user,
+      rewardHistory
     };
     return ApiResponse.success(res, enums.USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {

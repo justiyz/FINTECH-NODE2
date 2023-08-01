@@ -366,7 +366,7 @@ export default {
             user_id,
             reward_id,
             reward_description,
-            to_char(DATE (created_at)::date, 'DD Month, YYYY'),
+            to_char(DATE (created_at)::date, 'DD Month, YYYY') AS date_earned,
             type,
             point_reward
         FROM reward_points_tracking
