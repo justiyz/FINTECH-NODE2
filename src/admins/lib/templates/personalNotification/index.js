@@ -10,7 +10,7 @@ export const tierUpgradedSuccessfully = (first_name) => {
 };
   
 export const inviteClusterMember = (data) => {
-  return `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
+  return `${data.inviter} is inviting you to join ${data.name} Cluster`;
 };
 
 export const approvedLoanApplicationNotification = (data) => {

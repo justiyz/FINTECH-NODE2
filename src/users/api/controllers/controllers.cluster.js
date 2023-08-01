@@ -1304,7 +1304,7 @@ export const processClusterLoanRescheduling = async(req, res, next) => {
       user_id: user.user_id,
       email: user.email,
       first_name: user.first_name,
-      loan_reason: `${existingLoanApplication.cluster_name} group loan`,
+      loan_reason: `${existingLoanApplication.cluster_name} cluster loan`,
       amount_requested: existingLoanApplication.amount_requested,
       monthly_repayment: existingLoanApplication.monthly_repayment,
       initial_loan_duration: existingLoanApplication.loan_tenor_in_months,

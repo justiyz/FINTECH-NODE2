@@ -685,7 +685,7 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
         const reference = uuidv4();
         await processAnyData(loanQueries.initializeBankTransferPayment, [ paymentRecord.user_id, generalClusterLoanDetails.total_amount_requested, 'paystack', reference, 
-          'cluster_loan_disbursement', 'requested group cluster loan facility disbursement', paymentRecord.loan_id ]);
+          'cluster_loan_disbursement', 'requested cluster loan facility disbursement', paymentRecord.loan_id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan payment re-initialized in the DB 
         processClusterLoanTransferPayments.middlewares.payment.js`);
         const result = await initiateTransfer(body.data.recipient.recipient_code, { amount_requested: generalClusterLoanDetails.total_amount_requested }, reference);
@@ -764,7 +764,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         const clusterLoanStatus = otherExistingOverDueRepayments.length > 0 ? 'over due' : 'active';
         await Promise.all([
           processAnyData(clusterQueries.updateClusterLoanPaymentTable, [ paymentRecord.user_id, clusterLoanDetails.cluster_id, clusterLoanDetails.member_loan_id, 
-            clusterLoanDetails.loan_id, parseFloat(paymentRecord.amount), 'debit', `${clusterLoanDetails.cluster_name} group loan`, paymentDescriptionType, 
+            clusterLoanDetails.loan_id, parseFloat(paymentRecord.amount), 'debit', `${clusterLoanDetails.cluster_name} cluster loan`, paymentDescriptionType, 
             `paystack ${body.data.channel}` ]),
           processAnyData(clusterQueries.updateNextClusterLoanRepayment, [ nextClusterLoanRepayment.loan_repayment_id ]),
           processAnyData(clusterQueries.updateClusterLoanWithRepayment, [ clusterLoanDetails.member_loan_id, paymentRecord.user_id, statusType, 
@@ -809,7 +809,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
           sendUserPersonalNotification(user, 'Full cluster loan repayment successful', 
             PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
           await MailService('Loan successfully repaid', 'completedRepayment', 
-            { ...user, loan_reason: `${clusterLoanDetails.cluster_name} group loan`, total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2), 
+            { ...user, loan_reason: `${clusterLoanDetails.cluster_name} cluster loan`, total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2), 
               loan_duration: (clusterLoanDetails.reschedule_loan_tenor_in_months || `${clusterLoanDetails.loan_tenor_in_months} months`), 
               interest_rate: clusterLoanDetails.percentage_pricing_band, total_repayment: clusterLoanDetails.total_repayment_amount, 
               monthly_repayment: clusterLoanDetails.monthly_repayment });
@@ -824,7 +824,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
       const clusterLoanStatus = otherExistingOverDueRepayments.length > 0 ? 'over due' : 'active';
       await Promise.all([
         processAnyData(clusterQueries.updateClusterLoanPaymentTable, [ paymentRecord.user_id, clusterLoanDetails.cluster_id, clusterLoanDetails.member_loan_id, 
-          clusterLoanDetails.loan_id, parseFloat(paymentRecord.amount), 'debit', `${clusterLoanDetails.cluster_name} group loan`, 'full cluster loan repayment', 
+          clusterLoanDetails.loan_id, parseFloat(paymentRecord.amount), 'debit', `${clusterLoanDetails.cluster_name} cluster loan`, 'full cluster loan repayment', 
           `paystack ${body.data.channel}` ]),
         processAnyData(clusterQueries.updateAllClusterLoanRepaymentOnFullPayment, [ clusterLoanDetails.member_loan_id, paymentRecord.user_id ]),
         processAnyData(clusterQueries.updateClusterLoanWithRepayment, [ clusterLoanDetails.member_loan_id, paymentRecord.user_id, 'completed', 
@@ -863,7 +863,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
       sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
       await MailService('Loan successfully repaid', 'completedRepayment', 
-        { ...user, loan_reason: `${clusterLoanDetails.cluster_name} group loan`, total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2), 
+        { ...user, loan_reason: `${clusterLoanDetails.cluster_name} cluster loan`, total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2), 
           loan_duration: (clusterLoanDetails.reschedule_loan_tenor_in_months || `${clusterLoanDetails.loan_tenor_in_months} months`), 
           interest_rate: clusterLoanDetails.percentage_pricing_band, total_repayment: clusterLoanDetails.total_repayment_amount, 
           monthly_repayment: clusterLoanDetails.monthly_repayment });

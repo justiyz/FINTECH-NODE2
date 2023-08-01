@@ -121,7 +121,7 @@ export const adminClusterInvite = (data) => `
     <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
             <p>
-            SeedFi admin is inviting you to join ${data.cluster_name} Cluster loan group<br/>
+            SeedFi admin is inviting you to join ${data.cluster_name} Cluster on SeedFi<br/>
             Kindly Kindly click <a href="${data.join_url}">here</a> to join cluster.
             </p>  
         </td>

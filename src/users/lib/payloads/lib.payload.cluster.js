@@ -44,7 +44,7 @@ export default {
     loan_application_id: loanApplicationDetails.member_loan_id,
     loan_duration_in_month: `${body.duration_in_months}`,
     loan_amount: parseFloat(body.amount),
-    loan_reason: `${loanApplicationDetails.cluster_name} group loan`,
+    loan_reason: `${loanApplicationDetails.cluster_name} cluster loan`,
     monthly_income: userEmploymentDetails.monthly_income,
     employment_type: userEmploymentDetails.employment_type,
     martial_status: user.marital_status,

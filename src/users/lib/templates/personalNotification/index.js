@@ -1,47 +1,47 @@
 import * as Hash from '../../utils/lib.util.hash';
 
 export const requestToJoinClusterNotification = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} wants to join ${cluster.name} cluster loan group. Your approval is needed`;
+  return `${user.first_name} ${user.last_name} wants to join ${cluster.name} cluster. Your approval is needed`;
 };
 
 export const joinClusterRequestAccepted = (cluster) => {
-  return `Your request to join ${cluster.name} cluster loan group as a cluster member has been examined and your request has been accepted.
-  Therefore, you are now a member of ${cluster.name} cluster loan group.`;
+  return `Your request to join ${cluster.name} cluster as a cluster member has been examined and your request has been accepted.
+  Therefore, you are now a member of ${cluster.name} cluster.`;
 };
 
 export const joinClusterRequestRejected = (cluster) => {
-  return `Your request to join ${cluster.name} cluster loan group as a cluster member has been examined and your request has been rejected.
-  We are sorry to inform you that you were not accepted to join ${cluster.name} cluster loan group.`;
+  return `Your request to join ${cluster.name} cluster as a cluster member has been examined and your request has been rejected.
+  We are sorry to inform you that you were not accepted to join ${cluster.name} cluster.`;
 };
 
 export const inviteClusterMember = (data) => {
-  return `${data.inviter} is inviting you to join ${data.name} Cluster loan group`;
+  return `${data.inviter} is inviting you to join ${data.name} Cluster`;
 };
 
 export const clusterInvitationAcceptance = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} whom you invited to join ${cluster.name} Cluster loan group has accepted the invitation to be a member of the cluster`;
+  return `${user.first_name} ${user.last_name} whom you invited to join ${cluster.name} Cluster has accepted the invitation to be a member of the cluster`;
 };
 
 export const clusterInvitationDeclination = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} whom you invited to join ${cluster.name} Cluster loan group has declined the invitation to be a member of the cluster`;
+  return `${user.first_name} ${user.last_name} whom you invited to join ${cluster.name} Cluster has declined the invitation to be a member of the cluster`;
 };
 
 export const initiateDeleteCluster = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} is requesting to delete ${cluster.name} loan group. 
-  Kindly accept or decline this request to permanently delete the Cluster group. `;
+  return `${user.first_name} ${user.last_name} is requesting to delete ${cluster.name} cluster. 
+  Kindly accept or decline this request to permanently delete the Cluster. `;
 };
 
 export const selectNewAdmin = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} selected you to be the new cluster admin of ${cluster.name} loan group. Kindly accept or decline this request`;
+  return `${user.first_name} ${user.last_name} selected you to be the new cluster admin of ${cluster.name} cluster. Kindly accept or decline this request`;
 };
 
 export const newAdminSelectionRequestAccepted = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} has accepted the request to be the new cluster admin for cluster ${cluster.name} group. 
+  return `${user.first_name} ${user.last_name} has accepted the request to be the new cluster admin for ${cluster.name} cluster. 
   Therefore, you are no longer the cluster admin.`;
 };
 
 export const newAdminSelectionRequestDeclined = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} has declined the request to be the new cluster admin for cluster ${cluster.name} group. 
+  return `${user.first_name} ${user.last_name} has declined the request to be the new cluster admin for ${cluster.name} cluster. 
   Therefore, You are still the cluster admin.`;
 };
 
@@ -120,7 +120,7 @@ export const tierUpgradedSuccessfully = (first_name) => {
 };
 
 export const initiateClusterLoan = (user, cluster) => {
-  return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} loan group. 
+  return `${user.first_name} ${user.last_name} has requested a cluster loan for ${cluster.name} cluster. 
   Kindly accept or decline this request to be a part of this cluster loan.`;
 };
 
