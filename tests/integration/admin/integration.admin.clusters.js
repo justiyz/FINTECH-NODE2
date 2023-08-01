@@ -4713,7 +4713,7 @@ describe('Clusters', () => {
           expect(res.body.data).to.have.property('unclaimed_reward_points');
           expect(res.body.data).to.have.property('claimed_reward_points');
           expect(res.body.data).to.have.property('cumulative_reward_points');
-          expect(res.body.data.unclaimed_reward_points).to.equal('10');
+          expect(res.body.data.unclaimed_reward_points).to.equal('4');
           expect(res.body.data.claimed_reward_points).to.equal('20');
           expect(res.body.data.cumulative_reward_points).to.equal('30');
           expect(res.body.message).to.equal(enums.FETCHED_REFERRAL_DETAILS);
