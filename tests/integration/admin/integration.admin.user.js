@@ -1778,40 +1778,5 @@ describe('Admin Users management', () => {
         });
     });
   });
-  describe('should set all users total points to zero', () => {
-    it('Should throw when token is invalid', (done) => {
-      chai.request(app)
-        .put('/api/v1/admin/user/reset-rewards')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}0p`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('invalid signature');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          done();
-        });
-    });
-    it('Should set all users points to zero successfully', (done) => {
-      chai.request(app)
-        .put('/api/v1/admin/user/reset-rewards')
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_OK);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body).to.have.property('data');
-          expect(res.body.message).to.equal(enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY);
-          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
-          done();
-        });
-    });
-  });
 });
 

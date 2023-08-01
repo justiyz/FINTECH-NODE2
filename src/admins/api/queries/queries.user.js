@@ -386,8 +386,8 @@ export default {
       UPDATE users
       SET 
         updated_at = NOW(),
-        claimed_reward_points = 0,
-        unclaimed_reward_points = 0
+        unclaimed_reward_points = 0,
+        claimed_reward_points = 0
   `
 
   
