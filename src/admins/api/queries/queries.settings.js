@@ -252,5 +252,21 @@ export default {
       lower_bound = $2,
       upper_bound = $3,
       point = $4
-    WHERE range_id = $1`
+    WHERE range_id = $1`,
+
+  resetUserRewardPoints: `
+      UPDATE users
+      SET 
+        updated_at = NOW(),
+        claimed_reward_points = 0,
+        unclaimed_reward_points = 0
+      WHERE user_id = $1
+  `,
+  resetAllUsersRewardPoints: `
+      UPDATE users
+      SET 
+        updated_at = NOW(),
+        unclaimed_reward_points = 0,
+        claimed_reward_points = 0
+  `
 };

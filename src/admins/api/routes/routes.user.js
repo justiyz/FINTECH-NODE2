@@ -143,19 +143,5 @@ router.get(
   UserMiddleware.checkIfUserExists,
   UserController.fetchUserRewards
 );
-router.patch(
-  '/:user_id/reset-rewards',
-  AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('users', 'update'),
-  Model(Schema.userIdParams, 'params'),
-  UserMiddleware.checkIfUserExists,
-  UserController.resetUserRewardPoints
-);
-router.put(
-  '/reset-rewards',
-  AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('users', 'update'),
-  UserController.resetAllUsersRewardPoints
-);
 
 export default router;
