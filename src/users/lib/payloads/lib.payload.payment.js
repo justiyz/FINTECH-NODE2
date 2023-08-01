@@ -49,7 +49,7 @@ export default {
     email: userDetails.email,
     loanAmount: `₦${parseFloat(loanDetails.amount_requested).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     loanDuration: Number(loanDetails.loan_tenor_in_months),
-    loanPurpose: `${loanDetails.cluster_name} group loan`,
+    loanPurpose: `${loanDetails.cluster_name} cluster loan`,
     pricingBand: `${parseFloat(loanDetails.percentage_pricing_band).toFixed(2)}%`,
     monthlyInterest: `${(parseFloat(loanDetails.monthly_interest)).toFixed(2)}%`,
     totalInterestAmount: `₦${parseFloat(loanDetails.total_interest_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
@@ -82,7 +82,7 @@ export default {
     member.loan_id,
     parseFloat(member.amount_requested),
     'credit',
-    `${member.cluster_name} group loan`,
+    `${member.cluster_name} cluster loan`,
     'cluster loan disbursement',
     'paystack transfer'
   ],

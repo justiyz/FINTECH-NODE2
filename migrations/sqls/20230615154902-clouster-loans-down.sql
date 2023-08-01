@@ -44,5 +44,4 @@ DROP TABLE IF EXISTS cluster_member_loan_payments CASCADE;
 DROP TABLE IF EXISTS cluster_member_renegotiated_loan CASCADE;
 DROP TABLE IF EXISTS cluster_member_rescheduled_loan CASCADE;
 
-DELETE FROM admin_resources WHERE name = 'notifications';
 DELETE FROM admin_env_values_settings WHERE name = 'private_cluster_fixed_interest_rate';
