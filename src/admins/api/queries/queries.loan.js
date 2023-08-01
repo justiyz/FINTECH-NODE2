@@ -527,7 +527,7 @@ export default {
             cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
             cluster_member_loans.loan_tenor_in_months As duration,
             cluster_member_loans.status As loan_status,
-            CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
+            CONCAT(cluster_member_loans.cluster_name, ' ', 'cluster loan') As loan_reason
         FROM cluster_member_loans
         LEFT JOIN users
         ON cluster_member_loans.user_id = users.user_id
@@ -972,7 +972,7 @@ export default {
             cluster_member_loans.total_outstanding_amount As loan_amount_remaining,
             cluster_member_loans.loan_tenor_in_months As duration,
             cluster_member_loans.status As loan_status,
-            CONCAT(cluster_member_loans.cluster_name, ' ', 'group loan') As loan_reason
+            CONCAT(cluster_member_loans.cluster_name, ' ', 'cluster loan') As loan_reason
         FROM cluster_member_loans
         LEFT JOIN users
         ON cluster_member_loans.user_id = users.user_id
