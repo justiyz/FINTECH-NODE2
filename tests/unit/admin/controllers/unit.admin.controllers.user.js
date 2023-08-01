@@ -101,13 +101,13 @@ describe('', () => {
     });
     it('should call setUserPointsToZero', async() => {
       const req = { admin: '', params: null };
-      const data = await AdminUserController.resetUserPointsToZero(req, res, next);
+      const data = await AdminUserController.resetUserRewardPoints(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
     it('should call setAllUsersPointsToZero', async() => {
       const req = { admin: '' };
-      const data = await AdminUserController.resetAllUsersPointsToZero(req, res, next);
+      const data = await AdminUserController.resetAllUsersRewardPoints(req, res, next);
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });

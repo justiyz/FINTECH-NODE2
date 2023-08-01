@@ -74,6 +74,6 @@ export const delete_promo_failed = (name) => `${name} failed in deleting one or 
 export const delete_notification_failed = (name) => `${name} failed in deleting notifications`;
 export const updates_reward_point_ranges = (name, type) => `${name} updates ${type} reward point ranges values in settings`;
 export const updates_reward_points = (name, type) => `${name} updates ${type} reward point in settings`;
-export const set_user_reward_points_to_zero = (name, type) => `${name} sets reward point for ${type} to zero`;
-export const set_users_reward_points_to_zero = (name) => `${name} sets all users reward points to zero`;
+export const reset_user_reward_points = (name, userName) => `${name} resets reward point for ${userName}`;
+export const reset_all_users_reward_points = (name) => `${name} resets all users reward points`;
 

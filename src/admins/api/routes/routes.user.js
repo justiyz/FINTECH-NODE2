@@ -149,13 +149,13 @@ router.patch(
   RoleMiddleware.adminAccess('users', 'update'),
   Model(Schema.userIdParams, 'params'),
   UserMiddleware.checkIfUserExists,
-  UserController.resetUserPointsToZero
+  UserController.resetUserRewardPoints
 );
 router.put(
   '/reset-rewards',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'update'),
-  UserController.resetAllUsersPointsToZero
+  UserController.resetAllUsersRewardPoints
 );
 
 export default router;

@@ -366,7 +366,7 @@ export default {
             user_id,
             reward_id,
             reward_description,
-            created_at,
+            to_char(DATE (created_at)::date, 'DD Month, YYYY'),
             type,
             point_reward
         FROM reward_points_tracking
@@ -382,7 +382,7 @@ export default {
       WHERE user_id = $1
   `,
 
-  resetUserPointsToZero: `
+  resetUserRewardPoints: `
       UPDATE users
       SET 
         updated_at = NOW(),
@@ -390,7 +390,7 @@ export default {
         unclaimed_reward_points = 0
       WHERE user_id = $1
   `,
-  resetAllUsersPointsToZero: `
+  resetAllUsersRewardPoints: `
       UPDATE users
       SET 
         updated_at = NOW(),

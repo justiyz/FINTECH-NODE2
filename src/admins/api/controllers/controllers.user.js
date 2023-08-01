@@ -482,27 +482,26 @@ export const fetchingUserClusterDetails = async(req, res, next) => {
  */
 export const fetchUserRewards = async(req, res, next) => {
   try {
-    const { params: { user_id }, admin, query } = req;
+    const { params: { user_id }, admin, query, userDetails} = req;
     const payload = UserPayload.fetchUserRewards(user_id, query);
-    const [ user,  rewardHistory, [ rewardsCount ]  ] = await Promise.all([
-      processOneOrNoneData(userQueries.getUserByUserId, user_id),
+    const [  rewardHistory, [ rewardsCount ]  ] = await Promise.all([
       processAnyData(userQueries.fetchUserRewardHistory, payload),
       processAnyData(userQueries.fetchUserRewardHistoryCount, payload)
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user rewards points fetched from the DB 
      fetchUserRewards.admin.controllers.user.js`);
-    const userDetails = {
-      userName: user.name,
-      userStatus: user.status,
-      userTier: user.tier, 
-      userTotalPoint: user.total_available_reward_points
+    const user = {
+      userName: userDetails.name,
+      userStatus: userDetails.status,
+      userTier: userDetails.tier, 
+      userTotalPoint: userDetails.total_available_reward_points
     };
     const data ={
       page: parseFloat(req.query.page) || 1,
       total_count: Number(rewardsCount.total_count),
       total_pages: Helpers.calculatePages(Number(rewardsCount.total_count), Number(req.query.per_page) || 10),
       rewardHistory,
-      userDetails
+      user
     };
     return ApiResponse.success(res, enums.USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
@@ -523,14 +522,14 @@ export const fetchUserRewards = async(req, res, next) => {
  * @memberof AdminUserController
  */
 
-export const resetUserPointsToZero = async(req, res, next) => {
+export const resetUserRewardPoints = async(req, res, next) => {
   try {
     const {params: { user_id }, admin, userDetails } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`; 
     const userName = `${userDetails.first_name} ${userDetails.last_name}`;   
-    await processNoneData(userQueries.resetUserPointsToZero, user_id);
+    await processNoneData(userQueries.resetUserRewardPoints, user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully resets user  points to zero setUserPointsToZero.admin.controllers.user.js`);
-    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.set_user_reward_points_to_zero(adminName, userName)); 
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.reset_user_reward_points(adminName, userName)); 
     // to later change the activity tracking code when the migration is added
     return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
@@ -548,13 +547,13 @@ export const resetUserPointsToZero = async(req, res, next) => {
  * @memberof AdminUserController
  */
 
-export const resetAllUsersPointsToZero = async(req, res, next) => {
+export const resetAllUsersRewardPoints = async(req, res, next) => {
   try {
     const { admin } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`; 
-    await processNoneData(userQueries.resetAllUsersPointsToZero);
+    await processNoneData(userQueries.resetAllUsersRewardPoints);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully resets users points to zero setAllUsersPointsToZero.admin.controllers.user.js`);
-    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.set_users_reward_points_to_zero(adminName)); 
+    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.reset_all_users_reward_points(adminName)); 
     // to later change the activity tracking code when the migration is added
     return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
