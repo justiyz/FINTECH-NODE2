@@ -4798,7 +4798,7 @@ describe('Clusters', () => {
     describe('should set a user total points to zero', () => {
       it('Should successfully set a user total points to zero', (done) => {
         chai.request(app)
-          .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/reset-rewards`)
+          .patch(`/api/v1/admin/settings/${process.env.SEEDFI_USER_ONE_USER_ID}/reset-points`)
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4815,7 +4815,7 @@ describe('Clusters', () => {
       });
       it('Should throw error if user does not exist', (done) => {
         chai.request(app)
-          .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}truegd/reset-rewards`)
+          .patch(`/api/v1/admin/settings/${process.env.SEEDFI_USER_ONE_USER_ID}truegd/reset-points`)
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
@@ -4831,7 +4831,7 @@ describe('Clusters', () => {
       });
       it('Should throw when token is invalid', (done) => {
         chai.request(app)
-          .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_ONE_USER_ID}/reset-rewards`)
+          .patch(`/api/v1/admin/settings/${process.env.SEEDFI_USER_ONE_USER_ID}/reset-points`)
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}0p`
@@ -4849,7 +4849,7 @@ describe('Clusters', () => {
     describe('should set all users total points to zero', () => {
       it('Should throw when token is invalid', (done) => {
         chai.request(app)
-          .put('/api/v1/admin/user/reset-rewards')
+          .put('/api/v1/admin/settings/reset-points')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}0p`
@@ -4865,7 +4865,7 @@ describe('Clusters', () => {
       });
       it('Should set all users points to zero successfully', (done) => {
         chai.request(app)
-          .put('/api/v1/admin/user/reset-rewards')
+          .put('/api/v1/admin/settings/reset-points')
           .set({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`

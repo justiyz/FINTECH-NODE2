@@ -380,25 +380,7 @@ export default {
       SELECT COUNT(reward_id) AS total_count
       FROM reward_points_tracking
       WHERE user_id = $1
-  `,
-
-  resetUserRewardPoints: `
-      UPDATE users
-      SET 
-        updated_at = NOW(),
-        claimed_reward_points = 0,
-        unclaimed_reward_points = 0
-      WHERE user_id = $1
-  `,
-  resetAllUsersRewardPoints: `
-      UPDATE users
-      SET 
-        updated_at = NOW(),
-        unclaimed_reward_points = 0,
-        claimed_reward_points = 0
   `
-
-  
 };
 
   

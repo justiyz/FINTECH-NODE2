@@ -643,6 +643,7 @@ export default {
         referral_code, 
         unclaimed_reward_points,
         claimed_reward_points,
+        (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points,
         cumulative_reward_points 
       FROM users 
       WHERE user_id = $1

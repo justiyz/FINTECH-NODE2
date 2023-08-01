@@ -15,6 +15,7 @@ const getTemplate = (type, data) => {
   case 'failedAddressVerification': return email.failedAddressVerification(data);
   case 'successfulAddressVerification': return email.successfulAddressVerification(data);
   case 'loanRescheduled': return email.loanRescheduled(data);
+  case 'rewardPointsClaiming': return email.rewardPointsClaiming(data);
   default: return '';
   }
 };

@@ -10,9 +10,8 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
-import { updateNotificationReadBoolean } from '../services/services.firebase';
 import { initiateUserYouVerifyAddressVerification } from '../services/service.youVerify';
-import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import { sendUserPersonalNotification, sendPushNotification, updateNotificationReadBoolean } from '../services/services.firebase';
 import { generateMonoAccountId } from '../services/services.mono';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
@@ -747,7 +746,7 @@ export const homepageDetails = async(req, res, next) => {
 export const updateNotificationIsRead = async(req, res, next) => {
   try {
     const { body, user, params } = req;
-    await updateNotificationReadBoolean(user, params, body);
+    updateNotificationReadBoolean(user, params, body);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated notification read status updateNotificationIsRead.controller.user.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
@@ -976,6 +975,8 @@ export const userClaimsReferralPoints = async(req, res, next) => {
       processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
       processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
     ]);
+    await MailService('Reward points claimed', 'rewardPointsClaiming', { ...user, just_claimed_points: referralDetails.unclaimed_reward_points, 
+      claimed_points: updatedReferralValues.claimed_reward_points });
     userActivityTracking(req.user.user_id, 105, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user claimed points tracked in the DB userClaimsReferralPoints.controller.user.js`);
     return ApiResponse.success(res, enums.CLAIMED_REFERRAL_POINTS_SUCCESSFULLY, enums.HTTP_OK, updatedReferralValues);

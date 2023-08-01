@@ -433,3 +433,25 @@ export const loanRescheduled = (data) => `
         </td>
     </tr>
 `;
+
+export const rewardPointsClaiming = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td>
+    <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed point of ${data.claimed_points}</span>  
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td style="padding-bottom: 20px">
+    <span>Thank you</span>  
+  </td>
+</tr>
+`;
