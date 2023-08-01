@@ -40,6 +40,10 @@ const clusterDetailsParams = Joi.object().keys({
   user_id: Joi.string().required(),
   cluster_id: Joi.string().required()
 });
+const fetchUserRewards = Joi.object().keys({
+  page: Joi.number().optional(),
+  per_page: Joi.number().optional()
+});
 
 export default {
   userIdParams,
@@ -49,5 +53,6 @@ export default {
   clusterDetailsParams,
   approveUtilityBill,
   declineUtilityBill,
-  fileTitle
+  fileTitle,
+  fetchUserRewards
 };

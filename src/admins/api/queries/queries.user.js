@@ -370,11 +370,19 @@ export default {
             type,
             point_reward
         FROM reward_points_tracking
-        WHERE user_id = $1
+        WHERE user_id = $1 
         ORDER BY created_at DESC          
+        OFFSET $2
+        LIMIT $3
   `,
 
-  setUserPointsToZero: `
+  fetchUserRewardHistoryCount: `
+      SELECT COUNT(reward_id) AS total_count
+      FROM reward_points_tracking
+      WHERE user_id = $1
+  `,
+
+  resetUserPointsToZero: `
       UPDATE users
       SET 
         updated_at = NOW(),
@@ -382,7 +390,7 @@ export default {
         unclaimed_reward_points = 0
       WHERE user_id = $1
   `,
-  setAllUsersPointsToZero: `
+  resetAllUsersPointsToZero: `
       UPDATE users
       SET 
         updated_at = NOW(),
