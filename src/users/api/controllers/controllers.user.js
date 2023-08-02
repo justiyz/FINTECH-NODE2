@@ -988,3 +988,23 @@ export const userClaimsReferralPoints = async(req, res, next) => {
   }
 };
 
+/**
+ * user deletes own account
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user deleted response
+ * @memberof UserController
+ */
+export const deleteUserAccount = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const deletedUser = await processOneOrNoneData(userQueries.deleteUserOwnAccount, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully deleted user account in the DB. deleteUserAccount.controller.user.js`);
+    return ApiResponse.success(res, enums.DELETE_USER_OWN_ACCOUNT, enums.HTTP_OK, deletedUser);
+  } catch (error) {
+    error.label = enums.DELETE_USER_ACCOUNT_CONTROLLER;
+    logger.error(`Deleting user account failed:::${enums.DELETE_USER_ACCOUNT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

@@ -24,7 +24,7 @@ import ClusterPayload from '../../lib/payloads/lib.payload.cluster';
 export const checkIfClusterNameUnique = async(req, res, next) => {
   const { body, user } = req;
   try {
-    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
+    const [ existingCluster ] = await processAnyData(clusterQueries.checkIfClusterNameIsUnique, [ body.name?.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);
     if (existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster name already exists in the db checkIfClusterNameUnique.middlewares.cluster.js`);

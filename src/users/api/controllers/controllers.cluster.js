@@ -437,7 +437,7 @@ export const leaveCluster = async(req, res, next) => {
 export const editCluster = async(req, res, next) => {
   try {
     const { params, body, cluster, user  } = req;
-    const [ existingClusterName ] = await processAnyData(clusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
+    const [ existingClusterName ] = await processAnyData(clusterQueries.checkIfClusterNameIsUnique, [ body.name?.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster name already exists in the db editCluster.controllers.cluster.js`);
     if (existingClusterName) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster name already exists in the db editCluster.controllers.cluster.js`);

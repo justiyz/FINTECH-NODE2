@@ -1047,3 +1047,64 @@ export const verifyUserAndAddressResponse = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * check if user belongs to any cluster
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfUserBelongsToAnyCluster = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const activeClusterMembership = await processAnyData(userQueries.checkUserClusterMembership, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user cluster membership list checkIfUserBelongsToAnyCluster.middlewares.user.js`);
+    if (activeClusterMembership.length > 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly exit all clusters'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE;
+    logger.error(`checking if user belongs to a cluster in the DB failed::${enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user is on any active loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof UserMiddleware
+ */
+export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const activeClusterLoan = await processAnyData(userQueries.checkUserClusterLoanActiveness, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active cluster loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
+    if (activeClusterLoan.length > 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN, 
+        enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
+    const activeIndividualLoan = await processAnyData(userQueries.checkUserIndividualLoanActiveness, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active individual loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
+    if (activeIndividualLoan.length > 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
+      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN, 
+        enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE;
+    logger.error(`checking if user have active individual/cluster loan application in the DB failed::${enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

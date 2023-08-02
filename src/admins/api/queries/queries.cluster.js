@@ -168,6 +168,37 @@ export default {
       AND is_left = FALSE
   `,
 
+  fetchActiveClusters: `
+  SELECT 
+      id,
+      cluster_id,
+      name,
+      description, 
+      type,
+      maximum_members,
+      current_members,
+      loan_goal_target,
+      minimum_monthly_income,
+      admin,
+      image_url,
+      unique_code,
+      status,
+      loan_status,
+      total_loan_obligation,
+      join_cluster_closes_at,
+      is_deleted,
+      current_members,
+      is_created_by_admin,
+      company_name,
+      company_address,
+      company_type,
+      company_contact_number,
+      interest_type,
+      percentage_interest_type_value
+  FROM clusters
+  WHERE (cluster_id = $1 OR unique_code = $1 OR name = $1)
+  AND is_deleted = FALSE`,
+
   checkIfClusterExists: `
   SELECT 
       id,

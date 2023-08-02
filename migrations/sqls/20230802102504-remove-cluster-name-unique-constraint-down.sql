@@ -1,0 +1,1 @@
+ALTER TABLE clusters ADD CONSTRAINT clusters_name_key UNIQUE (name);

@@ -105,6 +105,7 @@ export const operations = {
   104: 'RCVLRRFBN', // user receives loan repayment referral bonus points
   105: 'CLRWDPTS', // user claim referral reward points
   106: 'RCVCLCTBN', // user receives cluster creation bonus points
-  107: 'RCVCLMIBN' // user receives extra bonus point on cluster membership increasing well
+  107: 'RCVCLMIBN', // user receives extra bonus point on cluster membership increasing well
+  108: 'DELOWNACT' // user deletes own account on seedfi
 };
   

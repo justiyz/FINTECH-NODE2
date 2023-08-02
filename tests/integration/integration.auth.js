@@ -1105,7 +1105,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should log user three in successfully', (done) => {
+    it('Should log user six in successfully', (done) => {
       chai.request(app)
         .post('/api/v1/auth/login')
         .send({
@@ -1133,7 +1133,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should log user SIX in successfully', (done) => {
+    it('Should log user three in successfully', (done) => {
       chai.request(app)
         .post('/api/v1/auth/login')
         .send({
@@ -1158,6 +1158,34 @@ describe('Auth', () => {
           process.env.SEEDFI_USER_THREE_ACCESS_TOKEN = res.body.data.token;
           process.env.SEEDFI_USER_THREE_REFRESH_TOKEN = res.body.data.refresh_token;
           process.env.SEEDFI_USER_THREE_EMAIL = res.body.data.email;
+          done();
+        });
+    });
+    it('Should log user seven in successfully', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: userSevenProfile.email,
+          password,
+          device_token: process.env.SEEDFI_USER_SEVEN_DEVICE_TOKEN
+        })
+        .query({
+          type: 'web'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_LOGIN_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('referral_code');
+          expect(res.body.data).to.have.property('tokenExpireAt');
+          expect(res.body.data.status).to.equal('active');
+          expect(res.body.data.is_completed_kyc).to.equal(true);
+          process.env.SEEDFI_USER_SEVEN_ACCESS_TOKEN = res.body.data.token;
+          process.env.SEEDFI_USER_SEVEN_REFRESH_TOKEN = res.body.data.refresh_token;
+          process.env.SEEDFI_USER_SEVEN_EMAIL = res.body.data.email;
           done();
         });
     });
