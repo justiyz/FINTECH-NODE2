@@ -1001,8 +1001,10 @@ export const deleteUserAccount = async(req, res, next) => {
     const { user } = req;
     const deletedUser = await processOneOrNoneData(userQueries.deleteUserOwnAccount, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully deleted user account in the DB. deleteUserAccount.controller.user.js`);
+    userActivityTracking(req.user.user_id, 108, 'success');
     return ApiResponse.success(res, enums.DELETE_USER_OWN_ACCOUNT, enums.HTTP_OK, deletedUser);
   } catch (error) {
+    userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.DELETE_USER_ACCOUNT_CONTROLLER;
     logger.error(`Deleting user account failed:::${enums.DELETE_USER_ACCOUNT_CONTROLLER}`, error.message);
     return next(error);
