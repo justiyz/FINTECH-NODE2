@@ -1069,6 +1069,7 @@ export const checkIfUserBelongsToAnyCluster = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
     return next();
   } catch (error) {
+    userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE;
     logger.error(`checking if user belongs to a cluster in the DB failed::${enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE}`, error.message);
     return next(error);
