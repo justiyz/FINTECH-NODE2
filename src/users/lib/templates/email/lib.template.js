@@ -445,7 +445,7 @@ export const rewardPointsClaiming = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed point of ${data.claimed_points}</span>  
+    <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed points of ${data.claimed_points}</span>  
   </td>
 </tr>
 

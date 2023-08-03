@@ -528,6 +528,7 @@ export default {
         kind_of_relationship
       ) VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *`,
+
   getUserNextOfKin: `
         SELECT 
             id,
@@ -551,6 +552,7 @@ export default {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING user_id, employment_type, monthly_income
       `,
+
   updateEmploymentDetails: `
     UPDATE employment_type
     SET 
@@ -587,6 +589,7 @@ export default {
     AND is_default = TRUE
     RETURNING id, user_id, bank_name, account_name, is_default, mono_account_id
     `,
+
   fetchTierOneLoanValue: `
    SELECT 
     name,
@@ -595,6 +598,7 @@ export default {
    WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
    'tier_one_minimum_loan_amount', 'tier_one_maximum_loan_amount');
   `,
+
   fetchTierTwoLoanValue: `
     SELECT 
     name,
@@ -603,6 +607,7 @@ export default {
     WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
     'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount')
  `,
+
   fetchAllActivePromos: `
       SELECT
           id,
@@ -675,8 +680,53 @@ export default {
   `,
 
   trackPointClaiming: `
-  INSERT INTO claimed_rewards_tracking(
-    user_id,
-    point
-  ) VALUES ($1, $2)`
+    INSERT INTO claimed_rewards_tracking(
+      user_id,
+      point
+    ) VALUES ($1, $2)`,
+
+  checkUserClusterMembership: `
+    SELECT
+      id,
+      cluster_id,
+      user_id,
+      is_admin,
+      status,
+      is_left
+    FROM cluster_members
+    WHERE user_id = $1
+    AND is_left = FALSE`,
+
+  checkUserClusterLoanActiveness: `
+    SELECT
+      id,
+      member_loan_id,
+      loan_id,
+      cluster_id,
+      user_id,
+      sharing_type,
+      status
+    FROM cluster_member_loans
+    WHERE user_id = $1
+    AND (status = 'pending' OR status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
+
+  checkUserIndividualLoanActiveness: `
+    SELECT
+      id,
+      loan_id,
+      user_id,
+      status
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
+
+  deleteUserOwnAccount: `
+    UPDATE users
+    SET
+      updated_at = NOW(),
+      is_deleted = TRUE,
+      status = 'inactive',
+      fcm_token = NULL
+    WHERE user_id = $1
+    RETURNING user_id, email, phone_number, is_deleted, status`
 };

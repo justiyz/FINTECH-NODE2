@@ -394,8 +394,7 @@ export const resetUserRewardPoints = async(req, res, next) => {
     const userName = `${userDetails.first_name} ${userDetails.last_name}`;   
     await processNoneData(settingsQueries.resetUserRewardPoints, user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully resets user  points to zero resetUserRewardPoints.admin.controllers.settings.js`);
-    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.reset_user_reward_points(adminName, userName)); 
-    // to later change the activity tracking code when the migration is added
+    await adminActivityTracking(req.admin.admin_id, 53, 'success', descriptions.reset_user_reward_points(adminName, userName)); 
     return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER;
@@ -417,8 +416,7 @@ export const resetAllUsersRewardPoints = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`; 
     await processNoneData(settingsQueries.resetAllUsersRewardPoints);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully resets users points to zero resetAllUsersRewardPoints.admin.controllers.settings.js`);
-    await adminActivityTracking(req.admin.admin_id, 52, 'success', descriptions.reset_all_users_reward_points(adminName)); 
-    // to later change the activity tracking code when the migration is added
+    await adminActivityTracking(req.admin.admin_id, 54, 'success', descriptions.reset_all_users_reward_points(adminName)); 
     return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     error.label = enums.ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER;
