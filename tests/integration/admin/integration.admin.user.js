@@ -1108,6 +1108,22 @@ describe('Admin Users management', () => {
           done();
         });
     });
+    it('Should flag if user one try uploading utility bill again after previous upload has been approved', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CHECK_USER_UTILITY_BILL_VERIFICATION);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should decline user two uploaded utility bill', (done) => {
       chai.request(app)
         .patch(`/api/v1/admin/user/${process.env.SEEDFI_USER_TWO_USER_ID}/decline-utility-bill`)
@@ -1148,6 +1164,25 @@ describe('Admin Users management', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.USER_HAS_NOT_UPLOADED_UTILITY_BILL);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should upload utility bill successfully for user two again after previous one declined', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
           done();
         });
     });

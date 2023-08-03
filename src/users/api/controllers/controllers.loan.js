@@ -47,7 +47,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
-      if (result.status >= 500) {
+      if (result.status >= 500 || result.response.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         checkUserLoanEligibility.controllers.loan.js`);
         admins.map((admin) => {
@@ -145,7 +145,7 @@ export const processLoanRenegotiation = async(req, res, next) => {
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing does not return success response from underwriting service 
       processLoanRenegotiation.controllers.loan.js`);
-      if (result.status >= 500) {
+      if (result.status >= 500 || result.response.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         processLoanRenegotiation.controllers.loan.js`);
         userActivityTracking(req.user.user_id, 74, 'fail');

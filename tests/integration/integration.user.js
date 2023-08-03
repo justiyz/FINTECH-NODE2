@@ -2146,6 +2146,31 @@ describe('User', () => {
           done();
         });
     });
+    it('Should flag if user two tries to update address again', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_VERIFICATION_STILL_PENDING);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should flag if user four try creating address information', (done) => {
       chai.request(app)
         .post('/api/v1/user/address-verification')
@@ -2263,6 +2288,59 @@ describe('User', () => {
           done();
         });
     });
+    it('Should flag if user one tries to update address again after it had been verified', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '14',
+          landmark: 'Microsoft lane',
+          street: 'Google road',
+          city: 'Apple',
+          state: 'Ogun' ,
+          lga: 'Abeokuta south',
+          resident_type: 'company provided',
+          rent_amount: '100000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.CHECK_USER_ADDRESS_VERIFICATION);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should successfully create user two address details again since it was disapproved', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/address-verification')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          house_number: '24',
+          landmark: 'Softwork lane',
+          street: 'Sony road',
+          city: 'Ikolaba',
+          state: 'Oyo' ,
+          lga: 'Ido',
+          resident_type: 'rented'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_ADDRESS_UPDATED_SUCCESSFULLY);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.have.property('is_verified_utility_bill');
+          expect(res.body.data).to.have.property('you_verify_candidate_id');
+          expect(res.body.data.is_editable).to.equal(false);
+          process.env.SEEDFI_USER_TWO_YOU_VERIFY_CANDIDATE_ID = res.body.data.you_verify_candidate_id;
+          done();
+        });
+    });
   });
   describe('Upload utility bill for user', () => {
     it('Should upload utility bill successfully for user one', (done) => {
@@ -2331,6 +2409,22 @@ describe('User', () => {
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.message).to.equal(enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED);
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should flag if user two try uploading utility bill again before previous one been decided on', (done) => {
+      chai.request(app)
+        .post('/api/v1/user/upload-utility-bill')
+        .set({
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .attach('document', path.resolve(__dirname, '../files/signature.png'))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.USER_UTILITY_BILL_VERIFICATION_PENDING);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
