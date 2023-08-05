@@ -304,6 +304,23 @@ export default {
       is_verified_address,
       you_verify_candidate_id
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+  
+  updateUserAddressDetailsOnCreation: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      street = $2,
+      state = $3,
+      city = $4,
+      house_number = $5,
+      landmark = $6,
+      lga = $7,
+      country = $8,
+      type_of_residence = $9,
+      rent_amount = $10,
+      is_verified_address = $11,
+      you_verify_candidate_id = $12
+    WHERE user_id = $1`,
 
   updateUserAddressDetails: `
     UPDATE address_verification
@@ -336,7 +353,12 @@ export default {
     WHERE user_id = $1
     `,
 
-  updateUtilityBillDocument: `
+  addUserUtilityBillDocument: `
+    INSERT INTO address_verification(
+      user_id, address_image_url, can_upload_utility_bill
+    ) VALUES ($1, $2, false)`,
+
+  updateUserUtilityBillDocument: `
     UPDATE address_verification
     SET 
       updated_at = NOW(),
