@@ -431,7 +431,8 @@ export const idUploadVerification = async(req, res, next) => {
 export const initiateAddressVerification = async(req, res, next) => {
   try {
     const { body, user, userAddressDetails, userYouVerifyCandidateDetails } = req;
-    const candidateId = userAddressDetails ? userAddressDetails.you_verify_candidate_id : userYouVerifyCandidateDetails.id;
+    const candidateId = (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) ? userAddressDetails.you_verify_candidate_id : 
+      userYouVerifyCandidateDetails.id;
     const requestId = uuidv4();
     const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
@@ -471,9 +472,10 @@ export const initiateAddressVerification = async(req, res, next) => {
  */
 export const updateUploadedUtilityBill = async(req, res, next) => {
   try {
-    const { user, document } = req;
+    const { user, document, userAddressDetails } = req;
     await Promise.all([
-      processOneOrNoneData(userQueries.updateUtilityBillDocument, [ user.user_id, document ]),
+      !userAddressDetails ? processOneOrNoneData(userQueries.addUserUtilityBillDocument, [ user.user_id, document ]) : 
+        processOneOrNoneData(userQueries.updateUserUtilityBillDocument, [ user.user_id, document ]),
       processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'utility bill', document ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user uploaded utility bill document saved in the DB

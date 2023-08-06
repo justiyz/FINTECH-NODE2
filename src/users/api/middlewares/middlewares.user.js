@@ -702,11 +702,10 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
       const payload = UserPayload.addressVerification(body, user, result.data.id);
-      if (!userAddressDetails) {
-        await processOneOrNoneData(userQueries.createUserAddressDetails, payload);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+      !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
+        await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
-      }
       req.userYouVerifyCandidateDetails = result.data;
       return next();
     }

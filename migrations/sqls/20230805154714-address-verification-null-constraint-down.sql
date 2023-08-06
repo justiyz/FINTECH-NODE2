@@ -1,0 +1,1 @@
+ALTER TABLE address_verification DROP CONSTRAINT IF EXISTS address_verification_user_id_key;
