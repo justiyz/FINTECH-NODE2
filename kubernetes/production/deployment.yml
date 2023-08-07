@@ -120,11 +120,11 @@ spec:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_DATADOG_API_KEY
-          valueFrom:
-            secretKeyRef:
-              key: datadogapikey
-              name: seedfi-api-config
+        # - name: SEEDFI_PROD_DATADOG_API_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       key: datadogapikey
+        #       name: seedfi-api-config
         - name: SEEDFI_NODE_ENV
           value: 'production'
         - name: SEEDFI_PROD_PORT
