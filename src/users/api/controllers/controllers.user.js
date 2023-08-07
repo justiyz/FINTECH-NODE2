@@ -10,9 +10,8 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
-import { updateNotificationReadBoolean } from '../services/services.firebase';
 import { initiateUserYouVerifyAddressVerification } from '../services/service.youVerify';
-import { sendUserPersonalNotification, sendPushNotification } from '../services/services.firebase';
+import { sendUserPersonalNotification, sendPushNotification, updateNotificationReadBoolean } from '../services/services.firebase';
 import { generateMonoAccountId } from '../services/services.mono';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
@@ -432,7 +431,8 @@ export const idUploadVerification = async(req, res, next) => {
 export const initiateAddressVerification = async(req, res, next) => {
   try {
     const { body, user, userAddressDetails, userYouVerifyCandidateDetails } = req;
-    const candidateId = userAddressDetails ? userAddressDetails.you_verify_candidate_id : userYouVerifyCandidateDetails.id;
+    const candidateId = (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) ? userAddressDetails.you_verify_candidate_id : 
+      userYouVerifyCandidateDetails.id;
     const requestId = uuidv4();
     const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
@@ -472,9 +472,10 @@ export const initiateAddressVerification = async(req, res, next) => {
  */
 export const updateUploadedUtilityBill = async(req, res, next) => {
   try {
-    const { user, document } = req;
+    const { user, document, userAddressDetails } = req;
     await Promise.all([
-      processOneOrNoneData(userQueries.updateUtilityBillDocument, [ user.user_id, document ]),
+      !userAddressDetails ? processOneOrNoneData(userQueries.addUserUtilityBillDocument, [ user.user_id, document ]) : 
+        processOneOrNoneData(userQueries.updateUserUtilityBillDocument, [ user.user_id, document ]),
       processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'utility bill', document ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user uploaded utility bill document saved in the DB
@@ -747,7 +748,7 @@ export const homepageDetails = async(req, res, next) => {
 export const updateNotificationIsRead = async(req, res, next) => {
   try {
     const { body, user, params } = req;
-    await updateNotificationReadBoolean(user, params, body);
+    updateNotificationReadBoolean(user, params, body);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated notification read status updateNotificationIsRead.controller.user.js`);
     return ApiResponse.success(res, enums.NOTIFICATION_UPDATED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
@@ -976,6 +977,8 @@ export const userClaimsReferralPoints = async(req, res, next) => {
       processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
       processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
     ]);
+    await MailService('Reward points claimed', 'rewardPointsClaiming', { ...user, just_claimed_points: referralDetails.unclaimed_reward_points, 
+      claimed_points: updatedReferralValues.claimed_reward_points });
     userActivityTracking(req.user.user_id, 105, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: user claimed points tracked in the DB userClaimsReferralPoints.controller.user.js`);
     return ApiResponse.success(res, enums.CLAIMED_REFERRAL_POINTS_SUCCESSFULLY, enums.HTTP_OK, updatedReferralValues);
@@ -987,3 +990,25 @@ export const userClaimsReferralPoints = async(req, res, next) => {
   }
 };
 
+/**
+ * user deletes own account
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user deleted response
+ * @memberof UserController
+ */
+export const deleteUserAccount = async(req, res, next) => {
+  try {
+    const { user } = req;
+    const deletedUser = await processOneOrNoneData(userQueries.deleteUserOwnAccount, [ user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:: successfully deleted user account in the DB. deleteUserAccount.controller.user.js`);
+    userActivityTracking(req.user.user_id, 108, 'success');
+    return ApiResponse.success(res, enums.DELETE_USER_OWN_ACCOUNT, enums.HTTP_OK, deletedUser);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 108, 'fail');
+    error.label = enums.DELETE_USER_ACCOUNT_CONTROLLER;
+    logger.error(`Deleting user account failed:::${enums.DELETE_USER_ACCOUNT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

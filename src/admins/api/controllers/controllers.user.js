@@ -471,3 +471,42 @@ export const fetchingUserClusterDetails = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * fetches user Rewards
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminUserController
+ */
+export const fetchUserRewards = async(req, res, next) => {
+  try {
+    const { params: { user_id }, admin, query, userDetails} = req;
+    const payload = UserPayload.fetchUserRewards(user_id, query);
+    const [  rewardHistory, [ rewardsCount ]  ] = await Promise.all([
+      processAnyData(userQueries.fetchUserRewardHistory, payload),
+      processAnyData(userQueries.fetchUserRewardHistoryCount, payload)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user rewards points fetched from the DB 
+     fetchUserRewards.admin.controllers.user.js`);
+    const user = {
+      userName: userDetails.name,
+      userStatus: userDetails.status,
+      userTier: userDetails.tier, 
+      userTotalPoint: userDetails.total_available_reward_points
+    };
+    const data ={
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(rewardsCount.total_count),
+      total_pages: Helpers.calculatePages(Number(rewardsCount.total_count), Number(req.query.per_page) || 10),
+      user,
+      rewardHistory
+    };
+    return ApiResponse.success(res, enums.USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.ADMIN_FETCH_USER_REWARDS_CONTROLLER;
+    logger.error(`Admin fetching user rewards failed:::${enums.ADMIN_FETCH_USER_REWARDS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};

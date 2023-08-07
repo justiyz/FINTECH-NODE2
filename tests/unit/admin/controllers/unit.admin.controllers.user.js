@@ -93,5 +93,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call fetchUserRewards', async() => {
+      const req = { admin: '', params: null, query: '' };
+      const data = await AdminUserController.fetchUserRewards(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

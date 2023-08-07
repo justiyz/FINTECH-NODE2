@@ -134,4 +134,14 @@ router.get(
   UserController.fetchingUserClusterDetails
 );
 
+router.get(
+  '/:user_id/rewards',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'read'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.fetchUserRewards, 'query'),
+  UserMiddleware.checkIfUserExists,
+  UserController.fetchUserRewards
+);
+
 export default router;

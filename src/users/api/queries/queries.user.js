@@ -304,6 +304,23 @@ export default {
       is_verified_address,
       you_verify_candidate_id
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+  
+  updateUserAddressDetailsOnCreation: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      street = $2,
+      state = $3,
+      city = $4,
+      house_number = $5,
+      landmark = $6,
+      lga = $7,
+      country = $8,
+      type_of_residence = $9,
+      rent_amount = $10,
+      is_verified_address = $11,
+      you_verify_candidate_id = $12
+    WHERE user_id = $1`,
 
   updateUserAddressDetails: `
     UPDATE address_verification
@@ -336,7 +353,12 @@ export default {
     WHERE user_id = $1
     `,
 
-  updateUtilityBillDocument: `
+  addUserUtilityBillDocument: `
+    INSERT INTO address_verification(
+      user_id, address_image_url, can_upload_utility_bill
+    ) VALUES ($1, $2, false)`,
+
+  updateUserUtilityBillDocument: `
     UPDATE address_verification
     SET 
       updated_at = NOW(),
@@ -528,6 +550,7 @@ export default {
         kind_of_relationship
       ) VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *`,
+
   getUserNextOfKin: `
         SELECT 
             id,
@@ -551,6 +574,7 @@ export default {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING user_id, employment_type, monthly_income
       `,
+
   updateEmploymentDetails: `
     UPDATE employment_type
     SET 
@@ -587,6 +611,7 @@ export default {
     AND is_default = TRUE
     RETURNING id, user_id, bank_name, account_name, is_default, mono_account_id
     `,
+
   fetchTierOneLoanValue: `
    SELECT 
     name,
@@ -595,6 +620,7 @@ export default {
    WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
    'tier_one_minimum_loan_amount', 'tier_one_maximum_loan_amount');
   `,
+
   fetchTierTwoLoanValue: `
     SELECT 
     name,
@@ -603,6 +629,7 @@ export default {
     WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
     'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount')
  `,
+
   fetchAllActivePromos: `
       SELECT
           id,
@@ -643,6 +670,7 @@ export default {
         referral_code, 
         unclaimed_reward_points,
         claimed_reward_points,
+        (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points,
         cumulative_reward_points 
       FROM users 
       WHERE user_id = $1
@@ -674,8 +702,53 @@ export default {
   `,
 
   trackPointClaiming: `
-  INSERT INTO claimed_rewards_tracking(
-    user_id,
-    point
-  ) VALUES ($1, $2)`
+    INSERT INTO claimed_rewards_tracking(
+      user_id,
+      point
+    ) VALUES ($1, $2)`,
+
+  checkUserClusterMembership: `
+    SELECT
+      id,
+      cluster_id,
+      user_id,
+      is_admin,
+      status,
+      is_left
+    FROM cluster_members
+    WHERE user_id = $1
+    AND is_left = FALSE`,
+
+  checkUserClusterLoanActiveness: `
+    SELECT
+      id,
+      member_loan_id,
+      loan_id,
+      cluster_id,
+      user_id,
+      sharing_type,
+      status
+    FROM cluster_member_loans
+    WHERE user_id = $1
+    AND (status = 'pending' OR status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
+
+  checkUserIndividualLoanActiveness: `
+    SELECT
+      id,
+      loan_id,
+      user_id,
+      status
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
+
+  deleteUserOwnAccount: `
+    UPDATE users
+    SET
+      updated_at = NOW(),
+      is_deleted = TRUE,
+      status = 'inactive',
+      fcm_token = NULL
+    WHERE user_id = $1
+    RETURNING user_id, email, phone_number, is_deleted, status`
 };

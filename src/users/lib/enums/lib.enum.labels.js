@@ -206,6 +206,8 @@ export const CREATE_NEXT_OF_KIN_CONTROLLER = 'UserController::createNextOfKin';
 export const FETCH_NEXT_OF_KIN_CONTROLLER = 'UserController::fetchNextOfKin';
 export const FETCH_LOAN_TIER_CONTROLLER = 'UserController::fetchLoanTierValue';
 export const CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE = 'UserMiddleware::checkIfUserHasPreviouslyCreatedNextOfKin';
+export const CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE = 'UserMiddleware::checkIfUserBelongsToAnyCluster';
+export const CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE = 'UserMiddleware::checkIfUserOnAnyActiveLoan';
 export const CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE = 'LoanMiddleware::checkIfUserBvnNotBlacklisted';
 export const USER_PROFILE_NEXT_UPDATE_MIDDLEWARE = 'UserMiddleware::userProfileNextUpdate';
 export const EMPLOYMENT_DETAILS_CONTROLLER = 'UserMiddleware::createUserEmploymentDetails';
@@ -216,6 +218,7 @@ export const FETCH_USER_REFERRAL_DETAILS_CONTROLLER = 'UserController::fetchUser
 export const FETCH_USER_REFERRAL_HISTORY_CONTROLLER = 'UserController::fetchUserReferralHistory';
 export const USER_CLAIMS_REFERRAL_POINTS_CONTROLLER = 'UserController::userClaimsReferralPoints';
 export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlertNotification';
+export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount';
 
 
 // Admin related labels
@@ -356,4 +359,7 @@ export const FETCH_CLUSTER_LOAN_REPAYMENT_CONTROLLER = 'AdminNotificationControl
 export const FETCH_CLUSTER_LOAN_REPAYMENT_DETAILS_CONTROLLER = 'AdminNotificationController::fetchUserClusterLoanRepaymentDetails';
 export const FETCH_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificationController::fetchRescheduledClusterLoans';
 export const FETCH_SINGLE_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificationController::fetchSingleClusterMemberRescheduledLoan';
+export const ADMIN_FETCH_USER_REWARDS_CONTROLLER = 'AdminUserController::fetchUserRewards';
+export const ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsController::resetUserRewardPoints';
+export const ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsController::resetAllUsersRewardPoints';
 

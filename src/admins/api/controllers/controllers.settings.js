@@ -3,7 +3,7 @@ import settingsQueries from '../queries/queries.settings';
 import  settingsPayload from '../../lib/payloads/lib.payload.settings';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import { processAnyData, processNoneData, processOneOrNoneData } from '../services/services.db';
 import { loanScoreCardBreakdown } from '../services/services.seedfiUnderwriting';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
@@ -376,5 +376,51 @@ export const updateGeneralRewardRanges = async(req, res, next) => {
     error.label = enums.UPDATE_GENERAL_REWARD_RANGES_CONTROLLER;
     logger.error(`updating general reward ranges and points failed:::${enums.UPDATE_GENERAL_REWARD_RANGES_CONTROLLER}`, error.message);
     return next(error); 
+  }
+};
+
+/**
+ * resets user points to zero
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminSettingsController
+ */
+export const resetUserRewardPoints = async(req, res, next) => {
+  try {
+    const {params: { user_id }, admin, userDetails } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`; 
+    const userName = `${userDetails.first_name} ${userDetails.last_name}`;   
+    await processNoneData(settingsQueries.resetUserRewardPoints, user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully resets user  points to zero resetUserRewardPoints.admin.controllers.settings.js`);
+    await adminActivityTracking(req.admin.admin_id, 53, 'success', descriptions.reset_user_reward_points(adminName, userName)); 
+    return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER;
+    logger.error(`resetting user reward points to zero failed:::${enums.ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+/**
+ * resets all users points to zero
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user kyc details.
+ * @memberof AdminSettingsController
+ */
+export const resetAllUsersRewardPoints = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`; 
+    await processNoneData(settingsQueries.resetAllUsersRewardPoints);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully resets users points to zero resetAllUsersRewardPoints.admin.controllers.settings.js`);
+    await adminActivityTracking(req.admin.admin_id, 54, 'success', descriptions.reset_all_users_reward_points(adminName)); 
+    return ApiResponse.success(res, enums.REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER;
+    logger.error(`setting userS points to zero failed:::${enums.ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER}`, error.message);
+    return next(error);
   }
 };

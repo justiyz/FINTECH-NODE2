@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as AdminMiddleware from '../middlewares/middlewares.admin';
+import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as AdminSettingsMiddleware from '../middlewares/middlewares.settings';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import * as Schema from '../../../admins/lib/schemas/lib.schema.settings';
@@ -127,6 +128,24 @@ router.patch(
   RolesMiddleware.adminAccess('settings', 'update'),
   AdminMiddleware.checkAdminType,
   AdminSettingsController.updateGeneralRewardRanges
+);
+
+router.patch(
+  '/:user_id/reset-points',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('settings', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  AdminMiddleware.checkAdminType,
+  AdminSettingsController.resetUserRewardPoints
+);
+
+router.put(
+  '/reset-points',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('settings', 'update'),
+  AdminMiddleware.checkAdminType,
+  AdminSettingsController.resetAllUsersRewardPoints
 );
 
 

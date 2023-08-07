@@ -65,3 +65,7 @@ export const generalRewardRangeIds = Joi.array().min(1).items(
   })
 );
 
+export const userIdParams = Joi.object().keys({
+  user_id: Joi.string().required()
+});
+

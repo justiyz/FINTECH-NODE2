@@ -437,7 +437,7 @@ export const leaveCluster = async(req, res, next) => {
 export const editCluster = async(req, res, next) => {
   try {
     const { params, body, cluster, user  } = req;
-    const [ existingClusterName ] = await processAnyData(clusterQueries.checkIfClusterIsUnique, [ body.name?.trim().toLowerCase() ]);
+    const [ existingClusterName ] = await processAnyData(clusterQueries.checkIfClusterNameIsUnique, [ body.name?.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if cluster name already exists in the db editCluster.controllers.cluster.js`);
     if (existingClusterName) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster name already exists in the db editCluster.controllers.cluster.js`);
@@ -588,7 +588,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       await processNoneData(clusterQueries.deleteGeneralClusterLoanApplication, [ initiatorLoanApplicationDetails.loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated cluster loan application deleted 
       checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
-      if (result.status >= 500) {
+      if (result.status >= 500 || result.response.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
         admins.map((admin) => {
@@ -712,7 +712,7 @@ export const processClusterLoanRenegotiation = async(req, res, next) => {
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan renegotiation processing does not return success response from underwriting service 
       processClusterLoanRenegotiation.controllers.cluster.js`);
-      if (result.status >= 500) {
+      if (result.status >= 500 || result.response.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         processClusterLoanRenegotiation.controllers.cluster.js`);
         userActivityTracking(req.user.user_id, 74, 'fail');
@@ -815,7 +815,7 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed 
       checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
-      if (result.status >= 500) {
+      if (result.status >= 500 || result.response.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status 
         checkClusterMemberClusterLoanEligibility.controllers.cluster.js`);
         admins.map((admin) => {

@@ -99,5 +99,17 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call resetUserRewardPoints', async() => {
+      const req = { admin: '', params: null };
+      const data = await AdminSettingsController.resetUserRewardPoints(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
+    it('should call resetAllUsersRewardPoints', async() => {
+      const req = { admin: '' };
+      const data = await AdminSettingsController.resetAllUsersRewardPoints(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

@@ -11,8 +11,22 @@ export default {
         loan_status,
         is_deleted
     FROM clusters
+    WHERE unique_code = $1`,
+
+  checkIfClusterNameIsUnique: `
+    SELECT 
+        id,
+        cluster_id,
+        name,
+        description, 
+        type,
+        unique_code,
+        status,
+        loan_status,
+        is_deleted
+    FROM clusters
     WHERE name = $1
-    OR unique_code = $1`,
+    AND is_deleted = FALSE`,
 
   fetchClusterGraceOpenPeriod: `
     SELECT

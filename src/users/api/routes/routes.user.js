@@ -270,5 +270,13 @@ router.post(
   UserController.userClaimsReferralPoints
 );
 
+router.delete(
+  '/account',
+  AuthMiddleware.validateAuthToken,
+  UserMiddleware.checkIfUserOnAnyActiveLoan,
+  UserMiddleware.checkIfUserBelongsToAnyCluster,
+  UserController.deleteUserAccount
+);
+
 
 export default router;
