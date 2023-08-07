@@ -196,9 +196,9 @@ export const loanClusterInvite = (data) => `
     <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td>
            <span
-           style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
-           ${data.inviter_first_name} ${data.inviter_last_name}  is inviting you to join <b>${data.cluster_name}</b> Cluster on SeedFi<br />
-           Kindly click <a href="${data.join_url}">here</a> to join cluster.
+           style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+           SeedFi admin is inviting you to join ${data.cluster_name} Cluster. <br />
+           Kindly click <a href="${data.join_url}">here</a> to join.
            </span>  
         </td>
     </tr>
