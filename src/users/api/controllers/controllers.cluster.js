@@ -769,6 +769,10 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
     const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [ existingLoanApplication.member_loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
+    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
+    const next_repayment_date = (!selectedStatuses.includes(existingLoanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') : 
+      dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
+    existingLoanApplication.next_repayment_date = next_repayment_date;
     const data = {
       nextClusterLoanRepaymentDetails: nextRepaymentDetails,
       clusterLoanDetails: existingLoanApplication,
