@@ -266,6 +266,10 @@ export const fetchPersonalLoanDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
+    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
+    const next_repayment_date = (!selectedStatuses.includes(existingLoanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') : 
+      dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
+    existingLoanApplication.next_repayment_date = next_repayment_date;
     const data = {
       nextLoanRepaymentDetails: nextRepaymentDetails,
       loanDetails: existingLoanApplication,

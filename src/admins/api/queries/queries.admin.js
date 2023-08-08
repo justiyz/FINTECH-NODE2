@@ -631,14 +631,14 @@ export default {
      OR ($1 IS NULL AND $2 IS NULL))`,
 
   rescheduledLoans: `
-  SELECT SUM(total_repayment_amount) 
+  SELECT COUNT(id)
   FROM (
-  SELECT total_repayment_amount FROM personal_loans
+  SELECT total_repayment_amount, id FROM personal_loans
   WHERE is_rescheduled = TRUE
   AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
    OR ($1 IS NULL AND $2 IS NULL))
   UNION ALL
-  SELECT total_repayment_amount FROM cluster_member_loans
+  SELECT total_repayment_amount, id FROM cluster_member_loans
   WHERE is_rescheduled = TRUE
   AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
    OR ($1 IS NULL AND $2 IS NULL))) AS rescheduledLoans;`,

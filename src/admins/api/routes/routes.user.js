@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
+import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
@@ -98,6 +99,7 @@ router.patch(
   '/:user_id/approve-utility-bill',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'approve'),
+  AdminMiddleware.checkAdminType,
   Model(Schema.userIdParams, 'params'),
   Model(Schema.approveUtilityBill, 'payload'),
   UserMiddleware.checkIfUserExists,
@@ -108,6 +110,7 @@ router.patch(
   '/:user_id/decline-utility-bill',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'reject'),
+  AdminMiddleware.checkAdminType,
   Model(Schema.userIdParams, 'params'),
   Model(Schema.declineUtilityBill, 'payload'),
   UserMiddleware.checkIfUserExists,
