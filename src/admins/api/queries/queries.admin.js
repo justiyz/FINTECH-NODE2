@@ -603,21 +603,21 @@ export default {
 
   loanTenor: `
       SELECT
-      MAX(loan_tenor_in_months) AS highest_month_tenure,
-      MIN(loan_tenor_in_months) AS lowest_month_tenure,
-      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM personal_loans 
+      MAX(loan_tenor_in_months::integer) AS highest_month_tenure,
+      MIN(loan_tenor_in_months::integer) AS lowest_month_tenure,
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months::integer = (SELECT MAX(loan_tenor_in_months::integer) FROM personal_loans 
       WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
-      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM personal_loans 
+      (SELECT COUNT(id) FROM personal_loans WHERE loan_tenor_in_months::integer = (SELECT MIN(loan_tenor_in_months::integer) FROM personal_loans 
       WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
       FROM personal_loans
       WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL)
       UNION ALL
       SELECT
-      MAX(loan_tenor_in_months) AS highest_month_tenure,
-      MIN(loan_tenor_in_months) AS lowest_month_tenure,
-      (SELECT COUNT(id) FROM cluster_member_loans WHERE loan_tenor_in_months = (SELECT MAX(loan_tenor_in_months) FROM cluster_member_loans 
+      MAX(loan_tenor_in_months::integer) AS highest_month_tenure,
+      MIN(loan_tenor_in_months::integer) AS lowest_month_tenure,
+      (SELECT COUNT(id) FROM cluster_member_loans WHERE loan_tenor_in_months::integer = (SELECT MAX(loan_tenor_in_months::integer) FROM cluster_member_loans 
       WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_highest_month,
-      (SELECT COUNT(id) FROM cluster_member_loans WHERE loan_tenor_in_months = (SELECT MIN(loan_tenor_in_months) FROM cluster_member_loans 
+      (SELECT COUNT(id) FROM cluster_member_loans WHERE loan_tenor_in_months::integer = (SELECT MIN(loan_tenor_in_months::integer) FROM cluster_member_loans 
       WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL))) AS count_lowest_month
       FROM cluster_member_loans
       WHERE (created_at::DATE BETWEEN $1::DATE AND $2::DATE) OR ($1 IS NULL AND $2 IS NULL);
@@ -631,14 +631,14 @@ export default {
      OR ($1 IS NULL AND $2 IS NULL))`,
 
   rescheduledLoans: `
-  SELECT SUM(total_repayment_amount) 
+  SELECT COUNT(id)
   FROM (
-  SELECT total_repayment_amount FROM personal_loans
+  SELECT total_repayment_amount, id FROM personal_loans
   WHERE is_rescheduled = TRUE
   AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
    OR ($1 IS NULL AND $2 IS NULL))
   UNION ALL
-  SELECT total_repayment_amount FROM cluster_member_loans
+  SELECT total_repayment_amount, id FROM cluster_member_loans
   WHERE is_rescheduled = TRUE
   AND ((reschedule_at::DATE BETWEEN $1::DATE AND $2::DATE) 
    OR ($1 IS NULL AND $2 IS NULL))) AS rescheduledLoans;`,

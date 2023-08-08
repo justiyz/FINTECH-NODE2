@@ -6,7 +6,7 @@ const heading = {
   verifyEmail: 'Welcome to SeedFi 🎉',
   requestVerifyEmail: 'Verify your email',
   loanDisbursement: 'Loan Application Successful',
-  loanClusterInvite: 'Loan cluster invite',
+  loanClusterInvite: 'Cluster Invitation',
   failedCardDebit: 'Failed card debiting',
   rejectedDebitCard: 'Rejected Debit Card',
   successfulRepayment: 'Successful loan repayment',

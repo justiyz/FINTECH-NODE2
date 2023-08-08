@@ -338,7 +338,7 @@ export const inviteClusterMember = async(req, res, next) => {
       join_url: body.link_url
     };
     if (body.type === 'email' && !invitedUser) {
-      await MailService('Cluster Invite', 'loanClusterInvite', { ...data });
+      await MailService('Cluster Invitation', 'loanClusterInvite', { ...data });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that invited user email is NOT a valid email in the DB. inviteClusterMember.controllers.cluster.js`);
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
@@ -357,7 +357,7 @@ export const inviteClusterMember = async(req, res, next) => {
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
       sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
       sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
-      await MailService('Cluster Invite', 'loanClusterInvite', { ...data });
+      await MailService('Cluster Invitation', 'loanClusterInvite', { ...data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
     }
   } catch (error) {
@@ -769,6 +769,10 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
     const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [ existingLoanApplication.member_loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
+    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
+    const next_repayment_date = (!selectedStatuses.includes(existingLoanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') : 
+      dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
+    existingLoanApplication.next_repayment_date = next_repayment_date;
     const data = {
       nextClusterLoanRepaymentDetails: nextRepaymentDetails,
       clusterLoanDetails: existingLoanApplication,

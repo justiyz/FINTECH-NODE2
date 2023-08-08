@@ -173,7 +173,7 @@ Not, without SeedFi’s prior written consent, make any offer of employment or e
     <p style="margin: 40px 0 20px;">Please indicate your acceptance of these terms in the space provided below.</p>
     
     <p style="margin-bottom: 40px;">
-      Yours faithfully,  <br />
+      Yours Sincerely,  <br />
       For: SeedFi. 
     </p>
     

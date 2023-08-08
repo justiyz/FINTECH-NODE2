@@ -274,6 +274,27 @@ describe('Individual loan', () => {
           done();
         });
     });
+    it('should fetch loan details for user two loan two successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_ONE_LOAN_ID}/personal/details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loanRepaymentDetails');
+          expect(res.body.data).to.have.property('loanDetails');
+          expect(res.body.data.loanDetails.status).to.equal('approved');
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(0);
+          expect(res.body.message).to.equal(enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          done();
+        });
+    });
     it('should apply for loan for user 1 successfully', (done) => {
       chai.request(app)
         .post('/api/v1/loan/application')
@@ -1152,6 +1173,27 @@ describe('Individual loan', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.LOAN_APPLICATION_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should fetch loan details for user two loan two successfully', (done) => {
+      chai.request(app)
+        .get(`/api/v1/loan/${process.env.SEEDFI_USER_TWO_LOAN_APPLICATION_TWO_LOAN_ID}/personal/details`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('loanRepaymentDetails');
+          expect(res.body.data).to.have.property('loanDetails');
+          expect(res.body.data.loanDetails.status).to.equal('ongoing');
+          expect(res.body.data.loanRepaymentDetails.length).to.equal(6);
+          expect(res.body.message).to.equal(enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'));
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           done();
         });
     });

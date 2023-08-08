@@ -17,10 +17,10 @@ export const completeKyc = () => `
     <tr>
         <td>
           <span style="line-height: 40px">Thanks</span> <br />
-          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="line-height: 40px">Yours Sincerely</span> <br />
           <span style="font-weight: 600; display: block;">SeedFi</span>
-          <span style="display: block;">Email: ask@seedfi.com</span>
-          <span style="display: block;">Call: +234 814 650 7035</span>
+          <span style="display: block;">Email: hello@theseedfi.com</span>
+          <span style="display: block;">Call: +234 803 752 5487</span>
         </td>
     </tr>`;
 
@@ -39,10 +39,10 @@ export const sendLoanApprovalMail = (data) => `
     <tr>
         <td>
           <span style="line-height: 40px">Thanks</span> <br />
-          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="line-height: 40px">Yours Sincerely</span> <br />
           <span style="font-weight: 600; display: block;">SeedFi</span>
-          <span style="display: block;">Email: ask@seedfi.com</span>
-          <span style="display: block;">Call: +234 814 650 7035</span>
+          <span style="display: block;">Email: hello@theseedfi.com</span>
+          <span style="display: block;">Call: +234 803 752 5487</span>
         </td>
     </tr>`;
 
@@ -61,10 +61,10 @@ export const sendLoanDisapprovalMail = (data) => `
     <tr>
         <td>
           <span style="line-height: 40px">Thanks</span> <br />
-          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="line-height: 40px">Yours Sincerely</span> <br />
           <span style="font-weight: 600; display: block;">SeedFi</span>
-          <span style="display: block;">Email: ask@seedfi.com</span>
-          <span style="display: block;">Call: +234 814 650 7035</span>
+          <span style="display: block;">Email: hello@theseedfi.com</span>
+          <span style="display: block;">Call: +234 803 752 5487</span>
         </td>
     </tr>`;
 export const utilityBillDeclinedMail = (data) => `
@@ -82,10 +82,10 @@ export const utilityBillDeclinedMail = (data) => `
     <tr>
         <td>
           <span style="line-height: 40px">Thanks</span> <br />
-          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="line-height: 40px">Yours Sincerely</span> <br />
           <span style="font-weight: 600; display: block;">SeedFi</span>
-          <span style="display: block;">Email: ask@seedfi.com</span>
-          <span style="display: block;">Call: +234 814 650 7035</span>
+          <span style="display: block;">Email: hello@theseedfi.com</span>
+          <span style="display: block;">Call: +234 803 752 5487</span>
         </td>
     </tr>`;
 
@@ -104,10 +104,10 @@ export const utilityBillApprovalMail = (data) => `
     <tr>
         <td>
           <span style="line-height: 40px">Thanks</span> <br />
-          <span style="line-height: 40px">Yours Credibly</span> <br />
+          <span style="line-height: 40px">Yours Sincerely</span> <br />
           <span style="font-weight: 600; display: block;">SeedFi</span>
-          <span style="display: block;">Email: ask@seedfi.com</span>
-          <span style="display: block;">Call: +234 814 650 7035</span>
+          <span style="display: block;">Email: hello@theseedfi.com</span>
+          <span style="display: block;">Call: +234 803 752 5487</span>
         </td>
     </tr>`;
 
@@ -121,8 +121,8 @@ export const adminClusterInvite = (data) => `
     <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
         <td style="padding-bottom: 20px">
             <p>
-            SeedFi admin is inviting you to join ${data.cluster_name} Cluster on SeedFi<br/>
-            Kindly Kindly click <a href="${data.join_url}">here</a> to join cluster.
+            SeedFi admin is inviting you to join ${data.cluster_name} Cluster<br/>
+            Kindly click <a href="${data.join_url}">here</a> to join cluster.
             </p>  
         </td>
     </tr>
@@ -130,10 +130,10 @@ export const adminClusterInvite = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
 <td>
-  <span style="line-height: 40px">Yours Credibly</span> <br />
+  <span style="line-height: 40px">Yours Sincerely</span> <br />
   <span style="font-weight: 600; display: block;">SeedFi</span>
-  <span style="display: block;">Email: ask@seedfi.com</span>
-  <span style="display: block;">Call: +234 814 650 7035</span>
+  <span style="display: block;">Email: hello@theseedfi.com</span>
+  <span style="display: block;">Call: +234 803 752 5487</span>
 </td>
 </tr>
 `;
