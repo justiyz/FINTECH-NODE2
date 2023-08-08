@@ -378,7 +378,7 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
     const data = {
       default_loans: parseFloat(parseFloat(totalDefaultLoans.sum).toFixed(2)) || 0,
       average_loan_tenor_in_months: Number(avgLoanTenor.avg),
-      rescheduled_loans: parseFloat(parseFloat(rescheduledLoans.sum).toFixed(2)) || 0,
+      rescheduled_loans: parseFloat(parseFloat(rescheduledLoans.count)) || 0,
       total_customer: Number(totalCustomer.count),
       disbursed_loans: disbursedLoans
     };
