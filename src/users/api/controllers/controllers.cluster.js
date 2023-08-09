@@ -200,7 +200,7 @@ export const createCluster = async(req, res, next) => {
     await processOneOrNoneData(authQueries.updateRewardPoints, 
       [ user.user_id, null, rewardPoint, rewardDescription, null, 'cluster creation' ]);
     await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
-    sendUserPersonalNotification(user, 'Welcome point', 
+    sendUserPersonalNotification(user, 'Create cluster point', 
       PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'cluster creation'), 'point-rewards', {});
     sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'cluster creation'), user.fcm_token);
     createClusterNotification(user, body, newClusterDetails, clusterMemberDetails, 
