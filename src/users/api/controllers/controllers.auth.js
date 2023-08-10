@@ -53,7 +53,7 @@ export const signup = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully updated the referral trails signup.controllers.auth.js`);
       }
     }
-    const data = { ...registeredUser, otp, otpExpire: expirationTime };
+    const data = { ...registeredUser, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
     userActivityTracking(registeredUser.user_id, 1, 'success');
     await sendSms(body.phone_number, signupSms(data));
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
@@ -90,7 +90,7 @@ export const resendSignupOtp = async(req, res, next) => {
     const payload = AuthPayload.register(body, otp, expireAt);
     await processAnyData(authQueries.updateVerificationToken, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated new verification token into the DB resendSignupOtp.controllers.auth.js`);
-    const data = { user_id: user.user_id, otp, otpExpire: expirationTime };
+    const data = { user_id: user.user_id, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
     userActivityTracking(user.user_id, 6, 'success');
     await sendSms(body.phone_number, verifyAccountOTPSms(data));
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
@@ -497,7 +497,7 @@ export const forgotPin = async(req, res, next) => {
     const expireAt = dayjs().add(5, 'minutes');
     const expirationTime = dayjs(expireAt);
     await processAnyData(authQueries.forgotPin,  [ user.user_id, otp, expireAt ]);
-    const data ={ user_id: user.user_id, otp, otpExpire: expirationTime };
+    const data ={ user_id: user.user_id, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},Info: sms for user to reset pin has been sent successfully forgotPin.controller.auth.js`);
     userActivityTracking(req.user.user_id, 12, 'success');
     await sendSms(user.phone_number, resetPinOTPSms(data));

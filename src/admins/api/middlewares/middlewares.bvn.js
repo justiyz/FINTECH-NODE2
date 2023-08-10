@@ -32,8 +32,10 @@ export const isBvnAlreadyBlacklisted = async(req, res, next) => {
     }
     if (body.type === 'single') return next();
 
+    const uploadedBvns = await JSON.parse(body.data);
+
     const ids = new Set(blacklistedBvn.map(({ bvn }) => bvn));
-    const addBvn = body.data.filter(({ bvn }) => !ids.has(bvn));
+    const addBvn = uploadedBvns.filter(({ bvn }) => !ids.has(bvn));
 
     if (!addBvn || !addBvn.length) {
       return ApiResponse.success(res, enums.BLACKLIST_BVN_EXIST, enums.HTTP_OK);

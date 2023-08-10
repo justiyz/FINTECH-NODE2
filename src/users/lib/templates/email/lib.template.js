@@ -101,13 +101,12 @@ export const requestVerifyEmail = (data) => `
   <td>
     <span style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 16px;cline-height: 36px;color: #84868c;">
     Below is the link to complete your
-    email verification. this email is valid for 10 minutes. <br><br>
+    email verification. The verification link below is valid for ${data.otpDuration}.<br><br>
 
     Kindly click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
     </span>
   </td>
-</tr>
-`;
+</tr>`;
 
 export const rejectedDebitCard = (data) => `
 <tr>

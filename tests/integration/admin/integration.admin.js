@@ -1089,22 +1089,8 @@ describe('Admin', () => {
         })
         .send({
           type: 'bulk',
-          data: [
-            {
-              first_name: 'st',
-              middle_name: 'ola',
-              last_name: 'dence ',
-              date_of_birth: '1954-12-08',
-              bvn: '22330121101'
-            },
-            {
-              first_name: 'jacob',
-              middle_name: 'michael ',
-              last_name: 'tolu',
-              date_of_birth: '1954-12-08',
-              bvn: '2231222110'
-            }
-          ]
+          // eslint-disable-next-line quotes, max-len
+          data: '[{"first_name":"ade","middle_name":"ola","last_name":"dence ","date_of_birth":"1954-12-08","bvn":"22330121101"},{"first_name":"jacob","middle_name":"michael ","last_name":"tolu","date_of_birth":"1954-12-08","bvn":"2231222110"}]'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(201);
@@ -1124,22 +1110,8 @@ describe('Admin', () => {
         })
         .send({
           type: 'bulk',
-          data: [
-            {
-              first_name: 'ade',
-              middle_name: 'ola',
-              last_name: 'dence ',
-              date_of_birth: '1954-12-08',
-              bvn: '22330121101'
-            },
-            {
-              first_name: 'janet',
-              middle_name: 'michael ',
-              last_name: 'tolu',
-              date_of_birth: '1954-12-08',
-              bvn: '22312110'
-            }
-          ]
+          // eslint-disable-next-line max-len
+          data: '[{"first_name":"kunle","middle_name":"ola","last_name":"bisola ","date_of_birth":"1954-12-08","bvn":"22330121101"},{"first_name":"janet","middle_name":"michael ","last_name":"tolu","date_of_birth":"1954-12-08","bvn":"22312110"}]'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(201);
@@ -1160,22 +1132,8 @@ describe('Admin', () => {
         })
         .send({
           type: 'bulk',
-          data: [
-            {
-              first_name: 'st',
-              middle_name: 'ola',
-              last_name: 'dence ',
-              date_of_birth: '1954-12-08',
-              bvn: '22330121101'
-            },
-            {
-              first_name: 'jacob',
-              middle_name: 'michael ',
-              last_name: 'tolu',
-              date_of_birth: '1954-12-08',
-              bvn: '2231222110'
-            }
-          ]
+          // eslint-disable-next-line quotes, max-len
+          data: '[{"first_name":"ade","middle_name":"ola","last_name":"dence ","date_of_birth":"1954-12-08","bvn":"22330121101"},{"first_name":"jacob","middle_name":"michael ","last_name":"tolu","date_of_birth":"1954-12-08","bvn":"2231222110"}]'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1211,7 +1169,6 @@ describe('Admin', () => {
         });
     });
   });
-
   describe('Fetch Blacklisted Bvn', () => {
     it('Should return error if token is not set', (done) => {
       chai.request(app)
@@ -1261,7 +1218,6 @@ describe('Admin', () => {
         });
     });
   });
-
   describe('fetch admin activity log', () => {
     it('should fetch activity log paginated', (done) => {
       chai.request(app)
