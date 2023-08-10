@@ -165,7 +165,7 @@ export const requestEmailVerification = async(req, res, next) => {
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.REQUEST_EMAIL_VERIFICATION, enums.HTTP_OK, data);
     }
-    await MailService('Verify your email', 'requestVerifyEmail', { otp: token, ...user });
+    await MailService('Verify your email', 'requestVerifyEmail', { otp: token, ...user, otpDuration: `${10} minutes` });
     logger.info(`[${enums.CURRENT_TIME_STAMP}, ${user.user_id},
       Info: email verification has been sent successfully to user mail. requestEmailVerification.controller.auth.js`);
     userActivityTracking(req.user.user_id, 3, 'success');

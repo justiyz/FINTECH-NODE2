@@ -51,15 +51,7 @@ const singleBvn = Joi.object({
 
 const bulkBvn = Joi.object({
   type: Joi.string().required().valid('bulk'),
-  data: Joi.array().min(1).items(
-    Joi.object({
-      first_name: Joi.string().required(),
-      middle_name: Joi.string().required(),
-      last_name: Joi.string().required(),
-      date_of_birth: Joi.string().required(),
-      bvn: Joi.string().required()
-    })
-  )
+  data: Joi.string().required()
 });
 
 const blacklistedBvn = Joi.alternatives().try(singleBvn, bulkBvn);

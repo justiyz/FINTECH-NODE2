@@ -101,13 +101,12 @@ export const requestVerifyEmail = (data) => `
   <td>
     <span style="cfont-family: 'Figtree';cfont-style: normal;cfont-weight: 400;cfont-size: 16px;cline-height: 36px;color: #84868c;">
     Below is the link to complete your
-    email verification. this email is valid for 10 minutes. <br><br>
+    email verification. The verification link below is valid for ${data.otpDuration}.<br><br>
 
     Kindly click <a href="${config.SEEDFI_BACKEND_BASE_URL}/api/v1/user/verify-email?verifyValue=${data.otp}">here</a> to verify your email.
     </span>
   </td>
-</tr>
-`;
+</tr>`;
 
 export const rejectedDebitCard = (data) => `
 <tr>
@@ -357,7 +356,7 @@ export const failedAddressVerification = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td style="padding-bottom: 20px">
-    <span>kindly update your valid address details. Thank you</span>  
+    <span>kindly update your valid address details.</span>  
   </td>
 </tr>`;
 
@@ -386,12 +385,6 @@ export const successfulAddressVerification = (data) => `
       <b>City:</b> ${data.city},  <br />
       <b>State:</b> ${data.state}
     </span>  
-  </td>
-</tr>
-
-<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-  <td style="padding-bottom: 20px">
-    <span>Thank you</span>  
   </td>
 </tr>`;
 
@@ -438,11 +431,4 @@ export const rewardPointsClaiming = (data) => `
   <td>
     <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed points of ${data.claimed_points}</span>  
   </td>
-</tr>
-
-<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-  <td style="padding-bottom: 20px">
-    <span>Thank you</span>  
-  </td>
-</tr>
-`;
+</tr>`;

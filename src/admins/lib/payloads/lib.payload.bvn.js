@@ -1,9 +1,9 @@
 export default {
   blacklistedBvn: (body, hash) => [
-    body.first_name, 
-    body.middle_name || null, 
-    body.last_name, 
-    body.date_of_birth,
+    body.first_name.trim(), 
+    body.middle_name.trim(), 
+    body.last_name.trim(), 
+    body.date_of_birth.trim(),
     hash
   ],
   

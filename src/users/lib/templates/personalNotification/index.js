@@ -101,8 +101,7 @@ export const userAddressVerificationFailed = (user, addressDetails) => {
   City: ${addressDetails.city}\n,
   State: ${addressDetails.state}\n
   
-  kindly update your valid address details. 
-  Thank you`;
+  kindly update your valid address details.`;
 };
 
 export const userAddressVerificationSuccessful = (user, addressDetails) => {
@@ -111,8 +110,7 @@ export const userAddressVerificationSuccessful = (user, addressDetails) => {
   Landmark: ${addressDetails.house_number}\n,
   Street: ${addressDetails.street}\n,
   City: ${addressDetails.city}\n,
-  State: ${addressDetails.state}\n
-  Thank you`;
+  State: ${addressDetails.state}\n`;
 };
 
 export const tierUpgradedSuccessfully = (first_name) => {
