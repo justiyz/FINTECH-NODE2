@@ -356,7 +356,7 @@ export const failedAddressVerification = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td style="padding-bottom: 20px">
-    <span>kindly update your valid address details. Thank you</span>  
+    <span>kindly update your valid address details.</span>  
   </td>
 </tr>`;
 
@@ -385,12 +385,6 @@ export const successfulAddressVerification = (data) => `
       <b>City:</b> ${data.city},  <br />
       <b>State:</b> ${data.state}
     </span>  
-  </td>
-</tr>
-
-<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-  <td style="padding-bottom: 20px">
-    <span>Thank you</span>  
   </td>
 </tr>`;
 
@@ -437,11 +431,4 @@ export const rewardPointsClaiming = (data) => `
   <td>
     <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed points of ${data.claimed_points}</span>  
   </td>
-</tr>
-
-<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
-  <td style="padding-bottom: 20px">
-    <span>Thank you</span>  
-  </td>
-</tr>
-`;
+</tr>`;
