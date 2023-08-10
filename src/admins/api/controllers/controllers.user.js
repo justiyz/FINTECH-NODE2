@@ -143,7 +143,7 @@ export const sendNotifications = async(req, res, next) => {
         return ApiResponse.error(res, enums.USER_PROFILE_PREVIOUSLY_COMPLETED, enums.HTTP_BAD_REQUEST, enums.SEND_NOTIFICATIONS_CONTROLLER);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile not  previously completed sendNotifications.admin.controllers.user.js`);
-      await sendPushNotification(userDetails.user_id, PushNotifications.userCompleteProfile, userDetails.fcm_token);
+      await sendPushNotification(userDetails.user_id, PushNotifications.userCompleteProfile(), userDetails.fcm_token);
       if (userDetails.email !== null) {
         await MailService('Kindly complete your kyc', 'completeKyc', { email: userDetails.email });
       }
@@ -386,7 +386,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       verifyUserUtilityBill.admin.controllers.user.js`);
       sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('decline'), userDetails.fcm_token);
       sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
-        PersonalNotifications.declinedUtilityBillNotification, 'utility-declined', {});
+        PersonalNotifications.declinedUtilityBillNotification(), 'utility-declined', {});
       await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
       await adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(adminName, userName));
       userActivityTracking(userDetails.user_id, 87, 'success');
@@ -403,7 +403,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       verifyUserUtilityBill.admin.controllers.user.js`);
     sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('approved'), userDetails.fcm_token);
     sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
-      PersonalNotifications.approvedUtilityBillNotification, 'utility-bill-approved', {});
+      PersonalNotifications.approvedUtilityBillNotification(), 'utility-bill-approved', {});
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
     await adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));
     userActivityTracking(userDetails.user_id, 88, 'success');

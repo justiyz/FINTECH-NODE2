@@ -160,7 +160,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, invitedClusterMember);
     }
 
-    sendPushNotification(userDetails.user_id, PushNotifications.clusterMemberInvitation, userDetails.fcm_token);
+    sendPushNotification(userDetails.user_id, PushNotifications.clusterMemberInvitation(), userDetails.fcm_token);
     sendUserPersonalNotification(userDetails, `${cluster.name} cluster invite`,
       PersonalNotifications.inviteClusterMember(clusterInviteInfo), 'cluster-invitation', { ...cluster });
     await MailService('Cluster Loan Invitation', 'adminClusterInvite', { ...data });
@@ -246,7 +246,7 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
         const payload = ClusterPayload.clusterInvite(data, cluster, admin, req.body.type);
         const [ existingUser ] = await processAnyData(UserQueries.getUserByUserEmailOrPhoneNumber, [ data.email || data.phone_number ]);
         if (existingUser) {
-          sendPushNotification(existingUser.user_id, PushNotifications.clusterMemberInvitation, existingUser.fcm_token);
+          sendPushNotification(existingUser.user_id, PushNotifications.clusterMemberInvitation(), existingUser.fcm_token);
           sendUserPersonalNotification(existingUser, `${cluster.name} cluster invite`,
             PersonalNotifications.inviteClusterMember(clusterInviteInfo), 'cluster-invitation', { ...cluster });
         } 

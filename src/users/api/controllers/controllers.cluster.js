@@ -355,7 +355,7 @@ export const inviteClusterMember = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
       decoded that invited user is a valid and active user in the DB. inviteClusterMember.controllers.cluster.js`);
       const clusterMember = await processOneOrNoneData(clusterQueries.inviteClusterMember, payload);
-      sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation, invitedUser.fcm_token);
+      sendPushNotification(invitedUser.user_id, PushNotifications.clusterMemberInvitation(), invitedUser.fcm_token);
       sendUserPersonalNotification(invitedUser, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
       await MailService('Cluster Invitation', 'loanClusterInvite', { ...data });
       return ApiResponse.success(res, enums.INVITE_CLUSTER_MEMBER, enums.HTTP_OK, clusterMember);
