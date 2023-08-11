@@ -3,6 +3,7 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import Model from '../../../users/api/middlewares/middlewares.model';
 import * as Schema from '../../../admins/lib/schemas/lib.schema.cluster';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
+import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as  AdminClusterController from '../controllers/controllers.cluster';
 import * as AdminClusterMiddleware from '../../../admins/api/middlewares/middlewares.cluster';
 import * as AdminUserMiddleware from '../../../admins/api/middlewares/middlewares.user';
@@ -82,6 +83,17 @@ router.post(
   Model(Schema.inviteClusterBulk, 'payload'),
   AdminClusterMiddleware.clusterMemberBulkInvite,
   AdminClusterController.clusterMemberBulkInvite
+);
+
+router.patch(
+  '/:cluster_id/interest-rates',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('cluster management', 'update'),
+  AdminMiddleware.checkAdminType,
+  Model(Schema.editClusterInterestRate, 'payload'),
+  AdminClusterMiddleware.checkIfClusterExists('active'),
+  AdminClusterMiddleware.adminClusterRestriction,
+  AdminClusterController.editClusterInterestRates
 );
 
 export default router;

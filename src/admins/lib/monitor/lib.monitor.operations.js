@@ -52,6 +52,7 @@ export const operations = {
   51: 'DELSTNTFS', // admin deletes admin sent notifications
   52: 'EDTRWDPNTS', // admin edits reward points
   53: 'RSTURWDPT', // admin resets a specified user reward points 
-  54: 'RSTAURWDPT' // admin resets all users reward points
+  54: 'RSTAURWDPT', // admin resets all users reward points
+  55: 'EDTCLST' // admin edits custer interest rate details
 };
 

@@ -169,66 +169,66 @@ export default {
   `,
 
   fetchActiveClusters: `
-  SELECT 
-      id,
-      cluster_id,
-      name,
-      description, 
-      type,
-      maximum_members,
-      current_members,
-      loan_goal_target,
-      minimum_monthly_income,
-      admin,
-      image_url,
-      unique_code,
-      status,
-      loan_status,
-      total_loan_obligation,
-      join_cluster_closes_at,
-      is_deleted,
-      current_members,
-      is_created_by_admin,
-      company_name,
-      company_address,
-      company_type,
-      company_contact_number,
-      interest_type,
-      percentage_interest_type_value
-  FROM clusters
-  WHERE (cluster_id = $1 OR unique_code = $1 OR name = $1)
-  AND is_deleted = FALSE`,
+    SELECT 
+        id,
+        cluster_id,
+        name,
+        description, 
+        type,
+        maximum_members,
+        current_members,
+        loan_goal_target,
+        minimum_monthly_income,
+        admin,
+        image_url,
+        unique_code,
+        status,
+        loan_status,
+        total_loan_obligation,
+        join_cluster_closes_at,
+        is_deleted,
+        current_members,
+        is_created_by_admin,
+        company_name,
+        company_address,
+        company_type,
+        company_contact_number,
+        interest_type,
+        percentage_interest_type_value
+    FROM clusters
+    WHERE (cluster_id = $1 OR unique_code = $1 OR name = $1)
+    AND is_deleted = FALSE`,
 
   checkIfClusterExists: `
-  SELECT 
-      id,
-      cluster_id,
-      name,
-      description, 
-      type,
-      maximum_members,
-      current_members,
-      loan_goal_target,
-      minimum_monthly_income,
-      admin,
-      image_url,
-      unique_code,
-      status,
-      loan_status,
-      total_loan_obligation,
-      join_cluster_closes_at,
-      is_deleted,
-      current_members,
-      is_created_by_admin,
-      company_name,
-      company_address,
-      company_type,
-      company_contact_number,
-      interest_type,
-      percentage_interest_type_value
-  FROM clusters
-  WHERE cluster_id = $1
-  OR unique_code = $1 OR name = $1`,
+    SELECT 
+        id,
+        cluster_id,
+        name,
+        description, 
+        type,
+        maximum_members,
+        current_members,
+        loan_goal_target,
+        minimum_monthly_income,
+        admin,
+        image_url,
+        unique_code,
+        status,
+        loan_status,
+        total_loan_obligation,
+        join_cluster_closes_at,
+        is_deleted,
+        current_members,
+        is_created_by_admin,
+        company_name,
+        company_address,
+        company_type,
+        company_contact_number,
+        interest_type,
+        percentage_interest_type_value
+    FROM clusters
+    WHERE cluster_id = $1
+    OR unique_code = $1 OR name = $1`,
 
   fetchActiveClusterMembers: `
   SELECT 
@@ -261,19 +261,27 @@ export default {
     WHERE loan_id = $1`,
     
   fetchClustersInvitees: `
-  SELECT 
-    cluster_id,
-    invitee,
-    invitation_mode,
-    to_char(DATE(created_at)::date, 'Mon DD YYYY') AS date,
-    is_joined,
-    is_declined,
-    inviter_id 
-  FROM cluster_invitees
-  WHERE cluster_id = $1
-  AND is_joined = false
-  ORDER BY is_declined;
-    `
+    SELECT 
+      cluster_id,
+      invitee,
+      invitation_mode,
+      to_char(DATE(created_at)::date, 'Mon DD YYYY') AS date,
+      is_joined,
+      is_declined,
+      inviter_id 
+    FROM cluster_invitees
+    WHERE cluster_id = $1
+    AND is_joined = false
+    ORDER BY is_declined`,
+
+  editClusterInterests: `
+    UPDATE clusters
+    SET  
+      updated_at = NOW(),
+      interest_type = $2,
+      percentage_interest_type_value = $3
+    WHERE cluster_id = $1
+    RETURNING id, cluster_id, company_name, status, name, interest_type, percentage_interest_type_value, updated_at`
 };
 
 

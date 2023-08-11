@@ -270,3 +270,29 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * admin edits cluster interest rate type and value
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns updated cluster details.
+ * @memberof AdminClusterController
+ */
+export const editClusterInterestRates = async(req, res, next) => {
+  const { body, admin, cluster } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
+  try {
+    const payload = ClusterPayload.clusterInterestRates(body, cluster);
+    const data = await processOneOrNoneData(ClusterQueries.editClusterInterests, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+     admin have successfully updated cluster interest rate details in the DB. editClusterInterestRates.admin.controllers.cluster.js`);
+    await adminActivityTracking(admin.admin_id, 55, 'success', descriptions.edit_cluster_interest_rate(adminName, cluster.name));
+    return ApiResponse.success(res, enums.CLUSTER_INTEREST_RATE_DETAILS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    await adminActivityTracking(admin.admin_id, 55, 'fail', descriptions.edit_cluster_interest_rate_failed(adminName, cluster.name));
+    error.label = enums.EDIT_CLUSTER_INTEREST_RATES_CONTROLLER;
+    logger.error(`Admin editing cluster interests failed::${enums.EDIT_CLUSTER_INTEREST_RATES_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
