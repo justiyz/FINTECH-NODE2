@@ -78,3 +78,8 @@ export const inviteClusterBulk = Joi.object().keys({
 export const editClusterStatus = Joi.object().keys({
   status: Joi.string().required().valid('active', 'deactivated')
 });
+
+export const editClusterInterestRate = Joi.object().keys({
+  interest_type: Joi.string().optional().valid('fixed', 'discount'),
+  percentage_interest_type_value: Joi.number().optional()
+});

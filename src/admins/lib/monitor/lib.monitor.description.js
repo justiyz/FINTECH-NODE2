@@ -45,6 +45,8 @@ export const deactivate_cluster = (name, cluster) => `${name} deactivates cluste
 export const cluster_member_invite  = (name) => `${name} invite a cluster member`;
 export const cluster_member_invite_failed  = (name) => `${name} failed to invite a cluster member`;
 export const delete_cluster_member = (name, clusterMemberName, clusterName) => `${name} deletes cluster member ${clusterMemberName} from cluster ${clusterName}`;
+export const edit_cluster_interest_rate = (name, clusterName) => `${name} updated interest rate details for ${clusterName} cluster`;
+export const edit_cluster_interest_rate_failed = (name, clusterName) => `${name} failed in updating interest rate details for ${clusterName} cluster`;
 export const unblacklist_bvn = (name) => `${name} unblacklist user bvn`;
 export const unblacklist_existing_user = (name) => `${name} unblacklist an existing user bvn`;
 export const initiate_document_type_export = (name, type) => `${name} successfully initiates selected ${type} file export`;

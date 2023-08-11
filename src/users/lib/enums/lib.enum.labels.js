@@ -322,6 +322,7 @@ export const CLUSTER_MEMBER_BULK_INVITE_MIDDLEWARE = 'AdminClusterMiddleware::cl
 export const CLUSTER_MEMBER_INVITE_CONTROLLER = 'AdminClusterController::clusterMemberInvite';
 export const ACTIVATE_AND_DEACTIVATE_CLUSTER_CONTROLLER = 'AdminClusterController::activateAndDeactivateCluster';
 export const DELETE_CLUSTER_MEMBER_CONTROLLER = 'AdminClusterController::deleteClusterMember';
+export const EDIT_CLUSTER_INTEREST_RATES_CONTROLLER = 'AdminClusterController::editClusterInterestRates';
 export const CHECK_CLUSTER_MEMBER_EXIST_MIDDLEWARE = 'AdminClusterController::checkClusterMemberExist';
 export const CHECK_ADMIN_TYPE_MIDDLEWARE = 'AdminAdminMiddleware:::checkAdminType';
 export const CHECK_IF_BVN_EXIST_MIDDLEWARE = 'AdminBvnMiddleware::checkIfBvnExist';

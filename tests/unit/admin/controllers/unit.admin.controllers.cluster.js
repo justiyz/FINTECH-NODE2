@@ -63,5 +63,11 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
+    it('should call editClusterInterestRates', async() => {
+      const req = { admin: '', cluster: '', body: ''};
+      const data = await AdminClusterController.editClusterInterestRates(req, res, next);
+      expect(data.code).to.equal(500);
+      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
+    });
   });
 });

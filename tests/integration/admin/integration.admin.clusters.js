@@ -247,7 +247,128 @@ describe('Clusters', () => {
           done();
         });
     });
-    
+  });
+  describe('Admin edits cluster interest rates', () => {
+    it('should flag error if invalid payload is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/interest-rates`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          interest_name: 'fixed'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('interest_name is not allowed');
+          done();
+        });
+    });
+    it('should flag error if invalid interest type value is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/interest-rates`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          interest_type: 'float'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('interest_type must be one of [fixed, discount]');
+          done();
+        });
+    });
+    it('should flag error if invalid cluster id is sent', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}90o/interest-rates`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          interest_type: 'discount'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_NOT_EXISTING);
+          done();
+        });
+    });
+    it('should flag error if not an admin created cluster', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_ID}/interest-rates`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          interest_type: 'fixed'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ADMIN_CLUSTER_RESTRICTED_ACTION);
+          done();
+        });
+    });
+    it('should flag error if not super admin token', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ADMIN_CLUSTER_ID_TWO}/interest-rates`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_ADMIN_TWO_ACCESS_TOKEN}`
+        })
+        .send({
+          interest_type: 'discount',
+          percentage_interest_type_value: 25
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal(enums.ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN);
+          done();
+        });
+    });
+    it('should successfully edit cluster interest rates', (done) => {
+      chai.request(app)
+        .patch(`/api/v1/admin/cluster/${process.env.SEEDFI_ENYATA_ADMIN_CLUSTER_ID}/interest-rates`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
+        })
+        .send({
+          interest_type: 'fixed',
+          percentage_interest_type_value: 10
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.data).to.have.property('interest_type');
+          expect(res.body.data).to.have.property('percentage_interest_type_value');
+          expect(res.body.data.percentage_interest_type_value).to.equal('10');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.message).to.equal(enums.CLUSTER_INTEREST_RATE_DETAILS_UPDATED_SUCCESSFULLY);
+          done();
+        });
+    });
   });
   describe('Admin fetches, filters and searches clusters', () => {
     it('Should return error if invalid token is set', (done) => {
