@@ -34,7 +34,7 @@ const expressConfig = app => {
   logger.info(`${enums.CURRENT_TIME_STAMP} Environment is ${process.env.SEEDFI_NODE_ENV}`);
 
   app.use(urlencoded({ extended: true }));
-  app.use(json());
+  app.use(json({ limit: 50000000 })); // set to allow 50mb JSON size
   app.use(cors());
   app.use(helmet());
   app.use(compression());
