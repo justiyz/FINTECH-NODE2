@@ -26,12 +26,19 @@ export default {
     body.percentage_interest_type_value,
     admin.admin_id
   ],
+
   clusterInvite: (body, cluster, admin, type, invitedUser) => [
     cluster.cluster_id,
     admin.admin_id,
     body.email?.trim().toLowerCase() || body.phone_number?.trim(),
     type,
     invitedUser?.user_id || null
+  ],
+
+  clusterInterestRates: (body, cluster) => [
+    cluster.cluster_id,
+    body.interest_type || cluster.interest_type,
+    body.percentage_interest_type_value || cluster.percentage_interest_type_value
   ]
 };
 

@@ -167,7 +167,7 @@ export const handleTransactionRefundResponse = async(req, res, next) => {
         handleTransactionRefundResponse.middlewares.payment.js`);
         sendUserPersonalNotification(user, 'Card Tokenization amount refund completed', 
           PersonalNotifications.cardTokenizationAmountRefundCompletelyProcessed(), 'card-tokenization-refund-processed', { });
-        sendPushNotification(user.user_id, PushNotifications.cardTokenizationAmountRefundSuccessful, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.cardTokenizationAmountRefundSuccessful(), user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 
         handleTransactionRefundResponse.middlewares.payment.js`);
         userActivityTracking(paymentRecord.user_id, 33, 'success');
@@ -179,7 +179,7 @@ export const handleTransactionRefundResponse = async(req, res, next) => {
         handleTransactionRefundResponse.middlewares.payment.js`);
         sendUserPersonalNotification(user, 'Card Tokenization amount refund failed', 
           PersonalNotifications.cardTokenizationAmountRefundProcessingFailed(), 'card-tokenization-refund-failed', { });
-        sendPushNotification(user.user_id, PushNotifications.cardTokenizationAmountRefundFailed, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.cardTokenizationAmountRefundFailed(), user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 
         handleTransactionRefundResponse.middlewares.payment.js`);
         userActivityTracking(paymentRecord.user_id, 33, 'fail');
@@ -264,7 +264,7 @@ export const saveCardAuth = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);
         sendUserPersonalNotification(user, 'Card Tokenization fails', 
           PersonalNotifications.cardTokenizationFailedDueToCardExpiration(), 'failed-card-tokenization', { });
-        sendPushNotification(user.user_id, PushNotifications.rejectDebitCard, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.rejectDebitCard(), user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 
         saveCardAuth.middlewares.payment.js`);
         return next();
@@ -287,7 +287,7 @@ export const saveCardAuth = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: tokenized card details saved successfully saveCardAuth.middlewares.payment.js`);
       sendUserPersonalNotification(user, 'Card Tokenization successful', 
         PersonalNotifications.cardTokenizedSuccessfully(), 'successful-card-tokenization', { });
-      sendPushNotification(user.user_id, PushNotifications.cardTokenizationSuccessful, user.fcm_token);
+      sendPushNotification(user.user_id, PushNotifications.cardTokenizationSuccessful(), user.fcm_token);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 
         saveCardAuth.middlewares.payment.js`);
       if (paymentRecord.payment_type === 'card_tokenization') {
@@ -332,7 +332,7 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
         await processAnyData(paymentQueries.updateTransactionIsInitiatedRefund, [ body.data.reference ]);
         sendUserPersonalNotification(user, 'Card Tokenization amount refund initiated', 
           PersonalNotifications.cardTokenizationAmountRefundInitiated(), 'successful-card-tokenization-refund-initiation', { });
-        sendPushNotification(user.user_id, PushNotifications.cardTokenizationRefundInitiated, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.cardTokenizationRefundInitiated(), user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: push and personal notifications sent to user 
         raiseRefundForCardTokenization.middlewares.payment.js`);
         return ApiResponse.success(res, enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
@@ -340,7 +340,7 @@ export const raiseRefundForCardTokenization = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: refund could not be initiated raiseRefundForCardTokenization.middlewares.payment.js`);
       sendUserPersonalNotification(user, 'Card Tokenization amount refund failed to be initiated', 
         PersonalNotifications.cardTokenizationAmountRefundCouldNotBeInitiated(), 'failed-card-tokenization-refund-initiation', { });
-      sendPushNotification(user.user_id, PushNotifications.cardTokenizationAmountRefundInitiationFailed, user.fcm_token);
+      sendPushNotification(user.user_id, PushNotifications.cardTokenizationAmountRefundInitiationFailed(), user.fcm_token);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: push and personal notifications sent to user 
         raiseRefundForCardTokenization.middlewares.payment.js`);
       return ApiResponse.error(res, enums.TRANSACTION_REFUND_INITIATED_FAILED, enums.HTTP_OK, enums.RAISE_REFUND_FOR_CARD_TOKENIZATION_MIDDLEWARE);
@@ -439,7 +439,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
         sendUserPersonalNotification(userDetails, 'Loan disbursement successful', 
           PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-disbursement', { });
-        sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
+        sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement(), userDetails.fcm_token);
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Loan Disbursement', adminNotification.loanDisbursement(), 
             [ `${user.first_name} ${user.last_name}` ], 'loan-disbursement');
@@ -544,7 +544,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
         sendUserPersonalNotification(user, 'Part loan repayment successful', 
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
-        sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
         if (statusType === 'completed') {
           const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
@@ -588,7 +588,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
       sendUserPersonalNotification(user, 'Full loan repayment successful', 
         PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
-      sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+      sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
       await MailService('Loan successfully repaid', 'completedRepayment', 
         { ...user, loan_reason: loanDetails.loan_reason, total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2), 
           loan_duration: (loanDetails.reschedule_loan_tenor_in_months || `${loanDetails.loan_tenor_in_months} months`), interest_rate: loanDetails.percentage_pricing_band,
@@ -668,7 +668,7 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
           await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
           sendUserPersonalNotification(userDetails, 'Loan disbursement successful', 
             PersonalNotifications.loanDisbursementSuccessful({ amount: parseFloat(member.amount_requested) }), 'successful-disbursement', { });
-          sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement, userDetails.fcm_token);
+          sendPushNotification(userDetails.user_id, PushNotifications.successfulLoanDisbursement(), userDetails.fcm_token);
         });
         sendClusterNotification(paymentRecord, cluster, { is_admin: true }, 'Cluster loan successfully disbursed', 
           'loan-application-disbursed', { ...generalClusterLoanDetails });
@@ -797,7 +797,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
           { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2) });
         sendUserPersonalNotification(user, 'Part cluster loan repayment successful', 
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
-        sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
         sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays part loan payment`, 
           'cluster-loan-part-payment', { });
         if (statusType === 'completed') {
@@ -861,7 +861,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2) });
       sendUserPersonalNotification(user, 'Full loan repayment successful', 
         PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
-      sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment, user.fcm_token);
+      sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
       await MailService('Loan successfully repaid', 'completedRepayment', 
         { ...user, loan_reason: `${clusterLoanDetails.cluster_name} cluster loan`, total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2), 
           loan_duration: (clusterLoanDetails.reschedule_loan_tenor_in_months || `${clusterLoanDetails.loan_tenor_in_months} months`), 

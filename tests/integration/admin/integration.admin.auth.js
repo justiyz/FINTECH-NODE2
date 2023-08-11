@@ -939,6 +939,10 @@ describe('Admin Auth', () => {
             {
               resource_id: `${process.env.SEEDFI_ADMIN_ROLE_MANAGEMENT_RESOURCE_ID}`,
               user_permissions: [ 'read' ]
+            },
+            {
+              resource_id: `${process.env.SEEDFI_ADMIN_CLUSTER_MANAGEMENT_RESOURCE_ID}`,
+              user_permissions: [ 'create', 'read', 'update', 'delete', 'approve', 'reject' ]
             }
           ]
         })

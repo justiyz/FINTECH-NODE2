@@ -338,7 +338,7 @@ export const compareDeviceToken = async(req, res, next) => {
       const expireAt = dayjs().add(10, 'minutes');
       const expirationTime = dayjs(expireAt);
       await processAnyData(authQueries.updateVerificationToken, [ user.phone_number, otp, expireAt ]);
-      const data = { otp };
+      const data = { otp, otpDuration: `${10} minutes` };
       await sendSms(user.phone_number, verifyAccountOTPSms(data));
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: New token successfully sent to user registered phone number compareDeviceToken.middlewares.auth.js`);
       if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {

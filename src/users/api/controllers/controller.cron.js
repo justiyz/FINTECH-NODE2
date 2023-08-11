@@ -111,7 +111,7 @@ export const initiateClusterLoanRepayment = async() => {
           return clusterRepayment;
         }
         await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...clusterRepayment });
-        sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.failedCardDebit(), user.fcm_token);
         sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...clusterRepayment }),
           'failed-card-debit', { ...clusterRepayment });
         return clusterRepayment;
@@ -155,7 +155,7 @@ export const initiateLoanRepayment = async() => {
           return repayment;
         }
         await MailService('Failed card debiting', 'failedCardDebit', { ...user, ...userDebitCardDetails, ...repayment });
-        sendPushNotification(user.user_id, PushNotifications.failedCardDebit, user.fcm_token);
+        sendPushNotification(user.user_id, PushNotifications.failedCardDebit(), user.fcm_token);
         sendUserPersonalNotification(user, `${user.name} Failed card debiting`, PersonalNotifications.failedCardDebit({ ...userDebitCardDetails, ...repayment }),
           'failed-card-debit', { ...repayment });
         return repayment;

@@ -340,6 +340,7 @@ export const CLUSTER__DETAILS_FETCHED_SUCCESSFULLY = 'Cluster details fetched su
 export const ADMIN_CLUSTER_MEMBER_INVITE = 'Admin Successfully invite cluster member';
 export const ADMIN_EDIT_CLUSTER_STATUS = (status, name) => `admin successfully ${status} ${name} cluster`;
 export const ADMIN_DELETES_CLUSTER_MEMBER = 'admin successfully deletes cluster member';
+export const CLUSTER_INTEREST_RATE_DETAILS_UPDATED_SUCCESSFULLY = 'Cluster interest rates details updated successfully';
 export const CLUSTER_MEMBER_NOT_EXISTING = 'Cluster member does not belong to this cluster';
 export const ACTION_NOT_ALLOWED_FOR_NONE_SUPER_ADMIN = 'action cannot be performed by none super admin';
 export const UNBLACKLIST_BVN = 'Bvn successfully unblacklisted';

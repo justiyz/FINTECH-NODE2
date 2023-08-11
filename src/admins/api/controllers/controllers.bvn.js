@@ -24,18 +24,18 @@ export const addBlacklistedBvns = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`;
     let processedData;
     if (body.type === 'single') {
-      const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn));
+      const hashedBvn = encodeURIComponent(await UserHash.encrypt(bodyData.bvn.trim()));
       const payload = BvnPayload.blacklistedBvn(bodyData, hashedBvn);
-      processedData  = await processAnyData(bvnQueries.blacklistedBvn, payload);
+      processedData  = await processOneOrNoneData(bvnQueries.blacklistedBvn, payload);
       await adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns(adminName,'single'));
     } else {
       processedData = await Promise.all(bodyData.map(async(data) => {
-        const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn));
+        const hashedBvn = encodeURIComponent(await UserHash.encrypt(data.bvn.trim()));
         const payload = BvnPayload.blacklistedBvn(data, hashedBvn);
-        const result = await processAnyData(bvnQueries.blacklistedBvn, payload);
-        await adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns(adminName,'bulk'));
-        return result[0];
+        await processOneOrNoneData(bvnQueries.blacklistedBvn, payload);
+        return data;
       }));
+      await adminActivityTracking(req.admin.admin_id, 29, 'success', descriptions.upload_blacklisted_bvns(adminName,'bulk'));
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::
       Info: have successfully added bvns in the DB blacklistedBvn.controllers.admin.admin.js`);

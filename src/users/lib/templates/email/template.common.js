@@ -61,7 +61,16 @@ export const commonTemplate = (messageType, data) => {
         </td>
       </tr>
       
-      ${getTemplate(messageType, data)} 
+      ${getTemplate(messageType, data)}
+      
+      <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+        <td>
+          <span style="line-height: 40px">Yours Sincerely</span> <br />
+          <span style="font-weight: 600; display: block;">SeedFi</span>
+          <span style="display: block;">Email: hello@theseedfi.com</span>
+          <span style="display: block;">Phone: +234 803 752 5487</span>
+        </td>
+      </tr>
     </table>
     <!--    FOOTER    -->
     <table role="footer" width="100%">

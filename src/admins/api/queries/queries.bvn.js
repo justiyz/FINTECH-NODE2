@@ -10,8 +10,7 @@ export default {
     RETURNING  first_name,
     middle_name,
     last_name,
-    date_of_birth,
-    bvn`,
+    date_of_birth`,
   
   fetchBlacklistedBvn: `
      SELECT 

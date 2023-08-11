@@ -160,7 +160,7 @@ export const clusterMemberInvite = async(req, res, next) => {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, invitedClusterMember);
     }
 
-    sendPushNotification(userDetails.user_id, PushNotifications.clusterMemberInvitation, userDetails.fcm_token);
+    sendPushNotification(userDetails.user_id, PushNotifications.clusterMemberInvitation(), userDetails.fcm_token);
     sendUserPersonalNotification(userDetails, `${cluster.name} cluster invite`,
       PersonalNotifications.inviteClusterMember(clusterInviteInfo), 'cluster-invitation', { ...cluster });
     await MailService('Cluster Loan Invitation', 'adminClusterInvite', { ...data });
@@ -246,7 +246,7 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
         const payload = ClusterPayload.clusterInvite(data, cluster, admin, req.body.type);
         const [ existingUser ] = await processAnyData(UserQueries.getUserByUserEmailOrPhoneNumber, [ data.email || data.phone_number ]);
         if (existingUser) {
-          sendPushNotification(existingUser.user_id, PushNotifications.clusterMemberInvitation, existingUser.fcm_token);
+          sendPushNotification(existingUser.user_id, PushNotifications.clusterMemberInvitation(), existingUser.fcm_token);
           sendUserPersonalNotification(existingUser, `${cluster.name} cluster invite`,
             PersonalNotifications.inviteClusterMember(clusterInviteInfo), 'cluster-invitation', { ...cluster });
         } 
@@ -267,6 +267,32 @@ export const clusterMemberBulkInvite = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CLUSTER_MEMBER_BULK_INVITE_CONTROLLER;
     logger.error(`Admin cluster member bulk invite failed::${enums.CLUSTER_MEMBER_BULK_INVITE_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * admin edits cluster interest rate type and value
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns updated cluster details.
+ * @memberof AdminClusterController
+ */
+export const editClusterInterestRates = async(req, res, next) => {
+  const { body, admin, cluster } = req;
+  const adminName = `${admin.first_name} ${admin.last_name}`;
+  try {
+    const payload = ClusterPayload.clusterInterestRates(body, cluster);
+    const data = await processOneOrNoneData(ClusterQueries.editClusterInterests, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+     admin have successfully updated cluster interest rate details in the DB. editClusterInterestRates.admin.controllers.cluster.js`);
+    await adminActivityTracking(admin.admin_id, 55, 'success', descriptions.edit_cluster_interest_rate(adminName, cluster.name));
+    return ApiResponse.success(res, enums.CLUSTER_INTEREST_RATE_DETAILS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    await adminActivityTracking(admin.admin_id, 55, 'fail', descriptions.edit_cluster_interest_rate_failed(adminName, cluster.name));
+    error.label = enums.EDIT_CLUSTER_INTEREST_RATES_CONTROLLER;
+    logger.error(`Admin editing cluster interests failed::${enums.EDIT_CLUSTER_INTEREST_RATES_CONTROLLER}`, error.message);
     return next(error);
   }
 };
