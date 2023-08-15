@@ -136,34 +136,34 @@ export const clusterMemberInvite = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const payload = ClusterPayload.clusterInvite(body, cluster, admin,  body.type, userDetails);
     const clusterInviteInfo = {inviter: admin.first_name, name: cluster.name};
-    const data = { email: body.email?.trim().toLowerCase(), cluster_name: cluster.name };
     const invitedClusterMember = await processOneOrNoneData(ClusterQueries.adminInviteClusterMember, payload);
-    await adminActivityTracking(admin.admin_id, 37, 'success', descriptions.cluster_member_invite(adminName));
-
+    
     const inviteDetails = {admin_id: admin.admin_id, cluster_id: cluster.cluster_id, unique_code: cluster.unique_code};
     const link = await createShortLink(inviteDetails);
     const smsInvite = {cluster_name: cluster.name, link};
+    const data = { email: body.email?.trim().toLowerCase(), cluster_name: cluster.name, join_url: link };
 
     if ((body.type === 'email' || body.type === 'phone_number') && !userDetails) {
       const sendInvite = body.type === 'phone_number' ? 
         sendSms(body.phone_number, clusterInvitation(smsInvite)) :  MailService('Cluster Loan Invitation', 'adminClusterInvite', { ...data });
       await sendInvite;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
-        decoded that invited user is not a valid user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
+      decoded that invited user is not a valid user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, invitedClusterMember);
     }
-
+    
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
-      decoded that invited user is a valid and active user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
-
+    decoded that invited user is a valid and active user in the DB. clusterMemberInvite.admin.controllers.cluster.js`);
+    
     if (SEEDFI_NODE_ENV === 'test') {
       return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, invitedClusterMember);
     }
-
+    
     sendPushNotification(userDetails.user_id, PushNotifications.clusterMemberInvitation(), userDetails.fcm_token);
     sendUserPersonalNotification(userDetails, `${cluster.name} cluster invite`,
       PersonalNotifications.inviteClusterMember(clusterInviteInfo), 'cluster-invitation', { ...cluster });
     await MailService('Cluster Loan Invitation', 'adminClusterInvite', { ...data });
+    await adminActivityTracking(admin.admin_id, 37, 'success', descriptions.cluster_member_invite(adminName));
     return ApiResponse.success(res, enums.ADMIN_CLUSTER_MEMBER_INVITE, enums.HTTP_OK, invitedClusterMember);
   } catch (error) {
     await adminActivityTracking(req.admin.admin_id, 37, 'fail', descriptions.cluster_member_invite_failed(`${req.admin.first_name} ${req.admin.last_name}`));

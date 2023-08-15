@@ -3,7 +3,8 @@ const Joi = require('joi').extend(require('@joi/date'));
 const loanApplication = Joi.object().keys({
   amount: Joi.number().positive().required(),
   duration_in_months: Joi.number().positive().required(),
-  loan_reason: Joi.string().required()
+  loan_reason: Joi.string().required(),
+  bank_statement_service_choice: Joi.string().required().valid('okra', 'mono')
 });
 
 const loanIdParams = Joi.object().keys({
