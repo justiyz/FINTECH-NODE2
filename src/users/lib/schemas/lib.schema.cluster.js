@@ -78,6 +78,7 @@ const editCluster = Joi.object().keys({
 const initiateClusterLoan = Joi.object().keys({
   total_amount: Joi.number().positive().required(),
   duration_in_months: Joi.number().positive().required(),
+  bank_statement_service_choice: Joi.string().required().valid('okra', 'mono'),
   sharing_type: Joi.string().required().valid('equal', 'self-allocate')
 }).when(Joi.object({ sharing_type: Joi.string().valid('self-allocate') }).unknown(), {
   then: Joi.object({
@@ -99,7 +100,8 @@ const clusterLoanRenegotiation = Joi.object().keys({
 });
 
 const membersClusterLoanEligibilityCheck = Joi.object().keys({
-  amount: Joi.number().positive().required()
+  amount: Joi.number().positive().required(),
+  bank_statement_service_choice: Joi.string().required().valid('okra', 'mono')
 });
 
 const membersClusterLoanDecision = Joi.object().keys({

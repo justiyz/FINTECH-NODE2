@@ -30,7 +30,8 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   user_maximum_allowable_amount: userMaximumAllowableAmount,
   user_minimum_allowable_amount: userMinimumAllowableAMount,
   previous_loan_count: previousLoanCount,
-  previous_loan_defaulted_count: previouslyDefaultedCount
+  previous_loan_defaulted_count: previouslyDefaultedCount,
+  bank_statement_service_choice: body.bank_statement_service_choice
 });
 
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
