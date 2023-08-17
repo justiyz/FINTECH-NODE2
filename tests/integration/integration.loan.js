@@ -25,7 +25,8 @@ describe('Individual loan', () => {
         })
         .send({
           amount: 200000,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -46,7 +47,8 @@ describe('Individual loan', () => {
         .send({
           amount: 'kunle',
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -67,7 +69,8 @@ describe('Individual loan', () => {
         .send({
           amount: -50000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -88,7 +91,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -132,7 +136,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -153,7 +158,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -174,7 +180,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -195,7 +202,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
@@ -216,7 +224,8 @@ describe('Individual loan', () => {
         .send({
           amount: 50000,
           duration_in_months: 0.5,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -237,7 +246,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 15,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -258,7 +268,8 @@ describe('Individual loan', () => {
         .send({
           amount: 120000,
           duration_in_months: 3,
-          loan_reason: 'car loan'
+          loan_reason: 'car loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -305,7 +316,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 2,
-          loan_reason: 'holiday flexing loan'
+          loan_reason: 'holiday flexing loan',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -580,7 +592,8 @@ describe('Individual loan', () => {
         .send({
           amount: 1000000,
           duration_in_months: 6,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -654,7 +667,8 @@ describe('Individual loan', () => {
         .send({
           amount: 200000,
           duration_in_months: 3,
-          loan_reason: 'camera fixing loan'
+          loan_reason: 'camera fixing loan',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);

@@ -1236,7 +1236,8 @@ describe('Clusters', () => {
         .send({
           amount: 100000,
           duration_in_months: 5,
-          loan_reason: 'House rent'
+          loan_reason: 'House rent',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1302,7 +1303,8 @@ describe('Clusters', () => {
         })
         .send({
           total_amount: 1000000,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -1323,7 +1325,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 'ma78ll',
           duration_in_months: 6,
-          sharing_type: 'self-allocate'
+          sharing_type: 'self-allocate',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -1344,7 +1347,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 200000,
           duration_in_months: 3,
-          sharing_type: 'manual-allocation'
+          sharing_type: 'manual-allocation',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -1365,7 +1369,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 200000,
           duration_in_months: 3,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1386,7 +1391,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 200000,
           duration_in_months: 3,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1407,7 +1413,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 200000,
           duration_in_months: 3,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_CONFLICT);
@@ -1428,7 +1435,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 200000,
           duration_in_months: 3,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1449,7 +1457,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 200000,
           duration_in_months: 3,
-          sharing_type: 'self-allocate'
+          sharing_type: 'self-allocate',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -1471,7 +1480,8 @@ describe('Clusters', () => {
           total_amount: 200000,
           duration_in_months: 3,
           sharing_type: 'self-allocate',
-          amount: 150000
+          amount: 150000,
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1492,7 +1502,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 2000000,
           duration_in_months: 3,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1513,7 +1524,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 40000,
           duration_in_months: 3,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1534,7 +1546,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 1000000,
           duration_in_months: 6,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1561,7 +1574,8 @@ describe('Clusters', () => {
         .send({
           total_amount: 1000000,
           duration_in_months: 6,
-          sharing_type: 'equal'
+          sharing_type: 'equal',
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1744,13 +1758,35 @@ describe('Clusters', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
-        .send({ })
+        .send({
+          bank_statement_service_choice: 'okra'
+        })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal('amount is required');
+          done();
+        });
+    });
+    it('should throw error when invalid bank account processing service is sent', (done) => {
+      chai.request(app)
+        .post(`/api/v1/cluster/loan/${process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_LOAN_ID}/eligibility-check`)
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
+        })
+        .send({
+          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT),
+          bank_statement_service_choice: 'lumo'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          expect(res.body.message).to.equal('bank_statement_service_choice must be one of [okra, mono]');
           done();
         });
     });
@@ -1762,7 +1798,8 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          amount: 'ma78ll'
+          amount: 'ma78ll',
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_UNPROCESSABLE_ENTITY);
@@ -1781,7 +1818,8 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT)
+          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT),
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1819,7 +1857,8 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT)
+          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT),
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1842,7 +1881,8 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT)
+          amount: parseFloat(process.env.SEEDFI_PRIVATE_CLUSTER_ONE_CLUSTER_LOAN_APPLICATION_USER_NINE_MEMBER_REQUESTING_AMOUNT),
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -2237,7 +2277,8 @@ describe('Clusters', () => {
           total_amount: 500000,
           duration_in_months: 3,
           sharing_type: 'self-allocate',
-          amount: 400000
+          amount: 400000,
+          bank_statement_service_choice: 'mono'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -2367,7 +2408,8 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          amount: 300000
+          amount: 300000,
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -2386,7 +2428,8 @@ describe('Clusters', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_NINE_ACCESS_TOKEN}`
         })
         .send({
-          amount: 200000
+          amount: 200000,
+          bank_statement_service_choice: 'okra'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
