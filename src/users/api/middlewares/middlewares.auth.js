@@ -326,6 +326,11 @@ export const compareDeviceToken = async(req, res, next) => {
     if (!req.body.device_token) {
       return ApiResponse.error(res, enums.DEVICE_TOKEN_REQUIRED, enums.HTTP_BAD_REQUEST, enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE);
     }
+    if (config.SEEDFI_NEW_DEVICE_LOGIN_WAVER_USERS.trim().toLowerCase().includes(user.email.trim().toLowerCase())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token does not match but user account was exempted 
+      compareDeviceToken.middlewares.auth.js`);
+      return next();
+    }
     if (req.body.device_token.trim() !== user.device_token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token does not match compareDeviceToken.middlewares.auth.js`);
       const otp =  Helpers.generateOtp();
@@ -351,6 +356,7 @@ export const compareDeviceToken = async(req, res, next) => {
   } catch (error) {
     error.label = enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE;
     logger.error(`Comparing user compare device token failed::${enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
   }
 };
 
