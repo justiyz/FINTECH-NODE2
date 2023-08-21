@@ -327,6 +327,7 @@ export const compareDeviceToken = async(req, res, next) => {
       return ApiResponse.error(res, enums.DEVICE_TOKEN_REQUIRED, enums.HTTP_BAD_REQUEST, enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE);
     }
     if (config.SEEDFI_NEW_DEVICE_LOGIN_WAVER_USERS.trim().toLowerCase().includes(user.email.trim().toLowerCase())) {
+      // This check was added so as to bypass app store testers logging in on new device requiring token
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token does not match but user account was exempted 
       compareDeviceToken.middlewares.auth.js`);
       return next();
