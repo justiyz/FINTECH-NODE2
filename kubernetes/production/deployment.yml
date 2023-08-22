@@ -185,6 +185,8 @@ spec:
           value: 'com.theseedfi.app'
         - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
           value: 'seedfi-backend' 
+        - name: SEEDFI_PROD_NEW_DEVICE_LOGIN_WAVER_USERS
+          value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
