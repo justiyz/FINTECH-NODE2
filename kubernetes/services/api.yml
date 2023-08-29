@@ -9,9 +9,6 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
 spec:
   ports:
-  - name: external
-    port: 80
-    targetPort: 4500
   - name: "https"
     port: 443
     targetPort: 4500
