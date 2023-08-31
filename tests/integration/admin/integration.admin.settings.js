@@ -270,7 +270,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-10-02')
         .field('end_date', '2023-11-30')
         .end((err, res) => {
@@ -291,7 +291,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-06-24')
         .field('end_date', '2023-06-30')
         .end((err, res) => {
@@ -312,7 +312,7 @@ describe('Admin Settings management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-06-24')
         .field('end_date', '2023-06-30')
         .end((err, res) => {
@@ -355,7 +355,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('end_date', '2023-06-30')
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -376,7 +376,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname, '../../files/BRD.pdf'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-06-24')
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -397,7 +397,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname,  '../../files/signature.png'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-10-02')
         .field('end_date', '2023-11-30')
         .field('percentage_discount', '20')
@@ -425,7 +425,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname,  '../../files/signature.png'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-06-24')
         .field('end_date', '2023-06-30')
         .field('percentage_discount', '20')
@@ -448,7 +448,7 @@ describe('Admin Settings management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .field('name', 'borrow for entertainment')
-        .field('description', 'borrow and get 10% discount')
+        .field('description', 'borrow and get 10 percent discount')
         .field('start_date', '2023-06-17')
         .field('end_date', '2023-06-30')
         .field('percentage_discount', '20')
@@ -471,7 +471,7 @@ describe('Admin Settings management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .field('name', 'borrow for entertainment')
-        .field('description', 'borrow and get 10% discount')
+        .field('description', 'borrow and get 10 percent discount')
         .field('start_date', '2023-06-17')
         .field('end_date', '2023-06-30')
         .field('percentage_discount', '20')
@@ -494,7 +494,7 @@ describe('Admin Settings management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .field('name', 'borrow for loving')
-        .field('description', 'borrow and get 10% discount')
+        .field('description', 'borrow and get 10 percent discount')
         .field('start_date', '2023-10-02')
         .field('end_date', '2023-11-30')
         .field('percentage_discount', '20')
@@ -696,7 +696,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname,  '../../files/signature.png'))
         .field('name', 'borrow for lifestyle')
-        .field('description', 'borrow and get 20% discount')
+        .field('description', 'borrow and get 20 percent discount')
         .field('start_date', '2023-06-24')
         .field('end_date', '2023-06-30')
         .field('percentage_discount', '20')
@@ -719,7 +719,7 @@ describe('Admin Settings management', () => {
           Authorization: `Bearer ${process.env.SEEDFI_SUPER_ADMIN_ACCESS_TOKEN}`
         })
         .field('name', 'borrow for entertainment')
-        .field('description', 'borrow and get 10% discount')
+        .field('description', 'borrow and get 10 percent discount')
         .field('start_date', '2023-06-17')
         .field('end_date', '2023-06-30')
         .field('percentage_discount', '20')
@@ -743,7 +743,7 @@ describe('Admin Settings management', () => {
         })
         .attach('document', path.resolve(__dirname,  '../../files/signature.png'))
         .field('name', 'borrow for feeding')
-        .field('description', 'borrow and get 10% discount')
+        .field('description', 'borrow and get 10 percent discount')
         .field('percentage_discount', '10')
         .field('customer_segment', 'employed')
         .end((err, res) => {

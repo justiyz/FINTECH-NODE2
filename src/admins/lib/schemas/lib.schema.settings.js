@@ -9,8 +9,12 @@ export const updateEnvValues = Joi.array().min(1).items(
 );
 
 export const createPromo = Joi.object().keys({
-  name: Joi.string().required(),
-  description: Joi.string().required(),
+  name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid promo name input'
+  }).required(),
+  description: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid promo description input'
+  }).required(),
   start_date: Joi.date().required(),
   end_date: Joi.date().required(),
   image_url: Joi.string().optional(),
@@ -30,13 +34,17 @@ export const promoIds = Joi.array().min(1).items(
 );
 
 export const editPromo = Joi.object().keys({
-  name: Joi.string().optional(),
-  description: Joi.string().optional(),
+  name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid promo name input'
+  }).optional(),
+  description: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid promo description input'
+  }).optional(),
   start_date: Joi.date().optional(),
   end_date: Joi.date().optional(),
   image_url: Joi.string().optional(),
   percentage_discount: Joi.number().optional(),
-  customer_segment: Joi.string().optional(),
+  customer_segment: Joi.string().optional().valid('student', 'employed', 'self employed', 'unemployed','retired'),
   tier_category: Joi.string().optional().valid('1', '2')
 });
 

@@ -102,51 +102,6 @@ export const confirmUserClusterInvitation = async(req, res, next) => {
 };
 
 /**
- * checking if members can still join a cluster
- * @param {string} type - a type to know which of the checks to make
- * @returns {object} - Returns an object (error or response).
- * @memberof ClusterMiddleware
- */
-export const confirmClusterIsStillOpenForJoining = (type = '') => async(req, res, next) => {
-  try {
-    const {user, cluster } = req;
-    if (
-      (type === 'join' || type === 'request') && 
-      (
-        (dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || 
-        (Number(cluster.maximum_members) === Number(cluster.current_members))
-      )
-    ) {
-      const activityType = type === 'request' ? 49 : 52;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster 
-      confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
-      return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
-    }
-    if (
-      (type === 'invite') && 
-        (
-          (dayjs().format('YYYY-MM-DD HH:mm:ss') > dayjs(cluster.join_cluster_closes_at).format('YYYY-MM-DD HH:mm:ss')) || 
-          (Number(cluster.maximum_members) === Number(cluster.current_members))
-        )
-    ) {
-      const activityType = req.body.type === 'email' ? 54 : 55;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
-      cluster can no longer accept new member confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
-      userActivityTracking(req.user.user_id, activityType, 'fail');
-      return ApiResponse.error(res, enums.CLUSTER_CLOSED_FOR_MEMBERSHIP, enums.HTTP_FORBIDDEN, enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE);
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster is still open for members to join or added 
-    confirmClusterIsStillOpenForJoining.middlewares.cluster.js`);
-    return next();
-  } catch (error) {
-    error.label = enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE;
-    logger.error(`checking if members can still be a part of a cluster failed::${enums.CONFIRM_CLUSTER_IS_STILL_OPEN_FOR_JOINING_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
-
-/**
  * check if cluster exists
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

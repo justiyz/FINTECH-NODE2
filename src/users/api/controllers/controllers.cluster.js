@@ -185,10 +185,6 @@ export const createCluster = async(req, res, next) => {
   const { body, user } = req;
   const activityType = body.type === 'public' ? 47 : 48;
   try {
-    const clusterOpenGrace = await processOneOrNoneData(clusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
-    const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster grace period for membership joining set successfully createCluster.controllers.cluster.js`);
-    body.join_cluster_closes_at = body.type === 'private' ? join_cluster_closes_at : null;
     const createClusterPayload = ClusterPayload.createClusterPayload(body, user);
     const newClusterDetails = await processOneOrNoneData(clusterQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster created successfully successfully createCluster.controllers.cluster.js`);

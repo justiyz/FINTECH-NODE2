@@ -6,7 +6,9 @@ const manualLoanApproval = Joi.object().keys({
 
 const manualLoanRejection = Joi.object().keys({
   decision: Joi.string().required().valid('decline'),
-  rejection_reason: Joi.string().required()
+  rejection_reason: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster rejection reason input'
+  }).required()
 });
 
 const loanIdParams = Joi.object().keys({

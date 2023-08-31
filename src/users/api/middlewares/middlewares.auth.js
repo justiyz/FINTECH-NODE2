@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import authQueries from '../queries/queries.auth';
 import userQueries from '../queries/queries.user';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -334,6 +334,12 @@ export const compareDeviceToken = async(req, res, next) => {
     }
     if (req.body.device_token.trim() !== user.device_token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token does not match compareDeviceToken.middlewares.auth.js`);
+      if (user && (user.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it 
+        checkOtpVerificationRequestCount.middlewares.auth.js`);
+        await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
+        return ApiResponse.error(res, enums.USER_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE);
+      }
       const otp =  Helpers.generateOtp();
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated compareDeviceToken.middlewares.auth.jss`);
       const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
@@ -343,7 +349,7 @@ export const compareDeviceToken = async(req, res, next) => {
       }
       const expireAt = dayjs().add(10, 'minutes');
       const expirationTime = dayjs(expireAt);
-      await processAnyData(authQueries.updateVerificationToken, [ user.phone_number, otp, expireAt ]);
+      await processAnyData(authQueries.updateVerificationToken, [ user.phone_number, otp, expireAt, (Number(user.verification_token_request_count) + 1) ]);
       const data = { otp, otpDuration: `${10} minutes` };
       await sendSms(user.phone_number, verifyAccountOTPSms(data));
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: New token successfully sent to user registered phone number compareDeviceToken.middlewares.auth.js`);
@@ -527,6 +533,32 @@ export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
   } catch (error) {
     error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
     logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if user OTP verification request is not getting suspicious
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const checkOtpVerificationRequestCount = async(req, res, next) => {
+  try {
+    const { user } = req;
+    if (user && (user.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it 
+      checkOtpVerificationRequestCount.middlewares.auth.js`);
+      await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
+      return ApiResponse.error(res, enums.USER_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user otp verification request still within limit checkOtpVerificationRequestCount.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE;
+    logger.error(`checking if user OTP verification request is still within limit failed::${enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

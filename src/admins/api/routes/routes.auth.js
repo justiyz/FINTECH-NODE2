@@ -13,6 +13,7 @@ router.post(
   Model(Schema.login, 'payload'),
   AdminMiddleware.validateUnAuthenticatedAdmin('login'),
   AuthMiddleware.compareAdminPassword,
+  AuthMiddleware.checkOtpVerificationRequestCount,
   AuthController.completeAdminLoginRequest
 );
 
@@ -38,6 +39,7 @@ router.post(
   Model(Schema.forgotPassword, 'payload'),
   AdminMiddleware.validateUnAuthenticatedAdmin('verify'),
   AuthMiddleware.checkIfChangedDefaultPassword('verify'),
+  AuthMiddleware.checkOtpVerificationRequestCount,
   AuthController.forgotPassword
 );
 

@@ -5,7 +5,7 @@ export default {
       WHERE admin_id = $1`,
 
   fetchAdminByVerificationToken: `
-      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password
+      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
       FROM admins 
       WHERE verification_token = $1`,
 
@@ -15,7 +15,8 @@ export default {
         updated_at = NOW(),
         is_verified_email = TRUE,
         verification_token = $2,
-        verification_token_expires = $3
+        verification_token_expires = $3,
+        verification_token_request_count = $4
       WHERE admin_id = $1
       RETURNING id, admin_id, first_name, last_name, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
 
@@ -49,6 +50,7 @@ export default {
     SET
       verification_token = $2,
       verification_token_expires = $3,
+      verification_token_request_count = $4,
       updated_at = NOW()
     WHERE email = $1
     RETURNING admin_id, first_name, last_name, status`,
@@ -59,7 +61,10 @@ export default {
       updated_at = NOW(),
       status = 'active',
       is_created_password = TRUE,
-      password = $2
+      password = $2,
+      verification_token = NULL,
+      verification_token_expires = NULL,
+      verification_token_request_count = verification_token_request_count - verification_token_request_count
     WHERE admin_id = $1
     RETURNING admin_id, status, is_created_password, is_verified_email, is_completed_profile`
 };
