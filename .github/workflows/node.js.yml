@@ -58,8 +58,7 @@ jobs:
           SEEDFI_TEST_FIREBASE_DATABASE_URL : 'https://seedfi.firebaseio.com'
           SEEDFI_TEST_UNDERWRITING_SERVICE_BASE_URL: 'https://staging-underwriting-api.enyata.com'
           SEEDFI_TEST_UNDERWRITING_SERVICE_API_KEY: '4NOSyMzb.NVj7HdWgCxnvZOkHqPygchIMkP42zBGO'
-
-
+          SEEDFI_TEST_ALLOWABLE_ORIGINS: 'http://locahost:7000, http://locahost:8000'
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
