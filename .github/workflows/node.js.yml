@@ -43,7 +43,7 @@ jobs:
           SEEDFI_TEST_MESSAGE_FORWARDING: 'false'
           SEEDFI_TEST_ENCODING_AUTHENTICATION_SECRET : 'anyrandomstringforencodingjwtlevels'
           SEEDFI_TEST_BCRYPT_SALT_ROUND : '10'
-          SEEDFI_TEST_PAYSTACK_SECRET_KEY: 'sk_test_db3c7dc6fdfba13511d5ff95c068ce798066341b'
+          SEEDFI_TEST_PAYSTACK_SECRET_KEY : 'sk_test_d91f4618973f5d8c724716d82a9e93148b95d051'
           SEEDFI_TEST_CARD_TOKENIZING_AMOUNT: '500'
           SEEDFI_TEST_FIREBASE_SERVICE_ACCOUNT_TYPE : 'service_account'
           SEEDFI_TEST_FIREBASE_SERVICE_ACCOUNT_PROJECT_ID : 'seedfi-d9251'
@@ -59,6 +59,7 @@ jobs:
           SEEDFI_TEST_UNDERWRITING_SERVICE_BASE_URL: 'https://staging-underwriting-api.enyata.com'
           SEEDFI_TEST_UNDERWRITING_SERVICE_API_KEY: '4NOSyMzb.NVj7HdWgCxnvZOkHqPygchIMkP42zBGO'
           SEEDFI_TEST_ALLOWABLE_ORIGINS: 'http://locahost:7000, http://locahost:8000'
+          SEEDFI_TEST_NEW_DEVICE_LOGIN_WAVER_USERS: 'randomemail@gmail.com,qa@enyata.com'
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

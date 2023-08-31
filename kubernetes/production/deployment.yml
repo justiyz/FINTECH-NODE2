@@ -120,11 +120,11 @@ spec:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_DATADOG_API_KEY
-          valueFrom:
-            secretKeyRef:
-              key: datadogapikey
-              name: seedfi-api-config
+        # - name: SEEDFI_PROD_DATADOG_API_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       key: datadogapikey
+        #       name: seedfi-api-config
         - name: SEEDFI_NODE_ENV
           value: 'production'
         - name: SEEDFI_PROD_PORT
@@ -187,6 +187,9 @@ spec:
           value: 'seedfi-backend'
         - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
+          value: 'seedfi-backend' 
+        - name: SEEDFI_PROD_NEW_DEVICE_LOGIN_WAVER_USERS
+          value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
