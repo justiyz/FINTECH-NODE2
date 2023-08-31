@@ -184,6 +184,9 @@ spec:
         - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_IOS_BUNDLE_ID
           value: 'com.theseedfi.app'
         - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
+          value: 'seedfi-backend'
+        - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
+          value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 
         - name: SEEDFI_PROD_NEW_DEVICE_LOGIN_WAVER_USERS
           value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
