@@ -4,15 +4,23 @@ const createCluster = Joi.object().keys({
   type: Joi.string().required().valid('public', 'private')
 }).when(Joi.object({ type: Joi.string().valid('public') }).unknown(), {
   then: Joi.object({
-    name: Joi.string().required(),
-    description: Joi.string().required(),
+    name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid cluster name input'
+    }).required(),
+    description: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid cluster description input'
+    }).required(),
     maximum_members: Joi.number().positive().required().min(2),
     minimum_monthly_income: Joi.number().positive().required()
   })
 }).when(Joi.object({ type: Joi.string().valid('private') }).unknown(), {
   then: Joi.object({
-    name: Joi.string().required(),
-    description: Joi.string().required(),
+    name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid cluster name input'
+    }).required(),
+    description: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid cluster description input'
+    }).required(),
     maximum_members: Joi.number().positive().required().min(2),
     loan_goal_target: Joi.number().positive().required(),
     minimum_monthly_income: Joi.number().positive().required()
@@ -59,7 +67,9 @@ const inviteClusterMember = Joi.object().keys({
 });
 
 const initiateDeleteCluster = Joi.object().keys({
-  deletion_reason: Joi.string().required()
+  deletion_reason: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid deletion reason input'
+  }).required()
 });
 
 const selectNewAdminParams = Joi.object().keys({
@@ -68,8 +78,12 @@ const selectNewAdminParams = Joi.object().keys({
 });
 
 const editCluster = Joi.object().keys({
-  name: Joi.string().optional(),
-  description: Joi.string().optional(),
+  name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster name input'
+  }).optional(),
+  description: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster description input'
+  }).optional(),
   maximum_members: Joi.number().optional(),
   loan_goal_target: Joi.number().optional(),
   minimum_monthly_income: Joi.number().optional()

@@ -6,22 +6,20 @@ export default {
 
   registerUser: `
     INSERT INTO users(
-        phone_number, verification_token, verification_token_expires
-    ) VALUES ($1, $2, $3)
-    ON CONFLICT(phone_number)
-    DO UPDATE SET
-    referral_code = EXCLUDED.referral_code,
-    verification_token = EXCLUDED.verification_token,
-    verification_token_expires = EXCLUDED.verification_token_expires
+        phone_number, verification_token, verification_token_expires, verification_token_request_count
+    ) VALUES ($1, $2, $3, $4)
     RETURNING user_id, phone_number, tier, status, verification_token_expires, is_deleted`,
 
   updateVerificationToken: `
     UPDATE users
     SET
       updated_at = NOW(),
+      referral_code = referral_code,
       verification_token = $2,
-      verification_token_expires = $3
-    WHERE phone_number = $1`,
+      verification_token_expires = $3,
+      verification_token_request_count = $4
+    WHERE phone_number = $1
+    RETURNING user_id, phone_number, tier, status, verification_token_expires, is_deleted`,
 
   checkIfExistingReferralCode: `
     SELECT id, user_id, referral_code
@@ -78,7 +76,8 @@ export default {
       device_token = $5,
       is_verified_phone_number = TRUE,
       verification_token = NULL,
-      verification_token_expires = NULL
+      verification_token_expires = NULL,
+      verification_token_request_count = verification_token_request_count - verification_token_request_count
     WHERE user_id = $1`,
 
   verifyUserAccountOnNewDevice: `
@@ -90,7 +89,8 @@ export default {
       device_token = $4,
       is_verified_phone_number = TRUE,
       verification_token = NULL,
-      verification_token_expires = NULL
+      verification_token_expires = NULL,
+      verification_token_request_count = verification_token_request_count - verification_token_request_count
     WHERE user_id = $1`,
 
   completeUserProfile: `
@@ -135,6 +135,7 @@ export default {
     SET
       verification_token = $2,
       verification_token_expires = $3,
+      verification_token_request_count = verification_token_request_count + 1,
       updated_at = NOW()
      WHERE email = $1
      RETURNING user_id, first_name, middle_name, last_name, status`,
@@ -145,6 +146,7 @@ export default {
       password = $2,
       verification_token = NULL,
       verification_token_expires = NULL,
+      verification_token_request_count = verification_token_request_count - verification_token_request_count,
       updated_at = NOW()
      WHERE user_id = $1
     `,
@@ -182,6 +184,7 @@ export default {
     SET
       verification_token = $2,
       verification_token_expires = $3,
+      verification_token_request_count = verification_token_request_count + 1,
       updated_at = NOW()
     WHERE user_id = $1
     RETURNING user_id, first_name, middle_name, last_name, status`,
@@ -192,6 +195,7 @@ export default {
       updated_at = NOW(),
       verification_token = NULL,
       verification_token_expires = NULL,
+      verification_token_request_count = verification_token_request_count - verification_token_request_count,
       pin = $2
     WHERE user_id = $1`,
 
@@ -254,5 +258,12 @@ export default {
     ON general_reward_points_range_settings.reward_id = general_reward_points_settings.reward_id
     WHERE general_reward_points_range_settings.reward_id = $1
     AND $2::FLOAT >= general_reward_points_range_settings.lower_bound::FLOAT
-    AND $2::FLOAT <= general_reward_points_range_settings.upper_bound::FLOAT`
+    AND $2::FLOAT <= general_reward_points_range_settings.upper_bound::FLOAT`,
+
+  deactivateUserAccount: `
+    UPDATE users
+    SET
+      updated_at = NOW(),
+      status = 'deactivated'
+    WHERE user_id = $1`
 };

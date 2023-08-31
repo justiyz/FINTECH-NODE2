@@ -1,7 +1,9 @@
 const Joi = require('joi').extend(require('@joi/date'));
 
 const createRole = Joi.object().keys({
-  name: Joi.string().required(),
+  name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid role name input'
+  }).required(),
   permissions: Joi.array().min(1).items(
     Joi.object().keys({
       resource_id: Joi.string().required(),
@@ -15,7 +17,9 @@ const roleCodeParams = Joi.object().keys({
 });
 
 const editRole = Joi.object().keys({
-  name: Joi.string().optional(),
+  name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid role name input'
+  }).optional(),
   permissions: Joi.array().min(1).items(
     Joi.object().keys({
       resource_id: Joi.string().required(),

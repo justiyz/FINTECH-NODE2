@@ -33,12 +33,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call confirmClusterIsStillOpenForJoining', async() => {
-      const req = { user: '', cluster: '' };
-      const data = await ClusterMiddlewares.confirmClusterIsStillOpenForJoining('join')(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call checkIfAlreadyClusterMember', async() => {
       const req = { user: '', cluster: '' };
       const data = await ClusterMiddlewares.checkIfAlreadyClusterMember('authenticate')(req, res, next);

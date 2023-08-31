@@ -7,6 +7,7 @@ import fileUpload from 'express-fileupload';
 import loggerInit from '../logger/index';
 import enums from '../../lib/enums/index';
 import routes from '../routes/index';
+import config from '../index';
 
 const expressConfig = app => {
   let logger;
@@ -42,12 +43,14 @@ const expressConfig = app => {
 
   // allow certain domains and allow certain HTTP methods
   app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', config.SEEDFI_ALLOWABLE_ORIGINS?.split(',').join('').split(' '));
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Origin, Content-Type, Accept');
     res.setHeader('Access-Control-Allow-Credentials', true);
     next();
   });
+
+  app.disable('x-powered-by');
 
   // Welcome route
   app.get('/', (_req, res) => {

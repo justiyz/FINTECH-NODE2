@@ -49,7 +49,6 @@ router.post(
   UserMiddleware.isUploadedVerifiedId('confirm'),
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
-  ClusterMiddleware.confirmClusterIsStillOpenForJoining('request'),
   ClusterMiddleware.checkIfPublicOrPrivateCluster('public'),
   ClusterMiddleware.checkIfUserBelongsToTypeOfCluster,
   ClusterMiddleware.compareUserMonthlyIncome,
@@ -84,7 +83,6 @@ router.post(
   ClusterMiddleware.checkIfAlreadyClusterMember('confirm'),
   ClusterMiddleware.confirmUserClusterInvitation,
   ClusterMiddleware.checkIfUserBelongsToTypeOfCluster,
-  ClusterMiddleware.confirmClusterIsStillOpenForJoining('join'),
   ClusterMiddleware.compareUserMonthlyIncome,
   ClusterController.joinClusterOnInvitation
 );
@@ -96,7 +94,6 @@ router.post(
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIfClusterMemberIsAdmin,
   ClusterMiddleware.checkIfClusterHasActiveLoan,
-  ClusterMiddleware.confirmClusterIsStillOpenForJoining('invite'),
   ClusterMiddleware.checkIfInviteeAlreadyClusterMember,
   ClusterController.inviteClusterMember
 );

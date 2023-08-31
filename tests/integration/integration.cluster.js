@@ -273,7 +273,6 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.CLUSTER_CREATED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('cluster_id');
-          expect(res.body.data).to.have.property('join_cluster_closes_at');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(2);
           process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
@@ -326,7 +325,6 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.CLUSTER_CREATED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('cluster_id');
-          expect(res.body.data).to.have.property('join_cluster_closes_at');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(4);
           process.env.SEEDFI_USER_ONE_PUBLIC_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
@@ -381,7 +379,6 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.CLUSTER_CREATED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('cluster_id');
-          expect(res.body.data).to.have.property('join_cluster_closes_at');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(3);
           process.env.SEEDFI_USER_ONE_PRIVATE_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
@@ -466,7 +463,6 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.CLUSTER_CREATED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('cluster_id');
-          expect(res.body.data).to.have.property('join_cluster_closes_at');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(2);
           process.env.SEEDFI_USER_THREE_PRIVATE_CLUSTER_ONE_CLUSTER_ID = res.body.data.cluster_id;
@@ -1215,27 +1211,6 @@ describe('Clusters', () => {
           expect(res.body).to.have.property('status');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           expect(res.body.message).to.equal(enums.VOTING_DECISION_ALREADY_CONCLUDED);
-          done();
-        });
-    });
-    it('Should flag when cluster is filled up and admin wants to invite member', (done) => {
-      chai.request(app)
-        .post(`/api/v1/cluster/${process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_ONE_CLUSTER_ID}/invite-member/`)
-        .set({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
-        })
-        .send({
-          type: 'phone_number',
-          phone_number: '+2349075743312',
-          link_url: 'sdfghjhgfdsdfdfghjkjhgfdsertghjm'
-        })
-        .end((err, res) => {
-          expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('status');
-          expect(res.body.status).to.equal(enums.ERROR_STATUS);
-          expect(res.body.message).to.equal(enums.CLUSTER_CLOSED_FOR_MEMBERSHIP);
           done();
         });
     });
@@ -2228,7 +2203,6 @@ describe('Clusters', () => {
           expect(res.body.message).to.equal(enums.CLUSTER_CREATED_SUCCESSFULLY);
           expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
           expect(res.body.data).to.have.property('cluster_id');
-          expect(res.body.data).to.have.property('join_cluster_closes_at');
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.maximum_members).to.equal(2);
           process.env.SEEDFI_USER_TWO_PUBLIC_CLUSTER_TWO_CLUSTER_ID = res.body.data.cluster_id;

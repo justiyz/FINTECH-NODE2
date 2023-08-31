@@ -7,7 +7,9 @@ const signup = Joi.object().keys({
       'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
       'string.empty': 'Phone Number is not allowed to be empty'
     }).required(),
-  referral_code: Joi.string().optional()
+  referral_code: Joi.string().regex(new RegExp('^[a-zA-Z0-9]+$')).messages({
+    'string.pattern.base': 'Invalid referral code input'
+  }).optional()
 });
 
 const resendPhoneNumberVerificationOTP = Joi.object().keys({
@@ -37,13 +39,21 @@ const deviceType = Joi.object().keys({
 
 
 const completeProfile = Joi.object().keys({
-  first_name: Joi.string().required(),
-  middle_name: Joi.string().optional(),
-  last_name: Joi.string().required(),
+  first_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid first name input'
+  }).required(),
+  middle_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid middle name input'
+  }).optional(),
+  last_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid last name input'
+  }).required(),
   email: Joi.string().email().required(),
   date_of_birth: Joi.date().format('YYYY-MM-DD').required(),
   gender: Joi.string().required().valid('male', 'female'),
-  password: Joi.string().required().min(8)
+  password: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
+    'string.pattern.base': 'Invalid password combination'
+  }).required().min(8)
 });
 
 const forgotPassword = Joi.object().keys({
@@ -55,12 +65,16 @@ const verifyOtp = Joi.object().keys({
 });
  
 const password = Joi.object().keys({
-  password: Joi.string().required().min(8)
+  password: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
+    'string.pattern.base': 'Invalid password combination'
+  }).required().min(8)
 });
 
 const changePassword = Joi.object().keys({
   oldPassword: Joi.string().required().min(8),
-  newPassword: Joi.string().required().min(8)
+  newPassword: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
+    'string.pattern.base': 'Invalid password combination'
+  }).required().min(8)
 });
 
 const pin = Joi.object().keys({

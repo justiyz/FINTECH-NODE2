@@ -12,8 +12,7 @@ export default {
     body.minimum_monthly_income,
     user.user_id,
     user.user_id,
-    body.clusterCode,
-    body.join_cluster_closes_at
+    body.clusterCode
   ],
   inviteClusterMember: (body, cluster, user, invitedUser, type) => [
     cluster.cluster_id,

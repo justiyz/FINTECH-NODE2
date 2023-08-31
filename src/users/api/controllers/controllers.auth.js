@@ -30,7 +30,7 @@ const { SEEDFI_NODE_ENV } = config;
  */
 export const signup = async(req, res, next) => {
   try {
-    const { body, referringUserDetails } = req;
+    const { body, referringUserDetails, user } = req;
     const otp =  Helpers.generateOtp();
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated signup.controllers.auth.js`);
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
@@ -40,8 +40,9 @@ export const signup = async(req, res, next) => {
     }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = AuthPayload.register(body, otp, expireAt);
-    const [ registeredUser ] = await processAnyData(authQueries.registerUser, payload);
+    const signupOtpRequest = user ? (Number(user.verification_token_request_count) + 1) : 1;
+    const payload = AuthPayload.register(body, otp, expireAt, signupOtpRequest);
+    const [ registeredUser ] = !user ? await processAnyData(authQueries.registerUser, payload) : await processAnyData(authQueries.updateVerificationToken, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database signup.controllers.auth.js`);
     if (body.referral_code) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload signup.controllers.auth.js`);

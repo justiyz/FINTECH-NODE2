@@ -12,6 +12,7 @@ router.post(
   Model(Schema.signup, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('validate'),
   AuthMiddleware.checkIfReferralCodeExists,
+  AuthMiddleware.checkOtpVerificationRequestCount,
   AuthController.signup
 );
 
@@ -19,6 +20,7 @@ router.post(
   '/resend-signup-otp',
   Model(Schema.resendPhoneNumberVerificationOTP, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('authenticate'),
+  AuthMiddleware.checkOtpVerificationRequestCount,
   AuthController.resendSignupOtp
 );
 
@@ -64,6 +66,7 @@ router.post(
   '/forgot-password',
   Model(Schema.forgotPassword, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
+  AuthMiddleware.checkOtpVerificationRequestCount,
   AuthController.forgotPassword
 );
 
@@ -128,6 +131,7 @@ router.post(
 router.post(
   '/forgot-pin',
   AuthMiddleware.validateAuthToken,
+  AuthMiddleware.checkOtpVerificationRequestCount,
   AuthController.forgotPin
 );
 

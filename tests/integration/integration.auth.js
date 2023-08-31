@@ -1471,7 +1471,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should throw error if invalid otp is sent', (done) => {
+    it('Should throw error if invalid authorization is sent', (done) => {
       chai.request(app)
         .post('/api/v1/auth/reset-password')
         .set({
@@ -1479,7 +1479,7 @@ describe('Auth', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN}0op`
         })
         .send({
-          password: 'cpcjksjs2'
+          password: 'afterwardsPAssword@09'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
@@ -1491,7 +1491,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should throw error if otp is malformed', (done) => {
+    it('Should throw error if jwt is malformed', (done) => {
       chai.request(app)
         .post('/api/v1/auth/reset-password')
         .set({
@@ -1499,7 +1499,7 @@ describe('Auth', () => {
           Authorization: `Bearer ${'fghjkejcxdrtyujk,mnbvcfghjkghjjhgfdfghjkmn'}0op`
         })
         .send({
-          password: 'cpcjksjs2'
+          password: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
@@ -1511,7 +1511,7 @@ describe('Auth', () => {
           done();
         });
     });
-    it('Should throw error if length of otp is less than six', (done) => {
+    it('Should throw error if password combination does not pass', (done) => {
       chai.request(app)
         .post('/api/v1/auth/reset-password')
         .set({
@@ -1525,7 +1525,7 @@ describe('Auth', () => {
           expect(res.statusCode).to.equal(422);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('password length must be at least 8 characters long');
+          expect(res.body.message).to.equal('Invalid password combination');
           expect(res.body.error).to.equal('UNPROCESSABLE_ENTITY');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -1539,7 +1539,7 @@ describe('Auth', () => {
           Authorization: `Bearer ${''}`
         })
         .send({
-          password: 'cpcjksjs2'
+          password: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(401);
@@ -1558,7 +1558,7 @@ describe('Auth', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_RESET_PASSWORD_TOKEN}`
         })
         .send({
-          password: 'userPassword1'
+          password: 'userPassword1_'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
@@ -1580,7 +1580,7 @@ describe('Auth', () => {
         })
         .send({
           password: password,
-          newPassword: 'hshsuw8uwhw'
+          newPassword: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -1599,7 +1599,7 @@ describe('Auth', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
         .send({
-          oldPassword: 'hshsrrwhw',
+          oldPassword: 'afterwardsPAssword@0',
           newPassword: ''
         })
         .end((err, res) => {
@@ -1620,7 +1620,7 @@ describe('Auth', () => {
         })
         .send({
           oldPassword: password,
-          newPassword: 'balablue'
+          newPassword: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1640,7 +1640,7 @@ describe('Auth', () => {
         })
         .send({
           oldPassword: `${password}0`,
-          newPassword: 'balablue'
+          newPassword: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1659,8 +1659,8 @@ describe('Auth', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          oldPassword: 'balablue',
-          newPassword: 'balablue'
+          oldPassword: 'afterwardsPAssword@0',
+          newPassword: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_BAD_REQUEST);
@@ -1680,7 +1680,7 @@ describe('Auth', () => {
           Authorization: `Bearer ${process.env.SEEDFI_USER_TWO_ACCESS_TOKEN}`
         })
         .send({
-          password: 'balablue'
+          password: 'afterwardsPAssword@0'
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);

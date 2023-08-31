@@ -326,7 +326,6 @@ export default {
         status,
         loan_status,
         total_loan_obligation,
-        join_cluster_closes_at,
         is_deleted
     FROM clusters
     WHERE cluster_id = $1`,
