@@ -184,7 +184,9 @@ spec:
         - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_IOS_BUNDLE_ID
           value: 'com.theseedfi.app'
         - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
-          value: 'seedfi-backend' 
+          value: 'seedfi-backend'
+        - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
+          value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
