@@ -13,8 +13,10 @@ export const commonTemplate = (messageType, data) => {
     adminClusterInvite: 'Cluster loan invitation',
     approvedUtilityBill: 'Approved utility bill',
     declinedUtilityBill: 'Declined utility bill',
-    adminSentNotification: data.tile,
-    manualLoanApproval: 'Manual Loan Approval Required'
+    adminSentNotification: data.title,
+    manualLoanApproval: 'Manual Loan Approval Required',
+    resetPassword: 'Password Reset Successful',
+    changePassword: 'Password Change Successful'
   };
   
   let headerText;

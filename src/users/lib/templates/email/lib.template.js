@@ -33,7 +33,116 @@ export const forgotPassword = (data) => `
 <tr>
   <td>
     <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-      If you didn't request a reset password, you can ignore this email.
+      If you didn't request a password reset, you can ignore this email.
+    </p>
+  </td>
+</tr>`;
+
+export const resetPassword = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your password has been successfully updated.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate password reset, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+export const changePassword = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your password has been changed successfully.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate change password, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+export const changePin = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your pin has been changed successfully.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate change password, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+
+export const resetPin = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your pin has been successfully updated.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate pin reset, kindly reach out to support.
     </p>
   </td>
 </tr>`;

@@ -285,3 +285,62 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * validates reset password
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const validateResetPassword = async(req, res, next) => {
+  try {
+    const { 
+      body, admin } = req;
+    const condition =  body.password;
+    const [ credentials ] =  await processAnyData(authQueries.fetchAdminPassword, [ admin.admin_id ]);
+    const isValidCredentials = UserHash.compareData(condition, credentials.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully returned compared password/pin in the DB validateResetPasswordOrPin.middlewares.auth.js`);
+    if (isValidCredentials) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully validate password/pin in the DB validateResetPasswordOrPin.middlewares.auth.js`);
+      return next();
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.VALIDATE_RESET_PASSWORD_OR_PIN_MIDDLEWARE;
+    logger.error(`validate password in the DB failed:::${enums.VALIDATE_RESET_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+ * Checks if reset password is same as current
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const checkIfResetCredentialsSameAsOld = async(req, res, next) => {
+  try {
+    const { 
+      body: { password }, admin } = req;
+    const [ adminPasswordDetails ] = await processAnyData(authQueries.fetchAdminPassword, [ admin.admin_id ]);
+    const isValidCredentials = UserHash.compareData(password, adminPasswordDetails.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: successfully returned compared user response checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+    if (isValidCredentials) {   
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+      decoded that new password matches with oldpassword. checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS('password'), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+    confirms that users new password is not the same as the currently set password checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
+    logger.error(`Checking if password sent matches in the DB failed:::${enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

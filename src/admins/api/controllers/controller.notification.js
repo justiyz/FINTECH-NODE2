@@ -87,6 +87,9 @@ export const sendNotifications = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: recipient tokens and names sorted sendNotifications.admin.controller.notification.js`);
     await Promise.all(body.sent_to.map(async(user) => {
       const [ userDetails ] = await processAnyData(usersQueries.getUsersForNotifications, [ user.user_id ]);
+      if (!userDetails) {
+        return;
+      }
       await MailService(body.title, 'adminSentNotification', { 
         email: userDetails.email, 
         first_name: userDetails.first_name,
