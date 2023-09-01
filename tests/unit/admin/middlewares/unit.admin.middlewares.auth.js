@@ -57,12 +57,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call validateResetPassword', async() => {
-      const req = { body: '', admin: '' };
-      const data = await AdminAuthMiddleware.validateResetPassword(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call checkIfResetCredentialsSameAsOld', async() => {
       const req = { body: '', admin: '' };
       const data = await AdminAuthMiddleware.checkIfResetCredentialsSameAsOld(req, res, next);

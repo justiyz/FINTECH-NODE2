@@ -287,35 +287,6 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
 };
 
 /**
- * validates reset password
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof AuthMiddleware
- */
-export const validateResetPassword = async(req, res, next) => {
-  try {
-    const { 
-      body, admin } = req;
-    const condition =  body.password;
-    const [ credentials ] =  await processAnyData(authQueries.fetchAdminPassword, [ admin.admin_id ]);
-    const isValidCredentials = UserHash.compareData(condition, credentials.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully returned compared password/pin in the DB validateResetPasswordOrPin.middlewares.auth.js`);
-    if (isValidCredentials) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully validate password/pin in the DB validateResetPasswordOrPin.middlewares.auth.js`);
-      return next();
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.VALIDATE_RESET_PASSWORD_OR_PIN_MIDDLEWARE;
-    logger.error(`validate password in the DB failed:::${enums.VALIDATE_RESET_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
-
-
-/**
  * Checks if reset password is same as current
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

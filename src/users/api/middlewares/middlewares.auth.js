@@ -569,35 +569,6 @@ export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
   }
 };
 
-/**
- * validate reset password/pin pin in the DB
- * @param {Request} type - The request from the endpoint.
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof AuthMiddleware
- */
-export const validateResetPasswordOrPin = (type = '') => async(req, res, next) => {
-  try {
-    const { 
-      body, user } = req;
-    const condition = body.pin || body.password;
-    const [ credentials ] = type == 'pin' ? await processAnyData(authQueries.fetchUserPin, [ user.user_id ]) : 
-      await processAnyData(authQueries.fetchUserPassword, [ user.user_id ]);
-    const isValidCredentials = type == 'pin' ? Hash.compareData(condition, credentials.pin) : Hash.compareData(condition, credentials.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared password/pin in the DB validateResetPasswordOrPin.middlewares.auth.js`);
-    if (isValidCredentials) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully validate password/pin in the DB validateResetPasswordOrPin.middlewares.auth.js`);
-      return next();
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.VALIDATE_RESET_PASSWORD_OR_PIN_MIDDLEWARE;
-    logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_RESET_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
 
 /**
  * check if user OTP verification request is not getting suspicious
