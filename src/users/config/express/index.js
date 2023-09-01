@@ -43,7 +43,11 @@ const expressConfig = app => {
 
   // allow certain domains and allow certain HTTP methods
   app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', config.SEEDFI_ALLOWABLE_ORIGINS?.split(',').join('').split(' '));
+    const allowedOrigins = config.SEEDFI_ALLOWABLE_ORIGINS?.split(',').join('').split(' ');
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Origin, Content-Type, Accept');
     res.setHeader('Access-Control-Allow-Credentials', true);

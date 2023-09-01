@@ -98,7 +98,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
         updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
         
       admins.map((admin) => {
-        sendNotificationToAdmin(admin.admin_id, ' Manual Approval Required', adminNotification.loanApplicationApproval(), 
+        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.loanApplicationApproval(), 
           [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
       });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Notification sent to admin successfully checkUserLoanEligibility.controllers.loan.js`);
