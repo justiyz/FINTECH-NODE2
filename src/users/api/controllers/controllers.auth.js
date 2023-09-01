@@ -340,6 +340,7 @@ export const resetPassword = async(req, res, next) => {
     await processAnyData(authQueries.resetPassword, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user password in the db. resetPassword.controllers.auth.js`);
+    await MailService('Password Reset Successful', 'resetPassword', { ...user });
     userActivityTracking(req.user.user_id, 9, 'success');
     return ApiResponse.success(res, enums.PASSWORD_RESET, enums.HTTP_OK);
   } catch (error) {
@@ -365,6 +366,7 @@ export const changePassword = async(req, res, next) => {
     await processAnyData(authQueries.changePassword, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully changed user password in the db. changePassword.controllers.auth.js`);
+    await MailService('Password Change Successful', 'changePassword', { ...user });
     userActivityTracking(req.user.user_id, 10, 'success');
     return ApiResponse.success(res, enums.CHANGE_PASSWORD, enums.HTTP_OK);
   } catch (error) {
@@ -415,6 +417,7 @@ export const changePin = async(req, res, next) => {
     await processAnyData(authQueries.changePin, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully changed user pin in the db. changePin.controllers.auth.js`);
+    await MailService('Pin Change Successful', 'changePin', { ...user });
     userActivityTracking(req.user.user_id, 14, 'success');
     return ApiResponse.success(res, enums.CHANGE_PIN, enums.HTTP_OK);
   } catch (error) {
@@ -529,6 +532,7 @@ export const resetPin = async(req, res, next) => {
     await processAnyData(authQueries.resetPin, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user pin in the resetPin.controllers.auth.js`);
+    await MailService('Pin Reset Successful', 'resetPin', { ...user });
     userActivityTracking(req.user.user_id, 13, 'success');
     return ApiResponse.success(res, enums.PIN_RESET, enums.HTTP_OK);
   } catch (error) {

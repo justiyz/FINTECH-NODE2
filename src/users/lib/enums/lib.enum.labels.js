@@ -31,6 +31,7 @@ export const PAYSTACK_FETCH_BANKS_SERVICE = 'PaystackService::fetchBanks';
 export const PAYSTACK_RESOLVE_BANK_ACCOUNT_NAME_SERVICE = 'PaystackService::resolveAccount';
 export const COMPARE_PIN_MIDDLEWARE = 'AuthMiddleware::comparePin';
 export const CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE = 'AuthMiddleware::checkIfNewCredentialsSameAsOld';
+export const CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE = 'AuthMiddleware::checkIfResetCredentialsSameAsOld';
 export const PAYSTACK_INITIATE_CARD_PAYMENT_SERVICE = 'PaystackService::initializeCardPayment';
 export const PAYSTACK_INITIATE_BANK_TRANSFER_PAYMENT_SERVICE = 'PaystackService::initializeBankTransferPayment';
 export const SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE = 'PaystackService::submitPaymentOtpWithReference';

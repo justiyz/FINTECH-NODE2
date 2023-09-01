@@ -81,6 +81,7 @@ router.post(
   '/reset-password',
   Model(Schema.password, 'payload'),
   AuthMiddleware.validateForgotPasswordAndPinToken,
+  AuthMiddleware.checkIfResetCredentialsSameAsOld('password'),
   AuthController.resetPassword
 );
 
@@ -146,6 +147,7 @@ router.patch(
   '/reset-pin',
   Model(Schema.pin, 'payload'),
   AuthMiddleware.validateForgotPasswordAndPinToken,
+  AuthMiddleware.checkIfResetCredentialsSameAsOld('pin'),
   AuthController.resetPin
 );
 

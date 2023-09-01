@@ -15,6 +15,8 @@ const getTemplate = (type, data) => {
   case 'adminClusterInvite': return userEmail.adminClusterInvite(data);
   case 'manualLoanApproval': return authEmail.manualLoanApproval(data);
   case 'adminSentNotification': return userEmail.adminSentNotification(data);
+  case 'changePassword': return authEmail.changePassword(data);
+  case 'resetPassword': return authEmail.resetPassword(data);
   default: return '';
   }
 };

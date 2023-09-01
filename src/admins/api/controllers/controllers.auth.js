@@ -95,6 +95,8 @@ export const setPassword =  (type = '') => async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: hashed password saved in the DB setPassword.admin.controllers.auth.js`);
     const typeMonitor = type === 'first' ? 11 : 2;
     const description = type === 'first' ? descriptions.new_password() : descriptions.reset_password();
+    type == 'first' ? await MailService('Password Change Successful', 'changePassword', { ...admin }) :
+      await MailService('Password Reset Successful', 'resetPassword', { ...admin });
     await adminActivityTracking(req.admin.admin_id, typeMonitor, 'success', description);
     return ApiResponse.success(res, enums.PASSWORD_SET_SUCCESSFULLY, enums.HTTP_OK, setNewPassword);
   } catch (error) {

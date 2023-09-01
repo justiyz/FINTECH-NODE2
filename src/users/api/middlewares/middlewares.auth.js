@@ -448,6 +448,38 @@ export const checkIfNewCredentialsSameAsOld = (type = '') => async(req, res, nex
 };
 
 /**
+ * Checks if reset password/pin is same as current
+ * @param {Request} type - The request from the endpoint.
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const checkIfResetCredentialsSameAsOld = (type = '') => async(req, res, next) => {
+  try {
+    const { 
+      body: { password, pin }, user } = req;
+    const [ userPasswordDetails ] = type == 'pin' ?  await processAnyData(authQueries.fetchUserPin, [ user.user_id ]) : 
+      await processAnyData(authQueries.fetchUserPassword, [ user.user_id ]);
+    const isValidCredentials = type == 'pin' ? Hash.compareData(pin, userPasswordDetails.pin) : Hash.compareData(password, userPasswordDetails.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+    if (isValidCredentials) {   
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      decoded that new ${type} matches with old ${type}. checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    confirms that users new ${type} pin is not the same as the currently set ${type} checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
+    logger.error(`Checking if password/pin sent matches in the DB failed:::${enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check if pin sent matches user's pin in the DB
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -536,6 +568,7 @@ export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
     return next(error);
   }
 };
+
 
 /**
  * check if user OTP verification request is not getting suspicious

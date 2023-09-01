@@ -54,6 +54,7 @@ router.post(
   '/reset-password',
   AuthMiddleware.validateAdminResetPasswordToken,
   Model(Schema.setPassword, 'payload'),
+  AuthMiddleware.checkIfResetCredentialsSameAsOld,
   AuthController.setPassword('reset')
 );
 
