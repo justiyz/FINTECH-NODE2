@@ -125,3 +125,19 @@ export const  insufficientBalance = (data) => `
     Kindly login to your paystack dashboard to fund balance
   </td>
 </tr>`;
+
+export const  manualLoanApproval = (data) => `
+<tr>
+  <td style="padding-bottom: 30px;">
+    Hello ${data.first_name},
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td style="padding-bottom: 20px">
+    <p>
+    There is ${data.type} loan application from ${data.loanUser} that requires manual approval<br/>
+    Kindly click <a href="${config.SEEDFI_ADMIN_WEB_BASE_URL}/dashboard/loan-applications/management">here</a> to take decision on the loan application
+    </p>  
+  </td>
+</tr>`;

@@ -6,6 +6,10 @@ export const loanApplicationApproval = () =>{
   return 'An individual loan application requires manual approval. Please review and take appropriate action.';
 };
 
+export const clusterLoanApplicationApproval = () =>{
+  return 'A cluster loan application requires manual approval. Please review and take appropriate action.';
+};
+
 export const loanDisbursement = () =>{
   return 'Loan amount has been disbursed to the customer\'s account. Please update the system and inform the customer.';
 };

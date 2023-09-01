@@ -658,6 +658,17 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
         'loan-application-eligibility', {});
       sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, clusterMembersToken, 
         'cluster-loan-decision', cluster.cluster_id);
+      admins.map(async(admin) => {
+        const data = {
+          email: admin.email,
+          loanUser: `${user.first_name} ${user.last_name}`,
+          type: 'a cluster',
+          first_name: admin.first_name
+        };
+        await AdminMailService('Manual Loan Approval Required', 'manualLoanApproval', { ...data });
+        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.clusterLoanApplicationApproval(), 
+          [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
+      });
       userActivityTracking(req.user.user_id, 95, 'success');
       userActivityTracking(req.user.user_id, 100, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
@@ -873,6 +884,17 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
         'loan-application-eligibility', {});
       sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, clusterMembersToken, 
         'cluster-loan-decision', cluster.cluster_id);
+      admins.map(async(admin) => {
+        const data = {
+          email: admin.email,
+          loanUser: `${user.first_name} ${user.last_name}`,
+          type: 'a cluster',
+          first_name: admin.first_name
+        };
+        await AdminMailService('Manual Loan Approval Required', 'manualLoanApproval', { ...data });
+        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.clusterLoanApplicationApproval(), 
+          [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
+      });
       userActivityTracking(req.user.user_id, 98, 'success');
       userActivityTracking(req.user.user_id, 100, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
