@@ -453,11 +453,11 @@ export default {
       FROM(
       SELECT total_payment_amount 
       FROM personal_loan_payment_schedules
-      WHERE (status = 'paid' OR status = 'over due')
+      WHERE (status = 'not due' OR status = 'over due')
       UNION ALL
       SELECT total_payment_amount 
       FROM cluster_member_loan_payment_schedules 
-      WHERE (status = 'paid' OR status = 'over due')
+      WHERE (status = 'not due' OR status = 'over due')
       ) AS totalExpectedRepayment`,
 
   totalNplOverdueRepayment: `
