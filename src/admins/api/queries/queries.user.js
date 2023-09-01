@@ -348,6 +348,9 @@ export default {
     SELECT 
       id, 
       user_id, 
+      email,
+      first_name,
+      last_name,
       fcm_token,
       INITCAP(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name
     FROM users
