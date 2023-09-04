@@ -355,7 +355,8 @@ export default {
       INITCAP(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name
     FROM users
     WHERE user_id = $1
-    AND is_completed_kyc
+    AND is_completed_kyc = TRUE
+    AND is_deleted = FALSE
   `,
 
   fetchUserFcmTOken: `
