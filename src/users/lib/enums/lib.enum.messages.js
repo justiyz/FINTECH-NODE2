@@ -225,7 +225,7 @@ export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
-export const CANNOT_DELETE_USER_ACCOUNT = (reason) => `User account cannot be deleted, ${reason}`;
+export const ACTION_CANNOT_BE_DONE = (reason) => `Action cannot be performed, ${reason}`;
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
 export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
 export const EMPLOYMENT_DETAILS_NOT_PREVIOUSLY_SET = 'Kindly add employment details first before editing';

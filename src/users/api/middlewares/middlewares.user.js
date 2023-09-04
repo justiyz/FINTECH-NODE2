@@ -1063,7 +1063,7 @@ export const checkIfUserBelongsToAnyCluster = async(req, res, next) => {
     if (activeClusterMembership.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 108, 'fail');
-      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly exit all clusters'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE);
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly exit all clusters'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
     return next();
@@ -1090,8 +1090,7 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active cluster loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeClusterLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      userActivityTracking(req.user.user_id, 108, 'fail');
-      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN, 
         enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
@@ -1099,14 +1098,12 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active individual loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeIndividualLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      userActivityTracking(req.user.user_id, 108, 'fail');
-      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN, 
         enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE;
     logger.error(`checking if user have active individual/cluster loan application in the DB failed::${enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
     return next(error);
