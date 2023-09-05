@@ -303,9 +303,8 @@ export default {
       country,
       type_of_residence,
       rent_amount,
-      is_verified_address,
-      you_verify_candidate_id
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      is_verified_address
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
   
   updateUserAddressDetailsOnCreation: `
     UPDATE address_verification
@@ -320,8 +319,14 @@ export default {
       country = $8,
       type_of_residence = $9,
       rent_amount = $10,
-      is_verified_address = $11,
-      you_verify_candidate_id = $12
+      is_verified_address = $11
+    WHERE user_id = $1`,
+
+  updateYouVerifyCandidateId: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      you_verify_candidate_id = $2
     WHERE user_id = $1`,
 
   updateUserAddressDetails: `

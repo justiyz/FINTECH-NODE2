@@ -694,6 +694,11 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
+    const payload = UserPayload.addressVerification(body, user);
+    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
+      await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+        createUserAddressYouVerifyCandidate.middlewares.user.js`);
     let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     userBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     const result = await createUserYouVerifyCandidate(user, userBvn);
@@ -702,10 +707,8 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
-      const payload = UserPayload.addressVerification(body, user, result.data.id);
-      !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
-        await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+      await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, result.data.id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
       req.userYouVerifyCandidateDetails = result.data;
       return next();
@@ -719,11 +722,9 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       if (retryResult && retryResult.statusCode === 201 && retryResult.message.toLowerCase() === 'candidate created successfully!') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
-        const payload = UserPayload.addressVerification(body, user, retryResult.data.id);
-        !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
-          await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
-          createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, retryResult.data.id ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
+        createUserAddressYouVerifyCandidate.middlewares.user.js`);
         req.userYouVerifyCandidateDetails = retryResult.data;
         return next();
       }
