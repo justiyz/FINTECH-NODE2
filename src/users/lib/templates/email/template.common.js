@@ -1,5 +1,6 @@
 /* eslint-disable */
 import getTemplate from '.';
+import { resetPassword } from '../../../api/controllers/controllers.auth';
 
 const heading = {
   forgotPassword: 'Password Reset Request',
@@ -15,7 +16,12 @@ const heading = {
   failedAddressVerification: 'Address verification failed',
   successfulAddressVerification: 'Address verification successful',
   loanRescheduled: 'Loan Facility Rescheduled',
-  rewardPointsClaiming: 'Reward points claimed'
+  rewardPointsClaiming: 'Reward points claimed',
+  resetPassword: 'Password Reset Successful',
+  changePassword: 'Password Change Successful',
+  changePin: 'Pin Change Successful',
+  resetPin: 'Pin Reset Successful',
+  rejectedDebitCardNotUsersCard: 'Rejected Debit Card'
 };
 
 export const commonTemplate = (messageType, data) => {

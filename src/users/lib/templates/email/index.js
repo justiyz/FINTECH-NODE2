@@ -16,6 +16,11 @@ const getTemplate = (type, data) => {
   case 'successfulAddressVerification': return email.successfulAddressVerification(data);
   case 'loanRescheduled': return email.loanRescheduled(data);
   case 'rewardPointsClaiming': return email.rewardPointsClaiming(data);
+  case 'resetPassword': return email.resetPassword(data);
+  case 'changePassword': return email.changePassword(data);
+  case 'changePin': return email.changePin(data);
+  case 'resetPin': return email.resetPin(data);
+  case 'rejectedDebitCardNotUsersCard': return email.rejectedDebitCardNotUsersCard(data);
   default: return '';
   }
 };

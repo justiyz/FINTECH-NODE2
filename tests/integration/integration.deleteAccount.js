@@ -55,7 +55,7 @@ describe('Delete User', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing cluster loans'));
+          expect(res.body.message).to.equal(enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'));
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -72,7 +72,7 @@ describe('Delete User', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing individual loans'));
+          expect(res.body.message).to.equal(enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'));
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
@@ -89,7 +89,7 @@ describe('Delete User', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.CANNOT_DELETE_USER_ACCOUNT('kindly exit all clusters'));
+          expect(res.body.message).to.equal(enums.ACTION_CANNOT_BE_DONE('kindly exit all clusters'));
           expect(res.body.error).to.equal('FORBIDDEN');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();

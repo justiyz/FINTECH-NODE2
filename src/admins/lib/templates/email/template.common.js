@@ -1,20 +1,24 @@
 /* eslint-disable */
 import getTemplate from '.';
 
-const heading = {
-  login: 'Complete Login with OTP',
-  forgotPassword: 'Reset your password',
-  adminInviteMail: 'Admin Invite',
-  completeKyc: 'Kindly complete your kyc',
-  insufficientBalance: 'Insufficient Paystack Balance',
-  approvedLoan: 'Loan application approved',
-  declinedLoan: 'Loan application declined',
-  adminClusterInvite: 'Cluster loan invitation',
-  approvedUtilityBill: 'Approved utility bill',
-  declinedUtilityBill: 'Declined utility bill'
-};
-
 export const commonTemplate = (messageType, data) => {
+  const heading = {
+    login: 'Complete Login with OTP',
+    forgotPassword: 'Reset your password',
+    adminInviteMail: 'Admin Invite',
+    completeKyc: 'Kindly complete your kyc',
+    insufficientBalance: 'Insufficient Paystack Balance',
+    approvedLoan: 'Loan application approved',
+    declinedLoan: 'Loan application declined',
+    adminClusterInvite: 'Cluster loan invitation',
+    approvedUtilityBill: 'Approved utility bill',
+    declinedUtilityBill: 'Declined utility bill',
+    adminSentNotification: data.title,
+    manualLoanApproval: 'Manual Loan Approval Required',
+    resetPassword: 'Password Reset Successful',
+    changePassword: 'Password Change Successful'
+  };
+  
   let headerText;
   switch (messageType) {
   case `${messageType}`:

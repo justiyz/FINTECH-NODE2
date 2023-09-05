@@ -23,6 +23,7 @@ export const REFUND_NOT_INITIATED_FOR_PAYMENT_TRANSACTION = 'Refund not initiate
 export const PAYMENT_EARLIER_RECORDED = 'Payment transaction status has been previously recorded';
 export const EXPIRED_VERIFICATION_TOKEN = 'Verification OTP is expired';
 export const ACCOUNT_NOT_PREVIOUSLY_VERIFIED = 'User account has not been previously verified';
+export const USER_CANNOT_REQUEST_VERIFICATION_ANYMORE = 'User can\'t request verification anymore, kindly contact support';
 export const NO_TOKEN = 'Please provide a token';
 export const INVALID_TOKEN = 'Invalid/Expired Token';
 export const SESSION_EXPIRED = 'Session expired';
@@ -34,11 +35,7 @@ export const SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED = 'User selfie image is yet to
 export const BVN_PREVIOUSLY_VERIFIED = 'User bvn has been previously verified';
 export const BVN_NOT_PREVIOUSLY_VERIFIED = 'User is yet to verify bvn, kindly do this first';
 export const BVN_USED_BY_ANOTHER_USER = 'This BVN has been used by another user';
-export const USER_FIRST_NAME_NOT_MATCHING_BVN_NAME = 'User\'s first name does not match bvn first name';
-export const USER_LAST_NAME_NOT_MATCHING_BVN_NAME = 'User\'s last name does not match bvn last name';
-export const USER_MIDDLE_NAME_NOT_MATCHING_BVN_NAME = 'User\'s middle name does not match bvn middle name';
-export const USER_GENDER_NOT_MATCHING_BVN_GENDER = 'User\'s gender does not match bvn gender';
-export const USER_DOB_NOT_MATCHING_BVN_DOB = 'User\'s date of birth does not match bvn date of birth';
+export const USER_BVN_NOT_MATCHING_RETURNED_BVN = 'Kindly input the correct BVN or contact support';
 export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_CREDENTIALS = (type) => `User ${type} have not been created.`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
@@ -157,6 +154,8 @@ export const CLUSTER_LOAN_APPLICATION_FAILED_DUE_TO_CURRENT_CLUSTER_STATUS = (ty
 export const CLUSTER_MEMBERS_NOT_MORE_THAN_ONE = 'Cluster loan cannot be initiated you need more than one cluster member to proceed';
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
+export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED = 'User address verification cannot proceed';
+export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED = 'User address verification cannot be processed now, kindly try again later';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
   'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_CLUSTER_LOAN_REASON =
@@ -197,7 +196,6 @@ export const CLUSTER_STATUS_SAME_AS_STATUS_ACTION = (status) => `Cluster status 
 export const ACTIVE_CLUSTER_LOAN_OBLIGATIONS = 'Cluster still has active loan obligation and thus cannot be deactivated';
 export const ACTIVE_CLUSTER_MEMBER_LOAN_OBLIGATIONS = 'Cluster member still has active cluster loan obligation and thus cannot be deleted';
 export const NOT_CATERED_FOR_DECISION_TYPE = 'Decision ticket belongs to a type not catered for yet';
-export const CLUSTER_CLOSED_FOR_MEMBERSHIP = 'No member can join this cluster again';
 export const USER_NO_CLUSTER_INVITATION = (name) => `User has no active invitation from ${name} cluster`;
 export const REQUEST_TO_JOIN_CLUSTER_SENT_SUCCESSFULLY = 'request to join cluster sent successfully, kindly wait for acceptance';
 export const JOIN_CLUSTER_DECISION_CHOICE = (decision) => `User ${decision} request to join cluster successfully`;
@@ -229,7 +227,7 @@ export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
-export const CANNOT_DELETE_USER_ACCOUNT = (reason) => `User account cannot be deleted, ${reason}`;
+export const ACTION_CANNOT_BE_DONE = (reason) => `Action cannot be performed, ${reason}`;
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
 export const EMPLOYMENT_DETAILS = 'User employment details successfully created';
 export const EMPLOYMENT_DETAILS_NOT_PREVIOUSLY_SET = 'Kindly add employment details first before editing';
@@ -364,6 +362,7 @@ export const PROMO_EDITED_SUCCESSFULLY= 'Promo edited successfully';
 export const PROMO_CANCELLED_SUCCESSFULLY= 'Promo cancelled successfully';
 export const PROMO_DELETED_SUCCESSFULLY= 'Promo deleted successfully';
 export const PROMO_DUE_TO_START = 'Certain promos due to start has been initiated';
+export const ADMIN_CANNOT_REQUEST_VERIFICATION_ANYMORE = 'Admin can\'t request verification anymore, kindly contact support';
 export const PROMO_DUE_TO_END = 'Certain promos due to end has been initiated';
 export const ADMIN_DID_NOT_CREATE_PROMO = (promoName) => `Access denied!, you did not create promo with name ${promoName}`;
 export const SUCCESSFULLY_NOTIFICATION = 'Notification sent successfully.';

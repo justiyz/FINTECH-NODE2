@@ -326,7 +326,6 @@ export default {
         status,
         loan_status,
         total_loan_obligation,
-        join_cluster_closes_at,
         is_deleted
     FROM clusters
     WHERE cluster_id = $1`,
@@ -349,11 +348,15 @@ export default {
     SELECT 
       id, 
       user_id, 
+      email,
+      first_name,
+      last_name,
       fcm_token,
       INITCAP(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name
     FROM users
     WHERE user_id = $1
-    AND is_completed_kyc
+    AND is_completed_kyc = TRUE
+    AND is_deleted = FALSE
   `,
 
   fetchUserFcmTOken: `

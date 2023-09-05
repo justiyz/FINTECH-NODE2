@@ -1,6 +1,6 @@
 import authQueries from '../queries/queries.auth';
 import adminQueries from '../queries/queries.admin';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
@@ -256,6 +256,62 @@ export const validateAdminResetPasswordToken = async(req, res, next) => {
   } catch (error) {
     error.label = enums.VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE;
     logger.error(`validating password reset authentication token failed:::${enums.VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * check if admin OTP verification request is not getting suspicious
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAuthMiddleware
+ */
+export const checkOtpVerificationRequestCount = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    if (admin && (admin.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it 
+      checkOtpVerificationRequestCount.admin.middlewares.auth.js`);
+      await processOneOrNoneData(adminQueries.deactivateAdmin, [ admin.admin_id ]);
+      return ApiResponse.error(res, enums.ADMIN_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.CHECK_ADMIN_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user otp verification request still within limit checkOtpVerificationRequestCount.admin.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_ADMIN_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE;
+    logger.error(`checking if admin OTP verification request is still within limit failed::${enums.CHECK_ADMIN_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Checks if reset password is same as current
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AuthMiddleware
+ */
+export const checkIfResetCredentialsSameAsOld = async(req, res, next) => {
+  try {
+    const { 
+      body: { password }, admin } = req;
+    const [ adminPasswordDetails ] = await processAnyData(authQueries.fetchAdminPassword, [ admin.admin_id ]);
+    const isValidCredentials = UserHash.compareData(password, adminPasswordDetails.password);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: successfully returned compared user response checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+    if (isValidCredentials) {   
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+      decoded that new password matches with oldpassword. checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS('password'), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
+    confirms that users new password is not the same as the currently set password checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
+    logger.error(`Checking if password sent matches in the DB failed:::${enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
     return next(error);
   }
 };

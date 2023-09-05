@@ -74,7 +74,61 @@ export const forgotPassword = (data) => `
     </p>
   </td>
 </tr>`;
-    
+
+export const resetPassword = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your password has been successfully updated.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate reset password, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+export const changePassword = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    You have successfully changed your password.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate change password, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
 export const  adminInviteMail = (data) => `
 <tr>
   <td>
@@ -123,5 +177,21 @@ export const  insufficientBalance = (data) => `
 <tr style="font-weight: 500; font-size: 16px; line-height: 160%; color: #84868c">
   <td>
     Kindly login to your paystack dashboard to fund balance
+  </td>
+</tr>`;
+
+export const  manualLoanApproval = (data) => `
+<tr>
+  <td style="padding-bottom: 30px;">
+    Hello ${data.first_name},
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td style="padding-bottom: 20px">
+    <p>
+    There is ${data.type} loan application from ${data.loanUser} that requires manual approval<br/>
+    Kindly click <a href="${config.SEEDFI_ADMIN_WEB_BASE_URL}/dashboard/loan-applications/management">here</a> to take decision on the loan application
+    </p>  
   </td>
 </tr>`;

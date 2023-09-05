@@ -50,6 +50,7 @@ router.post(
   Model(Schema.verifyEmail, 'payload'),
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   UserMiddleware.isEmailVerified('validate'),
+  AuthMiddleware.checkOtpVerificationRequestCount,
   UserController.requestEmailVerification
 );
 
@@ -99,6 +100,7 @@ router.delete(
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkIfAccountDetailsExists,
   UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.checkIfUserOnAnyActiveLoan,
   UserController.deleteUserAccountDetails
 );
 
@@ -108,6 +110,8 @@ router.patch(
   Model(Schema.idParams, 'params'),
   Model(Schema.accountChoiceType, 'query'),
   UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.checkIfUserOnAnyActiveLoan,
   UserMiddleware.checkAccountCurrentChoicesAndTypeSent,
   UserController.updateAccountDetailsChoice
 );
@@ -181,6 +185,7 @@ router.patch(
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.checkIfUserOnAnyActiveLoan,
   UserMiddleware.checkIfCardOrUserExist,
   UserMiddleware.checkIfCardAlreadyDefaultCard,
   UserController.setDefaultCard
@@ -191,6 +196,7 @@ router.delete(
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkUserLoanStatus,
+  UserMiddleware.checkIfUserOnAnyActiveLoan,
   UserMiddleware.checkIfCardOrUserExist,
   UserController.removeCard
 );

@@ -3,7 +3,7 @@ export default {
   SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
     is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
     is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-    number_of_children, marital_status, loan_status, device_token,
+    number_of_children, marital_status, loan_status, device_token, verification_token_request_count,
     to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
   FROM users
   WHERE phone_number = $1`,
@@ -12,7 +12,7 @@ export default {
     SELECT id, phone_number, user_id, email, title, INITCAP(first_name) AS first_name, INITCAP(middle_name) AS middle_name, INITCAP(last_name) AS last_name, 
       tier, gender, date_of_birth, image_url, is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, number_of_children, marital_status, loan_status, device_token,
-      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
+      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, verification_token_request_count
    FROM users
    WHERE user_id = $1`,
 
@@ -20,7 +20,7 @@ export default {
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, device_token,
+      number_of_children, marital_status, loan_status, device_token, verification_token_request_count,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
     FROM users
     WHERE email = $1`
@@ -78,6 +78,7 @@ export default {
       SET
         verification_token = $2,
         verification_token_expires = $3,
+        verification_token_request_count = verification_token_request_count + 1,
         updated_at = NOW()
       WHERE email = $1
       `,
@@ -224,6 +225,7 @@ export default {
         is_verified_email = TRUE,
         verification_token = NULL,
         verification_token_expires = NULL,
+        verification_token_request_count = verification_token_request_count - verification_token_request_count,
         updated_at = NOW()
       WHERE user_id = $1
       `,
@@ -301,9 +303,8 @@ export default {
       country,
       type_of_residence,
       rent_amount,
-      is_verified_address,
-      you_verify_candidate_id
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      is_verified_address
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
   
   updateUserAddressDetailsOnCreation: `
     UPDATE address_verification
@@ -318,8 +319,14 @@ export default {
       country = $8,
       type_of_residence = $9,
       rent_amount = $10,
-      is_verified_address = $11,
-      you_verify_candidate_id = $12
+      is_verified_address = $11
+    WHERE user_id = $1`,
+
+  updateYouVerifyCandidateId: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      you_verify_candidate_id = $2
     WHERE user_id = $1`,
 
   updateUserAddressDetails: `

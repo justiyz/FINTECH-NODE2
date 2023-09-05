@@ -48,9 +48,8 @@ export default {
         minimum_monthly_income,
         created_by,
         admin,
-        unique_code,
-        join_cluster_closes_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        unique_code
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING *`,
 
   checkIfClusterExists: `
@@ -70,7 +69,6 @@ export default {
         status,
         loan_status,
         total_loan_obligation,
-        join_cluster_closes_at,
         is_created_by_admin,
         created_by,
         cluster_creator_received_membership_count_reward,
@@ -349,7 +347,7 @@ export default {
       created_at
     FROM clusters
     WHERE is_deleted = FALSE
-    ORDER BY join_cluster_closes_at DESC`,
+    ORDER BY created_at DESC`,
 
   fetchUserClusters: `
     SELECT 

@@ -15,13 +15,23 @@ export const clusterId = Joi.object().keys({
 
 
 export const createCluster = Joi.object().keys({
-  name: Joi.string().required(), 
-  description: Joi.string().required(),
+  name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster name input'
+  }).required(), 
+  description: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster description input'
+  }).required(),
   maximum_members: Joi.number().required(),
   loan_goal_target: Joi.number().required(),
-  company_name: Joi.string().required(),
-  company_address: Joi.string().required(),
-  company_type: Joi.string().required(),
+  company_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster company name input'
+  }).required(),
+  company_address: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster company address input'
+  }).required(),
+  company_type: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid cluster company type input'
+  }).required(),
   company_contact_number: Joi.string()
     .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
     .messages({

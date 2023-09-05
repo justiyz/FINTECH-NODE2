@@ -97,8 +97,15 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user, 
         updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
         
-      admins.map((admin) => {
-        sendNotificationToAdmin(admin.admin_id, ' Manual Approval Required', adminNotification.loanApplicationApproval(), 
+      admins.map(async(admin) => {
+        const data = {
+          email: admin.email,
+          loanUser: `${user.first_name} ${user.last_name}`,
+          type: 'an individual',
+          first_name: admin.first_name
+        };
+        await AdminMailService('Manual Loan Approval Required', 'manualLoanApproval', { ...data });
+        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.loanApplicationApproval(), 
           [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
       });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Notification sent to admin successfully checkUserLoanEligibility.controllers.loan.js`);

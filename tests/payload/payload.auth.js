@@ -20,7 +20,7 @@ export const userTwoProfile = {
 
 export const userThreeProfile = {
   first_name: 'Elizabeth',
-  last_name: 'Agboka -Olasile',
+  last_name: 'Agboka-Olasile',
   email: 'eli@enyata.com',
   date_of_birth: '1954-08-08',
   gender: 'female'
@@ -28,7 +28,7 @@ export const userThreeProfile = {
 
 export const userFourProfile = {
   first_name: 'Azizat',
-  last_name: ' Alausa-Obalende ',
+  last_name: 'Alausa-Obalende',
   email: 'azizat@enyata.com',
   date_of_birth: '1954-12-08',
   gender: 'female'
@@ -44,7 +44,7 @@ export const userSixProfile = {
 
 export const userSevenProfile = {
   first_name: 'Motunrayo',
-  last_name: ' Iji- Kemi ',
+  last_name: 'Iji-Kemi',
   email: 'iji@enyata.com',
   date_of_birth: '1954-12-08',
   gender: 'male'

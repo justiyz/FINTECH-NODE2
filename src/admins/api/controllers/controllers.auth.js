@@ -36,7 +36,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token completeAdminLoginRequest.admin.controllers.auth.js`);
     const expireAt = momentTZ().add(3, 'minutes');
     const expireTime = momentTZ(expireAt).tz('Africa/Lagos').format('hh:mm a');
-    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, token, expireAt ]);
+    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, token, expireAt, (Number(admin.verification_token_request_count) + 1) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set in the DB completeAdminLoginRequest.admin.controllers.auth.js`);
     await MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
     await adminActivityTracking(req.admin.admin_id, 9, 'success', descriptions.login_request(adminName));
@@ -66,7 +66,8 @@ export const login = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const token = await Hash.generateAdminAuthToken(admin, permissions);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: auth token generated login.admin.controllers.auth.js`);
-    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, null, null ]);
+    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, null, null, 
+      (Number(admin.verification_token_request_count) - Number(admin.verification_token_request_count)) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set to null in the DB login.admin.controllers.auth.js`);
     const [ adminRoleDetails ] = await processAnyData(roleQueries.fetchRole, [ admin.role_type ]);
     await adminActivityTracking(req.admin.admin_id, 10, 'success', descriptions.login_approved(adminName));
@@ -94,6 +95,8 @@ export const setPassword =  (type = '') => async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: hashed password saved in the DB setPassword.admin.controllers.auth.js`);
     const typeMonitor = type === 'first' ? 11 : 2;
     const description = type === 'first' ? descriptions.new_password() : descriptions.reset_password();
+    type == 'first' ? await MailService('Password Change Successful', 'changePassword', { ...admin }) :
+      await MailService('Password Reset Successful', 'resetPassword', { ...admin });
     await adminActivityTracking(req.admin.admin_id, typeMonitor, 'success', description);
     return ApiResponse.success(res, enums.PASSWORD_SET_SUCCESSFULLY, enums.HTTP_OK, setNewPassword);
   } catch (error) {
@@ -125,7 +128,7 @@ export const forgotPassword = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token forgotPassword.admin.controllers.auth.js`);
     const expireAt = momentTZ().add(5, 'minutes');
     const expireTime = momentTZ(expireAt).tz('Africa/Lagos').format('hh:mm a');
-    const payload = [ admin.email, token, expireAt ];
+    const payload = [ admin.email, token, expireAt, (Number(admin.verification_token_request_count) + 1) ];
     await processAnyData(authQueries.adminForgotPassword, payload);
     const data ={ admin_id: admin.admin_id, token };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: reset password token set in the DB forgotPassword.admin.controllers.auth.js`);

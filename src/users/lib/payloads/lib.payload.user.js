@@ -19,7 +19,7 @@ export default {
     body.expiry_date || null
   ],
 
-  addressVerification: (body, user, userCandidateId) => [
+  addressVerification: (body, user) => [
     user.user_id,
     body.street.trim().toLowerCase(),
     body.state.trim().toLowerCase(),
@@ -30,8 +30,7 @@ export default {
     'nigeria',
     body.resident_type.trim().toLowerCase(),
     body.rent_amount || null,
-    false,
-    userCandidateId
+    false
   ],
 
   updateAddressVerification: (body, user, requestId, candidateId, userAddressVerificationRequestDetails) => [

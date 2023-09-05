@@ -185,10 +185,6 @@ export const createCluster = async(req, res, next) => {
   const { body, user } = req;
   const activityType = body.type === 'public' ? 47 : 48;
   try {
-    const clusterOpenGrace = await processOneOrNoneData(clusterQueries.fetchClusterGraceOpenPeriod, [ 'join_cluster_grace_in_days' ]);
-    const join_cluster_closes_at = dayjs().add(Number(clusterOpenGrace.value), 'days');
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster grace period for membership joining set successfully createCluster.controllers.cluster.js`);
-    body.join_cluster_closes_at = body.type === 'private' ? join_cluster_closes_at : null;
     const createClusterPayload = ClusterPayload.createClusterPayload(body, user);
     const newClusterDetails = await processOneOrNoneData(clusterQueries.createCluster, createClusterPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster created successfully successfully createCluster.controllers.cluster.js`);
@@ -662,6 +658,17 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
         'loan-application-eligibility', {});
       sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, clusterMembersToken, 
         'cluster-loan-decision', cluster.cluster_id);
+      admins.map(async(admin) => {
+        const data = {
+          email: admin.email,
+          loanUser: `${user.first_name} ${user.last_name}`,
+          type: 'a cluster',
+          first_name: admin.first_name
+        };
+        await AdminMailService('Manual Loan Approval Required', 'manualLoanApproval', { ...data });
+        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.clusterLoanApplicationApproval(), 
+          [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
+      });
       userActivityTracking(req.user.user_id, 95, 'success');
       userActivityTracking(req.user.user_id, 100, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);
@@ -877,6 +884,17 @@ export const checkClusterMemberClusterLoanEligibility = async(req, res, next) =>
         'loan-application-eligibility', {});
       sendMulticastPushNotification(`${user.first_name} ${user.last_name} cluster loan application subjected to manual approval`, clusterMembersToken, 
         'cluster-loan-decision', cluster.cluster_id);
+      admins.map(async(admin) => {
+        const data = {
+          email: admin.email,
+          loanUser: `${user.first_name} ${user.last_name}`,
+          type: 'a cluster',
+          first_name: admin.first_name
+        };
+        await AdminMailService('Manual Loan Approval Required', 'manualLoanApproval', { ...data });
+        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.clusterLoanApplicationApproval(), 
+          [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
+      });
       userActivityTracking(req.user.user_id, 98, 'success');
       userActivityTracking(req.user.user_id, 100, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_MANUAL_DECISION, enums.HTTP_OK, returnData);

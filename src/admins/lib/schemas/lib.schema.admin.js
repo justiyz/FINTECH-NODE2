@@ -1,8 +1,12 @@
 const Joi = require('joi').extend(require('@joi/date'));
 
 const adminCompleteProfile = Joi.object().keys({
-  first_name: Joi.string().required(),
-  last_name: Joi.string().required(),
+  first_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid first name input'
+  }).required(),
+  last_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid last name input'
+  }).required(),
   phone_number: Joi.string()
     .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
     .messages({
@@ -66,13 +70,17 @@ const sendNotification = Joi.object({
   type: Joi.string().valid('alert', 'system').required()
 }).when(Joi.object({ type: Joi.string().valid('alert') }).unknown(), {
   then: Joi.object({
-    title: Joi.string().required(),
+    title: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid title input'
+    }).required(),
     end_at: Joi.date().required(),
     content: Joi.string().required()
   })
 }).when(Joi.object({ type: Joi.string().valid('system') }).unknown(), {
   then: Joi.object({
-    title: Joi.string().required(),
+    title: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid title input'
+    }).required(),
     content: Joi.string().required(),
     sent_to: Joi.array().items(Joi.object({
       user_id: Joi.string().required()

@@ -64,9 +64,15 @@ const addressVerification = Joi.object().keys({
 });
 
 const updateUsersProfile = Joi.object().keys({
-  first_name: Joi.string().optional(), 
-  middle_name: Joi.string().optional(), 
-  last_name: Joi.string().optional(),
+  first_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid first name input'
+  }).optional(), 
+  middle_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid middle name input'
+  }).optional(), 
+  last_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid last name input'
+  }).optional(),
   date_of_birth: Joi.date().optional(),
   gender: Joi.string().optional().valid('male', 'female'), 
   number_of_children: Joi.number().required(),
@@ -86,8 +92,12 @@ const notificationIdParams = Joi.object().keys({
 });
 
 const nextOfKin = Joi.object().keys({
-  first_name: Joi.string().required(),
-  last_name: Joi.string().required(),
+  first_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid first name input'
+  }).required(),
+  last_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
+    'string.pattern.base': 'Invalid last name input'
+  }).required(),
   phone_number: Joi.string()
     .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
     .messages({
@@ -95,7 +105,9 @@ const nextOfKin = Joi.object().keys({
       'string.empty': 'Phone Number is not allowed to be empty'
     }).required(),
   email: Joi.string().email().required(),
-  kind_of_relationship: Joi.string().required()
+  kind_of_relationship: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+    'string.pattern.base': 'Invalid relations type input'
+  }).required()
 });
 
 const employmentDetails = Joi.object().keys({
@@ -103,11 +115,15 @@ const employmentDetails = Joi.object().keys({
   monthly_income: Joi.string().required()
 }).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
   then: Joi.object({
-    company_name: Joi.string().required()
+    company_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid company name input'
+    }).required()
   })
 }).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
   then: Joi.object({
-    school_name: Joi.string().required(), 
+    school_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid school name input'
+    }).required(), 
     date_started: Joi.string().required()
   })
 });
@@ -117,11 +133,15 @@ const updateEmploymentDetails = Joi.object().keys({
   monthly_income: Joi.string().optional()
 }).when(Joi.object({ employment_type: Joi.string().valid('employed') }).unknown(), {
   then: Joi.object({
-    company_name: Joi.string().optional()
+    company_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid company name input'
+    }).optional()
   })
 }).when(Joi.object({ employment_type: Joi.string().valid('student') }).unknown(), {
   then: Joi.object({
-    school_name: Joi.string().optional(), 
+    school_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
+      'string.pattern.base': 'Invalid school name input'
+    }).optional(), 
     date_started: Joi.string().optional()
   })
 });

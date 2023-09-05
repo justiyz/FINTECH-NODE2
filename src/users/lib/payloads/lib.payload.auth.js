@@ -1,5 +1,5 @@
 export default {
-  register: (body, otp, expireAt) => [ body.phone_number.trim(), otp, expireAt ],
+  register: (body, otp, expireAt, signupOtpRequest) => [ body.phone_number.trim(), otp, expireAt, signupOtpRequest ],
   verifyUserAccountAfterSignup: (user, refreshToken, body, referralCode) => [ 
     user.user_id, 
     refreshToken, 

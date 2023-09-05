@@ -4,7 +4,10 @@ export default {
         admins.id,
         admins.admin_id,
         admin_resources.name,
-        admins.role_type
+        admins.role_type,
+        admins.email,
+        admins.first_name,
+        admins.last_name
     FROM admins
     LEFT JOIN admin_user_permissions ON admin_user_permissions.admin_id = admins.admin_id
     LEFT JOIN admin_resources ON admin_resources.resource_id = admin_user_permissions.resource_id

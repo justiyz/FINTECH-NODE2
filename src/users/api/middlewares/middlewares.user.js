@@ -9,12 +9,13 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { resolveAccount } from '../services/service.paystack';
 import { dojahBvnVerificationCheck } from '../services/service.dojah';
-import { createUserYouVerifyCandidate } from '../services/service.youVerify';
+import { createUserYouVerifyCandidate, createUserYouVerifyCandidateUsingProfile } from '../services/service.youVerify';
 import { userActivityTracking } from '../../lib/monitor';
 import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
+import { HTTP_FORBIDDEN } from '../../lib/enums/lib.enum.status';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -198,32 +199,32 @@ export const verifyBvn = async(req, res, next) => {
     if (data.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, data.response.data.error, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.USER_FIRST_NAME_NOT_MATCHING_BVN_NAME, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     if (user.last_name.trim().toLowerCase() !== data.data.entity.last_name.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's last name don't match bvn last name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.USER_LAST_NAME_NOT_MATCHING_BVN_NAME, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     if (user.middle_name !== null && user.middle_name.trim().toLowerCase() !== data.data.entity.middle_name.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's middle name don't match bvn middle name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.USER_MIDDLE_NAME_NOT_MATCHING_BVN_NAME, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     if (user.gender.trim().toLowerCase() !== data.data.entity.gender.trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's gender does not match bvn returned gender verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.USER_GENDER_NOT_MATCHING_BVN_GENDER, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     if (dayjs(user.date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.entity.date_of_birth.trim()).format('YYYY-MM-DD')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's date of birth does not match bvn returned date of birth verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.USER_DOB_NOT_MATCHING_BVN_DOB, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification successful verifyBvn.middlewares.user.js`);
     return next();
@@ -693,6 +694,11 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
+    const payload = UserPayload.addressVerification(body, user);
+    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
+      await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+        createUserAddressYouVerifyCandidate.middlewares.user.js`);
     let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     userBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     const result = await createUserYouVerifyCandidate(user, userBvn);
@@ -701,18 +707,30 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
-      const payload = UserPayload.addressVerification(body, user, result.data.id);
-      !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
-        await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+      await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, result.data.id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
       req.userYouVerifyCandidateDetails = result.data;
       return next();
     }
     if (result && result.statusCode !== 201) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation failed createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation failed about to retry 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      const retryResult = await createUserYouVerifyCandidateUsingProfile(user);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation retried 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      if (retryResult && retryResult.statusCode === 201 && retryResult.message.toLowerCase() === 'candidate created successfully!') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, retryResult.data.id ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
+        createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        req.userYouVerifyCandidateDetails = retryResult.data;
+        return next();
+      }
       userActivityTracking(req.user.user_id, 83, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.data.statusCode, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      return ApiResponse.error(res, retryResult?.response.data.message || enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED, 
+        retryResult?.response.data.statusCode || enums,HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
@@ -1063,7 +1081,7 @@ export const checkIfUserBelongsToAnyCluster = async(req, res, next) => {
     if (activeClusterMembership.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 108, 'fail');
-      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly exit all clusters'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE);
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly exit all clusters'), enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BELONGS_TO_ANY_CLUSTER_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
     return next();
@@ -1090,8 +1108,7 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active cluster loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeClusterLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      userActivityTracking(req.user.user_id, 108, 'fail');
-      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN, 
         enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
@@ -1099,14 +1116,12 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active individual loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeIndividualLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      userActivityTracking(req.user.user_id, 108, 'fail');
-      return ApiResponse.error(res, enums.CANNOT_DELETE_USER_ACCOUNT('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN, 
         enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     return next();
   } catch (error) {
-    userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE;
     logger.error(`checking if user have active individual/cluster loan application in the DB failed::${enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE}`, error.message);
     return next(error);

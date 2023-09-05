@@ -2,6 +2,8 @@ import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { collateUsersFcmTokens } from '../../lib/utils/lib.util.helpers';
 import notificationQueries from '../queries/queries.settings';
+import usersQueries from '../queries/queries.user';
+import MailService from '../services/services.email';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import  notificationPayload from '../../lib/payloads/lib.payload.admin';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
@@ -84,6 +86,16 @@ export const sendNotifications = async(req, res, next) => {
     const [ usersToken, userNames ] = await collateUsersFcmTokens(body.sent_to);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: recipient tokens and names sorted sendNotifications.admin.controller.notification.js`);
     await Promise.all(body.sent_to.map(async(user) => {
+      const [ userDetails ] = await processAnyData(usersQueries.getUsersForNotifications, [ user.user_id ]);
+      if (!userDetails) {
+        return;
+      }
+      await MailService(body.title, 'adminSentNotification', { 
+        email: userDetails.email, 
+        first_name: userDetails.first_name,
+        title: body.title,
+        content: body.content
+      });
       sendUserPersonalNotification(user, body.title, body.content, 'admin-sent-notification');
     }));
     sendMulticastPushNotification(`${body.title} \n${body.content}`, usersToken, 'admin-notification');

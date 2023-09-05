@@ -32,19 +32,19 @@ export default {
     
   getAdminByEmail: `
     SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count
     FROM admins
     WHERE email = $1`,
 
   getAdminByPhoneNumber: `
     SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count
     FROM admins
     WHERE phone_number = $1`,
 
   getAdminByAdminId: `
     SELECT id, admin_id, role_type, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count
     FROM admins
     WHERE admin_id = $1`,
 
@@ -453,11 +453,11 @@ export default {
       FROM(
       SELECT total_payment_amount 
       FROM personal_loan_payment_schedules
-      WHERE (status = 'paid' OR status = 'over due')
+      WHERE (status = 'not due' OR status = 'over due')
       UNION ALL
       SELECT total_payment_amount 
       FROM cluster_member_loan_payment_schedules 
-      WHERE (status = 'paid' OR status = 'over due')
+      WHERE (status = 'not due' OR status = 'over due')
       ) AS totalExpectedRepayment`,
 
   totalNplOverdueRepayment: `
@@ -713,7 +713,14 @@ export default {
       FROM cluster_member_loan_disbursements
       WHERE status = 'success'
       AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
-  `
+  `,
+
+  deactivateAdmin: `
+    UPDATE admins
+    SET
+      updated_at = NOW(),
+      status = 'deactivated'
+    WHERE admin_id = $1` 
 };
 
 

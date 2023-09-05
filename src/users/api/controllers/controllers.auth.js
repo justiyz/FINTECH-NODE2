@@ -30,7 +30,7 @@ const { SEEDFI_NODE_ENV } = config;
  */
 export const signup = async(req, res, next) => {
   try {
-    const { body, referringUserDetails } = req;
+    const { body, referringUserDetails, user } = req;
     const otp =  Helpers.generateOtp();
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated signup.controllers.auth.js`);
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
@@ -40,8 +40,9 @@ export const signup = async(req, res, next) => {
     }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = AuthPayload.register(body, otp, expireAt);
-    const [ registeredUser ] = await processAnyData(authQueries.registerUser, payload);
+    const signupOtpRequest = user ? (Number(user.verification_token_request_count) + 1) : 1;
+    const payload = AuthPayload.register(body, otp, expireAt, signupOtpRequest);
+    const [ registeredUser ] = !user ? await processAnyData(authQueries.registerUser, payload) : await processAnyData(authQueries.updateVerificationToken, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: successfully registered user to the database signup.controllers.auth.js`);
     if (body.referral_code) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${registeredUser.user_id}:::Info: referral code is sent with signup payload signup.controllers.auth.js`);
@@ -339,6 +340,7 @@ export const resetPassword = async(req, res, next) => {
     await processAnyData(authQueries.resetPassword, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user password in the db. resetPassword.controllers.auth.js`);
+    await MailService('Password Reset Successful', 'resetPassword', { ...user });
     userActivityTracking(req.user.user_id, 9, 'success');
     return ApiResponse.success(res, enums.PASSWORD_RESET, enums.HTTP_OK);
   } catch (error) {
@@ -364,6 +366,7 @@ export const changePassword = async(req, res, next) => {
     await processAnyData(authQueries.changePassword, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully changed user password in the db. changePassword.controllers.auth.js`);
+    await MailService('Password Change Successful', 'changePassword', { ...user });
     userActivityTracking(req.user.user_id, 10, 'success');
     return ApiResponse.success(res, enums.CHANGE_PASSWORD, enums.HTTP_OK);
   } catch (error) {
@@ -414,6 +417,7 @@ export const changePin = async(req, res, next) => {
     await processAnyData(authQueries.changePin, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully changed user pin in the db. changePin.controllers.auth.js`);
+    await MailService('Pin Change Successful', 'changePin', { ...user });
     userActivityTracking(req.user.user_id, 14, 'success');
     return ApiResponse.success(res, enums.CHANGE_PIN, enums.HTTP_OK);
   } catch (error) {
@@ -528,6 +532,7 @@ export const resetPin = async(req, res, next) => {
     await processAnyData(authQueries.resetPin, [ user.user_id, hash ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
     successfully reset user pin in the resetPin.controllers.auth.js`);
+    await MailService('Pin Reset Successful', 'resetPin', { ...user });
     userActivityTracking(req.user.user_id, 13, 'success');
     return ApiResponse.success(res, enums.PIN_RESET, enums.HTTP_OK);
   } catch (error) {

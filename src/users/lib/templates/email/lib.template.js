@@ -33,7 +33,116 @@ export const forgotPassword = (data) => `
 <tr>
   <td>
     <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-      If you didn't request a reset password, you can ignore this email.
+      If you didn't request a password reset, you can ignore this email.
+    </p>
+  </td>
+</tr>`;
+
+export const resetPassword = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your password has been successfully updated.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate password reset, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+export const changePassword = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your password has been changed successfully.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate change password, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+export const changePin = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your pin has been changed successfully.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate change password, kindly reach out to support.
+    </p>
+  </td>
+</tr>`;
+
+
+export const resetPin = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    Your pin has been successfully updated.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+
+<tr>
+  <td style="padding-bottom: 40px">
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 18px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+    if you didn’t initiate pin reset, kindly reach out to support.
     </p>
   </td>
 </tr>`;
@@ -379,8 +488,8 @@ export const successfulAddressVerification = (data) => `
   <td>
     <p>Address Details</p><br />
     <span>
-      <b>House Number:</b> ${data.landmark},  <br />
-      <b>Landmark:</b> ${data.house_number},  <br />
+      <b>House Number:</b> ${data.house_number},  <br />
+      <b>Landmark:</b> ${data.landmark},  <br />
       <b>Street:</b> ${data.street},  <br />
       <b>City:</b> ${data.city},  <br />
       <b>State:</b> ${data.state}
@@ -430,5 +539,35 @@ export const rewardPointsClaiming = (data) => `
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
     <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed points of ${data.claimed_points}</span>  
+  </td>
+</tr>`;
+
+export const rejectedDebitCardNotUsersCard = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td>
+    <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+      Thanks for adding your card details on SeedFi.<br />
+      however, this added card does not bear your registered name on SeedFi.<br /> 
+      Kindly add a card that bears your registered name.
+    </span>  
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">card details</p><br />
+    <span
+      style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+      <b>Last 4 Digits:</b> ${data.last4Digits}, <br />
+      <b>Card Type:</b> ${data.cardType}
+    </span>  
   </td>
 </tr>`;
