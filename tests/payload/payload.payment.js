@@ -62,6 +62,68 @@ export const receiveChargeSuccessWebHookOne = (reference) => ({
   }
 });
 
+export const receiveChargeSuccessWebHookNotUserName = (reference) => ({
+  event: 'charge.success',
+  data: {
+    id: 2468221493,
+    domain: 'test',
+    status: 'success',
+    reference: reference,
+    amount: 50000,
+    message: 'test-3ds',
+    gateway_response: '[Test] Approved',
+    paid_at: '2023-01-22T12:08:21.000Z',
+    created_at: '2023-01-22T12:06:43.000Z',
+    channel: 'card',
+    currency: 'NGN',
+    ip_address: '102.89.32.100',
+    metadata: '',
+    fees_breakdown: null,
+    log: null,
+    fees: 750,
+    fees_split: null,
+    authorization: {
+      authorization_code: 'AUTH_opcf85n7x5',
+      bin: '408408',
+      last4: '0409',
+      exp_month: '01',
+      exp_year: '2024',
+      channel: 'card',
+      card_type: 'visa',
+      bank: 'TEST BANK',
+      country_code: 'NG',
+      brand: 'visa',
+      reusable: true,
+      signature: 'SIG_t5u0Of9ezvgBPXRyDX50',
+      account_name: 'Ali Samaila'
+    },
+    customer: {
+      id: 109405397,
+      first_name: null,
+      last_name: null,
+      email: 'victory@enyata.com',
+      customer_code: 'CUS_0wfczyq7aoqxz4v',
+      phone: null,
+      metadata: null,
+      risk_action: 'default',
+      international_format_phone: null
+    },
+    plan: {},
+    subaccount: {},
+    split: {},
+    order_id: null,
+    paidAt: '2023-01-22T12:08:21.000Z',
+    requested_amount: 50000,
+    pos_transaction_data: null,
+    source: {
+      type: 'api',
+      source: 'merchant_api',
+      entry_point: 'transaction_initialize',
+      identifier: null
+    }
+  }
+});
+
 export const receiveChargeSuccessWebHookTwo = (reference) => ({
   event: 'charge.success',
   data: {

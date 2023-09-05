@@ -12,7 +12,7 @@ const fetchUsers = Joi.object().keys({
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
-  status: Joi.string().optional().valid('active', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
+  status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
   export: Joi.string().optional().valid('true'),
   loan_status: Joi.string().optional().valid('active', 'inactive', 'over due'),
   from_date: Joi.date().optional(),
