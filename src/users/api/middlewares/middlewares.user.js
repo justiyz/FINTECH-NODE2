@@ -730,7 +730,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       }
       userActivityTracking(req.user.user_id, 83, 'fail');
       return ApiResponse.error(res, retryResult?.response.data.message || enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED, 
-        retryResult?.response.data.statusCode || HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+        retryResult?.response.data.statusCode || enums,HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);

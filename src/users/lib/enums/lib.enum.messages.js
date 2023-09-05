@@ -155,6 +155,7 @@ export const CLUSTER_MEMBERS_NOT_MORE_THAN_ONE = 'Cluster loan cannot be initiat
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED = 'User address verification cannot proceed';
+export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED = 'User address verification cannot be processed now, kindly try again later';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
   'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_CLUSTER_LOAN_REASON =
