@@ -246,6 +246,12 @@ export const saveCardAuth = async(req, res, next) => {
     const { body, paymentRecord, user } = req;
     if (body.event === 'charge.success' && body.data.channel === 'card') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event} saveCardAuth.middlewares.payment.js`);
+      const data = {
+        first_name: user.first_name,
+        email: user.email,
+        last4Digits: body.data.authorization.last4,
+        cardType: body.data.authorization.card_type
+      };
       const checkIfCardPreviouslyUsedPayload = PaymentPayload.checkCardSavedPayload(paymentRecord, body);
       const [ cardPreviouslySaved ] = await processAnyData(paymentQueries.checkIfCardPreviouslySaved, checkIfCardPreviouslyUsedPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if card previously saved saveCardAuth.middlewares.payment.js`);
@@ -254,17 +260,25 @@ export const saveCardAuth = async(req, res, next) => {
       ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms card will expire in 3 months time 
         saveCardAuth.middlewares.payment.js`);
-        const data = {
-          first_name: user.first_name,
-          email: user.email,
-          last4Digits: body.data.authorization.last4,
-          cardType: body.data.authorization.card_type
-        };
         await MailService('Rejected Debit Card', 'rejectedDebitCard', { ...data });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);
         sendUserPersonalNotification(user, 'Card Tokenization fails', 
           PersonalNotifications.cardTokenizationFailedDueToCardExpiration(), 'failed-card-tokenization', { });
         sendPushNotification(user.user_id, PushNotifications.rejectDebitCard(), user.fcm_token);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 
+        saveCardAuth.middlewares.payment.js`);
+        return next();
+      }
+      if ((paymentRecord.payment_type === 'card_tokenization') && (body.data.authorization.account_name?.trim().length > 0) &&
+        ((body.data.authorization.account_name.trim().toLowerCase().includes(user.first_name.toLowerCase())) && 
+        (body.data.authorization.account_name.trim().toLowerCase().includes(user.last_name.toLowerCase())))) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms that tokenized card does not bear user name 
+          saveCardAuth.middlewares.payment.js`);
+        await MailService('Rejected Debit Card', 'rejectedDebitCardNotUsersCard', { ...data });
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends mail to the user saveCardAuth.middlewares.payment.js`);
+        sendUserPersonalNotification(user, 'Card Tokenization fails', 
+          PersonalNotifications.cardTokenizationFailedDueToNotCardHolderName(), 'failed-card-tokenization', { });
+        sendPushNotification(user.user_id, PushNotifications.rejectDebitCardNotUserCard(), user.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully sends push and personal notification to the user 
         saveCardAuth.middlewares.payment.js`);
         return next();

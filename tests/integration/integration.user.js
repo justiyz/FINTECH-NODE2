@@ -6,7 +6,7 @@ import app from '../../src/app';
 import enums from '../../src/users/lib/enums';
 import * as Helpers from '../../src/users/lib/utils/lib.util.helpers';
 import * as Hash from '../../src/users/lib/utils/lib.util.hash';
-import { receiveChargeSuccessWebHookOne, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookThree,
+import { receiveChargeSuccessWebHookOne, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookThree, receiveChargeSuccessWebHookNotUserName,
   receiveRefundSuccessWebHook, receiveRefundProcessingWebHook, receiveRefundPendingWebHook, receiveChargeSuccessWebHookOneUserTwo
 } from '../payload/payload.payment';
 import { receiveAddressVerificationWebhookResponse, receiveAddressVerificationWrongEventWebhookResponse, 
@@ -1632,10 +1632,43 @@ describe('User', () => {
           done();
         });
     });
+    it('should throw error if name on card not user used name', (done) => {
+      chai.request(app)
+        .post('/api/v1/payment/paystack-webhook')
+        .send(receiveChargeSuccessWebHookNotUserName(process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_ONE))
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal(enums.CARD_PAYMENT_SUCCESS_STATUS_RECORDED);
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          expect(res.body.data).to.be.an('array');
+          done();
+        });
+    });
+    it('should initiate card tokenization successfully for user 2', (done) => {
+      chai.request(app)
+        .get('/api/v1/payment/initiate-card-tokenization')
+        .set({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_OK);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body).to.have.property('data');
+          expect(res.body.message).to.equal('Authorization URL created');
+          expect(res.body.status).to.equal(enums.SUCCESS_STATUS);
+          process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_FOUR = res.body.data.reference;
+          done();
+        });
+    });
     it('should successfully process card payment using paystack webhook', (done) => {
       chai.request(app)
         .post('/api/v1/payment/paystack-webhook')
-        .send(receiveChargeSuccessWebHookOne(process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_ONE))
+        .send(receiveChargeSuccessWebHookOne(process.env.SEEDFI_USER_ONE_CARD_TOKENIZATION_PAYMENT_REFERENCE_FOUR))
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
           expect(res.body).to.have.property('message');

@@ -9,12 +9,13 @@ import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { resolveAccount } from '../services/service.paystack';
 import { dojahBvnVerificationCheck } from '../services/service.dojah';
-import { createUserYouVerifyCandidate } from '../services/service.youVerify';
+import { createUserYouVerifyCandidate, createUserYouVerifyCandidateUsingProfile } from '../services/service.youVerify';
 import { userActivityTracking } from '../../lib/monitor';
 import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
+import { HTTP_FORBIDDEN } from '../../lib/enums/lib.enum.status';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -710,9 +711,25 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       return next();
     }
     if (result && result.statusCode !== 201) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation failed createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation failed about to retry 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      const retryResult = await createUserYouVerifyCandidateUsingProfile(user);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation retried 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+      if (retryResult && retryResult.statusCode === 201 && retryResult.message.toLowerCase() === 'candidate created successfully!') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
+      createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        const payload = UserPayload.addressVerification(body, user, retryResult.data.id);
+        !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
+          await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
+          createUserAddressYouVerifyCandidate.middlewares.user.js`);
+        req.userYouVerifyCandidateDetails = retryResult.data;
+        return next();
+      }
       userActivityTracking(req.user.user_id, 83, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.data.statusCode, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      return ApiResponse.error(res, retryResult?.response.data.message || enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED, 
+        retryResult?.response.data.statusCode || HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);

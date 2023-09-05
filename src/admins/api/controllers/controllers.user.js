@@ -384,8 +384,8 @@ export const verifyUserUtilityBill = async(req, res, next) => {
       const declineUtilityBill = await processOneOrNoneData(userQueries.declineUserUploadedUtilityBill, [ userDetails.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been declined so user can upload another 
       verifyUserUtilityBill.admin.controllers.user.js`);
-      sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('decline'), userDetails.fcm_token);
-      sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
+      sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('declined'), userDetails.fcm_token);
+      sendUserPersonalNotification(userDetails, `${userDetails.first_name} declined utility bill`, 
         PersonalNotifications.declinedUtilityBillNotification(), 'utility-declined', {});
       await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
       await adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(adminName, userName));
@@ -402,7 +402,7 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user tier value has been updated based on previous verifications
       verifyUserUtilityBill.admin.controllers.user.js`);
     sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('approved'), userDetails.fcm_token);
-    sendUserPersonalNotification(userDetails, `${userDetails.first_name} decline utility bill`, 
+    sendUserPersonalNotification(userDetails, `${userDetails.first_name} approved utility bill`, 
       PersonalNotifications.approvedUtilityBillNotification(), 'utility-bill-approved', {});
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
     await adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));

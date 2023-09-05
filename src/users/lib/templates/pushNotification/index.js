@@ -2,6 +2,10 @@ export const rejectDebitCard = () => {
   return 'The debit card you add has been rejected, kindly insert a debit card that will not expire in 3 months time';
 };
 
+export const rejectDebitCardNotUserCard = () => {
+  return 'The debit card you add has been rejected, Kindly add a card that bears your registered name on SeedFi';
+};
+
 export const cardTokenizationSuccessful = () => {
   return 'The debit card you added has been accepted and saved successfully';
 };

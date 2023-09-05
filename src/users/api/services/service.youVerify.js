@@ -31,6 +31,35 @@ const createUserYouVerifyCandidate = async(user, userBvn) => {
   }
 };
 
+const createUserYouVerifyCandidateUsingProfile = async(user) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.seedfiYouVerifyUserCandidateCreationTestResponse(user);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_YOU_VERIFY_BASE_URL}/v2/api/addresses/candidates`,
+      headers: {
+        token: `${config.SEEDFI_YOU_VERIFY_API_KEY}`
+      },
+      data: { 
+        firstName: user.first_name,
+        lastName: user.las_name,
+        mobile: '0' + user.phone_number.substring(4),
+        dateOfBirth: user.date_of_birth,
+        email: user.email,
+        image: user.image_url
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to you verify to create a user candidate 
+    failed::${enums.CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE}`, error.message);
+    return error;
+  }
+};
+
 const initiateUserYouVerifyAddressVerification = async(user, body, candidateId, requestId) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
@@ -71,4 +100,4 @@ const initiateUserYouVerifyAddressVerification = async(user, body, candidateId, 
   }
 };
 
-export { createUserYouVerifyCandidate, initiateUserYouVerifyAddressVerification };
+export { createUserYouVerifyCandidate, initiateUserYouVerifyAddressVerification, createUserYouVerifyCandidateUsingProfile };

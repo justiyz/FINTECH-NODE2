@@ -63,6 +63,11 @@ export const cardTokenizationFailedDueToCardExpiration = () => {
   Kindly add a card that will not expire in about three months time.`;
 };
 
+export const cardTokenizationFailedDueToNotCardHolderName = () => {
+  return `Thanks for adding your card details on SeedFi. however, this added card does not bear your registered name on SeedFi. 
+  Kindly add a card that bears your registered name.`;
+};
+
 export const cardTokenizedSuccessfully = () => {
   return 'Thanks for adding your card details on SeedFi. It has been accepted and saved.';
 };

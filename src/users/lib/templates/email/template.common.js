@@ -20,7 +20,8 @@ const heading = {
   resetPassword: 'Password Reset Successful',
   changePassword: 'Password Change Successful',
   changePin: 'Pin Change Successful',
-  resetPin: 'Pin Reset Successful'
+  resetPin: 'Pin Reset Successful',
+  rejectedDebitCardNotUsersCard: 'Rejected Debit Card'
 };
 
 export const commonTemplate = (messageType, data) => {
