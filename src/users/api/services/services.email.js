@@ -6,7 +6,10 @@ const MailService = async(subject, messageType, data) => {
   const msg = {
     to: data.email,
     cc: '',
-    from: config.SEEDFI_SENDGRID_FROM,
+    from: {
+      name: 'SeedFi',
+      email: config.SEEDFI_SENDGRID_FROM
+    },
     subject,
     html: commonTemplate(messageType, data)
   };
