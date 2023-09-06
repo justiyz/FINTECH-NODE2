@@ -428,7 +428,7 @@ export const idUploadVerification = async(req, res, next) => {
  * @memberof UserController
  */
 
-export const initiateAddressVerification = async(req, res, next) => {
+export const initiateAddressVerification = async(req, res) => {
   try {
     const { body, user, userAddressDetails, userYouVerifyCandidateDetails } = req;
     const candidateId = (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) ? userAddressDetails.you_verify_candidate_id : 
@@ -448,8 +448,9 @@ export const initiateAddressVerification = async(req, res, next) => {
     if (result && result.statusCode !== 201) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 83, 'fail');
-      return ApiResponse.error(res, result?.response.data.message || enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED, 
-        result?.response.data.statusCode || enums.HTTP_FORBIDDEN, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+      const errorMessage = result?.response?.data ? result.response.data.message : enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED;
+      const errorCode = result?.response?.data ? result.response.data.statusCode : enums.HTTP_FORBIDDEN;
+      return ApiResponse.error(res, errorMessage, errorCode, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification could not be initiated with youVerify 
     initiateAddressVerification.controller.user.js`);
@@ -459,7 +460,7 @@ export const initiateAddressVerification = async(req, res, next) => {
   } catch (error) {
     error.label = enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER;
     logger.error(`initiating user address verification failed:::${enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER}`, error.message);
-    return next(error);
+    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED, enums.HTTP_FORBIDDEN, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
   }
 };
 

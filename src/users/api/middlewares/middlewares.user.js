@@ -15,7 +15,6 @@ import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
-import { HTTP_FORBIDDEN } from '../../lib/enums/lib.enum.status';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -729,8 +728,9 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
         return next();
       }
       userActivityTracking(req.user.user_id, 83, 'fail');
-      return ApiResponse.error(res, retryResult?.response.data.message || enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED, 
-        retryResult?.response.data.statusCode || enums,HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      const errorMessage = retryResult?.response?.data ? retryResult.response.data.message : enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED;
+      const errorCode = retryResult?.response?.data ? retryResult.response.data.statusCode : enums.HTTP_FORBIDDEN;
+      return ApiResponse.error(res, errorMessage, errorCode, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
@@ -740,7 +740,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE;
     logger.error(`creating user youVerify candidate failed::${enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE}`, error.message);
-    return next(error);
+    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
   }
 };
 
