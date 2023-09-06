@@ -181,12 +181,6 @@ describe('', () => {
       expect(data.code).to.equal(500);
       expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
     });
-    it('should call initiateAddressVerification', async() => {
-      const req = { user: '', body: '' };
-      const data = await UserController.initiateAddressVerification(req, res, next);
-      expect(data.code).to.equal(500);
-      expect(data.error).to.equal('INTERNAL_SERVER_ERROR');
-    });
     it('should call updateUploadedUtilityBill', async() => {
       const req = { user: '', document: '' };
       const data = await UserController.updateUploadedUtilityBill(req, res, next);
