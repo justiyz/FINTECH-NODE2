@@ -85,6 +85,14 @@ export const editUserStatus = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user bvn is added to unBlacklisted bvn list editUserStatus.admin.controllers.user.js`);
       }
     }
+    if ((userDetails.status === 'deactivated') && (status === 'active')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user is deactivated about to be reactivated editUserStatus.admin.controllers.user.js`);
+      await processOneOrNoneData(userQueries.resetUserVerificationCount, [ userDetails.user_id ]);
+    }
+    if ((userDetails.status === 'inactive') && (userDetails.is_deleted === true) && (status === 'active')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: user account is deleted about to be restored editUserStatus.admin.controllers.user.js`);
+      await processOneOrNoneData(userQueries.restoreDeletedUserAccount, [ userDetails.user_id ]);
+    }
     await adminActivityTracking(req.admin.admin_id, activityType, 'success', description);
     return  ApiResponse.success(res, enums.EDIT_USER_STATUS, enums.HTTP_OK);
   } catch (error) {
