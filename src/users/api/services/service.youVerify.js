@@ -44,7 +44,7 @@ const createUserYouVerifyCandidateUsingProfile = async(user) => {
       },
       data: { 
         firstName: user.first_name,
-        lastName: user.las_name,
+        lastName: user.last_name,
         mobile: '0' + user.phone_number.substring(4),
         dateOfBirth: user.date_of_birth,
         email: user.email,
