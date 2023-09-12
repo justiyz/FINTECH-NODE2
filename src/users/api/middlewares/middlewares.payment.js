@@ -270,8 +270,8 @@ export const saveCardAuth = async(req, res, next) => {
         return next();
       }
       if ((paymentRecord.payment_type === 'card_tokenization') && (body.data.authorization.account_name?.trim().length > 0) &&
-        ((body.data.authorization.account_name.trim().toLowerCase().includes(user.first_name.toLowerCase())) && 
-        (body.data.authorization.account_name.trim().toLowerCase().includes(user.last_name.toLowerCase())))) {
+        ((!body.data.authorization.account_name.trim().toLowerCase().includes(user.first_name.toLowerCase())) && 
+        (!body.data.authorization.account_name.trim().toLowerCase().includes(user.last_name.toLowerCase())))) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully confirms that tokenized card does not bear user name 
           saveCardAuth.middlewares.payment.js`);
         await MailService('Rejected Debit Card', 'rejectedDebitCardNotUsersCard', { ...data });
