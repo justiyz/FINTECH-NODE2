@@ -131,7 +131,9 @@ export default {
       UPDATE admins
       SET
       updated_at = NOW(),
-      status = $2
+      status = $2,
+      verification_token_request_count = $3,
+      invalid_verification_token_count = $4
       WHERE admin_id = $1
       RETURNING *
     `,
