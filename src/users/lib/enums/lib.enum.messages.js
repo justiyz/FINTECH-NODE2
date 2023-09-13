@@ -9,6 +9,7 @@ export const ACCOUNT_EXIST = 'Account already exist, kindly contact support team
 export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
+export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
 export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
@@ -362,6 +363,7 @@ export const PROMO_EDITED_SUCCESSFULLY= 'Promo edited successfully';
 export const PROMO_CANCELLED_SUCCESSFULLY= 'Promo cancelled successfully';
 export const PROMO_DELETED_SUCCESSFULLY= 'Promo deleted successfully';
 export const PROMO_DUE_TO_START = 'Certain promos due to start has been initiated';
+export const ADMIN_ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
 export const ADMIN_CANNOT_REQUEST_VERIFICATION_ANYMORE = 'Admin can\'t request verification anymore, kindly contact support';
 export const PROMO_DUE_TO_END = 'Certain promos due to end has been initiated';
 export const ADMIN_DID_NOT_CREATE_PROMO = (promoName) => `Access denied!, you did not create promo with name ${promoName}`;

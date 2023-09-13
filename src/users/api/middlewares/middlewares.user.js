@@ -53,7 +53,7 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
         enums.HTTP_BAD_REQUEST,
         enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }
-    if (user && type === 'login' && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
+    if (user && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
       validateUnAuthenticatedUser.middlewares.user.js`);

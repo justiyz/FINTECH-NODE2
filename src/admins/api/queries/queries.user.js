@@ -24,7 +24,8 @@ export default {
     SET 
       updated_at = NOW(),
       status = 'active',
-      verification_token_request_count = '0'
+      verification_token_request_count = '0',
+      invalid_verification_token_count = '0'
     WHERE user_id = $1`,
 
   restoreDeletedUserAccount: `
@@ -33,6 +34,7 @@ export default {
       updated_at = NOW(),
       status = 'active',
       verification_token_request_count = '0',
+      invalid_verification_token_count = '0',
       is_deleted = FALSE
     WHERE user_id = $1`,
 
@@ -56,7 +58,7 @@ export default {
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, verification_token_request_count,
+      number_of_children, marital_status, loan_status, verification_token_request_count, invalid_verification_token_count,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created, (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points
     FROM users
     WHERE user_id = $1`,
@@ -67,7 +69,7 @@ export default {
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
-      number_of_children, marital_status, loan_status, verification_token_request_count,
+      number_of_children, marital_status, loan_status, verification_token_request_count, invalid_verification_token_count,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
     FROM users
     WHERE (email = $1 OR phone_number = $1)`,

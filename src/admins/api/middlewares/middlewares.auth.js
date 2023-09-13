@@ -38,6 +38,22 @@ export const compareAdminPassword = async(req, res, next) => {
 };
 
 /**
+ * records the number of times user has entered invalid otp and if more than required, deactivates the account
+ * @param {Response} res - The response returned by the method.
+ * @param {Object} admin - The admin details.
+ * @returns {object} - Returns a response
+ * @memberof AuthMiddleware
+ */
+const recordAdminInvalidOtpInputCount = async(res, admin) => {
+  await processOneOrNoneData(adminQueries.updateAdminInvalidOtpCount, [ admin.admin_id ]);
+  if (admin.invalid_verification_token_count >= 4) { // at 5th attempt or greater perform action
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has entered invalid otp more than required limit recordAdminInvalidOtpInputCount.admin.middlewares.auth.js`);
+    await processOneOrNoneData(adminQueries.deactivateAdmin, [ admin.admin_id ]);
+    return ApiResponse.error(res, enums.ADMIN_ACCOUNT_DEACTIVATED, enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
+  }
+};
+
+/**
  * verify validity and expiry of admin login verification token
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -47,14 +63,24 @@ export const compareAdminPassword = async(req, res, next) => {
  */
 export const verifyLoginVerificationToken = async(req, res, next) => {
   try {
-    const { body: { otp } } = req;
-    const [ otpAdmin ] = await processAnyData(authQueries.fetchAdminByVerificationToken, [ otp ]);
+    const { body: { otp, email } } = req;
+    const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ email.trim().toLowerCase() ]);
+    if (!admin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the email does not exist in the DB 
+      verifyLoginVerificationToken.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('Admin'), enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
+    }
+    const [ otpAdmin ] = await processAnyData(authQueries.fetchAdminByVerificationTokenAndUniqueId, [ otp, admin.admin_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct OTP is sent verifyLoginVerificationToken.admin.middlewares.auth.js`);
     if (!otpAdmin) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: OTP is invalid verifyVerificationToken.middlewares.auth.js`);
+      await recordAdminInvalidOtpInputCount(res, admin);
       return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: OTP is valid verifyLoginVerificationToken.admin.middlewares.auth.js`);
+    if (admin.invalid_verification_token_count >= 5) {
+      await recordAdminInvalidOtpInputCount(res, admin);
+    }
     const isExpired = new Date().getTime() > new Date(otpAdmin.verification_token_expires).getTime();
     if (isExpired) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpAdmin.admin_id}:::Info: successfully confirms that verification token has expired 

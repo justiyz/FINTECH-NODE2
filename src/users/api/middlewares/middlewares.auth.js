@@ -73,6 +73,22 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
 };
 
 /**
+ * records the number of times user has entered invalid otp and if more than required, deactivates the account
+ * @param {Response} res - The response returned by the method.
+ * @param {Object} user - The user details.
+ * @returns {object} - Returns a response
+ * @memberof AuthMiddleware
+ */
+const recordUserInvalidOtpInputCount = async(res, user) => {
+  await processOneOrNoneData(authQueries.updateUserInvalidOtpCount, [ user.user_id ]);
+  if (user.invalid_verification_token_count >= 4) { // at 5th attempt or greater perform action
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has entered invalid otp more than required limit recordUserInvalidOtpInputCount.middlewares.auth.js`);
+    await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
+    return ApiResponse.error(res, enums.ACCOUNT_DEACTIVATED, enums.HTTP_UNAUTHORIZED, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
+  }
+};
+
+/**
  * verify validity and expiry of signup or new device login verification token
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -82,14 +98,24 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
  */
 export const verifyVerificationToken = async(req, res, next) => {
   try {
-    const { body: { otp } } = req;
-    const [ otpUser ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
+    const { body: { otp, phone_number, email } } = req;
+    const [ user ] = !email ? await processAnyData(userQueries.getUserByPhoneNumber, [ phone_number.trim() ]) : 
+      await processAnyData(userQueries.getUserByEmail, [ email.trim().toLowerCase() ]);
+    if (!user) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAuthToken.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('User'), enums.HTTP_UNAUTHORIZED, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
+    }
+    const [ otpUser ] = await processAnyData(authQueries.getUserByVerificationTokenAndUniqueField, [ otp, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct OTP is sent verifyVerificationToken.middlewares.auth.js`);
     if (!otpUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: OTP is invalid verifyVerificationToken.middlewares.auth.js`);
+      await recordUserInvalidOtpInputCount(res, user);
       return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpUser.user_id}:::Info: OTP is valid verifyVerificationToken.middlewares.auth.js`);
+    if (user.invalid_verification_token_count >= 5) {
+      await recordUserInvalidOtpInputCount(res, user);
+    }
     const isExpired = new Date().getTime() > new Date(otpUser.verification_token_expires).getTime();
     if (isExpired) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpUser.user_id}:::Info: successfully confirms that verification token has expired 
@@ -99,7 +125,7 @@ export const verifyVerificationToken = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${otpUser.user_id}:::Info: successfully confirms that verification token is still active 
     verifyVerificationToken.middlewares.auth.js`);
-    req.user = otpUser;
+    req.user = user;
     return next();
   } catch (error) {
     error.label = enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE;

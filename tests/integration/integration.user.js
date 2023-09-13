@@ -3119,7 +3119,8 @@ describe('User', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-reset-pin-token')
         .send({
-          otp: '162611'
+          otp: '162611',
+          phone_number: process.env.SEEDFI_USER_SIX_PHONE_NUMBER
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -3130,11 +3131,28 @@ describe('User', () => {
           done();
         });
     });
-    it('Should return error if otp is wrong', (done) => {
+    it('Should return error if user account does not exist', (done) => {
       chai.request(app)
         .post('/api/v1/auth/verify-reset-pin-token')
         .send({
-          otp: ''
+          otp: process.env.SEEDFI_USER_SIX_FORGOT_PIN_OTP,
+          phone_number: '+23470000000'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal('User account does not exist');
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
+    it('Should return error if otp is empty', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-reset-pin-token')
+        .send({
+          otp: '',
+          phone_number: process.env.SEEDFI_USER_SIX_PHONE_NUMBER
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -3149,7 +3167,8 @@ describe('User', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-reset-pin-token')
         .send({
-          otp: process.env.SEEDFI_USER_SIX_FORGOT_PIN_OTP
+          otp: process.env.SEEDFI_USER_SIX_FORGOT_PIN_OTP,
+          phone_number: process.env.SEEDFI_USER_SIX_PHONE_NUMBER
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);

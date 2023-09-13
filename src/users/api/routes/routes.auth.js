@@ -35,7 +35,7 @@ router.post(
 
 router.post(
   '/verify-new-device',
-  Model(Schema.verifyPhoneNumber, 'payload'),
+  Model(Schema.verifyNewDevice, 'payload'),
   AuthMiddleware.verifyVerificationToken,
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   AuthMiddleware.checkIfUserAccountNotVerified,
@@ -72,7 +72,7 @@ router.post(
 
 router.post(
   '/verify-reset-token',
-  Model(Schema.verifyOtp, 'payload'),
+  Model(Schema.verifyOtpViaEmail, 'payload'),
   AuthMiddleware.verifyVerificationToken,
   AuthController.generateResetToken('password')
 );
@@ -138,7 +138,7 @@ router.post(
 
 router.post(
   '/verify-reset-pin-token',
-  Model(Schema.verifyOtp, 'payload'),
+  Model(Schema.verifyOtpViaPhoneNumber, 'payload'),
   AuthMiddleware.verifyVerificationToken,
   AuthController.generateResetToken('pin')
 );
