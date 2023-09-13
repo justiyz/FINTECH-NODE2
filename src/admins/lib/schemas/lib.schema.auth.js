@@ -6,7 +6,8 @@ const login = Joi.object().keys({
 });
 
 const verifyLogin = Joi.object().keys({
-  otp: Joi.string().required().length(6)
+  otp: Joi.string().required().length(6),
+  email: Joi.string().email().required()
 });
 
 const forgotPassword = Joi.object().keys({

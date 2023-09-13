@@ -4,6 +4,12 @@ export default {
     FROM users 
     WHERE verification_token = $1`,
 
+  getUserByVerificationTokenAndUniqueField: `
+    SELECT id, email, phone_number, user_id, verification_token_expires, is_verified_email, verification_token_request_count, invalid_verification_token_count
+    FROM users 
+    WHERE verification_token = $1
+    AND user_id = $2`,
+
   registerUser: `
     INSERT INTO users(
         phone_number, verification_token, verification_token_expires, verification_token_request_count
@@ -77,7 +83,8 @@ export default {
       is_verified_phone_number = TRUE,
       verification_token = NULL,
       verification_token_expires = NULL,
-      verification_token_request_count = verification_token_request_count - verification_token_request_count
+      verification_token_request_count = verification_token_request_count - verification_token_request_count,
+      invalid_verification_token_count = invalid_verification_token_count - invalid_verification_token_count
     WHERE user_id = $1`,
 
   verifyUserAccountOnNewDevice: `
@@ -90,7 +97,8 @@ export default {
       is_verified_phone_number = TRUE,
       verification_token = NULL,
       verification_token_expires = NULL,
-      verification_token_request_count = verification_token_request_count - verification_token_request_count
+      verification_token_request_count = verification_token_request_count - verification_token_request_count,
+      invalid_verification_token_count = invalid_verification_token_count - invalid_verification_token_count
     WHERE user_id = $1`,
 
   completeUserProfile: `
@@ -147,6 +155,7 @@ export default {
       verification_token = NULL,
       verification_token_expires = NULL,
       verification_token_request_count = verification_token_request_count - verification_token_request_count,
+      invalid_verification_token_count = invalid_verification_token_count - invalid_verification_token_count,
       updated_at = NOW()
      WHERE user_id = $1
     `,
@@ -196,6 +205,7 @@ export default {
       verification_token = NULL,
       verification_token_expires = NULL,
       verification_token_request_count = verification_token_request_count - verification_token_request_count,
+      invalid_verification_token_count = invalid_verification_token_count - invalid_verification_token_count,
       pin = $2
     WHERE user_id = $1`,
 
@@ -265,5 +275,12 @@ export default {
     SET
       updated_at = NOW(),
       status = 'deactivated'
+    WHERE user_id = $1`,
+
+  updateUserInvalidOtpCount: `
+    UPDATE users
+    SET 
+      updated_at = NOW(),
+      invalid_verification_token_count = invalid_verification_token_count + 1
     WHERE user_id = $1`
 };

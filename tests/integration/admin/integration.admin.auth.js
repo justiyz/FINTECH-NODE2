@@ -28,6 +28,7 @@ describe('Admin Auth', () => {
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_completed_profile).to.equal(false);
           process.env.SEEDFI_SUPER_ADMIN_LOGIN_OTP_ONE = res.body.data.token;
+          process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS = res.body.data.email;
           done();
         });
     });
@@ -103,7 +104,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_SUPER_ADMIN_LOGIN_OTP_ONE
+          otp: process.env.SEEDFI_SUPER_ADMIN_LOGIN_OTP_ONE,
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -125,7 +127,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: '906712'
+          otp: '906712',
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -141,7 +144,7 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -157,7 +160,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: ''
+          otp: '',
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -173,7 +177,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: '6657'
+          otp: '6657',
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -533,7 +538,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-password-token')
         .send({
-          otp: '6578699987'
+          otp: '6578699987',
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -549,7 +555,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-password-token')
         .send({
-          otp: '000000'
+          otp: '000000',
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -565,7 +572,8 @@ describe('Admin Auth', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-password-token')
         .send({
-          otp: process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_OTP
+          otp: process.env.SEEDFI_SUPER_ADMIN_PASSWORD_RESET_OTP,
+          email: process.env.SEEDFI_SUPER_ADMIN_EMAIL_ADDRESS
         })
         .set({
           'Content-Type': 'application/json',

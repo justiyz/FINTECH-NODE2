@@ -29,6 +29,12 @@ const login = Joi.object().keys({
 
 const verifyPhoneNumber = Joi.object().keys({
   otp: Joi.string().required().length(6),
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).required(),
   fcm_token: Joi.string().optional(),
   device_token: Joi.string().optional()
 });
@@ -60,8 +66,19 @@ const forgotPassword = Joi.object().keys({
   email: Joi.string().email().required()
 });
 
-const verifyOtp = Joi.object().keys({
-  otp: Joi.string().required().length(6)
+const verifyOtpViaEmail = Joi.object().keys({
+  otp: Joi.string().required().length(6),
+  email: Joi.string().email().required()
+});
+
+const verifyOtpViaPhoneNumber = Joi.object().keys({
+  otp: Joi.string().required().length(6),
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).required()
 });
  
 const password = Joi.object().keys({
@@ -94,7 +111,8 @@ export default {
   deviceType,
   completeProfile,
   forgotPassword,
-  verifyOtp,
+  verifyOtpViaEmail,
+  verifyOtpViaPhoneNumber,
   password,
   changePassword,
   pin,

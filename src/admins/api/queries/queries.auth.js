@@ -9,6 +9,12 @@ export default {
       FROM admins 
       WHERE verification_token = $1`,
 
+  fetchAdminByVerificationTokenAndUniqueId: `
+      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count
+      FROM admins 
+      WHERE verification_token = $1
+      AND admin_id = $2`,
+
   updateLoginToken: `
       UPDATE admins
       SET 
@@ -16,7 +22,8 @@ export default {
         is_verified_email = TRUE,
         verification_token = $2,
         verification_token_expires = $3,
-        verification_token_request_count = $4
+        verification_token_request_count = $4,
+        invalid_verification_token_count = $5
       WHERE admin_id = $1
       RETURNING id, admin_id, first_name, last_name, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
 
@@ -64,7 +71,8 @@ export default {
       password = $2,
       verification_token = NULL,
       verification_token_expires = NULL,
-      verification_token_request_count = verification_token_request_count - verification_token_request_count
+      verification_token_request_count = verification_token_request_count - verification_token_request_count,
+      invalid_verification_token_count = invalid_verification_token_count - invalid_verification_token_count
     WHERE admin_id = $1
     RETURNING admin_id, status, is_created_password, is_verified_email, is_completed_profile`
 };

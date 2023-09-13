@@ -188,6 +188,7 @@ describe('Admin', () => {
           expect(res.body.data.status).to.equal('active');
           expect(res.body.data.is_completed_profile).to.equal(false);
           process.env.SEEDFI_ADMIN_TWO_LOGIN_OTP = res.body.data.token;
+          process.env.SEEDFI_ADMIN_TWO_EMAIL_ADDRESS = res.body.data.email;
           done();
         });
     });
@@ -195,7 +196,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_ADMIN_TWO_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_TWO_LOGIN_OTP,
+          email: process.env.SEEDFI_ADMIN_TWO_EMAIL_ADDRESS
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -263,7 +265,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP,
+          email: process.env.SEEDFI_ADMIN_THREE_EMAIL 
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -360,7 +363,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP,
+          email: process.env.SEEDFI_ADMIN_THREE_EMAIL
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -1036,7 +1040,8 @@ describe('Admin', () => {
       chai.request(app)
         .post('/api/v1/admin/auth/verify-login')
         .send({
-          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP
+          otp: process.env.SEEDFI_ADMIN_THREE_LOGIN_OTP,
+          email: process.env.SEEDFI_ADMIN_THREE_EMAIL
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
