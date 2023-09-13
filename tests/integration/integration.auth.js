@@ -299,16 +299,16 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-new-device')
         .send({
           otp: process.env.SEEDFI_USER_ONE_VERIFICATION_OTP,
-          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER,
+          email: userOneProfile.email,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(403);
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_PREVIOUSLY_VERIFIED);
-          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('User'));
+          expect(res.body.error).to.equal('UNAUTHORIZED');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -1094,7 +1094,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-new-device')
         .send({
           otp: process.env.SEEDFI_USER_SIX_NEW_DEVICE_LOGIN_VERIFICATION_OTP,
-          phone_number: process.env.SEEDFI_USER_SIX_PHONE_NUMBER,
+          email: userSixProfile.email,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })

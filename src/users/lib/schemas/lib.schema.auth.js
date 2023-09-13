@@ -39,6 +39,13 @@ const verifyPhoneNumber = Joi.object().keys({
   device_token: Joi.string().optional()
 });
 
+const verifyNewDevice = Joi.object().keys({
+  otp: Joi.string().required().length(6),
+  email: Joi.string().email().required(),
+  fcm_token: Joi.string().optional(),
+  device_token: Joi.string().optional()
+});
+
 const deviceType = Joi.object().keys({
   type: Joi.string().required().valid('web', 'mobile')
 });
@@ -108,6 +115,7 @@ export default {
   resendPhoneNumberVerificationOTP,
   login,
   verifyPhoneNumber,
+  verifyNewDevice,
   deviceType,
   completeProfile,
   forgotPassword,

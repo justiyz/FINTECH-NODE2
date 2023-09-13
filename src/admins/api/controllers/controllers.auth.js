@@ -67,9 +67,7 @@ export const login = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const token = await Hash.generateAdminAuthToken(admin, permissions);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: auth token generated login.admin.controllers.auth.js`);
-    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, null, null, 
-      (Number(admin.verification_token_request_count) - Number(admin.verification_token_request_count)), 
-      (Number(admin.invalid_verification_token_count) - Number(admin.invalid_verification_token_count)) ]);
+    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.admin_id, null, null, 0, 0 ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set to null in the DB login.admin.controllers.auth.js`);
     const [ adminRoleDetails ] = await processAnyData(roleQueries.fetchRole, [ admin.role_type ]);
     await adminActivityTracking(req.admin.admin_id, 10, 'success', descriptions.login_approved(adminName));

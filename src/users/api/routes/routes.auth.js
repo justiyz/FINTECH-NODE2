@@ -35,7 +35,7 @@ router.post(
 
 router.post(
   '/verify-new-device',
-  Model(Schema.verifyPhoneNumber, 'payload'),
+  Model(Schema.verifyNewDevice, 'payload'),
   AuthMiddleware.verifyVerificationToken,
   UserMiddleware.validateUnAuthenticatedUser('verify'),
   AuthMiddleware.checkIfUserAccountNotVerified,
