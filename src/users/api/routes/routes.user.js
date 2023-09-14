@@ -111,7 +111,6 @@ router.patch(
   Model(Schema.accountChoiceType, 'query'),
   UserMiddleware.checkIfAccountDetailsExists,
   UserMiddleware.checkUserLoanStatus,
-  UserMiddleware.checkIfUserOnAnyActiveLoan,
   UserMiddleware.checkAccountCurrentChoicesAndTypeSent,
   UserController.updateAccountDetailsChoice
 );
@@ -185,7 +184,6 @@ router.patch(
   AuthMiddleware.validateAuthToken,
   Model(Schema.idParams, 'params'),
   UserMiddleware.checkUserLoanStatus,
-  UserMiddleware.checkIfUserOnAnyActiveLoan,
   UserMiddleware.checkIfCardOrUserExist,
   UserMiddleware.checkIfCardAlreadyDefaultCard,
   UserController.setDefaultCard

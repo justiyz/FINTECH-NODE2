@@ -212,9 +212,13 @@ export const fetchAllAdmins = async(req, res, next) => {
  */
 export const editAdminStatus = async(req, res, next) => {
   try {
+    const { adminUser, body } = req;
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     decoded that admin status is about to be edited editAdminStatus.admin.controllers.admin.js`);
-    await processAnyData(adminQueries.editAdminStatus, [ req.params.admin_id, req.body.status ]);
+    const adminVerificationRequestCountChoice = body.status === 'deactivated' ? adminUser.verification_token_request_count : 0;
+    const adminInvalidVerificationInputCountChoice = body.status === 'deactivated' ? adminUser.invalid_verification_token_count : 0;
+    await processAnyData(adminQueries.editAdminStatus, [ req.params.admin_id, req.body.status, 
+      adminVerificationRequestCountChoice, adminInvalidVerificationInputCountChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
     successfully confirm that admin status has been edited. editAdminStatus.admin.controllers.admin.js`);
     return  ApiResponse.success(res, enums.EDIT_ADMIN_STATUS, enums.HTTP_OK);

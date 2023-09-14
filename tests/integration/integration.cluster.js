@@ -1266,6 +1266,7 @@ describe('Clusters', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_EIGHT_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_EIGHT_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -1294,6 +1295,7 @@ describe('Clusters', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_NINE_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_NINE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })

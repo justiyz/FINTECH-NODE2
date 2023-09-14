@@ -32,19 +32,19 @@ export default {
     
   getAdminByEmail: `
     SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count, invalid_verification_token_count
     FROM admins
     WHERE email = $1`,
 
   getAdminByPhoneNumber: `
     SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count, invalid_verification_token_count
     FROM admins
     WHERE phone_number = $1`,
 
   getAdminByAdminId: `
     SELECT id, admin_id, role_type, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count
+      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count, invalid_verification_token_count
     FROM admins
     WHERE admin_id = $1`,
 
@@ -131,7 +131,9 @@ export default {
       UPDATE admins
       SET
       updated_at = NOW(),
-      status = $2
+      status = $2,
+      verification_token_request_count = $3,
+      invalid_verification_token_count = $4
       WHERE admin_id = $1
       RETURNING *
     `,
@@ -720,7 +722,14 @@ export default {
     SET
       updated_at = NOW(),
       status = 'deactivated'
-    WHERE admin_id = $1` 
+    WHERE admin_id = $1`,
+
+  updateAdminInvalidOtpCount: `
+    UPDATE admins
+    SET 
+      updated_at = NOW(),
+      invalid_verification_token_count = invalid_verification_token_count + 1
+    WHERE admin_id = $1`
 };
 
 

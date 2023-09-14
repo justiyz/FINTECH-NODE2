@@ -299,15 +299,16 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-new-device')
         .send({
           otp: process.env.SEEDFI_USER_ONE_VERIFICATION_OTP,
+          email: userOneProfile.email,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
         .end((err, res) => {
-          expect(res.statusCode).to.equal(403);
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_PREVIOUSLY_VERIFIED);
-          expect(res.body.error).to.equal('FORBIDDEN');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('User'));
+          expect(res.body.error).to.equal('UNAUTHORIZED');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -317,6 +318,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_ONE_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -345,6 +347,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_TWO_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_TWO_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -373,6 +376,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_THREE_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_THREE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -400,7 +404,8 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
-          otp: process.env.SEEDFI_USER_FOUR_VERIFICATION_OTP
+          otp: process.env.SEEDFI_USER_FOUR_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_FOUR_PHONE_NUMBER
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -427,6 +432,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_FIVE_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_FIVE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -455,6 +461,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_SIX_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_SIX_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -482,7 +489,8 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
-          otp: process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP
+          otp: process.env.SEEDFI_USER_SEVEN_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_SEVEN_PHONE_NUMBER
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(enums.HTTP_OK);
@@ -509,6 +517,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: '239012',
+          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -526,6 +535,7 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-phone-number')
         .send({
+          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -544,6 +554,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: '2392',
+          phone_number: process.env.SEEDFI_USER_ONE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -602,6 +613,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-phone-number')
         .send({
           otp: process.env.SEEDFI_USER_THREE_VERIFICATION_OTP,
+          phone_number: process.env.SEEDFI_USER_THREE_PHONE_NUMBER,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -1082,6 +1094,7 @@ describe('Auth', () => {
         .post('/api/v1/auth/verify-new-device')
         .send({
           otp: process.env.SEEDFI_USER_SIX_NEW_DEVICE_LOGIN_VERIFICATION_OTP,
+          email: userSixProfile.email,
           fcm_token: Hash.generateRandomString(20),
           device_token: Hash.generateRandomString(20)
         })
@@ -1409,7 +1422,8 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-reset-token')
         .send({
-          otp: '162611'
+          otp: '162611',
+          email: userOneProfile.email
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(400);
@@ -1424,7 +1438,8 @@ describe('Auth', () => {
       chai.request(app)
         .post('/api/v1/auth/verify-reset-token')
         .send({
-          otp: ''
+          otp: '',
+          email: userOneProfile.email
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(422);
@@ -1435,11 +1450,28 @@ describe('Auth', () => {
           done();
         });
     });
+    it('Should return error if user account does not exist', (done) => {
+      chai.request(app)
+        .post('/api/v1/auth/verify-reset-token')
+        .send({
+          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP,
+          email: 'user@gmsil.com'
+        })
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(enums.HTTP_UNAUTHORIZED);
+          expect(res.body).to.have.property('message');
+          expect(res.body).to.have.property('status');
+          expect(res.body.message).to.equal(enums.ACCOUNT_NOT_EXIST('User'));
+          expect(res.body.status).to.equal(enums.ERROR_STATUS);
+          done();
+        });
+    });
     it('Should successfully verify and generate reset password token', (done) => {
       chai.request(app)
         .post('/api/v1/auth/verify-reset-token')
         .send({
-          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP
+          otp: process.env.SEEDFI_USER_ONE_FORGOT_PASSWORD_OTP,
+          email: userOneProfile.email
         })
         .end((err, res) => {
           expect(res.statusCode).to.equal(200);
