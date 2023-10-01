@@ -366,4 +366,5 @@ export const FETCH_SINGLE_RESCHEDULED_CLUSTER_LOANS_CONTROLLER = 'AdminNotificat
 export const ADMIN_FETCH_USER_REWARDS_CONTROLLER = 'AdminUserController::fetchUserRewards';
 export const ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsController::resetUserRewardPoints';
 export const ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsController::resetAllUsersRewardPoints';
+export const CREATE_LOAN_APPLICATION_RECORD = 'AdminLoanController::manuallyCreateLoanRecord';
 

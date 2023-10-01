@@ -1,6 +1,6 @@
 export default {
   fetchUserDefaultBankAccount: `
-    SELECT 
+    SELECT
       id,
       user_id,
       bank_name,
@@ -17,7 +17,7 @@ export default {
     LIMIT 1`,
 
   fetchUserDefaultDebitCard: `
-    SELECT 
+    SELECT
       id,
       user_id,
       card_attached_bank,
@@ -30,7 +30,7 @@ export default {
     LIMIT 1`,
 
   checkIfUserHasPreviouslyDefaultedInLoanRepayment: `
-    SELECT 
+    SELECT
       COUNT(DISTINCT(loan_repayment_id))
     FROM non_performing_loan_trail
     WHERE user_id = $1`,
@@ -52,7 +52,7 @@ export default {
     WHERE user_id = $1`,
 
   fetchAllBlackListedBvnsBlacklistedBvn: `
-     SELECT 
+     SELECT
         id,
         first_name,
         middle_name,
@@ -63,7 +63,7 @@ export default {
 
   updateUserDeclinedDecisionLoanApplication: `
     UPDATE personal_loans
-    SET 
+    SET
         updated_at = NOW(),
         percentage_orr_score = $2,
         status = $3,
@@ -75,7 +75,7 @@ export default {
 
   updateUserManualOrApprovedDecisionLoanApplication: `
     UPDATE personal_loans
-    SET 
+    SET
         updated_at = NOW(),
         total_repayment_amount = $2,
         total_interest_amount = $3,
@@ -99,7 +99,7 @@ export default {
     RETURNING *`,
 
   fetchUserLoanDetailsByLoanId: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       user_id,
@@ -138,13 +138,13 @@ export default {
 
   updateDisbursedLoanRepaymentSchedule: `
     INSERT INTO personal_loan_payment_schedules(
-      loan_id, user_id, repayment_order, principal_payment, interest_payment, fees, 
-      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount, 
+      loan_id, user_id, repayment_order, principal_payment, interest_payment, fees,
+      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount,
       proposed_payment_date, pre_reschedule_proposed_payment_date
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 
   fetchLoanRepaymentSchedule: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       loan_id,
@@ -163,7 +163,7 @@ export default {
     ORDER BY repayment_order ASC`,
 
   fetchLoanNextRepaymentDetails: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       loan_id,
@@ -185,7 +185,7 @@ export default {
     LIMIT 1`,
 
   fetchUserUnpaidRepayments: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       loan_id,
@@ -222,7 +222,7 @@ export default {
     AND payment_at IS NULL`,
 
   existingUnpaidRepayments: `
-    SELECT 
+    SELECT
       COUNT(id)
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
@@ -241,7 +241,7 @@ export default {
     AND user_id = $2`,
 
   checkUserOnClusterLoan: `
-    SELECT 
+    SELECT
       id,
       user_id,
       cluster_id,
@@ -253,7 +253,7 @@ export default {
     LIMIT 1`,
 
   checkUserOnPersonalLoan: `
-    SELECT 
+    SELECT
       id,
       user_id,
       loan_id,
@@ -283,7 +283,7 @@ export default {
     RETURNING id, user_id, loan_id, status, loan_decision`,
 
   fetchUserDisbursementAccount: `
-    SELECT 
+    SELECT
       id,
       user_id,
       bank_name,
@@ -300,8 +300,8 @@ export default {
 
   initializeBankTransferPayment: `
     INSERT INTO paystack_payment_histories (
-        user_id, 
-        amount, 
+        user_id,
+        amount,
         payment_platform,
         transaction_reference,
         payment_type,
@@ -314,7 +314,7 @@ export default {
 
   updateUserLoanStatus: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       loan_status = $2
     WHERE user_id = $1`,
@@ -329,7 +329,7 @@ export default {
     RETURNING id, user_id, loan_id, status, loan_decision`,
 
   fetchUserActivePersonalLoans: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       user_id,
@@ -344,7 +344,7 @@ export default {
     LIMIT 1`,
 
   fetchAdminSetEnvDetails: `
-    SELECT 
+    SELECT
       id,
       env_id,
       name,
@@ -353,7 +353,7 @@ export default {
     WHERE name = $1`,
 
   fetchUserCurrentPersonalLoans: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       user_id,
@@ -369,7 +369,7 @@ export default {
     ORDER BY created_at DESC`,
 
   fetchUserCurrentClusterLoans: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       member_loan_id,
@@ -413,7 +413,7 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 
   fetchUserPersonalLoanPayments: `
-    SELECT 
+    SELECT
       id,
       payment_id,
       loan_id,
@@ -430,7 +430,7 @@ export default {
     ORDER BY created_at DESC`,
 
   fetchUserClusterLoanPayments: `
-    SELECT 
+    SELECT
       id,
       payment_id,
       loan_id,
@@ -449,7 +449,7 @@ export default {
     ORDER BY created_at DESC`,
 
   fetchUserPersonalLoanPaymentDetails: `
-    SELECT 
+    SELECT
       id,
       payment_id,
       loan_id,
@@ -465,7 +465,7 @@ export default {
     AND user_id = $2`,
 
   fetchUserClusterLoanPaymentDetails: `
-    SELECT 
+    SELECT
       id,
       payment_id,
       cluster_id,
@@ -484,28 +484,28 @@ export default {
 
   updateOfferLetter: `
     UPDATE personal_loans
-    SET 
+    SET
       updated_at = NOW(),
       offer_letter_url = $3
     WHERE loan_id = $1
     AND user_id = $2`,
 
   fetchUserPreviousPersonalLoanCounts: `
-    SELECT 
+    SELECT
       COUNT(user_id)
     FROM personal_loans
     WHERE user_id = $1
     AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'completed')`,
 
   fetchUserPreviousClusterLoanCounts: `
-    SELECT 
+    SELECT
       COUNT(user_id)
     FROM cluster_member_loans
     WHERE user_id = $1
     AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'completed')`,
 
   fetchIndividualLoanReschedulingDurations: `
-    SELECT 
+    SELECT
       id,
       extension_in_days,
       created_at,
@@ -513,7 +513,7 @@ export default {
     FROM personal_loan_rescheduling_extension`,
 
   fetchIndividualLoanReschedulingDurationById: `
-    SELECT 
+    SELECT
       id,
       extension_in_days,
       created_at,
@@ -528,11 +528,11 @@ export default {
     RETURNING *`,
 
   fetchLoanRescheduleRequest: `
-    SELECT 
+    SELECT
       id,
       reschedule_id,
-      loan_id, 
-      user_id, 
+      loan_id,
+      user_id,
       extension_in_days,
       is_accepted
     FROM personal_rescheduled_loan
@@ -577,12 +577,12 @@ export default {
     SET
       updated_at = NOW(),
       is_renegotiated = TRUE,
-      percentage_pricing_band = $2, 
-      monthly_interest = $3, 
-      monthly_repayment = $4, 
-      processing_fee = $5, 
+      percentage_pricing_band = $2,
+      monthly_interest = $3,
+      monthly_repayment = $4,
+      processing_fee = $5,
       insurance_fee = $6,
-      advisory_fee = $7, 
+      advisory_fee = $7,
       percentage_processing_fee = $8,
       percentage_insurance_fee = $9,
       percentage_advisory_fee = $10,
@@ -599,7 +599,7 @@ export default {
     SELECT
       clusters.id,
       clusters.cluster_id,
-      clusters.name, 
+      clusters.name,
       clusters.type,
       clusters.status,
       clusters.loan_status,
@@ -622,7 +622,7 @@ export default {
     SELECT
       clusters.id,
       clusters.cluster_id,
-      clusters.name, 
+      clusters.name,
       clusters.type,
       clusters.status,
       clusters.loan_status,

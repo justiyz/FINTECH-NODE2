@@ -1,6 +1,6 @@
 export default {
   fetchLoanDetailsById: `
-    SELECT 
+    SELECT
         id,
         loan_id,
         user_id,
@@ -52,7 +52,7 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5)`,
 
   fetchClusterMemberLoanDetailsById: `
-    SELECT 
+    SELECT
         id,
         cluster_id,
         member_loan_id,
@@ -90,7 +90,7 @@ export default {
     RETURNING id, member_loan_id, loan_id, cluster_id, user_id, status`,
 
   fetchLoanRepaymentBreakdown: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       user_id,
@@ -119,14 +119,14 @@ export default {
   FROM personal_loans
   LEFT JOIN users
   ON personal_loans.user_id = users.user_id
-  WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+  WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-    OR $1 IS NULL) 
-  AND (personal_loans.status = $2 OR $2 IS NULL) 
+    OR $1 IS NULL)
+  AND (personal_loans.status = $2 OR $2 IS NULL)
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   AND (users.tier = $5 OR $5 IS NULL)
   ORDER BY personal_loans.created_at DESC
@@ -140,14 +140,14 @@ export default {
     FROM personal_loans
     LEFT JOIN users
     ON personal_loans.user_id = users.user_id
-    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-      OR $1 IS NULL) 
-    AND (personal_loans.status = $2 OR $2 IS NULL) 
+      OR $1 IS NULL)
+    AND (personal_loans.status = $2 OR $2 IS NULL)
     AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     AND (users.tier = $5 OR $5 IS NULL)
   `,
@@ -167,21 +167,21 @@ export default {
   FROM personal_loans
   LEFT JOIN users
   ON personal_loans.user_id = users.user_id
-  WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+  WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
     OR $1 IS NULL)
-  AND (personal_loans.status = $2 OR $2 IS NULL) 
+  AND (personal_loans.status = $2 OR $2 IS NULL)
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   AND (users.tier = $5 OR $5 IS NULL)
   ORDER BY personal_loans.created_at DESC
    `,
-      
+
   fetchRepaidLoans: `
-      SELECT 
+      SELECT
           personal_loan_payment_schedules.id,
           personal_loan_payment_schedules.loan_repayment_id,
           personal_loan_payment_schedules.loan_id,
@@ -198,14 +198,14 @@ export default {
       ON personal_loan_payment_schedules.user_id = users.user_id
       LEFT JOIN personal_loans
       ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
-      WHERE personal_loan_payment_schedules.status = 'paid' 
-      AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      WHERE personal_loan_payment_schedules.status = 'paid'
+      AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL)  
+        OR $1 IS NULL)
       AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
       AND (users.tier = $4 OR $4 IS NULL)
       ORDER BY personal_loan_payment_schedules.payment_at DESC
@@ -219,20 +219,20 @@ export default {
     FROM personal_loan_payment_schedules
     LEFT JOIN users
     ON personal_loan_payment_schedules.user_id = users.user_id
-    WHERE personal_loan_payment_schedules.status = 'paid' 
-    AND ((TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    WHERE personal_loan_payment_schedules.status = 'paid'
+    AND ((TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1))
-      OR $1 IS NULL)  
+      OR $1 IS NULL)
     AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
     AND (users.tier = $4 OR $4 IS NULL)
   `,
-  
+
   fetchAllRepaidLoans: `
-   SELECT 
+   SELECT
       personal_loan_payment_schedules.id,
       personal_loan_payment_schedules.loan_repayment_id,
       personal_loan_payment_schedules.loan_id,
@@ -249,22 +249,22 @@ export default {
   ON personal_loan_payment_schedules.user_id = users.user_id
   LEFT JOIN personal_loans
   ON personal_loan_payment_schedules.loan_id = personal_loans.loan_id
-  WHERE personal_loan_payment_schedules.status = 'paid' 
-  AND personal_loans.loan_id = personal_loan_payment_schedules.loan_id 
-  AND (((TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+  WHERE personal_loan_payment_schedules.status = 'paid'
+  AND personal_loans.loan_id = personal_loan_payment_schedules.loan_id
+  AND (((TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)))
-    OR $1 IS NULL) 
+    OR $1 IS NULL)
   AND ((personal_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
   AND (users.tier = $4 OR $4 IS NULL)
-  ORDER BY personal_loan_payment_schedules.payment_at DESC 
+  ORDER BY personal_loan_payment_schedules.payment_at DESC
   `,
 
   fetchRescheduledLoans: `
-      SELECT 
+      SELECT
         personal_loans.id,
         personal_loans.loan_id,
         personal_loans.user_id,
@@ -272,21 +272,21 @@ export default {
         users.tier,
         personal_loans.amount_requested AS loan_amount,
         personal_loans.reschedule_extension_days AS loan_extention_duration,
-        personal_loans.status 
+        personal_loans.status
       FROM personal_loans
-      LEFT JOIN users 
+      LEFT JOIN users
       ON personal_loans.user_id = users.user_id
       WHERE personal_loans.reschedule_extension_days IS NOT NULL
       AND personal_loans.is_rescheduled = true
-      AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
-      AND (personal_loans.status = $2 OR $2 IS NULL) 
-      AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+        OR $1 IS NULL)
+      AND (personal_loans.status = $2 OR $2 IS NULL)
+      AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
       AND (users.tier = $5 OR $5 IS NULL)
       ORDER BY personal_loans.created_at DESC
       OFFSET $6
@@ -301,20 +301,20 @@ export default {
   ON personal_loans.user_id = users.user_id
   WHERE personal_loans.reschedule_extension_days IS NOT NULL
     AND personal_loans.is_rescheduled = true
-    AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-    OR $1 IS NULL) 
-  AND (personal_loans.status = $2 OR $2 IS NULL) 
+    OR $1 IS NULL)
+  AND (personal_loans.status = $2 OR $2 IS NULL)
   AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   AND (users.tier = $5 OR $5 IS NULL)
   `,
 
   fetchAllRescheduledLoans: `
-    SELECT 
+    SELECT
         personal_loans.id,
         personal_loans.loan_id,
         personal_loans.user_id,
@@ -322,29 +322,29 @@ export default {
         users.tier,
         personal_loans.amount_requested AS loan_amount,
         personal_loans.reschedule_extension_days AS loan_duration,
-        personal_loans.status 
+        personal_loans.status
     FROM personal_loans
-    LEFT JOIN users 
+    LEFT JOIN users
     ON personal_loans.user_id = users.user_id
     WHERE personal_loans.reschedule_extension_days IS NOT NULL
     AND personal_loans.is_rescheduled = true
-    AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-      OR $1 IS NULL) 
-    AND (personal_loans.status = $2 OR $2 IS NULL) 
+      OR $1 IS NULL)
+    AND (personal_loans.status = $2 OR $2 IS NULL)
     AND ((personal_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     AND (users.tier = $5 OR $5 IS NULL)
-    ORDER BY personal_loans.created_at DESC 
+    ORDER BY personal_loans.created_at DESC
   `,
 
   fetchSingleRescheduledLoanDetails: `
-      SELECT 
+      SELECT
           personal_loans.loan_id,
-          personal_loans.user_id,      
+          personal_loans.user_id,
           TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
           users.tier,
           users.status,
@@ -375,7 +375,7 @@ export default {
   `,
 
   fetchNewRepaymentBreakdown: `
-    SELECT 
+    SELECT
         id,
         loan_repayment_id,
         loan_id,
@@ -394,7 +394,7 @@ export default {
       SELECT
       	cluster_loans.id,
         cluster_loans.loan_id,
-        cluster_loans.cluster_id,      
+        cluster_loans.cluster_id,
         cluster_loans.cluster_name,
         cluster_loans.total_amount_requested As loan_amount,
         COUNT(cluster_member_loans.member_loan_id) As total_member,
@@ -424,7 +424,7 @@ export default {
   fetchAllClusterLoans: `
       SELECT
         cluster_loans.id,
-        cluster_loans.loan_id, 
+        cluster_loans.loan_id,
         cluster_loans.cluster_id,
         cluster_loans.cluster_name,
         cluster_loans.total_repayment_amount As Loan_amount,
@@ -443,9 +443,9 @@ export default {
 `,
 
   fetchClusterLoanDetails: `
-      SELECT 
+      SELECT
             clusters.id,
-            clusters.cluster_id,      
+            clusters.cluster_id,
             clusters.name,
             clusters.type,
             cluster_member_loans.member_loan_id,
@@ -460,16 +460,16 @@ export default {
       FROM clusters
       LEFT JOIN cluster_member_loans
       ON clusters.cluster_id = cluster_member_loans.cluster_id
-      LEFT JOIN cluster_loans 
+      LEFT JOIN cluster_loans
       ON clusters.cluster_id = cluster_loans.cluster_id
-      WHERE cluster_member_loans.member_loan_id = $1 
+      WHERE cluster_member_loans.member_loan_id = $1
       GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
   `,
   fetchClusterLoanDetailsByLoanId: `
-        SELECT 
+        SELECT
           clusters.id,
-          clusters.cluster_id,      
+          clusters.cluster_id,
           clusters.name,
           clusters.type,
           cluster_loans.loan_id,
@@ -481,9 +481,9 @@ export default {
           cluster_loans.sharing_type AS type_of_repayment,
           cluster_loans.total_amount_requested AS loan_amount
       FROM clusters
-      LEFT JOIN cluster_loans 
+      LEFT JOIN cluster_loans
       ON clusters.cluster_id = cluster_loans.cluster_id
-      WHERE cluster_loans.loan_id = $1 
+      WHERE cluster_loans.loan_id = $1
       GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
   `,
 
@@ -510,7 +510,7 @@ export default {
 `,
 
   fetchMembersDetailsOfAClusterLoan: `
-        SELECT 
+        SELECT
             users.id,
             users.user_id,
             users.tier,
@@ -559,7 +559,7 @@ export default {
 `,
 
   fetchClusterLoanDetailsById: `
-      SELECT 
+      SELECT
           id,
           cluster_id,
           loan_id,
@@ -585,7 +585,7 @@ export default {
       WHERE loan_id = $1
 `,
   fetchClusterLoanDetailsOfEachUser: `
-        SELECT 
+        SELECT
             cluster_member_loans.id,
             cluster_member_loans.cluster_id,
             cluster_member_loans.loan_id,
@@ -634,12 +634,12 @@ export default {
     FROM cluster_member_loans
     LEFT JOIN users
     ON cluster_member_loans.user_id = users.user_id
-    WHERE cluster_member_loans.status = 'in review' 
-        AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    WHERE cluster_member_loans.status = 'in review'
+        AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL)
         AND (cluster_member_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_member_loans.status = $2 OR $2 IS NULL)
@@ -656,11 +656,11 @@ export default {
     LEFT JOIN users
     ON cluster_member_loans.user_id = users.user_id
     WHERE cluster_member_loans.status = 'in review'
-    AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+    AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+    OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
     OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
     OR $1 IS NULL)
     AND (cluster_member_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_member_loans.status = $2 OR $2 IS NULL)
@@ -683,12 +683,12 @@ export default {
         FROM cluster_member_loans
         LEFT JOIN users
         ON cluster_member_loans.user_id = users.user_id
-        WHERE cluster_member_loans.status = 'in review' 
-        AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        WHERE cluster_member_loans.status = 'in review'
+        AND (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
         OR $1 IS NULL)
         AND (cluster_member_loans.cluster_name ILIKE TRIM($1) OR $1 IS NULL) AND (cluster_member_loans.status = $2 OR $2 IS NULL)
@@ -720,7 +720,7 @@ export default {
  `,
 
   fetchRescheduledClusterLoans: `
-        SELECT 
+        SELECT
               cluster_member_loans.id,
               cluster_member_loans.loan_id,
               cluster_member_loans.user_id,
@@ -732,22 +732,22 @@ export default {
               to_char(DATE (cluster_member_loans.reschedule_at)::date, 'Mon DD YYYY') As reschedule_date,
               cluster_member_loans.loan_tenor_in_months AS loan_duration,
               cluster_member_loans.reschedule_extension_days AS loan_extention_duration,
-              cluster_member_loans.status 
+              cluster_member_loans.status
         FROM cluster_member_loans
-        LEFT JOIN users 
+        LEFT JOIN users
         ON  cluster_member_loans.user_id = users.user_id
         WHERE cluster_member_loans.reschedule_extension_days IS NOT NULL
         AND  cluster_member_loans.is_rescheduled = true
-        AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
-        AND ( cluster_member_loans.status = $2 OR $2 IS NULL) AND 
+        OR $1 IS NULL)
+        AND ( cluster_member_loans.status = $2 OR $2 IS NULL) AND
         ((cluster_member_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-        GROUP BY 1,2,3,4,5,6,7,8,9,10 
+        GROUP BY 1,2,3,4,5,6,7,8,9,10
         ORDER BY cluster_member_loans.created_at DESC
         OFFSET $5
         LIMIT $6
@@ -756,24 +756,24 @@ export default {
   rescheduledClusterLoansCount: `
     SELECT COUNT(loan_id) AS total_count
     FROM cluster_member_loans
-    LEFT JOIN users 
+    LEFT JOIN users
     ON  cluster_member_loans.user_id = users.user_id
     WHERE cluster_member_loans.reschedule_extension_days IS NOT NULL
         AND  cluster_member_loans.is_rescheduled = true
-        AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
-        AND ( cluster_member_loans.status = $2 OR $2 IS NULL) 
-        AND 
+        OR $1 IS NULL)
+        AND ( cluster_member_loans.status = $2 OR $2 IS NULL)
+        AND
         ((cluster_member_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
  `,
 
   fetchAllClusterRescheduledLoans: `
-        SELECT 
+        SELECT
               cluster_member_loans.id,
               cluster_member_loans.loan_id,
               cluster_member_loans.user_id,
@@ -785,23 +785,23 @@ export default {
               to_char(DATE (cluster_member_loans.reschedule_at)::date, 'Mon DD YYYY') As reschedule_date,
               cluster_member_loans.loan_tenor_in_months AS loan_duration,
               cluster_member_loans.reschedule_extension_days AS loan_extention_duration,
-              cluster_member_loans.status 
+              cluster_member_loans.status
         FROM cluster_member_loans
-        LEFT JOIN users 
+        LEFT JOIN users
         ON  cluster_member_loans.user_id = users.user_id
         WHERE cluster_member_loans.reschedule_extension_days IS NOT NULL
         AND  cluster_member_loans.is_rescheduled = true
-        AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        AND(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
+        OR $1 IS NULL)
         AND ( cluster_member_loans.status = $2 OR $2 IS NULL)
-        AND 
+        AND
         ((cluster_member_loans.reschedule_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
-        GROUP BY 1,2,3,4,5,6,7,8,9,10 
+        GROUP BY 1,2,3,4,5,6,7,8,9,10
         ORDER BY cluster_member_loans.created_at DESC
 `,
 
@@ -819,7 +819,7 @@ export default {
               round(CAST(cluster_member_loans.total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
               CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name) AS name,
               users.tier,
-              users.status     
+              users.status
         FROM cluster_member_loans
         LEFT JOIN users
         ON cluster_member_loans.user_id = users.user_id
@@ -827,7 +827,7 @@ export default {
       `,
 
   fetchNewClusterRepaymentBreakdown: `
-    SELECT 
+    SELECT
         id,
         loan_repayment_id,
         loan_id,
@@ -844,7 +844,7 @@ export default {
   `,
 
   fetchClusterLoanRepayments: `
-      SELECT 
+      SELECT
           TRIM(CONCAT(users.first_name, ' ', users.last_name)) As name,
           cluster_member_loan_payment_schedules.id,
           cluster_member_loan_payment_schedules.loan_repayment_id,
@@ -861,15 +861,15 @@ export default {
       FROM cluster_member_loan_payment_schedules
       LEFT JOIN cluster_loans ON cluster_member_loan_payment_schedules.loan_id = cluster_loans.loan_id
       LEFT JOIN users ON cluster_member_loan_payment_schedules.user_id = users.user_id
-      WHERE cluster_member_loan_payment_schedules.status = 'paid' AND 
-      (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      WHERE cluster_member_loan_payment_schedules.status = 'paid' AND
+      (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
       OR $1 IS NULL)
-      AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
+      AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
       ORDER BY cluster_member_loan_payment_schedules.payment_at DESC
       OFFSET $4
       LIMIT $5
@@ -880,15 +880,15 @@ export default {
       FROM cluster_member_loan_payment_schedules
       LEFT JOIN cluster_loans ON cluster_member_loan_payment_schedules.loan_id = cluster_loans.loan_id
       LEFT JOIN users ON cluster_member_loan_payment_schedules.user_id = users.user_id
-      WHERE cluster_member_loan_payment_schedules.status = 'paid' AND 
-      (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      WHERE cluster_member_loan_payment_schedules.status = 'paid' AND
+      (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+      OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
       OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-      OR $1 IS NULL) 
-      AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
+      OR $1 IS NULL)
+      AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
 `,
 
   fetchAllClusterLoanRepayment: `
@@ -909,15 +909,15 @@ export default {
             FROM cluster_member_loan_payment_schedules
             LEFT JOIN cluster_loans ON cluster_member_loan_payment_schedules.loan_id = cluster_loans.loan_id
             LEFT JOIN users ON cluster_member_loan_payment_schedules.user_id = users.user_id
-        WHERE cluster_member_loan_payment_schedules.status = 'paid' AND 
-        (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+        WHERE cluster_member_loan_payment_schedules.status = 'paid' AND
+        (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
-        AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL)) 
+        OR $1 IS NULL)
+        AND ((cluster_member_loan_payment_schedules.payment_at::DATE BETWEEN $2::DATE AND $3::DATE) OR ($2 IS NULL AND $3 IS NULL))
         ORDER BY cluster_member_loan_payment_schedules.repayment_order
 `,
 
@@ -978,7 +978,44 @@ export default {
         ON cluster_member_loans.user_id = users.user_id
         WHERE cluster_member_loans.member_loan_id = $1
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
-`
+`,
+  createDisbursedLoanRepaymentSchedule: `
+    INSERT INTO personal_loan_payment_schedules(
+      loan_id, user_id, repayment_order, principal_payment, interest_payment, fees,
+      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount,
+      proposed_payment_date, pre_reschedule_proposed_payment_date
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+
+  manuallyInitiatePersonalLoanApplication: `
+    INSERT INTO personal_loans(
+        user_id,
+        amount_requested,
+        loan_reason,
+        loan_tenor_in_months,
+        total_repayment_amount,
+        total_interest_amount,
+        percentage_pricing_band,
+        percentage_processing_fee,
+        percentage_insurance_fee,
+        percentage_advisory_fee,
+        monthly_interest,
+        processing_fee,
+        insurance_fee,
+        advisory_fee,
+        monthly_repayment,
+        loan_decision,
+        is_loan_disbursed,
+        loan_disbursed_at,
+        total_outstanding_amount,
+        status,
+        is_rescheduled,
+        initial_amount_requested,
+        initial_loan_tenor_in_months
+        ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+        $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+        )
+        RETURNING *`
 };
 
-  
+
