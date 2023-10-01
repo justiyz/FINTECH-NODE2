@@ -133,11 +133,11 @@ export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is auto
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER = 'Loan application not existing for cluster';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
-export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_STATUS = 
+export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_STATUS =
 'loan application disbursement cannot be processed because cluster loan application status is no longer pending';
-export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_DECISIONS = 
+export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_DECISIONS =
 'loan application disbursement cannot be processed till all cluster members loan decisions are recorded';
-export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_NOT_MORE_THAN_ONE_QUALIFIED_MEMBER = 
+export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_NOT_MORE_THAN_ONE_QUALIFIED_MEMBER =
 'loan application disbursement cannot be processed till all cluster members loan decisions are recorded';
 export const ALLOCATED_AMOUNT_EXCEEDING_TOTAL_AMOUNT = (amount) => `loan allocated amount will exceed cluster total loan, ${amount} is still available for allocation`;
 export const LOAN_RESCHEDULING_NOT_ALLOWED = (count) => `User has rescheduled this loan ${count} time(s), thus rescheduling not allowed`;
@@ -376,3 +376,5 @@ export const DELETE_NOTIFICATION = 'Notification successfully deleted';
 export const CLUSTER_LOAN_REPAYMENTS_FETCHED_SUCCESSFULLY = 'Cluster loan repayment(s) fetched successfully.';
 export const USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY = 'User Rewards fetched successfully.';
 export const REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY = 'Claimed points set to zero successfully';
+export const MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN = 'User loan application was created by the admin';
+export const FAILED_TO_CREATE_MANUAL_LOAN_RECORD = 'Admin could not create the loan record for the user';
