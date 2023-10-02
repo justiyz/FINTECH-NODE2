@@ -131,7 +131,7 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
     scale: 0.5,
     printBackground: true
   });
-  
+
   // upload to Amazon s3
   const url = `files/user-documents/${user.user_id}/loan-offer-letter/${loanDetails.loan_id}.pdf`;
   const payload = Buffer.from(document, 'binary');

@@ -5,7 +5,7 @@ import loanPayload from '../../lib/payloads/lib.payload.loans';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
-import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import { processAnyData, processNoneData, processOneOrNoneData } from '../services/services.db';
 import MailService from '../services/services.email';
 import { sendPushNotification, sendUserPersonalNotification, sendClusterNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
@@ -13,7 +13,15 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
-
+import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from '../../../users/lib/utils/lib.util.helpers';
+import { userActivityTracking } from '../../../users/lib/monitor';
+import {
+  FAILED_TO_CREATE_MANUAL_LOAN_RECORD,
+  LOAN_APPLICATION_MANUAL_DECISION,
+  MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN
+} from "../../../users/lib/enums/lib.enum.messages";
+import moment from 'moment-timezone/moment-timezone-utils';
+// import updateDisbursedLoanRepaymentSchedule from
 /**
  * approve loan applications manually by admin
  * @param {Request} req - The request from the endpoint.
@@ -33,7 +41,7 @@ export const approveLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin approval recorded approveLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval('individual'), loanApplicant.fcm_token);
-    sendUserPersonalNotification(loanApplicant, 'Approved loan application', 
+    sendUserPersonalNotification(loanApplicant, 'Approved loan application',
       PersonalNotifications.approvedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'approved-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveLoanApplication.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName, 'individual'));
@@ -65,29 +73,29 @@ export const approveClusterMemberLoanApplication = async(req, res, next) => {
     const isClusterAdmin = loanApplication.is_loan_initiator ? true : false;
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched approveClusterMemberLoanApplication.admin.controllers.loan.js`);
     const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus, [ member_loan_id, 'approved', null ]);
-    await processOneOrNoneData(loanQueries.updateAdminClusterLoanApprovalTrail, 
+    await processOneOrNoneData(loanQueries.updateAdminClusterLoanApprovalTrail,
       [ loanApplication.loan_id, member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: cluster loan status updated and admin approval recorded 
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: cluster loan status updated and admin approval recorded
     approveClusterMemberLoanApplication.admin.controllers.loan.js`);
     const outstandingLoanDecision = await processAnyData(clusterQueries.checkForOutstandingClusterLoanDecision, [ loanApplication.loan_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if loan can be disbursed by cluster admin 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if loan can be disbursed by cluster admin
     approveClusterMemberLoanApplication.admin.controllers.loan.js`);
     if (outstandingLoanDecision.length <= 0) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan can now be disbursed by cluster admin 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan can now be disbursed by cluster admin
       approveClusterMemberLoanApplication.admin.controllers.loan.js`);
       await processOneOrNoneData(clusterQueries.updateGeneralLoanApplicationCanDisburseLoan, [ loanApplication.loan_id ]);
-      sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan', 
+      sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, 'Cluster loan decisions concluded, admin can proceed to disburse loan',
         'loan-application-can-disburse', {});
-      sendMulticastPushNotification('Cluster loan decisions concluded, admin can proceed to disburse loan', clusterMembersToken, 
+      sendMulticastPushNotification('Cluster loan decisions concluded, admin can proceed to disburse loan', clusterMembersToken,
         'conclude-cluster-loan');
     }
     await MailService('Loan application approved', 'approvedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationApproval('cluster'), loanApplicant.fcm_token);
-    sendUserPersonalNotification(loanApplicant, 'Approved loan application', 
+    sendUserPersonalNotification(loanApplicant, 'Approved loan application',
       PersonalNotifications.approvedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'approved-loan', { ...loanApplication });
-    sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan approved by admin`, 
+    sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan approved by admin`,
       'loan-application-approved', {});
-    sendMulticastPushNotification(`${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan approved by admin`, clusterMembersToken, 
+    sendMulticastPushNotification(`${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan approved by admin`, clusterMembersToken,
       'admin-cluster-loan-decision');
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant approveClusterMemberLoanApplication.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 21, 'success', descriptions.manually_loan_approval(adminName, 'cluster'));
@@ -119,7 +127,7 @@ export const declineLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan status updated and admin rejection recorded declineLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval('individual'), loanApplicant.fcm_token);
-    sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
+    sendUserPersonalNotification(loanApplicant, 'Declined loan application',
       PersonalNotifications.declinedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'declined-loan', { ...loanApplication });
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineLoanApplication.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_disapproval(adminName, 'individual'));
@@ -150,19 +158,19 @@ export const declineClusterMemberLoanApplication = async(req, res, next) => {
     const clusterMembersToken = await Helpers.collateUsersFcmTokensExceptConcernedUser(clusterMembers, loanApplicant.user_id);
     const isClusterAdmin = loanApplication.is_loan_initiator ? true : false;
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan applicant details fetched declineClusterMemberLoanApplication.admin.controllers.loan.js`);
-    const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus, 
+    const updatedLoanApplication = await processOneOrNoneData(loanQueries.updateClusterMemberLoanStatus,
       [ member_loan_id, 'declined', rejection_reason.trim().toLowerCase() ]);
-    await processOneOrNoneData(loanQueries.updateAdminClusterLoanApprovalTrail, 
+    await processOneOrNoneData(loanQueries.updateAdminClusterLoanApprovalTrail,
       [ loanApplication.loan_id, member_loan_id, loanApplication.user_id, decision, admin.admin_id  ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: cluster loan status updated and admin rejection recorded 
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: cluster loan status updated and admin rejection recorded
     declineClusterMemberLoanApplication.admin.controllers.loan.js`);
     await MailService('Loan application declined', 'declinedLoan', { ...loanApplicant, requested_amount: loanApplication.amount_requested });
     await sendPushNotification(loanApplicant.user_id, PushNotifications.userLoanApplicationDisapproval('cluster'), loanApplicant.fcm_token);
-    sendUserPersonalNotification(loanApplicant, 'Declined loan application', 
+    sendUserPersonalNotification(loanApplicant, 'Declined loan application',
       PersonalNotifications.declinedLoanApplicationNotification({ requested_amount: loanApplication.amount_requested }), 'declined-loan', { ...loanApplication });
-    sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan declined by admin`, 
+    sendClusterNotification(loanApplicant, cluster, { is_admin: isClusterAdmin }, `${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan declined by admin`,
       'loan-application-declined', {});
-    sendMulticastPushNotification(`${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan declined by admin`, clusterMembersToken, 
+    sendMulticastPushNotification(`${loanApplicant.first_name} ${loanApplicant.last_name} cluster loan declined by admin`, clusterMembersToken,
       'admin-cluster-loan-decision');
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: notification sent to loan applicant declineClusterMemberLoanApplication.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 22, 'success', descriptions.manually_loan_disapproval(adminName, 'cluster'));
@@ -196,11 +204,11 @@ export const loanApplicationDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: loan repayment breakdown fetched loanApplicationDetails.admin.controllers.loan.js`);
     const data = {
       loan_id,
-      loan_applicant: { 
+      loan_applicant: {
         name: `${loanApplicant.first_name} ${loanApplicant.last_name}`,
         status: loanApplicant.status,
         tier: loanApplicant.tier,
-        image_url: loanApplicant.image_url 
+        image_url: loanApplicant.image_url
       },
       loan_details: loanApplication,
       orr_break_down: orrScoreBreakdown,
@@ -238,20 +246,20 @@ export const fetchLoans = async(req, res, next) => {
       };
       await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'individual loan applications'));
       return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
-      
+
     }
     const payload = loanPayload.fetchLoans(query);
     const [ loans, [ loansCount ] ] = await Promise.all([
       processAnyData(loanQueries.fetchLoans, payload),
       processAnyData(loanQueries.getLoansCount, payload)
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched loans from the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched loans from the DB
     fetchLoans.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(loansCount.total_count),
       total_pages: Helpers.calculatePages(Number(loansCount.total_count), Number(req.query.per_page) || 10),
-      loans 
+      loans
     };
     return ApiResponse.success(res, enums.LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
@@ -291,14 +299,14 @@ export const fetchRepaidLoans = async(req, res, next) => {
       processAnyData(loanQueries.fetchRepaidLoans, payload),
       processAnyData(loanQueries.getRepaidLoansCount, payload)
     ]);
-    
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched repaid loans from the DB 
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched repaid loans from the DB
     fetchRepaidLoans.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(repaidLoansCount.total_count),
       total_pages: Helpers.calculatePages(Number(repaidLoansCount.total_count), Number(req.query.per_page) || 10),
-      repaidLoans 
+      repaidLoans
     };
     return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
 
@@ -339,8 +347,8 @@ export const fetchRescheduledLoans = async(req, res, next) => {
       processAnyData(loanQueries.fetchRescheduledLoans, payload),
       processAnyData(loanQueries.fetchRescheduledLoansCount, payload)
     ]);
-    
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched rescheduled loans from the DB 
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched rescheduled loans from the DB
     fetchRescheduledLoans.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
@@ -379,7 +387,7 @@ export const fetchSingleUserRescheduledLoan = async(req, res, next) => {
       userRescheduleDetails: userRescheduledDetails,
       newRepayment: newRepaymentBreakdown
     };
-    return ApiResponse.success(res, enums.RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data); 
+    return ApiResponse.success(res, enums.RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.RESCHEDULED_LOAN_DETAILS_CONTROLLER;
     logger.error(`fetching recheduled loan details failed:::${enums.RESCHEDULED_LOAN_DETAILS_CONTROLLER}`, error.message);
@@ -411,14 +419,14 @@ export const fetchClusterLoans = async(req, res, next) => {
       };
       await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'cluster loan applications'));
       return ApiResponse.success(res, enums.CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
-      
+
     }
     const payload = loanPayload.fetchClusterLoans(query);
     const [ clusterLoans, [ clusterLoansCount ] ] = await Promise.all([
       processAnyData(loanQueries.fetchClusterLoans, payload),
       processAnyData(loanQueries.fetchClusterLoanCount, payload)
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched cluster loans from the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched cluster loans from the DB
     fetchClusterLoans.admin.controllers.loan.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
@@ -529,14 +537,14 @@ export const fetchInReviewClusterLoans = async(req, res, next) => {
       };
       await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'in-review cluster loan applications'));
       return ApiResponse.success(res, enums.IN_REVIEW_CLUSTER_LOAN_APPLICATIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
-      
+
     }
     const payload = loanPayload.fetchInReviewClusterLoans(query);
     const [ inReviewClusterLoans, [ inReviewClusterLoansCount ] ] = await Promise.all([
       processAnyData(loanQueries.fetchInReviewClusterLoans, payload),
       processAnyData(loanQueries.fetchInReviewClusterLoanCount, payload)
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched cluster loans from the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched cluster loans from the DB
     fetchInReviewClusterLoans.admin.controllers.loan.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
@@ -566,7 +574,7 @@ export const fetchSingleMemberInReviewLoanDetails = async(req, res, next) => {
     const { admin, params: { member_loan_id } } = req;
     const clusterDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetails, [ member_loan_id ]);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched details a particular member of a cluster loan from the DB
     fetchSingleMemberInReviewLoanDetails.admin.controllers.loan.js`);
     const memberLoanId = loanDetails.member_loan_id;
     const result = loanDetails.percentage_orr_score === null ? {  } : await loanOrrScoreBreakdown(loanDetails.user_id, memberLoanId);
@@ -578,8 +586,8 @@ export const fetchSingleMemberInReviewLoanDetails = async(req, res, next) => {
       clusterDetails,
       orr_break_down: orrScoreBreakdown
     };
-    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data); 
-    
+    return  ApiResponse.success(res, enums.LOAN_APPLICATION_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+
   } catch (error) {
     error.label = enums.FETCH_DETAILS_OF_A_CLUSTER_MEMBER_CONTROLLER;
     logger.error(`fetching details of a cluster member failed:::${enums.FETCH_DETAILS_OF_A_CLUSTER_MEMBER_CONTROLLER}`, error.message);
@@ -617,14 +625,14 @@ export const fetchClusterMembersLoanRepayment = async(req, res, next) => {
       processAnyData(loanQueries.fetchClusterLoanRepayments, payload),
       processAnyData(loanQueries.fetchClusterLoanRepaymentCount, payload)
     ]);
-    
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched repaid loans from the DB 
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched repaid loans from the DB
     fetchClusterMembersLoanRepayment.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(repaidClusterLoansCount.total_count),
       total_pages: Helpers.calculatePages(Number(repaidClusterLoansCount.total_count), Number(req.query.per_page) || 10),
-      repaidClusterLoans 
+      repaidClusterLoans
     };
     return ApiResponse.success(res, enums.REPAID_LOANS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
 
@@ -636,7 +644,7 @@ export const fetchClusterMembersLoanRepayment = async(req, res, next) => {
 };
 
 /**
- * fetches user's repayment details 
+ * fetches user's repayment details
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
@@ -648,7 +656,7 @@ export const fetchUserClusterLoanRepaymentDetails = async(req, res, next) => {
   try {
     const { params: { member_loan_id }, admin } = req;
     const clusterLoanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanRepaymentDetailsOfAUser, member_loan_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched cluster loan details of a user successfully 
+    logger.info(`${enums.CURRENT_TIME_STAMP}  ${admin.admin_id}:::Info: successfully fetched cluster loan details of a user successfully
      fetchUserClusterLoanRepaymentDetails.admin.controllers.loan.js`);
     const loanDetails = await processOneOrNoneData(loanQueries.fetchClusterLoanDetailsOfEachUser, [ member_loan_id ]);
     const memberLoanId = loanDetails.member_loan_id;
@@ -701,8 +709,8 @@ export const fetchRescheduledClusterLoans = async(req, res, next) => {
       processAnyData(loanQueries.fetchRescheduledClusterLoans, payload),
       processAnyData(loanQueries.rescheduledClusterLoansCount, payload)
     ]);
-    
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched rescheduled loans from the DB 
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched rescheduled loans from the DB
     fetchRescheduledClusterLoans.admin.controllers.roles.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
@@ -743,10 +751,157 @@ export const fetchSingleClusterMemberRescheduledLoan = async(req, res, next) => 
       userRescheduleDetails: memberRescheduledDetails,
       newRepayment: newRepaymentBreakdown
     };
-    return ApiResponse.success(res, enums.RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data); 
+    return ApiResponse.success(res, enums.RESCHEDULED_LOAN_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_SINGLE_RESCHEDULED_CLUSTER_LOANS_CONTROLLER;
     logger.error(`fetching single recheduled cluster loan details failed:::${enums.FETCH_SINGLE_RESCHEDULED_CLUSTER_LOANS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
+
+
+/**
+ * Manually create loan records for loans that have been issued offline
+ *   Function Name: ManuallyInitiatePersonalLoanApplication
+ *   Steps (1 -8)
+ *   1. Get loan application details (user_id, amount, amount, loan_reason, duration_in_months, duration_in_months)
+ *   2. Calculate totalFees (Processing Fee, Insurance Fee, and Advisory Fee)
+ *   3. Calculate totalMonthlyRepayment ( Monthly_repayment * laon_duration_in_months
+ *   4. Calculate totalInterestAmount ()
+ *   5. Calculate totalAmountRepayable (totalmonthly repayment + total fees)
+ *   6. Generate and process offer letter
+ *   7. Approve loan
+ *   8. Return success message
+ */
+
+// Function to calculate total fees
+function calculateTotalFees(processingFee, insuranceFee, advisoryFee) {
+  return parseFloat(processingFee) + parseFloat(insuranceFee) + parseFloat(advisoryFee);
+}
+
+// Function to calculate total monthly repayment
+function calculateTotalMonthlyRepayment(monthlyRepayment, durationInMonths) {
+  return parseFloat(monthlyRepayment) * Number(durationInMonths);
+}
+
+// Function to calculate total interest amount
+function calculateTotalInterestAmount(totalMonthlyRepayment, loanAmount) {
+  return parseFloat(totalMonthlyRepayment) - parseFloat(loanAmount);
+}
+
+// Function to calculate total amount repayable
+function calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees) {
+  return parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+}
+
+// Function to create loan application
+async function createLoanApplication(userDetails, body) {
+  const totalFees = calculateTotalFees(body.processing_fee, body.insurance_fee, body.advisory_fee);
+  const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
+  const totalInterestAmount = calculateTotalInterestAmount(totalMonthlyRepayment, body.amount);
+  const totalAmountRepayable = calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
+
+  const loanApplicationDetails = await processOneOrNoneData(loanQueries.manuallyInitiatePersonalLoanApplication, [
+    userDetails.user_id,
+    parseFloat(body.amount),
+    body.loan_reason,
+    body.duration_in_months,
+    totalAmountRepayable,
+    totalInterestAmount,
+    body.percentage_pricing_band,
+    body.percentage_processing_fee,
+    body.percentage_insurance_fee,
+    body.percentage_advisory_fee,
+    body.monthly_interest,
+    body.processing_fee,
+    body.insurance_fee,
+    body.advisory_fee,
+    body.monthly_repayment,
+    body.loan_decision,
+    body.is_loan_disbursed,
+    body.loan_disbursed_at,
+    body.total_outstanding_amount,
+    body.status,
+    false,
+    body.initial_amount_requested,
+    body.initial_loan_tenor_in_months
+  ]);
+
+  return loanApplicationDetails;
+}
+
+// Function to create repayment schedule
+async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
+  const repaymentSchedule = await generateLoanRepaymentSchedule(loanApplicationDetails, userDetails.user_id);
+  for (const schedule of repaymentSchedule) {
+    await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [
+      schedule.loan_id,
+      schedule.user_id,
+      schedule.repayment_order,
+      schedule.principal_payment,
+      schedule.interest_payment,
+      schedule.fees,
+      schedule.total_payment_amount,
+      schedule.pre_payment_outstanding_amount,
+      schedule.post_payment_outstanding_amount,
+      schedule.proposed_payment_date,
+      schedule.proposed_payment_date
+    ]);
+  }
+  return repaymentSchedule;
+}
+
+// Function to prepare and return the response data
+function prepareResponseData(loanApplicationDetails, body, totalMonthlyRepayment, totalAmountRepayable, totalInterestAmount, repaymentSchedule, userDetails) {
+  return {
+    loan_application_id: loanApplicationDetails.loan_id,
+    loan_duration_in_month: body.duration_in_months,
+    loan_amount: body.amount,
+    fee: {
+      processing_fee: body.processing_fee,
+      insurance_fee: body.insurance_fee,
+      advisory_fee: body.advisory_fee
+    },
+    monthly_repayment: totalMonthlyRepayment,
+    total_amount_repayable: totalAmountRepayable,
+    total_interest_amount: totalInterestAmount,
+    repayment_data: repaymentSchedule
+  };
+}
+
+// Main function
+export const manuallyInitiatePersonalLoanApplication = async(req, res, next) => {
+  try {
+    const { body } = req;
+    const [ userDetails ] = await processAnyData(
+      userQueries.getUserByUserId, [ req.body.user_id ]);
+
+    const loanApplicationDetails = await createLoanApplication(
+      userDetails, body);
+    const repaymentSchedule = await createRepaymentSchedule(
+      loanApplicationDetails, userDetails
+    );
+
+    const totalMonthlyRepayment = calculateTotalMonthlyRepayment(
+      body.monthly_repayment, body.duration_in_months);
+    const totalAmountRepayable = calculateTotalAmountRepayable(
+      loanApplicationDetails.totalMonthlyRepayment,
+      calculateTotalFees(body.processing_fee, body.insurance_fee, body.advisory_fee));
+    const totalInterestAmount = calculateTotalInterestAmount(
+      loanApplicationDetails.totalMonthlyRepayment, body.amount);
+
+    const responseData = prepareResponseData(
+      loanApplicationDetails, body, totalMonthlyRepayment, totalAmountRepayable, totalInterestAmount, repaymentSchedule, userDetails);
+
+    await userActivityTracking(userDetails.user_id, 37, 'success');
+    await userActivityTracking(userDetails.user_id, 39, 'success');
+
+    return ApiResponse.success(res, enums.MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN, enums.HTTP_OK, responseData);
+  } catch (error) {
+    error.label = enums.FAILED_TO_CREATE_MANUAL_LOAN_RECORD;
+    logger.error(`creating loan application record failed:::${enums.FAILED_TO_CREATE_MANUAL_LOAN_RECORD}`, error.message);
+    return next(error);
+  }
+};
+
+
