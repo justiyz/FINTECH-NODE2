@@ -70,7 +70,7 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
     </tr>
     <tr>
       <td width="30%" height="40px">Annual Percentage Rate:</td>
-      <td>${parseFloat(loanDetails.monthly_interest * 12).toFixed(2)}%</td>
+      <td>${parseFloat(loanDetails.percentage_pricing_band  + loanDetails.percentage_processing_fee + loanDetails.percentage_advisory_fee + loanDetails.percentage_insurance_fee).toFixed(2)}%</td>
     </tr>
     <tr>
       <td width="30%" height="40px" style="vertical-align: top;">Rate Review:</td>
@@ -112,17 +112,17 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
       <li>Acceptance of terms and conditions. </li>
       <li>Payment of upfront fees.</li>
     </ol>
-    
+
 <div>
       <h4 style="margin-bottom: 20px;">TRANSACTION DYNAMICS</h4>
-  
+
   <ol style="padding-left: 15px;">
     <li>he Borrower executes offer letter, accepts terms and condition, and any other required document</li>
     <li>Borrower funds the account for upfront fees which are debited upon receipt of documents.</li>
     <li>Loan is booked for approved tenor.</li>
     <li>Borrower’s account is debited monthly for loan repayment</li>
   </ol>
-  
+
   <ol type="A" style="padding-left: 15px;">
         <li>
           <h4>Other Conditions</h4>
@@ -138,7 +138,7 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
             <li>SeedFi reserves the right to cancel its commitment unconditionally if the facility remains undrawn or if, in SeedFi’s opinion, there is any deterioration in the Borrower’s creditworthiness and the Borrower shall thereafter be notified of such cancellation.</li>
           </ol>
         </li>
-    
+
         <li>
           <h4>Covenants</h4>
           <ol style="padding-left: 0px;" type="i">
@@ -154,29 +154,29 @@ Not, without SeedFi’s prior written consent, make any offer of employment or e
        <p>The Borrower may repay the whole or any part of the loan upon giving the Lender 7 (seven) Business days prior notice. Any amount prepaid may not be redrawn (and shall be applied against scheduled repayments in (inverse order of maturity). Any amount prepaid shall include interest and any pro rata amount of fees that become due and payable on the immediately succeeding due date for such fees. Provided, however, that the Borrower may be charged a fee if the Borrower pays off the loan before maturity. </p>
       </ol>
     </li>
-    
+
     <li>
       <h4>Assignment</h4>
       <p>The Borrower hereby acknowledges that SeedFi may sell, transfer, assign, novate or otherwise dispose of all or part of its rights or obligations (including by granting of participations) under this Agreement to its lending partner (Sterling Bank) or another bank, financial institution, to a trust, fund, or any other entity which is engaged in or established to make, purchase or investing in loans, securities or other financial assets. The Borrower hereby agrees to execute all documents and take all such steps as may reasonably be required by SeedFi to give effect to such an assignment or transfer.</p>
     </li>
-    
+
     <li>
       <h4>Cooling Off Period:</h4>
       <p>The Borrower may cancel this loan contract within 3 days after signing without any penalty or charges, however, the Borrower reserves the right to waive this option by notifying SeedFi in writing. </p>
     </li>
       </ol>
 </div>
-    
+
   </div>
-  
+
   <div>
     <p style="margin: 40px 0 20px;">Please indicate your acceptance of these terms in the space provided below.</p>
-    
+
     <p style="margin-bottom: 40px;">
       Yours Sincerely,  <br />
-      For: SeedFi. 
+      For: SeedFi.
     </p>
-    
+
     <p>
       Pelumi Alli <br />
       CEO
