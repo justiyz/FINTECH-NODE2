@@ -1152,7 +1152,8 @@ export const initiateManualCardOrBankClusterLoanRepayment = async(req, res, next
       const [ nextRepaymentDetails ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ member_loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan next repayment details fetched
       initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
-      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount) : parseFloat(nextRepaymentDetails.total_payment_amount);
+      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2)
+        : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
       const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted
       initiateManualCardOrBankClusterLoanRepayment.controllers.cluster.js`);
