@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: seedfibrowser
+  name: seedfibrowser
+spec:
+  selector:
+    matchLabels:
+      app: seedfibrowser
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: seedfibrowser
+        tier: backend
+        env: production
+    spec:
+      imagePullSecrets:
+        - name: registrypullsecret
+      containers:
+      - env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        image: browserless/chrome
+        imagePullPolicy: "Always"
+        name: poucher-api
+        ports: 
+        - containerPort: 3000
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 150m
+            memory: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: seedfibrowser
+  name: seedfibrowser
+spec:
+  ports:
+  - name: http
+    port: 3000
+  - name: external
+    port: 80
+    targetPort: 3000
+  - name: "https"
+    port: 443
+    targetPort: 3000
+    protocol: "TCP"
+  selector:
+    app: seedfibrowser
+    tier: backend
+  sessionAffinity: None

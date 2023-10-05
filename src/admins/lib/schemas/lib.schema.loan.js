@@ -39,7 +39,7 @@ const fetchRepaidLoans = Joi.object().keys({
   tier: Joi.number().optional().valid(1, 2),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
-  export: Joi.string().optional().valid('true') 
+  export: Joi.string().optional().valid('true')
 });
 const fetchRescheduledLoans = Joi.object().keys({
   search: Joi.string().optional(),
@@ -49,7 +49,7 @@ const fetchRescheduledLoans = Joi.object().keys({
   tier: Joi.number().optional().valid(1, 2),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
-  export: Joi.string().optional().valid('true') 
+  export: Joi.string().optional().valid('true')
 });
 
 const fetchClusterLoans = Joi.object().keys({
@@ -104,6 +104,49 @@ const fetchClusterDetails = Joi.object().keys({
   loan_id: Joi.string().required()
 });
 
+const manuallyCreateLoanRepaymentSchedule = Joi.object().keys({
+  user_id: Joi.string().required(),
+  loan_id: Joi.string().required(),
+  repayment_order: Joi.number().positive().required(),
+  principal_payment: Joi.number().positive().required(),
+  interest_payment: Joi.number().positive().required(),
+  fees: Joi.number().positive().required(),
+  total_payment_amount: Joi.number().positive().required(),
+  pre_payment_outstanding_amount: Joi.number().positive().required(),
+  post_payment_outstanding_amount: Joi.number().positive().required(),
+  proposed_payment_date: Joi.string().required(),
+  pre_reschedule_proposed_payment_date: Joi.string().required()
+});
+
+const manuallyInitiatedLoanApplication = Joi.object().keys({
+  user_id: Joi.string().required(),
+  amount: Joi.number().positive().required(),
+  loan_reason: Joi.string().required(),
+  duration_in_months: Joi.number().positive().required(),
+  total_repayment_amount: Joi.number().positive().optional(),
+  total_interest_amount: Joi.number().positive().optional(),
+  monthly_interest: Joi.number().required(),
+  monthly_repayment: Joi.number().required(),
+  percentage_advisory_fee: Joi.number().required(),
+  percentage_insurance_fee: Joi.number().required(),
+  percentage_pricing_band: Joi.number().required(),
+  percentage_processing_fee: Joi.number().required(),
+  processing_fee: Joi.number().optional(),
+  insurance_fee: Joi.number().optional(),
+  advisory_fee: Joi.number().optional(),
+  loan_decision: Joi.string().optional(),
+  is_renegotiated: Joi.boolean().default(false),
+  is_loan_disbursed: Joi.boolean().default(false),
+  total_outstanding_amount: Joi.number().optional(),
+  loan_disbursed_at: Joi.string().optional(),
+  status: Joi.string().required(),
+  initial_amount_requested: Joi.number().required(),
+  initial_loan_tenor_in_months: Joi.number().required(),
+  reschedule_count: Joi.number().default(0),
+  renegotiation_count: Joi.number().default(0)
+});
+
+
 
 export default {
   manualLoanApproval,
@@ -119,5 +162,7 @@ export default {
   memberLoanId,
   fetchRescheduledClusterLoans,
   fetchRepaidClusterLoans,
-  fetchClusterDetails
+  fetchClusterDetails,
+  manuallyInitiatedLoanApplication,
+  manuallyCreateLoanRepaymentSchedule
 };
