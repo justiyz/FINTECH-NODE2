@@ -36,7 +36,7 @@ export const SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED = 'User selfie image is yet to
 export const BVN_PREVIOUSLY_VERIFIED = 'User bvn has been previously verified';
 export const BVN_NOT_PREVIOUSLY_VERIFIED = 'User is yet to verify bvn, kindly do this first';
 export const BVN_USED_BY_ANOTHER_USER = 'This BVN has been used by another user';
-export const USER_BVN_NOT_MATCHING_RETURNED_BVN = 'Kindly input the correct BVN or contact support';
+export const USER_BVN_NOT_MATCHING_RETURNED_BVN = 'Kindly ensure your profile details match your BVN record';
 export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_CREDENTIALS = (type) => `User ${type} have not been created.`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
@@ -156,7 +156,7 @@ export const CLUSTER_MEMBERS_NOT_MORE_THAN_ONE = 'Cluster loan cannot be initiat
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED = 'User address verification failed to proceed';
-export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED = 'User address verification cannot be processed now, kindly try again later';
+export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED = 'Verification ongoing';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
   'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_CLUSTER_LOAN_REASON =

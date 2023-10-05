@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
 
-const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, 
+const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
   userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
   user_id: user.user_id,
   loan_application_id: loanApplicationDetails.loan_id,
@@ -44,8 +44,8 @@ const processDeclinedLoanDecisionUpdatePayload = (data) => [
 ];
 
 const loanApplicationDeclinedDecisionResponse = async(user, data, loan_status, loan_decision) => ({
-  user_id: user.user_id, 
-  loan_id: data.loan_application_id, 
+  user_id: user.user_id,
+  loan_id: data.loan_application_id,
   loan_status,
   loan_decision
 });
@@ -159,8 +159,8 @@ const loanApplicationRenegotiationResponse = async(data, totalAmountRepayable, t
   max_allowable_amount: null
 });
 
-export default { 
-  checkUserEligibilityPayload, 
+export default {
+  checkUserEligibilityPayload,
   processDeclinedLoanDecisionUpdatePayload,
   loanApplicationDeclinedDecisionResponse,
   processLoanDecisionUpdatePayload,
