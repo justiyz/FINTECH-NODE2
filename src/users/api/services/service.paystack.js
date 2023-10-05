@@ -281,10 +281,8 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
       return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    logger.info(`AmountRequestType ${amountRequestedType}:::Info: Logs the amount to be passed to paystack`);
     // this is because paystack will not process transaction greater than 1 Million in test environment
-    let calculateAmountPlusPaystackTransactionCharge = calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Current location: initializeDebitCarAuthChargeForLoanRepayment.
-    Amount requested: ${amountRequestedType}, Calculated Amount: ${calculateAmountPlusPaystackTransactionCharge}`);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/charge_authorization`,
@@ -294,7 +292,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge,
+        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
         reference,
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
@@ -360,7 +358,9 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
     else
       amount_plus_charges = amount + maximum_applicable_fee;
 
-    return parseFloat(amount_plus_charges.toString());
+    logger.info(`AmountRequestType ${amount_plus_charges}:::Info: Logs the amount to be passed to paystack plus charges`);
+
+    return amount_plus_charges;
   } catch (error) {
     logger.error(`Error calculating the transaction fee for the process::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
     return error;
