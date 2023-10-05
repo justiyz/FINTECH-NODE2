@@ -64,7 +64,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: parseFloat(amountRequestedType),
+        amount: parseFloat(amountRequestedType.toString()),
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -97,7 +97,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
       },
       data: {
         email: user.email,
-        amount: parseFloat(amountRequestedType),
+        amount: parseFloat(amountRequestedType.toString()),
         currency: 'NGN',
         reference,
         channels: [ 'bank_transfer' ],
@@ -257,7 +257,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
       },
       data: {
         email: user.email,
-        amount: parseFloat(amountRequestedType),
+        amount: parseFloat(amountRequestedType.toString()),
         reference,
         bank: {
           code: bankCodeType,
@@ -342,8 +342,8 @@ const submitPaymentOtpWithReference = async(body, reference) => {
  */
 const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount) => {
   try {
-    let amount = parseFloat(loan_repayment_amount);
-    const maximum_applicable_fee = parseFloat(2000);
+    let amount = parseFloat(loan_repayment_amount.toString());
+    const maximum_applicable_fee = 2000;
     let amount_plus_charges = 0;
     let applicable_fee = 0;
 
@@ -357,7 +357,7 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
     else
       amount_plus_charges = amount + maximum_applicable_fee;
 
-    return parseFloat(amount_plus_charges);
+    return parseFloat(amount_plus_charges.toString());
   } catch (error) {
     logger.error(`Error calculating the transaction fee for the process::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
     return error;
