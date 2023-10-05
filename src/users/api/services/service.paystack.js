@@ -64,7 +64,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: parseFloat(amountRequestedType.toString()),
+        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -97,7 +97,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
       },
       data: {
         email: user.email,
-        amount: parseFloat(amountRequestedType.toString()),
+        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
         currency: 'NGN',
         reference,
         channels: [ 'bank_transfer' ],
@@ -257,7 +257,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
       },
       data: {
         email: user.email,
-        amount: parseFloat(amountRequestedType.toString()),
+        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
         reference,
         bank: {
           code: bankCodeType,
@@ -331,20 +331,15 @@ const submitPaymentOtpWithReference = async(body, reference) => {
   }
 };
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Repayment Calculation
  * Loan Repayment Amount (LRA) -> passed as a parameter
  * Applicable Fee: (LRA * 1.5%) + 100
- * @param loan_repayment_amount
  * @returns {Promise<*>}
  * If Applicable Fee is > 2000
  * Final Amount: LRA + 2000
- * Else   Final Amount: ((LRA +100)/(1-1.5%)) +0.01
- */
-/**
- *
- * @param loan_repayment_amount
- * @returns {Promise<*|number>}
+ * Else Final Amount: ((LRA +100)/(1-1.5%)) +0.01
  */
 const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount) => {
   try {
@@ -372,17 +367,15 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
   }
 };
 
-/**
- *
- * @param input
- * @returns {*|number}
- */
 function getNumericValue(input) {
   if (typeof input === 'string' || typeof input === 'object') {
+    logger.info(`The type of input to be processed: ${typeof input}`);
     return Number(input);
   } else if (typeof input === 'number') {
+    logger.info(`The type of input to be processed: ${typeof input}`);
     return input;
   } else {
+    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return NaN; // Return NaN for unsupported types
   }
 }
