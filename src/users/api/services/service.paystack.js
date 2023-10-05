@@ -341,6 +341,11 @@ const submitPaymentOtpWithReference = async(body, reference) => {
  * Final Amount: LRA + 2000
  * Else   Final Amount: ((LRA +100)/(1-1.5%)) +0.01
  */
+/**
+ *
+ * @param loan_repayment_amount
+ * @returns {Promise<*|number>}
+ */
 const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount) => {
   try {
     let amount = parseFloat(loan_repayment_amount.toString());
@@ -360,12 +365,27 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
 
     logger.info(`AmountRequestType ${amount_plus_charges}:::Info: Logs the amount to be passed to paystack plus charges`);
 
-    return amount_plus_charges;
+    return getNumericValue(amount_plus_charges);
   } catch (error) {
     logger.error(`Error calculating the transaction fee for the process::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
     return error;
   }
 };
+
+/**
+ *
+ * @param input
+ * @returns {*|number}
+ */
+function getNumericValue(input) {
+  if (typeof input === 'string' || typeof input === 'object') {
+    return Number(input);
+  } else if (typeof input === 'number') {
+    return input;
+  } else {
+    return NaN; // Return NaN for unsupported types
+  }
+}
 
 export {
   fetchBanks,
