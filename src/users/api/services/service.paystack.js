@@ -282,6 +282,9 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million in test environment
+    let calculateAmountPlusPaystackTransactionCharge = calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Current location: initializeDebitCarAuthChargeForLoanRepayment.
+    Amount requested: ${amountRequestedType}, calculatedAmount: ${calculateAmountPlusPaystackTransactionCharge}`);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/charge_authorization`,
@@ -291,7 +294,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
+        amount: calculateAmountPlusPaystackTransactionCharge,
         reference,
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
