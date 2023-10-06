@@ -1,13 +1,13 @@
 {
   "name": "seedfi-backend",
-  "version": "3.4.9",
+  "version": "3.4.91",
   "description": "A money lending application",
   "author": "Enyata Nexus Engineering Team",
   "license": "ISC",
   "private": true,
   "main": "app.js",
   "engines": {
-    "node": "16.8.01",
+    "node": "16.8.0",
     "npm": "8.19.2"
   },
   "scripts": {
