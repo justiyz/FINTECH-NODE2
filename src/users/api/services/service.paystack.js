@@ -55,6 +55,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
+
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -88,6 +89,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -97,7 +99,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
+        amount: amountToBeCharged,
         currency: 'NGN',
         reference,
         channels: [ 'bank_transfer' ],
@@ -247,6 +249,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
     const bankAccountNumberChoice = SEEDFI_NODE_ENV === 'development' ? '0000000000' : bankAccountDetails.account_number;
     const userBirthdayChoice = SEEDFI_NODE_ENV === 'development' ? '1995-12-23' : user.date_of_birth;
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
@@ -257,7 +260,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
+        amount: amountToBeCharged,
         reference,
         bank: {
           code: bankCodeType,
@@ -283,6 +286,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     logger.info(`AmountRequestType ${amountRequestedType}:::Info: Logs the amount to be passed to paystack`);
     // this is because paystack will not process transaction greater than 1 Million in test environment
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/charge_authorization`,
@@ -292,7 +296,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
+        amount: amountToBeCharged,
         reference,
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
@@ -358,8 +362,6 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
     else
       amount_plus_charges = amount + maximum_applicable_fee;
 
-    logger.info(`AmountRequestType ${amount_plus_charges}:::Info: Logs the amount to be passed to paystack plus charges`);
-
     return getNumericValue(amount_plus_charges);
   } catch (error) {
     logger.error(`Error calculating the transaction fee for the process::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
@@ -368,11 +370,13 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
 };
 
 function getNumericValue(input) {
+  logger.info(`AmountRequestType ${input}:::Info: Logs the amount to be passed to paystack plus charges`);
+  logger.info(`Datatype of AmountRequestType ${typeof input}:::Info: Logs the amount to be passed to paystack plus charges`);
   if (typeof input === 'string' || typeof input === 'object') {
-    logger.info(`The type of input to be processed: ${typeof input}`);
+    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return Number(input);
   } else if (typeof input === 'number') {
-    logger.info(`The type of input to be processed: ${typeof input}`);
+    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return input;
   } else {
     logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
