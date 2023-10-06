@@ -6,6 +6,7 @@ import * as AdminClusterMiddleware from '../middlewares/middlewares.cluster';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as LoanController from '../controllers/controllers.loan';
+import * as UserMiddleware from '../middlewares/middlewares.user';
 
 const router = Router();
 
@@ -171,4 +172,14 @@ router.get(
   LoanMiddleware.checkIfClusterMemberLoanExists,
   LoanController.fetchSingleClusterMemberRescheduledLoan
 );
+
+router.post(
+  '/manual-application',
+  AuthMiddleware.validateAdminAuthToken,
+  UserMiddleware.checkIfUserExists,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  Model(Schema.manuallyInitiatedLoanApplication, 'payload'),
+  LoanController.manuallyInitiatePersonalLoanApplication
+);
+
 export default router;

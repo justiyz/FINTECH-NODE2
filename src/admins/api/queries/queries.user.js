@@ -1,7 +1,7 @@
 export default {
   editUserStatus: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       status = $2
     WHERE user_id = $1`,
@@ -21,7 +21,7 @@ export default {
 
   resetUserVerificationCount: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       status = 'active',
       verification_token_request_count = '0',
@@ -30,7 +30,7 @@ export default {
 
   restoreDeletedUserAccount: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       status = 'active',
       verification_token_request_count = '0',
@@ -48,15 +48,15 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5)`,
 
   fetchAllExistingBlacklistedBvns: `
-      SELECT id, bvn 
+      SELECT id, bvn
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
-      
+
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
-      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
       number_of_children, marital_status, loan_status, verification_token_request_count, invalid_verification_token_count,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created, (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points
@@ -67,7 +67,7 @@ export default {
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
       to_char(DATE (date_of_birth)::date, 'DDth Month, YYYY') AS date_of_birth, image_url, bvn,
-      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
       number_of_children, marital_status, loan_status, verification_token_request_count, invalid_verification_token_count,
        to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created
@@ -75,7 +75,7 @@ export default {
     WHERE (email = $1 OR phone_number = $1)`,
 
   getUserEmploymentDetails: `
-    SELECT 
+    SELECT
       user_id,
       employment_type,
       company_name,
@@ -87,7 +87,7 @@ export default {
     WHERE user_id = $1`,
 
   getUserAddressDetails: `
-    SELECT 
+    SELECT
       id,
       user_id,
       (CONCAT(house_number, ' ', street, ' ', city, ' city', ' ', lga, ' lga', ' ', state, ' state', ' ', country)) AS address,
@@ -105,7 +105,7 @@ export default {
     WHERE user_id = $1`,
 
   fetchUserBankAccounts: `
-      SELECT 
+      SELECT
         id,
         user_id,
         bank_name,
@@ -138,7 +138,7 @@ export default {
       ORDER BY is_default DESC`,
 
   fetchUsers: `
-      SELECT 
+      SELECT
         users.id,
         users.user_id,
         TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
@@ -150,20 +150,20 @@ export default {
       FROM users
       LEFT JOIN employment_type
       ON users.user_id = employment_type.user_id
-      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1) 
+      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
-      AND (users.status = $2 OR $2 IS NULL) 
-      AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+        OR $1 IS NULL)
+      AND (users.status = $2 OR $2 IS NULL)
+      AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
       AND (users.loan_status = $5 OR $5 IS NULL) AND users.is_completed_kyc = true
       ORDER BY users.created_at DESC
       OFFSET $6
       LIMIT $7`,
-      
+
   fetchAllUsers: `
         SELECT
         users.id,
@@ -177,15 +177,17 @@ export default {
       FROM users
       LEFT JOIN employment_type
       ON users.user_id = employment_type.user_id
-      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1) 
+      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
+        OR TRIM(users.email) ILIKE TRIM($1)
+        OR TRIM(users.phone_number) ILIKE TRIM($1)
+        OR $1 IS NULL)
       AND (users.status = $2 OR $2 IS NULL)
-      AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
+      AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
       AND (users.loan_status = $5 OR $5 IS NULL) AND users.is_completed_kyc = true
       ORDER BY users.created_at DESC
       `,
@@ -193,21 +195,21 @@ export default {
   fetchUsersCount: `
       SELECT COUNT(user_id) AS total_count
       FROM users
-      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1) 
+      WHERE (TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1) 
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR $1 IS NULL) 
-      AND (status = $2 OR $2 IS NULL) 
+        OR $1 IS NULL)
+      AND (status = $2 OR $2 IS NULL)
       AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
       AND (loan_status = $5 OR $5 IS NULL) AND is_completed_kyc = true
     `,
-    
+
   uploadUserDocument: `
     INSERT INTO user_admin_uploaded_documents (
-      user_id, 
+      user_id,
       uploaded_by,
       document_title,
       image_url
@@ -215,7 +217,7 @@ export default {
     RETURNING id, user_id, document_title, uploaded_by, created_at`,
 
   fetchUploadedUserDocuments: `
-      SELECT 
+      SELECT
         id,
         user_id,
         uploaded_by,
@@ -224,10 +226,10 @@ export default {
         created_at
       FROM user_admin_uploaded_documents
       WHERE user_id = $1`,
-  
+
   fetchUserKycDetails: `
-    SELECT 
-      users.user_id, 
+    SELECT
+      users.user_id,
       users.tier,
       users.is_verified_bvn,
       users.is_completed_kyc,
@@ -237,7 +239,7 @@ export default {
       address_verification.is_verified_utility_bill,
       address_verification.address_image_url AS utility_bill_image_url
     FROM users
-    LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id 
+    LEFT JOIN user_national_id_details ON user_national_id_details.user_id = users.user_id
     LEFT JOIN address_verification ON address_verification.user_id = users.user_id
     WHERE users.user_id = $1`,
 
@@ -261,7 +263,7 @@ export default {
 
   updateUserTier: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       tier = $2
     WHERE user_id = $1`,
@@ -276,10 +278,10 @@ export default {
       clusters.current_members,
       clusters.type
     FROM clusters
-    LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
+    LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id
     LEFT JOIN users ON users.user_id = clusters.created_by
     WHERE cluster_members.user_id = $1
-    AND clusters.is_deleted = FALSE 
+    AND clusters.is_deleted = FALSE
     AND cluster_members.is_left = FALSE
     AND clusters.is_created_by_admin = FALSE;
 `,
@@ -293,7 +295,7 @@ export default {
       clusters.current_members,
       clusters.type
     FROM clusters
-    LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id 
+    LEFT JOIN cluster_members ON cluster_members.cluster_id = clusters.cluster_id
     LEFT JOIN admins ON clusters.created_by = admins.admin_id
     WHERE cluster_members.user_id = $1
     AND clusters.is_deleted = FALSE
@@ -302,7 +304,7 @@ export default {
 `,
 
   fetchClusterMemberDetails: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       user_id,
@@ -313,7 +315,7 @@ export default {
     AND is_left = FALSE`,
 
   fetchUserClusterMembers: `
-    SELECT 
+    SELECT
       cluster_members.id,
       cluster_members.cluster_id,
       cluster_members.user_id,
@@ -323,16 +325,16 @@ export default {
       cluster_members.is_admin,
       cluster_members.is_left
     FROM cluster_members
-    LEFT JOIN users ON users.user_id = cluster_members.user_id 
+    LEFT JOIN users ON users.user_id = cluster_members.user_id
     WHERE cluster_members.is_left = FALSE
     AND cluster_members.cluster_id = $1`,
 
   checkIfClusterExists: `
-    SELECT 
+    SELECT
         id,
         cluster_id,
         name,
-        description, 
+        description,
         type,
         maximum_members,
         current_members,
@@ -363,9 +365,9 @@ export default {
   `,
 
   getUsersForNotifications: `
-    SELECT 
-      id, 
-      user_id, 
+    SELECT
+      id,
+      user_id,
       email,
       first_name,
       last_name,
@@ -383,7 +385,7 @@ export default {
       WHERE user_id = $1`,
 
   fetchUserRewardHistory: `
-        SELECT 
+        SELECT
             user_id,
             reward_id,
             reward_description,
@@ -391,8 +393,8 @@ export default {
             type,
             point_reward
         FROM reward_points_tracking
-        WHERE user_id = $1 
-        ORDER BY created_at DESC          
+        WHERE user_id = $1
+        ORDER BY created_at DESC
         OFFSET $2
         LIMIT $3
   `,
@@ -404,4 +406,4 @@ export default {
   `
 };
 
-  
+

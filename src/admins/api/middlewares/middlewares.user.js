@@ -123,9 +123,9 @@ export const uploadDocument = async(req, res, next) => {
     const url = `files/user-documents/${userDetails.user_id}/${body.title.trim()}/${files.document.name}`;
     if (config.SEEDFI_NODE_ENV === 'test') {
       req.document = encodeURIComponent(
-        await UserHash.encrypt({ 
+        await UserHash.encrypt({
           document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc',
-          document_extension: fileExt 
+          document_extension: fileExt
         })
       );
       return next();
@@ -156,10 +156,11 @@ export const uploadDocument = async(req, res, next) => {
  */
 export const checkIfUserExists = async(req, res, next) => {
   try {
-    const { params: { user_id } } = req;
+    // const { params: { user_id } } = req;
+    const user_id = req.params.user_id || req.body.user_id;
     const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ user_id ]);
     if (userDetails) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
         successfully confirms that user being queried exists in the DB checkIfUserExists.admin.middlewares.user.js`);
       const [ userEmploymentDetails ] = await processAnyData(userQueries.getUserEmploymentDetails, [ user_id ]);
       const [ userAddressDetails ] = await processAnyData(userQueries.getUserAddressDetails, [ user_id ]);
@@ -170,7 +171,7 @@ export const checkIfUserExists = async(req, res, next) => {
       req.userNextOfKinDetails = userNextOfKinDetails;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
       successfully confirms that user being queried does not exists in the DB checkIfUserExists.admin.middlewares.user.js`);
     return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('user'), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_EXISTS_MIDDLEWARE);
   } catch (error) {
@@ -196,7 +197,7 @@ export const adminCheckIfClusterExists = async(req, res, next) => {
     if (!existingCluster) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: cluster does not exist in the DB checkIfClusterExists.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.ADMIN_CHECK_IF_CLUSTER_EXIST, enums.HTTP_BAD_REQUEST, enums.ADMIN_CHECK_IF_CLUSTER_EXISTS_MIDDLEWARE_MIDDLEWARE);
-    } 
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: cluster is existing in the DB checkIfClusterExists.middlewares.cluster.js`);
     req.cluster = existingCluster;
     return next();
@@ -223,7 +224,7 @@ export const checkIfUserBelongsToCluster = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user does not belong to this cluster adminCheckIfClusterMemberExist.middlewares.cluster.js`);
       return ApiResponse.error(res, enums.USER_NOT_CLUSTER_MEMBER, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_BELONGS_TO_CLUSTER_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user belongs to this cluster and can proceed 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: user belongs to this cluster and can proceed
     adminCheckIfClusterMemberExist.middlewares.cluster.js`);
     return next();
   } catch (error) {
