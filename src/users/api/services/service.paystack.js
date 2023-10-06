@@ -40,6 +40,7 @@ const resolveAccount = async(account_number, bank_code, user) => {
         'Content-Type': 'application/json'
       }
     };
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTAK OBJECT DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -206,6 +207,8 @@ const createTransferRecipient = async(userDisbursementAccountDetails) => {
         'Content-Type': 'application/json'
       }
     };
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTAK OBJECT DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
