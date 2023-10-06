@@ -40,7 +40,7 @@ const resolveAccount = async(account_number, bank_code, user) => {
         'Content-Type': 'application/json'
       }
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTAK OBJECT DATA: ${options}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -75,7 +75,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
         }
       }
     };
-    logger.info(`PAYSTACK DATA: ${options}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -110,7 +110,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
         }
       }
     };
-    logger.info(`PAYSTACK DATA: ${options}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -132,7 +132,7 @@ const confirmPaystackPaymentStatusByReference = async(reference) => {
         'Content-Type': 'application/json'
       }
     };
-    logger.info(`PAYSTACK DATA: ${options}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -157,7 +157,7 @@ const raiseARefundTickedForCardTokenizationTransaction = async(transaction_id) =
         'Content-Type': 'application/json'
       }
     };
-    logger.info(`PAYSTACK DATA: ${options}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -208,7 +208,7 @@ const createTransferRecipient = async(userDisbursementAccountDetails) => {
       }
     };
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTAK OBJECT DATA: ${options}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
