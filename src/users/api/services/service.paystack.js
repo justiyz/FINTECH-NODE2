@@ -208,7 +208,7 @@ const createTransferRecipient = async(userDisbursementAccountDetails) => {
       }
     };
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA (createTransferRecipient): ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -239,6 +239,7 @@ const initiateTransfer = async(userTransferRecipient, existingLoanApplication, r
         'Content-Type': 'application/json'
       }
     };
+    logger.info(`PAYSTACK DATA(Initiate Transfer): ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -309,7 +310,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
     };
-    logger.info(`PAYSTACK DATA: ${options}`);
+    logger.info(`PAYSTACK DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -336,6 +337,7 @@ const submitPaymentOtpWithReference = async(body, reference) => {
         reference
       }
     };
+    logger.info(`PAYSTACK DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
