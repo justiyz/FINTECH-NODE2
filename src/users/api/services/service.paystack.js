@@ -66,7 +66,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
+        amount: amountRequestedType,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -257,7 +257,6 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
     const bankAccountNumberChoice = SEEDFI_NODE_ENV === 'development' ? '0000000000' : bankAccountDetails.account_number;
     const userBirthdayChoice = SEEDFI_NODE_ENV === 'development' ? '1995-12-23' : user.date_of_birth;
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
-    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
@@ -268,7 +267,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
       },
       data: {
         email: user.email,
-        amount: amountToBeCharged,
+        amount: amountRequestedType,
         reference,
         bank: {
           code: bankCodeType,
@@ -277,7 +276,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
         birthday: userBirthdayChoice
       }
     };
-    logger.info(`PAYSTACK DATA: ${options}`);
+    logger.info(`PAYSTACK DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
