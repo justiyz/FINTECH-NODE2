@@ -74,6 +74,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
         }
       }
     };
+    logger.info(`PAYSTACK DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -108,6 +109,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
         }
       }
     };
+    logger.info(`PAYSTACK DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -129,6 +131,7 @@ const confirmPaystackPaymentStatusByReference = async(reference) => {
         'Content-Type': 'application/json'
       }
     };
+    logger.info(`PAYSTACK DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -153,6 +156,7 @@ const raiseARefundTickedForCardTokenizationTransaction = async(transaction_id) =
         'Content-Type': 'application/json'
       }
     };
+    logger.info(`PAYSTACK DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -269,6 +273,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
         birthday: userBirthdayChoice
       }
     };
+    logger.info(`PAYSTACK DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -301,6 +306,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
     };
+    logger.info(`PAYSTACK DATA: ${options}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
