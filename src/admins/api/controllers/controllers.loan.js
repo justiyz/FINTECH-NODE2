@@ -5,7 +5,7 @@ import loanPayload from '../../lib/payloads/lib.payload.loans';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
-import { processAnyData, processNoneData, processOneOrNoneData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import MailService from '../services/services.email';
 import { sendPushNotification, sendUserPersonalNotification, sendClusterNotification, sendMulticastPushNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
@@ -19,9 +19,7 @@ import {
   FAILED_TO_CREATE_MANUAL_LOAN_RECORD,
   LOAN_APPLICATION_MANUAL_DECISION,
   MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN
-} from "../../../users/lib/enums/lib.enum.messages";
-import moment from 'moment-timezone/moment-timezone-utils';
-// import updateDisbursedLoanRepaymentSchedule from
+} from '../../../users/lib/enums/lib.enum.messages';
 /**
  * approve loan applications manually by admin
  * @param {Request} req - The request from the endpoint.

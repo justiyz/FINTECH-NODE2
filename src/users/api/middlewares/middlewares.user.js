@@ -28,7 +28,7 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
   try {
     const { body } = req;
     const payload = body.phone_number || body.email || req.user.phone_number;
-    const [ user ] = payload.startsWith('+') ? await processAnyData(userQueries.getUserByPhoneNumber, [ payload.trim() ]) : 
+    const [ user ] = payload.startsWith('+') ? await processAnyData(userQueries.getUserByPhoneNumber, [ payload.trim() ]) :
       await processAnyData(userQueries.getUserByEmail, [ payload.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched users details from the database validateUnAuthenticatedUser.middlewares.user.js`);
     if (user && user.is_verified_phone_number && user.is_created_password && type === 'validate') {
@@ -55,7 +55,7 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
     }
     if (user && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
       const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database
       validateUnAuthenticatedUser.middlewares.user.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
     }
@@ -81,7 +81,7 @@ export const validateRefreshToken = async(req, res, next) => {
     const { query: { refreshToken },  user } = req;
     const [ userRefreshToken ] = await processAnyData(userQueries.fetchUserRefreshToken, [ user.user_id ]);
     if (refreshToken !== userRefreshToken.refresh_token) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database
       validateRefreshToken.middlewares.user.js`);
       return ApiResponse.error(res, enums.INVALID_USER_REFRESH_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE);
     }
@@ -103,13 +103,13 @@ export const isUploadedImageSelfie = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
     if (user.is_uploaded_selfie_image && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image
       isUploadedImageSelfie.middlewares.user.js`);
       userActivityTracking(user.user_id, 17, 'fail');
       return ApiResponse.error(res, enums.SELFIE_IMAGE_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
     }
     if (!user.is_uploaded_selfie_image && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image
       isUploadedImageSelfie.middlewares.user.js`);
       return ApiResponse.error(res, enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
     }
@@ -284,7 +284,7 @@ export const isEmailVerified = (type = 'authenticate') => async(req, res, next) 
       return ApiResponse.error(res, enums.EMAIL_NOT_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
     }
     if (type === 'validate' && user.is_verified_email) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user has already been 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user has already been
       isEmailVerified.middleware.user.js`);
       return ApiResponse.error(res, enums.EMAIL_ALREADY_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
     }
@@ -336,7 +336,7 @@ export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
     const { user } = req;
     const [ existingAccountsCount ] = await processAnyData(userQueries.checkMaximumExistingAccountCounts, [ user.user_id ]);
     if (Number(existingAccountsCount.count) >= 3) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved 
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved
       checkIfMaximumBankAccountsSaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 27, 'fail');
       return ApiResponse.error(res, enums.BANK_ACCOUNTS_LIMITS_REACHED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE);
@@ -368,7 +368,7 @@ export const checkAccountPreviouslySaved = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 27, 'fail');
       return ApiResponse.error(res, enums.ACCOUNT_DETAILS_PREVIOUSLY_SAVED, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account has not been saved previously by user in the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account has not been saved previously by user in the DB
     checkAccountPreviouslySaved.middlewares.user.js`);
     return next();
   } catch (error) {
@@ -394,11 +394,11 @@ export const checkAccountOwnership = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
     if (user.middle_name !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);
-      if ((accountDetailsName.includes(user.first_name.toLowerCase()) && 
-        accountDetailsName.includes(user.middle_name.toLowerCase()) && 
+      if ((accountDetailsName.includes(user.first_name.toLowerCase()) &&
+        accountDetailsName.includes(user.middle_name.toLowerCase()) &&
         accountDetailsName.includes(user.last_name.toLowerCase())
-      ) || 
-      (accountDetailsName.includes(user.first_name.toLowerCase()) && 
+      ) ||
+      (accountDetailsName.includes(user.first_name.toLowerCase()) &&
       accountDetailsName.includes(user.last_name.toLowerCase())
       )) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
@@ -488,7 +488,7 @@ export const checkIfAccountDetailsExists = async(req, res, next) => {
   try {
     const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
     if (!payment_channel || payment_channel === 'bank') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
       const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id || payment_channel_id ]);
       if (!accountIdExists) {
@@ -504,7 +504,7 @@ export const checkIfAccountDetailsExists = async(req, res, next) => {
       req.accountDetails = accountIdExists;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     query payment type is sent and payment query type sent is to check for card repayment checkIfAccountDetailsExists.middlewares.user.js`);
     return next();
   } catch (error) {
@@ -531,7 +531,7 @@ export const checkAccountCurrentChoicesAndTypeSent = async(req, res, next) => {
       return ApiResponse.error(res, enums.ACCOUNT_ALREADY_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE);
     }
     if (accountDetails.is_disbursement_account && type === 'disbursement') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already set to disbursement account 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already set to disbursement account
       checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 36, 'fail');
       return ApiResponse.error(res, enums.ACCOUNT_ALREADY_DISBURSEMENT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CHECK_ACCOUNT_CURRENT_CHOICE_AND_TYPE_SENT_MIDDLEWARE);
@@ -562,7 +562,7 @@ export const verifyEmailVerificationToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct verification token is sent verifyEmailVerificationToken.middlewares.user.js`);
     if (!tokenUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: sent token is invalid verifyEmailVerificationToken.middlewares.user.js`);
-      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN, 
+      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN,
         enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE) :
         res.send(enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN);
     }
@@ -676,25 +676,25 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     const { user, body } = req;
     const [ userAddressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
     if (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has previously created on youVerify 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has previously created on youVerify
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
       if (userAddressDetails.you_verify_address_verification_status === 'pending') {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification still pending 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification still pending
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
         return ApiResponse.error(res, enums.USER_ADDRESS_VERIFICATION_STILL_PENDING, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
       }
       if (!userAddressDetails.is_editable) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification cannot be edited at this point 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address verification cannot be edited at this point
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
         return ApiResponse.error(res, enums.USER_ADDRESS_CANNOT_BE_UPDATED, enums.HTTP_FORBIDDEN, enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
       }
       req.userAddressDetails = userAddressDetails;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     const payload = UserPayload.addressVerification(body, user);
-    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) : 
+    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) :
       await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
@@ -704,7 +704,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details creation has been initiated with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
       await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, result.data.id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
@@ -713,13 +713,13 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       return next();
     }
     if (result && result.statusCode !== 201) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation failed about to retry 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation failed about to retry
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
       const retryResult = await createUserYouVerifyCandidateUsingProfile(user);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation retried 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's candidate address creation retried
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
       if (retryResult && retryResult.statusCode === 201 && retryResult.message.toLowerCase() === 'candidate created successfully!') {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
         await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, retryResult.data.id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
@@ -730,13 +730,13 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 83, 'fail');
       // const errorMessage = !retryResult.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED : retryResult.response.data.message;
       // const errorCode = !retryResult.response.data ? enums.HTTP_FORBIDDEN : retryResult.response.data.statusCode;
-      return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED , enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED , enums.HTTP_FORBIDDEN,
         enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     userActivityTracking(req.user.user_id, 83, 'fail');
-    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, 
+    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
       enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE;
@@ -774,9 +774,9 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
     const url = `files/user-documents/${user.user_id}/utility-bills/${files.document.name}`;
     if (config.SEEDFI_NODE_ENV === 'test') {
       req.document = encodeURIComponent(
-        await Hash.encrypt({ 
+        await Hash.encrypt({
           document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc',
-          document_extension: fileExt 
+          document_extension: fileExt
         })
       );
       return next();
@@ -836,7 +836,7 @@ export const checkIfCardOrUserExist = async(req, res, next) => {
   try {
     const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
     if (!payment_channel || payment_channel === 'card') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for card repayment checkIfCardOrUserExist.middlewares.user.js`);
       const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id || payment_channel_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
@@ -856,7 +856,7 @@ export const checkIfCardOrUserExist = async(req, res, next) => {
       req.userDebitCard = userCard;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     query payment type is sent and query payment type sent is to check for bank repayment checkIfCardOrUserExist.middlewares.user.js`);
     return next();
   } catch (error) {
@@ -968,7 +968,7 @@ export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
       }
       const canUpdate = dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
       if (!canUpdate) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their
         details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
         return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
       }
@@ -978,7 +978,7 @@ export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
     (body.marital_status.toLowerCase() !== user.marital_status?.toLowerCase()))) {
       const canUpdate = dayjs().isAfter(dayjs(user.next_profile_update));
       if (!canUpdate) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their
         details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
         return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
       }
@@ -1007,15 +1007,15 @@ export const youVerifyWebhookVerification = async(req, res, next) => {
     }
     const webhookSigningKey = config.SEEDFI_YOU_VERIFY_WEBHOOK_SIGNING_KEY;
     const hash = crypto.createHmac('sha256', webhookSigningKey).update(JSON.stringify(req.body)).digest('hex');
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully saved the hash generated using the signing key into a variable "hash" 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully saved the hash generated using the signing key into a variable "hash"
     and the webhook signing key from the config into the variable "secret" youVerifyWebhookVerification.middlewares.user.js`);
     if (!hash) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that no hash is returned in 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that no hash is returned in
       the headers of the response youVerifyWebhookVerification.middlewares.user.js`);
       return ApiResponse.error(res, enums.NO_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE);
     }
     if (hash !== req.headers['x-youverify-signature']) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the youVerify authorization token is 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the youVerify authorization token is
       invalid youVerifyWebhookVerification.middlewares.user.js`);
       return ApiResponse.error(res, enums.INVALID_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE);
     }
@@ -1055,10 +1055,10 @@ export const verifyUserAndAddressResponse = async(req, res, next) => {
       req.userAddressDetails = userAddressDetails;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the webhook event sent is not valid 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the webhook event sent is not valid
     verifyUserAndAddressResponse.middlewares.user.js`);
     return ApiResponse.error(res, enums.INVALID_YOU_VERIFY_WEBHOOK_EVENT, enums.HTTP_FORBIDDEN, enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE);
-    
+
   } catch (error) {
     error.label = enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE;
     logger.error(`verification of webhook details sent failed:::${enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE}`, error.message);
@@ -1109,7 +1109,7 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active cluster loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeClusterLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN,
         enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
@@ -1117,7 +1117,7 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active individual loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeIndividualLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN,
         enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);

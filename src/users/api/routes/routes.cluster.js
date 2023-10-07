@@ -63,7 +63,7 @@ router.post(
   ClusterMiddleware.checkIfClusterDecisionTicketExists,
   ClusterMiddleware.checkIfClusterExists,
   ClusterMiddleware.checkIClusterDecisionHasBeenConcluded,
-  ClusterMiddleware.checkIfUserHasPreviouslyDecided, 
+  ClusterMiddleware.checkIfUserHasPreviouslyDecided,
   ClusterMiddleware.userTakesRequestToJoinClusterDecision,
   ClusterMiddleware.newAdminClusterAcceptance,
   ClusterMiddleware.requestToDeleteCluster,
