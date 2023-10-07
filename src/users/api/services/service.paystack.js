@@ -55,8 +55,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
-
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::INITIALIZECARDPAYMENT: ${amountRequestedType}`);
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -66,7 +65,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: amountRequestedType,
+        amount: amountToBeCharged,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -75,7 +74,6 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
         }
       }
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::PAYSTACK OBJECT DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -92,7 +90,6 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
     const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::INITIALIZEBANKTRANSFERPAYMENT: ${amountToBeCharged}`);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -220,8 +217,6 @@ const initiateTransfer = async(userTransferRecipient, existingLoanApplication, r
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested);
     // this is because paystack will not process transaction greater than 1 Million
-
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::INITIATETRANSFER: ${amountRequestedType}`);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transfer`,
@@ -237,7 +232,6 @@ const initiateTransfer = async(userTransferRecipient, existingLoanApplication, r
         'Content-Type': 'application/json'
       }
     };
-    logger.info(`PAYSTACK DATA(Initiate Transfer): ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -255,8 +249,8 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
     const bankAccountNumberChoice = SEEDFI_NODE_ENV === 'development' ? '0000000000' : bankAccountDetails.account_number;
     const userBirthdayChoice = SEEDFI_NODE_ENV === 'development' ? '1995-12-23' : user.date_of_birth;
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::initializeBankAccountChargeForLoanRepayment: ${amountRequestedType}`);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/charge`,
@@ -266,7 +260,7 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
       },
       data: {
         email: user.email,
-        amount: amountRequestedType,
+        amount: amountToBeCharged,
         reference,
         bank: {
           code: bankCodeType,
@@ -275,7 +269,6 @@ const initializeBankAccountChargeForLoanRepayment = async(user, paystackAmountFo
         birthday: userBirthdayChoice
       }
     };
-    logger.info(`PAYSTACK DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -291,7 +284,6 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
       return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
-    logger.info(`AmountRequestType ${amountRequestedType}:::Info: Logs the amount to be passed to paystack`);
     // this is because paystack will not process transaction greater than 1 Million in test environment
     const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
@@ -308,7 +300,6 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
     };
-    logger.info(`PAYSTACK DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -371,7 +362,7 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
     else
       amount_plus_charges = amount + maximum_applicable_fee;
 
-    return getNumericValue(amount_plus_charges);
+    return Math.ceil(getNumericValue(amount_plus_charges));
   } catch (error) {
     logger.error(`Error calculating the transaction fee for the process::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
     return error;
