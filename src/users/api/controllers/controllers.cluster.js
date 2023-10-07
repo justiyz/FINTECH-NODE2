@@ -1098,10 +1098,10 @@ export const initiateManualClusterLoanRepayment = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan next repayment details fetched
       initiateManualClusterLoanRepayment.controllers.cluster.js`);
 
-      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2)
-        : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
+      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount)
+        : parseFloat(nextRepaymentDetails.total_payment_amount);
       // const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount) : parseFloat(nextRepaymentDetails.total_payment_amount);
-      const paystackAmountFormatting = parseFloat(paymentAmount.toString()) * 100; // Paystack requires amount to be in kobo for naira payment
+      const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualClusterLoanRepayment.controllers.cluster.js`);
       await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference,
         `${payment_type}_cluster_loan_repayment`, `user repays out of or all of existing cluster loan facility via ${payment_channel}`, member_loan_id ]);
