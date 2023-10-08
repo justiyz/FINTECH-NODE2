@@ -55,7 +55,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
-
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -65,7 +65,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: calculateAmountPlusPaystackTransactionCharge(amountRequestedType),
+        amount: amountToBeCharged,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -284,7 +284,6 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
       return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
-    logger.info(`AmountRequestType ${amountRequestedType}:::Info: Logs the amount to be passed to paystack`);
     // this is because paystack will not process transaction greater than 1 Million in test environment
     const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
@@ -327,6 +326,7 @@ const submitPaymentOtpWithReference = async(body, reference) => {
         reference
       }
     };
+    logger.info(`PAYSTACK DATA: ${options.toString()}`);
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -362,7 +362,7 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
     else
       amount_plus_charges = amount + maximum_applicable_fee;
 
-    return getNumericValue(amount_plus_charges);
+    return Math.ceil(getNumericValue(amount_plus_charges));
   } catch (error) {
     logger.error(`Error calculating the transaction fee for the process::${enums.SUBMIT_PAYMENT_OTP_WITH_REFERENCE_SERVICE}`, error.message);
     return error;
