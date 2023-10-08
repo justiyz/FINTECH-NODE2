@@ -378,3 +378,4 @@ export const USER_REWARD_HISTORY_FETCHED_SUCCESSFULLY = 'User Rewards fetched su
 export const REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY = 'Claimed points set to zero successfully';
 export const MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN = 'User loan application was created by the admin';
 export const FAILED_TO_CREATE_MANUAL_LOAN_RECORD = 'Admin could not create the loan record for the user';
+export const SHOP_CATEGORIES_LIST = 'Shop categories fetched successfully';

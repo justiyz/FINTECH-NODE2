@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS shop_categories(
     id SERIAL,
-    env_id VARCHAR PRIMARY KEY DEFAULT 'shop-category-' || LOWER(
+    shop_category_id VARCHAR PRIMARY KEY DEFAULT 'shop-category-' || LOWER(
         REPLACE(
             CAST(uuid_generate_v1mc() AS VARCHAR(20))
             , '-',''

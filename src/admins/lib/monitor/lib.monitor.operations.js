@@ -35,7 +35,7 @@ export const operations = {
   34: 'ANDECR', // admin deactivate cluster
   35: 'ANDTCR', // admin delete cluster
   36: 'ANRECRNR', // admin remove cluster member
-  37: 'ANCRMRIR', // admin cluster member invite 
+  37: 'ANCRMRIR', // admin cluster member invite
   38: 'ANUTBN', // admin unblacklist bvn
   39: 'ANAECRMR', // admin activate cluster member
   40: 'ANDECRMR', // admin deactivate cluster member
@@ -51,8 +51,9 @@ export const operations = {
   50: 'SATNTFTUSR', // admin sends alert type notification to users
   51: 'DELSTNTFS', // admin deletes admin sent notifications
   52: 'EDTRWDPNTS', // admin edits reward points
-  53: 'RSTURWDPT', // admin resets a specified user reward points 
+  53: 'RSTURWDPT', // admin resets a specified user reward points
   54: 'RSTAURWDPT', // admin resets all users reward points
-  55: 'EDTCLST' // admin edits custer interest rate details
+  55: 'EDTCLST', // admin edits custer interest rate details
+  56: 'ALSCL' // admin list shop categories
 };
 

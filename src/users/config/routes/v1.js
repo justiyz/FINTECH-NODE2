@@ -12,6 +12,7 @@ import adminLoanRoute from '../../../admins/api/routes/routes.loan';
 import adminSettingsRoute from '../../../admins/api/routes/routes.settings';
 import bvnRoute from '../../../admins/api/routes/routes.bvn';
 import AdminClusterRoute from '../../../admins/api/routes/routes.cluster';
+import adminShopRoutes from '../../../admins/api/routes/routes.shop';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/admin/loan', adminLoanRoute);
 router.use('/admin/settings', adminSettingsRoute);
 router.use('/admin/bvn', bvnRoute);
 router.use('/admin/cluster', AdminClusterRoute);
+router.use('/admin/shop', adminShopRoutes);
 
 export default router;
