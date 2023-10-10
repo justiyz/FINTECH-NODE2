@@ -11,7 +11,6 @@ export const shopCategories = async(req, res, next) => {
     const data = {
       shop_categories
     };
-    console.log(data);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: shop details fetched successfully shopCategories.controller.shop.js`);
     return ApiResponse.success(res, enums.SHOP_CATEGORIES_LIST, enums.HTTP_OK, data);
   } catch (error) {
