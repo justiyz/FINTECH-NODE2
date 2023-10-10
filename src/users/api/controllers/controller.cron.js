@@ -22,17 +22,17 @@ import * as adminNotification from '../../lib/templates/adminNotification';
 export const updateLoanStatusToOverdue = async() => {
   try {
     const overDueLoanRepayments = await processAnyData(cronQueries.fetchAllOverdueLoanRepayments, []);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database
     updateLoanStatusToOverdue.controllers.cron.js`);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the unique values have been filtered apart updateLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
       overDueLoanRepayments.map(async(application) => {
         const [ nextRepayment ] = await processAnyData(cronQueries.fetchLoanNextRepayment, [ application.loan_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateNextLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
-        await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus, [ application.loan_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [ application.user_id ]);
-        await processOneOrNoneData(cronQueries.recordLoanDefaulting, [ application.user_id, application.loan_id, application.loan_repayment_id, null, 'individual loan' ]);
-        await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user loan repayment is past and loan status set to over due' ]);
+        await processOneOrNoneData(cronQueries.updateNextLoanRepaymentOverdue);
+        await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus);
+        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue);
+        await processOneOrNoneData(cronQueries.recordLoanDefaulting);
+        await processOneOrNoneData(cronQueries.recordCronTrail);
         userActivityTracking(application.user_id, 78, 'success');
         return application;
       })
@@ -54,25 +54,24 @@ export const updateLoanStatusToOverdue = async() => {
 export const updateClusterLoanStatusToOverdue = async() => {
   try {
     const overDueLoanRepayments = await processAnyData(cronQueries.fetchAllOverdueClusterLoanRepayments, []);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all cluster loan repayments that have passed the current date fetched from the database 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all cluster loan repayments that have passed the current date fetched from the database
     updateClusterLoanStatusToOverdue.controllers.cron.js`);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the unique values have been filtered apart updateClusterLoanStatusToOverdue.controllers.cron.js`);
     await Promise.all([
       overDueLoanRepayments.map(async(application) => {
         const [ nextRepayment ] = await processAnyData(cronQueries.fetchClusterLoanNextRepayment, [ application.member_loan_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateNextClusterLoanRepaymentOverdue, [ nextRepayment.loan_repayment_id ]);
-        await processOneOrNoneData(cronQueries.updateClusterLoanWithOverDueStatus, [ application.member_loan_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [ application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateClusterMemberClusterLoanStatusOverDue, [ application.cluster_id, application.user_id ]);
-        await processOneOrNoneData(cronQueries.updateGeneralClusterLoanStatusOverDue, [ application.cluster_id ]);
-        await processOneOrNoneData(cronQueries.recordLoanDefaulting, [ application.user_id, application.member_loan_id, application.loan_repayment_id, 
-          application._loan_id, 'cluster loan' ]);
-        await processOneOrNoneData(cronQueries.recordCronTrail, [ application.user_id, 'ODLNSETOD', 'user cluster loan repayment is past and loan status set to over due' ]);
+        await processOneOrNoneData(cronQueries.updateNextClusterLoanRepaymentOverdue);
+        await processOneOrNoneData(cronQueries.updateClusterLoanWithOverDueStatus);
+        await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue);
+        await processOneOrNoneData(cronQueries.updateClusterMemberClusterLoanStatusOverDue);
+        await processOneOrNoneData(cronQueries.updateGeneralClusterLoanStatusOverDue);
+        await processOneOrNoneData(cronQueries.recordLoanDefaulting);
+        await processOneOrNoneData(cronQueries.recordCronTrail);
         userActivityTracking(application.user_id, 78, 'success');
         return application;
       })
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully updated cluster loans that are over due to over due in the database 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully updated cluster loans that are over due to over due in the database
     updateClusterLoanStatusToOverdue.controllers.cron.js`);
     return;
   } catch (error) {
@@ -91,7 +90,7 @@ export const initiateClusterLoanRepayment = async() => {
   try {
     const dueForPaymentClusterLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedClusterLoanRepayments, [ Number(7) ]);
     // still try to automatically debit until after 7 days proposed loan repayment date passes
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all luster loan repayments that have passed the current date fetched from the database 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all luster loan repayments that have passed the current date fetched from the database
     initiateClusterLoanRepayment.controllers.cron.js`);
     await Promise.all([
       dueForPaymentClusterLoanRepayments.map(async(clusterRepayment) => {
@@ -104,9 +103,9 @@ export const initiateClusterLoanRepayment = async() => {
         const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails);
         // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
-          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan repayment via paystack initialized 
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster loan repayment via paystack initialized
           initiateClusterLoanRepayment.controllers.cron.js`);
-          await processOneOrNoneData(cronQueries.recordCronTrail, [ user.user_id, 'LNRPTCDIN', 'user next cluster loan repayment initiated' ]);
+          await processOneOrNoneData(cronQueries.recordCronTrail);
           userActivityTracking(user.user_id, 79, 'success');
           return clusterRepayment;
         }
@@ -120,7 +119,7 @@ export const initiateClusterLoanRepayment = async() => {
     return;
   } catch (error) {
     error.label = enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER;
-    logger.error(`initiating cluster loan repayment for loan repayments which are due for repayment 
+    logger.error(`initiating cluster loan repayment for loan repayments which are due for repayment
     failed::${enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`, error.message);
     return;
   }
@@ -135,7 +134,7 @@ export const initiateLoanRepayment = async() => {
   try {
     const dueForPaymentLoanRepayments = await processAnyData(cronQueries.fetchAllQualifiedRepayments, [ Number(7) ]);
     // still try to automatically debit until after 7 days proposed loan repayment date passes
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: all loan repayments that have passed the current date fetched from the database
     initiateLoanRepayment.controllers.cron.js`);
     await Promise.all([
       dueForPaymentLoanRepayments.map(async(repayment) => {
@@ -148,9 +147,9 @@ export const initiateLoanRepayment = async() => {
         const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCardDetails);
         // the first in the array is the default card, if no default card, use the next tokenized card
         if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'success') {
-          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized 
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized
           initiateLoanRepayment.controllers.cron.js`);
-          await processOneOrNoneData(cronQueries.recordCronTrail, [ user.user_id, 'LNRPTCDIN', 'user next loan repayment initiated' ]);
+          await processOneOrNoneData(cronQueries.recordCronTrail);
           userActivityTracking(user.user_id, 79, 'success');
           return repayment;
         }
@@ -179,7 +178,7 @@ export const updatesPromoStatusToActive = async() => {
     await processAnyData(cronQueries.updatePromoStatusToActive);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain inactive promos in the database has been made active
       updatesPromoStatusToActive.controllers.cron.js`);
-    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'UPRMSTACT', 'update promo status to active' ]);
+    await processOneOrNoneData(cronQueries.recordCronTrail);
     return;
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
@@ -196,7 +195,7 @@ export const updatesPromoStatusToActive = async() => {
  */
 export const nonPerformingPersonalLoans = async() => {
   try {
-    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
+    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const nonPerformingUsers = await processAnyData(notificationQueries.nonPerformingLoans, [ Number(nplGraceDay.value) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non performing users from the db nonPerformingLoans.controllers.loan.js`);
@@ -213,10 +212,10 @@ export const nonPerformingPersonalLoans = async() => {
         sendNotificationToAdmin(adminUsers.admin_id, 'Non-performing Individual loans',
           adminNotification.nonPerformingPersonalLoans(userName), userName, 'non-performing-loans');
       }
-      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [ user.user_id, user.loan_id, user.loan_repayment_id, null, 'individual loan' ]); 
+      await processOneOrNoneData(cronQueries.recordLoanAsNpl);
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
-    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non performing loan notifications to admins' ]);
+    await processOneOrNoneData(cronQueries.recordCronTrail);
     return;
   } catch (error) {
     error.label = enums.NON_PERFORMING_LOANS_CONTROLLER;
@@ -232,11 +231,11 @@ export const nonPerformingPersonalLoans = async() => {
  */
 export const nonPerformingClusterLoans = async() => {
   try {
-    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails, [ 'npl_overdue_past' ]);
+    const nplGraceDay = await processOneOrNoneData(notificationQueries.fetchAdminSetEnvDetails);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const clusterMembers = await processAnyData(notificationQueries.nonPerformingClusterLoans, [ Number(nplGraceDay.value) ]);
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non-performing users from 
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: successfully fetched loan application admin and non-performing users from
     the db. nonPerformingClusterLoans.controllers.loan.js`);
 
     const userName = [];
@@ -251,11 +250,11 @@ export const nonPerformingClusterLoans = async() => {
         sendNotificationToAdmin(adminUsers.admin_id, 'Non-Performing cluster members Loan',
           adminNotification.nonPerformingClusterLoans(userName), userName, 'non-performing-loans');
       }
-      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [ user.user_id, user.member_loan_id, user.loan_repayment_id, user.loan_id, 'cluster loan' ]); 
+      await processOneOrNoneData(cronQueries.recordLoanAsNpl);
     });
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingClusterLoans.controllers.cron.js`);
-    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SNPLNNTADM', 'send non-performing loan notifications to admins' ]);
+    await processOneOrNoneData(cronQueries.recordCronTrail);
     return;
   } catch (error) {
     error.label = enums.NON_PERFORMING_CLUSTER_LOANS_CONTROLLER;
@@ -274,7 +273,7 @@ export const updatesPromoStatusToEnded = async() => {
   try {
     await processAnyData(cronQueries.updatePromoStatusToEnded);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: certain active promos in the database has been made to end updatesPromoStatusToEnded.controllers.cron.js`);
-    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'UPRMSTAEND', 'update promo status to ended' ]);
+    await processOneOrNoneData(cronQueries.recordCronTrail);
     return;
   } catch (error) {
     error.label = enums.UPDATE_PROMO_STATUS_TO_ACTIVE_CONTROLLER;
@@ -296,7 +295,7 @@ export const promoEndingSoonNotification = async() => {
     await admins.map((admin) => {
       sendNotificationToAdmin(admin.admin_id, 'Admin Promo Ending Soon', adminNotification.promoEndingSoonNotification(`${promo.name}`), 'ending-promo');
     });
-    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SPESNTADM', 'send promo ending soon notification to admins' ]);
+    await processOneOrNoneData(cronQueries.recordCronTrail);
     return;
   } catch (error) {
     error.label = enums.PROMO_ENDING_SOON_NOTIFICATION_CONTROLLER;
@@ -306,7 +305,7 @@ export const promoEndingSoonNotification = async() => {
 };
 
 /**
- * update alert notification 
+ * update alert notification
  * @returns { Return } -
  * @memberof CronController
  */
@@ -314,7 +313,7 @@ export const updateAlertNotification = async() => {
   try {
     await processAnyData(userQueries.updateAlertNotification, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:: successfully fetched alert notification from the DB. fetchAlertNotification.controller.cron.js`);
-    await processOneOrNoneData(cronQueries.recordCronTrail, [ null, 'SANTEND', 'set alert notifications to ended' ]);
+    await processOneOrNoneData(cronQueries.recordCronTrail);
     return;
   } catch (error) {
     error.label = enums.UPDATE_ALERT_NOTIFICATION_CONTROLLER;

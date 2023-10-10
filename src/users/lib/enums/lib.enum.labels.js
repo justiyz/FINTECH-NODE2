@@ -368,4 +368,5 @@ export const ADMIN_SET_USER_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsCon
 export const ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsController::resetAllUsersRewardPoints';
 export const CREATE_LOAN_APPLICATION_RECORD = 'AdminLoanController::manuallyCreateLoanRecord';
 export const FETCH_CATEGORY_LIST = 'AdminShopController::listShopCategories';
-
+export const FETCH_SINGLE_CATEGORY = 'ShopController::fetchShopDetails';
+export const FETCH_ALL_TICKETS = 'ShopController::getAllTickets'

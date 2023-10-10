@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS ticket_categories CASCADE;
+DROP TYPE IF EXISTS ticket_status CASCADE;
+DROP TYPE IF EXISTS ticket_category_type CASCADE;
+DROP TYPE IF EXISTS ticket_category_status CASCADE;
+DROP TABLE IF EXISTS tickets CASCADE;
+DROP TABLE IF EXISTS user_tickets CASCADE;
+
+

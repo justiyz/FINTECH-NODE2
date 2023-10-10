@@ -10,7 +10,7 @@ const router = Router();
 router.get(
   '/fetch/shop-categories',
   AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('role management', 'read'),
+  // RoleMiddleware.adminAccess('role management', 'read'),
   ShopController.listShopCategories
 );
 export default router;

@@ -106,6 +106,9 @@ export const operations = {
   105: 'CLRWDPTS', // user claim referral reward points
   106: 'RCVCLCTBN', // user receives cluster creation bonus points
   107: 'RCVCLMIBN', // user receives extra bonus point on cluster membership increasing well
-  108: 'DELOWNACT' // user deletes own account on seedfi
+  108: 'DELOWNACT', // user deletes own account on seedfi
+  109: 'FTFSCL', // user failed to fetch shop categories list
+  110: 'FATLBU', // user failed to fetch all the list of available tickets
+  111: 'FTLUST' // failed to load users subscribed tickets
 };
-  
+
