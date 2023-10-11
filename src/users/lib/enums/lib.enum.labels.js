@@ -369,4 +369,6 @@ export const ADMIN_SET_USERS_REWARD_POINTS_TO_ZERO_CONTROLLER = 'AdminSettingsCo
 export const CREATE_LOAN_APPLICATION_RECORD = 'AdminLoanController::manuallyCreateLoanRecord';
 export const FETCH_CATEGORY_LIST = 'AdminShopController::listShopCategories';
 export const FETCH_SINGLE_CATEGORY = 'ShopController::fetchShopDetails';
-export const FETCH_ALL_TICKETS = 'ShopController::getAllTickets'
+export const FETCH_ALL_TICKETS = 'ShopController::getAllTickets';
+export const CREATE_SHOP_CATEGORY_ITEM = 'ShopController::createShopCategory';
+export const CREATE_EVENT_SUCCESSFUL = 'ShopContrller::createEventRecord';

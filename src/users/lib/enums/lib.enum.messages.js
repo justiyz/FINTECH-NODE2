@@ -379,7 +379,10 @@ export const REWARD_POINTS_SET_TO_ZERO_SUCCESSFULLY = 'Claimed points set to zer
 export const MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN = 'User loan application was created by the admin';
 export const FAILED_TO_CREATE_MANUAL_LOAN_RECORD = 'Admin could not create the loan record for the user';
 export const SHOP_CATEGORIES_LIST = 'Shop categories fetched successfully';
+export const CREATE_CATEGORIES_ITEM = 'Shop category successfully created';
 export const SHOP_CATEGORY_EXIST =  (shopName) => `Shop category ${shopName} exist`;
 export const TICKET_LIST = 'Tickets list fetched successfully. ';
 export const FETCH_USER_TICKETS_SUCCESSFULLY = 'User tickets fetched successfully.';
 export const FAILED_TO_FETCH_USER_TICKETS = 'failed to fetch user tickets';
+export const FETCH_LIST_OF_EVENT = 'list of active events fetched successfully';
+export const CREATED_EVENT_SUCCESSFULLY = 'Event record successfully created';

@@ -78,5 +78,8 @@ export const updates_reward_point_ranges = (name, type) => `${name} updates ${ty
 export const updates_reward_points = (name, type) => `${name} updates ${type} reward point in settings`;
 export const reset_user_reward_points = (name, userName) => `${name} resets reward point for ${userName}`;
 export const reset_all_users_reward_points = (name) => `${name} resets all users reward points`;
-export const fetch_shop_categories = () => 'attempt to fetch shop category';
+export const fetch_shop_categories = (name) => `${name} attempt to fetch shop category`;
+export const create_shop_categories = (name) => `${name} attempted to create shop category but failed`;
+export const fetch_events_lists = (name) => `${name} successfully fetches list of events`;
+export const create_event_record_failed = 'failed to create repayment record';
 

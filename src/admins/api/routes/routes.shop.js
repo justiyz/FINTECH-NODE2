@@ -8,9 +8,27 @@ import * as ShopController from '../controllers/controller.shop';
 const router = Router();
 
 router.get(
-  '/fetch/shop-categories',
+  '/shop-categories',
   AuthMiddleware.validateAdminAuthToken,
   // RoleMiddleware.adminAccess('role management', 'read'),
   ShopController.listShopCategories
 );
+
+router.post(
+  '/create-shop-category',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.createShopCategory
+);
+
+router.get(
+  '/get-event-list',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.getEventsList
+);
+
+router.post(
+  '/create-event-record',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.createEventRecord
+)
 export default router;

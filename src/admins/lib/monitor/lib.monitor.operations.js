@@ -54,6 +54,9 @@ export const operations = {
   53: 'RSTURWDPT', // admin resets a specified user reward points
   54: 'RSTAURWDPT', // admin resets all users reward points
   55: 'EDTCLST', // admin edits custer interest rate details
-  56: 'ALSCL' // admin list shop categories
+  56: 'ALSCL', // admin list shop categories
+  57: 'FTCSC', // admin failed to create shop category
+  58: 'LOEFS', // admin successfully fetched list of events
+  59: 'FTCER' // admin failed to create event record
 };
 
