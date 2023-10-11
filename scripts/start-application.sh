@@ -8,6 +8,11 @@ PORT=4500
 # Restart the container
 echo "Running Hook: start-application.sh"
 
+# docker build
+cd /home/ubuntu/seedfi-backend-test/seedfi-backend-api
+sudo docker ps
+sudo docker build -t seedfi-backend-test .
+
 # Stop and Remove old Container
 echo "Running Hook: Removing Old Container"
 sudo docker stop "$CONTAINER_NAME" && sudo docker rm "$CONTAINER_NAME"

@@ -13,9 +13,3 @@ unzip /home/ubuntu/seedfi-backend-test/seedfi-app.zip -d "$app_dir"
 cp "$env_dir/.env" "$app_dir"
 
 chown -R ubuntu:ubuntu "$app_dir"
-
-
-# # Run npm install
-cd /home/ubuntu/seedfi-backend-test/seedfi-backend-api
-sudo docker ps
-sudo docker build -t seedfi-backend-test .
