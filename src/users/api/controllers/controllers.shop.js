@@ -69,6 +69,19 @@ export const fetchUserTickets = async(req, res, next) => {
   }
 };
 
+export const fetchTicketCategories = async(req, res, next) => {
+  try {
+    const ticket_categories = await processAnyData(shopQueries.getTicketCategories, req.params.ticket_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket categories fetched successfully fetchTicketCategories.controller.shop.js`);
+    return ApiResponse.success(res, enums.FETCH_TICKET_CATEGORIES_SUCCESSFULLY, enums.HTTP_OK, ticket_categories);
+  } catch (error) {
+    await userActivityTracking(req.user.user_id, 112, 'fail');
+    error.label = enums.FAILED_TO_FETCH_TICKET_CATEGORIES;
+    logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_FETCH_USER_TICKETS}`);
+    return next(error);
+  }
+};
+
 
 
 

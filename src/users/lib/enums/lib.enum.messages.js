@@ -386,3 +386,5 @@ export const FETCH_USER_TICKETS_SUCCESSFULLY = 'User tickets fetched successfull
 export const FAILED_TO_FETCH_USER_TICKETS = 'failed to fetch user tickets';
 export const FETCH_LIST_OF_EVENT = 'list of active events fetched successfully';
 export const CREATED_EVENT_SUCCESSFULLY = 'Event record successfully created';
+export const FETCH_TICKET_CATEGORIES_SUCCESSFULLY = 'list of ticket categories fetched successfully';
+export const FAILED_TO_FETCH_TICKET_CATEGORIES = 'failed to fetch ticket categories successfully';

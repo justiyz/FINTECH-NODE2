@@ -40,10 +40,9 @@ router.get(
 );
 
 router.get(
-  '/:cluster_id/details',
+  '/ticket/:ticket_id',
   AuthMiddleware.validateAuthToken,
-  Model(Schema.clusterIdParams, 'params'),
-  ClusterMiddleware.checkIfClusterExists,
-  ClusterController.fetchClusterDetails
+  Model(Schema.ticketId, 'params'),
+  shopCategories.fetchTicketCategories
 );
 export default router;
