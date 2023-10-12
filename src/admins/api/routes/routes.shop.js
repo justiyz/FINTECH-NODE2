@@ -4,6 +4,8 @@ import { Router } from 'express';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as ShopController from '../controllers/controller.shop';
+import Model from "../../../users/api/middlewares/middlewares.model";
+import Schema from "../../../users/lib/schemas/lib.schema.shop";
 
 const router = Router();
 
@@ -26,9 +28,23 @@ router.get(
   ShopController.getEventsList
 );
 
+
 router.post(
   '/create-event-record',
   AuthMiddleware.validateAdminAuthToken,
   ShopController.createEventRecord
-)
+);
+
+// router.get(
+//   '/:shop_category_id/details',
+//   AuthMiddleware.validateAdminAuthToken,
+//   Model(Schema.shopCategoryIdParams, 'params'),
+//   ShopController.fetchShopDetails
+// );
+
+router.get(
+  '/ticket/:ticket',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.fetchEventTicketCategories
+);
 export default router;

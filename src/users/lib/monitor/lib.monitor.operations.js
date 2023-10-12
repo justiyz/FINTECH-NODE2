@@ -109,6 +109,7 @@ export const operations = {
   108: 'DELOWNACT', // user deletes own account on seedfi
   109: 'FTFSCL', // user failed to fetch shop categories list
   110: 'FATLBU', // user failed to fetch all the list of available tickets
-  111: 'FTLUST' // failed to load users subscribed tickets
+  111: 'FTLUST', // failed to load users subscribed tickets
+  112: 'FTFTC'
 };
 

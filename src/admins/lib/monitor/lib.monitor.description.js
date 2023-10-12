@@ -81,5 +81,7 @@ export const reset_all_users_reward_points = (name) => `${name} resets all users
 export const fetch_shop_categories = (name) => `${name} attempt to fetch shop category`;
 export const create_shop_categories = (name) => `${name} attempted to create shop category but failed`;
 export const fetch_events_lists = (name) => `${name} successfully fetches list of events`;
-export const create_event_record_failed = 'failed to create repayment record';
+export const create_event_record_failed = 'failed to create event record';
+export const create_event_category_record_failed = 'failed to create event category record';
+export const failed_to_fetch_ticket_categories = 'failed to fetch ticket categories';
 

@@ -371,4 +371,7 @@ export const FETCH_CATEGORY_LIST = 'AdminShopController::listShopCategories';
 export const FETCH_SINGLE_CATEGORY = 'ShopController::fetchShopDetails';
 export const FETCH_ALL_TICKETS = 'ShopController::getAllTickets';
 export const CREATE_SHOP_CATEGORY_ITEM = 'ShopController::createShopCategory';
-export const CREATE_EVENT_SUCCESSFUL = 'ShopContrller::createEventRecord';
+export const CREATE_EVENT_SUCCESSFUL = 'ShopController::createEventRecord';
+export const CREATE_EVENT_CATEGORY_SUCCESSFUL = 'ShopController::createEventTicketRecord';
+export const FETCH_TICKET_CATEGORIES = 'ShopController::fetchTicketCategoriesRecord';
+

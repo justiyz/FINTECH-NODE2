@@ -57,6 +57,8 @@ export const operations = {
   56: 'ALSCL', // admin list shop categories
   57: 'FTCSC', // admin failed to create shop category
   58: 'LOEFS', // admin successfully fetched list of events
-  59: 'FTCER' // admin failed to create event record
+  59: 'FTCER', // admin failed to create event record
+  60: 'FTCECR', // admin failed to create event category record
+  61: 'FTCCF' // admin failed to fetch ticket categories
 };
 
