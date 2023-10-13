@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS shop_categories CASCADE;
+-- DROP TABLE IF EXISTS shop_categories CASCADE;
