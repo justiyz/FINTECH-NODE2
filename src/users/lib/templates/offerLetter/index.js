@@ -110,15 +110,13 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
       </li>
       <li>Execution of offer letter in acceptance of the facility.</li>
       <li>Acceptance of terms and conditions. </li>
-      <li>Payment of upfront fees.</li>
     </ol>
 
 <div>
       <h4 style="margin-bottom: 20px;">TRANSACTION DYNAMICS</h4>
 
   <ol style="padding-left: 15px;">
-    <li>he Borrower executes offer letter, accepts terms and condition, and any other required document</li>
-    <li>Borrower funds the account for upfront fees which are debited upon receipt of documents.</li>
+    <li>The Borrower executes offer letter, accepts terms and condition, and any other required document</li>
     <li>Loan is booked for approved tenor.</li>
     <li>Borrower’s account is debited monthly for loan repayment</li>
   </ol>
@@ -127,13 +125,13 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
         <li>
           <h4>Other Conditions</h4>
           <ol style="padding-left: 0px;">
-            <li>This Offer letter shall not be binding unless it is accepted unconditionally within 30 days from the date hereof. Upon acceptance, it shall remain valid for a period of 90 days, after which it is deemed to have elapsed if the facility is not utilized.</li>
+            <li>This offer letter shall not be binding unless it is accepted unconditionally within 30 days from the date hereof. Upon acceptance, it shall remain valid for a period of 90 days, after which it is deemed to have elapsed if the facility is not utilized.</li>
             <li>Without prejudice to the foregoing, SeedFi reserves the right to vary, alter or amend any of the terms and conditions of the facility as and when the need arises.</li>
-            <li>All expenses incurred in the arrangement, documentation, and enforcement of payments under the facility, including all professional, valuation, legal fees, monitoring, taxes, and commissions (if any) would be borne by the Borrower and SeedFi shall be entitled to debit the Borrower’s account immediately for such expenses.</li>
+            <li>All expenses incurred in the arrangement, documentation, and enforcement of payments under the facility, including all professional, valuation, legal and monitoring fees, taxes and commissions (if any) would be borne by the Borrower and SeedFi shall be entitled to debit the Borrower’s account immediately for such expenses.</li>
             <li>Utilization of the facility or any part thereof shall be at SeedFi’s discretion and is subject to satisfactory documentation and regulation of the Central Bank of Nigeria (CBN) as may be laid down from time to time.</li>
             <li>The Borrower hereby agrees to indemnify SeedFi against any loss howsoever occurring that they may incur, because of any misrepresentation, irregularity, or incompleteness in the information contained in any document submitted to SeedFi.</li>
-            <li>Where there is a turnover covenant, and there is the default in the turnover covenant which exceeds a continuous period of three (3) months and extends up to six (6) months, in addition to the increase in the interest rate pricing mentioned above, the approved limit for the facility shall be reduced, to match the level of the turnover achieved.</li>
-            <li>Funds received into the account when the principal and/or interest are past due, will be applied first to the overdue interest before the outstanding principal amount.</li>
+            <li>Where there is a turnover covenant, and there is the default in the turnover covenant which exceeds a continuous period of three (3) months and extends up to six (6) months, in addition to the increase in the interest rate pricing mentioned above, the approved limit for the facility shall be reduced to match the level of the turnover achieved.</li>
+            <li>Funds received into the account when the principal and/or interest are past due will be applied first to the overdue interest before the outstanding principal amount.</li>
             <li>The facility shall terminate and all sums due to SeedFi hereunder shall become immediately due and payable if the Borrower commits any breach or defaults under the terms of this facility or any other credit facility granted to the Borrower by SeedFi or any other bank.</li>
             <li>SeedFi reserves the right to cancel its commitment unconditionally if the facility remains undrawn or if, in SeedFi’s opinion, there is any deterioration in the Borrower’s creditworthiness and the Borrower shall thereafter be notified of such cancellation.</li>
           </ol>
@@ -151,7 +149,7 @@ Not, without SeedFi’s prior written consent, make any offer of employment or e
     <li>
       <ol style="padding-left: 0px;">
         <h4>Voluntary Prepayment</h4>
-       <p>The Borrower may repay the whole or any part of the loan upon giving the Lender 7 (seven) Business days prior notice. Any amount prepaid may not be redrawn (and shall be applied against scheduled repayments in (inverse order of maturity). Any amount prepaid shall include interest and any pro rata amount of fees that become due and payable on the immediately succeeding due date for such fees. Provided, however, that the Borrower may be charged a fee if the Borrower pays off the loan before maturity. </p>
+       <p>The Borrower may repay the whole or any part of the loan upon giving the Lender 7 (seven) business days prior notice. Any amount prepaid may not be redrawn (and shall be applied against scheduled repayments in inverse order of maturity. Any amount prepaid shall include interest and any pro rata amount of fees that become due and payable on the immediately succeeding due date for such fees. This is provided, however, that the Borrower may be charged a fee if the Borrower pays off the loan before maturity. </p>
       </ol>
     </li>
 
@@ -170,8 +168,6 @@ Not, without SeedFi’s prior written consent, make any offer of employment or e
   </div>
 
   <div>
-    <p style="margin: 40px 0 20px;">Please indicate your acceptance of these terms in the space provided below.</p>
-
     <p style="margin-bottom: 40px;">
       Yours Sincerely,  <br />
       For: SeedFi.
