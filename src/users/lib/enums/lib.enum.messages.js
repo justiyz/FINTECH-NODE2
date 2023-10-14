@@ -388,3 +388,4 @@ export const FETCH_LIST_OF_EVENT = 'list of active events fetched successfully';
 export const CREATED_EVENT_SUCCESSFULLY = 'Event record successfully created';
 export const FETCH_TICKET_CATEGORIES_SUCCESSFULLY = 'list of ticket categories fetched successfully';
 export const FAILED_TO_FETCH_TICKET_CATEGORIES = 'failed to fetch ticket categories successfully';
+export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';

@@ -374,4 +374,5 @@ export const CREATE_SHOP_CATEGORY_ITEM = 'ShopController::createShopCategory';
 export const CREATE_EVENT_SUCCESSFUL = 'ShopController::createEventRecord';
 export const CREATE_EVENT_CATEGORY_SUCCESSFUL = 'ShopController::createEventTicketRecord';
 export const FETCH_TICKET_CATEGORIES = 'ShopController::fetchTicketCategoriesRecord';
+export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'ShopController::createTicketSubscription';
 

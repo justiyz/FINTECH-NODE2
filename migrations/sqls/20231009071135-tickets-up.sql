@@ -2,6 +2,21 @@ CREATE TYPE ticket_status AS ENUM('inactive', 'active', 'suspended', 'deactivate
 CREATE TYPE ticket_category_type AS ENUM('regular', 'bronze', 'gold');
 CREATE TYPE ticket_category_status AS ENUM('inactive', 'active');
 
+CREATE TABLE IF NOT EXISTS shop_categories(
+    id SERIAL,
+    shop_category_id VARCHAR PRIMARY KEY DEFAULT 'shop-category-' || LOWER(
+        REPLACE(
+            CAST(uuid_generate_v1mc() AS VARCHAR(20))
+            , '-',''
+        )
+    ),
+    category_name VARCHAR UNIQUE NOT NULL,
+    category_description VARCHAR NOT NULL,
+    status BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS tickets (
     id SERIAL,
     ticket_id VARCHAR PRIMARY KEY DEFAULT 'ticket-' || LOWER(
@@ -32,6 +47,7 @@ CREATE TABLE IF NOT EXISTS ticket_categories (
   ticket_id VARCHAR REFERENCES tickets(ticket_id),
   ticket_category_type ticket_category_type DEFAULT 'regular',
   ticket_price NUMERIC NOT NULL,
+  units NUMERIC NOT NULL,
   ticket_category_status ticket_category_status DEFAULT 'active',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -51,22 +67,5 @@ CREATE TABLE IF NOT EXISTS user_tickets (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-CREATE TABLE IF NOT EXISTS ticket_categories(
-  id SERIAL,
-  ticket_category_id VARCHAR PRIMARY KEY DEFAULT 'ticket-category-' || LOWER(
-    REPLACE(
-      CAST(uuid_generate_v1mc() as VARCHAR(30))
-      , '-', ''
-    )
-  ),
-  ticket_id VARCHAR REFERENCES tickets(ticket_id),
-  category_title VARCHAR NOT NULL,
-  category_price NUMERIC NOT NULL,
-  status ticket_category_status DEFAULT 'active',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 
 

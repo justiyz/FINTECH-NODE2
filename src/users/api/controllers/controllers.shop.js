@@ -3,6 +3,7 @@ import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
+import { FAILED_TO_CREATE_TICKET_SUBSCRIPTION } from "../../lib/enums/lib.enum.labels";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -78,6 +79,17 @@ export const fetchTicketCategories = async(req, res, next) => {
     await userActivityTracking(req.user.user_id, 112, 'fail');
     error.label = enums.FAILED_TO_FETCH_TICKET_CATEGORIES;
     logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_FETCH_USER_TICKETS}`);
+    return next(error);
+  }
+};
+
+export const createTicketSubscription = async(req, res, next) => {
+  try {
+
+  } catch (error) {
+    await userActivityTracking(req.user.user_id, 113, 'fail');
+    error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
+    logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION}`);
     return next(error);
   }
 };

@@ -60,6 +60,7 @@ export const createShopCategory = async(req, res, next) => {
 export const getEventsList = async(req, res, next) => {
   try {
     let events = await processAnyData(shopQueries.getAllEvents);
+    console.log(typeof events);
     if (events)
       return ApiResponse.success(res, enums.FETCH_LIST_OF_EVENT, enums.HTTP_OK, events);
   } catch (error) {
@@ -93,21 +94,19 @@ export const createEventRecord = async(req, res, next) => {
       ticket_status,
       event_date
     ]);
-
-    if (!createEventRecord) {
-      // logger.error(`Failed to create event record:::${enums.CREATE_SHOP_CATEGORY_ITEM}`, error.label);
-      throw new Error('Failed to create event record.');
-    }
-
+    // Create ticket category
     const ticket_id = createEventRecord[0].ticket_id;
-
-    for (const key in ticket_categories) {
-      // Create ticket category
-      await processOneOrNoneData(shopQueries.createTicketCategory, [ ticket_id, key, ticket_categories[key], 'active' ]);
-
-      logger.info(`Created Ticket category ${key} with value ${ticket_categories[key]}:::${enums.CREATE_EVENT_CATEGORY_SUCCESSFUL}`);
+    for (const category in ticket_categories) {
+      const c_ticket = ticket_categories[category];
+      await processOneOrNoneData(shopQueries.createTicketCategory, [
+        ticket_id,
+        c_ticket.type,
+        c_ticket.amount,
+        c_ticket.units,
+        'active' ]
+      );
+      logger.info(`Created Ticket category ${c_ticket.type} with value ${c_ticket.amount} and ${c_ticket.units} units:::${enums.CREATE_EVENT_CATEGORY_SUCCESSFUL}`);
     }
-
     logger.info(`Create Event Record:::${enums.CREATE_EVENT_SUCCESSFUL}`);
     return ApiResponse.success(res, enums.CREATED_EVENT_SUCCESSFULLY, enums.HTTP_OK, createEventRecord);
   } catch (error) {
@@ -124,45 +123,9 @@ export const fetchEventTicketCategories = async(req, res, next) => {
     return ApiResponse.success(res, enums.FETCH_TICKET_CATEGORIES_SUCCESSFULLY, enums.HTTP_OK, ticket_categories);
   } catch (error) {
     await adminActivityTracking(req.admin.admin_id, 61, 'fail', descriptions.failed_to_fetch_ticket_categories);
-    error.label = enums.FETCH_TICKET_CATEGORIES;;
+    error.label = enums.FETCH_TICKET_CATEGORIES;
     logger.error(`Failed to fetch event ticket categories record::${enums.FETCH_TICKET_CATEGORIES}`);
-    return next(error)
-  }
-};
-
-export const createEventRecord_ = async(req, res, next) => {
-  try {
-    let payload = [
-      req.body.ticket_name,
-      req.body.ticket_description,
-      req.body.ticket_image_url,
-      req.body.insurance_coverage,
-      req.body.processing_fee,
-      req.body.ticket_status,
-      req.body.event_date
-    ];
-    const createEventRecord = await processAnyData(shopQueries.createEventRecord, payload);
-    if (createEventRecord) {
-      const ticket_id = createEventRecord[0].ticket_id;
-      const ticket_categories = req.body.ticket_categories;
-      for (const key in ticket_categories) {
-        try {
-          logger.info(`Created Ticket category ${key} with value ${ticket_categories[key]}:::${enums.CREATE_EVENT_CATEGORY_SUCCESSFUL}`);
-          await processOneOrNoneData(shopQueries.createTicketCategory, [ ticket_id, key, ticket_categories[key], 'active' ]);
-        } catch (error) {
-          await adminActivityTracking(req.admin.admin_id, 60, 'fail', descriptions.create_event_category_record_failed);
-          error.label = enums.CREATE_EVENT_CATEGORY_SUCCESSFUL;
-          logger.error(`Failed to create shop category:::${enums.CREATE_EVENT_CATEGORY_SUCCESSFUL}`, error.label);
-          return next(error);
-        }
-      }
-    }
-    logger.info(`Create Event Record:::${enums.CREATE_EVENT_SUCCESSFUL}`);
-    return ApiResponse.success(res, enums.CREATED_EVENT_SUCCESSFULLY, enums.HTTP_OK, createEventRecord);
-  } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 59, 'fail', descriptions.create_event_record_failed);
-    error.label = enums.CREATE_SHOP_CATEGORY_ITEM;
-    logger.error(`Failed to create shop category:::${enums.CREATE_SHOP_CATEGORY_ITEM}`, error.label);
     return next(error);
   }
 };
+

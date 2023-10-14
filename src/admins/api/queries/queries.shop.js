@@ -39,17 +39,8 @@ export default {
         tickets.processing_fee,
         tickets.ticket_status,
         tickets.event_date
-    LEFT JOIN ticket_categories ON tickets.ticket_id = ticket_categories.ticket_id
     FROM tickets;
 
-    SELECT
-    t.*,
-    tc.ticket_category_id,
-    tc.ticket_category_type,
-    tc.ticket_price,
-    tc.ticket_category_status
-    FROM tickets AS t
-    LEFT JOIN ticket_categories AS tc ON t.ticket_id = tc.ticket_id;
   `,
   createEventRecord: `
     INSERT INTO tickets(
@@ -69,8 +60,9 @@ export default {
         ticket_id,
         ticket_category_type,
         ticket_price,
+        units,
         ticket_category_status
-    ) VALUES ($1, $2, $3, $4)
+    ) VALUES ($1, $2, $3, $4, $5)
     RETURNING id, ticket_category_id;
   `,
 
@@ -78,5 +70,15 @@ export default {
     SELECT *
     FROM ticket_categories
     WHERE ticket_id = $1
+  `,
+
+  fetchUserTickets: `
+    SELECT *
+    FROM user_tickets
+    WHERE user_id = $1
+  `,
+
+  fetchUserEventTicket: `
+    SELECT * FROM user_tickets WHERE user_id = $1
   `
 };
