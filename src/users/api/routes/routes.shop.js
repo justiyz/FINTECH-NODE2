@@ -47,9 +47,9 @@ router.get(
 );
 
 router.post(
-  '/ticket/:ticket_id/subscribe',
+  '/ticket/:ticket_id/book',
   AuthMiddleware.validateAuthToken,
-  Model(Schema.subscribeTicket, 'params'),
+  Model(Schema.subscribeTicket, 'body'),
   shopCategories.createTicketSubscription
 );
 

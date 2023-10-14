@@ -63,9 +63,8 @@ CREATE TABLE IF NOT EXISTS user_tickets (
   ),
   user_id VARCHAR REFERENCES users(user_id),
   ticket_id VARCHAR REFERENCES tickets(ticket_id),
+  units NUMERIC NOT NULL,
   status ticket_status DEFAULT 'active',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-

@@ -78,7 +78,19 @@ export default {
     WHERE user_id = $1
   `,
 
+  createUserTicketRecord: `
+    INSERT INTO user_tickets(
+        user_id,
+        ticket_id,
+        units,
+        status
+      ) VALUES ($1, $2, $3, $4)
+    RETURNING *;
+  `,
+
   fetchUserEventTicket: `
-    SELECT * FROM user_tickets WHERE user_id = $1
+    SELECT *
+    FROM user_tickets
+    WHERE user_id = $1
   `
 };

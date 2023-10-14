@@ -1,9 +1,12 @@
 import { processAnyData } from '../services/services.db';
-import shopQueries from '../queries/queries.shop';
+// import shopQueries from '../../queries/queries.shop';
+import adminShopQueries from '../../../admins/api/queries/queries.shop';
+import shopQueries      from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
-import { FAILED_TO_CREATE_TICKET_SUBSCRIPTION } from "../../lib/enums/lib.enum.labels";
+import { FAILED_TO_CREATE_TICKET_SUBSCRIPTION } from '../../lib/enums/lib.enum.labels';
+import { CREATE_USER_TICKET_SUCCESSFULLY, FAILED_TO_CREATE_USER_TICKET } from "../../lib/enums/lib.enum.messages";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -39,9 +42,9 @@ export const fetchShopDetails = async(req, res, next) => {
 export const fetchTickets = async(req, res, next) => {
   try {
     const { user } = req;
-    const user_ticket = await processAnyData(shopQueries.getTicketCategories, [ req.params.ticket_status ]);
+    let tickets = await processAnyData(adminShopQueries.getAllEvents, [ req.body.status ]);
     const data = {
-      user_ticket
+      tickets
     };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tickets fetched successfully fetchTickets.controller.shop.js`);
     return ApiResponse.success(res, enums.TICKET_LIST, enums.HTTP_OK, data);
@@ -85,7 +88,15 @@ export const fetchTicketCategories = async(req, res, next) => {
 
 export const createTicketSubscription = async(req, res, next) => {
   try {
-
+    const ticket = req.body;
+    const user_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, [
+      req.user.user_id,
+      ticket.ticket_id,
+      ticket.units,
+      'active'
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
+    return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, user_ticket);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
@@ -93,6 +104,21 @@ export const createTicketSubscription = async(req, res, next) => {
     return next(error);
   }
 };
+
+export const fetchUserSubscribedTickets = async(req, res, next) => {
+  try {
+    const user_id = req.user.user_id;
+    const user_tickets = await processAnyData(adminShopQueries.fetchUserTickets, [ user_id ]);
+    if (user_tickets)
+      return ApiResponse.success(res, enums.FETCHED_USER_TICKETS_SUCCESSFULLY, enums.HTTP_OK, user_tickets);
+  } catch (error) {
+    await userActivityTracking(req.user.user_id, 114, 'fail');
+    error.label = enums.FAILED_TO_FETCH_USER_TICKETS;
+    return next(error);
+  }
+};
+
+
 
 
 

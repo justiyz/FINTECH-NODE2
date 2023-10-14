@@ -60,7 +60,6 @@ export const createShopCategory = async(req, res, next) => {
 export const getEventsList = async(req, res, next) => {
   try {
     let events = await processAnyData(shopQueries.getAllEvents);
-    console.log(typeof events);
     if (events)
       return ApiResponse.success(res, enums.FETCH_LIST_OF_EVENT, enums.HTTP_OK, events);
   } catch (error) {

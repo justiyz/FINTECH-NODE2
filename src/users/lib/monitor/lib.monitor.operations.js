@@ -111,6 +111,7 @@ export const operations = {
   110: 'FATLBU', // user failed to fetch all the list of available tickets
   111: 'FTLUST', // failed to load users subscribed tickets
   112: 'FTFTC',
-  113: 'FTCTAR' // failed to create ticket application subscription
+  113: 'FTCTAR', // failed to create ticket application subscription
+  114: 'FTFUTS' // failed to fetch user tickets successfully
 };
 
