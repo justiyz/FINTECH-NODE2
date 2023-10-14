@@ -19,10 +19,16 @@ const userTickets = Joi.object().keys({
 const ticketId = Joi.object().keys({
   ticket_id: Joi.string().required()
 });
+
+const subscribeTicket = Joi.object().keys({
+  units: Joi.string().required(),
+  ticket_id: Joi.string().required()
+});
 export default  {
   shopCategory,
   shopCategoryIdParams,
   ticketList,
   userTickets,
-  ticketId
+  ticketId,
+  subscribeTicket
 };

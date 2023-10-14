@@ -45,4 +45,12 @@ router.get(
   Model(Schema.ticketId, 'params'),
   shopCategories.fetchTicketCategories
 );
+
+router.post(
+  '/ticket/:ticket_id/book',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.subscribeTicket, 'body'),
+  shopCategories.createTicketSubscription
+);
+
 export default router;
