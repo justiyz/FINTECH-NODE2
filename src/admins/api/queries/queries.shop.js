@@ -82,9 +82,12 @@ export default {
     INSERT INTO user_tickets(
         user_id,
         ticket_id,
+        ticket_category_id,
         units,
+        insurance_coverage,
+        payment_tenure,
         status
-      ) VALUES ($1, $2, $3, $4)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING *;
   `,
 
@@ -92,5 +95,19 @@ export default {
     SELECT *
     FROM user_tickets
     WHERE user_id = $1
+  `,
+
+  updateTicketUnitsAvailable: `
+    UPDATE ticket_categories
+    SET
+        units = $2,
+        updated_at = NOW()
+    WHERE ticket_categories = $1
+  `,
+
+  getTicketUnitsAvailable: `
+    SELECT units
+    FROM ticket_categories
+    WHERE ticket_category_id = $1
   `
 };

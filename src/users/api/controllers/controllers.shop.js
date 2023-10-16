@@ -7,6 +7,7 @@ import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 import { FAILED_TO_CREATE_TICKET_SUBSCRIPTION } from '../../lib/enums/lib.enum.labels';
 import { CREATE_USER_TICKET_SUCCESSFULLY, FAILED_TO_CREATE_USER_TICKET } from "../../lib/enums/lib.enum.messages";
+import { processOneOrNoneData } from "../../../admins/api/services/services.db";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -88,15 +89,33 @@ export const fetchTicketCategories = async(req, res, next) => {
 
 export const createTicketSubscription = async(req, res, next) => {
   try {
-    const ticket = req.body;
-    const user_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, [
-      req.user.user_id,
-      ticket.ticket_id,
-      ticket.units,
-      'active'
-    ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
-    return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, user_ticket);
+    const tickets = req.body.tickets;
+    const ticket_purchase_logs = [];
+    // if(// number of ticket )
+    for (const ticket in tickets) {
+      // get the number of tickets available
+      const available_tickets = await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, tickets[ticket].ticket_category_id);
+
+      const ticket_application = [
+        req.user.user_id,
+        tickets[ticket].ticket_id,
+        tickets[ticket].ticket_category_id,
+        tickets[ticket].units,
+        req.body.insurance_coverage,
+        req.body.payment_tenure,
+        'active'
+      ];
+      const booked_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
+      const reduceTicket = available_tickets.units - tickets[ticket].units;
+      // update available ticket units
+      await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, [ tickets[ticket].ticket_category_id, reduceTicket ]);
+      ticket_purchase_logs.push(booked_ticket);
+    }
+
+
+    // const user_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
+    // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, ticket_purchase_logs);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;

@@ -1,6 +1,7 @@
 CREATE TYPE ticket_status AS ENUM('inactive', 'active', 'suspended', 'deactivated');
 CREATE TYPE ticket_category_type AS ENUM('regular', 'bronze', 'gold');
 CREATE TYPE ticket_category_status AS ENUM('inactive', 'active');
+CREATE TYPE user_ticket_status AS ENUM('inactive', 'active');
 
 CREATE TABLE IF NOT EXISTS shop_categories(
     id SERIAL,
@@ -63,8 +64,11 @@ CREATE TABLE IF NOT EXISTS user_tickets (
   ),
   user_id VARCHAR REFERENCES users(user_id),
   ticket_id VARCHAR REFERENCES tickets(ticket_id),
+  ticket_category_id VARCHAR REFERENCES ticket_categories(ticket_category_id),
   units NUMERIC NOT NULL,
-  status ticket_status DEFAULT 'active',
+  insurance_coverage VARCHAR NOT NULL,
+  payment_tenure VARCHAR NOT NULL,
+  status user_ticket_status DEFAULT 'active',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
