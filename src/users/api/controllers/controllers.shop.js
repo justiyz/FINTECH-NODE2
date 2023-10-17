@@ -108,14 +108,14 @@ export const createTicketSubscription = async(req, res, next) => {
       const booked_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
       const reduceTicket = available_tickets.units - tickets[ticket].units;
       // update available ticket units
-      await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, [ tickets[ticket].ticket_category_id, reduceTicket ]);
+      const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
+      console.log(slate_array);
+
+      // await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slate_array);
       ticket_purchase_logs.push(booked_ticket);
     }
-
-
-    // const user_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
-    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
-    // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, ticket_purchase_logs);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
+    return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, ticket_purchase_logs);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
