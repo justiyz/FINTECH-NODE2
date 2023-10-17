@@ -2,7 +2,7 @@ export default {
   shopCategories: `
     SELECT id, shop_category_id, category_name, status, category_description
     FROM shop_categories
-    WHERE status = $1`,
+    WHERE status = true`,
 
   getShopDetails: `
     SELECT id, shop_category_id, category_name, status, category_description
