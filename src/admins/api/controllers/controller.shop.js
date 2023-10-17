@@ -80,9 +80,13 @@ export const createEventRecord = async(req, res, next) => {
       processing_fee,
       ticket_status,
       event_date,
-      ticket_categories
+      ticket_categories,
+      ticket_start_date,
+      ticket_end_date,
+      event_location,
+      event_time
     } = req.body;
-
+    // event_start_date, event_end_date, event_location, event_time
     // Create the event record
     const createEventRecord = await processAnyData(shopQueries.createEventRecord, [
       ticket_name,
@@ -91,7 +95,11 @@ export const createEventRecord = async(req, res, next) => {
       insurance_coverage,
       processing_fee,
       ticket_status,
-      event_date
+      event_date,
+      ticket_start_date,
+      ticket_end_date,
+      event_location,
+      event_time
     ]);
     // Create ticket category
     const ticket_id = createEventRecord[0].ticket_id;

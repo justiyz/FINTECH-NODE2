@@ -50,8 +50,12 @@ export default {
         insurance_coverage,
         processing_fee,
         ticket_status,
-        event_date
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        event_date,
+        ticket_start_date,
+        ticket_end_date,
+        event_location,
+        event_time
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
    RETURNING *;
   `,
 
