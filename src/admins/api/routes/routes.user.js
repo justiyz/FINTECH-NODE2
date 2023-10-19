@@ -6,6 +6,8 @@ import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
+import { saveAdminUploadedDocument } from "../controllers/controllers.user";
+import { uploadAdminDocument } from "../middlewares/middlewares.user";
 
 const router = Router();
 
@@ -77,6 +79,14 @@ router.get(
   UserController.fetchAdminUploadedUserDocuments
 );
 
+router.post(
+  '/upload-admin-document',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.fileTitle, 'payload'),
+  UserMiddleware.uploadAdminDocument,
+  UserController.saveAdminUploadedDocument
+);
+
 router.get(
   '/:user_id/orr-breakdown',
   AuthMiddleware.validateAdminAuthToken,
@@ -127,7 +137,7 @@ router.get(
 );
 
 router.get(
-  '/:user_id/:cluster_id/cluster-details', 
+  '/:user_id/:cluster_id/cluster-details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'read'),
   Model(Schema.clusterDetailsParams, 'params'),

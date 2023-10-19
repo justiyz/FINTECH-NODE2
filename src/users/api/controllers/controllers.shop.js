@@ -5,9 +5,8 @@ import shopQueries      from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
-import { FAILED_TO_CREATE_TICKET_SUBSCRIPTION } from '../../lib/enums/lib.enum.labels';
-import { CREATE_USER_TICKET_SUCCESSFULLY, FAILED_TO_CREATE_USER_TICKET } from "../../lib/enums/lib.enum.messages";
-import { processOneOrNoneData } from "../../../admins/api/services/services.db";
+import { processOneOrNoneData } from '../../../admins/api/services/services.db';
+import QRCode from 'qrcode';
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -103,13 +102,13 @@ export const createTicketSubscription = async(req, res, next) => {
         tickets[ticket].units,
         req.body.insurance_coverage,
         req.body.payment_tenure,
-        'active'
+        'pending'
       ];
       const booked_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
-      const reduceTicket = available_tickets.units - tickets[ticket].units;
       // update available ticket units
-      const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
-      console.log(slate_array);
+      // const reduceTicket = available_tickets.units - tickets[ticket].units;
+      // const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
+      // console.log(slate_array);
 
       // await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slate_array);
       ticket_purchase_logs.push(booked_ticket);
@@ -137,6 +136,33 @@ export const fetchUserSubscribedTickets = async(req, res, next) => {
   }
 };
 
+
+export const sendEventTicketToEmails = async(req, res, next) => {
+  try {
+    const tickets = req.body.tickets;
+    const ticket_id = req.params.ticket_id;
+    console.log('ticket_id', ticket_id);
+    for (const ticket in tickets) {
+      // create QR code
+      QRCode.toDataURL(ticket_id)
+        .then(qr_code => {
+          console.log(qr_code);
+          const ticket_info = {
+            'qr_code': qr_code,
+            'email_address': tickets[ticket].email
+          };
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      console.log(tickets[ticket].email);
+    }
+  } catch (error) {
+    await userActivityTracking(req.user.user_id, 115, 'fail');
+    error.label = enums.FAILED_TO_SEND_EVENT_TICKETS_TO_EMAILS;
+    return next(error);
+  }
+};
 
 
 

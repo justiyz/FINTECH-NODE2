@@ -13,6 +13,7 @@ import { adminActivityTracking } from '../../lib/monitor';
 import { userActivityTracking } from '../../../users/lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import { SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER } from "../../../users/lib/enums/lib.enum.labels";
 
 /**
  * should activate and deactivate user status
@@ -28,7 +29,7 @@ export const editUserStatus = async(req, res, next) => {
   let description;
   const userName = `${userDetails.first_name} ${userDetails.last_name}`;
   const adminName = `${admin.first_name} ${admin.last_name}`;
-  
+
   switch (status) {
   case 'deactivated':
     activityType = 20;
@@ -52,10 +53,10 @@ export const editUserStatus = async(req, res, next) => {
     break;
   }
   try {
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:
     decoded that admin is about to update user status. editUserStatus.admin.controllers.user.js`);
     await processAnyData(userQueries.editUserStatus, [ req.params.user_id, req.body.status ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info:
     confirm that user status has been edited and updated in the DB. editUserStatus.admin.controllers.user.js`);
     const addBlacklistedBvnPayload = UserPayload.addBlacklistedBvn(userDetails);
     if (status === 'blacklisted' && userDetails.bvn !== null) {
@@ -142,9 +143,9 @@ export const sendNotifications = async(req, res, next) => {
     const { admin, userDetails, userEmploymentDetails, query: { type } } = req;
     if (type === 'incomplete-profile') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: type ${type} is decoded sendNotifications.admin.controllers.user.js`);
-      if (userDetails.is_completed_kyc && userDetails.is_verified_bvn && 
+      if (userDetails.is_completed_kyc && userDetails.is_verified_bvn &&
           userDetails.is_uploaded_identity_card &&
-          userEmploymentDetails?.monthly_income && userDetails?.number_of_children && 
+          userEmploymentDetails?.monthly_income && userDetails?.number_of_children &&
           userDetails?.marital_status && userEmploymentDetails?.employment_type
       ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: user profile previously completed sendNotifications.admin.controllers.user.js`);
@@ -180,7 +181,7 @@ export const userAccountInformation = async(req, res, next) => {
       processAnyData(userQueries.fetchUserDebitCards, [ user_id ]),
       processAnyData(userQueries.fetchUserBankAccounts, [ user_id ])
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user debit cards and bank accounts fetched from the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user debit cards and bank accounts fetched from the DB
     userAccountInformation.admin.controllers.user.js`);
     await Promise.all(
       userDebitCards.map(async(card) => {
@@ -274,6 +275,23 @@ export const saveUserUploadedDocument = async(req, res, next) => {
   }
 };
 
+export const saveAdminUploadedDocument = async(req, res, next) => {
+  try {
+    const { admin, body, document } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const uploadedDocument = await processOneOrNoneData(userQueries.uploadProductImage, [ admin.admin_id, body.title.trim(), document ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
+    document uploaded and saved for user successfully saveAdminUploadedDocument.admin.controllers.user.js`);
+    await adminActivityTracking(admin.admin_id, 23, 'success', descriptions.uploads_admin_document(document, adminName));
+    return ApiResponse.success(res, enums.DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER, enums.HTTP_OK, uploadedDocument);
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 62, 'fail', descriptions.uploads_document_failed(req.admin.first_name));
+    error.label = enums.SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER;
+    logger.error(`Saving uploaded document for user failed:::${enums.SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 /**
  * fetching admin uploaded documents of a user
  * @param {Request} req - The request from the endpoint.
@@ -286,7 +304,7 @@ export const fetchAdminUploadedUserDocuments = async(req, res, next) => {
   try {
     const { admin, userDetails } = req;
     const uploadedDocuments = await processAnyData(userQueries.fetchUploadedUserDocuments, [ userDetails.user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents fetched successfully 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents fetched successfully
     fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
     await Promise.all([
       uploadedDocuments.map(async(document) => {
@@ -297,7 +315,7 @@ export const fetchAdminUploadedUserDocuments = async(req, res, next) => {
         return document;
       })
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents sorted successfully 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user admin uploaded documents sorted successfully
     fetchAdminUploadedUserDocuments.admin.controllers.user.js`);
     return ApiResponse.success(res, enums.ADMIN_USER_UPLOADED_DOCUMENTS_FETCHED, enums.HTTP_OK, uploadedDocuments);
   } catch (error) {
@@ -377,47 +395,47 @@ export const verifyUserUtilityBill = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const userName = `${userDetails.first_name} ${userDetails.last_name}`;
     if (!userAddressDetails || userAddressDetails.address_image_url === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user has not filled address details or has not uploaded any utility bill 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user has not filled address details or has not uploaded any utility bill
       verifyUserUtilityBill.admin.controllers.user.js`);
       return ApiResponse.error(res, enums.USER_HAS_NOT_UPLOADED_UTILITY_BILL, enums.HTTP_BAD_REQUEST, enums.VERIFY_USER_UTILITY_BILL_CONTROLLER);
     }
     if (userAddressDetails.is_verified_utility_bill) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user uploaded utility bill has been previously approved 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user uploaded utility bill has been previously approved
       verifyUserUtilityBill.admin.controllers.user.js`);
       return ApiResponse.error(res, enums.USER_UTILITY_BILL_PREVIOUSLY_APPROVED, enums.HTTP_BAD_REQUEST, enums.VERIFY_USER_UTILITY_BILL_CONTROLLER);
     }
     if (body.decision === 'decline') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to decline the uploaded utility bill 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to decline the uploaded utility bill
       verifyUserUtilityBill.admin.controllers.user.js`);
       const declineUtilityBill = await processOneOrNoneData(userQueries.declineUserUploadedUtilityBill, [ userDetails.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been declined so user can upload another 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been declined so user can upload another
       verifyUserUtilityBill.admin.controllers.user.js`);
       sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('declined'), userDetails.fcm_token);
-      sendUserPersonalNotification(userDetails, `${userDetails.first_name} declined utility bill`, 
+      sendUserPersonalNotification(userDetails, `${userDetails.first_name} declined utility bill`,
         PersonalNotifications.declinedUtilityBillNotification(), 'utility-declined', {});
       await MailService('Declined utility bill', 'declinedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
       await adminActivityTracking(req.admin.admin_id, 28, 'success', descriptions.decline_utility_bill(adminName, userName));
       userActivityTracking(userDetails.user_id, 87, 'success');
       return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('declined'), enums.HTTP_OK, declineUtilityBill);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to approve the uploaded utility bill 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin is deciding to approve the uploaded utility bill
       verifyUserUtilityBill.admin.controllers.user.js`);
     const approveUtilityBill = await processOneOrNoneData(userQueries.approveUserUploadedUtilityBill, [ userDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: uploaded utility bill has been approved verifyUserUtilityBill.admin.controllers.user.js`);
-    const tierChoice = (approveUtilityBill.is_verified_address && approveUtilityBill.is_verified_utility_bill) ? '2' : '1'; 
+    const tierChoice = (approveUtilityBill.is_verified_address && approveUtilityBill.is_verified_utility_bill) ? '2' : '1';
     // user needs address to have been verified and uploaded utility bill verified to move to tier 2
     await processOneOrNoneData(userQueries.updateUserTier, [ userDetails.user_id, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user tier value has been updated based on previous verifications
       verifyUserUtilityBill.admin.controllers.user.js`);
     sendPushNotification(userDetails.user_id, PushNotifications.userUtilityBillNotification('approved'), userDetails.fcm_token);
-    sendUserPersonalNotification(userDetails, `${userDetails.first_name} approved utility bill`, 
+    sendUserPersonalNotification(userDetails, `${userDetails.first_name} approved utility bill`,
       PersonalNotifications.approvedUtilityBillNotification(), 'utility-bill-approved', {});
     await MailService('Approved utility bill', 'approvedUtilityBill', { email: userDetails.email, first_name: userDetails.first_name });
     await adminActivityTracking(req.admin.admin_id, 27, 'success', descriptions.approves_utility_bill(adminName, userName));
     userActivityTracking(userDetails.user_id, 88, 'success');
     if (tierChoice === '2') {
       await sendPushNotification(userDetails.user_id, PushNotifications.userTierUpgraded(), userDetails.fcm_token);
-      sendUserPersonalNotification(userDetails, 'Tier upgraded successfully', 
+      sendUserPersonalNotification(userDetails, 'Tier upgraded successfully',
         PersonalNotifications.tierUpgradedSuccessfully(userDetails.first_name), 'tier-upgraded-successfully', {});
     }
     return ApiResponse.success(res, enums.USER_UTILITY_BILL_DECIDED_SUCCESSFULLY('approved'), enums.HTTP_OK, approveUtilityBill);
@@ -496,12 +514,12 @@ export const fetchUserRewards = async(req, res, next) => {
       processAnyData(userQueries.fetchUserRewardHistory, payload),
       processAnyData(userQueries.fetchUserRewardHistoryCount, payload)
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user rewards points fetched from the DB 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user rewards points fetched from the DB
      fetchUserRewards.admin.controllers.user.js`);
     const user = {
       userName: userDetails.name,
       userStatus: userDetails.status,
-      userTier: userDetails.tier, 
+      userTier: userDetails.tier,
       userTotalPoint: userDetails.total_available_reward_points
     };
     const data ={

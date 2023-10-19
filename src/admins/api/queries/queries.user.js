@@ -216,6 +216,15 @@ export default {
     ) VALUES ($1, $2, $3, $4)
     RETURNING id, user_id, document_title, uploaded_by, created_at`,
 
+  uploadProductImage: `
+    INSERT INTO uploaded_documents (
+        uploaded_by,
+        document_title,
+        image_url
+    ) VALUES ($1, $2, $3)
+    RETURNING id, file_id, image_url, uploaded_by, created_at
+  `,
+
   fetchUploadedUserDocuments: `
       SELECT
         id,
