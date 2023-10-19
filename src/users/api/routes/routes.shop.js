@@ -53,4 +53,10 @@ router.post(
   shopCategories.createTicketSubscription
 );
 
+router.post(
+  '/ticket/:ticket_id/send_tickets',
+  AuthMiddleware.validateAuthToken,
+  shopCategories.sendEventTicketToEmails
+);
+
 export default router;

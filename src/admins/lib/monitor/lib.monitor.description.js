@@ -28,6 +28,7 @@ export const manually_loan_approval_failed = (name, type) => `${name}, approving
 export const manually_loan_disapproval = (name, type) => `${name}, disapproves ${type} loan application manually`;
 export const manually_loan_disapproval_failed = (name, type) => `${name}, disapproving ${type} loan application manually failed`;
 export const uploads_document = (name, user_name) => `${name} uploads document for user ${user_name}`;
+export const uploads_admin_document = (filename, admin) => `${filename} was uploaded by ${admin}`;
 export const uploads_document_failed = (name, user_name) => `${name} uploading document for user ${user_name} failed`;
 export const user_status = (name, action, user_name) => `${name} successfully ${action} a user ${user_name}`;
 export const user_status_failed = (name, action, user_name) => `${name} failed to ${action} a user ${user_name}`;

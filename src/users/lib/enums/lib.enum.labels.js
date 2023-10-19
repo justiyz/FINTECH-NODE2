@@ -277,6 +277,7 @@ export const USER_LOAN_STATUS_MIDDLEWARE = 'AdminUserMiddleware::userLoanStatus'
 export const EDIT_USER_STATUS_CONTROLLER = 'AdminUserController::editUserStatus';
 export const FETCH_USERS_CONTROLLER = 'AdminUserController::fetchUsers';
 export const SAVE_USER_UPLOADED_DOCUMENT_CONTROLLER = 'AdminUserController::saveUserUploadedDocument';
+export const SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER = 'AdminUserController::saveAdminUploadedDocument';
 export const FETCH_ADMIN_UPLOADED_USER_DOCUMENTS_CONTROLLER = 'AdminUserController::fetchAdminUploadedUserDocuments';
 export const USER_ORR_BREAKDOWN_CONTROLLER = 'AdminUserController::fetchUserOrrBreakdown';
 export const USER_KYC_DETAILS_CONTROLLER = 'AdminUserController::fetchUserKycDetails';

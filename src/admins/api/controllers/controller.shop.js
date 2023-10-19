@@ -10,17 +10,17 @@ import {
   CREATED_EVENT_SUCCESSFULLY,
   FAILED_TO_FETCH_USER_TICKETS,
   FETCH_LIST_OF_EVENT, FETCH_TICKET_CATEGORIES_SUCCESSFULLY
-} from "../../../users/lib/enums/lib.enum.messages";
+} from '../../../users/lib/enums/lib.enum.messages';
 import {
   create_event_category_record_failed,
   create_event_record_failed,
   fetch_events_lists
-} from "../../lib/monitor/lib.monitor.description";
+} from '../../lib/monitor/lib.monitor.description';
 import {
   CREATE_EVENT_CATEGORY_SUCCESSFUL,
   CREATE_EVENT_SUCCESSFUL,
   FETCH_CATEGORY_LIST
-} from "../../../users/lib/enums/lib.enum.labels";
+} from '../../../users/lib/enums/lib.enum.labels';
 
 export const listShopCategories = async(req, res, next) => {
   try {
@@ -110,6 +110,10 @@ export const createEventRecord = async(req, res, next) => {
         c_ticket.type,
         c_ticket.amount,
         c_ticket.units,
+        c_ticket.ticket_start_date,
+        c_ticket.ticket_end_date,
+        c_ticket.event_location,
+        c_ticket.event_time,
         'active' ]
       );
       logger.info(`Created Ticket category ${c_ticket.type} with value ${c_ticket.amount} and ${c_ticket.units} units:::${enums.CREATE_EVENT_CATEGORY_SUCCESSFUL}`);
