@@ -56,6 +56,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
     const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
+    console.log('amount to be charged: ', amountToBeCharged);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -90,6 +91,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
     const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
+    console.log('amount to be charged: ', amountToBeCharged);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -352,10 +354,10 @@ const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount
     let amount_plus_charges = 0;
     let applicable_fee = 0;
 
-    if (amount < 2500)
-      applicable_fee = amount * 0.015;
-    else
-      applicable_fee = (amount * 0.015) + 100;
+    // if (amount < 2500)
+    //   applicable_fee = amount * 0.015;
+    // else
+    applicable_fee = (amount * 0.015) + 100;
 
     if (applicable_fee < maximum_applicable_fee)
       amount_plus_charges = ((amount + 100) / (1 - 0.015)) + 0.01;
