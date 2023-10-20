@@ -393,3 +393,7 @@ export const CREATE_USER_TICKET_SUCCESSFULLY = 'created user ticket successfully
 export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 export const FETCHED_USER_TICKETS_SUCCESSFULLY = 'fetched user tickets successfully';
 export const FAILED_TO_SEND_EVENT_TICKETS_TO_EMAILS = 'failed to send event tickets to emails';
+export const FAILED_TO_FETCH_TICKET_SUMMARY = 'failed to fetch ticket summary information';
+
+
+

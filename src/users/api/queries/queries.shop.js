@@ -27,6 +27,12 @@ export default {
     FROM user_tickets
     WHERE user_id = $1
     AND status = $2
+  `,
+
+  getTicketSummary: `
+    SELECT *
+    FROM user_tickets
+    WHERE ticket_id = $1
   `
 
 };

@@ -376,4 +376,5 @@ export const CREATE_EVENT_SUCCESSFUL = 'ShopController::createEventRecord';
 export const CREATE_EVENT_CATEGORY_SUCCESSFUL = 'ShopController::createEventTicketRecord';
 export const FETCH_TICKET_CATEGORIES = 'ShopController::fetchTicketCategoriesRecord';
 export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'ShopController::createTicketSubscription';
+export const FAILED_TO_FETCH_TICKET_SUMMARY_STRING = 'ShopController::createTicketSubscription';
 

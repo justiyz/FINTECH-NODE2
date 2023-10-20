@@ -7,6 +7,7 @@ import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 import { processOneOrNoneData } from '../../../admins/api/services/services.db';
 import QRCode from 'qrcode';
+import { FAILED_TO_FETCH_TICKET_SUMMARY_STRING } from "../../lib/enums/lib.enum.labels";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -43,6 +44,17 @@ export const fetchTickets = async(req, res, next) => {
   try {
     const { user } = req;
     let tickets = await processAnyData(adminShopQueries.getAllEvents, [ req.body.status ]);
+    const ticket_units = [];
+    for (const tick in tickets) {
+      // while (tick > 0) {
+      //   console.log(tickets)
+      // }
+      // for (const counter in tick) {
+      //
+      // }
+      ticket_units.push(tickets[tick]);
+      // await processOneOrNoneData(adminShopQueries.getLeastValueTicket, tick.id);
+    }
     const data = {
       tickets
     };
@@ -86,15 +98,31 @@ export const fetchTicketCategories = async(req, res, next) => {
   }
 };
 
+export const getTicketSubscriptionSummary = async(req, res, next) => {
+  try {
+    const ticket_information = await processAnyData(shopQueries.getTicketSummary, req.params.ticket_id);
+    for (const tick_information in ticket_information) {
+      console.log(tick_information);
+      // const ticket_price = await processOneOrNoneData(shopQueries.)
+    }
+
+  } catch (error) {
+    await userActivityTracking(req.user.user_id, 116, 'fail');
+    error.label = enums.FAILED_TO_FETCH_TICKET_SUMMARY_STRING;
+    logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_FETCH_TICKET_SUMMARY}`);
+    return next(error);
+  }
+};
+
 export const createTicketSubscription = async(req, res, next) => {
   try {
     const tickets = req.body.tickets;
     const ticket_purchase_logs = [];
-    // if(// number of ticket )
     for (const ticket in tickets) {
       // get the number of tickets available
-      const available_tickets = await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, tickets[ticket].ticket_category_id);
-
+      const available_tickets = await processOneOrNoneData(
+        adminShopQueries.getTicketUnitsAvailable, tickets[ticket].ticket_category_id
+      );
       const ticket_application = [
         req.user.user_id,
         tickets[ticket].ticket_id,
@@ -102,15 +130,24 @@ export const createTicketSubscription = async(req, res, next) => {
         tickets[ticket].units,
         req.body.insurance_coverage,
         req.body.payment_tenure,
-        'pending'
+        'inactive'
       ];
       const booked_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
+      const barcode_string = tickets[ticket].ticket_id.concat('|', req.user.user_id);
+      // Generate QR Code for each ticket
+      QRCode.toDataURL(barcode_string)
+        .then(
+          qr_code => {
+            processOneOrNoneData(adminShopQueries.storeTicketQR, [ booked_ticket[0].user_ticket_id, qr_code ]);
+            logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket QR Code successfully created. createTicketSubscription.controller.shop.js`);
+          })
+        .catch(err => {
+          logger.error(`failed to update user ticket with QR Code::${enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION}, error: ${err}`);
+        });
       // update available ticket units
-      // const reduceTicket = available_tickets.units - tickets[ticket].units;
-      // const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
-      // console.log(slate_array);
-
-      // await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slate_array);
+      const reduceTicket = available_tickets.units - tickets[ticket].units;
+      const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
+      await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slate_array);
       ticket_purchase_logs.push(booked_ticket);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);

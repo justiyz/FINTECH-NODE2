@@ -35,6 +35,12 @@ router.post(
   ShopController.createEventRecord
 );
 
+router.post(
+  '/update-event-record/:event_id',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.updateEventRecord
+);
+
 // router.get(
 //   '/:shop_category_id/details',
 //   AuthMiddleware.validateAdminAuthToken,

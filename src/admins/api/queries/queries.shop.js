@@ -38,10 +38,22 @@ export default {
         tickets.insurance_coverage,
         tickets.processing_fee,
         tickets.ticket_status,
-        tickets.event_date
-    FROM tickets;
+        tickets.event_date,
+        tickets.event_location,
+        tickets.event_time,
+        ticket_categories
+    FROM tickets
+    LEFT JOIN ticket_categories ON ticket_categories.ticket_id = tickets.ticket_id;
 
   `,
+
+  getLeastValueTicket: `
+    SELECT *
+    FROM ticket_categories
+    WHERE ticket_id = $1
+    AND ticket_category_type = 'regular'
+  `,
+
   createEventRecord: `
     INSERT INTO tickets(
         ticket_name,
@@ -59,6 +71,26 @@ export default {
    RETURNING *;
   `,
 
+  updateEventRecord: `
+    UPDATE tickets
+    SET
+      ticket_name = $1,
+      ticket_description = $2,
+      ticket_image_url = $3,
+      insurance_coverage = $4,
+      processing_fee = $5,
+      ticket_status = $6,
+      event_date = $7,
+      ticket_start_date = $8,
+      ticket_end_date = $9,
+      event_location = $10,
+      event_time = $11,
+      updated_at = NOW()
+    WHERE
+      ticket_id = $12
+    RETURNING *;
+  `,
+
   createTicketCategory: `
     INSERT INTO ticket_categories(
         ticket_id,
@@ -74,6 +106,12 @@ export default {
     SELECT *
     FROM ticket_categories
     WHERE ticket_id = $1
+  `,
+
+  checkIfEventExist: `
+    SELECT *
+    FROM tickets
+    WHERE ticket_name = $1
   `,
 
   fetchUserTickets: `
@@ -95,6 +133,13 @@ export default {
     RETURNING *;
   `,
 
+  storeTicketQR: `
+    UPDATE user_tickets
+    SET
+        ticket_qr_code = $2
+    WHERE user_ticket_id = $1
+  `,
+
   fetchUserEventTicket: `
     SELECT *
     FROM user_tickets
@@ -106,7 +151,7 @@ export default {
     SET
         units = $2,
         updated_at = NOW()
-    WHERE ticket_categories = $1
+    WHERE ticket_category_id = $1
   `,
 
   getTicketUnitsAvailable: `
