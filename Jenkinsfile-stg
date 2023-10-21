@@ -33,7 +33,7 @@ pipeline {
     environment {
         // Define your environment variables here
         VAULT_ADDR = '${VAULT_ADDR}'
-        REPO_NAME = envRepoName(seedfi-backend)
+        REPO_NAME = envRepoName('seedfi-backend')
 
         // DOCKER_ENV = 'staging'
         // KUBECONFIG = 'k8sStg'
@@ -117,8 +117,8 @@ pipeline {
             
             steps {
                 script {
-                    
-                    env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
+                    sh 'ls -la'
+                    env.VERSION_NUMBER = sh(script: "jq '.version' package.json", returnStdout: true).trim().replaceAll('"','')
                     println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
 
                     // dockerTag
@@ -133,9 +133,9 @@ pipeline {
                     println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
 
                     sh '''
-                        ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                        sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                        grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                        ls -al kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                        sed -i "s~ image:.*~ image: ${dockerTag}~" kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                        grep ' image:' kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                     '''
                 }
             }
@@ -145,7 +145,7 @@ pipeline {
             steps {
                 script {
                     
-                    dir(REPO_NAME) {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
                         sh '''
                         grep version package.json
                         docker build \
@@ -240,26 +240,26 @@ pipeline {
     //             }
     //         }
     //     }
-    // }
-    post {
-        failure {
-            script {
-                // Send a failure message to Microsoft Teams
-                def payload = [
-                    '@type': 'MessageCard',
-                    '@context': 'http://schema.org/extensions',
-                    'themeColor': 'D00000',
-                    'title': 'Jenkins Build Status',
-                    'text': "FAILED: Unable to Build '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
-                ]
-                def jsonPayload = groovy.json.JsonOutput.toJson(payload)
-
-                // Send the message to Microsoft Teams
-                sh """
-                    curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
-                """
-            }
-        }
     }
+    // post {
+    //     failure {
+    //         script {
+                // Send a failure message to Microsoft Teams
+    //             def payload = [
+    //                 '@type': 'MessageCard',
+    //                 '@context': 'http://schema.org/extensions',
+    //                 'themeColor': 'D00000',
+    //                 'title': 'Jenkins Build Status',
+    //                 'text': "FAILED: Unable to Build '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
+    //             ]
+    //             def jsonPayload = groovy.json.JsonOutput.toJson(payload)
+     
+                // Send the message to Microsoft Teams
+    //             sh """
+    //                 curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
+    //            """
+    //         }
+    //     }
+    // }
     
 }
