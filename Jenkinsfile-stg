@@ -55,19 +55,19 @@ pipeline {
                 script {
                     if (GIT_BRANCH.equals("origin/master")){
 
-                        env.MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
-                        env.VAULT_ENV = 'production'
-                        env.DOCKER_ENV = 'production'
-                        env.DEPLOYMENT_ENV = 'production'
+                        MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
+                        VAULT_ENV = 'production'
+                        DOCKER_ENV = 'production'
+                        DEPLOYMENT_ENV = 'production'
                     } else if (GIT_BRANCH.equals("origin/snapshot")){
 
-                        env.MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
-                        env.VAULT_ENV = 'staging'
-                        env.DOCKER_ENV = 'staging'
-                        env.DEPLOYMENT_ENV = 'staging'
-                        env.APIENVCONFIG = 'stage'
-                        env.KUBECONFIG = 'k8sStg'
-                        env.NAMESPACE = 'staging'
+                        MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
+                        VAULT_ENV = 'staging'
+                        DOCKER_ENV = 'staging'
+                        DEPLOYMENT_ENV = 'staging'
+                        APIENVCONFIG = 'stage'
+                        KUBECONFIG = 'k8sStg'
+                        NAMESPACE = 'staging'
 
                     } else {
 
@@ -93,18 +93,18 @@ pipeline {
                     def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
                 }
 
-                println("MSTEAMS_WEBHOOK_URL: ${env.MSTEAMS_WEBHOOK_URL}")
-                println("VAULT_ENV: ${env.VAULT_ENV}")
-                println("DOCKER_ENV: ${env.DOCKER_ENV}")
-                println("DEPLOYMENT_ENV: ${env.DEPLOYMENT_ENV}")
-                println("APIENVCONFIG: ${env.APIENVCONFIG}")
-                println("KUBECONFIG: ${env.KUBECONFIG}")
+                println("MSTEAMS_WEBHOOK_URL: ${MSTEAMS_WEBHOOK_URL}")
+                println("VAULT_ENV: ${VAULT_ENV}")
+                println("DOCKER_ENV: ${DOCKER_ENV}")
+                println("DEPLOYMENT_ENV: ${DEPLOYMENT_ENV}")
+                println("APIENVCONFIG: ${APIENVCONFIG}")
+                println("KUBECONFIG: ${KUBECONFIG}")
                 println("NAMESPACE: ${NAMESPACE}")
                 println("================================================================================")
                 
-                println("REPO_NAME: ${env.REPO_NAME}")
-                println("deployName: ${env.deployName}")
-                println("SvcName: ${env.SvcName}")
+                println("REPO_NAME: ${REPO_NAME}")
+                println("deployName: ${deployName}")
+                println("SvcName: ${SvcName}")
                 println("================================================================================")
 
 
@@ -115,7 +115,7 @@ pipeline {
             
             steps {
                 script {
-                    setupEnvironmentAndSecrets()
+                    
                     env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
                     println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
 
@@ -142,7 +142,7 @@ pipeline {
         stage('docker build/push container image') {
             steps {
                 script {
-                    setupEnvironmentAndSecrets()
+                    
                     dir(REPO_NAME) {
                         sh '''
                         grep version package.json
