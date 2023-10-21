@@ -14,18 +14,18 @@ def envRepoName(REPO_NAME){
 
 
 
-def secrets = [
-    [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
-        [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
-    [path: "secret/k8s/kubeconfig/$KUBECONFIG", engineVersion: 2, secretValues: [
-        [envVar: 'KUBE_CONFIG', vaultKey: 'secret']]],
-    [path: "secret/k8s/secrets/$VAULT_ENV/api-config", engineVersion: 2, secretValues: [
-        [envVar: 'API_CONFIG',vaultKey: 'secret']]],
-    [path: "secret/k8s/secrets/$VAULT_ENV/underwriting-config", engineVersion: 2, secretValues: [
-        [envVar: 'UNDERWRITING_CONFIG',vaultKey: 'secret']]]
-]
+// def secrets = [
+//     [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
+//         [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
+//     [path: "secret/k8s/kubeconfig/$KUBECONFIG", engineVersion: 2, secretValues: [
+//         [envVar: 'KUBE_CONFIG', vaultKey: 'secret']]],
+//     [path: "secret/k8s/secrets/$VAULT_ENV/api-config", engineVersion: 2, secretValues: [
+//         [envVar: 'API_CONFIG',vaultKey: 'secret']]],
+//     [path: "secret/k8s/secrets/$VAULT_ENV/underwriting-config", engineVersion: 2, secretValues: [
+//         [envVar: 'UNDERWRITING_CONFIG',vaultKey: 'secret']]]
+// ]
 
-def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
+// def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
 
 pipeline {
     agent any
@@ -34,7 +34,7 @@ pipeline {
         // Define your environment variables here
         VAULT_ADDR = '${VAULT_ADDR}'
         REPO_NAME = envRepoName(seedfi-backend)
-        KUBECONFIG = 'k8sStg'
+        // KUBECONFIG = 'k8sStg'
         // SCM_BRANCH = 'snapshot'
         // NAMESPACE = 'staging'
     }
@@ -78,6 +78,19 @@ pipeline {
                         ENV="dev"
 
                     }
+
+                    def secrets = [
+                        [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
+                            [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
+                        [path: "secret/k8s/kubeconfig/${KUBECONFIG}", engineVersion: 2, secretValues: [
+                            [envVar: 'KUBE_CONFIG', vaultKey: 'secret']]],
+                        [path: "secret/k8s/secrets/${VAULT_ENV}/api-config", engineVersion: 2, secretValues: [
+                            [envVar: 'API_CONFIG', vaultKey: 'secret']]],
+                        [path: "secret/k8s/secrets/${VAULT_ENV}/underwriting-config", engineVersion: 2, secretValues: [
+                            [envVar: 'UNDERWRITING_CONFIG', vaultKey: 'secret']]
+                    ]
+                    
+                    def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
                 }
 
                 println("MSTEAMS_WEBHOOK_URL: ${env.MSTEAMS_WEBHOOK_URL}")
