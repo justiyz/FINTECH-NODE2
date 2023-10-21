@@ -348,17 +348,17 @@ const submitPaymentOtpWithReference = async(body, reference) => {
 const calculateAmountPlusPaystackTransactionCharge = async(loan_repayment_amount) => {
   try {
     let amount = parseFloat(loan_repayment_amount.toString());
-    const maximum_applicable_fee = 2000;
+    const maximum_applicable_fee = 200000;
     let amount_plus_charges = 0;
     let applicable_fee = 0;
 
-    if (amount < 2500)
+    if (amount < 250000)
       applicable_fee = amount * 0.015;
     else
-      applicable_fee = (amount * 0.015) + 100;
+      applicable_fee = (amount * 0.015) + 10000;
 
     if (applicable_fee < maximum_applicable_fee)
-      amount_plus_charges = ((amount + 100) / (1 - 0.015)) + 0.01;
+      amount_plus_charges = ((amount + 10000) / (1 - 0.015)) + 0.01;
     else
       amount_plus_charges = amount + maximum_applicable_fee;
 
