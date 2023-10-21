@@ -118,7 +118,7 @@ pipeline {
             steps {
                 script {
                     sh 'ls -la'
-                    env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
+                    env.VERSION_NUMBER = sh(script: "jq '.version' package.json", returnStdout: true).trim().replaceAll('"','')
                     println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
 
                     // dockerTag
@@ -133,9 +133,9 @@ pipeline {
                     println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
 
                     sh '''
-                        ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                        sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                        grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                        ls -al kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                        sed -i "s~ image:.*~ image: ${dockerTag}~" kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                        grep ' image:' kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                     '''
                 }
             }
@@ -145,7 +145,7 @@ pipeline {
             steps {
                 script {
                     
-                    dir(REPO_NAME) {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
                         sh '''
                         grep version package.json
                         docker build \
