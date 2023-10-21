@@ -133,6 +133,9 @@ pipeline {
                     println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
 
                     sh '''
+                        pwd
+                        echo "DEPLOYMENT_ENV: ${DEPLOYMENT_ENV}"
+                        ls -al kubernetes
                         ls -al kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                         sed -i "s~ image:.*~ image: ${dockerTag}~" kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                         grep ' image:' kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
