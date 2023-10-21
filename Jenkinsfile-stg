@@ -59,13 +59,13 @@ pipeline {
 
                         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
                         VAULT_ENV = 'production'
-                        // DOCKER_ENV = 'production'
+                        DOCKER_ENV = 'production'
                         DEPLOYMENT_ENV = 'production'
                     } else if (GIT_BRANCH.equals("origin/snapshot")){
 
                         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
                         VAULT_ENV = 'staging'
-                        // DOCKER_ENV = 'staging'
+                        DOCKER_ENV = 'staging'
                         DEPLOYMENT_ENV = 'staging'
                         APIENVCONFIG = 'stage'
                         KUBECONFIG = 'k8sStg'
