@@ -241,25 +241,25 @@ pipeline {
     //         }
     //     }
     }
-    post {
-        failure {
-            script {
+    // post {
+    //     failure {
+    //         script {
                 // Send a failure message to Microsoft Teams
-                def payload = [
-                    '@type': 'MessageCard',
-                    '@context': 'http://schema.org/extensions',
-                    'themeColor': 'D00000',
-                    'title': 'Jenkins Build Status',
-                    'text': "FAILED: Unable to Build '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
-                ]
-                def jsonPayload = groovy.json.JsonOutput.toJson(payload)
-
+    //             def payload = [
+    //                 '@type': 'MessageCard',
+    //                 '@context': 'http://schema.org/extensions',
+    //                 'themeColor': 'D00000',
+    //                 'title': 'Jenkins Build Status',
+    //                 'text': "FAILED: Unable to Build '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
+    //             ]
+    //             def jsonPayload = groovy.json.JsonOutput.toJson(payload)
+     
                 // Send the message to Microsoft Teams
-                sh """
-                    curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
-                """
-            }
-        }
-    }
+    //             sh """
+    //                 curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
+    //            """
+    //         }
+    //     }
+    // }
     
 }
