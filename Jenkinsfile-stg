@@ -33,7 +33,7 @@ pipeline {
     environment {
         // Define your environment variables here
         VAULT_ADDR = '${VAULT_ADDR}'
-        REPO_NAME = envRepoName(seedfi-backend)
+        REPO_NAME = envRepoName('seedfi-backend')
 
         // DOCKER_ENV = 'staging'
         // KUBECONFIG = 'k8sStg'
