@@ -87,7 +87,7 @@ pipeline {
                         [path: "secret/k8s/secrets/${VAULT_ENV}/api-config", engineVersion: 2, secretValues: [
                             [envVar: 'API_CONFIG', vaultKey: 'secret']]],
                         [path: "secret/k8s/secrets/${VAULT_ENV}/underwriting-config", engineVersion: 2, secretValues: [
-                            [envVar: 'UNDERWRITING_CONFIG', vaultKey: 'secret']]
+                            [envVar: 'UNDERWRITING_CONFIG', vaultKey: 'secret']]]
                     ]
                     
                     def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
