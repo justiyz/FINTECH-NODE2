@@ -34,6 +34,7 @@ pipeline {
         // Define your environment variables here
         VAULT_ADDR = '${VAULT_ADDR}'
         REPO_NAME = envRepoName(seedfi-backend)
+        DOCKER_ENV = 'staging'
         // KUBECONFIG = 'k8sStg'
         // SCM_BRANCH = 'snapshot'
         // NAMESPACE = 'staging'
@@ -57,13 +58,13 @@ pipeline {
 
                         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
                         VAULT_ENV = 'production'
-                        DOCKER_ENV = 'production'
+                        // DOCKER_ENV = 'production'
                         DEPLOYMENT_ENV = 'production'
                     } else if (GIT_BRANCH.equals("origin/snapshot")){
 
                         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
                         VAULT_ENV = 'staging'
-                        DOCKER_ENV = 'staging'
+                        // DOCKER_ENV = 'staging'
                         DEPLOYMENT_ENV = 'staging'
                         APIENVCONFIG = 'stage'
                         KUBECONFIG = 'k8sStg'
@@ -158,87 +159,87 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                script {
+    //     stage('Deploy') {
+    //         steps {
+    //             script {
    
-                    deleteDir()
+    //                 deleteDir()
 
-                    withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        def container = docker.image('seedfidevops/containerbuilder')
-                        container.pull() // make sure we have the latest available from Docker Hub
-                        container.inside() {
-                            // Downloaded/Created in $WORKSPACE
-                            writeFile file: "KUBE_CONFIG_FILE", text: KUBE_CONFIG
+    //                 withVault([configuration: configuration, vaultSecrets: secrets]) {
+    //                     def container = docker.image('seedfidevops/containerbuilder')
+    //                     container.pull() // make sure we have the latest available from Docker Hub
+    //                     container.inside() {
+    //                         // Downloaded/Created in $WORKSPACE
+    //                         writeFile file: "KUBE_CONFIG_FILE", text: KUBE_CONFIG
 
-                            // TODO: pull/create other svc secrets.yaml
-                            if (REPO_NAME == 'seedfi-backend') {
-                                writeFile file: "API_CONFIG_FILE", text: API_CONFIG
-                            } else if (REPO_NAME == 'seedfi-underwriting') {
-                                writeFile file: "UNDERWRITING_CONFIG_FILE", text: UNDERWRITING_CONFIG
-                            }
+    //                         // TODO: pull/create other svc secrets.yaml
+    //                         if (REPO_NAME == 'seedfi-backend') {
+    //                             writeFile file: "API_CONFIG_FILE", text: API_CONFIG
+    //                         } else if (REPO_NAME == 'seedfi-underwriting') {
+    //                             writeFile file: "UNDERWRITING_CONFIG_FILE", text: UNDERWRITING_CONFIG
+    //                         }
 
-                            sh ('pwd; ls -al')
-                            sh 'git clone -b $SCM_BRANCH https://$GIT_TOKEN@github.com/theseedfi/$REPO_NAME.git'
-                            env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
-                            println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
+    //                         sh ('pwd; ls -al')
+    //                         sh 'git clone -b $SCM_BRANCH https://$GIT_TOKEN@github.com/theseedfi/$REPO_NAME.git'
+    //                         env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
+    //                         println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
 
-                            // dockerTag
-                            env.dockerTag = ''
-                            if (REPO_NAME == 'seedfi-backend') {
-                                env.dockerTag = "seedfidevops/seedfi-api:${DOCKER_ENV}_v${VERSION_NUMBER}"
-                            } else if (REPO_NAME == 'seedfi-underwriting') {
-                                env.dockerTag = "seedfidevops/seedfi-underwriting:${DOCKER_ENV}_v${VERSION_NUMBER}"
-                            }
+    //                         // dockerTag
+    //                         env.dockerTag = ''
+    //                         if (REPO_NAME == 'seedfi-backend') {
+    //                             env.dockerTag = "seedfidevops/seedfi-api:${DOCKER_ENV}_v${VERSION_NUMBER}"
+    //                         } else if (REPO_NAME == 'seedfi-underwriting') {
+    //                             env.dockerTag = "seedfidevops/seedfi-underwriting:${DOCKER_ENV}_v${VERSION_NUMBER}"
+    //                         }
 
-                            env.DEPLOYMENT_YAML = 'deployment.yml'
-                            println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
-                            sh '''
-                                ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                                sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                                grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                            '''
+    //                         env.DEPLOYMENT_YAML = 'deployment.yml'
+    //                         println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
+    //                         sh '''
+    //                             ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+    //                             sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+    //                             grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+    //                         '''
 
-                            if (REPO_NAME == 'seedfi-backend') {
-                                sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
-                            } else if (REPO_NAME == 'seedfi-underwriting') {
-                                sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
-                            }
+    //                         if (REPO_NAME == 'seedfi-backend') {
+    //                             sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
+    //                         } else if (REPO_NAME == 'seedfi-underwriting') {
+    //                             sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
+    //                         }
 
-                            DEPLOYDIR = "${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}"
-                            dir(DEPLOYDIR) {
-                                stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $DEPLOYMENT_YAML', returnStdout: true).trim().replaceAll('"','')
-                                println "===== stdOut: ${stdOut} ====="
-                                if (stdOut =~ /configured/) {
-                                    sleep 2
-                                    stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE rollout restart deploy $deployName', returnStdout: true).trim().replaceAll('"','')
-                                    println "===== stdOut: ${stdOut} ====="
-                                }
-                            }
+    //                         DEPLOYDIR = "${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}"
+    //                         dir(DEPLOYDIR) {
+    //                             stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $DEPLOYMENT_YAML', returnStdout: true).trim().replaceAll('"','')
+    //                             println "===== stdOut: ${stdOut} ====="
+    //                             if (stdOut =~ /configured/) {
+    //                                 sleep 2
+    //                                 stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE rollout restart deploy $deployName', returnStdout: true).trim().replaceAll('"','')
+    //                                 println "===== stdOut: ${stdOut} ====="
+    //                             }
+    //                         }
 
-                            SVCDIR = "${REPO_NAME}/kubernetes/services"
-                            dir(SVCDIR) {
-                                env.svcNameYaml = 'api.yml'
-                                if (REPO_NAME == 'seedfi-backend') {
-                                    env.svcNameYaml = 'api.yml'
-                                }
+    //                         SVCDIR = "${REPO_NAME}/kubernetes/services"
+    //                         dir(SVCDIR) {
+    //                             env.svcNameYaml = 'api.yml'
+    //                             if (REPO_NAME == 'seedfi-backend') {
+    //                                 env.svcNameYaml = 'api.yml'
+    //                             }
 
-                                if (svcNameYaml) {
-                                    stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $svcNameYaml', returnStdout: true).trim().replaceAll('"','')
-                                    println "===== stdOut: ${stdOut} ====="
-                                }
-                            }
+    //                             if (svcNameYaml) {
+    //                                 stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $svcNameYaml', returnStdout: true).trim().replaceAll('"','')
+    //                                 println "===== stdOut: ${stdOut} ====="
+    //                             }
+    //                         }
 
-                            sh '''
-                                sleep 15
-                                kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE get deploy,svc,po
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //                         sh '''
+    //                             sleep 15
+    //                             kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE get deploy,svc,po
+    //                         '''
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
     post {
         failure {
             script {
