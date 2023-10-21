@@ -117,7 +117,7 @@ pipeline {
             
             steps {
                 script {
-                    
+                    sh 'ls -la'
                     env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
                     println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
 
