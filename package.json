@@ -1,6 +1,6 @@
 {
   "name": "seedfi-backend",
-  "version": "3.4.97",
+  "version": "3.4.98",
   "description": "A money lending application",
   "author": "Enyata Nexus Engineering Team",
   "license": "ISC",
@@ -50,6 +50,7 @@
   "dependencies": {
     "@joi/date": "^2.1.0",
     "@sendgrid/mail": "^7.7.0",
+    "api": "^6.1.1",
     "aws-sdk": "^2.1333.0",
     "axios": "^1.2.1",
     "bcrypt": "^5.1.0",
