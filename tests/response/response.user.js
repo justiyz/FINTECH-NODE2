@@ -1,8 +1,66 @@
 import { generateReferralCode } from '../../src/users/lib/utils/lib.util.helpers';
 
+export const zeehVerifyNinTestResponse = (user, nin) => {
+  const data = {
+    status: 200,
+    code: 0,
+    data: {
+      entity: {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        gender: user.gender,
+        middle_name: user.middle_name !== null ? user.middle_name : '',
+        phone_number1: user.phone_number,
+        photo: 'ygguygujhgjghy8tw67tyuhjikhnkjghuo',
+        date_of_birth: user.date_of_birth,
+        customer: '38e0e1c0-2318-4292-8180-b35345f6dd99'
+      }
+    }
+  };
+  return data;
+};
+
 export const dojahVerifyBvnTestResponse = (user, bvn) => {
   const data = {
     status: 200,
+    data: {
+      entity: {
+        bvn: bvn,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        middle_name: user.middle_name !== null ? user.middle_name : '',
+        gender: user.gender,
+        date_of_birth: user.date_of_birth,
+        phone_number1: user.phone_number,
+        image: 'ygguygujhgjghy8tw67tyuhjikhnkjghuo',
+        email: '',
+        enrollment_bank: '033',
+        enrollment_branch: 'Badagry',
+        level_of_account: 'Level 1 - Low Level Accounts',
+        lga_of_origin: 'Katsina-Ala',
+        lga_of_residence: 'Badagry',
+        marital_status: 'Married',
+        name_on_card: '242 c compound badagry',
+        nationality: 'Nigeria',
+        nin: '',
+        phone_number2: '',
+        registration_date: '',
+        residential_address: '242 c compound badaGRY ',
+        state_of_origin: 'Benue State',
+        state_of_residence: 'Lagos State',
+        title: 'Mrs',
+        watch_listed: '',
+        customer: '38e0e1c0-2318-4292-8180-b35345f6dd99'
+      }
+    }
+  };
+  return data;
+};
+
+export const zeehVerifyBvnTestResponse = (user, bvn) => {
+  const data = {
+    status: 'success',
+    code: 0,
     data: {
       entity: {
         bvn: bvn,
@@ -43,7 +101,7 @@ export const paystackResolveAccountNumberTestResponse = (account_number, user) =
     message: 'Account number resolved',
     data: {
       'account_number': account_number,
-      'account_name': `${user.first_name.toUpperCase()} ${user.middle_name.toUpperCase()} ${user.last_name.toUpperCase()}`, 
+      'account_name': `${user.first_name.toUpperCase()} ${user.middle_name.toUpperCase()} ${user.last_name.toUpperCase()}`,
       // This will only pass for users with middle name and won't pass for users without middle name
       'bank_id': 9
     }
@@ -298,7 +356,7 @@ export const seedfiUnderwritingLoanRenegotiationTestResponse = (body, existingLo
         pricing_band: 45,
         final_decision: 'MANUAL',
         monthly_interest: 0.04,
-        monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(existingLoanApplication.amount_requested)) / 
+        monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(existingLoanApplication.amount_requested)) /
         (1 - ((1 + (0.04))**(-Number(existingLoanApplication.initial_loan_tenor_in_months)))))).toFixed(2)),
         loan_application_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
         loan_duration_in_month: parseFloat(existingLoanApplication.initial_loan_tenor_in_months)
