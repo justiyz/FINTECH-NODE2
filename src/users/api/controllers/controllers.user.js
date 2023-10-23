@@ -17,6 +17,8 @@ import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
+import { VERIFY_USER_IDENTITY_DOCUMENT } from "../../lib/enums/lib.enum.labels";
+import { zeehNINVerificationCheck } from "../services/services.zeeh";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -135,6 +137,32 @@ export const updateBvn = async(req, res, next) => {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
     logger.error(`updating user bvn after verification failed::${enums.UPDATE_BVN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+export const documentVerification = async(req, res, next) => {
+  try {
+    const DocumentType = {
+      PASSPORT: 'passport',
+      DRIVER_LICENSE: 'drivers_license',
+      NIN: 'nin',
+      OTHER: 'OTHER'
+    };
+
+
+    const { user, body } = req;
+
+    if (body.document_type == 'nin') {
+      console.log('body::: ', body.document_type);
+      const response = await zeehNINVerificationCheck(body.nin, user);
+      console.log(`${response}`);
+    }
+    // console.log('Request:: ', user);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 109, 'fail');
+    error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
+    logger.error(`user identity document verification failed::${enums.VERIFY_USER_IDENTITY_DOCUMENT}`, error.message);
     return next(error);
   }
 };

@@ -35,6 +35,7 @@ const zeehBVNVerificationCheck = async(bvn, user) => {
       'zeeh-private-key': zeehPrivateKey
     });
     response.data['entity'] = response.data;
+    console.log(response);
     return response.data.entity;
   } catch (error) {
     if (error.message === 'Not Found') {

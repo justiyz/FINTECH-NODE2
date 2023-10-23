@@ -46,6 +46,7 @@ export const IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE = 'UserMiddleware::isUploadedIm
 export const IS_VERIFIED_BVN_MIDDLEWARE = 'UserMiddleware::isVerifiedBvn';
 export const VERIFY_BVN_MIDDLEWARE = 'UserMiddleware::verifyBvn';
 export const UPDATE_BVN_CONTROLLER = 'UserController::updateBvn';
+export const VERIFY_USER_IDENTITY_DOCUMENT = 'UserController::documentVerification';
 export const UPDATE_USER_FCM_TOKEN_CONTROLLER = 'UserController::updateUserFcmToken';
 export const UPDATE_LOAN_STATUS_TO_OVERDUE_CONTROLLER = 'CronController::updateLoanStatusToOverdue';
 export const UPDATE_CLUSTER_LOAN_STATUS_TO_OVERDUE_CONTROLLER = 'CronController::updateClusterLoanStatusToOverdue';

@@ -43,6 +43,17 @@ router.post(
   UserController.updateBvn
 );
 
+router.post(
+  '/verify-document',
+  AuthMiddleware.validateAuthToken,
+  // Model(Schema.bvnVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  // UserMiddleware.isVerifiedBvn('complete'),
+  // UserMiddleware.isBvnPreviouslyExisting,
+  UserController.documentVerification
+
+);
+
 
 router.post(
   '/request-email-verification',
