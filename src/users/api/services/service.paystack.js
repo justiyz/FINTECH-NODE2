@@ -55,7 +55,6 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     }
     const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
-    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -65,7 +64,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: amountToBeCharged,
+        amount: amountRequestedType,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
