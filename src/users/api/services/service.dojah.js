@@ -2,12 +2,13 @@ import axios from 'axios';
 import config from '../../config';
 import enums from '../../lib/enums';
 import * as userMockedTestResponses from '../../../../tests/response/response.user';
+import { DOJAH_NIN_VERIFICATION_SERVICE } from "../../lib/enums/lib.enum.labels";
 
 const { SEEDFI_NODE_ENV } = config;
 
 const dojahBvnVerificationCheck = async(bvn, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') { 
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       // Dojah sandbox returns a fixed value, this is done for flexibility sake while testing and developing
       return userMockedTestResponses.dojahVerifyBvnTestResponse(user, bvn);
     }
@@ -29,4 +30,29 @@ const dojahBvnVerificationCheck = async(bvn, user) => {
   }
 };
 
-export { dojahBvnVerificationCheck };
+const dojahNINVerification = async(nin, user) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      // Dojah sandbox returns a fixed value, this is done for flexibility sake while testing and developing
+      return userMockedTestResponses.dojahVerifyNINTestResponse(user, nin);
+    }
+
+    const options = {
+      method: 'GET',
+      url: 'https://api.dojah.io/api/v1/kyc/vin',
+      headers: {
+        accept: 'application/json',
+        AppId: config.SEEDFI_DOJAH_APP_ID,
+        Authorization: config.SEEDFI_DOJAH_SECRET_KEY,
+        'Accept-Encoding': 'gzip,deflate,compress'
+      }
+    };
+    const data = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to Dojah for NIN validation failed::${enums.DOJAH_NIN_VERIFICATION_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+export { dojahBvnVerificationCheck, dojahNINVerification };

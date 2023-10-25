@@ -17,8 +17,10 @@ import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
-import { VERIFY_USER_IDENTITY_DOCUMENT } from "../../lib/enums/lib.enum.labels";
-import { zeehNINVerificationCheck } from "../services/services.zeeh";
+import { VERIFY_USER_IDENTITY_DOCUMENT } from '../../lib/enums/lib.enum.labels';
+import * as zeehService from '../services/services.zeeh';
+import * as S3 from "../services/services.s3";
+import { now } from "moment-timezone";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -140,33 +142,6 @@ export const updateBvn = async(req, res, next) => {
     return next(error);
   }
 };
-
-export const documentVerification = async(req, res, next) => {
-  try {
-    const DocumentType = {
-      PASSPORT: 'passport',
-      DRIVER_LICENSE: 'drivers_license',
-      NIN: 'nin',
-      OTHER: 'OTHER'
-    };
-
-
-    const { user, body } = req;
-
-    if (body.document_type == 'nin') {
-      console.log('body::: ', body.document_type);
-      const response = await zeehNINVerificationCheck(body.nin, user);
-      console.log(`${response}`);
-    }
-    // console.log('Request:: ', user);
-  } catch (error) {
-    userActivityTracking(req.user.user_id, 109, 'fail');
-    error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
-    logger.error(`user identity document verification failed::${enums.VERIFY_USER_IDENTITY_DOCUMENT}`, error.message);
-    return next(error);
-  }
-};
-
 
 /**
  Request email verification
@@ -447,6 +422,148 @@ export const idUploadVerification = async(req, res, next) => {
     return next(error);
   }
 };
+
+
+export const nationalIdentificationNumberVerification = async(document, user) => {
+  logger.info('Now running nationalIdentificationNumberVerification');
+  const response = await zeehService.zeehNINVerificationCheck(document.document_id, user);
+  if (response.status === 'success') {
+    const user_data = response.data;
+    if (
+      user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+      user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+      user_data.phone_number1.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
+      user_data.date_of_birth === user.date_of_birth
+    ) {
+      const full_name = user.first_name.toLowerCase()+'_'+user.last_name.toLowerCase();
+      const time_stamp = dayjs(now()).format('YYYY-MM-DD HH:mm:ss');
+      // const fileExt = path.extname(user_data.image.trim());
+      // const documen_t = encodeURIComponent(
+      //   await Hash.encrypt({ document_url: user_data.image.trim(), document_extension: fileExt })
+      // );
+      const bag = {
+        'user_id': user.user_id,
+        'full_name': full_name,
+        'created_at': time_stamp,
+        'updated_at': time_stamp,
+        'id_type': document.document_type, // id_type [nin, nigeria - voter card #2]
+        'card_number': document.document_id,
+        'image_url': 'https://image-url-link'
+      };
+
+      const payload = UserPayload.imgVerification(user, bag);
+      const contentType = 'image/png';
+
+      console.log('--------------user data----------------------------');
+      const url = `files/user-documents/${user.user_id}/${document.document_type}/${user.user_id}-${full_name}`;
+      const data  = await S3.uploadFile(url, payload, contentType);
+      console.log('S3 Data: ', data);
+      await processAnyData(userQueries.updateIdVerification, payload);
+      await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'valid identification', documen_t ]);
+      const imageBuffer = Buffer.from(user_data.photo, 'base64');
+      console.log('imageBuffer: ', imageBuffer);
+      console.log('------------------------------------------');
+
+      const bucket_name = 'https://app.dojah.io/verifications/bio-data/DJ-D0F0BD8BBA';
+
+      // const params = {
+      //   Bucket: `${config.SEEDFI_AMAZON_S3_BUCKET}`,
+      //   Key: key,
+      //   Body: imageBuffer,
+      //   ACL: 'public-read', // You can adjust the permissions as needed
+      //   ContentType: 'image/jpeg' // Specify the content type of your image
+      // };
+      // const data = await s3.upload(params).promise();
+
+      // console.log(user);
+    //   // const fileExt = path.extname(user_data.photo.trim());
+    //   // const document = encodeURIComponent(
+    //   //   await Hash.encrypt({ document_url: user_data.photo.trim(), document_extension: fileExt })
+    //   // );
+    //
+    //   // const payload = UserPayload.imgVerification(user, body);
+    //
+    //   // if (
+    //   // is_completed_kyc
+    //   // is_uploaded_identity_card
+    //   // )
+    //   // "first_name": "TOMIIWO",
+    //   // "last_name": "FAKINLEDE",
+    //   // "gender": "m",
+    //   // "middle_name": "ABOSEDE",
+    //   // "phone_number": "08137288381"
+    //   // "date_of_birth": "1990-07-29",
+    //   // console.log(response.data.phone_number);
+    }
+
+  }
+};
+
+export const votersIdentificationNumberVerification = async(document_id, user) => {
+  try {
+    const response = await zeehService.zeehVINVerificationCheck(document_id, user, 'ondo', user.last_name);
+    console.log(response.response.statusText == 'Not Found' || response.response.status == 404);
+    if (response.response.statusText == 'Not Found' || response.response.status == 404) {
+      return 'The information provided cannot be verified.';
+    }
+    // if (response.status === 'success') {
+    //   const user_data = response.data.entity.data;
+    //   console.log(user_data.firstName.toLowerCase()+' '+user_data.lastName.toLowerCase());
+    //   console.log(user.first_name.toLowerCase()+' '+user.last_name.toLowerCase());
+    //   if (
+    //     user_data.firstName.toLowerCase()+' '+user_data.lastName.toLowerCase() == user.first_name.toLowerCase()+' '+user.last_name.toLowerCase()
+    //   ) {
+    //     console.log('phone number: ', user_data);
+    //   }
+    // }
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 109, 'fail');
+    error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
+    logger.error(`user identity document verification failed::${enums.VERIFY_USER_IDENTITY_DOCUMENT}`, error.message);
+    return next(error);
+  }
+
+  // if (response.status === 'success') {
+  //   const user_data = response.data.entity.data;
+  //   console.log(user_data.firstName.toLowerCase()+' '+user_data.lastName.toLowerCase());
+  //   console.log(user.first_name.toLowerCase()+' '+user.last_name.toLowerCase());
+  //   if (
+  //     user_data.firstName.toLowerCase()+' '+user_data.lastName.toLowerCase() == user.first_name.toLowerCase()+' '+user.last_name.toLowerCase()
+  //   ) {
+  //     console.log('phone number: ', user_data);
+  //   }
+  // } else if (response.status == 404 || response.statusText == 'Not Fount') {
+  //
+  // }
+};
+
+export const documentVerification = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    switch (body.document_type) {
+      case 'nin':
+        return nationalIdentificationNumberVerification(body, user);
+      case 'voters_card':
+        return votersIdentificationNumberVerification(body.document_id, user, 'lagos', user.last_name);
+      default:
+        break;
+    }
+    // if (body.document_type == 'nin') {
+    //   return nationalIdentificationNumberVerification(body.document_id, user);
+    // }
+    //
+    // if (body.document_type == 'voters_card') {
+    //   return votersIdentificationNumberVerification(body.document_id, user);
+    // }
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 109, 'fail');
+    error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
+    logger.error(`user identity document verification failed::${enums.VERIFY_USER_IDENTITY_DOCUMENT}`, error.message);
+    return next(error);
+  }
+};
+
+
 
 /**
  * initiate user address verification using youVerify

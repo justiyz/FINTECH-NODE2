@@ -44,18 +44,6 @@ router.post(
 );
 
 router.post(
-  '/verify-document',
-  AuthMiddleware.validateAuthToken,
-  // Model(Schema.bvnVerification, 'payload'),
-  AuthMiddleware.isCompletedKyc('confirm'),
-  // UserMiddleware.isVerifiedBvn('complete'),
-  // UserMiddleware.isBvnPreviouslyExisting,
-  UserController.documentVerification
-
-);
-
-
-router.post(
   '/request-email-verification',
   AuthMiddleware.validateAuthToken,
   Model(Schema.verifyEmail, 'payload'),
@@ -140,6 +128,23 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.idUploadVerification
+);
+
+
+router.post(
+  '/verify-document',
+  AuthMiddleware.validateAuthToken,
+  // Model(Schema.bvnVerification, 'payload'),
+
+  // Model(Schema.idVerification, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  // UserMiddleware.isUploadedImageSelfie('confirm'),
+  // UserMiddleware.isUploadedVerifiedId('complete'),
+
+  // UserMiddleware.isVerifiedBvn('complete'),
+  // UserMiddleware.isBvnPreviouslyExisting,
+  UserController.documentVerification
+
 );
 
 router.post(
