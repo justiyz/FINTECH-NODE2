@@ -1,80 +1,15 @@
-if (NAMESPACE=='prod'){
-    env.MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
-    env.VAULT_ENV = 'production'
-    env.DOCKER_ENV = 'production'
-    env.DEPLOYMENT_ENV = 'production'
-
-} else if (NAMESPACE=='staging'){
-    env.MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
-    env.VAULT_ENV = 'staging'
-    env.DOCKER_ENV = 'staging'
-    env.DEPLOYMENT_ENV = 'staging'
-    env.APIENVCONFIG = 'stage'
-    env.KUBECONFIG = 'k8sStg'
-    env.NAMESPACE = 'staging'
-
-} else {
-
-    CLUSTER_NAME=""
-    ECR_REPO=''
-    TASK_FAMILY=""
-    SERVICE_NAME="api-dev"
-    ENV="dev"
-
-}
-println("MSTEAMS_WEBHOOK_URL: ${MSTEAMS_WEBHOOK_URL}")
-println("VAULT_ENV: ${VAULT_ENV}")
-println("DOCKER_ENV: ${DOCKER_ENV}")
-println("DEPLOYMENT_ENV: ${DEPLOYMENT_ENV}")
-println("APIENVCONFIG: ${APIENVCONFIG}")
-println("KUBECONFIG: ${KUBECONFIG}")
-println("NAMESPACE: ${NAMESPACE}")
-println("================================================================================")
-
-def envRepoName(REPO_NAME){
-    env.deployName = ''
-    env.SvcName = ''
-
-    if (REPO_NAME == 'seedfi-backend') {
-        env.deployName = 'seedfi-api'
-        env.SvcName = 'seedfi-backend'
-    } else if (REPO_NAME == 'seedfi-underwriting') {
-        env.deployName = 'api'
-        env.SvcName = 'seedfi-underwriting'
-    }
-}
-println("REPO_NAME: ${REPO_NAME}")
-println("deployName: ${deployName}")
-println("SvcName: ${SvcName}")
-println("================================================================================")
-
-
-def secrets = [
-    [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
-        [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
-    [path: "secret/k8s/kubeconfig/$KUBECONFIG", engineVersion: 2, secretValues: [
-        [envVar: 'KUBE_CONFIG', vaultKey: 'secret']]],
-    [path: "secret/k8s/secrets/$VAULT_ENV/api-config", engineVersion: 2, secretValues: [
-        [envVar: 'API_CONFIG',vaultKey: 'secret']]],
-    [path: "secret/k8s/secrets/$VAULT_ENV/underwriting-config", engineVersion: 2, secretValues: [
-        [envVar: 'UNDERWRITING_CONFIG',vaultKey: 'secret']]]
-]
-
-def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
 
 pipeline {
     agent any
 
     environment {
         // Define your environment variables here
-        VAULT_ADDR = '${VAULT_ADDR}'
-        REPO_NAME = envRepoName('seedfi-backend')
+        
+        REPO_NAME = 'seedfi-backend'
         DEPLOYMENT_ENV = 'staging'
-
-        // DOCKER_ENV = 'staging'
-        // KUBECONFIG = 'k8sStg'
-        // SCM_BRANCH = 'snapshot'
-        // NAMESPACE = 'staging'
+        SCM_BRANCH = 'snapshot'
+        NAMESPACE = 'staging'
+        DOCKER_ENV = 'staging'
     }
 
     stages {
@@ -84,70 +19,6 @@ pipeline {
             echo "$GIT_BRANCH"
             }
         }
-
-
-        // stage("Set environment specific variables")
-        // {
-        //     steps
-        //     {
-        //         script {
-        //             if (GIT_BRANCH.equals("origin/master")){
-
-        //                 MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
-        //                 VAULT_ENV = 'production'
-        //                 DOCKER_ENV = 'production'
-        //                 DEPLOYMENT_ENV = 'production'
-        //             } else if (GIT_BRANCH.equals("origin/snapshot")){
-
-        //                 MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
-        //                 VAULT_ENV = 'staging'
-        //                 DOCKER_ENV = 'staging'
-        //                 DEPLOYMENT_ENV = 'staging'
-        //                 APIENVCONFIG = 'stage'
-        //                 KUBECONFIG = 'k8sStg'
-        //                 NAMESPACE = 'staging'
-
-        //             } else {
-
-        //                 CLUSTER_NAME=""
-        //                 ECR_REPO=''
-        //                 TASK_FAMILY=""
-        //                 SERVICE_NAME="api-dev"
-        //                 ENV="dev"
-
-        //             }
-
-        //             def secrets = [
-        //                 [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
-        //                     [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
-        //                 [path: "secret/k8s/kubeconfig/${KUBECONFIG}", engineVersion: 2, secretValues: [
-        //                     [envVar: 'KUBE_CONFIG', vaultKey: 'secret']]],
-        //                 [path: "secret/k8s/secrets/${VAULT_ENV}/api-config", engineVersion: 2, secretValues: [
-        //                     [envVar: 'API_CONFIG', vaultKey: 'secret']]],
-        //                 [path: "secret/k8s/secrets/${VAULT_ENV}/underwriting-config", engineVersion: 2, secretValues: [
-        //                     [envVar: 'UNDERWRITING_CONFIG', vaultKey: 'secret']]]
-        //             ]
-                    
-        //             def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
-        //         }
-
-        //         println("MSTEAMS_WEBHOOK_URL: ${MSTEAMS_WEBHOOK_URL}")
-        //         println("VAULT_ENV: ${VAULT_ENV}")
-        //         println("DOCKER_ENV: ${DOCKER_ENV}")
-        //         println("DEPLOYMENT_ENV: ${DEPLOYMENT_ENV}")
-        //         println("APIENVCONFIG: ${APIENVCONFIG}")
-        //         println("KUBECONFIG: ${KUBECONFIG}")
-        //         println("NAMESPACE: ${NAMESPACE}")
-        //         println("================================================================================")
-                
-        //         println("REPO_NAME: ${REPO_NAME}")
-        //         println("deployName: ${deployName}")
-        //         println("SvcName: ${SvcName}")
-        //         println("================================================================================")
-
-
-        //     }
-        // }
 
         stage("Set deployment Image Tag") {
             
@@ -169,9 +40,6 @@ pipeline {
                     println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
 
                     sh '''
-                        pwd
-                        echo "DEPLOYMENT_ENV: ${DEPLOYMENT_ENV}"
-                        ls -al kubernetes
                         ls -al kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                         sed -i "s~ image:.*~ image: ${dockerTag}~" kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                         grep ' image:' kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
@@ -184,121 +52,161 @@ pipeline {
             steps {
                 script {
                     
-                    withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh '''
-                        grep version package.json
-                        docker build \
-                            --build-arg "VITE_REACT_APP_API_URL=$VITE_REACT_APP_API_URL" \
-                            -t "$dockerTag" .
-                        '''
-                        // Always push to Docker Hub
-                        echo 'Pushing to Docker Hub'
-                        sh 'docker push $dockerTag'
-                    }
+                    sh '''
+                    grep version package.json
+                    docker build \
+                        --build-arg "VITE_REACT_APP_API_URL=$VITE_REACT_APP_API_URL" \
+                        -t "$dockerTag" .
+                    '''
+                    // Always push to Docker Hub
+                    echo 'Pushing to Docker Hub'
+                    sh 'docker push $dockerTag'
+                    
                 }
             }
         }
 
-    //     stage('Deploy') {
-    //         steps {
-    //             script {
+        stage('Deploy') {
+            steps {
+                script {
+
+                    if (GIT_BRANCH.equals("origin/master")){
+
+                        MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/29988145ae2249428d714cdee3562694/318f2aee-3f38-416e-8897-45d9eee55525'
+                        VAULT_ENV = 'production'
+                        DOCKER_ENV = 'production'
+                        DEPLOYMENT_ENV = 'production'
+                    } else if (GIT_BRANCH.equals("origin/snapshot")){
+
+                        MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
+                        VAULT_ENV = 'staging'
+                        DOCKER_ENV = 'staging'
+                        DEPLOYMENT_ENV = 'staging'
+                        APIENVCONFIG = 'stage'
+                        KUBECONFIG = 'k8sStg'
+                        NAMESPACE = 'staging'
+                        SCM_BRANCH = 'snapshot'
+
+                    } else {
+
+                        CLUSTER_NAME=""
+                        ECR_REPO=''
+                        TASK_FAMILY=""
+                        SERVICE_NAME="api-dev"
+                        ENV="dev"
+
+                    }
+
+                    def secrets = [
+                        [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
+                            [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
+                        [path: "secret/k8s/kubeconfig/${KUBECONFIG}", engineVersion: 2, secretValues: [
+                            [envVar: 'KUBE_CONFIG', vaultKey: 'secret']]],
+                        [path: "secret/k8s/secrets/${VAULT_ENV}/api-config", engineVersion: 2, secretValues: [
+                            [envVar: 'API_CONFIG', vaultKey: 'secret']]],
+                        // [path: "secret/k8s/secrets/${VAULT_ENV}/underwriting-config", engineVersion: 2, secretValues: [
+                        //     [envVar: 'UNDERWRITING_CONFIG', vaultKey: 'secret']]]
+                    ]
+                    
+                    def configuration = [vaultUrl: "${VAULT_ADDR}", vaultCredentialId: 'vault-jenkins-role', engineVersion: 2]
    
-    //                 deleteDir()
+                    deleteDir()
 
-    //                 withVault([configuration: configuration, vaultSecrets: secrets]) {
-    //                     def container = docker.image('seedfidevops/containerbuilder')
-    //                     container.pull() // make sure we have the latest available from Docker Hub
-    //                     container.inside() {
-    //                         // Downloaded/Created in $WORKSPACE
-    //                         writeFile file: "KUBE_CONFIG_FILE", text: KUBE_CONFIG
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        def container = docker.image('seedfidevops/containerbuilder')
+                        container.pull() // make sure we have the latest available from Docker Hub
+                        container.inside() {
+                            // Downloaded/Created in $WORKSPACE
+                            writeFile file: "KUBE_CONFIG_FILE", text: KUBE_CONFIG
 
-    //                         // TODO: pull/create other svc secrets.yaml
-    //                         if (REPO_NAME == 'seedfi-backend') {
-    //                             writeFile file: "API_CONFIG_FILE", text: API_CONFIG
-    //                         } else if (REPO_NAME == 'seedfi-underwriting') {
-    //                             writeFile file: "UNDERWRITING_CONFIG_FILE", text: UNDERWRITING_CONFIG
-    //                         }
+                            // TODO: pull/create other svc secrets.yaml
+                            if (REPO_NAME == 'seedfi-backend') {
+                                writeFile file: "API_CONFIG_FILE", text: API_CONFIG
+                            } else if (REPO_NAME == 'seedfi-underwriting') {
+                                writeFile file: "UNDERWRITING_CONFIG_FILE", text: UNDERWRITING_CONFIG
+                            }
 
-    //                         sh ('pwd; ls -al')
-    //                         sh 'git clone -b $SCM_BRANCH https://$GIT_TOKEN@github.com/theseedfi/$REPO_NAME.git'
-    //                         env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
-    //                         println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
+                            sh ('pwd; ls -al')
+                            sh 'git clone -b $SCM_BRANCH https://$GIT_TOKEN@github.com/theseedfi/$REPO_NAME.git'
+                            env.VERSION_NUMBER = sh(script: "jq '.version' ${REPO_NAME}/package.json", returnStdout: true).trim().replaceAll('"','')
+                            println("VERSION_NUMBER: ${env.VERSION_NUMBER}")
 
-    //                         // dockerTag
-    //                         env.dockerTag = ''
-    //                         if (REPO_NAME == 'seedfi-backend') {
-    //                             env.dockerTag = "seedfidevops/seedfi-api:${DOCKER_ENV}_v${VERSION_NUMBER}"
-    //                         } else if (REPO_NAME == 'seedfi-underwriting') {
-    //                             env.dockerTag = "seedfidevops/seedfi-underwriting:${DOCKER_ENV}_v${VERSION_NUMBER}"
-    //                         }
+                            // dockerTag
+                            env.dockerTag = ''
+                            if (REPO_NAME == 'seedfi-backend') {
+                                env.dockerTag = "seedfidevops/seedfi-api:${DOCKER_ENV}_v${VERSION_NUMBER}"
+                            } else if (REPO_NAME == 'seedfi-underwriting') {
+                                env.dockerTag = "seedfidevops/seedfi-underwriting:${DOCKER_ENV}_v${VERSION_NUMBER}"
+                            }
 
-    //                         env.DEPLOYMENT_YAML = 'deployment.yml'
-    //                         println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
-    //                         sh '''
-    //                             ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-    //                             sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-    //                             grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-    //                         '''
+                            env.DEPLOYMENT_YAML = 'deployment.yml'
+                            println("DEPLOYMENT_YAML: ${DEPLOYMENT_YAML}")
+                            sh '''
+                                ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                                sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                                grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
+                                cat KUBE_CONFIG_FILE
+                            '''
 
-    //                         if (REPO_NAME == 'seedfi-backend') {
-    //                             sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
-    //                         } else if (REPO_NAME == 'seedfi-underwriting') {
-    //                             sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
-    //                         }
+                            // if (REPO_NAME == 'seedfi-backend') {
+                            //     sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
+                            // } else if (REPO_NAME == 'seedfi-underwriting') {
+                            //     sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
+                            // }
 
-    //                         DEPLOYDIR = "${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}"
-    //                         dir(DEPLOYDIR) {
-    //                             stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $DEPLOYMENT_YAML', returnStdout: true).trim().replaceAll('"','')
-    //                             println "===== stdOut: ${stdOut} ====="
-    //                             if (stdOut =~ /configured/) {
-    //                                 sleep 2
-    //                                 stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE rollout restart deploy $deployName', returnStdout: true).trim().replaceAll('"','')
-    //                                 println "===== stdOut: ${stdOut} ====="
-    //                             }
-    //                         }
+                            DEPLOYDIR = "${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}"
+                            dir(DEPLOYDIR) {
+                                stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $DEPLOYMENT_YAML', returnStdout: true).trim().replaceAll('"','')
+                                println "===== stdOut: ${stdOut} ====="
+                                if (stdOut =~ /configured/) {
+                                    sleep 2
+                                    stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE rollout restart deploy $deployName', returnStdout: true).trim().replaceAll('"','')
+                                    println "===== stdOut: ${stdOut} ====="
+                                }
+                            }
 
-    //                         SVCDIR = "${REPO_NAME}/kubernetes/services"
-    //                         dir(SVCDIR) {
-    //                             env.svcNameYaml = 'api.yml'
-    //                             if (REPO_NAME == 'seedfi-backend') {
-    //                                 env.svcNameYaml = 'api.yml'
-    //                             }
+                            SVCDIR = "${REPO_NAME}/kubernetes/services"
+                            dir(SVCDIR) {
+                                env.svcNameYaml = 'api.yml'
+                                if (REPO_NAME == 'seedfi-backend') {
+                                    env.svcNameYaml = 'api.yml'
+                                }
 
-    //                             if (svcNameYaml) {
-    //                                 stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $svcNameYaml', returnStdout: true).trim().replaceAll('"','')
-    //                                 println "===== stdOut: ${stdOut} ====="
-    //                             }
-    //                         }
+                                if (svcNameYaml) {
+                                    stdOut = sh(script: 'kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE apply -f $svcNameYaml', returnStdout: true).trim().replaceAll('"','')
+                                    println "===== stdOut: ${stdOut} ====="
+                                }
+                            }
 
-    //                         sh '''
-    //                             sleep 15
-    //                             kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE get deploy,svc,po
-    //                         '''
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
+                            sh '''
+                                sleep 15
+                                kubectl --kubeconfig $WORKSPACE/KUBE_CONFIG_FILE -n $NAMESPACE get deploy,svc,po
+                            '''
+                        }
+                    }
+                }
+            }
+        }
     }
-    // post {
-    //     failure {
-    //         script {
-                // Send a failure message to Microsoft Teams
-    //             def payload = [
-    //                 '@type': 'MessageCard',
-    //                 '@context': 'http://schema.org/extensions',
-    //                 'themeColor': 'D00000',
-    //                 'title': 'Jenkins Build Status',
-    //                 'text': "FAILED: Unable to Build '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
-    //             ]
-    //             def jsonPayload = groovy.json.JsonOutput.toJson(payload)
+    post {
+        failure {
+            script {
+                Send a failure message to Microsoft Teams
+                def payload = [
+                    '@type': 'MessageCard',
+                    '@context': 'http://schema.org/extensions',
+                    'themeColor': 'D00000',
+                    'title': 'Jenkins Build Status',
+                    'text': "FAILED: Unable to Build '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
+                ]
+                def jsonPayload = groovy.json.JsonOutput.toJson(payload)
      
-                // Send the message to Microsoft Teams
-    //             sh """
-    //                 curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
-    //            """
-    //         }
-    //     }
-    // }
+                Send the message to Microsoft Teams
+                sh """
+                    curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
+               """
+            }
+        }
+    }
     
 }
