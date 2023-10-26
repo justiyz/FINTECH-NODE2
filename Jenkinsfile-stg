@@ -10,6 +10,7 @@ pipeline {
         SCM_BRANCH = 'snapshot'
         NAMESPACE = 'staging'
         DOCKER_ENV = 'staging'
+        MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
     }
 
     stages {
@@ -61,7 +62,21 @@ pipeline {
                     // Always push to Docker Hub
                     echo 'Pushing to Docker Hub'
                     sh 'docker push $dockerTag'
-                    
+
+                    def payload = [
+                    '@type': 'MessageCard',
+                    '@context': 'http://schema.org/extensions',
+                    'themeColor': '#00FF00',
+                    'title': 'Jenkins Build Status',
+                    'text': "PASSED: Finished Building '${env.SvcName}:${DOCKER_ENV}_v${VERSION_NUMBER}' Container - ${env.JOB_NAME} ${env.BUILD_NUMBER} ([Open](${env.BUILD_URL}))",
+                    ]
+                    def jsonPayload = groovy.json.JsonOutput.toJson(payload)
+
+                    // Send the message to Microsoft Teams
+                    sh """
+                    curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
+                    """
+                            
                 }
             }
         }
