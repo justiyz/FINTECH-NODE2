@@ -135,15 +135,24 @@ export const createTicketSubscription = async(req, res, next) => {
       const booked_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, ticket_application);
       const barcode_string = tickets[ticket].ticket_id.concat('|', req.user.user_id);
       // Generate QR Code for each ticket
-      QRCode.toDataURL(barcode_string)
-        .then(
-          qr_code => {
-            processOneOrNoneData(adminShopQueries.storeTicketQR, [ booked_ticket[0].user_ticket_id, qr_code ]);
-            logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket QR Code successfully created. createTicketSubscription.controller.shop.js`);
-          })
-        .catch(err => {
-          logger.error(`failed to update user ticket with QR Code::${enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION}, error: ${err}`);
-        });
+      try {
+        const the_qr = QRCode.toDataURL(barcode_string)
+          .then(
+            qr_code => {
+              processOneOrNoneData(adminShopQueries.storeTicketQR, [ booked_ticket[0].user_ticket_id, qr_code ]);
+              logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket QR Code successfully created. createTicketSubscription.controller.shop.js`);
+            })
+          .catch(err => {
+            logger.error(`failed to update user ticket with QR Code::${enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION}, error: ${err}`);
+          });
+
+        console.log(the_qr);
+      } catch (er) {
+        console.log(er);
+      } finally {
+        console.log('here');
+      }
+
       // update available ticket units
       const reduceTicket = available_tickets.units - tickets[ticket].units;
       const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];

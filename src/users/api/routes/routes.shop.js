@@ -5,8 +5,6 @@ import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
 import * as shopCategories from '../controllers/controllers.shop';
 import Schema from '../../lib/schemas/lib.schema.shop';
-import * as ClusterMiddleware from '../middlewares/middlewares.cluster';
-import * as ClusterController from '../controllers/controllers.cluster';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 
 const router = Router();
