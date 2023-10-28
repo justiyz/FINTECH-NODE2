@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import Model from '../middlewares/middlewares.model';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
-// import * as UserMiddleware from '../middlewares/middlewares.user';
-// import * as UserController from '../controllers/controllers.user';
+import * as UserMiddleware from '../middlewares/middlewares.user';
+import * as UserController from '../controllers/controllers.user';
 import * as shopCategories from '../controllers/controllers.shop';
 import Schema from '../../lib/schemas/lib.schema.shop';
-import * as ClusterMiddleware from '../middlewares/middlewares.cluster';
-import * as ClusterController from '../controllers/controllers.cluster';
+import * as LoanMiddleware from '../middlewares/middlewares.loan';
 
 const router = Router();
 
@@ -50,7 +49,16 @@ router.post(
   '/ticket/:ticket_id/book',
   AuthMiddleware.validateAuthToken,
   Model(Schema.subscribeTicket, 'body'),
+  // LoanMiddleware.checkUserLoanApplicationExists,
+  // UserMiddleware.checkIfAccountDetailsExists,
+  // UserMiddleware.checkIfCardOrUserExist,
   shopCategories.createTicketSubscription
+);
+
+router.get(
+  '/ticket/:ticket_id/summary',
+  AuthMiddleware.validateAuthToken,
+  shopCategories.getTicketSubscriptionSummary
 );
 
 router.post(

@@ -22,7 +22,14 @@ const ticketId = Joi.object().keys({
 
 const subscribeTicket = Joi.object().keys({
   units: Joi.string().required(),
-  ticket_id: Joi.string().required()
+  ticket_id: Joi.string().required(),
+  insurance_type: Joi.string().required(),
+  insurance_coverage: Joi.boolean().required(),
+  payment_tenure: Joi.number().required(),
+  ticket_start_date: Joi.string().required(),
+  ticket_end_date: Joi.string().required(),
+  event_location: Joi.string().required(),
+  event_time: Joi.string().required()
 });
 export default  {
   shopCategory,
