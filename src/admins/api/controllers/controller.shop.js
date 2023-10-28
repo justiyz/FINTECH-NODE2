@@ -87,12 +87,13 @@ export const createEventRecord = async(req, res, next) => {
       event_time
     } = req.body;
     // event_start_date, event_end_date, event_location, event_time
-    try {
-      const event_exists = await processAnyData(shopQueries.checkIfEventExist, ticket_name);
+    // try {
+    const event_exists = await processAnyData(shopQueries.checkIfEventExist, ticket_name);
     // } catch (error) {
-        if (event_exists.length > 0) {
-          logger.error(`Failed to create event record:::${enums.CREATE_SHOP_CATEGORY_ITEM}`, error.label);
-          return next(error);
+    if (event_exists.length > 0) {
+      console.log(event_exists);
+      // logger.error(`Failed to create event record:::${enums.CREATE_SHOP_CATEGORY_ITEM}`, error.label);
+      // return next(error);
     }
 
 

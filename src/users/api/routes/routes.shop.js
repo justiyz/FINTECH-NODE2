@@ -49,9 +49,9 @@ router.post(
   '/ticket/:ticket_id/book',
   AuthMiddleware.validateAuthToken,
   Model(Schema.subscribeTicket, 'body'),
-  LoanMiddleware.checkUserLoanApplicationExists,
-  UserMiddleware.checkIfAccountDetailsExists,
-  UserMiddleware.checkIfCardOrUserExist,
+  // LoanMiddleware.checkUserLoanApplicationExists,
+  // UserMiddleware.checkIfAccountDetailsExists,
+  // UserMiddleware.checkIfCardOrUserExist,
   shopCategories.createTicketSubscription
 );
 

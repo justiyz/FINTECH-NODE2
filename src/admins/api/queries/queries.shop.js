@@ -41,12 +41,17 @@ export default {
         tickets.event_date,
         tickets.event_location,
         tickets.event_time,
-        ticket_categories
+        tickets.ticket_status
     FROM tickets
-    LEFT JOIN ticket_categories ON ticket_categories.ticket_id = tickets.ticket_id;
-
   `,
+  // ,
+  //   LEFT JOIN
+  //   ticket_categories
 
+  // ticket_categories.ticket_category_id,
+  //   ticket_categories.ticket_category_type,
+  //   ticket_categories.ticket_price,
+  //   ticket_categories.units
   getLeastValueTicket: `
     SELECT *
     FROM ticket_categories
@@ -128,8 +133,9 @@ export default {
         units,
         insurance_coverage,
         payment_tenure,
-        status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        status,
+        ticket_qr_code
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *;
   `,
 
@@ -152,10 +158,11 @@ export default {
         units = $2,
         updated_at = NOW()
     WHERE ticket_category_id = $1
+    RETURNING units;
   `,
 
   getTicketUnitsAvailable: `
-    SELECT units
+    SELECT units, ticket_price
     FROM ticket_categories
     WHERE ticket_category_id = $1
   `
