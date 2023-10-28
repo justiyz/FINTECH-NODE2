@@ -3,6 +3,7 @@ import { Router } from 'express';
 // import Schema from '../../lib/schemas/lib.schema.role';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
+import * as ShopMiddleware from '../middlewares/middlewares.user';
 import * as ShopController from '../controllers/controller.shop';
 import Model from "../../../users/api/middlewares/middlewares.model";
 import Schema from "../../../users/lib/schemas/lib.schema.shop";
@@ -32,6 +33,7 @@ router.get(
 router.post(
   '/create-event-record',
   AuthMiddleware.validateAdminAuthToken,
+  ShopMiddleware.uploadAdminImage,
   ShopController.createEventRecord
 );
 

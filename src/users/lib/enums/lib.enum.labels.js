@@ -268,6 +268,7 @@ export const EDIT_ADMIN_STATUS_CONTROLLER = 'AdminAdminController::editAdminStat
 export const CHECK_ADMIN_CURRENT_STATUS_MIDDLEWARE = 'AdminAdminMiddleware::checkAdminCurrentStatus';
 export const CHECK_USER_CURRENT_STATUS_MIDDLEWARE = 'AdminUserMiddleware::checkUserCurrentStatus';
 export const UPLOAD_DOCUMENT_MIDDLEWARE = 'AdminUserMiddleware::uploadDocument';
+export const UPLOAD_IMAGE_MIDDLEWARE = 'AdminUserMiddleware::uploadImage';
 export const FETCH_ROLES = 'AdminRoleController::fetchRoles';
 export const FETCH_ADMINS_PER_ROLE_CONTROLLER = 'AdminRoleController::fetchAdminsPerRole';
 export const GET_PROFILE_CONTROLLER = 'AdminAdminController::getProfile';

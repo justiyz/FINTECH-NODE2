@@ -5,6 +5,7 @@ import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
+import * as S3 from '../services/services.s3'
 import {
   CREATE_CATEGORIES_ITEM,
   CREATED_EVENT_SUCCESSFULLY,
@@ -137,13 +138,17 @@ export const createEventRecord = async(req, res, next) => {
     return next(error);
   }
 };
-/**
- *
- * @param req
- * @param res
- * @param next
- * @returns {Promise<void>}
- */
+
+function uploadTicketImage() {
+  const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
+  const url = `files/promo-banners/${admin.admin_id}/promo-banner/${files.document.name}`;
+  const upload = S3.uploadFile()
+}
+
+// @param req
+// @param res
+// @param next
+// @returns {Promise<void>}
 export const updateEventRecord = async (req, res, next) => {
   try {
     const eventId = req.params.eventId; // Extract the event ID from the URL

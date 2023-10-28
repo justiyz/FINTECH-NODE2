@@ -41,6 +41,7 @@ export const fetchShopDetails = async(req, res, next) => {
   }
 };
 
+
 function findIndexOfLeastValue(arr) {
   if (arr.length === 0) {
     return -1; // Return -1 if the array is empty
@@ -97,8 +98,6 @@ export const fetchUserTickets = async(req, res, next) => {
     error.label = enums.FAILED_TO_FETCH_USER_TICKETS;
     logger.error(`failed to fetch shop single category::${enums.FETCH_SINGLE_CATEGORY}`, error.message);
     return next(error);
-  } finally {
-    console.log('this one will run ');
   }
 };
 
