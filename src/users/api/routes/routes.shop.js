@@ -62,7 +62,7 @@ router.get(
 );
 
 router.post(
-  '/ticket/:ticket_id/send_tickets',
+  '/ticket/send_notifications',
   AuthMiddleware.validateAuthToken,
   shopCategories.sendEventTicketToEmails
 );

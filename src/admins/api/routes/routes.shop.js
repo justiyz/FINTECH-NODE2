@@ -1,12 +1,11 @@
 import { Router } from 'express';
-// import Model from '../../../users/api/middlewares/middlewares.model';
+import Model from '../../../users/api/middlewares/middlewares.model';
 // import Schema from '../../lib/schemas/lib.schema.role';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as ShopMiddleware from '../middlewares/middlewares.user';
 import * as ShopController from '../controllers/controller.shop';
-import Model from "../../../users/api/middlewares/middlewares.model";
-import Schema from "../../../users/lib/schemas/lib.schema.shop";
+import * as ShopSchema from '../../../users/lib/schemas/lib.schema.shop';
 
 const router = Router();
 
@@ -46,7 +45,7 @@ router.post(
 // router.get(
 //   '/:shop_category_id/details',
 //   AuthMiddleware.validateAdminAuthToken,
-//   Model(Schema.shopCategoryIdParams, 'params'),
+//   Model(ShopSchema.shopCategoryIdParams, 'params'),
 //   ShopController.fetchShopDetails
 // );
 

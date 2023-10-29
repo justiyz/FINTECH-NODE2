@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { userActivityTracking } from '../../lib/monitor';
 import { processOneOrNoneData } from '../../../admins/api/services/services.db';
 import QRCode from 'qrcode';
+import MailService from '../services/services.email';
+import { SEND_TICKET_NOTIFICATIONS } from "../../lib/enums/lib.enum.messages";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -291,26 +293,37 @@ export const fetchUserSubscribedTickets = async(req, res, next) => {
   }
 };
 
-export const sendEventTicketToEmails = async(req, res, next) => {
+export const _sendEventTicketToEmails = async(req, res, next) => {
   try {
-    const tickets = req.body.tickets;
-    const ticket_id = req.params.ticket_id;
-    console.log('ticket_id', ticket_id);
-    for (const ticket in tickets) {
-      // create QR code
-      QRCode.toDataURL(ticket_id)
-        .then(qr_code => {
-          const ticket_info = {
-            'qr_code': qr_code,
-            'email_address': tickets[ticket].email
-          };
-          console.log(ticket_info);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-      console.log(tickets[ticket].email);
+    const recipients = req.body.recipients;
+    let data = {};
+    const ticket_recipients = [];
+    const ticket_id = req.body.ticket_id;
+    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ ticket_id ]);
+    const title = 'Hurray! Ticket Booked';
+    const content = `Your ticket for ${ticket.ticket_name} has been booked on SeedFi!`;
+    // Send Tickets to recipients
+    for (const recipient in recipients) {
+      const savedRecipient = await processOneOrNoneData(adminShopQueries.savedRecipientInformation, [
+        recipients[recipient].first_name,
+        recipients[recipient].last_name,
+        recipients[recipient].phone_number,
+        recipients[recipient].email,
+        ticket_id
+      ]);
+      ticket_recipients.push(savedRecipient);
+      await MailService(ticket.ticket_name, 'ticketBookedForYou', {
+        email: recipients[recipient].email,
+        first_name: recipients[recipient].first_name,
+        title: title,
+        content: content,
+        ticket: ticket
+      });
     }
+    data = {
+      ticket_recipients: ticket_recipients
+    };
+    return ApiResponse.success(res, enums.SEND_TICKET_NOTIFICATIONS, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 115, 'fail');
     error.label = enums.FAILED_TO_SEND_EVENT_TICKETS_TO_EMAILS;
@@ -318,6 +331,55 @@ export const sendEventTicketToEmails = async(req, res, next) => {
   }
 };
 
+// Helper function to send a ticket email
+const sendTicketEmail = async (recipient, ticket) => {
+  const title = 'Hurray! Ticket Booked';
+  const content = `Your ticket for ${ticket.ticket_name} has been booked on SeedFi!`;
+
+  const savedRecipient = await processOneOrNoneData(adminShopQueries.savedRecipientInformation, [
+    recipient.first_name,
+    recipient.last_name,
+    recipient.phone_number,
+    recipient.email,
+    ticket.ticket_id
+  ]);
+
+  await MailService(ticket.ticket_name, 'ticketBookedForYou', {
+    email: recipient.email,
+    first_name: recipient.first_name,
+    title: title,
+    content: content,
+    ticket: ticket
+  });
+
+  return savedRecipient;
+};
+
+export const sendEventTicketToEmails = async(req, res, next) => {
+  try {
+    const recipients = req.body.recipients;
+    const ticket_id = req.body.ticket_id;
+    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ticket_id]);
+
+    const ticket_recipients = [];
+
+    // Send Tickets to recipients
+    for (const recipient of recipients) {
+      const savedRecipient = await sendTicketEmail(recipient, ticket);
+      ticket_recipients.push(savedRecipient);
+    }
+
+    const data = {
+      ticket_recipients: ticket_recipients
+    };
+
+    return ApiResponse.success(res, enums.SEND_TICKET_NOTIFICATIONS, enums.HTTP_OK, data);
+  } catch (error) {
+    await userActivityTracking(req.user.user_id, 115, 'fail');
+    error.label = enums.FAILED_TO_SEND_EVENT_TICKETS_TO_EMAILS;
+    return next(error);
+  }
+};
 
 
 
