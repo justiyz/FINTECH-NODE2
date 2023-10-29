@@ -107,16 +107,39 @@ export default {
       ticket_end_date = $9,
       event_location = $10,
       event_time = $11,
-      updated_at = NOW()
+      updated_at = NOW(),
+      event_start_date = $13,
+      event_end_date = $14
     WHERE
-      ticket_id = $13
-    RETURNING ticket_name, ticket_description;
+      ticket_id = $15
+    RETURNING
+        ticket_name,
+        ticket_description,
+        ticket_image_url,
+        insurance_coverage,
+        processing_fee,
+        ticket_image_url,
+        event_date,
+        ticket_start_date,
+        ticket_end_date,
+        event_location,
+        event_time,
+        updated_at,
+        event_start_date,
+        event_end_date
+        ;
   `,
 
   getEventRecordByTicketId: `
     SELECT *
     FROM ticket_categories
     WHERE ticket_category_id = $1
+  `,
+
+  getTicketCategoriesByTicketId: `
+    SELECT *
+    FROM tickets
+    WHERE ticket_id = $1
   `,
 
   createTicketCategory: `

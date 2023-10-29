@@ -5,7 +5,7 @@ import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import * as S3 from '../services/services.s3'
+import * as S3 from '../services/services.s3';
 import {
   CREATE_CATEGORIES_ITEM,
   CREATED_EVENT_SUCCESSFULLY, EVENT_EXISTS, EVENT_TICKET_CATEGORY_NOT_FOUND, FAILED_TO_FETCH_EVENT,
@@ -21,7 +21,7 @@ import {
   CREATE_EVENT_CATEGORY_SUCCESSFUL,
   CREATE_EVENT_SUCCESSFUL, EVENT_RECORD_ALREADY_CREATED,
   FETCH_CATEGORY_LIST
-} from "../../../users/lib/enums/lib.enum.labels";
+} from '../../../users/lib/enums/lib.enum.labels';
 
 export const listShopCategories = async(req, res, next) => {
   try {
@@ -256,9 +256,10 @@ export const updateEventRecord = async(req, res, next) => {
   try {
     const eventId = req.params.eventId; // Extract the event ID from the URL
     const updatedEventDetails = req.body; // Get the updated event details from the request body
-
+    console.log(eventId);
+    console.log(updatedEventDetails);
     // Call the update function to update the event record
-    await updateEventRecord_(eventId, updatedEventDetails);
+    // await updateEventRecord_(eventId, updatedEventDetails);
 
     // Respond with a success message or updated event details
     res.status(200).json({ message: 'Event record updated successfully' });
@@ -267,33 +268,6 @@ export const updateEventRecord = async(req, res, next) => {
     next(error);
   }
 };
-
-async function updateEventRecord_(eventId, updatedEventDetails) {
-  // Execute an UPDATE query on the events table
-  const updateQuery = `
-    UPDATE events
-    SET
-      ticket_name = $1,
-      ticket_description = $2,n
-    WHERE
-      event_id = $n;
-  `;
-
-  // Provide updated event details as parameters to the query
-  const queryParams = [
-    updatedEventDetails.ticket_name,
-    updatedEventDetails.ticket_description,
-    // Include parameters for other columns
-    eventId // The event's unique identifier
-  ];
-
-  // Execute the update query and handle any errors
-  try {
-    await processAnyData(updateQuery, queryParams);
-  } catch (error) {
-    throw error;
-  }
-}
 
 export const createEventRecord2 = async(req, res, next) => {
   try {
@@ -393,7 +367,7 @@ const getEventRecordByTicketId = async(ticketId) => {
 };
 
 const getTicketCategoryRecord = async(ticketCategoryID) => {
-  return await processOneOrNoneData(shopQueries.getTicketCategory, ticketCategoryID);
+  return await processOneOrNoneData(shopQueries.getTicketCategoriesByTicketId, ticketCategoryID);
 };
 
 // Function to update the event record
@@ -468,6 +442,7 @@ export const editEventRecord = async(req, res, next) => {
   const ticketId = req.params.event_id; // Assuming the ticket_id is passed as a URL parameter
   try {
     const existingEventRecord = await getTicketCategoryRecord(ticketId);
+    console.log(existingEventRecord);
     if (!existingEventRecord) {
       return ApiResponse.error(res, enums.EVENT_NOT_FOUND, enums.HTTP_NOT_FOUND, enums.EVENT_RECORD_NOT_FOUND);
     }
@@ -484,7 +459,9 @@ export const editEventRecord = async(req, res, next) => {
       ticket_start_date,
       ticket_end_date,
       event_location,
-      event_time
+      event_time,
+      event_start_date,
+      event_end_date
     } = req.body;
 
     const updatedEventRecord = await updateCurrentEventRecord(ticketId, [
@@ -499,9 +476,10 @@ export const editEventRecord = async(req, res, next) => {
       ticket_start_date,
       ticket_end_date,
       event_location,
-      event_time
+      event_time,
+      event_start_date,
+      event_end_date
     ]);
-
     return ApiResponse.success(res, enums.UPDATE_EVENT_SUCCESSFUL_MESSAGE, enums.HTTP_OK, updatedEventRecord);
   } catch (error) {
     error.label = enums.EDIT_EVENT_RECORD;
