@@ -178,7 +178,6 @@ export const createTicketSubscription = async(req, res, next) => {
             req.body.payment_tenure,
             theQRCode
           );
-          console.log(bookedTicket[0]);
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
           ticketPurchaseLogs.push(bookedTicket[0]);
           // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
@@ -381,6 +380,10 @@ export const sendEventTicketToEmails = async(req, res, next) => {
   }
 };
 
+export const cancel_ticket_booking = async(req, res, next) => {
+  // reverse createUserTicketRecord
+  // reverse updateTicketUnitsAvailable
+};
 
 
 

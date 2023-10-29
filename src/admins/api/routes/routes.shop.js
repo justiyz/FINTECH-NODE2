@@ -32,7 +32,7 @@ router.get(
 router.post(
   '/create-event-record',
   AuthMiddleware.validateAdminAuthToken,
-  ShopMiddleware.uploadAdminImage,
+  // ShopMiddleware.uploadAdminImage,
   ShopController.createEventRecord
 );
 
@@ -40,6 +40,18 @@ router.post(
   '/update-event-record/:event_id',
   AuthMiddleware.validateAdminAuthToken,
   ShopController.updateEventRecord
+);
+
+router.post(
+  '/:event_id/update',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.editEventRecord
+);
+
+router.post(
+  '/category/:ticket_category_id/update',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.editEventTicketCategory
 );
 
 // router.get(

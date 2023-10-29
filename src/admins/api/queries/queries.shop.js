@@ -100,8 +100,14 @@ export default {
       event_time = $11,
       updated_at = NOW()
     WHERE
-      ticket_id = $12
-    RETURNING *;
+      ticket_id = $13
+    RETURNING ticket_name, ticket_description;
+  `,
+
+  getEventRecordByTicketId: `
+    SELECT *
+    FROM ticket_categories
+    WHERE ticket_category_id = $1
   `,
 
   createTicketCategory: `
@@ -115,10 +121,49 @@ export default {
     RETURNING id, ticket_category_id;
   `,
 
+  updateEventTicketCategory: `
+    UPDATE ticket_categories
+    SET
+        ticket_price = $1,
+        units = $2,
+        ticket_category_status = $3,
+        updated_at = NOW()
+    WHERE
+        ticket_category_id = $4
+    RETURNING
+        ticket_category_id,
+        ticket_id,
+        ticket_category_type,
+        ticket_price,
+        units,
+        ticket_category_status
+  `,
+
   getTicketCategories: `
     SELECT *
     FROM ticket_categories
     WHERE ticket_id = $1
+  `,
+
+  getTicketCategoryByID: `
+    SELECT *
+    FROM ticket_categories
+    WHERE ticket_category_id = $1
+  `,
+
+  getTicketUnitsAvailable: `
+    SELECT units, ticket_price
+    FROM ticket_categories
+    WHERE ticket_category_id = $1
+  `,
+
+  updateTicketUnitsAvailable: `
+    UPDATE ticket_categories
+    SET
+        units = $2,
+        updated_at = NOW()
+    WHERE ticket_category_id = $1
+    RETURNING units;
   `,
 
   checkIfEventExist: `
@@ -160,21 +205,6 @@ export default {
     WHERE user_id = $1
   `,
 
-  updateTicketUnitsAvailable: `
-    UPDATE ticket_categories
-    SET
-        units = $2,
-        updated_at = NOW()
-    WHERE ticket_category_id = $1
-    RETURNING units;
-  `,
-
-  getTicketUnitsAvailable: `
-    SELECT units, ticket_price
-    FROM ticket_categories
-    WHERE ticket_category_id = $1
-  `,
-
   savedRecipientInformation: `
     INSERT INTO ticket_recipients(
         first_name,
@@ -184,6 +214,5 @@ export default {
         ticket_id
     ) VALUES ($1, $2, $3, $4, $5)
     RETURNING ticket_recipient_id, first_name, last_name, email;
-
   `
 };
