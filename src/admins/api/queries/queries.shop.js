@@ -67,6 +67,13 @@ export default {
     AND ticket_category_type = 'regular'
   `,
 
+  getPriceOfLeastValueTicket: `
+    SELECT ticket_price
+    FROM ticket_categories
+    WHERE ticket_id = $1
+    AND ticket_category_type = 'regular'
+  `,
+
   createEventRecord: `
     INSERT INTO tickets(
         ticket_name,
