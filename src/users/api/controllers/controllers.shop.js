@@ -64,13 +64,25 @@ function findIndexOfLeastValue(arr) {
   return minValue;
 }
 
+function isObjectEmpty(obj) {
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
 export const fetchTickets = async(req, res, next) => {
   try {
     const { user } = req;
     let tickets = await processAnyData(adminShopQueries.getAllEvents, [ req.body.status, req.query.ticket_id ]);
-    const ticket_units = [];
     for (const tick in tickets) {
-      ticket_units.push([ tickets[tick].ticket_category_id, tickets[tick].ticket_price ]);
+      const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
+      if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
+        tickets[tick].lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
+      } else {
+        tickets[tick].lowest_ticket_price = 0;
+      }
     }
     const data = {
       'tickets': tickets
@@ -90,6 +102,14 @@ export const fetchUserTickets = async(req, res, next) => {
     const { user } = req;
     const user_tickets = await processAnyData(
       shopQueries.getUserTickets, [ user.user_id, req.query.status ]);
+    for (const tick in user_tickets) {
+      const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, user_tickets[tick].ticket_id);
+      if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
+        user_tickets[tick].lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
+      } else {
+        user_tickets[tick].lowest_ticket_price = 0;
+      }
+    }
     // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user tickets fetched successfully fetchUserTickets.controller.shop.js`);
     const data = {
       user_tickets
