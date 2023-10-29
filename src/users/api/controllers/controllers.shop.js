@@ -381,6 +381,10 @@ export const sendEventTicketToEmails = async(req, res, next) => {
   }
 };
 
+export const cancel_ticket_booking = async(req, res, next) => {
+  // reverse createUserTicketRecord
+  // reverse updateTicketUnitsAvailable
+};
 
 
 
