@@ -111,7 +111,7 @@ export const uploadAdminImage = async(req, res, next) => {
     }
 
     const url = `files/event-images/${files.image.name}`; // Adjust the S3 bucket path as needed
-    if (config.SEEDFI_NODE_ENV === 'test') {
+    if (config.SEEDFI_NODE_ENV === 'testz') {
       req.image = encodeURIComponent(
         await UserHash.encrypt({
           image_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-images/user-af4922be60fd1b85068ed/land%20ownership%20proof.jpg',

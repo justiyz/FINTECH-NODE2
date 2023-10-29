@@ -14,6 +14,7 @@ export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified O
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
+export const EVENT_EXISTS = 'Event Record Exists';
 export const INVALID_AUTHORIZATION = 'Invalid Authorization Token';
 export const NOT_SUCCESSFUL_TRANSACTION = 'Payment was not successful';
 export const INVALID_YOU_VERIFY_WEBHOOK_EVENT = 'Invalid webhook event sent';
@@ -397,6 +398,8 @@ export const FETCHED_USER_TICKETS_SUCCESSFULLY = 'fetched user tickets successfu
 export const FAILED_TO_SEND_EVENT_TICKETS_TO_EMAILS = 'failed to send event tickets to emails';
 export const FAILED_TO_FETCH_TICKET_SUMMARY = 'failed to fetch ticket summary information';
 export const SEND_TICKET_NOTIFICATIONS = 'ticket notifications sent to recipients';
-
+export const UPDATE_EVENT_SUCCESSFUL_MESSAGE = 'ticket record updated successfully';
+export const UPDATE_EVENT_TICKET_SUCCESSFUL = 'ticket category record updated successfully';
+export const EVENT_TICKET_CATEGORY_NOT_FOUND = 'failed to fetch event ticket category information';
 
 
