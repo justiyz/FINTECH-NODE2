@@ -89,7 +89,7 @@ export const fetchUserTickets = async(req, res, next) => {
   try {
     const { user } = req;
     const user_tickets = await processAnyData(
-      shopQueries.getUserTickets, [ user.user_id, req.body.status ]);
+      shopQueries.getUserTickets, [ user.user_id, req.query.status ]);
     // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user tickets fetched successfully fetchUserTickets.controller.shop.js`);
     const data = {
       user_tickets

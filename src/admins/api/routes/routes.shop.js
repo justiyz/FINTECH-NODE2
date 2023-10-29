@@ -28,6 +28,11 @@ router.get(
   ShopController.getEventsList
 );
 
+router.get(
+  '/get-event-by-id/:event_id',
+  AuthMiddleware.validateAdminAuthToken,
+  ShopController.getEventById
+);
 
 router.post(
   '/create-event-record',

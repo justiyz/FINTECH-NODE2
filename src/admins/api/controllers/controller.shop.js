@@ -8,15 +8,15 @@ import enums from '../../../users/lib/enums';
 import * as S3 from '../services/services.s3'
 import {
   CREATE_CATEGORIES_ITEM,
-  CREATED_EVENT_SUCCESSFULLY, EVENT_EXISTS, EVENT_TICKET_CATEGORY_NOT_FOUND,
+  CREATED_EVENT_SUCCESSFULLY, EVENT_EXISTS, EVENT_TICKET_CATEGORY_NOT_FOUND, FAILED_TO_FETCH_EVENT,
   FAILED_TO_FETCH_USER_TICKETS,
   FETCH_LIST_OF_EVENT, FETCH_TICKET_CATEGORIES_SUCCESSFULLY, UPDATE_EVENT_SUCCESSFUL_MESSAGE
 } from "../../../users/lib/enums/lib.enum.messages";
 import {
   create_event_category_record_failed,
   create_event_record_failed,
-  fetch_events_lists
-} from '../../lib/monitor/lib.monitor.description';
+  fetch_events_lists, fetch_single_event
+} from "../../lib/monitor/lib.monitor.description";
 import {
   CREATE_EVENT_CATEGORY_SUCCESSFUL,
   CREATE_EVENT_SUCCESSFUL, EVENT_RECORD_ALREADY_CREATED,
@@ -61,6 +61,9 @@ export const createShopCategory = async(req, res, next) => {
 export const getEventsList = async(req, res, next) => {
   try {
     let events = await processAnyData(shopQueries.getAllEvents);
+    for (const event_record_id in events) {
+      events[event_record_id].tickets = await processAnyData(shopQueries.getTicketCategories, events[event_record_id].ticket_id);
+    }
     if (events)
       return ApiResponse.success(res, enums.FETCH_LIST_OF_EVENT, enums.HTTP_OK, events);
   } catch (error) {
@@ -71,8 +74,26 @@ export const getEventsList = async(req, res, next) => {
   }
 };
 
+// function to get a single event record
+export const getEventById = async(req, res, next) => {
+  const event_record_id = req.params.event_id;
+  try {
+    let event = await processOneOrNoneData(shopQueries.getEventById, event_record_id);
+    if (event) {
+      event.tickets = await processAnyData(shopQueries.getTicketCategories, event.ticket_id);
+      return ApiResponse.success(res, enums.FETCH_LIST_OF_EVENT, enums.HTTP_OK, event);
+    }
+
+  } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 64, 'fail', descriptions.fetch_single_event);
+    error.label = enums.FAILED_TO_FETCH_EVENT;
+    logger.error(`Failed to fetch shop categories:::${enums.FAILED_TO_FETCH_USER_TICKETS}`, error.message);
+    return next(error);
+  }
+};
+
 // Function to check if an event exists
-const checkIfEventExists = async (eventName) => {
+const checkIfEventExists = async(eventName) => {
   return await processAnyData(shopQueries.checkIfEventExist, eventName);
 };
 
@@ -106,7 +127,9 @@ export const createEventRecord = async(req, res, next) => {
     ticket_start_date: req.body.ticket_start_date,
     ticket_end_date: req.body.ticket_end_date,
     event_location: req.body.event_location,
-    event_time: req.body.event_time
+    event_time: req.body.event_time,
+    event_start_date: req.body.event_start_date,
+    event_end_date: req.body.event_end_date
   };
   const {
     ticket_name,
@@ -120,7 +143,9 @@ export const createEventRecord = async(req, res, next) => {
     ticket_start_date,
     ticket_end_date,
     event_location,
-    event_time
+    event_time,
+    event_start_date,
+    event_end_date
   } = req.body;
 
   try {
@@ -140,7 +165,9 @@ export const createEventRecord = async(req, res, next) => {
       ticket_start_date,
       ticket_end_date,
       event_location,
-      event_time
+      event_time,
+      event_start_date,
+      event_end_date
     ]);
     const ticketId = createdEventRecord[0].ticket_id;
     const ticketCategories = JSON.parse(ticket_categories);
