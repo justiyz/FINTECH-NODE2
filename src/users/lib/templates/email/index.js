@@ -21,6 +21,7 @@ const getTemplate = (type, data) => {
   case 'changePin': return email.changePin(data);
   case 'resetPin': return email.resetPin(data);
   case 'rejectedDebitCardNotUsersCard': return email.rejectedDebitCardNotUsersCard(data);
+  case 'ticketBookedForYou': return email.ticketBookedForYou(data);
   default: return '';
   }
 };

@@ -304,8 +304,10 @@ export const ADMIN_USER_UPLOADED_DOCUMENTS_FETCHED = 'Admin uploaded user docume
 export const FETCH_USER_KYC_DETAILS = 'User kyc details fetched successfully';
 export const USER_UTILITY_BILL_DECIDED_SUCCESSFULLY = (decision) => `User uploaded utility bill ${decision} successfully`;
 export const UPLOAD_DOCUMENT_VALIDATION = 'Please upload document';
+export const UPLOAD_IMAGE_VALIDATION = 'Please upload image';
 export const FILE_SIZE_TOO_BIG = 'Please upload a file less than 3MB';
 export const UPLOAD_PDF_DOCUMENT_VALIDATION = 'Please upload a .pdf extension document file';
+export const UPLOAD_AN_IMAGE_IMAGE_VALIDATION = 'Please upload a .jpg, .jpeg, or .png extension image file';
 export const UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION = 'Please upload a .jpeg or .jpg or .png extension image file';
 export const GENERATE_ADMIN_RESET_PASSWORD_TOKEN = 'Password token Successfully generated';
 export const LOAN_APPLICATION_NOT_EXISTING_IN_DB = 'loan application does not exist';
@@ -394,6 +396,7 @@ export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket sub
 export const FETCHED_USER_TICKETS_SUCCESSFULLY = 'fetched user tickets successfully';
 export const FAILED_TO_SEND_EVENT_TICKETS_TO_EMAILS = 'failed to send event tickets to emails';
 export const FAILED_TO_FETCH_TICKET_SUMMARY = 'failed to fetch ticket summary information';
+export const SEND_TICKET_NOTIFICATIONS = 'ticket notifications sent to recipients';
 
 
 

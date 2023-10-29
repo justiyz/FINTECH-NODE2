@@ -44,6 +44,14 @@ export default {
         tickets.ticket_status
     FROM tickets
   `,
+
+  getEventById: `
+    SELECT *
+    FROM
+        tickets
+    WHERE
+        ticket_id = $1
+  `,
   // ,
   //   LEFT JOIN
   //   ticket_categories
@@ -165,5 +173,17 @@ export default {
     SELECT units, ticket_price
     FROM ticket_categories
     WHERE ticket_category_id = $1
+  `,
+
+  savedRecipientInformation: `
+    INSERT INTO ticket_recipients(
+        first_name,
+        last_name,
+        phone_number,
+        email,
+        ticket_id
+    ) VALUES ($1, $2, $3, $4, $5)
+    RETURNING ticket_recipient_id, first_name, last_name, email;
+
   `
 };

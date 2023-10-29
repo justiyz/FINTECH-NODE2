@@ -86,6 +86,60 @@ export const checkUserCurrentStatus = async(req, res, next) => {
   }
 };
 
+export const uploadAdminImage = async(req, res, next) => {
+  try {
+    const { files, body } = req;
+    const file_name = req.files.image.md5;
+    if (!files || (files && !files.image)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: No file is being selected for upload uploadImage.admin.middlewares.user.js`);
+      await adminActivityTracking(req.admin.admin_id, 63, 'fail', descriptions.uploads_admin_image(`${req.admin.first_name} ${req.admin.last_name}`, file_name));
+      return ApiResponse.error(res, enums.UPLOAD_IMAGE_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_IMAGE_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: To be uploaded image file exists uploadImage.admin.middlewares.user.js`);
+    const fileExt = path.extname(files.image.name);
+    if (files.image.size > 3197152) { // 3 MB
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: File size is greater than 3MB uploadImage.admin.middlewares.user.js`);
+      await adminActivityTracking(req.admin.admin_id, 63, 'fail', descriptions.uploads_admin_image(`${req.admin.first_name} ${req.admin.last_name}`, file_name));
+      return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_IMAGE_MIDDLEWARE);
+    }
+
+    const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ]; // Additional image formats
+    if (body.type === 'image' && !acceptedImageFileTypes.includes(fileExt)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: Image type is not a jpeg, jpg, or png file uploadImage.admin.middlewares.user.js`);
+      await adminActivityTracking(req.admin.admin_id, 23, 'fail', descriptions.uploads_admin_image(`${req.admin.first_name} ${req.admin.last_name}`, file_name));
+      return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_IMAGE_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_IMAGE_MIDDLEWARE);
+    }
+
+    const url = `files/event-images/${files.image.name}`; // Adjust the S3 bucket path as needed
+    if (config.SEEDFI_NODE_ENV === 'test') {
+      req.image = encodeURIComponent(
+        await UserHash.encrypt({
+          image_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-images/user-af4922be60fd1b85068ed/land%20ownership%20proof.jpg',
+          image_extension: fileExt
+        })
+      );
+      return next();
+    }
+
+    const payload = Buffer.from(files.image.data, 'binary');
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: Upload payload and URL set uploadImage.admin.middlewares.user.js`);
+    const contentType = 'image/' + (fileExt === '.jpg' ? 'jpeg' : 'png'); // Set content type for image files
+
+    const data = await S3.uploadFile(url, payload, contentType);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: Image uploaded to Amazon S3 bucket uploadImage.admin.middlewares.user.js`);
+
+    req.image = encodeURIComponent(
+      await UserHash.encrypt({ image_url: data.Location, image_extension: fileExt })
+    );
+
+    return next();
+  } catch (error) {
+    error.label = enums.UPLOAD_IMAGE_MIDDLEWARE;
+    logger.error(`Uploading image to Amazon S3 failed::${enums.UPLOAD_IMAGE_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
 /**
  * uploading document to s3 for user
  * @param {Request} req - The request from the endpoint.

@@ -60,6 +60,8 @@ export const operations = {
   59: 'FTCER', // admin failed to create event record
   60: 'FTCECR', // admin failed to create event category record
   61: 'FTCCF', // admin failed to fetch ticket categories
-  62: 'FTCFFS' // admin failed to create file for storage
+  62: 'FTCFFS', // admin failed to create file for storage
+  63: 'UPIMGFENV' // admin uploads image for event
+
 };
 
