@@ -403,5 +403,10 @@ export const SEND_TICKET_NOTIFICATIONS = 'ticket notifications sent to recipient
 export const UPDATE_EVENT_SUCCESSFUL_MESSAGE = 'ticket record updated successfully';
 export const UPDATE_EVENT_TICKET_SUCCESSFUL = 'ticket category record updated successfully';
 export const EVENT_TICKET_CATEGORY_NOT_FOUND = 'failed to fetch event ticket category information';
-
+export const DELETE_EVENT_FAILED = 'failed to delete event ticket record';
+export const FAILED_TO_BOOK_TICKETS = 'payment for ticket was not successful';
+export const DELETE_TICKET_INFORMATION = 'deleted ticket information successfully';
+export const EVENT_PAYMENT_SUCCESSFUL = 'payment for tickets was successfully made';
+export const EVENT_PAYMENT_UNSUCCESSFUL = 'payment for tickets was not successful made';
+export const EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT = (user_id) => `ticket(s) booked successfully for ${user_id}`;
 

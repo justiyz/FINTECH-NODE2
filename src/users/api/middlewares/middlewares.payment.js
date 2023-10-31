@@ -21,6 +21,7 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule, generateClusterLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
+import adminShopQueries from "../../../admins/api/queries/queries.shop";
 
 /**
  * verify the legibility of the webhook response if from Paystack
@@ -94,6 +95,23 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
   } catch (error) {
     error.label = enums.VERIFY_PAYSTACK_PAYMENT_STATUS_MIDDLEWARE;
     logger.error(`verification of paystack transaction success status failed:::${enums.VERIFY_PAYSTACK_PAYMENT_STATUS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const ticketPurchaseUpdate = async(req, res, next) => {
+  try {
+    const { body, params } = req;
+    const ticket_id = req.query.ticket_id;
+    const user_id = req.query.user_id;
+    await processOneOrNoneData(adminShopQueries.updateEventStatus,
+      [ user_id, ticket_id ]);
+    const data = {};
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
+    return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.EVENT_PAYMENT_UNSUCCESSFUL;
+    logger.error(`Failed to purchase event ticket successful:::${enums.FAILED_TO_PAY_FOR_TICKET}`, error.label);
     return next(error);
   }
 };

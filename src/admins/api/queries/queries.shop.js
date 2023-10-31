@@ -42,9 +42,31 @@ export default {
         tickets.event_location,
         tickets.event_time,
         tickets.ticket_status
-    FROM tickets
+    FROM
+        tickets
+    ORDER BY
+        tickets.event_date ASC;
   `,
 
+  getCustomerTicketInformation: `
+    SELECT
+        tickets.ticket_name,
+        tickets.event_location,
+        tickets.event_time
+    FROM tickets
+    WHERE
+        ticket_id = $1
+  `,
+
+  getEventAmountByEventIdAndEventCategoryId: `
+    SELECT *
+    FROM
+        ticket_categories
+    WHERE
+        ticket_id = $1
+    AND
+        ticket_category_id = $2;
+  `,
   getEventById: `
     SELECT *
     FROM
@@ -67,11 +89,35 @@ export default {
     AND ticket_category_type = 'regular'
   `,
 
+  getTicketCategoryTypeById: `
+    SELECT ticket_category_type
+    FROM ticket_categories
+    WHERE ticket_id = $1
+    AND ticket_category_id = $2
+  `,
   getPriceOfLeastValueTicket: `
     SELECT ticket_price
     FROM ticket_categories
     WHERE ticket_id = $1
     AND ticket_category_type = 'regular'
+  `,
+
+  deleteTicketInformationRecord: `
+    DELETE FROM user_tickets
+    WHERE
+        user_id = $2
+    AND
+        ticket_id = $1
+    AND
+        status = 'inactive'
+  `,
+
+  deleteTicketRecord: `
+    DELETE FROM user_tickets
+    WHERE
+        ticket_id = $1
+    AND
+        user_id = $2
   `,
 
   createEventRecord: `
@@ -108,10 +154,10 @@ export default {
       event_location = $10,
       event_time = $11,
       updated_at = NOW(),
-      event_start_date = $13,
-      event_end_date = $14
+      event_start_date = $12,
+      event_end_date = $13
     WHERE
-      ticket_id = $15
+      ticket_id = $14
     RETURNING
         ticket_name,
         ticket_description,
@@ -162,6 +208,36 @@ export default {
         updated_at = NOW()
     WHERE
         ticket_category_id = $4
+    RETURNING
+        ticket_category_id,
+        ticket_id,
+        ticket_category_type,
+        ticket_price,
+        units,
+        ticket_category_status
+  `,
+
+  updateEventStatus: `
+    UPDATE user_tickets
+    SET
+        status = 'active',
+        updated_at = NOW()
+    WHERE
+        ticket_id = $2
+        AND user_id = $1
+  `,
+
+  updateEventTicketCategory2: `
+    UPDATE ticket_categories
+    SET
+        ticket_price = $1,
+        units = $2,
+        ticket_category_status = $3,
+        updated_at = NOW()
+    WHERE
+        ticket_category_id = $4
+    AND
+        ticket_id = $5
     RETURNING
         ticket_category_id,
         ticket_id,

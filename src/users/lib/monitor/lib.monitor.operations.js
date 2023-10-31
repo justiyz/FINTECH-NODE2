@@ -114,6 +114,8 @@ export const operations = {
   113: 'FTCTAR', // failed to create ticket application subscription
   114: 'FTFUTS', // failed to fetch user tickets successfully
   115: 'FTSETTE',  // failed to send event tickets to email address
-  116: 'FTCTSFV' // failed to compute ticket summary for viewing
+  116: 'FTCTSFV', // failed to compute ticket summary for viewing
+  117: 'DELUTB', // delete unpaid tickets
+  118: 'UTLELCF' // user ticket loan eligibility failure
 };
 

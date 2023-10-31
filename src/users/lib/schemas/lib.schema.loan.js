@@ -7,6 +7,17 @@ const loanApplication = Joi.object().keys({
   bank_statement_service_choice: Joi.string().required().valid('okra', 'mono')
 });
 
+const loanForEventApplication = Joi.object().keys({
+  duration_in_months: Joi.number().positive().required(),
+  loan_reason: Joi.string().required(),
+  bank_statement_service_choice: Joi.string().required().valid('okra', 'mono'),
+  tickets: Joi.array().required(),
+  insurance_coverage: Joi.boolean().required(),
+  payment_channel: Joi.string().required().valid('bank', 'card'),
+  payment_tenure: Joi.number().positive().required(),
+  fee: Joi.object().required()
+});
+
 const loanIdParams = Joi.object().keys({
   loan_id: Joi.string().required()
 });
@@ -73,5 +84,6 @@ export default  {
   paymentOtp,
   rescheduleExtensionId,
   loanRescheduleParams,
-  loanRenegotiation
-}; 
+  loanRenegotiation,
+  loanForEventApplication
+};
