@@ -5,23 +5,7 @@ import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
-import * as S3 from '../services/services.s3';
-import {
-  CREATE_CATEGORIES_ITEM,
-  CREATED_EVENT_SUCCESSFULLY, EVENT_EXISTS, EVENT_TICKET_CATEGORY_NOT_FOUND, FAILED_TO_FETCH_EVENT,
-  FAILED_TO_FETCH_USER_TICKETS,
-  FETCH_LIST_OF_EVENT, FETCH_TICKET_CATEGORIES_SUCCESSFULLY, UPDATE_EVENT_SUCCESSFUL_MESSAGE
-} from "../../../users/lib/enums/lib.enum.messages";
-import {
-  create_event_category_record_failed,
-  create_event_record_failed,
-  fetch_events_lists, fetch_single_event
-} from "../../lib/monitor/lib.monitor.description";
-import {
-  CREATE_EVENT_CATEGORY_SUCCESSFUL,
-  CREATE_EVENT_SUCCESSFUL, EVENT_RECORD_ALREADY_CREATED,
-  FETCH_CATEGORY_LIST
-} from '../../../users/lib/enums/lib.enum.labels';
+// import * as S3 from '../services/services.s3';
 
 export const listShopCategories = async(req, res, next) => {
   try {
@@ -252,23 +236,6 @@ export const createEventRecord_old = async(req, res, next) => {
   }
 };
 
-export const updateEventRecord = async(req, res, next) => {
-  try {
-    const eventId = req.params.eventId; // Extract the event ID from the URL
-    const updatedEventDetails = req.body; // Get the updated event details from the request body
-    console.log(eventId);
-    console.log(updatedEventDetails);
-    // Call the update function to update the event record
-    // await updateEventRecord_(eventId, updatedEventDetails);
-
-    // Respond with a success message or updated event details
-    res.status(200).json({ message: 'Event record updated successfully' });
-  } catch (error) {
-    // Handle and log any errors
-    next(error);
-  }
-};
-
 export const createEventRecord2 = async(req, res, next) => {
   try {
     const eventDetails = extractEventDetails(req.body);
@@ -442,7 +409,6 @@ export const editEventRecord = async(req, res, next) => {
   const ticketId = req.params.event_id; // Assuming the ticket_id is passed as a URL parameter
   try {
     const existingEventRecord = await getTicketCategoryRecord(ticketId);
-    console.log(existingEventRecord);
     if (!existingEventRecord) {
       return ApiResponse.error(res, enums.EVENT_NOT_FOUND, enums.HTTP_NOT_FOUND, enums.EVENT_RECORD_NOT_FOUND);
     }
@@ -464,6 +430,16 @@ export const editEventRecord = async(req, res, next) => {
       event_end_date
     } = req.body;
 
+    const ticket_categories_object = JSON.parse(ticket_categories);
+    for (const object_position in ticket_categories_object) {
+      await processOneOrNoneData(shopQueries.updateEventTicketCategory2, [
+        ticket_categories_object[object_position].amount,
+        ticket_categories_object[object_position].units,
+        ticket_categories_object[object_position].status,
+        ticket_categories_object[object_position].ticket_category_id,
+        ticketId
+      ]);
+    }
     const updatedEventRecord = await updateCurrentEventRecord(ticketId, [
       ticket_name,
       ticket_description,
@@ -472,7 +448,6 @@ export const editEventRecord = async(req, res, next) => {
       processing_fee,
       ticket_status,
       event_date,
-      ticket_categories,
       ticket_start_date,
       ticket_end_date,
       event_location,
@@ -482,8 +457,30 @@ export const editEventRecord = async(req, res, next) => {
     ]);
     return ApiResponse.success(res, enums.UPDATE_EVENT_SUCCESSFUL_MESSAGE, enums.HTTP_OK, updatedEventRecord);
   } catch (error) {
+    if (error.code === '23505') {
+      // Handle the unique constraint violation error here
+      error.label = enums.TABLE_INTEGRITY_CONSTRAINT;
+      logger.error(`Duplicate key value violates unique constraint.:::${enums.EDIT_EVENT_RECORD}`, error.label);
+      return next(error);
+    }
     error.label = enums.EDIT_EVENT_RECORD;
     logger.error(`Failed to edit event record:::${enums.EDIT_EVENT_RECORD}`, error.label);
     return next(error);
   }
 };
+
+// Function to delete an event record
+export const removeTicketRecord = async(req, res, next) => {
+  try {
+    const ticket_id = req.params.ticket_id;
+    console.log(ticket_id);
+  } catch (error) {
+    error.label = enums.DELETE_EVENT_FAILED;
+    logger.error(`Failed to delete event record:::${enums.EDIT_EVENT_RECORD}`, error.label);
+    return next(error);
+  }
+};
+
+
+
+

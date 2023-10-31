@@ -27,6 +27,29 @@ export default {
     FROM user_tickets
     WHERE user_id = $1
     AND status = $2
+    ORDER BY id ASC
+  `,
+
+  getUserTicketsRefined: `
+    SELECT *
+    FROM user_tickets
+    WHERE user_id = $1
+    AND status = $2
+    AND ticket_id = $3
+  `,
+
+  getUserTickectsMiniInformation: `
+    SELECT
+      user_ticket_id,
+      user_id,
+      ticket_category_id,
+      units,
+      insurance_coverage,
+      payment_tenure,
+      status
+    FROM user_tickets
+    WHERE user_id = $1
+    AND status = $2
   `,
 
   getTicketSummary: `
