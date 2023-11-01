@@ -52,7 +52,9 @@ export default {
     SELECT
         tickets.ticket_name,
         tickets.event_location,
-        tickets.event_time
+        tickets.event_time,
+        tickets.ticket_image_url,
+        tickets.event_date
     FROM tickets
     WHERE
         ticket_id = $1
