@@ -75,7 +75,6 @@ function findIndexOfLeastValue(arr) {
   for (let i = 1; i < arr.length; i++) {
     const currentValue = parseFloat(arr[i][1]);
     if (currentValue < minValue) {
-      console.log('current value: ', currentValue);
       minValue = currentValue;
       minIndex = i;
     }
@@ -357,8 +356,6 @@ export const _createTicketSubscription = async(req, res, next) => {
         );
 
         // URGENT::Check if units to be purchased is greater than or equal to available units
-        console.log('tickets available: ', available_tickets.units);
-
         const booked_ticket = await processAnyData(adminShopQueries.createUserTicketRecord, [
           req.user.user_id,
           tickets[ticket].ticket_id,
@@ -522,7 +519,6 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     for (const fee in _user_fees) {
       total_fee += Number(_user_fees[fee]);
     }
-    console.log('total fee: ', total_fee);
     // calculate amount to be booked
     let booking_amount = 0;
     for (const ticket_record_id in ticket_bookings) {
@@ -560,7 +556,6 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
-    console.log('result: ', result);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
