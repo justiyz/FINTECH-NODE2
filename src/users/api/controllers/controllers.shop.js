@@ -149,18 +149,22 @@ async function enrichUserTicketData(user_ticket) {
     adminShopQueries.getPriceOfLeastValueTicket, user_ticket.ticket_id);
   const ticket_category = await processOneOrNoneData(
     adminShopQueries.getTicketCategoryTypeById, [ user_ticket.ticket_id, user_ticket.ticket_category_id ]);
-  const { ticket_name, event_location, event_time } = await processOneOrNoneData(
+  const { ticket_name, event_location, event_time, ticket_image_url, event_date } = await processOneOrNoneData(
     adminShopQueries.getCustomerTicketInformation, [ user_ticket.ticket_id, user_ticket.user_id ]);
 
   if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;
     user_ticket.event_location = event_location;
     user_ticket.event_time = event_time;
+    user_ticket.ticket_image_url = ticket_image_url;
+    user_ticket.event_date = event_date;
     user_ticket.lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
     user_ticket.ticket_category_type = ticket_category.ticket_category_type;
   } else {
     user_ticket.ticket_name = '';
     user_ticket.event_location = '';
+    user_ticket.event_time = '';
+    user_ticket.ticket_image_url = '';
     user_ticket.event_time = '';
     user_ticket.lowest_ticket_price = 0;
   }
@@ -508,14 +512,18 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
     const ticket_bookings = req.body.tickets;
-
+    const _user_fees = {
+      'insurance_fee': 0,
+      'advisory_fee': 0,
+      'processing_fee': 100
+    };
     // calculate fee
-    const user_fees = req.body.fee;
+    // const user_fees = req.body.fee;
     let total_fee = 0;
-    for (const fee in user_fees) {
-      total_fee += Number(user_fees[fee]);
+    for (const fee in _user_fees) {
+      total_fee += Number(_user_fees[fee]);
     }
-
+    console.log('total fee: ', total_fee);
     // calculate amount to be booked
     let booking_amount = 0;
     for (const ticket_record_id in ticket_bookings) {
@@ -528,6 +536,8 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
     const booking_amount_plus_charges = booking_amount;
     body.amount = booking_amount;
+    body.loan_reason = 'event booking';
+    body.bank_statement_service_choice = 'okra';
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
@@ -551,7 +561,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
-
+    console.log('result: ', result);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);

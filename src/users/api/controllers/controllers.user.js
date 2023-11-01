@@ -595,15 +595,13 @@ export const getProfile = async(req, res, next) => {
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
-    const [ userEmploymentDetail, userNextOfKinDetails, userAddressDetails, userBvn ] = await Promise.all([
-      processOneOrNoneData(userQueries.fetchEmploymentDetails),
-      processOneOrNoneData(userQueries.getUserNextOfKin),
-      processOneOrNoneData(userQueries.fetchUserAddressDetails),
-      processOneOrNoneData(userQueries.fetchUserBvn)
-    ]);
+    const userEmploymentDetail = await processAnyData(userQueries.fetchEmploymentDetails, [ user.user_id ]);
+    const userNextOfKinDetails = await processAnyData(userQueries.getUserNextOfKin, [ user.user_id ]);
+    const userAddressDetails = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
+    const userBvn = await processAnyData(userQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's employment details, address details and next of kin from the DB
     fetchUserInformationDetails.controller.user.js`);
-    user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
+    user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn[0].bvn)) : '';
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
       true : false;
     const data = {
