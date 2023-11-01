@@ -301,7 +301,8 @@ export const createTicketSubscription = async(req, res, next) => {
     const data = {
       'tickets': ticketPurchaseLogs,
       'total_amount': totalAmountToBePaid,
-      'payment': payment_operation
+      'payment': payment_operation,
+      'payment_reference': reference
     };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::User tickets created successfully.`);
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
