@@ -571,8 +571,8 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- START NOW LOGGING PAYLOAD---------------------------`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
-    logger.info(`Payload: ${payload}`);
     console.log('JSON Input For Loan Eligibility: ', payload);
+    // logger.info(`Payload: ${payload}`);
     // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(payload)}`);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- END NOW LOGGING PAYLOAD------------------------------`);
     const result = await loanApplicationEligibilityCheck(payload);
