@@ -571,14 +571,15 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- START NOW LOGGING PAYLOAD---------------------------`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
-    logger.info(`Payload: ${JSON.stringify(payload)}`);
-    console.log('JSON Input For Loan Eligibility: ', JSON.stringify(payload));
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(payload)}`);
+    logger.info(`Payload: ${payload}`);
+    console.log('JSON Input For Loan Eligibility: ', payload);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(payload)}`);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- END NOW LOGGING PAYLOAD------------------------------`);
     const result = await loanApplicationEligibilityCheck(payload);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- Start NOW LOGGING Call------------------------------`);
-    console.log('JSON Result For Loan Eligibility: ', JSON.stringify(result));
+    console.log('JSON Result For Loan Eligibility: ', result);
+    console.log('JSON Result For Loan Eligibility Stringify: ', JSON.stringify(result));
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- END NOW LOGGING Call------------------------------`);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(result)}`);
