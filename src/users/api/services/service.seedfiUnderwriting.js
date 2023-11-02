@@ -7,9 +7,9 @@ const { SEEDFI_NODE_ENV } = config;
 
 const loanApplicationEligibilityCheck = async(payload) => {
   try {
-    if (SEEDFI_NODE_ENV === 'development') {
-      return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
-    }
+    // if (SEEDFI_NODE_ENV === 'development') {
+    //   return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
+    // }
     const options = {
       method: 'post',
       url: `${config.SEEDFI_UNDERWRITING_SERVICE_BASE_URL}/v1/loan_processing_engine/`,
