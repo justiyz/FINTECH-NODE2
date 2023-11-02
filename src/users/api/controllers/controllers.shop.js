@@ -546,27 +546,27 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       user.user_id,
       booking_amount_plus_charges,
       booking_amount_plus_charges,
-      'Ticket Loan',
+      body.loan_reason,
       body.duration_in_months,
       body.duration_in_months,
       0,
       0
     ]);
-    logger.info(`loanApplicationDetails:1 ${loanApplicationDetails}`);
+    logger.info(`loanApplicationDetails:1 ${JSON.stringify(loanApplicationDetails)}`);
 
-    logger.info(`loanApplicationDetails:2 ${user}`);
-    logger.info(`loanApplicationDetails:3 ${body}`);
-    logger.info(`loanApplicationDetails:4 ${userDefaultAccountDetails}`);
-    logger.info(`loanApplicationDetails:5 ${loanApplicationDetails}`);
-    logger.info(`loanApplicationDetails:6 ${userEmploymentDetails}`);
-    logger.info(`loanApplicationDetails:7 ${userBvn}`);
-    logger.info(`loanApplicationDetails:8 ${userMonoId}`);
-    logger.info(`loanApplicationDetails:9 ${userLoanDiscount}`);
-    logger.info(`loanApplicationDetails:10 ${clusterType}`);
-    logger.info(`loanApplicationDetails:11 ${userMinimumAllowableAMount}`);
-    logger.info(`loanApplicationDetails:12 ${userMaximumAllowableAmount}`);
-    logger.info(`loanApplicationDetails:13 ${previousLoanCount}`);
-    logger.info(`loanApplicationDetails:14 ${previouslyDefaultedCount}`);
+    logger.info(`loanApplicationDetails:2 ${JSON.stringify(user)}`);
+    logger.info(`loanApplicationDetails:3 ${JSON.stringify(body)}`);
+    logger.info(`loanApplicationDetails:4 ${JSON.stringify(userDefaultAccountDetails)}`);
+    logger.info(`loanApplicationDetails:5 ${JSON.stringify(loanApplicationDetails)}`);
+    logger.info(`loanApplicationDetails:6 ${JSON.stringify(userEmploymentDetails)}`);
+    logger.info(`loanApplicationDetails:7 ${JSON.stringify(userBvn)}`);
+    logger.info(`loanApplicationDetails:8 ${JSON.stringify(userMonoId)}`);
+    logger.info(`loanApplicationDetails:9 ${JSON.stringify(userLoanDiscount)}`);
+    logger.info(`loanApplicationDetails:10 ${JSON.stringify(clusterType)}`);
+    logger.info(`loanApplicationDetails:11 ${JSON.stringify(userMinimumAllowableAMount)}`);
+    logger.info(`loanApplicationDetails:12 ${JSON.stringify(userMaximumAllowableAmount)}`);
+    logger.info(`loanApplicationDetails:13 ${JSON.stringify(previousLoanCount)}`);
+    logger.info(`loanApplicationDetails:14 ${JSON.stringify(previouslyDefaultedCount)}`);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
