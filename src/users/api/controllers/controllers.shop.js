@@ -556,8 +556,10 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     console.log('JSON Input For Loan Eligibility: ', payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${payload}`);
     const result = await loanApplicationEligibilityCheck(payload);
     console.log('JSON Result For Loan Eligibility: ', result);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${result}`);
 
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
