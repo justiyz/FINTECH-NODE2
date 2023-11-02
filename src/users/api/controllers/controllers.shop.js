@@ -533,6 +533,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = 'okra';
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: body::: ${body}`);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
@@ -551,7 +552,21 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       0,
       0
     ]);
-    logger.info(`loanApplicationDetails: ${loanApplicationDetails}`);
+    logger.info(`loanApplicationDetails:1 ${loanApplicationDetails}`);
+
+    logger.info(`loanApplicationDetails:2 ${user}`);
+    logger.info(`loanApplicationDetails:3 ${body}`);
+    logger.info(`loanApplicationDetails:4 ${userDefaultAccountDetails}`);
+    logger.info(`loanApplicationDetails:5 ${loanApplicationDetails}`);
+    logger.info(`loanApplicationDetails:6 ${userEmploymentDetails}`);
+    logger.info(`loanApplicationDetails:7 ${userBvn}`);
+    logger.info(`loanApplicationDetails:8 ${userMonoId}`);
+    logger.info(`loanApplicationDetails:9 ${userLoanDiscount}`);
+    logger.info(`loanApplicationDetails:10 ${clusterType}`);
+    logger.info(`loanApplicationDetails:11 ${userMinimumAllowableAMount}`);
+    logger.info(`loanApplicationDetails:12 ${userMaximumAllowableAmount}`);
+    logger.info(`loanApplicationDetails:13 ${previousLoanCount}`);
+    logger.info(`loanApplicationDetails:14 ${previouslyDefaultedCount}`);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
