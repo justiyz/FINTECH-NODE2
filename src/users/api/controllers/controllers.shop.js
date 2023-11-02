@@ -571,12 +571,12 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
-    logger.info(`Payload: ${payload}`);
-    console.log('JSON Input For Loan Eligibility: ', payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${payload}`);
+    logger.info(`Payload: ${JSON.stringify(payload)}`);
+    console.log('JSON Input For Loan Eligibility: ', JSON.stringify(payload));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(payload)}`);
     const result = await loanApplicationEligibilityCheck(payload);
-    console.log('JSON Result For Loan Eligibility: ', result);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${result}`);
+    console.log('JSON Result For Loan Eligibility: ', JSON.stringify(result));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(result)}`);
 
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
