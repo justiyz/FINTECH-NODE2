@@ -557,7 +557,6 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     logger.info(`loanApplicationDetails:2 ${JSON.stringify(user)}`);
     logger.info(`loanApplicationDetails:3 ${JSON.stringify(body)}`);
     logger.info(`loanApplicationDetails:4 ${JSON.stringify(userDefaultAccountDetails)}`);
-    logger.info(`loanApplicationDetails:5 ${JSON.stringify(loanApplicationDetails)}`);
     logger.info(`loanApplicationDetails:6 ${JSON.stringify(userEmploymentDetails)}`);
     logger.info(`loanApplicationDetails:7 ${JSON.stringify(userBvn)}`);
     logger.info(`loanApplicationDetails:8 ${JSON.stringify(userMonoId)}`);
@@ -569,13 +568,19 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     logger.info(`loanApplicationDetails:14 ${JSON.stringify(previouslyDefaultedCount)}`);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- START NOW LOGGING PAYLOAD---------------------------`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     logger.info(`Payload: ${JSON.stringify(payload)}`);
     console.log('JSON Input For Loan Eligibility: ', JSON.stringify(payload));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(payload)}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- END NOW LOGGING PAYLOAD------------------------------`);
     const result = await loanApplicationEligibilityCheck(payload);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- Start NOW LOGGING Call------------------------------`);
     console.log('JSON Result For Loan Eligibility: ', JSON.stringify(result));
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: -------------------- END NOW LOGGING Call------------------------------`);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(result)}`);
 
     if (result.status !== 200) {
