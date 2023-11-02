@@ -551,10 +551,12 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       0,
       0
     ]);
+    logger.info(`loanApplicationDetails: ${loanApplicationDetails}`);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    logger.info(`Payload: ${payload}`);
     console.log('JSON Input For Loan Eligibility: ', payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${payload}`);
     const result = await loanApplicationEligibilityCheck(payload);
