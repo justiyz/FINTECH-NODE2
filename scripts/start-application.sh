@@ -20,7 +20,7 @@ sudo docker stop "$CONTAINER_NAME" && sudo docker rm "$CONTAINER_NAME"
 
 # Start new Container
 echo "Running Hook: Starting the new Container"
-sudo docker run --name "$CONTAINER_NAME" --env-file="$ENV" -d -p $PORT:4000 "$IMAGE_URL"
+sudo docker run --name "$CONTAINER_NAME" -d -p $PORT:4000 "$IMAGE_URL"
 
 # Remove Dangling Images
 echo "Running Hook: Removing Dangling Images!!!"
