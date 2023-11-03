@@ -246,6 +246,8 @@ export const CLAIMED_REFERRAL_POINTS_SUCCESSFULLY = 'Referral points claimed suc
 export const NO_UNCLAIMED_POINTS_TO_CLAIM = 'User has no unclaimed points to claim';
 export const UPDATE_ALERT_NOTIFICATION = 'Notifications updated successfully';
 export const DELETE_USER_OWN_ACCOUNT = 'User account deleted successfully';
+export const USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY = 'User identity document verified successfully';
+export const USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED = 'User identity document verification failed';
 
 // admin module related messages
 export const LOGIN_REQUEST_SUCCESSFUL = 'Login request successful, kindly check your mail';

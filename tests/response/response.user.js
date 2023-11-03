@@ -1,4 +1,4 @@
-import { generateReferralCode } from '../../src/users/lib/utils/lib.util.helpers';
+import {generateReferralCode} from '../../src/users/lib/utils/lib.util.helpers';
 
 export const zeehVerifyNinTestResponse = (user, nin) => {
   const data = {
@@ -20,12 +20,12 @@ export const zeehVerifyNinTestResponse = (user, nin) => {
   return data;
 };
 
-export const dojahVerifyNINTestResponse = (user, nin) => {
+export const dojahVerifyVINTestResponse = (user, nin) => {
   const data = {
     status: 200,
     data: {
       entity: {
-        full_name: user.first_name + ' '+ user.last_name,
+        full_name: user.first_name + ' ' + user.last_name,
         voter_identification_number: nin,
         gender: 'Male',
         occupation: 'STUDENT',
@@ -90,7 +90,7 @@ export const zeehVerifyVINTestResponse = (user, vin) => {
         status: 'success',
         code: 0,
         data: {
-          fullName: user.first_name +' '+user.last_name,
+          fullName: user.first_name + ' ' + user.last_name,
           vin: vin,
           gender: 'M',
           occupation: 'Banker',
@@ -401,7 +401,7 @@ export const paystackResolveAccountNumberTestResponse = (account_number, user) =
     message: 'Account number resolved',
     data: {
       'account_number': account_number,
-      'account_name': `${user.first_name.toUpperCase()} ${user.middle_name.toUpperCase()} ${user.last_name.toUpperCase()}`,
+      'account_name': `${ user.first_name.toUpperCase() } ${ user.middle_name.toUpperCase() } ${ user.last_name.toUpperCase() }`,
       // This will only pass for users with middle name and won't pass for users without middle name
       'bank_id': 9
     }
@@ -506,7 +506,7 @@ export const paystackVerifyTransactionStatusTestResponse = (reference) => {
         success: false,
         mobile: false,
         input: [],
-        history: [ Array ]
+        history: [Array]
       },
       fees: 750,
       fees_split: null,
@@ -554,7 +554,7 @@ export const paystackVerifyTransactionStatusTestResponse = (reference) => {
 };
 
 export const paystackInitiateRefundTestResponse = (transaction_id) => {
-  const result =  {
+  const result = {
     status: true,
     message: 'Refund has been queued for processing',
     data: {
@@ -566,10 +566,10 @@ export const paystackInitiateRefundTestResponse = (transaction_id) => {
         paid_at: '2023-01-21T01:00:48.000Z',
         channel: 'card',
         currency: 'NGN',
-        authorization: [ Object ],
-        customer: [ Object ],
+        authorization: [Object],
+        customer: [Object],
         plan: {},
-        subaccount: [ Object ],
+        subaccount: [Object],
         split: {},
         order_id: null,
         paidAt: '2023-01-21T01:00:48.000Z',
@@ -617,7 +617,7 @@ export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) =
         insurance_fee_percentage: 0.01,
         advisory_fee_percentage: 0.01
       },
-      monthly_repayment: parseFloat(parseFloat((((0.03) * parseFloat(payload.loan_amount)) / (1 - ((1 + (0.03))**(-Number(payload.loan_duration_in_month)))))).toFixed(2)),
+      monthly_repayment: parseFloat(parseFloat((((0.03) * parseFloat(payload.loan_amount)) / (1 - ((1 + (0.03)) ** (-Number(payload.loan_duration_in_month)))))).toFixed(2)),
       max_approval: parseFloat(parseFloat(payload.loan_amount) - parseFloat(payload.loan_amount * 0.25))
     }
   };
@@ -632,7 +632,7 @@ export const seedfiUnderwritingLoanRenegotiationTestResponse = (body, existingLo
       loan_application_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
       pricing_band: 45,
       monthly_interest: 0.04,
-      monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(body.new_loan_amount)) / (1 - ((1 + (0.04))**(-Number(body.new_loan_duration_in_month)))))).toFixed(2)),
+      monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(body.new_loan_amount)) / (1 - ((1 + (0.04)) ** (-Number(body.new_loan_duration_in_month)))))).toFixed(2)),
       fees: {
         processing_fee: parseFloat(0.01 * parseFloat(body.new_loan_amount)),
         insurance_fee: parseFloat(0.01 * parseFloat(body.new_loan_amount)),
@@ -657,7 +657,7 @@ export const seedfiUnderwritingLoanRenegotiationTestResponse = (body, existingLo
         final_decision: 'MANUAL',
         monthly_interest: 0.04,
         monthly_repayment: parseFloat(parseFloat((((0.04) * parseFloat(existingLoanApplication.amount_requested)) /
-        (1 - ((1 + (0.04))**(-Number(existingLoanApplication.initial_loan_tenor_in_months)))))).toFixed(2)),
+          (1 - ((1 + (0.04)) ** (-Number(existingLoanApplication.initial_loan_tenor_in_months)))))).toFixed(2)),
         loan_application_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
         loan_duration_in_month: parseFloat(existingLoanApplication.initial_loan_tenor_in_months)
       }
@@ -725,7 +725,7 @@ export const seedfiYouVerifyUserAddressVerificationRequestTestResponse = (user, 
         photo: null
       },
       address: {
-        latlong: [ Object ],
+        latlong: [Object],
         flatNumber: '',
         buildingName: '',
         buildingNumber: body.house_number,
@@ -753,7 +753,7 @@ export const seedfiYouVerifyUserAddressVerificationRequestTestResponse = (user, 
       businessId: '642e9966bfa9c5d130d62571',
       userId: '642e9966bfa9c50707d6256d',
       type: 'individual',
-      metadata: { requestId },
+      metadata: {requestId},
       createdAt: '2023-04-26T23:55:19.272Z',
       lastModifiedAt: '2023-04-26T23:55:19.272Z',
       _createdAt: '2023-04-26T23:55:1919+00:00',
@@ -767,7 +767,7 @@ export const seedfiYouVerifyUserAddressVerificationRequestTestResponse = (user, 
 };
 
 export const seedfiUnderwritingUserAndLoanApplicationOrrBreakdownTestResponse = (user_id, loan_id) => {
-  const result ={
+  const result = {
     status: 200,
     data: {
       customer_id: user_id,
@@ -807,16 +807,16 @@ export const seedfiUnderwritingUserAndLoanApplicationOrrBreakdownTestResponse = 
 };
 
 export const paystackPlatformBalanceCheckerTestResponse = () => {
-  const result =  {
+  const result = {
     status: true,
     message: 'Balances retrieved',
-    data: [ { currency: 'NGN', balance: 10000000000 } ]
+    data: [{currency: 'NGN', balance: 10000000000}]
   };
   return result;
 };
 
 export const paystackUserRecipientCodeCreationTestResponse = (userDisbursementAccountDetails) => {
-  const result =  {
+  const result = {
     status: true,
     message: 'Transfer recipient created successfully',
     data: {
@@ -845,7 +845,7 @@ export const paystackUserRecipientCodeCreationTestResponse = (userDisbursementAc
 };
 
 export const initiatePaystackBankTransferTestResponse = (userTransferRecipient, existingLoanApplication, reference) => {
-  const result =  {
+  const result = {
     status: true,
     message: 'Transfer has been queued',
     data: {
@@ -1016,7 +1016,7 @@ export const paystackSubmitOtpTestResponse = (reference) => {
 };
 
 export const seedfiUnderwritingLoanScoreCardBreakdown = () => {
-  const result =  {
+  const result = {
     status: 200,
     data: {
       monthly_income_weight: 5.0,

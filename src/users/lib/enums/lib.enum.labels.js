@@ -28,6 +28,7 @@ export const CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE = 'YouVerifyService::creat
 export const INITIATE_YOU_VERIFY_ADDRESS_VERIFICATION_SERVICE = 'YouVerifyService::initiateUserYouVerifyAddressVerification';
 export const DOJAH_BVN_VERIFICATION_SERVICE = 'DojahService::dojahBvnVerificationCheck';
 export const DOJAH_NIN_VERIFICATION_SERVICE = 'DojahService::dojahNINVerificationCheck';
+export const DOJAH_VIN_VERIFICATION_SERVICE = 'DojahService::dojahVINVerificationCheck';
 export const ZEEH_BVN_VERIFICATION_SERVICE = 'ZeehService::zeehBnvVerificationCheck';
 export const PAYSTACK_FETCH_BANKS_SERVICE = 'PaystackService::fetchBanks';
 export const PAYSTACK_RESOLVE_BANK_ACCOUNT_NAME_SERVICE = 'PaystackService::resolveAccount';

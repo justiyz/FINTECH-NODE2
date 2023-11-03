@@ -107,6 +107,7 @@ export const operations = {
   106: 'RCVCLCTBN', // user receives cluster creation bonus points
   107: 'RCVCLMIBN', // user receives extra bonus point on cluster membership increasing well
   108: 'DELOWNACT', // user deletes own account on seedfi
-  109: 'FTVUID' // failed to verify user identity document
+  109: 'FTVUID', // failed to verify user identity document
+  110: 'UIDDOCVS' //user identity document verified successfully
 };
 
