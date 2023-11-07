@@ -41,6 +41,20 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0)
     RETURNING *`,
 
+  initiatePersonalLoanApplicationV2: `
+    INSERT INTO personal_loans(
+        user_id,
+        amount_requested,
+        initial_amount_requested,
+        loan_reason,
+        loan_tenor_in_months,
+        initial_loan_tenor_in_months,
+        reschedule_count,
+        renegotiation_count,
+        total_repayment_amount
+    ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0, $7)
+    RETURNING *`,
+
   deleteInitiatedLoanApplication: `
     DELETE FROM personal_loans
     WHERE loan_id = $1

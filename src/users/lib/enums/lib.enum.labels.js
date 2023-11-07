@@ -133,6 +133,7 @@ export const SORT_CLUSTER_LOAN_AMOUNT_MIDDLEWARE = 'ClusterMiddleware::sortClust
 export const CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE = 'LoanMiddleware::checkIfOngoingLoanApplication';
 export const CHECK_IF_USER_HAS_CLUSTER_DISCOUNT_MIDDLEWARE = 'LoanMiddleware::checkIfUserHasClusterDiscount';
 export const ADDITIONAL_USER_CHECKS_FOR_LOAN_MIDDLEWARE = 'LoanMiddleware::additionalUserChecksForLoan';
+export const EXCEEDED_AVAILABLE_TICKETS = 'ShopController::checkUserTicketLoanEligibility';
 export const CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE = 'LoanMiddleware::checkLoanReschedulingRequest';
 export const CHECK_CLUSTER_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE = 'ClusterMiddleware::checkClusterLoanReschedulingRequest';
 export const CHECK_IF_EMPLOYMENT_TYPE_LIMIT_APPLIES_MIDDLEWARE = 'LoanMiddleware::checkIfEmploymentTypeLimitApplies';

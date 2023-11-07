@@ -798,38 +798,41 @@ async function createLoanApplication(userDetails, body) {
   const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
   const totalInterestAmount = calculateTotalInterestAmount(totalMonthlyRepayment, body.amount);
   const totalAmountRepayable = calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
-
-  const loanApplicationDetails = await processOneOrNoneData(loanQueries.manuallyInitiatePersonalLoanApplication, [
-    userDetails.user_id,
-    parseFloat(body.amount),
-    body.loan_reason,
-    body.duration_in_months,
-    totalAmountRepayable,
-    totalInterestAmount,
-    body.percentage_pricing_band,
-    body.percentage_processing_fee,
-    body.percentage_insurance_fee,
-    body.percentage_advisory_fee,
-    body.monthly_interest,
-    body.processing_fee,
-    body.insurance_fee,
-    body.advisory_fee,
-    body.monthly_repayment,
-    body.loan_decision,
-    body.is_loan_disbursed,
-    body.loan_disbursed_at,
-    body.total_outstanding_amount,
-    body.status,
-    false,
-    body.initial_amount_requested,
-    body.initial_loan_tenor_in_months
-  ]);
+  console.log('the four: ', totalFees, totalMonthlyRepayment, totalInterestAmount, totalAmountRepayable);
+  const loanApplicationDetails = await processOneOrNoneData(
+    loanQueries.manuallyInitiatePersonalLoanApplication,
+    [
+      userDetails.user_id,
+      parseFloat(body.amount),
+      body.loan_reason,
+      body.duration_in_months,
+      totalAmountRepayable,
+      totalInterestAmount,
+      body.percentage_pricing_band,
+      body.percentage_processing_fee,
+      body.percentage_insurance_fee,
+      body.percentage_advisory_fee,
+      body.monthly_interest,
+      body.processing_fee,
+      body.insurance_fee,
+      body.advisory_fee,
+      body.monthly_repayment,
+      body.loan_decision,
+      body.is_loan_disbursed,
+      body.loan_disbursed_at,
+      body.total_outstanding_amount,
+      body.status,
+      false,
+      body.initial_amount_requested,
+      body.initial_loan_tenor_in_months
+    ]
+  );
 
   return loanApplicationDetails;
 }
 
 // Function to create repayment schedule
-async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
+export async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
   const repaymentSchedule = await generateLoanRepaymentSchedule(loanApplicationDetails, userDetails.user_id);
   for (const schedule of repaymentSchedule) {
     await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [

@@ -9,6 +9,7 @@ import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import config from '../../../users/config';
 import { processAnyData } from '../services/services.db';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import * as Hash from '../../../users/lib/utils/lib.util.hash';
 import { uploads_admin_document } from "../../lib/monitor/lib.monitor.description";
 
 /**
@@ -276,6 +277,9 @@ export const checkIfUserExists = async(req, res, next) => {
       const [ userEmploymentDetails ] = await processAnyData(userQueries.getUserEmploymentDetails, [ user_id ]);
       const [ userAddressDetails ] = await processAnyData(userQueries.getUserAddressDetails, [ user_id ]);
       const [ userNextOfKinDetails ] = await processAnyData(UserQueries.getUserNextOfKin, [ user_id ]);
+      if (userDetails.bvn !== null) {
+        userDetails.unhashed_bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
+      }
       req.userDetails = userDetails;
       req.userEmploymentDetails = userEmploymentDetails;
       req.userAddressDetails = userAddressDetails;
