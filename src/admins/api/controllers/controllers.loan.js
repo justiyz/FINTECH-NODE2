@@ -798,7 +798,6 @@ async function createLoanApplication(userDetails, body) {
   const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
   const totalInterestAmount = calculateTotalInterestAmount(totalMonthlyRepayment, body.amount);
   const totalAmountRepayable = calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
-  console.log('the four: ', totalFees, totalMonthlyRepayment, totalInterestAmount, totalAmountRepayable);
   const loanApplicationDetails = await processOneOrNoneData(
     loanQueries.manuallyInitiatePersonalLoanApplication,
     [
