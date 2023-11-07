@@ -387,6 +387,7 @@ export const SHOP_CATEGORY_EXIST =  (shopName) => `Shop category ${shopName} exi
 export const TICKET_LIST = 'Tickets list fetched successfully. ';
 export const FETCH_USER_TICKETS_SUCCESSFULLY = 'User tickets fetched successfully.';
 export const FAILED_TO_FETCH_USER_TICKETS = 'failed to fetch user tickets';
+export const TICKET_UNITS_OVERSHOT = 'not enough tickets available to fulfil order';
 export const FETCH_LIST_OF_EVENT = 'list of active events fetched successfully';
 export const FETCH_EVENT_RECORD = 'fetch event record successfully';
 export const FAILED_TO_FETCH_EVENT = 'failed to fetch the list of events';

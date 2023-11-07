@@ -14,6 +14,7 @@ import { userActivityTracking } from '../../../users/lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import { SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER } from "../../../users/lib/enums/lib.enum.labels";
+import * as Hash from '../../../users/lib/utils/lib.util.hash';
 
 /**
  * should activate and deactivate user status
@@ -235,6 +236,14 @@ export const fetchUsers = async(req, res, next) => {
       processAnyData(userQueries.fetchUsersCount, payload)
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: successfully fetched users from the DB fetchUsers.admin.controllers.user.js`);
+    await Promise.all(
+      users.map(
+        async(user) => {
+          if (user.bvn !== null) {
+            user.unhashed_bvn = await Hash.decrypt(decodeURIComponent(user.bvn));
+          }
+        })
+    );
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(usersCount.total_count),
