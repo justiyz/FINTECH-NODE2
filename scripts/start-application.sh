@@ -4,6 +4,7 @@
 CONTAINER_NAME='seedfi-backend-test'
 IMAGE_URL="seedfi-backend-test:latest"
 PORT=4500
+ENV="/opt/vars/seedfi.env"
 
 # Restart the container
 echo "Running Hook: start-application.sh"
