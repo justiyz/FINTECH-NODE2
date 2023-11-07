@@ -304,10 +304,10 @@ export const createTicketSubscription = async(req, res, next) => {
 
     const reference = uuidv4();
     const paystackAmountFormatting = parseFloat(totalAmountToBePaid) * 100;
-    const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
+    // const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
     const payment_operation = payment_channel === 'card' ?
-      await initializeCardPayment(user, amountWithTransactionCharges, reference) :
-      await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
+      await initializeCardPayment(user, paystackAmountFormatting, reference) :
+      await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
     const data = {
       'tickets': ticketPurchaseLogs,
       'total_amount': totalAmountToBePaid,
@@ -316,7 +316,6 @@ export const createTicketSubscription = async(req, res, next) => {
 
     // When payment is successful,  update ticket/loan status
     // now change ticket status to successful/ongoing
-
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::User tickets created successfully.`);
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
@@ -607,7 +606,8 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan
     checkUserLoanEligibility.controllers.loan.js`);
-    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
+    // const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
+    const totalFees = 100;
     const totalRepaymentAmount = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
     const totalInterestAmount = data.max_approval === null ? parseFloat(totalRepaymentAmount) - parseFloat(data.loan_amount) :
       parseFloat(totalRepaymentAmount) - parseFloat(data.max_approval);
