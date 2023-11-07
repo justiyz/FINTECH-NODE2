@@ -50,9 +50,9 @@ const resolveAccount = async(account_number, bank_code, user) => {
 
 const initializeCardPayment = async(user, paystackAmountFormatting, reference) => {
   try {
-    // if (SEEDFI_NODE_ENV === 'test') {
-    //   return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
-    // }
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
+    }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     const amountRequestedType = parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
@@ -85,9 +85,9 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
 
 const initializeBankTransferPayment = async(user, paystackAmountFormatting, reference) => {
   try {
-    // if (SEEDFI_NODE_ENV === 'test') {
-    //   return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
-    // }
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
+    }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     const amountRequestedType = parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
