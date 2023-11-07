@@ -347,22 +347,13 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to take up to 2 previous loans checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
 
-    const [
-      employedUserLoanAmountLimit,
-      selfEmployedUserLoanAmountLimit,
-      unemployedUserLoanAmountLimit,
-      retiredUserLoanAmountLimit,
-      studentUserLoanAmountLimit,
-      tierOneMaximumLoanAmountDetails,
-      tierTwoMaximumLoanAmountDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails)
-    ]);
+    const employedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'employed_loan_amount_percentage_limit');
+    const selfEmployedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'self_employed_loan_amount_percentage_limit');
+    const unemployedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'unemployed_loan_amount_percentage_limit');
+    const retiredUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'retired_loan_amount_percentage_limit');
+    const studentUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'student_loan_amount_percentage_limit');
+    const tierOneMaximumLoanAmountDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_maximum_loan_amount');
+    const tierTwoMaximumLoanAmountDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_maximum_loan_amount');
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: constant limit values fetched from the DB checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
     const tierMaximumLoanAmountChoice = Number(user.tier) === 1 ? tierOneMaximumLoanAmountDetails : tierTwoMaximumLoanAmountDetails;
