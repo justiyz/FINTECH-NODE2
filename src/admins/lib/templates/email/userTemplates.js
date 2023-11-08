@@ -22,7 +22,7 @@ export const completeKyc = () => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;
 
@@ -35,7 +35,7 @@ export const sendLoanApprovalMail = (data) => `
 
 <tr>
   <td style="padding-bottom: 40px">
-    <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been approved.<br /> 
+    <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been approved.<br />
     Kindly login to the application to complete loan disbursement.
     </p>
   </td>
@@ -46,7 +46,7 @@ export const sendLoanApprovalMail = (data) => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;
 
@@ -59,7 +59,7 @@ export const sendLoanDisapprovalMail = (data) => `
 
 <tr>
   <td style="padding-bottom: 40px">
-    <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been declined.<br /> 
+    <p>Your loan application of ₦${parseFloat(data.requested_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} has been declined.<br />
     Kindly login to try again or reach out to our support team.
     </p>
   </td>
@@ -70,7 +70,7 @@ export const sendLoanDisapprovalMail = (data) => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;
 
@@ -83,7 +83,7 @@ export const utilityBillDeclinedMail = (data) => `
 
 <tr>
   <td style="padding-bottom: 40px">
-    <p>Your utility bill submission has been declined. <br /> 
+    <p>Your utility bill submission has been declined. <br />
     Please login upload your utility bill again.
     </p>
   </td>
@@ -94,7 +94,7 @@ export const utilityBillDeclinedMail = (data) => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;
 
@@ -118,7 +118,7 @@ export const utilityBillApprovalMail = (data) => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;
 
@@ -127,7 +127,7 @@ export const adminClusterInvite = (data) => `
   <td>
     <p>
     You have been invited to join a cluster.
-    </p>       
+    </p>
   </td>
 </tr>
 
@@ -136,7 +136,7 @@ export const adminClusterInvite = (data) => `
     <p>
     SeedFi admin is inviting you to join ${data.cluster_name} Cluster<br/>
     Kindly click <a href="${data.join_url}">here</a> to join cluster.
-    </p>  
+    </p>
   </td>
 </tr>
 
@@ -145,7 +145,7 @@ export const adminClusterInvite = (data) => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;
 
@@ -167,6 +167,6 @@ export const adminSentNotification = (data) => `
     <span style="line-height: 40px">Yours Sincerely</span> <br />
     <span style="font-weight: 600; display: block;">SeedFi</span>
     <span style="display: block;">Email: hello@theseedfi.com</span>
-    <span style="display: block;">Phone: +234 803 752 5487</span>
+    <span style="display: block;">Phone: +234(0) 913 887 2203</span>
   </td>
 </tr>`;

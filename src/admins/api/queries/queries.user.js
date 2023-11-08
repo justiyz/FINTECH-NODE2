@@ -142,6 +142,7 @@ export default {
         users.id,
         users.user_id,
         TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+        users.email,
         users.tier,
         to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
         users.loan_status,
@@ -157,6 +158,8 @@ export default {
         OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR email ILIKE TRIM($1)
+        OR phone_number ILIKE TRIM($1)
         OR $1 IS NULL)
       AND (users.status = $2 OR $2 IS NULL)
       AND ((users.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))

@@ -129,6 +129,7 @@ export const updateBvn = async(req, res, next) => {
     const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn, tierChoice ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
+
     return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, { ...updateBvn, tier_upgraded });
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
@@ -476,9 +477,9 @@ export const updateUploadedUtilityBill = async(req, res, next) => {
   try {
     const { user, document, userAddressDetails } = req;
     await Promise.all([
-      !userAddressDetails ? processOneOrNoneData(userQueries.addUserUtilityBillDocument) :
-        processOneOrNoneData(userQueries.updateUserUtilityBillDocument),
-      processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments)
+      !userAddressDetails ? processOneOrNoneData(userQueries.addUserUtilityBillDocument, [ user.user_id, document ]) :
+        processOneOrNoneData(userQueries.updateUserUtilityBillDocument, [ user.user_id, document ]),
+      processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'utility bill', document ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user uploaded utility bill document saved in the DB
     updateUploadedUtilityBill.controller.user.js`);
@@ -566,7 +567,7 @@ export const updateUserProfile = async(req, res, next) => {
         decoded that user details are already linked to their bvn and cant be edited in the DB updateUserProfile.controller.user.js`);
       return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
     }
-    const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile);
+    const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully updated user profile in the DB updateUserProfile.controller.user.js`);
     userActivityTracking(req.user.user_id, 19, 'success');
@@ -645,7 +646,6 @@ export const setDefaultCard = async(req, res, next) => {
     return next(error);
   }
 };
-
 /**
  * removes a saved debit card
  * @param {Request} req - The request from the endpoint.
@@ -799,7 +799,7 @@ export const createUserEmploymentDetails = async(req, res, next) => {
       User already created employment type in the DB. createUserEmploymentDetails.controller.user.js`);
       return ApiResponse.success(res, enums.EMPLOYMENT_TYPE_ALREADY_EXIST, enums.HTTP_BAD_REQUEST);
     }
-    const data = await processOneOrNoneData(userQueries.createUserEmploymentDetails);
+    const data = await processOneOrNoneData(userQueries.createUserEmploymentDetails, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info:
     user employment details successfully updated in the DB. createUserEmploymentDetails.controller.user.js`);
     userActivityTracking(req.user.user_id, 90, 'success');

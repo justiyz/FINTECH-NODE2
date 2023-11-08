@@ -22,7 +22,6 @@ export const adminAccess = (resource, action) => async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms this is not a super admin initiated action adminAccess.admin.middlewares.roles.js`);
-    console.log(permissions);
     const allowedRoleResource = Object.keys(permissions.role_permissions);
     const allowedAdminResource = Object.keys(permissions.admin_permissions);
     if (allowedRoleResource.includes(resource.trim()) || allowedAdminResource.includes(resource.trim())) {

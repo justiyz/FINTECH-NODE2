@@ -48,6 +48,7 @@ export const getEventsList = async(req, res, next) => {
     for (const event_record_id in events) {
       events[event_record_id].tickets = await processAnyData(shopQueries.getTicketCategories, events[event_record_id].ticket_id);
     }
+
     if (events)
       return ApiResponse.success(res, enums.FETCH_LIST_OF_EVENT, enums.HTTP_OK, events);
   } catch (error) {

@@ -27,6 +27,7 @@ export const GENERATE_MONO_ACCOUNT_ID_SERVICE = 'MonoService::generateMonoAccoun
 export const CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE = 'YouVerifyService::createUserYouVerifyCandidate';
 export const INITIATE_YOU_VERIFY_ADDRESS_VERIFICATION_SERVICE = 'YouVerifyService::initiateUserYouVerifyAddressVerification';
 export const DOJAH_BVN_VERIFICATION_SERVICE = 'DojahService::dojahBvnVerificationCheck';
+export const ZEEH_BVN_VERIFICATION_SERVICE = 'ZeehService::zeehBnvVerificationCheck';
 export const PAYSTACK_FETCH_BANKS_SERVICE = 'PaystackService::fetchBanks';
 export const PAYSTACK_RESOLVE_BANK_ACCOUNT_NAME_SERVICE = 'PaystackService::resolveAccount';
 export const COMPARE_PIN_MIDDLEWARE = 'AuthMiddleware::comparePin';

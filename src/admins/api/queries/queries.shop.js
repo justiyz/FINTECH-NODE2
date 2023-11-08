@@ -256,7 +256,7 @@ export default {
         ticket_category_type,
         ticket_price,
         units,
-        ticket_category_status,
+        ticket_category_status
     FROM ticket_categories
     WHERE ticket_id = $1
   `,
