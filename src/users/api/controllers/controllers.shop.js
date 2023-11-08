@@ -253,7 +253,6 @@ export const getTicketSubscriptionSummary = async(req, res, next) => {
   try {
     const ticket_information = await processAnyData(shopQueries.getTicketSummary, req.params.ticket_id);
     for (const tick_information in ticket_information) {
-      console.log(tick_information);
       // const ticket_price = await processOneOrNoneData(shopQueries.)
     }
 
