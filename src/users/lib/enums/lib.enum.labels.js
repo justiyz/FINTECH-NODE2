@@ -225,6 +225,7 @@ export const FETCH_USER_REFERRAL_HISTORY_CONTROLLER = 'UserController::fetchUser
 export const USER_CLAIMS_REFERRAL_POINTS_CONTROLLER = 'UserController::userClaimsReferralPoints';
 export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlertNotification';
 export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount';
+export const CHECK_NIN_LENGTH_MIDDLEWARE = 'UserController::checkIfTheLengthOfTheNinIsCorrect';
 
 
 // Admin related labels

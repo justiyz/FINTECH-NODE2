@@ -21,6 +21,9 @@ import {VERIFY_USER_IDENTITY_DOCUMENT} from '../../lib/enums/lib.enum.labels';
 import * as zeehService from '../services/services.zeeh';
 import * as S3 from "../services/services.s3";
 import {now} from "moment-timezone";
+import * as dojahService from '../services/service.dojah'
+import {error} from 'console';
+import {response} from 'express';
 
 const {SEEDFI_NODE_ENV} = config;
 
@@ -424,58 +427,130 @@ export const idUploadVerification = async (req, res, next) => {
 };
 
 
-export const nationalIdentificationNumberVerification = async (document, user) => {
-  logger.info('Now running nationalIdentificationNumberVerification');
-  const response = await zeehService.zeehNINVerificationCheck(document.document_id, user);
+export const checkIfTheLengthOfTheNinIsCorrect = async (nin, user, res, next) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now checking the length/format of the NIN checkIfTheLengthOfTheNinIsCorrect.middlewares.user.js`);
+  const ninRegex = /^\d{11}$/ // Matches exactly 11 digits
+  if (!ninRegex.test(nin)) {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: NIN is not in the correct format/length {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    return false;
+  }
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: NIN is in the correct format/length {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  return true;
+}
+
+export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
+  return (
+    user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+    user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+    user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
+    user_data.date_of_birth === user.date_of_birth
+  );
+}
+
+export const callTheZeehAfricaNINVerificationCheck = async (nin, user) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the the user id with zeeh africa  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  const response = await zeehService.zeehNINVerificationCheck(nin, user);
   if (response.status === 'success') {
-    const user_data = response.data;
-    if (
-      user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
-      user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-      user_data.phone_number1.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
-      user_data.date_of_birth === user.date_of_birth
-    ) {
-      const full_name = user.first_name.toLowerCase() + '_' + user.last_name.toLowerCase();
-      const contentType = 'image/png';
-      const url = `files/user-documents/${ user.user_id }/${ document.document_type }/${ user.user_id }-${ full_name }`;
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with zeeh africa successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  } else {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  }
+  return response;
+}
 
-      const payload = Buffer.from(user_data.image, 'base64');
-      const data = await S3.uploadFile(url, payload, contentType);
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+export const callTheDojahNINVerificationCheck = async (nin, user) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the the user id with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  const response = await dojahService.dojahNINVerification(nin, user);
+  if (response.status === 200) {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with dojah successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  } else {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  }
+  return response;
+}
 
+export const uploadImageToS3Bucket = async (user, document, user_data) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now tyring to uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  const full_name = user.first_name.toLowerCase() + '_' + user.last_name.toLowerCase();
+  const contentType = 'image/png';
+  const url = `files/user-documents/${ user.user_id }/${ document.document_type }/${ user.user_id }-${ full_name }`;
+  const payload = Buffer.from(user_data.photo, 'binary');
+  const data = await S3.uploadFile(url, payload, contentType);
+  if (data.Location) {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  } else {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: failed to uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  }
+  return data;
+}
+
+export const nationalIdentificationNumberVerification = async (document, user, res, next) => {
+  logger.info('Now running nationalIdentificationNumberVerification');
+  if (! await checkIfTheLengthOfTheNinIsCorrect(document.document_id, user, res, next)) {
+    return ApiResponse.error(res, 'NIN must be exactly 11 digits long and consist of numbers only', enums.HTTP_BAD_REQUEST, enums.CHECK_NIN_LENGTH_MIDDLEWARE);
+  }
+  let user_data;
+  let ninResponse;
+  ninResponse = await callTheZeehAfricaNINVerificationCheck(document.document_id, user);
+  user_data = ninResponse.data;
+
+  if (ninResponse.status !== 'success') {
+    ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
+    user_data = ninResponse.data.entity;
+  }
+  if (ninResponse.status === 'success' || ninResponse.status === 200) {      
+    if (checkIfUserDetailsMatchNinResponse(user_data, user)) {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+
+      const data = await uploadImageToS3Bucket(user, document, user_data);
       const updateIdVerification = [
         user.user_id, document.document_type, document.document_id,
         data.Location, null, null, null
       ];
-      // const confirmedPayload = UserPayload.imgVerification(user, updateIdVerification);
+
       await processAnyData(userQueries.updateIdVerification, updateIdVerification);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_national_id_details created successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
-      const fileExt = path.extname(user_data.image.trim());
+      const fileExt = path.extname(user_data.photo.trim());
       const documen_t = encodeURIComponent(
-        await Hash.encrypt({ document_url: user_data.image.trim(), document_extension: fileExt })
+        await Hash.encrypt({document_url: user_data.photo.trim(), document_extension: fileExt})
       );
+
       await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [user.user_id, 'valid identification', documen_t]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_admin_uploaded_documents created successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
-      await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location]);
+      //user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
+      const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
+      const tier_upgraded = tierChoice === 2 ? true : false;
+      const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
-    } else {
-      //throw an error here
-    }
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successfull documentVerification.controller.user.js`);
+      userActivityTracking(user.user_id, 109, 'success');
+      return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...response, tier_upgraded});
 
+    } else {
+      const errorMessage = 'user details does not match the details on the provided NIN ';
+      logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::::Info: ${ errorMessage } {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+      return ApiResponse.error(res, errorMessage, enums.HTTP_BAD_REQUEST, enums.USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED);
+    }
   } else {
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification could not be initiated with zeehafrica initiateAddressVerification.controller.user.js`);
-    // return ApiResponse.error(res, enums.USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED, enums.HTTP_SERVICE_UNAVAILABLE,
-    //   enums.VERIFY_USER_IDENTITY_DOCUMENT);
+    const errorMessage = 'user id verification initiation failed ';
+    logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: ${ errorMessage } {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    return ApiResponse.error(res, 'user id verification failed', enums.HTTP_SERVICE_UNAVAILABLE, enums.USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED);
   }
 };
 
-export const votersIdentificationNumberVerification = async (document_id, user) => {
+
+export const votersIdentificationNumberVerification = async (document_id, state, user, res) => {
   try {
-    const response = await zeehService.zeehVINVerificationCheck(document_id, user, 'ondo', user.last_name);
-    console.log(response.response.statusText == 'Not Found' || response.response.status == 404);
+    // const response = await zeehService.zeehVINVerificationCheck(document_id, user, 'ondo');
+    const response = await dojahService.dojahVINVerification('90F5AFA54F295792111', user);
+
+
+
+    console.log('RESPONSE FROM DOJAH => ', response.data)
+    // console.log(response.response.statusText == 'Not Found' || response.response.status == 404);
     if (response.response.statusText == 'Not Found' || response.response.status == 404) {
       return 'The information provided cannot be verified.';
     }
@@ -490,10 +565,10 @@ export const votersIdentificationNumberVerification = async (document_id, user) 
     //   }
     // }
   } catch (error) {
-    userActivityTracking(req.user.user_id, 109, 'fail');
+    userActivityTracking(user.user_id, 109, 'fail');
     error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
     logger.error(`user identity document verification failed::${ enums.VERIFY_USER_IDENTITY_DOCUMENT }`, error.message);
-    return next(error);
+    // return next(error);
   }
 
   // if (response.status === 'success') {
@@ -510,24 +585,23 @@ export const votersIdentificationNumberVerification = async (document_id, user) 
   // }
 };
 
+
 export const documentVerification = async (req, res, next) => {
   try {
     const {user, body} = req;
 
     if (body.document_type == 'nin') {
-      await nationalIdentificationNumberVerification(body, user);
-
+      await nationalIdentificationNumberVerification(body, user, res, next);
     } else if (body.document_type == 'voters_card') {
-      await votersIdentificationNumberVerification(body.document_id, user, 'lagos', user.last_name);
+      await votersIdentificationNumberVerification(body.document_id, user, 'lagos', res);
+    } else {
+      logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: invalid document type passed documentVerification.controller.user.js`);
+      return ApiResponse.error(res, 'Enter a valid document type', enums.HTTP_BAD_REQUEST);
     }
-    console.log('GOT HERE -> MAIN EDP 1')
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successfull documentVerification.controller.user.js`);
-    userActivityTracking(req.user.user_id, 110, 'success');
-    return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK);
   } catch (error) {
     userActivityTracking(req.user.user_id, 109, 'fail');
     error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
-    logger.error(`user identity document verification failed::${ enums.VERIFY_USER_IDENTITY_DOCUMENT }`, error.message);
+    logger.error(`Id verification failed:::${ enums.VERIFY_USER_IDENTITY_DOCUMENT }`, error.message);
     return next(error);
   }
 };

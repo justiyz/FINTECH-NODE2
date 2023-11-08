@@ -20,13 +20,13 @@ export const zeehVerifyNinTestResponse = (user, nin) => {
   return data;
 };
 
-export const dojahVerifyVINTestResponse = (user, nin) => {
+export const dojahVerifyVINTestResponse = (user, vin) => {
   const data = {
     status: 200,
     data: {
       entity: {
         full_name: user.first_name + ' ' + user.last_name,
-        voter_identification_number: nin,
+        voter_identification_number: vin,
         gender: 'Male',
         occupation: 'STUDENT',
         time_of_registration: '2011-02-18 13:59:46',
@@ -121,8 +121,8 @@ export const zeehVerifyBvnTestResponse = (user, bvn) => {
       middle_name: user.middle_name !== null ? user.middle_name : '',
       gender: user.gender,
       date_of_birth: user.date_of_birth,
-      phone_number1: user.phone_number,
-      image: '/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a\n' +
+      phone_number: user.phone_number,
+      photo: '/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a\n' +
         'HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy\n' +
         'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAHSAV4DASIA\n' +
         'AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA\n' +

@@ -389,6 +389,7 @@ export default {
     SET
     updated_at = NOW(),
     image_url = $2,
+    tier = $3,
     is_uploaded_identity_card = true,
     is_uploaded_selfie_image = true
     WHERE user_id = $1
