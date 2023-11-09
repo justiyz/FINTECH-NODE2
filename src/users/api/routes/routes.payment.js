@@ -27,6 +27,8 @@ router.post(
   PaymentMiddleware.saveCardAuth,
   PaymentMiddleware.raiseRefundForCardTokenization,
   PaymentController.finalWebhookResponse
+  // ,
+  // PaymentMiddleware.
 );
 
 export default router;

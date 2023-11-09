@@ -792,7 +792,7 @@ export const getProfile = async (req, res, next) => {
     ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully fetched user's employment details, address details and next of kin from the DB
     fetchUserInformationDetails.controller.user.js`);
-    user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
+    user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn[0].bvn)) : '';
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
       true : false;
     const data = {
@@ -836,7 +836,6 @@ export const setDefaultCard = async (req, res, next) => {
     return next(error);
   }
 };
-
 /**
  * removes a saved debit card
  * @param {Request} req - The request from the endpoint.
@@ -961,7 +960,7 @@ export const createNextOfKin = async (req, res, next) => {
   try {
     const {body, user} = req;
     const payload = UserPayload.createNextOfKin(body, user);
-    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
+    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin);
     userActivityTracking(req.user.user_id, 89, 'success');
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully created user's next of kin createNextOfKin.controller.user.js`);
     return ApiResponse.success(res, enums.NEXT_OF_KIN_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, nextOfKin);

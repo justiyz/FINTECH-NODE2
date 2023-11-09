@@ -230,9 +230,9 @@ export const rejectedDebitCard = (data) => `
   <td>
     <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       Thanks for adding your card details on SeedFi.<br />
-      however, it has been rejected because the card will expire soon.<br /> 
+      however, it has been rejected because the card will expire soon.<br />
       Kindly add a card that will not expire in about three months time.
-    </span>  
+    </span>
   </td>
 </tr>
 
@@ -243,7 +243,7 @@ export const rejectedDebitCard = (data) => `
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       <b>Last 4 Digits:</b> ${data.last4Digits}, <br />
       <b>Card Type:</b> ${data.cardType}
-    </span>  
+    </span>
   </td>
 </tr>`;
 
@@ -261,7 +261,7 @@ export const loanDisbursement = (data) => `
     <span
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
       >Your loan application has been approved and disbursement made.
-    </span>  
+    </span>
   </td>
 </tr>
 
@@ -280,7 +280,7 @@ export const loanDisbursement = (data) => `
         <b>Advisory Fee:</b> ${data.advisoryFee} <br />
         <b>Total Repayment Amount:</b> ${data.totalRepaymentAmount} <br />
         <b>Monthly Repayment:</b> ${data.monthlyRepayment} <br />
-      </span>  
+      </span>
   </td>
 </tr>
 
@@ -296,7 +296,7 @@ export const loanClusterInvite = (data) => `
     <span
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;"
       >You have been invited to join a cluster.
-    </span>  
+    </span>
   </td>
 </tr>
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
@@ -305,7 +305,7 @@ export const loanClusterInvite = (data) => `
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       ${data.inviter_first_name} ${data.inviter_last_name} is inviting you to join ${data.cluster_name} Cluster. <br />
       Kindly click <a href="${data.join_url}">here</a> to join.
-    </span>  
+    </span>
   </td>
 </tr>`;
 
@@ -321,7 +321,7 @@ export const failedCardDebit = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">>
   <td>
-    <span>Your card could not be debited for the loan repayment of ₦${parseFloat(data.total_payment_amount).toFixed(2)}</span>  
+    <span>Your card could not be debited for the loan repayment of ₦${parseFloat(data.total_payment_amount).toFixed(2)}</span>
   </td>
 </tr>
 
@@ -331,13 +331,13 @@ export const failedCardDebit = (data) => `
     <span>
       <b>Last 4 Digits:</b> ${Hash.decrypt(decodeURIComponent(data.last_4_digits))}, <br />
       <b>Card Type:</b> ${data.card_type}
-    </span>  
+    </span>
   </td>
 </tr>
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment</span>  
+    <span>Kindly fund your account or contact your bank if need be to resolve the issue, or login to seedfi application to do manual repayment</span>
   </td>
 </tr>`;
 
@@ -352,7 +352,7 @@ export const failedChargePayment = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>Your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} on seedfi was not successful</span>  
+    <span>Your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} on seedfi was not successful</span>
   </td>
 </tr>
 
@@ -363,13 +363,13 @@ export const failedChargePayment = (data) => `
       <b>Last 4 Digits:</b> ${data.last4Digits}, <br />
       <b>Card Type:</b> ${data.cardType}, <br />
       <b>Bank:</b> ${data.bank}
-    </span>  
+    </span>
   </td>
 </tr>
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td style="padding-bottom: 20px">
-    <span>Kindly try again or reach out to your bank if need be.</span>  
+    <span>Kindly try again or reach out to your bank if need be.</span>
   </td>
 </tr>`;
 
@@ -386,7 +386,7 @@ export const successfulRepayment = (data) => `
   <td>
     <span>Seedfi received your payment of ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
       as a loan repayment of your existing loan facility
-    </span>  
+    </span>
   </td>
 </tr>
 
@@ -396,13 +396,13 @@ export const successfulRepayment = (data) => `
     <span>
       <b>Total Loan Amount:</b> ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
       <b>Amount Repaid:</b> ₦${parseFloat(data.amount_paid).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-    </span>  
+    </span>
   </td>
 </tr>
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>Thank you for being loyal and keeping to your promise of loan facility repayment</span>  
+    <span>Thank you for being loyal and keeping to your promise of loan facility repayment</span>
   </td>
 </tr>`;
 
@@ -417,7 +417,7 @@ export const completedRepayment = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>You successfully repaid your ${data.loan_reason}, below is the loan breakdown</span>  
+    <span>You successfully repaid your ${data.loan_reason}, below is the loan breakdown</span>
   </td>
 </tr>
 
@@ -431,7 +431,7 @@ export const completedRepayment = (data) => `
       <b>Interest Rate:</b> ${parseFloat(data.interest_rate)}%<br />
       <b>Total Repayment:</b> ₦${parseFloat(data.total_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
       <b>Monthly Repayment</b>: ₦${parseFloat(data.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-    </span>  
+    </span>
   </td>
 </tr>`;
 
@@ -446,7 +446,7 @@ export const failedAddressVerification = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>your address verification processing FAILED for address with the following details:</span>  
+    <span>your address verification processing FAILED for address with the following details:</span>
   </td>
 </tr>
 
@@ -459,13 +459,13 @@ export const failedAddressVerification = (data) => `
         <b>Street:</b> ${data.street},  <br />
         <b>City:</b> ${data.city},  <br />
         <b>State:</b> ${data.state}
-    </span>  
+    </span>
   </td>
 </tr>
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td style="padding-bottom: 20px">
-    <span>kindly update your valid address details.</span>  
+    <span>kindly update your valid address details.</span>
   </td>
 </tr>`;
 
@@ -480,7 +480,7 @@ export const successfulAddressVerification = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>your address verification processing is SUCCESSFUL for address with the following details:</span>  
+    <span>your address verification processing is SUCCESSFUL for address with the following details:</span>
   </td>
 </tr>
 
@@ -493,7 +493,7 @@ export const successfulAddressVerification = (data) => `
       <b>Street:</b> ${data.street},  <br />
       <b>City:</b> ${data.city},  <br />
       <b>State:</b> ${data.state}
-    </span>  
+    </span>
   </td>
 </tr>`;
 
@@ -508,7 +508,7 @@ export const loanRescheduled = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>You successfully Rescheduled your ${data.loan_reason}, below is the loan breakdown</span>  
+    <span>You successfully Rescheduled your ${data.loan_reason}, below is the loan breakdown</span>
   </td>
 </tr>
 
@@ -523,7 +523,7 @@ export const loanRescheduled = (data) => `
       <b>Reschedule Extension Day:</b> ${data.reschedule_extension_days} days<br />
       <b>Current Loan Duration:</b> ${data.current_loan_duration}<br />
       <b>Next Loan Repayment Date:</b> ${data.next_repayment_date}
-    </span>  
+    </span>
   </td>
 </tr>`;
 
@@ -538,7 +538,7 @@ export const rewardPointsClaiming = (data) => `
 
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
-    <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed points of ${data.claimed_points}</span>  
+    <span>You have successfully claimed ${data.just_claimed_points} points and you now have a total claimed points of ${data.claimed_points}</span>
   </td>
 </tr>`;
 
@@ -555,9 +555,9 @@ export const rejectedDebitCardNotUsersCard = (data) => `
   <td>
     <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       Thanks for adding your card details on SeedFi.<br />
-      however, this added card does not bear your registered name on SeedFi.<br /> 
+      however, this added card does not bear your registered name on SeedFi.<br />
       Kindly add a card that bears your registered name.
-    </span>  
+    </span>
   </td>
 </tr>
 
@@ -568,6 +568,39 @@ export const rejectedDebitCardNotUsersCard = (data) => `
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
       <b>Last 4 Digits:</b> ${data.last4Digits}, <br />
       <b>Card Type:</b> ${data.cardType}
-    </span>  
+    </span>
   </td>
 </tr>`;
+
+export const ticketBookedForYou = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+    Hi ${data.first_name},
+    </h2>
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td>
+    <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+      Your ticket for ${data.ticket_name} has been booked!<br />
+      however, this added card does not bear your registered name on SeedFi.<br />
+      Kindly add a card that bears your registered name.
+    </span>
+  </td>
+</tr>
+
+<tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">card details</p><br />
+    <span
+      style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+      <b>Event Title:</b> ${data.ticket_name}, <br />
+      <img src="${data.ticket_image_url}">
+      <b>Date:</b> ${data.event_date}, <br />
+      ${data.ticket_description}
+    </span>
+  </td>
+</tr>
+`;

@@ -1,0 +1,2 @@
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS event_start_date VARCHAR;
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS event_end_date VARCHAR;

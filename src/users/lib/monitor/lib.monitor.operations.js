@@ -107,6 +107,16 @@ export const operations = {
   106: 'RCVCLCTBN', // user receives cluster creation bonus points
   107: 'RCVCLMIBN', // user receives extra bonus point on cluster membership increasing well
   108: 'DELOWNACT', // user deletes own account on seedfi
+  109: 'FTFSCL', // user failed to fetch shop categories list
+  110: 'FATLBU', // user failed to fetch all the list of available tickets
+  111: 'FTLUST', // failed to load users subscribed tickets
+  112: 'FTFTC',
+  113: 'FTCTAR', // failed to create ticket application subscription
+  114: 'FTFUTS', // failed to fetch user tickets successfully
+  115: 'FTSETTE',  // failed to send event tickets to email address
+  116: 'FTCTSFV', // failed to compute ticket summary for viewing
+  117: 'DELUTB', // delete unpaid tickets
+  118: 'UTLELCF' // user ticket loan eligibility failure
   109: 'VUIDDOC', // verify user identity document
 
 };

@@ -73,7 +73,7 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
 export const collateUsersFcmTokens = async(users) => {
   const tokens = [];
   await Promise.all(users.map(async(user) => {
-    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [ user.user_id ]);
+    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken);
     if (userFcmToken?.fcm_token) {
       tokens.push(userFcmToken.fcm_token);
     }
@@ -87,7 +87,7 @@ export const collateUsersFcmTokensExceptAuthenticatedUser = async(users, user_id
   const otherClusterMembers = await users.filter(user => user.user_id != user_id);
   const tokens = [];
   await Promise.all(otherClusterMembers.map(async(user) => {
-    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [ user.user_id ]);
+    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken);
     if (userFcmToken?.fcm_token) {
       tokens.push(userFcmToken.fcm_token);
     }
