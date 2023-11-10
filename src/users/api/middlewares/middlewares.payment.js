@@ -101,12 +101,12 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
 
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    const { body, params } = req;
-    const ticket_id = req.query.ticket_id;
-    const user_id = req.query.user_id;
-    await processOneOrNoneData(adminShopQueries.updateEventStatus,
-      [ user_id, ticket_id ]);
-    const data = {};
+    const { ticket_id, user_id, reference } = req.query;
+    const updated_record = await processAnyData(adminShopQueries.updateEventStatus,
+      [ user_id, ticket_id, reference ]);
+    const data = {
+      active_tickets: updated_record
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {

@@ -3,7 +3,7 @@ import { processAnyData, processNoneData } from "../services/services.db";
 import adminShopQueries from '../../../admins/api/queries/queries.shop';
 import shopQueries      from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import { createRepaymentSchedule } from '../../../admins/api/controllers/controllers.loan';
+import {createRepaymentSchedule, createShopRepaymentSchedule} from '../../../admins/api/controllers/controllers.loan';
 import {
   calculateAmountPlusPaystackTransactionCharge,
   initializeBankTransferPayment,
@@ -15,6 +15,12 @@ import { userActivityTracking } from '../../lib/monitor';
 import { processOneOrNoneData } from '../../../admins/api/services/services.db';
 import QRCode from 'qrcode';
 import MailService from '../services/services.email';
+import notificationQueries from "../queries/queries.notification";
+import loanQueries from "../queries/queries.loan";
+import LoanPayload from "../../lib/payloads/lib.payload.loan";
+import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
+import { sendNotificationToAdmin } from '../services/services.firebase';
+import * as adminNotification from '../../lib/templates/adminNotification';
 import {
   DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
   FAILED_TO_BOOK_TICKETS,
@@ -24,12 +30,6 @@ import {
   CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER,
   EVENT_PAYMENT_SUCCESSFUL
 } from "../../lib/enums/lib.enum.labels";
-import notificationQueries from "../queries/queries.notification";
-import loanQueries from "../queries/queries.loan";
-import LoanPayload from "../../lib/payloads/lib.payload.loan";
-import { loanApplicationEligibilityCheck } from "../services/service.seedfiUnderwriting";
-import { sendNotificationToAdmin } from "../services/services.firebase";
-import * as adminNotification from "../../lib/templates/adminNotification";
 import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib/utils/lib.util.helpers";
 import AdminMailService from "../../../admins/api/services/services.email";
 
@@ -268,6 +268,7 @@ export const createTicketSubscription = async(req, res, next) => {
   try {
     const tickets = req.body.tickets;
     const payment_channel = req.body.payment_channel;
+    const reference = uuidv4();
     const ticketPurchaseLogs = [];
     let totalAmountToBePaid = 0;
     const { user } = req;
@@ -279,12 +280,13 @@ export const createTicketSubscription = async(req, res, next) => {
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         if (availableTickets && availableTickets.units >= 1) {
           const bookedTicket = await createUserTicket(
-            req.user.user_id,
-            ticket_id,
-            ticket_category_id,
-            req.body.insurance_coverage,
-            req.body.duration_in_months,
-            theQRCode
+              req.user.user_id,
+              ticket_id,
+              ticket_category_id,
+              req.body.insurance_coverage,
+              req.body.duration_in_months,
+              theQRCode,
+              reference
           );
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
           ticketPurchaseLogs.push(bookedTicket[0]);
@@ -297,16 +299,12 @@ export const createTicketSubscription = async(req, res, next) => {
       }
     }
     // changes started from here
-    // const repayment = req.first_repayment;
-    // totalAmountToBePaid = repayment.first_repayment + repayment.fees + repayment.interest_payment;
-    totalAmountToBePaid = req.first_repayment;
-
-    const reference = uuidv4();
-    const paystackAmountFormatting = parseFloat(totalAmountToBePaid) * 100;
-    // const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
+    totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
+    const paystackAmountFormatting = totalAmountToBePaid * 100;
+    const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
     const payment_operation = payment_channel === 'card' ?
-      await initializeCardPayment(user, paystackAmountFormatting, reference) :
-      await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
+      await initializeCardPayment(user, amountWithTransactionCharges, reference) :
+      await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
     const data = {
       'tickets': ticketPurchaseLogs,
       'total_amount': totalAmountToBePaid,
@@ -334,16 +332,17 @@ async function getAvailableTicketUnits(ticketCategoryId) {
   return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
 }
 
-async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode) {
+async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference) {
   return await processAnyData(adminShopQueries.createUserTicketRecord, [
-    userId,
-    ticketId,
-    ticketCategoryId,
-    1,
-    insuranceCoverage,
-    paymentTenure,
-    'inactive',
-    qrCode
+      userId,
+      ticketId,
+      ticketCategoryId,
+      1,
+      insuranceCoverage,
+      paymentTenure,
+      'inactive',
+      qrCode,
+      reference
   ]);
 }
 
@@ -474,8 +473,10 @@ const sendTicketEmail = async(recipient, ticket) => {
 
 export const sendEventTicketToEmails = async(req, res, next) => {
   try {
-    const recipients = req.body.recipients;
-    const ticket_id = req.body.ticket_id;
+    const { recipients, ticket_id, transaction_reference, reference } = req.body;
+    console.log(typeof recipients, ticket_id, transaction_reference, reference);
+    // fetch the transaction record by transaction_reference
+    // update the tickets connected to active
     const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ ticket_id ]);
 
     const ticket_recipients = [];
@@ -548,8 +549,8 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = 'okra';
     // body.total_repayment_amount = booking_amount;
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: body::: ${body}`);
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: body>::: ${body}`);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn, [
       user.user_id,
       booking_amount,
       booking_amount,
@@ -559,12 +560,14 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       0,
       0
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
-    const result = await loanApplicationEligibilityCheck(payload);
+    const result = await loanApplicationEligibilityCheckV2(payload);
+    const { data } = result;
 
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
@@ -590,7 +593,6 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
 
-    const { data } = result;
     if (data.final_decision === 'DECLINED') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan
       checkUserLoanEligibility.controllers.loan.js`);
@@ -607,22 +609,16 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     checkUserLoanEligibility.controllers.loan.js`);
     // const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalFees = 100;
-    const totalRepaymentAmount = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
-    const totalInterestAmount = data.max_approval === null ? parseFloat(totalRepaymentAmount) - parseFloat(data.loan_amount) :
-      parseFloat(totalRepaymentAmount) - parseFloat(data.max_approval);
-
-    // The activationCharge is the 30% of the total sum
-    const activationCharge = 0.3 * totalRepaymentAmount;
-    const loanAmount = (totalRepaymentAmount - activationCharge).toFixed(2);
-
-    const totalAmountRepayable = (parseFloat(activationCharge) + parseFloat(totalFees)).toFixed(2);
+    const monthly_repayment = (booking_amount * 0.7)/body.duration_in_months;
+    const first_installment = (booking_amount * 0.3).toFixed(2);
     if (data.final_decision === 'APPROVED') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval
       checkUserLoanEligibility.controllers.loan.js`);
-      const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, loanAmount, totalInterestAmount, 'approved');
+      const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, booking_amount, 0, 'approved');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
-      const loanRepaymentSchedule = await createRepaymentSchedule(updatedLoanDetails, user);
-      req.first_repayment = totalAmountRepayable; // loanRepaymentSchedule[0];
+      const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);
+      body.initial_payment = loan_repayment_schedule[0];
+      req.first_repayment = first_installment; // loanRepaymentSchedule[0];
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
 
       userActivityTracking(req.user.user_id, 37, 'success');
@@ -639,8 +635,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    const ticket_id = req.query.ticket_id;
-    const user_id = req.query.user_id;
+    const { ticket_id, user_id } = req.query;
     await processOneOrNoneData(adminShopQueries.updateEventStatus,
       [ user_id, ticket_id ]);
     const data = {};

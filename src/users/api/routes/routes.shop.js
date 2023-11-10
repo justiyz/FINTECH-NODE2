@@ -7,6 +7,7 @@ import * as shopCategories from '../controllers/controllers.shop';
 import Schema from '../../lib/schemas/lib.schema.shop';
 import loanSchema from '../../lib/schemas/lib.schema.loan';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
+import * as paymentMiddleware from '../middlewares/middlewares.payment';
 
 const router = Router();
 
@@ -79,9 +80,9 @@ router.get(
 );
 
 router.post(
-  '/ticket/send_notifications',
-  AuthMiddleware.validateAuthToken,
-  shopCategories.sendEventTicketToEmails
+    '/ticket/send_notifications',
+    AuthMiddleware.validateAuthToken,
+    shopCategories.sendEventTicketToEmails
 );
 
 router.delete(
@@ -91,9 +92,11 @@ router.delete(
 );
 
 router.post(
-  '/ticket/payment-successful',
-  AuthMiddleware.validateAuthToken,
-  shopCategories.ticketPurchaseUpdate
+    '/ticket/payment-successful',
+    // Model(loanSchema.successfulPayment, 'payload'),
+    AuthMiddleware.validateAuthToken,
+    paymentMiddleware.ticketPurchaseUpdate,
+    shopCategories.ticketPurchaseUpdate
 );
 
 export default router;

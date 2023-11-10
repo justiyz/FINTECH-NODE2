@@ -13,7 +13,11 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
-import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from '../../../users/lib/utils/lib.util.helpers';
+import {
+  generateLoanRepaymentSchedule,
+  generateLoanRepaymentScheduleForShop,
+  generateOfferLetterPDF
+} from '../../../users/lib/utils/lib.util.helpers';
 import { userActivityTracking } from '../../../users/lib/monitor';
 import {
   FAILED_TO_CREATE_MANUAL_LOAN_RECORD,
@@ -833,6 +837,26 @@ async function createLoanApplication(userDetails, body) {
 // Function to create repayment schedule
 export async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
   const repaymentSchedule = await generateLoanRepaymentSchedule(loanApplicationDetails, userDetails.user_id);
+  for (const schedule of repaymentSchedule) {
+    await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [
+      schedule.loan_id,
+      schedule.user_id,
+      schedule.repayment_order,
+      schedule.principal_payment,
+      schedule.interest_payment,
+      schedule.fees,
+      schedule.total_payment_amount,
+      schedule.pre_payment_outstanding_amount,
+      schedule.post_payment_outstanding_amount,
+      schedule.proposed_payment_date,
+      schedule.proposed_payment_date
+    ]);
+  }
+  return repaymentSchedule;
+}
+
+export async function createShopRepaymentSchedule(loanApplicationDetails, userDetails, activationCharge, monthly_installment) {
+  const repaymentSchedule = await generateLoanRepaymentScheduleForShop(loanApplicationDetails, userDetails.user_id, activationCharge, monthly_installment);
   for (const schedule of repaymentSchedule) {
     await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [
       schedule.loan_id,
