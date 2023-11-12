@@ -76,11 +76,11 @@ const zeehVINVerificationCheck = async (vin, user, state) => {
  
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
-      return userMockedTestResponses.zeehVerifyVINTestResponse(user, vin);
+      // return userMockedTestResponses.zeehVerifyVINTestResponse(user, vin);
     }
     const options = {
       method: 'GET',
-      url: `${config.SEEDFI_ZEEH_URL}/vin/live/lookup/${config.SEEDFI_ZEEH_PUBLIC_KEY}?vin=${ vin }&state=${state}&last_name=${last_name}`,
+      url: `${ config.SEEDFI_ZEEH_URL }/vin/live/lookup/${ config.SEEDFI_ZEEH_PUBLIC_KEY }?vin=${ vin }&state=${ state }&last_name=${ last_name }`,
       headers: {
         accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',

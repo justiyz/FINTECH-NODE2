@@ -1,19 +1,19 @@
-import { processAnyData, processNoneData } from "../services/services.db";
+import {processAnyData, processNoneData} from "../services/services.db";
 // import shopQueries from '../../queries/queries.shop';
 import adminShopQueries from '../../../admins/api/queries/queries.shop';
-import shopQueries      from '../queries/queries.shop';
+import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import { createRepaymentSchedule } from '../../../admins/api/controllers/controllers.loan';
+import {createRepaymentSchedule} from '../../../admins/api/controllers/controllers.loan';
 import {
   calculateAmountPlusPaystackTransactionCharge,
   initializeBankTransferPayment,
   initializeCardPayment
 } from "../services/service.paystack";
 import enums from '../../lib/enums';
-import { v4 as uuidv4 } from 'uuid';
-import { userActivityTracking } from '../../lib/monitor';
-import { processOneOrNoneData } from '../../../admins/api/services/services.db';
-import QRCode from 'qrcode';
+import {v4 as uuidv4} from 'uuid';
+import {userActivityTracking} from '../../lib/monitor';
+import {processOneOrNoneData} from '../../../admins/api/services/services.db';
+// import QRCode from 'qrcode';
 import MailService from '../services/services.email';
 import {
   DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
@@ -27,39 +27,39 @@ import {
 import notificationQueries from "../queries/queries.notification";
 import loanQueries from "../queries/queries.loan";
 import LoanPayload from "../../lib/payloads/lib.payload.loan";
-import { loanApplicationEligibilityCheck } from "../services/service.seedfiUnderwriting";
-import { sendNotificationToAdmin } from "../services/services.firebase";
+import {loanApplicationEligibilityCheck} from "../services/service.seedfiUnderwriting";
+import {sendNotificationToAdmin} from "../services/services.firebase";
 import * as adminNotification from "../../lib/templates/adminNotification";
-import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib/utils/lib.util.helpers";
+import {generateLoanRepaymentSchedule, generateOfferLetterPDF} from "../../lib/utils/lib.util.helpers";
 import AdminMailService from "../../../admins/api/services/services.email";
 
-export const shopCategories = async(req, res, next) => {
+export const shopCategories = async (req, res, next) => {
   try {
-    const { user} = req;
-    let shop_categories = await processAnyData(shopQueries.shopCategories, [ req.query.status ]);
+    const {user} = req;
+    let shop_categories = await processAnyData(shopQueries.shopCategories, [req.query.status]);
     const data = {
       shop_categories
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: shop details fetched successfully shopCategories.controller.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: shop details fetched successfully shopCategories.controller.shop.js`);
     return ApiResponse.success(res, enums.SHOP_CATEGORIES_LIST, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 109, 'fail');
     error.label = enums.FETCH_CATEGORY_LIST;
-    logger.error(`failed to fetch shop categories list::${enums.FETCH_CATEGORY_LIST}`, error.message);
+    logger.error(`failed to fetch shop categories list::${ enums.FETCH_CATEGORY_LIST }`, error.message);
     return next(error);
   }
 };
 
-export const fetchShopDetails = async(req, res, next) => {
+export const fetchShopDetails = async (req, res, next) => {
   try {
-    const { params: { shop_category_id }, user} = req;
-    let shopDetails = await processAnyData(shopQueries.getShopDetails, [ shop_category_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: shop details fetched successfully fetchShopDetails.controller.shop.js`);
+    const {params: {shop_category_id}, user} = req;
+    let shopDetails = await processAnyData(shopQueries.getShopDetails, [shop_category_id]);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: shop details fetched successfully fetchShopDetails.controller.shop.js`);
     return ApiResponse.success(res, enums.SHOP_CATEGORY_EXIST, enums.HTTP_OK, shopDetails);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 110, 'fail');
     error.label = enums.FETCH_SINGLE_CATEGORY;
-    logger.error(`failed to fetch shop single category::${enums.FETCH_SINGLE_CATEGORY}`, error.message);
+    logger.error(`failed to fetch shop single category::${ enums.FETCH_SINGLE_CATEGORY }`, error.message);
     return next(error);
   }
 };
@@ -92,10 +92,10 @@ function isObjectEmpty(obj) {
   }
   return true;
 }
-export const fetchTickets = async(req, res, next) => {
+export const fetchTickets = async (req, res, next) => {
   try {
-    const { user } = req;
-    let tickets = await processAnyData(adminShopQueries.getAllEvents, [ req.body.status, req.query.ticket_id ]);
+    const {user} = req;
+    let tickets = await processAnyData(adminShopQueries.getAllEvents, [req.body.status, req.query.ticket_id]);
     for (const tick in tickets) {
       const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
       if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
@@ -107,20 +107,20 @@ export const fetchTickets = async(req, res, next) => {
     const data = {
       'tickets': tickets
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: tickets fetched successfully fetchTickets.controller.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: tickets fetched successfully fetchTickets.controller.shop.js`);
     return ApiResponse.success(res, enums.TICKET_LIST, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 110, 'fail');
     error.label = enums.FETCH_ALL_TICKETS;
-    logger.error(`failed to fetch shop single category::${enums.FETCH_SINGLE_CATEGORY}`, error.message);
+    logger.error(`failed to fetch shop single category::${ enums.FETCH_SINGLE_CATEGORY }`, error.message);
     return next(error);
   }
 };
 
 // fetch users tickets
-export const fetchUserTickets = async(req, res, next) => {
+export const fetchUserTickets = async (req, res, next) => {
   try {
-    const { user } = req;
+    const {user} = req;
     const user_tickets = await fetchUserTicketsData(user.user_id, req.query.status);
 
     // separation of concerns for optimized reading
@@ -128,29 +128,29 @@ export const fetchUserTickets = async(req, res, next) => {
       await enrichUserTicketData(user_ticket);
     }
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user tickets fetched successfully fetchUserTickets.controller.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user tickets fetched successfully fetchUserTickets.controller.shop.js`);
 
-    const data = { user_tickets };
+    const data = {user_tickets};
     return ApiResponse.success(res, enums.FETCH_USER_TICKETS_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 111, 'fail');
     error.label = enums.FAILED_TO_FETCH_USER_TICKETS;
-    logger.error(`failed to fetch shop single category::${enums.FETCH_SINGLE_CATEGORY}`, error.message);
+    logger.error(`failed to fetch shop single category::${ enums.FETCH_SINGLE_CATEGORY }`, error.message);
     return next(error);
   }
 };
 
 async function fetchUserTicketsData(userId, status) {
-  return await processAnyData(shopQueries.getUserTickets, [ userId, status ]);
+  return await processAnyData(shopQueries.getUserTickets, [userId, status]);
 }
 
 async function enrichUserTicketData(user_ticket) {
   const least_ticket_priced_ticket = await processAnyData(
     adminShopQueries.getPriceOfLeastValueTicket, user_ticket.ticket_id);
   const ticket_category = await processOneOrNoneData(
-    adminShopQueries.getTicketCategoryTypeById, [ user_ticket.ticket_id, user_ticket.ticket_category_id ]);
-  const { ticket_name, event_location, event_time, ticket_image_url, event_date } = await processOneOrNoneData(
-    adminShopQueries.getCustomerTicketInformation, [ user_ticket.ticket_id, user_ticket.user_id ]);
+    adminShopQueries.getTicketCategoryTypeById, [user_ticket.ticket_id, user_ticket.ticket_category_id]);
+  const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
+    adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
 
   if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;
@@ -169,19 +169,19 @@ async function enrichUserTicketData(user_ticket) {
     user_ticket.lowest_ticket_price = 0;
   }
 }
-export const _fetchUserTickets = async(req, res, next) => {
+export const _fetchUserTickets = async (req, res, next) => {
   try {
-    const { user } = req;
+    const {user} = req;
     const user_tickets = await processAnyData(
-      shopQueries.getUserTickets, [ user.user_id, req.query.status ]);
+      shopQueries.getUserTickets, [user.user_id, req.query.status]);
     for (const tick in user_tickets) {
       const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, user_tickets[tick].ticket_id);
       const ticket_category = await processOneOrNoneData(
         adminShopQueries.getTicketCategoryTypeById, [
-          user_tickets[tick].ticket_id,
-          user_tickets[tick].ticket_category_id ]
+        user_tickets[tick].ticket_id,
+        user_tickets[tick].ticket_category_id]
       );
-      const { ticket_name, event_location, event_time } = await processOneOrNoneData(
+      const {ticket_name, event_location, event_time} = await processOneOrNoneData(
         adminShopQueries.getCustomerTicketInformation,
         [
           user_tickets[tick].ticket_id,
@@ -201,7 +201,7 @@ export const _fetchUserTickets = async(req, res, next) => {
         user_tickets[tick].lowest_ticket_price = 0;
       }
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user tickets fetched successfully fetchUserTickets.controller.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user tickets fetched successfully fetchUserTickets.controller.shop.js`);
     const data = {
       user_tickets
     };
@@ -209,24 +209,24 @@ export const _fetchUserTickets = async(req, res, next) => {
   } catch (error) {
     await userActivityTracking(req.user.user_id, 111, 'fail');
     error.label = enums.FAILED_TO_FETCH_USER_TICKETS;
-    logger.error(`failed to fetch shop single category::${enums.FETCH_SINGLE_CATEGORY}`, error.message);
+    logger.error(`failed to fetch shop single category::${ enums.FETCH_SINGLE_CATEGORY }`, error.message);
     return next(error);
   }
 };
 
-export const fetchTicketCategories = async(req, res, next) => {
+export const fetchTicketCategories = async (req, res, next) => {
   try {
     const ticket_categories = await processAnyData(shopQueries.getTicketCategories, req.params.ticket_id);
     const data = {
       'tickets': ticket_categories,
       'ticket_with_least_price': await findTicketWithLowestPrice(ticket_categories) // ticket_with_least_price
     };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket categories fetched successfully fetchTicketCategories.controller.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::Info: user ticket categories fetched successfully fetchTicketCategories.controller.shop.js`);
     return ApiResponse.success(res, enums.FETCH_TICKET_CATEGORIES_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 112, 'fail');
     error.label = enums.FAILED_TO_FETCH_TICKET_CATEGORIES;
-    logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_FETCH_USER_TICKETS}`);
+    logger.error(`failed to fetch ticket categories::${ enums.FAILED_TO_FETCH_USER_TICKETS }`);
     return next(error);
   }
 };
@@ -249,7 +249,7 @@ function findTicketWithLowestPrice(tickets) {
 
 
 
-export const getTicketSubscriptionSummary = async(req, res, next) => {
+export const getTicketSubscriptionSummary = async (req, res, next) => {
   try {
     const ticket_information = await processAnyData(shopQueries.getTicketSummary, req.params.ticket_id);
     for (const tick_information in ticket_information) {
@@ -259,22 +259,22 @@ export const getTicketSubscriptionSummary = async(req, res, next) => {
   } catch (error) {
     await userActivityTracking(req.user.user_id, 116, 'fail');
     error.label = enums.FAILED_TO_FETCH_TICKET_SUMMARY_STRING;
-    logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_FETCH_TICKET_SUMMARY}`);
+    logger.error(`failed to fetch ticket categories::${ enums.FAILED_TO_FETCH_TICKET_SUMMARY }`);
     return next(error);
   }
 };
 
-export const createTicketSubscription = async(req, res, next) => {
+export const createTicketSubscription = async (req, res, next) => {
   try {
     const tickets = req.body.tickets;
     const payment_channel = req.body.payment_channel;
     const ticketPurchaseLogs = [];
     let totalAmountToBePaid = 0;
-    const { user } = req;
+    const {user} = req;
     for (const ticket of tickets) {
-      const { ticket_id, ticket_category_id, units } = ticket;
+      const {ticket_id, ticket_category_id, units} = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
-        const barcodeString = `${ticket_id}|${req.user.user_id}`;
+        const barcodeString = `${ ticket_id }|${ req.user.user_id }`;
         const theQRCode = await generateQRCode(barcodeString);
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         if (availableTickets && availableTickets.units >= 1) {
@@ -316,12 +316,12 @@ export const createTicketSubscription = async(req, res, next) => {
     // When payment is successful,  update ticket/loan status
     // now change ticket status to successful/ongoing
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::User tickets created successfully.`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
-    logger.error(`Failed to create ticket subscription: ${error.message}`);
+    logger.error(`Failed to create ticket subscription: ${ error.message }`);
     return next(error);
   }
 };
@@ -348,17 +348,17 @@ async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCov
 }
 
 async function updateAvailableTicketUnits(ticketCategoryId, newUnits) {
-  const slateArray = [ ticketCategoryId, newUnits ];
+  const slateArray = [ticketCategoryId, newUnits];
   return await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slateArray);
 }
 
-export const _createTicketSubscription = async(req, res, next) => {
+export const _createTicketSubscription = async (req, res, next) => {
   try {
     const tickets = req.body.tickets;
     const ticket_purchase_logs = [];
     for (const ticket in tickets) {
       for (let ticket_counter = 1; ticket_counter <= tickets[ticket].units; ticket_counter++) {
-        logger.info(`generating ticket count ${tickets[ticket].ticket_id}`);
+        logger.info(`generating ticket count ${ tickets[ticket].ticket_id }`);
         const barcode_string = tickets[ticket].ticket_id.concat('|', req.user.user_id);
         const the_qr = await QRCode.toDataURL(barcode_string);
         const available_tickets = await processOneOrNoneData(
@@ -377,30 +377,30 @@ export const _createTicketSubscription = async(req, res, next) => {
           the_qr
         ]);
         ticket_purchase_logs.push(booked_ticket[0]);
-        logger.info(`${enums.CURRENT_TIME_STAMP},
-        ${req.user.user_id}
+        logger.info(`${ enums.CURRENT_TIME_STAMP },
+        ${ req.user.user_id }
                 :::Info: user ticket QR Code successfully created. createTicketSubscription.controller.shop.js`);
         // update available ticket units
         const reduceTicket = available_tickets.units - 1;  // tickets[ticket].units;
-        const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
+        const slate_array = [tickets[ticket].ticket_category_id, reduceTicket];
         await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slate_array);
       }
 
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::Info: user ticket created successfully createTicketSubscription.controller.shop.js`);
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, ticket_purchase_logs);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
-    logger.error(`failed to fetch ticket categories::${enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION}`);
+    logger.error(`failed to fetch ticket categories::${ enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION }`);
     return next(error);
   }
 };
 
-export const fetchUserSubscribedTickets = async(req, res, next) => {
+export const fetchUserSubscribedTickets = async (req, res, next) => {
   try {
     const user_id = req.user.user_id;
-    const user_tickets = await processAnyData(adminShopQueries.fetchUserTickets, [ user_id ]);
+    const user_tickets = await processAnyData(adminShopQueries.fetchUserTickets, [user_id]);
     if (user_tickets)
       return ApiResponse.success(res, enums.FETCHED_USER_TICKETS_SUCCESSFULLY, enums.HTTP_OK, user_tickets);
   } catch (error) {
@@ -410,15 +410,15 @@ export const fetchUserSubscribedTickets = async(req, res, next) => {
   }
 };
 
-export const _sendEventTicketToEmails = async(req, res, next) => {
+export const _sendEventTicketToEmails = async (req, res, next) => {
   try {
     const recipients = req.body.recipients;
     let data = {};
     const ticket_recipients = [];
     const ticket_id = req.body.ticket_id;
-    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ ticket_id ]);
+    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ticket_id]);
     const title = 'Hurray! Ticket Booked';
-    const content = `Your ticket for ${ticket.ticket_name} has been booked on SeedFi!`;
+    const content = `Your ticket for ${ ticket.ticket_name } has been booked on SeedFi!`;
     // Send Tickets to recipients
     for (const recipient in recipients) {
       const savedRecipient = await processOneOrNoneData(adminShopQueries.savedRecipientInformation, [
@@ -449,9 +449,9 @@ export const _sendEventTicketToEmails = async(req, res, next) => {
 };
 
 // Helper function to send a ticket email
-const sendTicketEmail = async(recipient, ticket) => {
+const sendTicketEmail = async (recipient, ticket) => {
   const title = 'Hurray! Ticket Booked';
-  const content = `Your ticket for ${ticket.ticket_name} has been booked on SeedFi!`;
+  const content = `Your ticket for ${ ticket.ticket_name } has been booked on SeedFi!`;
 
   const savedRecipient = await processOneOrNoneData(adminShopQueries.savedRecipientInformation, [
     recipient.first_name,
@@ -472,11 +472,11 @@ const sendTicketEmail = async(recipient, ticket) => {
   return savedRecipient;
 };
 
-export const sendEventTicketToEmails = async(req, res, next) => {
+export const sendEventTicketToEmails = async (req, res, next) => {
   try {
     const recipients = req.body.recipients;
     const ticket_id = req.body.ticket_id;
-    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ ticket_id ]);
+    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ticket_id]);
 
     const ticket_recipients = [];
 
@@ -498,13 +498,13 @@ export const sendEventTicketToEmails = async(req, res, next) => {
   }
 };
 
-export const cancel_ticket_booking = async(req, res, next) => {
+export const cancel_ticket_booking = async (req, res, next) => {
   try {
     const ticket_id = req.params.ticket_id;
     const user_id = req.user.user_id;
     const data = {};
-    await processAnyData(adminShopQueries.deleteTicketInformationRecord, [ ticket_id, user_id ]);
-    await processAnyData(adminShopQueries.deleteTicketRecord, [ ticket_id, user_id ]);
+    await processAnyData(adminShopQueries.deleteTicketInformationRecord, [ticket_id, user_id]);
+    await processAnyData(adminShopQueries.deleteTicketRecord, [ticket_id, user_id]);
     return ApiResponse.success(res, enums.DELETE_TICKET_INFORMATION, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 117, 'fail');
@@ -513,7 +513,7 @@ export const cancel_ticket_booking = async(req, res, next) => {
   }
 };
 
-const getBookingTotalPrice = async(ticket_bookings) => {
+const getBookingTotalPrice = async (ticket_bookings) => {
   let booking_amount = 0;
   for (const ticket_record_id in ticket_bookings) {
     let unit_size = ticket_bookings[ticket_record_id].units;
@@ -527,28 +527,28 @@ const getBookingTotalPrice = async(ticket_bookings) => {
   }
   return booking_amount;
 };
-export const checkUserTicketLoanEligibility = async(req, res, next) => {
+export const checkUserTicketLoanEligibility = async (req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
-      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
+    const {user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
+      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount} = req;
 
     // calculate amount to be booked
     const booking_amount = await getBookingTotalPrice(req.body.tickets);
     // const booking_amount_plus_charges = booking_amount; // process applicable charges
-    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
-    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, ['loan application']);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
 
-    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const [userPreviouslyDefaulted] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [user.user_id]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
 
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = 'okra';
     // body.total_repayment_amount = booking_amount;
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: body::: ${body}`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: body::: ${ body }`);
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [
       user.user_id,
       booking_amount,
@@ -559,22 +559,22 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       0,
       0
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
 
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: ${ JSON.stringify(body) }`);
     const result = await loanApplicationEligibilityCheck(payload);
 
     if (result.status !== 200) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
-      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
+      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [loanApplicationDetails.loan_id, user.user_id]);
       if (result.status >= 500 || result.response.status >= 500) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status
+        logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: returned response from underwriting is of a 500 plus status
         checkUserLoanEligibility.controllers.loan.js`);
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application');
+            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
         });
         userActivityTracking(req.user.user_id, 37, 'fail');
         return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
@@ -582,17 +582,17 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       if (result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application');
+            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
         });
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
 
-    const { data } = result;
+    const {data} = result;
     if (data.final_decision === 'DECLINED') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is not eligible for loan
       checkUserLoanEligibility.controllers.loan.js`);
       const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(data);
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication, declinedDecisionPayload);
@@ -603,7 +603,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
     }
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan
     checkUserLoanEligibility.controllers.loan.js`);
     // const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalFees = 100;
@@ -617,13 +617,13 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
     const totalAmountRepayable = (parseFloat(activationCharge) + parseFloat(totalFees)).toFixed(2);
     if (data.final_decision === 'APPROVED') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval
       checkUserLoanEligibility.controllers.loan.js`);
       const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, loanAmount, totalInterestAmount, 'approved');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
       const loanRepaymentSchedule = await createRepaymentSchedule(updatedLoanDetails, user);
       req.first_repayment = totalAmountRepayable; // loanRepaymentSchedule[0];
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
 
       userActivityTracking(req.user.user_id, 37, 'success');
       userActivityTracking(req.user.user_id, 39, 'success');
@@ -632,23 +632,23 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
   } catch (error) {
     userActivityTracking(req.user.user_id, 18, 'fail');
     error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
-    logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+    logger.error(`checking user ticket loan application eligibility failed::${ enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER }`, error.message);
     return next(error);
   }
 };
 
-export const ticketPurchaseUpdate = async(req, res, next) => {
+export const ticketPurchaseUpdate = async (req, res, next) => {
   try {
     const ticket_id = req.query.ticket_id;
     const user_id = req.query.user_id;
     await processOneOrNoneData(adminShopQueries.updateEventStatus,
-      [ user_id, ticket_id ]);
+      [user_id, ticket_id]);
     const data = {};
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user_id }:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.EVENT_PAYMENT_UNSUCCESSFUL;
-    logger.error(`Failed to purchase event ticket successful:::${enums.FAILED_TO_PAY_FOR_TICKET}`, error.label);
+    logger.error(`Failed to purchase event ticket successful:::${ enums.FAILED_TO_PAY_FOR_TICKET }`, error.label);
     return next(error);
   }
 };

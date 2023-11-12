@@ -448,23 +448,23 @@ export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
 }
 
 export const callTheZeehAfricaNINVerificationCheck = async (nin, user) => {
-  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the the user id with zeeh africa  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user NIN with zeeh africa  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   const response = await zeehService.zeehNINVerificationCheck(nin, user);
   if (response.status === 'success') {
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with zeeh africa successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with zeeh africa successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   } else {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   }
   return response;
 }
 
 export const callTheDojahNINVerificationCheck = async (nin, user) => {
-  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the the user id with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user NIN with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   const response = await dojahService.dojahNINVerification(nin, user);
   if (response.status === 200) {
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with dojah successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with dojah successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   } else {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user id verification with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   }
   return response;
 }
@@ -541,11 +541,76 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   }
 };
 
+export const callTheZeehAfricaVINVerificationCheck = async (vin, user, state) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the the user VIN with zeeh africa  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  const response = await zeehService.zeehVINVerificationCheck(vin, user, state);
+  if (response.status === 'success') {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN verification with zeeh africa successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  } else {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN verification with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  }
+  return response;
+}
+
+export const callTheDojahVINVerificationCheck = async (vin, user) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user VIN with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  const response = await dojahService.dojahNINVerification(vin, user);
+  if (response.status === 200) {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN with dojah successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  } else {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  }
+  return response;
+}
+
+export const checkIfUserDetailsMatchVINResponse = async (user_data, user) => {
+  const nameParts = user_data.full_name.split(' ');
+  let firstName = '';
+  let middleName = '';
+  let lastName = '';
+  if (nameParts.length === 2) {
+    firstName = nameParts[0];
+    lastName = nameParts[1];
+  } else {
+    firstName = nameParts[0];
+    lastName = nameParts[nameParts.length - 1];
+    middleName = nameParts.slice(1, nameParts.length - 1).join(' ');
+  }
+  return (
+    user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+    // user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+    user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') 
+    // user_data.date_of_birth === user.date_of_birth
+  );
+}
 
 export const votersIdentificationNumberVerification = async (document_id, state, user, res) => {
+  logger.info('Now running votersIdentificationNumberVerification');
   try {
-    // const response = await zeehService.zeehVINVerificationCheck(document_id, user, 'ondo');
-    const response = await dojahService.dojahVINVerification('90F5AFA54F295792111', user);
+    const response = await callTheZeehAfricaVINVerificationCheck(document_id, user, 'lagos');
+    // const response = await dojahService.dojahVINVerification('90F5AFA54F295792111', user);
+
+    let user_data;
+    let vinResponse;
+    vinResponse = await callTheZeehAfricaVINVerificationCheck(document.document_id, user);
+    user_data = vinResponse.data;
+
+    if (vinResponse.status !== 'success') {
+      vinResponse = await callTheDojahVINVerificationCheck(document.document_id, user);
+      user_data = vinResponse.data.entity;
+    }
+
+    if (vinResponse.status === 'success' || vinResponse.status === 200) {
+      if (checkIfUserDetailsMatchNinResponse(user_data, user)) {
+        logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the VIN details {votersIdentificationNumberVerification} documentVerification.controller.user.js`);
+
+        //STOPPED HERE...
+      } else {
+        const errorMessage = 'user details does not match the details on the provided VIN';
+        logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::::Info: ${ errorMessage } {votersIdentificationNumberVerification} documentVerification.controller.user.js`);
+        return ApiResponse.error(res, errorMessage, enums.HTTP_BAD_REQUEST, enums.USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED);
+      }
+    }
 
 
 

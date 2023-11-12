@@ -64,9 +64,9 @@ const dojahVINVerification = async (vin, user) => {
 const dojahNINVerification = async (nin, user) => {
 
   try {
-    // if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
-    //   return userMockedTestResponses.zeehVerifyNinTestResponse(user, nin);
-    // }
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return userMockedTestResponses.zeehVerifyNinTestResponse(user, nin);
+    }
 
     const options = {
       method: 'GET',
