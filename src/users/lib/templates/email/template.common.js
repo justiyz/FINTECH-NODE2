@@ -21,7 +21,8 @@ const heading = {
   changePassword: 'Password Change Successful',
   changePin: 'Pin Change Successful',
   resetPin: 'Pin Reset Successful',
-  rejectedDebitCardNotUsersCard: 'Rejected Debit Card'
+  rejectedDebitCardNotUsersCard: 'Rejected Debit Card',
+  ticketBookedForYou: 'Hurray! Ticket Booked'
 };
 
 export const commonTemplate = (messageType, data) => {
@@ -34,7 +35,7 @@ export const commonTemplate = (messageType, data) => {
     headerText = '';
     break;
   }
-
+  
   return `
   <html lang="en">
   <head>

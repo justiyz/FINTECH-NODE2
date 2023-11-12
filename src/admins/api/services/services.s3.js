@@ -20,3 +20,18 @@ export const uploadFile = (Key, Body, type) => {
   const upload = S3.upload(params);
   return upload.promise();
 };
+
+export const uploadImage = (Key, Body, type) => {
+  const params = {
+    Bucket: 'your-bucket-name',
+    Key: 'path-to-your-image.jpg',
+    ACL: 'public-read'
+  };
+  S3.putObjectAcl(params, (err, data) => {
+    if (err) {
+      console.log('Error setting object ACL:', err);
+    } else {
+      console.log('Object ACL set to public-read');
+    }
+  });
+};

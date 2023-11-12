@@ -9,7 +9,7 @@ const options = {
 
 const S3 = new AWS.S3(options);
 
-export const uploadFile = (Key, Body, type) => {
+export const  uploadFile = (Key, Body, type) => {
   const params = {
     Bucket: `${config.SEEDFI_AMAZON_S3_BUCKET}`,
     Key,

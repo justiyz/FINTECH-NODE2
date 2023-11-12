@@ -36,12 +36,12 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token completeAdminLoginRequest.admin.controllers.auth.js`);
     const expireAt = momentTZ().add(3, 'minutes');
     const expireTime = momentTZ(expireAt).tz('Africa/Lagos').format('hh:mm a');
-    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, 
+    const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken,
       [ admin.admin_id, token, expireAt, (Number(admin.verification_token_request_count) + 1), Number(admin.invalid_verification_token_count) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: login token set in the DB completeAdminLoginRequest.admin.controllers.auth.js`);
     await MailService('Complete Login with OTP', 'login', { token, expireTime, ...admin });
     await adminActivityTracking(req.admin.admin_id, 9, 'success', descriptions.login_request(adminName));
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.LOGIN_REQUEST_SUCCESSFUL, enums.HTTP_OK, { ...updatedAdmin, token });
     }
     return ApiResponse.success(res, enums.LOGIN_REQUEST_SUCCESSFUL, enums.HTTP_OK, updatedAdmin);
@@ -80,7 +80,7 @@ export const login = async(req, res, next) => {
   }
 };
 
-/** 
+/**
 *  set admin password
  * @param {String} type - The type to know which action is being carried out.
  * @returns { JSON } - A JSON response containing user details
@@ -107,7 +107,7 @@ export const setPassword =  (type = '') => async(req, res, next) => {
   }
 };
 
-/** 
+/**
 *  Admin Forgot password
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -146,7 +146,7 @@ export const forgotPassword = async(req, res, next) => {
   }
 };
 
-/** 
+/**
 *  send admin reset password token
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -162,7 +162,7 @@ export const sendAdminPasswordToken = async(req, res, next) => {
     const tokenExpiration = await JSON.parse(Buffer.from(passwordToken.split('.')[1], 'base64').toString()).exp;
     const myDate = new Date(tokenExpiration * 1000);
     const tokenExpireAt = dayjs(myDate);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched token expiration time and converted it 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched token expiration time and converted it
     sendAdminPasswordToken.admin.controllers.auth.js`);
     await adminActivityTracking(req.admin.admin_id, 18, 'success', descriptions.verify_reset_pass_otp());
     return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken, tokenExpireAt });
