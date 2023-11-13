@@ -186,14 +186,13 @@ pipeline {
                                 ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                                 sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                                 grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                                cat KUBE_CONFIG_FILE
                             '''
 
-                            if (REPO_NAME == 'seedfi-backend') {
-                                sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
-                            } else if (REPO_NAME == 'seedfi-underwriting') {
-                                sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
-                            }
+                            // if (REPO_NAME == 'seedfi-backend') {
+                            //     sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
+                            // } else if (REPO_NAME == 'seedfi-underwriting') {
+                            //     sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
+                            // }
 
                             DEPLOYDIR = "${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}"
                             dir(DEPLOYDIR) {
