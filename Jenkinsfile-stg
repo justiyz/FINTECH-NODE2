@@ -232,16 +232,6 @@ pipeline {
     post {
         failure {
 
-            env.deployName=''
-            env.SvcName=''
-
-            if(REPO_NAME=='seedfi-backend') {
-            env.deployName='seedfi-api' 
-            env.SvcName='seedfi-backend' 
-            } else if(REPO_NAME=='seedfi-underwriting') {
-            env.deployName='api' 
-            env.SvcName='seedfi-underwriting'
-            } 
             script {
 
                 // Send a failure message to Microsoft Teams
