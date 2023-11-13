@@ -231,8 +231,20 @@ pipeline {
     }
     post {
         failure {
+
+            env.deployName=''
+            env.SvcName=''
+
+            if(REPO_NAME=='seedfi-backend') {
+            env.deployName='seedfi-api' 
+            env.SvcName='seedfi-backend' 
+            } else if(REPO_NAME=='seedfi-underwriting') {
+            env.deployName='api' 
+            env.SvcName='seedfi-underwriting'
+            } 
             script {
-                Send a failure message to Microsoft Teams
+
+                // Send a failure message to Microsoft Teams
                 def payload = [
                     '@type': 'MessageCard',
                     '@context': 'http://schema.org/extensions',
@@ -242,7 +254,7 @@ pipeline {
                 ]
                 def jsonPayload = groovy.json.JsonOutput.toJson(payload)
      
-                Send the message to Microsoft Teams
+                // Send the message to Microsoft Teams
                 sh """
                     curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
                """
