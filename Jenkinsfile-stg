@@ -52,6 +52,17 @@ pipeline {
         stage('docker build/push container image') {
             steps {
                 script {
+
+                    env.deployName=''
+                    env.SvcName=''
+
+                    if(REPO_NAME=='seedfi-backend') {
+                    env.deployName='seedfi-api' 
+                    env.SvcName='seedfi-backend' 
+                    } else if(REPO_NAME=='seedfi-underwriting') {
+                    env.deployName='api' 
+                    env.SvcName='seedfi-underwriting'
+                    } 
                     
                     sh '''
                     grep version package.json
@@ -112,6 +123,21 @@ pipeline {
 
                     }
 
+                    env.deployName=''
+                    env.SvcName=''
+
+                    if(REPO_NAME=='seedfi-backend') {
+                    env.deployName='seedfi-api' 
+                    env.SvcName='seedfi-backend' 
+                    } else if(REPO_NAME=='seedfi-underwriting') {
+                    env.deployName='api' 
+                    env.SvcName='seedfi-underwriting'
+                    } 
+
+                    println("deployName: ${env.deployName}")
+                    println("SvcName: ${env.SvcName}")
+                    println("================================================================================")
+
                     def secrets = [
                         [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
                             [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
@@ -163,11 +189,11 @@ pipeline {
                                 cat KUBE_CONFIG_FILE
                             '''
 
-                            // if (REPO_NAME == 'seedfi-backend') {
-                            //     sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
-                            // } else if (REPO_NAME == 'seedfi-underwriting') {
-                            //     sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
-                            // }
+                            if (REPO_NAME == 'seedfi-backend') {
+                                sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f API_CONFIG_FILE'
+                            } else if (REPO_NAME == 'seedfi-underwriting') {
+                                sh 'kubectl --kubeconfig KUBE_CONFIG_FILE -n $NAMESPACE apply -f UNDERWRITING_CONFIG_FILE'
+                            }
 
                             DEPLOYDIR = "${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}"
                             dir(DEPLOYDIR) {
