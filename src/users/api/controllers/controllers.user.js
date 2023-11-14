@@ -516,7 +516,6 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       const data = await uploadImageToS3Bucket(user, document, user_data);
-      console.log('RESPONSE FROM S3 BUCKET => ', data.Location)
       const updateIdVerification = [
         user.user_id, document.document_type, document.document_id,
         data.Location, null, null, null
@@ -628,7 +627,6 @@ export const votersIdentificationNumberVerification = async (document_id, state,
 
 
 
-    console.log('RESPONSE FROM DOJAH => ', response.data)
     // console.log(response.response.statusText == 'Not Found' || response.response.status == 404);
     if (response.response.statusText == 'Not Found' || response.response.status == 404) {
       return 'The information provided cannot be verified.';
