@@ -7,8 +7,8 @@ import {DOJAH_VIN_VERIFICATION_SERVICE} from "../../lib/enums/lib.enum.labels";
 const {SEEDFI_NODE_ENV} = config;
 
 const dojahSDK = require('api')('@zeeh/v1.0#fs4sj9tl74p65ce');
-const dojahSecretKey = 'prod_sk_CiQpXbp0yfnQDuNe5f1u77Vsr';
-const dojahAppId = '63b814abe1ecda003649de87';
+const dojahSecretKey = '';
+const dojahAppId = '';
 const dojahApiURL = '';
 // dojahSDK.auth(dojahSecretKey);
 
@@ -73,10 +73,10 @@ const dojahNINVerification = async (nin, user) => {
       url: `https://api.dojah.io/api/v1/kyc/nin?nin=${ nin }`,
       headers: {
         accept: 'application/json',
-        // AppId: config.SEEDFI_DOJAH_APP_ID,
-        // Authorization: config.SEEDFI_DOJAH_SECRET_KEY,
-        AppId: dojahAppId,
-        Authorization: dojahSecretKey,
+        AppId: config.SEEDFI_DOJAH_APP_ID,
+        Authorization: config.SEEDFI_DOJAH_SECRET_KEY,
+        // AppId: dojahAppId,
+        // Authorization: dojahSecretKey,
         'Accept-Encoding': 'gzip,deflate,compress'
       }
     };

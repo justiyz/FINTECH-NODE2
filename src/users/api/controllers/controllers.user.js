@@ -24,6 +24,7 @@ import {now} from "moment-timezone";
 import * as dojahService from '../services/service.dojah'
 import {error} from 'console';
 import {response} from 'express';
+import sharp from 'sharp';
 
 const {SEEDFI_NODE_ENV} = config;
 
@@ -470,19 +471,31 @@ export const callTheDojahNINVerificationCheck = async (nin, user) => {
 }
 
 export const uploadImageToS3Bucket = async (user, document, user_data) => {
-  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now tyring to uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
-  const full_name = user.first_name.toLowerCase() + '_' + user.last_name.toLowerCase();
-  const contentType = 'image/png';
-  const url = `files/user-documents/${ user.user_id }/${ document.document_type }/${ user.user_id }-${ full_name }`;
-  const payload = Buffer.from(user_data.photo, 'binary');
-  const data = await S3.uploadFile(url, payload, contentType);
-  if (data.Location) {
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
-  } else {
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: failed to uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+  try {
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: now trying to upload image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+
+    const full_name = user.first_name.toLowerCase() + '_' + user.last_name.toLowerCase();
+    const contentType = 'image/jpeg'; // You can change this to 'image/png' if needed
+    const url = `files/user-documents/${user.user_id}/${document.document_type}/${user.user_id}-${full_name}`;
+
+    // Convert base64 image to buffer
+    const imageBuffer = Buffer.from(user_data.photo, 'base64');
+
+    // Convert the image to JPEG format using sharp
+    const jpegBuffer = await sharp(imageBuffer).jpeg().toBuffer();
+
+    const data = await S3.uploadFile(url, jpegBuffer, contentType);
+    if (data.Location) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    } else {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: failed to upload image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    }
+    return data;
+  } catch (error) {
+    logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Error: failed to upload image to S3 bucket ${error.message} {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    throw error;
   }
-  return data;
-}
+};
 
 export const nationalIdentificationNumberVerification = async (document, user, res, next) => {
   logger.info('Now running nationalIdentificationNumberVerification');
@@ -614,7 +627,6 @@ export const votersIdentificationNumberVerification = async (document_id, state,
 
 
 
-    console.log('RESPONSE FROM DOJAH => ', response.data)
     // console.log(response.response.statusText == 'Not Found' || response.response.status == 404);
     if (response.response.statusText == 'Not Found' || response.response.status == 404) {
       return 'The information provided cannot be verified.';
