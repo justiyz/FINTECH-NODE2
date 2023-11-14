@@ -80,9 +80,9 @@ router.get(
 );
 
 router.post(
-    '/ticket/send_notifications',
-    AuthMiddleware.validateAuthToken,
-    shopCategories.sendEventTicketToEmails
+  '/ticket/send_notifications',
+  AuthMiddleware.validateAuthToken,
+  shopCategories.sendEventTicketToEmails
 );
 
 router.delete(
@@ -92,11 +92,11 @@ router.delete(
 );
 
 router.post(
-    '/ticket/payment-successful',
-    // Model(loanSchema.successfulPayment, 'payload'),
-    AuthMiddleware.validateAuthToken,
-    paymentMiddleware.ticketPurchaseUpdate,
-    shopCategories.ticketPurchaseUpdate
+  '/ticket/payment-successful',
+  AuthMiddleware.validateAuthToken,
+  // Model(loanSchema.successfulPayment, 'payload'),
+  paymentMiddleware.ticketPurchaseUpdate,
+  shopCategories.ticketPurchaseUpdate
 );
 
 export default router;
