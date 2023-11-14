@@ -221,6 +221,17 @@ export default {
         ticket_category_status
   `,
 
+  getTicketByReference: `
+    SELECT *
+    FROM user_tickets
+    WHERE
+        transaction_reference = $1
+    AND
+        user_id = $2
+    AND
+        ticket_id = $3
+  `,
+
   updateEventStatus: `
     UPDATE user_tickets
     SET
@@ -228,8 +239,10 @@ export default {
         updated_at = NOW()
     WHERE
         user_id = $1
-        AND ticket_id = $2
-        AND transaction_reference = $3
+    AND
+        ticket_id = $2
+    AND
+        transaction_reference = $3
    RETURNING user_ticket_id, ticket_id, status
   `,
 
@@ -319,8 +332,9 @@ export default {
         payment_tenure,
         status,
         ticket_qr_code,
-        transaction_reference
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        transaction_reference,
+        loan_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING *;
   `,
 

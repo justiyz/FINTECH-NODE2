@@ -122,7 +122,6 @@ export const fetchUserTickets = async(req, res, next) => {
   try {
     const { user } = req;
     const user_tickets = await fetchUserTicketsData(user.user_id, req.query.status);
-
     // separation of concerns for optimized reading
     for (const user_ticket of user_tickets) {
       await enrichUserTicketData(user_ticket);
@@ -160,13 +159,6 @@ async function enrichUserTicketData(user_ticket) {
     user_ticket.event_date = event_date;
     user_ticket.lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
     user_ticket.ticket_category_type = ticket_category.ticket_category_type;
-  } else {
-    user_ticket.ticket_name = '';
-    user_ticket.event_location = '';
-    user_ticket.event_time = '';
-    user_ticket.ticket_image_url = '';
-    user_ticket.event_time = '';
-    user_ticket.lowest_ticket_price = 0;
   }
 }
 export const _fetchUserTickets = async(req, res, next) => {
@@ -271,7 +263,11 @@ export const createTicketSubscription = async(req, res, next) => {
     const reference = uuidv4();
     const ticketPurchaseLogs = [];
     let totalAmountToBePaid = 0;
+    let loan_id = req.body.initial_payment.loan_id;
     const { user } = req;
+    // check if tickets available can fulfill order
+    // loop ticket id and check if number available is greater than the number being requested by the user
+
     for (const ticket of tickets) {
       const { ticket_id, ticket_category_id, units } = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
@@ -280,13 +276,14 @@ export const createTicketSubscription = async(req, res, next) => {
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         if (availableTickets && availableTickets.units >= 1) {
           const bookedTicket = await createUserTicket(
-              req.user.user_id,
-              ticket_id,
-              ticket_category_id,
-              req.body.insurance_coverage,
-              req.body.duration_in_months,
-              theQRCode,
-              reference
+            req.user.user_id,
+            ticket_id,
+            ticket_category_id,
+            req.body.insurance_coverage,
+            req.body.duration_in_months,
+            theQRCode,
+            reference,
+            loan_id
           );
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
           ticketPurchaseLogs.push(bookedTicket[0]);
@@ -332,17 +329,18 @@ async function getAvailableTicketUnits(ticketCategoryId) {
   return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
 }
 
-async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference) {
+async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id) {
   return await processAnyData(adminShopQueries.createUserTicketRecord, [
-      userId,
-      ticketId,
-      ticketCategoryId,
-      1,
-      insuranceCoverage,
-      paymentTenure,
-      'inactive',
-      qrCode,
-      reference
+    userId,
+    ticketId,
+    ticketCategoryId,
+    1,
+    insuranceCoverage,
+    paymentTenure,
+    'inactive',
+    qrCode,
+    reference,
+    loan_id
   ]);
 }
 
@@ -635,10 +633,9 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    const { ticket_id, user_id } = req.query;
-    await processOneOrNoneData(adminShopQueries.updateEventStatus,
-      [ user_id, ticket_id ]);
-    const data = {};
+    const { user_id } = req.query;
+    let ticket_update = req.ticket_update;
+    const data = { ticket_update };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {

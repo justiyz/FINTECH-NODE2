@@ -660,5 +660,24 @@ export default {
     AND cluster_members.is_left = false
     AND clusters.type = $2
     AND clusters.is_created_by_admin = false
-    LIMIT 1`
+    LIMIT 1`,
+
+  updateTicketLoanStatus: `
+    UPDATE personal_loans
+    SET
+        is_loan_disbursed = true,
+        loan_disbursed_at = NOW(),
+        is_renegotiated = false,
+        updated_at = NOW(),
+        status = 'ongoing',
+        loan_decision = 'MANUAL',
+        is_rescheduled = false,
+        reschedule_count = 0,
+        used_previous_eligibility_details = false
+    WHERE
+        loan_id = $1
+    AND
+        user_id = $2
+    RETURNING *
+  `
 };

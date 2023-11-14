@@ -102,13 +102,21 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
     const { ticket_id, user_id, reference } = req.query;
+    const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
+    await processAnyData(loanQueries.updateTicketLoanStatus, [
+      ticket_record[0].loan_id,
+      user_id
+    ]);
     const updated_record = await processAnyData(adminShopQueries.updateEventStatus,
       [ user_id, ticket_id, reference ]);
-    const data = {
-      active_tickets: updated_record
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
-    return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
+    req.ticket_update = {
+      updated_record,
+      ticket_record
+    };
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful,
+     loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
+    return next();
+    // return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.EVENT_PAYMENT_UNSUCCESSFUL;
     logger.error(`Failed to purchase event ticket successful:::${enums.FAILED_TO_PAY_FOR_TICKET}`, error.label);
