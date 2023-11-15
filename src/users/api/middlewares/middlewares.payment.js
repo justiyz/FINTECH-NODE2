@@ -103,12 +103,29 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
     const { ticket_id, user_id, reference } = req.query;
     const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
+    // update ticket loan status
     await processAnyData(loanQueries.updateTicketLoanStatus, [
       ticket_record[0].loan_id,
       user_id
     ]);
+    // update first repayment record
+    const [ loan_id, principal_payment] = await processAnyData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
+    // create first repayment record
+    await processAnyData(loanQueries.updatePersonalLoanPaymentTable,
+        [
+          user_id,
+          loan_id,
+          principal_payment,
+          'debit',
+          'ticket loan',
+          'part loan repayment',
+          'paystack card'
+        ]
+    );
+    // update event status
     const updated_record = await processAnyData(adminShopQueries.updateEventStatus,
       [ user_id, ticket_id, reference ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
     req.ticket_update = {
       updated_record,
       ticket_record

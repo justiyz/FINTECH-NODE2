@@ -679,5 +679,18 @@ export default {
     AND
         user_id = $2
     RETURNING *
-  `
+  `,
+
+  updateFirstRepaymentRecordStatus: `
+    UPDATE personal_loan_payment_schedules
+    SET
+        status = 'paid',
+        updated_at = NOW(),
+        payment_at = NOW()
+    WHERE
+        loan_id = $1 AND repayment_order = 1
+    RETURNING loan_id, loan_repayment_id, principal_payment
+  `,
+
+
 };
