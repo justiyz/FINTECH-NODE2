@@ -694,7 +694,10 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.loan.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -740,7 +743,7 @@
       <option name="presentableId" value="Default" />
       <updated>1699349967828</updated>
       <workItem from="1699349969039" duration="98105000" />
-      <workItem from="1700022273927" duration="6511000" />
+      <workItem from="1700022273927" duration="9789000" />
     </task>
     <servers />
   </component>

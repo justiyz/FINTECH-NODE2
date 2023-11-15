@@ -67,7 +67,7 @@ const loanRenegotiation = Joi.object().keys({
   new_loan_duration_in_month: Joi.number().positive().required()
 });
 
-const successfulPayment = Joi.object().keys({
+const successfulEventPayment = Joi.object().keys({
   ticket_id: Joi.string().required(),
   user_id: Joi.string().required(),
   // recipients: Joi.array().required(),
@@ -90,5 +90,5 @@ export default  {
   loanRescheduleParams,
   loanRenegotiation,
   loanForEventApplication,
-  successfulPayment
+  successfulEventPayment
 };

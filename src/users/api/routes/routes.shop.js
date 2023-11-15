@@ -94,7 +94,7 @@ router.delete(
 router.post(
   '/ticket/payment-successful',
   AuthMiddleware.validateAuthToken,
-  // Model(loanSchema.successfulPayment, 'payload'),
+  Model(loanSchema.successfulEventPayment, 'payload'),
   paymentMiddleware.ticketPurchaseUpdate,
   shopCategories.ticketPurchaseUpdate
 );
