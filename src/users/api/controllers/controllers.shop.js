@@ -633,7 +633,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    const { user_id } = req.query;
+    const { user_id } = req.body;
     let ticket_update = req.ticket_update;
     const data = { ticket_update };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
