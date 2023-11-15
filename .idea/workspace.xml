@@ -3,7 +3,7 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="ChangeListManager">
+  <component name="ChangeListManager"> 
     <list default="true" id="3f77793f-beb1-4c05-92c1-a5671e770c57" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/Jenkinsfile-stg" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/users/api/services/services.zeeh.js" afterDir="false" />
@@ -26,14 +26,14 @@
       <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/template.common.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/template.common.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/response/response.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/response/response.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/response/response.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/response/response.user.js" afterDir="false" /> 
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings">
+  <component name="Git.Settings"> 
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -75,5 +75,5 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
+  </component> 
 </project>
