@@ -15,7 +15,7 @@ export const processAnyData = (query, payload) =>  db.any(query, payload);
  * @returns { Promise<JSON> } - A Promise response with the queried data or no data
  * @memberof UserPostgresDbService
  */
-export const processOneOrNoneData = query => db.oneOrNone(query, payload);
+export const processOneOrNoneData = (query, payload) => db.oneOrNone(query, payload);
 
 /**
  * Process db.none calls to the database
