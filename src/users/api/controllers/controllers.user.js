@@ -853,27 +853,27 @@ export const updateUserProfile = async (req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-export const getProfile = async (req, res, next) => {
+
+export const getProfile = async(req, res, next) => {
   try {
-    const {user, userEmploymentDetails} = req;
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: User data Info fetched. getProfile.controllers.user.js`);
+    const { user, userEmploymentDetails } = req;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User data Info fetched. getProfile.controllers.user.js`);
     delete user.pin;
     delete user.password;
     delete user.fcm_token;
     delete user.refresh_token;
-    const [userEmploymentDetail, userNextOfKinDetails, userAddressDetails, userBvn] = await Promise.all([
-      processAnyData(userQueries.fetchEmploymentDetails, user.user_id),
-      processAnyData(userQueries.getUserNextOfKin, user.user_id),
-      processAnyData(userQueries.fetchUserAddressDetails, user.user_id),
-      processAnyData(userQueries.fetchUserBvn, user.user_id)
+    const [ userEmploymentDetail, userNextOfKinDetails, userAddressDetails, userBvn ] = await Promise.all([
+      processOneOrNoneData(userQueries.fetchEmploymentDetails, user.user_id),
+      processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id),
+      processOneOrNoneData(userQueries.fetchUserAddressDetails, user.user_id),
+      processOneOrNoneData(userQueries.fetchUserBvn, user.user_id)
     ]);
-    
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully fetched user's employment details, address details and next of kin from the DB
-    fetchUserInformationDetails.controller.user.js`);
 
-    user.bvn = userBvn[0].bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn[0].bvn)) : '';
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user's employment details, address details and next of kin from the DB
+    fetchUserInformationDetails.controller.user.js`);
+    user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
-      true : false;
+      true : false;        
     const data = {
       userProfileDetails: user,
       employmentDetails: userEmploymentDetail,
@@ -883,10 +883,11 @@ export const getProfile = async (req, res, next) => {
     return ApiResponse.success(res, enums.FETCH_USER_PROFILE, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.GET_USER_PROFILE_CONTROLLER;
-    logger.error(`Fetching user profile failed:::${ enums.GET_USER_PROFILE_CONTROLLER }`, error.message);
+    logger.error(`Fetching user profile failed:::${enums.GET_USER_PROFILE_CONTROLLER}`, error.message);
     return next(error);
   }
 };
+
 
 
 /**
