@@ -120,6 +120,16 @@ spec:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
+        - name: SEEDFI_ZEEH_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              key: zeehpublickey
+              name: seedfi-api-config
+        - name: SEEDFI_ZEEH_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: zeehsecretkey
+              name: seedfi-api-config
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
         #     secretKeyRef:
@@ -185,6 +195,8 @@ spec:
           value: 'com.theseedfi.app'
         - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
           value: 'seedfi-backend'
+        - name: SEEDFI_ZEEH_URL
+          value: 'https://api.zeeh.africa/api/v1'
         - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 

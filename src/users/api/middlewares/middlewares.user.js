@@ -15,6 +15,7 @@ import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
+import * as zeehService from '../services/services.zeeh';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -193,34 +194,36 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
 export const verifyBvn = async(req, res, next) => {
   try {
     const { body: { bvn },  user } = req;
-    const data = await dojahBvnVerificationCheck(bvn.trim(), user);
+    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
-    if (data.status !== 200) {
+    if (data.status !== 'success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    // eslint-disable-next-line max-len
+    // if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase() || user.first_name.trim().toLowerCase() !== data.data.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    if (user.first_name.trim().toLowerCase() !== data.data.firstName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.last_name.trim().toLowerCase() !== data.data.entity.last_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    if (user.last_name.trim().toLowerCase() !== data.data.lastName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's last name don't match bvn last name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.middle_name !== null && user.middle_name.trim().toLowerCase() !== data.data.entity.middle_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    if (user.middle_name !== null && user.middle_name.trim().toLowerCase() !== data.data.middleName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's middle name don't match bvn middle name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.gender.trim().toLowerCase() !== data.data.entity.gender.trim().toLowerCase()) {
+    if (user.gender.trim().toLowerCase() !== data.data.gender.trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's gender does not match bvn returned gender verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (dayjs(user.date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.entity.date_of_birth.trim()).format('YYYY-MM-DD')) {
+    if (dayjs(user.date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's date of birth does not match bvn returned date of birth verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
@@ -257,7 +260,7 @@ export const checkIfBvnFlaggedBlacklisted = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     if (plainBlacklistedBvns.includes(body.bvn.trim())) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously flagged blacklisted checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
-      await processOneOrNoneData(userQueries.blacklistUser, [ user.user_id ]);
+      await processOneOrNoneData(userQueries.blacklistUser);
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is clean and is not on blacklisted bvns list checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
@@ -694,11 +697,11 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     const payload = UserPayload.addressVerification(body, user);
-    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) :
-      await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
+    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails) :
+      await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
-    let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn);
     userBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     const result = await createUserYouVerifyCandidate(user, userBvn);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details creation has been initiated with youVerify
@@ -706,7 +709,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
-      await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, result.data.id ]);
+      await processOneOrNoneData(userQueries.updateYouVerifyCandidateId);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
       req.userYouVerifyCandidateDetails = result.data;
@@ -721,7 +724,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       if (retryResult && retryResult.statusCode === 201 && retryResult.message.toLowerCase() === 'candidate created successfully!') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
-        await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, retryResult.data.id ]);
+        await processOneOrNoneData(userQueries.updateYouVerifyCandidateId);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
         req.userYouVerifyCandidateDetails = retryResult.data;
@@ -838,7 +841,7 @@ export const checkIfCardOrUserExist = async(req, res, next) => {
     if (!payment_channel || payment_channel === 'card') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for card repayment checkIfCardOrUserExist.middlewares.user.js`);
-      const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id || payment_channel_id ]);
+      const userCard = await processOneOrNoneData(userQueries.fetchCardsById);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully fetched a user's card checkIfCardOrUserExist.middlewares.user.js`);
       if (userCard === null) {
@@ -937,7 +940,7 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
 export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) => {
   try {
     const { user } = req;
-    const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
+    const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user next of kin checkIfUserHasPreviouslyCreatedNextOfKin.middlewares.user.js`);
     if (nextOfKin) {
       return ApiResponse.error(res, enums.CANNOT_CHANGE_NEXT_OF_KIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_HAS_FILLED_NEXT_OF_KIN_MIDDLEWARE);
@@ -1128,3 +1131,6 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     return next(error);
   }
 };
+
+
+

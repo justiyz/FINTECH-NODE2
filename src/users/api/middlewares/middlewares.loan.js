@@ -22,12 +22,12 @@ export const checkUserLoanApplicationExists = async(req, res, next) => {
     const [ existingLoanApplication ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan application exists in the db checkUserLoanApplicationExists.middlewares.loan.js`);
     if (existingLoanApplication) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application exists and belongs to authenticated user 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application exists and belongs to authenticated user
       checkUserLoanApplicationExists.middlewares.loan.js`);
       req.existingLoanApplication = existingLoanApplication;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user
     checkUserLoanApplicationExists.middlewares.loan.js`);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
   } catch (error) {
@@ -82,10 +82,10 @@ export const checkSeedfiPaystackBalance = async(req, res, next) => {
     if (result.status === true && result.message === 'Balances retrieved') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: seedfi balance retrieved successfully checkSeedfiPaystackBalance.middlewares.loan.js`);
       const balance = parseFloat(result.data[0].balance / 100); // paystack returns balance in kobo
-      const amountRequestingType = config.SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested); 
+      const amountRequestingType = config.SEEDFI_NODE_ENV === 'development' ? 100 : parseFloat(existingLoanApplication.amount_requested);
       // paystack will not process any amount greater than 1 million in test environment
       if (amountRequestingType > balance) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user requested amount is greater than seedfi balance with paystack 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user requested amount is greater than seedfi balance with paystack
         checkSeedfiPaystackBalance.middlewares.loan.js`);
         const data = {
           email: config.SEEDFI_ADMIN_EMAIL_ADDRESS,
@@ -95,7 +95,7 @@ export const checkSeedfiPaystackBalance = async(req, res, next) => {
         userActivityTracking(req.user.user_id, 44, 'fail');
         return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_SEEDFI_PAYSTACK_BALANCE_MIDDLEWARE);
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user requested amount is less than seedfi balance with paystack 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user requested amount is less than seedfi balance with paystack
       checkSeedfiPaystackBalance.middlewares.loan.js`);
       return next();
     }
@@ -126,17 +126,17 @@ export const generateLoanDisbursementRecipient = async(req, res, next) => {
     const [ userDisbursementAccountDetails ] = await processAnyData(loanQueries.fetchUserDisbursementAccount, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user disbursement account fetched successfully generateLoanDisbursementRecipient.middlewares.loan.js`);
     const result = await createTransferRecipient(userDisbursementAccountDetails);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: response gotten from calling paystack to generate user transfer recipient code 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: response gotten from calling paystack to generate user transfer recipient code
     generateLoanDisbursementRecipient.middlewares.loan.js`);
     if (result.status === true && result.message === 'Transfer recipient created successfully') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code generated successfully 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code generated successfully
       generateLoanDisbursementRecipient.middlewares.loan.js`);
       const userPaystackTransferRecipient = result.data.recipient_code;
       req.userTransferRecipient = userPaystackTransferRecipient;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated 
-    generateLoanDisbursementRecipient.middlewares.loan.js`);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated generateLoanDisbursementRecipient.middlewares.loan.js`);
     if (result.response.status !== 200) {
       userActivityTracking(user.user_id, 44, 'fail');
       return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
@@ -163,34 +163,34 @@ export const checkIfLoanApplicationStatusIsCurrentlyApproved = async(req, res, n
   try {
     const { existingLoanApplication, user } = req;
     if (existingLoanApplication.status === 'approved') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is currently approved 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is currently approved
       checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
-      if ((existingLoanApplication.max_possible_approval !== null) && 
+      if ((existingLoanApplication.max_possible_approval !== null) &&
       (parseFloat(existingLoanApplication.amount_requested) > parseFloat(existingLoanApplication.max_possible_approval))) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: system allowable amount has not been accepted by user so disbursement cannot
         be processed checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
         userActivityTracking(req.user.user_id, 44, 'fail');
-        return ApiResponse.error(res, enums.LOAN_AMOUNT_GREATER_THAN_SYSTEM_MAXIMUM_AMOUNT, enums.HTTP_FORBIDDEN, 
+        return ApiResponse.error(res, enums.LOAN_AMOUNT_GREATER_THAN_SYSTEM_MAXIMUM_AMOUNT, enums.HTTP_FORBIDDEN,
           enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
       }
       return next();
     }
     if (existingLoanApplication.status === 'in review') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending
       checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
       userActivityTracking(req.user.user_id, 44, 'fail');
       return ApiResponse.error(res, enums.LOAN_APPLICATION_STILL_AWAITS_APPROVAL, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
     }
     if (existingLoanApplication.status === 'declined') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is declined 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is declined
       checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
       userActivityTracking(req.user.user_id, 44, 'fail');
       return ApiResponse.error(res, enums.LOAN_APPLICATION_DECLINED, enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application status is ${existingLoanApplication.status} 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application status is ${existingLoanApplication.status}
     checkIfLoanApplicationStatusIsCurrentlyApproved.middlewares.loan.js`);
     userActivityTracking(req.user.user_id, 44, 'fail');
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_PREVIOUSLY_DISBURSED(existingLoanApplication.status), 
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_PREVIOUSLY_DISBURSED(existingLoanApplication.status),
       enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_CURRENTLY_APPROVED_MIDDLEWARE);
   } catch (error) {
     userActivityTracking(req.user.user_id, 44, 'fail');
@@ -212,14 +212,14 @@ export const checkIfLoanApplicationStatusIsStillPending = async(req, res, next) 
   try {
     const { existingLoanApplication, user } = req;
     if (existingLoanApplication.status === 'pending' || existingLoanApplication.status === 'approved' || existingLoanApplication.status === 'in review') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is still pending
       checkIfLoanApplicationStatusIsStillPending.middlewares.loan.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is no longer pending 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application status is no longer pending
     checkIfLoanApplicationStatusIsStillPending.middlewares.loan.js`);
     userActivityTracking(req.user.user_id, 43, 'fail');
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), 
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status),
       enums.HTTP_FORBIDDEN, enums.CHECK_LOAN_APPLICATION_STATUS_IS_STILL_PENDING_MIDDLEWARE);
   } catch (error) {
     userActivityTracking(req.user.user_id, 43, 'fail');
@@ -241,25 +241,25 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
   try {
     const { user } = req;
     const [ existingActiveLoanApplication ] = await processAnyData(loanQueries.fetchUserActivePersonalLoans, [ user.user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user active personal loan application from the db 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user active personal loan application from the db
     checkIfUserHasActivePersonalLoan.middlewares.loan.js`);
     if (existingActiveLoanApplication) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has an existing active personal loan 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has an existing active personal loan
       checkIfUserHasActivePersonalLoan.middlewares.loan.js`);
       if (existingActiveLoanApplication.status === 'approved') {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingActiveLoanApplication.status} existing personal loan 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingActiveLoanApplication.status} existing personal loan
         checkIfUserHasActivePersonalLoan.middlewares.loan.js`);
         userActivityTracking(req.user.user_id, 37, 'fail');
-        return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON, 
+        return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON,
           enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_HAS_ACTIVE_PERSONAL_LOAN_MIDDLEWARE);
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingActiveLoanApplication.status} existing personal loan 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that user has ${existingActiveLoanApplication.status} existing personal loan
       checkIfUserHasActivePersonalLoan.middlewares.loan.js`);
-      const statusType = existingActiveLoanApplication.status === 'processing' || existingActiveLoanApplication.status === 'pending' ? 
-        `a ${existingActiveLoanApplication.status} personal loan application` : 
+      const statusType = existingActiveLoanApplication.status === 'processing' || existingActiveLoanApplication.status === 'pending' ?
+        `a ${existingActiveLoanApplication.status} personal loan application` :
         `an ${existingActiveLoanApplication.status} personal loan`;
       userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN(statusType), 
+      return ApiResponse.error(res, enums.LOAN_APPLICATION_FAILED_DUE_TO_EXISTING_ACTIVE_LOAN(statusType),
         enums.HTTP_BAD_REQUEST, enums.CHECK_IF_USER_HAS_ACTIVE_PERSONAL_LOAN_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms user has no active personal loan checkIfUserHasActivePersonalLoan.middlewares.loan.js`);
@@ -283,22 +283,22 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
 export const validateLoanAmountAndTenor = async(req, res, next) => {
   const { user, body } = req;
   try {
-    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails, 
+    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
       maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ])
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails)
     ]);
     if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor
       validateLoanAmountAndTenor.middleware.loan.js`);
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails.value)) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration greater than allowable maximum tenor 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration greater than allowable maximum tenor
       validateLoanAmountAndTenor.middleware.loan.js`);
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
@@ -346,16 +346,15 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to take up to 2 previous loans checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-    const [ employedUserLoanAmountLimit, selfEmployedUserLoanAmountLimit, unemployedUserLoanAmountLimit, retiredUserLoanAmountLimit, 
-      studentUserLoanAmountLimit, tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'employed_loan_amount_percentage_limit' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'self_employed_loan_amount_percentage_limit' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'unemployed_loan_amount_percentage_limit' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'retired_loan_amount_percentage_limit' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'student_loan_amount_percentage_limit' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ])
-    ]);
+
+    const employedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'employed_loan_amount_percentage_limit');
+    const selfEmployedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'self_employed_loan_amount_percentage_limit');
+    const unemployedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'unemployed_loan_amount_percentage_limit');
+    const retiredUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'retired_loan_amount_percentage_limit');
+    const studentUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'student_loan_amount_percentage_limit');
+    const tierOneMaximumLoanAmountDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_maximum_loan_amount');
+    const tierTwoMaximumLoanAmountDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_maximum_loan_amount');
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: constant limit values fetched from the DB checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
     const tierMaximumLoanAmountChoice = Number(user.tier) === 1 ? tierOneMaximumLoanAmountDetails : tierTwoMaximumLoanAmountDetails;
     const employedUserAllowableAmount = ((parseFloat(employedUserLoanAmountLimit.value) / 100) * (parseFloat(tierMaximumLoanAmountChoice.value)));
@@ -371,7 +370,7 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
       return next();
     }
     if (userEmploymentDetails.employment_type === 'self employed') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: self employed user is applying for a loan greater than 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: self employed user is applying for a loan greater than
       ${parseFloat(selfEmployedUserLoanAmountLimit.value)}% of tier ${parseFloat(user.tier)} amount limit checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
       req.previousLoanCount = parseFloat(totalPreviousLoanCount);
       req.userMaximumAllowableAmount = parseFloat(selfEmployedUserAllowableAmount);
@@ -401,7 +400,7 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_EMPLOYMENT_TYPE_LIMIT_APPLIES_MIDDLEWARE;
-    logger.error(`validating user employment type loan amount limit based on number of previous loans 
+    logger.error(`validating user employment type loan amount limit based on number of previous loans
     failed::${enums.CHECK_IF_EMPLOYMENT_TYPE_LIMIT_APPLIES_MIDDLEWARE}`, error.message);
     return next(error);
   }
@@ -418,7 +417,7 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
 export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
   try {
     const { user } = req;
-    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn);
     const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user bvn checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
     const allBlackListedBvns = await processAnyData(loanQueries.fetchAllBlackListedBvnsBlacklistedBvn, []);
@@ -430,9 +429,9 @@ export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
         return data;
       })
     );
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully decrypted bvn coming from the database checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
-    if (allBlackListedBvns.find((data) => data.bvn === userDecryptedBvn)) { 
+    if (allBlackListedBvns.find((data) => data.bvn === userDecryptedBvn)) {
       return ApiResponse.error(res, enums.BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION, enums.HTTP_FORBIDDEN, enums.CHECK_IF_USER_BVN_NOT_BLACKLISTED_MIDDLEWARE);
     }
     return next();
@@ -488,7 +487,7 @@ export const checkIfOngoingLoanApplication = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application is not an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), enums.HTTP_FORBIDDEN, 
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), enums.HTTP_FORBIDDEN,
       enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE;
@@ -513,7 +512,7 @@ export const checkLoanReschedulingRequest = async(req, res, next) => {
     if (loanRescheduleRequest) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request exists checkLoanReschedulingRequest.middlewares.loan.js`);
       if (loanRescheduleRequest.is_accepted) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request has been previously processed 
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request has been previously processed
         checkLoanReschedulingRequest.middlewares.loan.js`);
         userActivityTracking(req.user.user_id, 75, 'fail');
         return ApiResponse.error(res, enums.LOAN_RESCHEDULE_REQUEST_PREVIOUSLY_PROCESSED_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_RESCHEDULING_REQUEST_MIDDLEWARE);
@@ -544,17 +543,17 @@ export const validateRenegotiationAmount = async(req, res, next) => {
   try {
     const { body, existingLoanApplication, user } = req;
     if (existingLoanApplication.max_possible_approval === null) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not have system maximum allowable loan amount value in the DB
       validateRenegotiationAmount.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 74, 'fail');
-      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.SYSTEM_MAXIMUM_ALLOWABLE_AMOUNT_HAS_NULL_VALUE, enums.HTTP_FORBIDDEN,
         enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
     }
     if (parseFloat(existingLoanApplication.max_possible_approval) < parseFloat(body.new_loan_amount)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: system maximum allowable loan amount in the DB is lesser than the renegotiation amount
       validateRenegotiationAmount.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 74, 'fail');
-      return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN, 
+      return ApiResponse.error(res, enums.RENEGOTIATION_AMOUNT_GREATER_THAN_ALLOWABLE_AMOUNT, enums.HTTP_FORBIDDEN,
         enums.VALIDATE_RENEGOTIATION_AMOUNT_MIDDLEWARE);
     }
     return next();
@@ -578,13 +577,13 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
   try {
     const { user } = req;
     const [ userClusterDiscounts ] = await processAnyData(loanQueries.userAdminCreatedCluster, [ user.user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user has admin cluster loan discounts returns 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user has admin cluster loan discounts returns
     checkIfUserHasClusterDiscount.middlewares.loan.js`);
     const [ userBelongsToAPublicClusterType ] = await processAnyData(loanQueries.userNonAdminCreatedCluster, [ user.user_id, 'public' ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user belongs to a public cluster returns 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: query to check if user belongs to a public cluster returns
     checkIfUserHasClusterDiscount.middlewares.loan.js`);
     if (!userClusterDiscounts) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user does not have any admin cluster loan discounts 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user does not have any admin cluster loan discounts
       checkIfUserHasClusterDiscount.middlewares.loan.js`);
       if (userBelongsToAPublicClusterType) {
         const [ fetchPublicClusterLoanDiscount ] = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'public_cluster_discount_interest_rate' ]);

@@ -33,17 +33,17 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
-    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
     const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication,
-      [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
+    logger.info(`Result: ${result}`);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
@@ -72,7 +72,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan
       checkUserLoanEligibility.controllers.loan.js`);
       const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(data);
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication, declinedDecisionPayload);
+      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication);
       userActivityTracking(req.user.user_id, 37, 'fail');
       userActivityTracking(req.user.user_id, 40, 'success');
       const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
@@ -89,7 +89,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval
       checkUserLoanEligibility.controllers.loan.js`);
       const manualDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'in review');
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, manualDecisionPayload);
+      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
       const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
@@ -117,7 +117,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval
       checkUserLoanEligibility.controllers.loan.js`);
       const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(data, totalAmountRepayable, totalInterestAmount, 'approved');
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
+      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
       const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
@@ -173,8 +173,8 @@ export const processLoanRenegotiation = async(req, res, next) => {
     const renegotiationPayload = await LoanPayload.loanRenegotiationPayload(user, body, existingLoanApplication, data);
     const updateRenegotiationPayload = await LoanPayload.loanApplicationRenegotiationPayload(data, totalAmountRepayable, totalInterestAmount, body, existingLoanApplication);
     const [ , updatedLoanDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.createRenegotiationDetails, renegotiationPayload),
-      processOneOrNoneData(loanQueries.updateLoanApplicationWithRenegotiation, updateRenegotiationPayload)
+      processOneOrNoneData(loanQueries.createRenegotiationDetails),
+      processOneOrNoneData(loanQueries.updateLoanApplicationWithRenegotiation)
     ]);
     const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated processLoanRenegotiation.controllers.loan.js`);
@@ -202,7 +202,7 @@ export const processLoanRenegotiation = async(req, res, next) => {
 export const cancelLoanApplication = async(req, res, next) => {
   try {
     const { user, params: { loan_id } } = req;
-    const cancelLoanProcess = await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [ loan_id, user.user_id ]);
+    const cancelLoanProcess = await processOneOrNoneData(loanQueries.cancelUserLoanApplication);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 43, 'success');
     return ApiResponse.success(res, enums.LOAN_APPLICATION_CANCELLING_SUCCESSFUL, enums.HTTP_OK, cancelLoanProcess);
@@ -232,7 +232,7 @@ export const initiateLoanDisbursement = async(req, res, next) => {
     const result = await initiateTransfer(userTransferRecipient, existingLoanApplication, reference);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: transfer initiate via paystack returns response initiateLoanDisbursement.controllers.loan.js`);
     if (result.status === true && result.message === 'Transfer has been queued') {
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ loan_id ]);
+      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateProcessingLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details status set to processing in the DB initiateLoanDisbursement.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 44, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL, enums.HTTP_OK, { ...updatedLoanDetails , reference });
@@ -301,7 +301,7 @@ export const fetchPersonalLoanDetails = async(req, res, next) => {
 export const fetchPersonalLoanPaymentDetails = async(req, res, next) => {
   try {
     const { user, existingLoanPayment } = req;
-    const loanDetails = await processOneOrNoneData(loanQueries.fetchUserLoanDetailsByLoanId, [ existingLoanPayment.loan_id, user.user_id ]);
+    const loanDetails = await processOneOrNoneData(loanQueries.fetchUserLoanDetailsByLoanId);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan details fetched fetchPersonalLoanPaymentDetails.controllers.loan.js`);
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ existingLoanPayment.loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched fetchPersonalLoanPaymentDetails.controllers.loan.js`);
@@ -329,7 +329,7 @@ export const fetchPersonalLoanPaymentDetails = async(req, res, next) => {
 export const fetchClusterLoanPaymentDetails = async(req, res, next) => {
   try {
     const { user, existingLoanPayment } = req;
-    const clusterLoanDetails = await processOneOrNoneData(clusterQueries.fetchClusterMemberLoanDetailsByLoanId, [ existingLoanPayment.member_loan_id, user.user_id ]);
+    const clusterLoanDetails = await processOneOrNoneData(clusterQueries.fetchClusterMemberLoanDetailsByLoanId);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan details fetched fetchClusterLoanPaymentDetails.controllers.loan.js`);
     const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [ existingLoanPayment.member_loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched fetchClusterLoanPaymentDetails.controllers.loan.js`);
@@ -584,7 +584,7 @@ export const individualLoanReschedulingDurations = async(req, res, next) => {
 export const loanReschedulingSummary = async(req, res, next) => {
   try {
     const { user, existingLoanApplication, loanRescheduleExtensionDetails } = req;
-    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched loanReschedulingSummary.controllers.loan.js`);
     if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count
@@ -598,8 +598,7 @@ export const loanReschedulingSummary = async(req, res, next) => {
     const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next loan repayment details fetched loanReschedulingSummary.controllers.loan.js`);
     const returnData = await LoanPayload.loanReschedulingRequestSummaryResponse(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment);
-    const rescheduleRequest = await processOneOrNoneData(loanQueries.createRescheduleRequest,
-      [ existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
+    const rescheduleRequest = await processOneOrNoneData(loanQueries.createRescheduleRequest);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request saved in the DB loanReschedulingSummary.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 94, 'success');
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY, enums.HTTP_OK, { ...returnData, reschedule_id: rescheduleRequest.reschedule_id });
@@ -622,7 +621,7 @@ export const loanReschedulingSummary = async(req, res, next) => {
 export const processLoanRescheduling = async(req, res, next) => {
   try {
     const { user, existingLoanApplication, loanRescheduleRequest } = req;
-    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched processLoanRescheduling.controllers.loan.js`);
     if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count
@@ -640,13 +639,11 @@ export const processLoanRescheduling = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: updated total loan tenor fetched processLoanRescheduling.controllers.loan.js`);
     await Promise.all([
       userUnpaidRepayments.map((repayment) => {
-        processOneOrNoneData(loanQueries.updateNewRepaymentDate,
-          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+        processOneOrNoneData(loanQueries.updateNewRepaymentDate);
         return repayment;
       }),
-      processOneOrNoneData(loanQueries.updateLoanWithRescheduleDetails, [ existingLoanApplication.loan_id, Number(loanRescheduleRequest.extension_in_days),
-        parseFloat((existingLoanApplication.reschedule_count || 0) + 1), newLoanDuration, totalExtensionDays ]),
-      processOneOrNoneData(loanQueries.updateRescheduleRequestAccepted, [ loanRescheduleRequest.reschedule_id ])
+      processOneOrNoneData(loanQueries.updateLoanWithRescheduleDetails),
+      processOneOrNoneData(loanQueries.updateRescheduleRequestAccepted)
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling details updated successfully processLoanRescheduling.controllers.loan.js`);
     const data = {

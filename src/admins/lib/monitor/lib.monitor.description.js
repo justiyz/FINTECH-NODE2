@@ -28,7 +28,9 @@ export const manually_loan_approval_failed = (name, type) => `${name}, approving
 export const manually_loan_disapproval = (name, type) => `${name}, disapproves ${type} loan application manually`;
 export const manually_loan_disapproval_failed = (name, type) => `${name}, disapproving ${type} loan application manually failed`;
 export const uploads_document = (name, user_name) => `${name} uploads document for user ${user_name}`;
+export const uploads_admin_document = (filename, admin) => `${filename} was uploaded by ${admin}`;
 export const uploads_document_failed = (name, user_name) => `${name} uploading document for user ${user_name} failed`;
+export const uploads_admin_image = (name, user_name) => `${name} uploading image for user ${user_name} failed`;
 export const user_status = (name, action, user_name) => `${name} successfully ${action} a user ${user_name}`;
 export const user_status_failed = (name, action, user_name) => `${name} failed to ${action} a user ${user_name}`;
 export const approves_utility_bill = (name, user_name) => `${name} approves user ${user_name} uploaded utility bill`;
@@ -78,4 +80,11 @@ export const updates_reward_point_ranges = (name, type) => `${name} updates ${ty
 export const updates_reward_points = (name, type) => `${name} updates ${type} reward point in settings`;
 export const reset_user_reward_points = (name, userName) => `${name} resets reward point for ${userName}`;
 export const reset_all_users_reward_points = (name) => `${name} resets all users reward points`;
+export const fetch_shop_categories = (name) => `${name} attempt to fetch shop category`;
+export const create_shop_categories = (name) => `${name} attempted to create shop category but failed`;
+export const fetch_events_lists = (name) => `${name} successfully fetches list of events`;
+export const fetch_single_event = (name) => 'event record fetched successfully';
+export const create_event_record_failed = 'failed to create event record';
+export const create_event_category_record_failed = 'failed to create event category record';
+export const failed_to_fetch_ticket_categories = 'failed to fetch ticket categories';
 
