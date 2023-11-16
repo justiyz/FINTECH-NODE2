@@ -43,8 +43,8 @@ export default {
 
   initiatePersonalLoanApplicationWithReturn: `
     INSERT INTO personal_loans(
-        user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months, reschedule_count, renegotiation_count
-    ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0)
+        user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months, reschedule_count, renegotiation_count, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0, 'pending')
     RETURNING user_id, loan_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months`,
 
   initiatePersonalLoanApplicationV2: `
