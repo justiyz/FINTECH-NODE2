@@ -64,7 +64,7 @@ router.post(
   UserMiddleware.checkUserAdvancedKycUpdate,
   // LoanMiddleware.checkIfUserHasActivePersonalLoan,
   LoanMiddleware.validateLoanAmountAndTenor,
-  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  // LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
   // LoanMiddleware.checkIfUserHasClusterDiscount,
   // UserMiddleware.checkIfCardOrUserExist,
