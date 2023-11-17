@@ -54,7 +54,7 @@ router.post(
   '/ticket/:ticket_id/book',
   AuthMiddleware.validateAuthToken,
   AuthMiddleware.isCompletedKyc('confirm'),
-  // UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkIfAccountDetailsExists,
   Model(loanSchema.loanForEventApplication, 'payload'),
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
