@@ -66,9 +66,9 @@ router.post(
   LoanMiddleware.validateLoanAmountAndTenor,
   LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
-  LoanMiddleware.checkIfUserHasClusterDiscount,
+  // LoanMiddleware.checkIfUserHasClusterDiscount,
   // UserMiddleware.checkIfCardOrUserExist,
-  LoanMiddleware.additionalUserChecksForLoan,
+  // LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
   shopCategories.createTicketSubscription
 );
