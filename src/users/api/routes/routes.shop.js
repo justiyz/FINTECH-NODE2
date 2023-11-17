@@ -69,7 +69,7 @@ router.post(
   // LoanMiddleware.checkIfUserHasClusterDiscount,
   // UserMiddleware.checkIfCardOrUserExist,
   // LoanMiddleware.additionalUserChecksForLoan,
-  shopCategories.checkUserTicketLoanEligibility,
+  // shopCategories.checkUserTicketLoanEligibility,
   shopCategories.createTicketSubscription
 );
 
