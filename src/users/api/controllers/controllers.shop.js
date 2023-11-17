@@ -528,17 +528,16 @@ const getBookingTotalPrice = async(ticket_bookings) => {
 };
 export const checkUserTicketLoanEligibility = async(req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
+    const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
-
+    const userDefaultAccountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
     // calculate amount to be booked
     const booking_amount = await getBookingTotalPrice(req.body.tickets);
     // const booking_amount_plus_charges = booking_amount; // process applicable charges
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
-    const userMonoId = null; // userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
-
+    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
@@ -562,7 +561,6 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
-
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
     const result = await loanApplicationEligibilityCheckV2(payload);
     const { data } = result;
@@ -605,8 +603,6 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan
     checkUserLoanEligibility.controllers.loan.js`);
-    // const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
-    const totalFees = 100;
     const monthly_repayment = (booking_amount * 0.7)/body.duration_in_months;
     const first_installment = (booking_amount * 0.3).toFixed(2);
     if (data.final_decision === 'APPROVED') {
@@ -616,9 +612,8 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
       const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);
       body.initial_payment = loan_repayment_schedule[0];
-      req.first_repayment = first_installment; // loanRepaymentSchedule[0];
+      req.first_repayment = first_installment;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
-
       userActivityTracking(req.user.user_id, 37, 'success');
       userActivityTracking(req.user.user_id, 39, 'success');
       return next();

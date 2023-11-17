@@ -1,7 +1,7 @@
 export default {
   getUserByPhoneNumber: `
   SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
-    is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+    is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
     is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
     number_of_children, marital_status, loan_status, device_token, verification_token_request_count, invalid_verification_token_count,
     to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
@@ -9,8 +9,8 @@ export default {
   WHERE phone_number = $1`,
 
   getUserByUserId: `
-    SELECT id, phone_number, user_id, email, title, INITCAP(first_name) AS first_name, INITCAP(middle_name) AS middle_name, INITCAP(last_name) AS last_name, 
-      tier, gender, date_of_birth, image_url, is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+    SELECT id, phone_number, user_id, email, title, INITCAP(first_name) AS first_name, INITCAP(middle_name) AS middle_name, INITCAP(last_name) AS last_name,
+      tier, gender, date_of_birth, image_url, is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, number_of_children, marital_status, loan_status, device_token,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, verification_token_request_count, invalid_verification_token_count
    FROM users
@@ -18,7 +18,7 @@ export default {
 
   getUserByEmail: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
-      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
       number_of_children, marital_status, loan_status, device_token, verification_token_request_count, invalid_verification_token_count,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
@@ -28,7 +28,7 @@ export default {
 
   updateUserFcmToken: `
       UPDATE users
-      SET 
+      SET
         updated_at = NOW(),
         fcm_token = $2
       WHERE user_id = $1`,
@@ -39,7 +39,7 @@ export default {
       WHERE user_id = $1`,
 
   fetchUserRefreshToken: `
-      SELECT refresh_token 
+      SELECT refresh_token
       FROM users
       WHERE user_id = $1`,
 
@@ -94,7 +94,7 @@ export default {
       RETURNING *`,
 
   checkIfAccountExisting: `
-      SELECT 
+      SELECT
         account_number,
         bank_code
       FROM user_bank_accounts
@@ -113,7 +113,7 @@ export default {
       WHERE user_id = $1`,
 
   fetchBankAccountDetails: `
-      SELECT 
+      SELECT
         id,
         user_id,
         bank_name,
@@ -145,8 +145,22 @@ export default {
       WHERE user_id = $1
       ORDER BY is_default DESC`,
 
+    fetchBankAccountDetailsByUserId: `
+      SELECT
+        id,
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name,
+        is_default,
+        is_disbursement_account,
+        created_at
+      FROM user_bank_accounts
+      WHERE user_id =$1`,
+
   fetchBankAccountDetailsById: `
-      SELECT 
+      SELECT
         id,
         user_id,
         bank_name,
@@ -166,7 +180,7 @@ export default {
 
   setExistingAccountDefaultFalse: `
       UPDATE user_bank_accounts
-      SET 
+      SET
         updated_at = NOW(),
         mono_account_id = NULL,
         is_default = FALSE
@@ -174,7 +188,7 @@ export default {
 
   SetNewAccountDefaultTrue: `
       UPDATE user_bank_accounts
-      SET 
+      SET
         updated_at = NOW(),
         is_default = TRUE
       WHERE user_id = $1
@@ -183,14 +197,14 @@ export default {
 
   setExistingAccountDisbursementFalse: `
       UPDATE user_bank_accounts
-      SET 
+      SET
         updated_at = NOW(),
         is_disbursement_account = FALSE
       WHERE user_id = $1`,
 
   SetNewAccountDisbursementTrue: `
       UPDATE user_bank_accounts
-      SET 
+      SET
         updated_at = NOW(),
         is_disbursement_account = TRUE
       WHERE user_id = $1
@@ -198,24 +212,24 @@ export default {
       RETURNING id, user_id, account_number, account_name,is_default, is_disbursement_account`,
 
   fetchAllExistingBvns: `
-      SELECT bvn 
+      SELECT bvn
       FROM users
       WHERE bvn IS NOT NULL`,
 
   fetchAllExistingBlacklistedBvns: `
-      SELECT bvn 
+      SELECT bvn
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
 
   blacklistUser: `
       UPDATE user
-      SET 
+      SET
         updated_at = NOW(),
         status = 'blacklisted'
       WHERE user_id = $1`,
 
   fetchUserBvn: `
-      SELECT bvn 
+      SELECT bvn
       FROM users
       WHERE user_id = $1`,
 
@@ -244,13 +258,13 @@ export default {
 
   addDocumentTOUserUploadedDocuments: `
     INSERT INTO user_admin_uploaded_documents (
-      user_id, 
+      user_id,
       document_title,
       image_url
     ) VALUES ($1, $2, $3)`,
 
   fetchUserAddressDetails: `
-    SELECT 
+    SELECT
       id,
       user_id,
       street,
@@ -276,7 +290,7 @@ export default {
     WHERE (user_id = $1 OR you_verify_candidate_id = $1)`,
 
   fetchUserOfferLetterAddressDetails: `
-    SELECT 
+    SELECT
       id,
       user_id,
       INITCAP(street) AS street,
@@ -305,7 +319,7 @@ export default {
       rent_amount,
       is_verified_address
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-  
+
   updateUserAddressDetailsOnCreation: `
     UPDATE address_verification
     SET
@@ -367,7 +381,7 @@ export default {
 
   updateUserUtilityBillDocument: `
     UPDATE address_verification
-    SET 
+    SET
       updated_at = NOW(),
       address_image_url = $2,
       can_upload_utility_bill = false
@@ -379,20 +393,20 @@ export default {
     is_uploaded_identity_card = true,
     tier = $2
     WHERE user_id = $1
-    RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn, 
+    RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn,
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
 
   updateUserTierValue: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       tier = $2
     WHERE user_id = $1`,
 
   updateUserProfile: `
      UPDATE users
-     SET 
+     SET
      updated_at = NOW(),
      first_name = $2,
      middle_name = $3,
@@ -414,14 +428,14 @@ export default {
 
   setExistingCardDefaultFalse: `
       UPDATE user_debit_cards
-      SET 
+      SET
         updated_at = NOW(),
         is_default = FALSE
       WHERE user_id = $1`,
 
   setNewCardDefaultTrue: `
       UPDATE user_debit_cards
-      SET 
+      SET
         updated_at = NOW(),
         is_default = TRUE
       WHERE user_id = $1
@@ -434,14 +448,14 @@ export default {
 
   updateSecondaryCardDefault: `
       UPDATE user_debit_cards
-      SET 
+      SET
         updated_at = NOW(),
         is_default = TRUE
       WHERE user_id = $1
       RETURNING id, user_id, is_default, card_type`,
 
   userOutstandingPersonalLoan: `
-      SELECT 
+      SELECT
         id,
         user_id,
         loan_id,
@@ -451,7 +465,7 @@ export default {
       AND (status = 'ongoing' OR status = 'over due')`,
 
   userOutstandingClusterLoan: `
-      SELECT 
+      SELECT
         id,
         user_id,
         loan_id,
@@ -463,7 +477,7 @@ export default {
       AND (status = 'ongoing' OR status = 'over due')`,
 
   userExistingProcessingLoans: `
-      SELECT 
+      SELECT
         id,
         loan_id,
         user_id,
@@ -480,7 +494,7 @@ export default {
       ORDER BY created_at DESC`,
 
   userExistingClusterProcessingLoans: `
-      SELECT 
+      SELECT
         id,
         loan_id,
         member_loan_id,
@@ -498,7 +512,7 @@ export default {
       ORDER BY created_at DESC`,
 
   userPersonalLoanTransactions: `
-      SELECT 
+      SELECT
         id,
         payment_id,
         loan_id,
@@ -516,7 +530,7 @@ export default {
       ORDER BY created_at DESC`,
 
   userClusterLoanTransactions: `
-      SELECT 
+      SELECT
         id,
         payment_id,
         loan_id,
@@ -536,7 +550,7 @@ export default {
       ORDER BY created_at DESC`,
 
   userOfferLetterDetails: `
-      SELECT 
+      SELECT
         id,
         user_id,
         INITCAP(
@@ -559,7 +573,7 @@ export default {
         RETURNING *`,
 
   getUserNextOfKin: `
-        SELECT 
+        SELECT
             id,
             first_name,
             last_name,
@@ -569,7 +583,7 @@ export default {
         FROM next_of_kin
         WHERE user_id = $1`,
 
-  createUserEmploymentDetails: `  
+  createUserEmploymentDetails: `
     INSERT INTO employment_type(
         user_id,
         employment_type,
@@ -584,7 +598,7 @@ export default {
 
   updateEmploymentDetails: `
     UPDATE employment_type
-    SET 
+    SET
       updated_at = NOW(),
       employment_type = $2,
       company_name = $3,
@@ -597,7 +611,7 @@ export default {
     `,
 
   fetchEmploymentDetails: `
-       SELECT 
+       SELECT
           user_id,
           employment_type,
           company_name,
@@ -611,7 +625,7 @@ export default {
 
   updateUserMonoAccountId: `
     UPDATE user_bank_accounts
-    SET 
+    SET
       updated_at = NOW(),
       mono_account_id = $2
     WHERE user_id = $1
@@ -620,20 +634,20 @@ export default {
     `,
 
   fetchTierOneLoanValue: `
-   SELECT 
+   SELECT
     name,
     value
    FROM admin_env_values_settings
-   WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
+   WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor',
    'tier_one_minimum_loan_amount', 'tier_one_maximum_loan_amount');
   `,
 
   fetchTierTwoLoanValue: `
-    SELECT 
+    SELECT
     name,
     value
     FROM admin_env_values_settings
-    WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor', 
+    WHERE name IN ('maximum_loan_tenor', 'minimum_loan_tenor',
     'tier_two_minimum_loan_amount', 'tier_two_maximum_loan_amount')
  `,
 
@@ -649,58 +663,58 @@ export default {
           status,
           created_by
       FROM system_promos
-      WHERE status = 'active' 
+      WHERE status = 'active'
  `,
- 
+
   fetchAlert: `
-     SELECT 
-        notification_id,  
-        title, 
-        content, 
-        created_at 
-      FROM admin_sent_notifications 
+     SELECT
+        notification_id,
+        title,
+        content,
+        created_at
+      FROM admin_sent_notifications
       WHERE type = 'alert' AND is_ended IS FALSE
   `,
-  
+
   updateAlertNotification: `
       UPDATE admin_sent_notifications
-      SET 
+      SET
       updated_at = NOW(),
       is_ended = TRUE
       WHERE DATE(end_at) = CURRENT_DATE
   `,
 
   fetchUserReferralDetails: `
-     SELECT 
-        id,  
-        user_id, 
-        referral_code, 
+     SELECT
+        id,
+        user_id,
+        referral_code,
         unclaimed_reward_points,
         claimed_reward_points,
         (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points,
-        cumulative_reward_points 
-      FROM users 
+        cumulative_reward_points
+      FROM users
       WHERE user_id = $1
   `,
 
   fetchUserReferralHistory: `
-     SELECT 
+     SELECT
         id,
-        reward_id,  
-        user_id, 
-        referral_code, 
+        reward_id,
+        user_id,
+        referral_code,
         point_reward,
         reward_description,
         to_char(DATE (created_at)::date, 'DD Mon, YYYY') AS date,
         type
-      FROM reward_points_tracking 
+      FROM reward_points_tracking
       WHERE user_id = $1
       ORDER BY created_at DESC
   `,
 
   updateUserClaimedPoints: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       unclaimed_reward_points = unclaimed_reward_points - $2,
       claimed_reward_points = claimed_reward_points + $2
