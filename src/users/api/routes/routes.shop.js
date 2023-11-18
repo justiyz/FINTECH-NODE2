@@ -70,7 +70,7 @@ router.post(
   // UserMiddleware.checkIfCardOrUserExist,
   // LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
-  // shopCategories.createTicketSubscription
+  shopCategories.createTicketSubscription
 );
 
 router.get(

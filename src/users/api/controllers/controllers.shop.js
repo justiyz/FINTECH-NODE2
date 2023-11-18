@@ -610,6 +610,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
     if (data.final_decision === 'APPROVED') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval
       checkUserLoanEligibility.controllers.loan.js`);
+      data.monthly_repayment = monthly_repayment;
       const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
       const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);

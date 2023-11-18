@@ -688,7 +688,6 @@ export const homepageDetails = async(req, res, next) => {
   try {
     const { user } = req;
     const [ userOutstandingPersonalLoanRepayment ] = await processAnyData(userQueries.userOutstandingPersonalLoan, [ user.user_id ]);
-    const [ shopLoans ] = await processAnyData(userQueries.userOutstandingShopLoans)
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's personal loan outstanding fetched homepageDetails.controller.user.js`);
     const outstandingPersonalLoanAmount = !userOutstandingPersonalLoanRepayment ? 0 : parseFloat(userOutstandingPersonalLoanRepayment.total_outstanding_amount);
     const [ userOutstandingClusterLoanRepayment ] = await processAnyData(userQueries.userOutstandingClusterLoan, [ user.user_id ]);

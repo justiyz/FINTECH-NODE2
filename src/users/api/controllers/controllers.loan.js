@@ -32,6 +32,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
   try {
     const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
+    console.log(user)
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processAnyData(loanQueries.fetchUserBvn, [ user.user_id ]);
