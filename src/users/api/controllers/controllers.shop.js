@@ -21,6 +21,7 @@ import LoanPayload from "../../lib/payloads/lib.payload.loan";
 import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
+const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 import {
   DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
   FAILED_TO_BOOK_TICKETS,
@@ -32,6 +33,7 @@ import {
 } from "../../lib/enums/lib.enum.labels";
 import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib/utils/lib.util.helpers";
 import AdminMailService from "../../../admins/api/services/services.email";
+import config from "../../config";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -544,9 +546,7 @@ export const checkUserTicketLoanEligibility = async(req, res, next) => {
 
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
-    body.bank_statement_service_choice = 'okra';
-    // body.total_repayment_amount = booking_amount;
-    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: body>::: ${body}`);
+    body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn, [
       user.user_id,
       booking_amount,
