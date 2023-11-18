@@ -42,7 +42,6 @@ const loanApplicationEligibilityCheck = async(payload) => {
       data: { ...payload }
     };
     logger.info(`${enums.CURRENT_TIME_STAMP}::: ${JSON.stringify(options)}`);
-    logger.info(`${enums.CURRENT_TIME_STAMP}::: ${options}`);
     const data = await axios(options);
     return data;
   } catch (error) {

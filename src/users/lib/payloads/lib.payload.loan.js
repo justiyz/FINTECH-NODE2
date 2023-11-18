@@ -31,7 +31,8 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   user_minimum_allowable_amount: userMinimumAllowableAMount,
   previous_loan_count: previousLoanCount,
   previous_loan_defaulted_count: previouslyDefaultedCount,
-  bank_statement_service_choice: body.bank_statement_service_choice
+  bank_statement_service_choice: body.bank_statement_service_choice,
+  tier: user.tier
 });
 
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
@@ -72,6 +73,27 @@ const processLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInter
   data.is_stale ? true : false
 ];
 
+const processShopLoanDecisionUpdatePayload = (data, totalAmountRepayable, totalInterestAmount, status) => [
+  data.loan_application_id,
+  parseFloat(totalAmountRepayable).toFixed(2),
+  parseFloat(totalInterestAmount).toFixed(2),
+  data.orr_score,
+  data.pricing_band,
+  0,
+  0,
+  0,
+  parseFloat((parseFloat(data.monthly_interest) * 100)).toFixed(2), // convert to percentage
+  0, // parseFloat(data.fees.processing_fee).toFixed(2),
+  0, // parseFloat(data.fees.insurance_fee).toFixed(2),
+  0, // parseFloat(data.fees.advisory_fee).toFixed(2),
+  parseFloat(data.monthly_repayment).toFixed(2),
+  status,
+  data.final_decision,
+  parseFloat(totalAmountRepayable).toFixed(2),
+  data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : null,
+  data.max_approval !== null ? parseFloat(data.max_approval).toFixed(2) : parseFloat(data.loan_amount).toFixed(2),
+  data.is_stale ? true : false
+];
 const loanApplicationApprovalDecisionResponse = async(data, totalAmountRepayable, totalInterestAmount, user, loan_status, loan_decision, offer_letter_url) => ({
   user_id: user.user_id,
   loan_id: data.loan_application_id,
@@ -164,6 +186,7 @@ export default {
   processDeclinedLoanDecisionUpdatePayload,
   loanApplicationDeclinedDecisionResponse,
   processLoanDecisionUpdatePayload,
+  processShopLoanDecisionUpdatePayload,
   loanApplicationApprovalDecisionResponse,
   loanReschedulingRequestSummaryResponse,
   loanRenegotiationPayload,
