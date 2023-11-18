@@ -695,9 +695,8 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

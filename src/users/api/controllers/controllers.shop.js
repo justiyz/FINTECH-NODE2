@@ -34,6 +34,7 @@ import {
 import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib/utils/lib.util.helpers";
 import AdminMailService from "../../../admins/api/services/services.email";
 import config from "../../config";
+import {createUserEmploymentDetails} from "./controllers.user";
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -644,6 +645,308 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
 // send email notifications to recipients
 
 // there will be a requery endpoint that'll be called on the web
+
+export const checkUserTicketLoanEligibility_ = async (req, res, next) => {
+  // const { user, body } = req;
+  const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
+    userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
+  const userDefaultAccountDetails = await getUserDefaultAccountDetails(user.user_id);
+  const bookingAmount = await calculateBookingAmount(req.body.tickets);
+  const admins = await getAdminsForNotification('loan application');
+  try {
+    const userBvn = await getUserBvn(user.user_id);
+    const userMonoId = userDefaultAccountDetails.mono_account_id || '';
+    const previouslyDefaultedCount = await checkPreviousLoanDefault(user.user_id);
+
+    const loanApplicationDetails = await initiateLoanApplication(user, body, bookingAmount);
+
+    const payload = await prepareLoanEligibilityPayload(
+        user,
+        body,
+        userDefaultAccountDetails,
+        loanApplicationDetails,
+        previouslyDefaultedCount,
+        createUserEmploymentDetails
+    );
+
+    const result = await checkLoanEligibility(payload);
+    const { data } = result;
+
+    if (result.status !== 200) {
+      handleFailedLoanApplication(
+          res,
+          user.user_id,
+          loanApplicationDetails.loan_id,
+          result,
+          admins
+      );
+    }
+
+    if (data.final_decision === 'DECLINED') {
+      handleDeclinedLoanApplication(res, user, data, loanApplicationDetails);
+    }
+
+    if (data.final_decision === 'APPROVED') {
+      handleApprovedLoanApplication(
+          res,
+          user,
+          data,
+          loanApplicationDetails,
+          bookingAmount,
+          body
+      );
+      return next();
+    }
+  } catch (error) {
+    handleLoanApplicationError(req, res, next, user.user_id, error);
+    // userActivityTracking(req.user.user_id, 18, 'fail');
+    // error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
+    // logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+    // return next(error);
+  }
+};
+
+function handleLoanApplicationError(req, res, next, user_id, error) {
+  userActivityTracking(req.user.user_id, 18, 'fail');
+  error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
+  logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+  return next(error);
+}
+
+// Define the extracted functions below...
+
+async function getUserDefaultAccountDetails(userId) {
+  return await processOneOrNoneData(
+      loanQueries.fetchBankAccountDetailsByUserId,
+      userId
+  );
+}
+
+async function calculateBookingAmount(tickets) {
+  return await getBookingTotalPrice(tickets);
+}
+
+async function getAdminsForNotification(notificationType) {
+  return await processAnyData(notificationQueries.fetchAdminsForNotification, [
+    notificationType,
+  ]);
+}
+
+async function getUserBvn(userId) {
+  return await processOneOrNoneData(loanQueries.fetchUserBvn, [userId]);
+}
+
+async function checkPreviousLoanDefault(userId) {
+  const [userPreviouslyDefaulted] = await processAnyData(
+      loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment,
+      [userId]
+  );
+  return parseFloat(userPreviouslyDefaulted.count);
+}
+
+async function initiateLoanApplication(user, body, bookingAmount) {
+  body.amount = bookingAmount;
+  body.loan_reason = 'event booking';
+  body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
+
+  return await processOneOrNoneData(
+      loanQueries.initiatePersonalLoanApplicationWithReturn,
+      [
+        user.user_id,
+        bookingAmount,
+        bookingAmount,
+        'Ticket Loan',
+        body.duration_in_months,
+        body.duration_in_months,
+        0,
+        0,
+      ]
+  );
+}
+
+async function prepareLoanEligibilityPayload(
+    user,
+    body,
+    userDefaultAccountDetails,
+    loanApplicationDetails,
+    previouslyDefaultedCount
+) {
+  const userBvn = await getUserBvn(user.user_id);
+  const userMonoId =
+      userDefaultAccountDetails.mono_account_id === null
+          ? ''
+          : userDefaultAccountDetails.mono_account_id;
+
+  return await LoanPayload.checkUserEligibilityPayload(
+      user,
+      body,
+      userDefaultAccountDetails,
+      loanApplicationDetails,
+      userEmploymentDetails,
+      userBvn,
+      userMonoId,
+      userLoanDiscount,
+      clusterType,
+      userMinimumAllowableAMount,
+      userMaximumAllowableAmount,
+      previousLoanCount,
+      previouslyDefaultedCount
+  );
+}
+
+async function checkLoanEligibility(payload) {
+  return await loanApplicationEligibilityCheckV2(payload);
+}
+
+function handleFailedLoanApplication(
+    res,
+    userId,
+    loanId,
+    result,
+    admins
+) {
+  logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${userId}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`
+  );
+
+  processNoneData(loanQueries.deleteInitiatedLoanApplication, [
+    loanId,
+    userId,
+  ]);
+
+  if (result.status >= 500 || result.response.status >= 500) {
+    logger.info(
+        `${enums.CURRENT_TIME_STAMP}, ${userId}:::Info: returned response from underwriting is of a 500 plus status checkUserLoanEligibility.controllers.loan.js`
+    );
+
+    admins.map((admin) => {
+      sendNotificationToAdmin(
+          admin.admin_id,
+          'Failed Loan Application',
+          adminNotification.loanApplicationDownTime(),
+          [`${user.first_name} ${user.last_name}`],
+          'failed-loan-application'
+      );
+    });
+
+    userActivityTracking(req.user.user_id, 37, 'fail');
+    ApiResponse.error(
+        res,
+        enums.UNDERWRITING_SERVICE_NOT_AVAILABLE,
+        enums.HTTP_SERVICE_UNAVAILABLE,
+        enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER
+    );
+  }
+
+  if (
+      result.response.data?.message ===
+      'Service unavailable loan application can\'t be completed. Please try again later.'
+  ) {
+    admins.map((admin) => {
+      sendNotificationToAdmin(
+          admin.admin_id,
+          'Failed Loan Application',
+          adminNotification.loanApplicationDownTime(),
+          [`${user.first_name} ${user.last_name}`],
+          'failed-loan-application'
+      );
+    });
+  }
+
+  logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${userId}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`
+  );
+  userActivityTracking(req.user.user_id, 37, 'fail');
+  ApiResponse.error(
+      res,
+      result.response.data.message,
+      result.response.status,
+      enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER
+  );
+}
+
+async function handleDeclinedLoanApplication(
+    res,
+    user,
+    data,
+    updatedLoanDetails
+) {
+  logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan checkUserLoanEligibility.controllers.loan.js`
+  );
+
+  const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(
+      data
+  );
+  const updatedLoanDetailsflu = await processOneOrNoneData(
+      loanQueries.updateUserDeclinedDecisionLoanApplication,
+      declinedDecisionPayload
+  );
+
+  userActivityTracking(req.user.user_id, 37, 'fail');
+  userActivityTracking(req.user.user_id, 40, 'success');
+
+  const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(
+      user,
+      data,
+      updatedLoanDetailsflu.status,
+      'DECLINED'
+  );
+
+  ApiResponse.success(
+      res,
+      enums.LOAN_APPLICATION_DECLINED_DECISION,
+      enums.HTTP_OK,
+      returnData
+  );
+}
+
+async function handleApprovedLoanApplication(
+    res,
+    user,
+    data,
+    updatedLoanDetails,
+    bookingAmount,
+    body
+) {
+  logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`
+  );
+
+  const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(
+      data,
+      bookingAmount,
+      0,
+      'pending'
+  );
+  let updatedLoanDetailsx = await processOneOrNoneData(
+      loanQueries.updateUserManualOrApprovedDecisionLoanApplication,
+      approvedDecisionPayload
+  );
+
+  const monthlyRepayment =
+      (bookingAmount * 0.7) / body.duration_in_months;
+  const firstInstallment = (bookingAmount * 0.3).toFixed(2);
+
+  const loanRepaymentSchedule = await createShopRepaymentSchedule(
+      updatedLoanDetailsx,
+      user,
+      firstInstallment,
+      monthlyRepayment
+  );
+
+  body.initial_payment = loanRepaymentSchedule[0];
+  req.firstRepayment = firstInstallment;
+
+  logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`
+  );
+
+  userActivityTracking(req.user.user_id, 37, 'success');
+  userActivityTracking(req.user.user_id, 39, 'success');
+
+  ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK);
+}
 
 
 

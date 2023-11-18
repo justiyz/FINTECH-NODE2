@@ -23,7 +23,6 @@ export const generateLoanRepaymentScheduleForShop = async(existingLoanApplicatio
   let repaymentOrder = 1;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested) - activationCharge;
   let immediateOutstanding = parseFloat(activationCharge) + parseFloat(preOutstandingLoanAmount);
-
   let repaymentArray = [
     {
       loan_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
@@ -38,11 +37,11 @@ export const generateLoanRepaymentScheduleForShop = async(existingLoanApplicatio
       proposed_payment_date: dayjs().format('YYYY-MM-DD')
     }
   ];
-
   let prePaymentOutstandingAmount = immediateOutstanding - activationCharge;
   let postPaymentOutstandingAmount = prePaymentOutstandingAmount - monthly_installment;
-  for (let i = 1; i <= Number(existingLoanApplication.loan_tenor_in_months); i++) {
-    let newRepaymentOrder = repaymentOrder + i;
+
+  for (let repaymentOrderCounter = 1; repaymentOrderCounter <= Number(existingLoanApplication.loan_tenor_in_months); repaymentOrderCounter++) {
+    let newRepaymentOrder = repaymentOrder + repaymentOrderCounter;
     let nextInterestPayment = 0;
     const nextRepaymentDetails = {
       loan_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
@@ -54,7 +53,7 @@ export const generateLoanRepaymentScheduleForShop = async(existingLoanApplicatio
       pre_payment_outstanding_amount: parseFloat(prePaymentOutstandingAmount.toFixed(2)), // parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       total_payment_amount: parseFloat(parseFloat(monthly_installment).toFixed(2)),
       post_payment_outstanding_amount: parseFloat(postPaymentOutstandingAmount.toFixed(2)), // parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(newRepaymentOrder, 'month').format('YYYY-MM-DD')  // dayjs().add((additionalMonth * (i + 1)) * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
+      proposed_payment_date: dayjs().add(repaymentOrderCounter, 'month').format('YYYY-MM-DD')  // dayjs().add((additionalMonth * (i + 1)) * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
     };
     prePaymentOutstandingAmount = postPaymentOutstandingAmount;
     postPaymentOutstandingAmount = postPaymentOutstandingAmount - monthly_installment;
