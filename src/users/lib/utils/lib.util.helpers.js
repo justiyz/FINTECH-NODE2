@@ -147,14 +147,27 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const [ userOfferLetterDetail ] = await processAnyData(userQueries.userOfferLetterDetails, [ user.user_id ]);
   const [ userOfferLetterAddressDetail ] = await processAnyData(userQueries.fetchUserOfferLetterAddressDetails, [ user.user_id ]);
   const genderType = userOfferLetterDetail.gender === 'male' ? 'Sir' : 'Ma';
+  if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
+    userOfferLetterDetail.bvn = '12345678910'
+  }
   const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;
   const houseAddressStreet = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.house_number} ${userOfferLetterAddressDetail.street} Street,` || '';
   const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
-
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState);
-
   if (config.SEEDFI_NODE_ENV === 'test') {
+    const data = {
+      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
+      ServerSideEncryption: 'AES256',
+      Location: 'https://photow-profile-images.s3.us-west-2.amazonaws.com/files/user-documents/user-af4921b85068ed/loan-offer-letter/pers-loan-72c4918cc7ee1c30.pdf',
+      key: 'files/user-documents/user-af4922be97ef11edb0660fd1b85068ed/loan-offer-letter/pers-loan-72c4918cc7ee11eda5b8432fe1971c30.pdf',
+      Key: 'files/user-documents/user-af4922be97ef11edb0660fd1b85068ed/loan-offer-letter/pers-loan-72c4918cc7ee11eda5b8432fe1971c30.pdf',
+      Bucket: 'p-prof-img'
+    };
+    return data;
+  }
+
+  if (config.SEEDFI_NODE_ENV === 'development') {
     const data = {
       ETag: '"68bec848a3eea33f3ccfad41c1242691"',
       ServerSideEncryption: 'AES256',
