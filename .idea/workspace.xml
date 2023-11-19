@@ -686,6 +686,18 @@
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/vite.config.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/vite.config.js.timestamp-1683017275825.mjs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/Dashboard/Loans/ManuallyCreateLoanApplication/index.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-2fe1eb0886c511ee870c13c6a1.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-469d557486c711eea79c3b1ca9.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-6e89d24e86cf11eeae28cf19fc.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-70c127e286cf11eeae29c7427d.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-734dbe3086cf11eeae2aab7e3e.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-b88dfdc086cf11eea6ba57634f.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-b8d8a8da86ce11eeb05a0bc03c.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-bae448d286ce11eeb05b13b653.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-bb0ddbe286cf11eea6bb63ab2b.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-bcfa184486cf11eea6bca7d30e.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-e63a642086cf11eeb0d1731585.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-e834725286cf11eeb0d24fd27a.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/.env.local" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/env.local.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/docker-compose.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/server.js" afterDir="false" />
@@ -694,11 +706,20 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.model.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/express/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/express/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/logger/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/logger/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

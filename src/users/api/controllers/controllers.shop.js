@@ -21,6 +21,7 @@ import LoanPayload from "../../lib/payloads/lib.payload.loan";
 import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
+import * as html_pdf from 'html-pdf'
 const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 import {
   DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
@@ -35,6 +36,10 @@ import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib
 import AdminMailService from "../../../admins/api/services/services.email";
 import config from "../../config";
 import {createUserEmploymentDetails} from "./controllers.user";
+import {ticketPDFTemplate} from "../../lib/templates/offerLetter";
+
+// const html_pdf = require('html-pdf');
+// var html = fs.readFileSync('./test/businesscard.html', 'utf8');
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -259,6 +264,22 @@ export const getTicketSubscriptionSummary = async(req, res, next) => {
   }
 };
 
+const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
+  const ticket_category = await processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]);
+  const ticket_record = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
+  const dateObject = new Date();
+  const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
+  const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticket_category, user, ticket_record)
+  const outputpath = `tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
+  // generate ticket pdf
+  await html_pdf.create(ticketHtmlPDF).toFile(outputpath, (err, res) => {
+    console.log('burp')
+    console.log('what should be returned: ', res.filename);
+    return res.filename;
+  });
+}
+
+
 export const createTicketSubscription = async(req, res, next) => {
   try {
     const tickets = req.body.tickets;
@@ -268,26 +289,44 @@ export const createTicketSubscription = async(req, res, next) => {
     let totalAmountToBePaid = 0;
     let loan_id = req.body.initial_payment.loan_id;
     const { user } = req;
+    let tickets_files = [];
     // check if tickets available can fulfill order
     // loop ticket id and check if number available is greater than the number being requested by the user
 
+    // for (const ticket_check of tickets) {
+    //   const { ticket_category_id } = ticket_check;
+    //   const availableTickets = await getAvailableTicketUnits(ticket_category_id);
+    //   console.log('The size of tickets left');
+    //   console.log(availableTickets);
+    //   if (availableTickets.units < 1) {
+    //
+    //   }
+    // }
     for (const ticket of tickets) {
       const { ticket_id, ticket_category_id, units } = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
-        const barcodeString = `${ticket_id}|${req.user.user_id}`;
+        const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
         const theQRCode = await generateQRCode(barcodeString);
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
-        if (availableTickets && availableTickets.units >= 1) {
+        const new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
+        console.log('The new ticket file: ', new_ticket_file_url);
+        if (availableTickets && availableTickets.units >= units) {
           const bookedTicket = await createUserTicket(
             req.user.user_id,
             ticket_id,
             ticket_category_id,
             req.body.insurance_coverage,
             req.body.duration_in_months,
-            theQRCode,
+            new_ticket_file_url,
             reference,
             loan_id
           );
+          console.log(bookedTicket)
+
+          // generate ticket document
+          // let new_ticket_file = await generateTicketPDF(bookedTicket[0], user);
+          // tickets_files.push(new_ticket_file);
+          tickets_files.push(new_ticket_file_url);
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
           ticketPurchaseLogs.push(bookedTicket[0]);
           // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
@@ -298,6 +337,8 @@ export const createTicketSubscription = async(req, res, next) => {
         // add an "else" statement for handling cases where no available tickets.
       }
     }
+    console.log('flow position x')
+    console.log(tickets_files);
     // changes started from here
     totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
@@ -325,6 +366,7 @@ export const createTicketSubscription = async(req, res, next) => {
 };
 
 async function generateQRCode(barcodeString) {
+  // create and upload ticket
   return QRCode.toDataURL(barcodeString);
 }
 
