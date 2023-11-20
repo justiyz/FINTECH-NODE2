@@ -636,6 +636,17 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof LoanMiddleware
  */
+
+// export const availableTicketsMiddleware = async(req, res, next) => {
+//   try {
+//     const { user } = req;
+//
+//   } catch (error) {
+//     error.label = enums.TICKET_REQUESTED_HIGHER_THAN_AVAILABLE_UNITS;
+//     logger.error(`checking if available tickets can fulfil order::${enums.CHECK_AVAILABLE_TICKETS_MIDDLEWARE}`, error.message);
+//     return next(error);
+//   }
+// };
 export const additionalUserChecksForLoan = async(req, res, next) => {
   try {
     const { user } = req;

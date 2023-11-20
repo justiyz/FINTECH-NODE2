@@ -22,6 +22,7 @@ import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule, generateClusterLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
 import adminShopQueries from "../../../admins/api/queries/queries.shop";
+import {RETRIEVE_TICKET_URL_FROM_DATABASE} from "../../lib/enums/lib.enum.labels";
 
 /**
  * verify the legibility of the webhook response if from Paystack
@@ -99,10 +100,22 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
   }
 };
 
+export const getTicketUrls = async(req, res, next) => {
+  try {
+    let ticket_urls = 1;
+  } catch (error) {
+    error.label = enums.RETRIEVE_TICKET_URL_FROM_DATABASE;
+    logger.error(`failed to get ticket urls from the database:::${enums.RETRIEVE_TICKET_URL_FROM_DATABASE}`, error.message);
+    return next(error);
+  }
+};
+
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
     // check if ticket is already active
     const { ticket_id, user_id, reference } = req.body;
+    const { user } = req;
+    let ticket_urls = '';
     const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
     // update ticket loan status
     await processAnyData(loanQueries.updateTicketLoanStatus, [ ticket_record[0].loan_id, user_id ]);
@@ -122,6 +135,17 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
     );
     // update event status
     await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
+
+    // send notification email
+    for (let ticketRecordKey in ticket_record) {
+      ticket_urls = ticket_urls + `<img src="${ticket_record[ticketRecordKey].ticket_url} />`
+    }
+    const data = {
+      first_name: user.first_name,
+      email: user.email,
+      ticket_urls: ticket_urls
+    };
+    await MailService('Ticket Information', 'eventBooking', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
     req.ticket_update = {
       ticket_record

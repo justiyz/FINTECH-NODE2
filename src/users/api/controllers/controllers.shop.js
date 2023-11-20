@@ -21,6 +21,7 @@ import LoanPayload from "../../lib/payloads/lib.payload.loan";
 import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
+import * as html_pdf from 'html-pdf'
 const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 import {
   DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
@@ -35,6 +36,13 @@ import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib
 import AdminMailService from "../../../admins/api/services/services.email";
 import config from "../../config";
 import {createUserEmploymentDetails} from "./controllers.user";
+import {ticketPDFTemplate} from "../../lib/templates/offerLetter";
+const puppeteer = require('puppeteer');
+import * as S3 from '../../api/services/services.s3';
+import * as UserHash from "../../lib/utils/lib.util.hash";
+
+// const html_pdf = require('html-pdf');
+// var html = fs.readFileSync('./test/businesscard.html', 'utf8');
 
 export const shopCategories = async(req, res, next) => {
   try {
@@ -259,6 +267,31 @@ export const getTicketSubscriptionSummary = async(req, res, next) => {
   }
 };
 
+export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
+  const ticket_category = await processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]);
+  const ticket_record = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
+  const dateObject = new Date();
+  const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
+  const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticket_category, user, ticket_record)
+  const outputpath = `files/tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
+  // generate ticket pdf
+  if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
+    const data = {
+      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
+      ServerSideEncryption: 'AES256',
+      Location: `https://photow-profile-images.s3.us-west-2.amazonaws.com/${outputpath}`,
+      key: outputpath,
+      Key: outputpath,
+      Bucket: 'p-prof-img'
+    };
+    return data.Location.trim();
+  }
+  const payload = Buffer.from(ticketHtmlPDF, 'binary');
+  const ticket_data  = await S3.uploadFile(outputpath, payload, 'application/pdf');
+  return ticket_data;
+}
+
+
 export const createTicketSubscription = async(req, res, next) => {
   try {
     const tickets = req.body.tickets;
@@ -274,23 +307,23 @@ export const createTicketSubscription = async(req, res, next) => {
     for (const ticket of tickets) {
       const { ticket_id, ticket_category_id, units } = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
-        const barcodeString = `${ticket_id}|${req.user.user_id}`;
+        const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
+
+        // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
         const theQRCode = await generateQRCode(barcodeString);
+        // get available tickets from the database
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
-        if (availableTickets && availableTickets.units >= 1) {
+        // generate ticket document
+        let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
+
+        // save booked ticket information in the database
+        if (availableTickets && availableTickets.units >= units) {
           const bookedTicket = await createUserTicket(
-            req.user.user_id,
-            ticket_id,
-            ticket_category_id,
-            req.body.insurance_coverage,
-            req.body.duration_in_months,
-            theQRCode,
-            reference,
-            loan_id
+            req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
+            req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
-          ticketPurchaseLogs.push(bookedTicket[0]);
-          // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
+          ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
 
@@ -298,6 +331,7 @@ export const createTicketSubscription = async(req, res, next) => {
         // add an "else" statement for handling cases where no available tickets.
       }
     }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Total amount to be paid by user is N${totalAmountToBePaid}`);
     // changes started from here
     totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
@@ -325,6 +359,7 @@ export const createTicketSubscription = async(req, res, next) => {
 };
 
 async function generateQRCode(barcodeString) {
+  // create and upload ticket
   return QRCode.toDataURL(barcodeString);
 }
 
@@ -332,8 +367,8 @@ async function getAvailableTicketUnits(ticketCategoryId) {
   return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
 }
 
-async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id) {
-  return await processAnyData(adminShopQueries.createUserTicketRecord, [
+async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id, ticket_url) {
+  return await processOneOrNoneData(adminShopQueries.createUserTicketRecord, [
     userId,
     ticketId,
     ticketCategoryId,
@@ -343,7 +378,8 @@ async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCov
     'inactive',
     qrCode,
     reference,
-    loan_id
+    loan_id,
+    ticket_url
   ]);
 }
 
@@ -634,6 +670,7 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
     const { user_id } = req.body;
     let ticket_update = req.ticket_update;
     const data = { ticket_update };
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {
