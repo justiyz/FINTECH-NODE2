@@ -694,26 +694,7 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-8c2a25f6304911ee9cfaf39c1694d18e.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-2fe1eb0886c511ee870c13c6a1.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-469d557486c711eea79c3b1ca9.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-6e89d24e86cf11eeae28cf19fc.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-70c127e286cf11eeae29c7427d.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-734dbe3086cf11eeae2aab7e3e.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-b88dfdc086cf11eea6ba57634f.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-b8d8a8da86ce11eeb05a0bc03c.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-bae448d286ce11eeb05b13b653.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-bb0ddbe286cf11eea6bb63ab2b.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-bcfa184486cf11eea6bca7d30e.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-e63a642086cf11eeb0d1731585.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-e834725286cf11eeb0d24fd27a.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/ticket-b908dfdc769d11ee9/user-ticket-ea2aaad686cf11eeb0d38ffdd0.pdf" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

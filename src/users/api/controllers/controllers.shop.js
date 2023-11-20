@@ -268,39 +268,27 @@ export const getTicketSubscriptionSummary = async(req, res, next) => {
 };
 
 export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
-  console.log('step 2')
   const ticket_category = await processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]);
   const ticket_record = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
   const dateObject = new Date();
   const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
   const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticket_category, user, ticket_record)
-  const outputpath = `tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
+  const outputpath = `files/tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
   // generate ticket pdf
   if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
-    return 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.pdf';
+    const data = {
+      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
+      ServerSideEncryption: 'AES256',
+      Location: `https://photow-profile-images.s3.us-west-2.amazonaws.com/${outputpath}`,
+      key: outputpath,
+      Key: outputpath,
+      Bucket: 'p-prof-img'
+    };
+    return data.Location.trim();
   }
-  // if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
-  //   return encodeURIComponent(
-  //       await UserHash.encrypt({
-  //         document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.pdf',
-  //         document_extension: '.pdf'
-  //       })
-  //   );
-  //   return next();
-  // }
   const payload = Buffer.from(ticketHtmlPDF, 'binary');
   const ticket_data  = await S3.uploadFile(outputpath, payload, 'application/pdf');
   return ticket_data;
-  // console.log('passing through: ', ticket_data)
-  // const new_ticket = await html_pdf.create(ticketHtmlPDF).toFile(outputpath, (err, res) => {
-  //   if (err) {
-  //     return console.log(err);
-  //   } else {
-  //     console.log('step 3');
-  //     return res.filename;
-  //   }
-  // });
-  // return ticket_data;
 }
 
 
@@ -323,8 +311,8 @@ export const createTicketSubscription = async(req, res, next) => {
         const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
         const theQRCode = await generateQRCode(barcodeString);
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
+        // generate ticket document
         let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
-        console.log('New ticket file url: ', new_ticket_file_url);
         if (availableTickets && availableTickets.units >= units) {
           const bookedTicket = await createUserTicket(
             req.user.user_id,
@@ -336,12 +324,9 @@ export const createTicketSubscription = async(req, res, next) => {
             reference,
             loan_id
           );
-          // generate ticket document
-          // let new_ticket_file = await generateTicketPDF(bookedTicket[0], user);
-          // tickets_files.push(new_ticket_file);
           tickets_files.push(new_ticket_file_url);
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
-          ticketPurchaseLogs.push(bookedTicket[0]);
+          ticketPurchaseLogs.push(bookedTicket);
           // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
@@ -386,7 +371,7 @@ async function getAvailableTicketUnits(ticketCategoryId) {
 }
 
 async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id) {
-  return await processAnyData(adminShopQueries.createUserTicketRecord, [
+  return await processOneOrNoneData(adminShopQueries.createUserTicketRecord, [
     userId,
     ticketId,
     ticketCategoryId,
