@@ -3,6 +3,7 @@
 import dayjs from 'dayjs';
 import { decrypt } from '../../utils/lib.util.hash';
 
+
 export const ticketPDFTemplate = async(ticket_qr_code, purchase_date, ticket_category, user, ticket_record) => {
   return `<html lang="en">
     <head>

@@ -8,6 +8,7 @@ import Schema from '../../lib/schemas/lib.schema.shop';
 import loanSchema from '../../lib/schemas/lib.schema.loan';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as paymentMiddleware from '../middlewares/middlewares.payment';
+// import {availableTicketsMiddleware} from "../middlewares/middlewares.loan";
 
 const router = Router();
 
@@ -63,6 +64,7 @@ router.post(
   UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.checkUserAdvancedKycUpdate,
   // LoanMiddleware.checkIfUserHasActivePersonalLoan,
+  // LoanMiddleware.availableTicketsMiddleware not to be used,
   LoanMiddleware.validateLoanAmountAndTenor,
   // LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,

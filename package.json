@@ -74,7 +74,7 @@
     "moment-timezone": "^0.5.43",
     "node-cron": "^3.0.2",
     "pg-promise": "^10.15.4",
-    "puppeteer": "^18.1.0",
+    "puppeteer": "^18.2.1",
     "qrcode": "^1.5.3",
     "uuid": "^9.0.0",
     "winston": "^3.8.2"

@@ -37,6 +37,9 @@ import AdminMailService from "../../../admins/api/services/services.email";
 import config from "../../config";
 import {createUserEmploymentDetails} from "./controllers.user";
 import {ticketPDFTemplate} from "../../lib/templates/offerLetter";
+const puppeteer = require('puppeteer');
+import * as S3 from '../../api/services/services.s3';
+import * as UserHash from "../../lib/utils/lib.util.hash";
 
 // const html_pdf = require('html-pdf');
 // var html = fs.readFileSync('./test/businesscard.html', 'utf8');
@@ -264,7 +267,8 @@ export const getTicketSubscriptionSummary = async(req, res, next) => {
   }
 };
 
-const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
+export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
+  console.log('step 2')
   const ticket_category = await processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]);
   const ticket_record = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
   const dateObject = new Date();
@@ -272,11 +276,31 @@ const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_c
   const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticket_category, user, ticket_record)
   const outputpath = `tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
   // generate ticket pdf
-  await html_pdf.create(ticketHtmlPDF).toFile(outputpath, (err, res) => {
-    console.log('burp')
-    console.log('what should be returned: ', res.filename);
-    return res.filename;
-  });
+  if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
+    return 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.pdf';
+  }
+  // if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
+  //   return encodeURIComponent(
+  //       await UserHash.encrypt({
+  //         document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.pdf',
+  //         document_extension: '.pdf'
+  //       })
+  //   );
+  //   return next();
+  // }
+  const payload = Buffer.from(ticketHtmlPDF, 'binary');
+  const ticket_data  = await S3.uploadFile(outputpath, payload, 'application/pdf');
+  return ticket_data;
+  // console.log('passing through: ', ticket_data)
+  // const new_ticket = await html_pdf.create(ticketHtmlPDF).toFile(outputpath, (err, res) => {
+  //   if (err) {
+  //     return console.log(err);
+  //   } else {
+  //     console.log('step 3');
+  //     return res.filename;
+  //   }
+  // });
+  // return ticket_data;
 }
 
 
@@ -293,23 +317,14 @@ export const createTicketSubscription = async(req, res, next) => {
     // check if tickets available can fulfill order
     // loop ticket id and check if number available is greater than the number being requested by the user
 
-    // for (const ticket_check of tickets) {
-    //   const { ticket_category_id } = ticket_check;
-    //   const availableTickets = await getAvailableTicketUnits(ticket_category_id);
-    //   console.log('The size of tickets left');
-    //   console.log(availableTickets);
-    //   if (availableTickets.units < 1) {
-    //
-    //   }
-    // }
     for (const ticket of tickets) {
       const { ticket_id, ticket_category_id, units } = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
         const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
         const theQRCode = await generateQRCode(barcodeString);
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
-        const new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
-        console.log('The new ticket file: ', new_ticket_file_url);
+        let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
+        console.log('New ticket file url: ', new_ticket_file_url);
         if (availableTickets && availableTickets.units >= units) {
           const bookedTicket = await createUserTicket(
             req.user.user_id,
@@ -321,8 +336,6 @@ export const createTicketSubscription = async(req, res, next) => {
             reference,
             loan_id
           );
-          console.log(bookedTicket)
-
           // generate ticket document
           // let new_ticket_file = await generateTicketPDF(bookedTicket[0], user);
           // tickets_files.push(new_ticket_file);
@@ -337,8 +350,6 @@ export const createTicketSubscription = async(req, res, next) => {
         // add an "else" statement for handling cases where no available tickets.
       }
     }
-    console.log('flow position x')
-    console.log(tickets_files);
     // changes started from here
     totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
