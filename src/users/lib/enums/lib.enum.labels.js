@@ -58,6 +58,7 @@ export const EVENT_RECORD_ALREADY_CREATED = 'ShopController::createEventRecord';
 export const YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE = 'UserMiddleware::youVerifyWebhookVerification';
 export const VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE = 'UserMiddleware::verifyUserAndAddressResponse';
 export const VERIFY_PAYSTACK_PAYMENT_STATUS_MIDDLEWARE = 'PaymentMiddleware::verifyPaystackPaymentStatus';
+export const RETRIEVE_TICKET_URL_FROM_DATABASE = 'TicketMiddleware::getTicketUrls';
 export const RAISE_REFUND_FOR_CARD_TOKENIZATION_MIDDLEWARE = 'PaymentMiddleware::raiseRefundForCardTokenization';
 export const PROCESS_PERSONAL_LOAN_REPAYMENTS_MIDDLEWARE = 'PaymentMiddleware::processPersonalLoanRepayments';
 export const PROCESS_CLUSTER_LOAN_REPAYMENTS_MIDDLEWARE = 'PaymentMiddleware::processClusterLoanRepayments';

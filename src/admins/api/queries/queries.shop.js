@@ -333,8 +333,9 @@ export default {
         status,
         ticket_qr_code,
         transaction_reference,
-        loan_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        loan_id,
+        ticket_url
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *;
   `,
 

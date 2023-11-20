@@ -301,7 +301,6 @@ export const createTicketSubscription = async(req, res, next) => {
     let totalAmountToBePaid = 0;
     let loan_id = req.body.initial_payment.loan_id;
     const { user } = req;
-    let tickets_files = [];
     // check if tickets available can fulfill order
     // loop ticket id and check if number available is greater than the number being requested by the user
 
@@ -309,25 +308,22 @@ export const createTicketSubscription = async(req, res, next) => {
       const { ticket_id, ticket_category_id, units } = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
         const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
+
+        // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
         const theQRCode = await generateQRCode(barcodeString);
+        // get available tickets from the database
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         // generate ticket document
         let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
+
+        // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
           const bookedTicket = await createUserTicket(
-            req.user.user_id,
-            ticket_id,
-            ticket_category_id,
-            req.body.insurance_coverage,
-            req.body.duration_in_months,
-            new_ticket_file_url,
-            reference,
-            loan_id
+            req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
+            req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
-          tickets_files.push(new_ticket_file_url);
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
-          ticketPurchaseLogs.push(bookedTicket);
-          // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
+          ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
 
@@ -335,6 +331,7 @@ export const createTicketSubscription = async(req, res, next) => {
         // add an "else" statement for handling cases where no available tickets.
       }
     }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Total amount to be paid by user is N${totalAmountToBePaid}`);
     // changes started from here
     totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
@@ -370,7 +367,7 @@ async function getAvailableTicketUnits(ticketCategoryId) {
   return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
 }
 
-async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id) {
+async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id, ticket_url) {
   return await processOneOrNoneData(adminShopQueries.createUserTicketRecord, [
     userId,
     ticketId,
@@ -381,7 +378,8 @@ async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCov
     'inactive',
     qrCode,
     reference,
-    loan_id
+    loan_id,
+    ticket_url
   ]);
 }
 
@@ -672,6 +670,7 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
     const { user_id } = req.body;
     let ticket_update = req.ticket_update;
     const data = { ticket_update };
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {
