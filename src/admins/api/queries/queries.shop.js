@@ -41,6 +41,8 @@ export default {
         tickets.event_date,
         tickets.event_location,
         tickets.event_time,
+        tickets.created_at,
+        tickets.updated_at,
         tickets.ticket_status
     FROM
         tickets
@@ -219,10 +221,36 @@ export default {
         ticket_category_status
   `,
 
+  getTicketByReference: `
+    SELECT *
+    FROM user_tickets
+    WHERE
+        transaction_reference = $1
+    AND
+        user_id = $2
+    AND
+        ticket_id = $3
+  `,
+
   updateEventStatus: `
     UPDATE user_tickets
     SET
         status = 'active',
+        updated_at = NOW()
+    WHERE
+        user_id = $1
+    AND
+        ticket_id = $2
+    AND
+        transaction_reference = $3
+   RETURNING user_ticket_id, ticket_id, status
+  `,
+
+  updateUserTicketsByReference: `
+    UPDATE user_tickets
+    SET
+        status = 'active',
+        transaction_reference = $3
         updated_at = NOW()
     WHERE
         ticket_id = $2
@@ -303,8 +331,11 @@ export default {
         insurance_coverage,
         payment_tenure,
         status,
-        ticket_qr_code
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ticket_qr_code,
+        transaction_reference,
+        loan_id,
+        ticket_url
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *;
   `,
 

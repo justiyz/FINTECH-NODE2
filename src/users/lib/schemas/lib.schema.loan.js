@@ -11,8 +11,7 @@ const loanForEventApplication = Joi.object().keys({
   duration_in_months: Joi.number().positive().required(),
   tickets: Joi.array().required(),
   insurance_coverage: Joi.boolean().required(),
-  payment_channel: Joi.string().required().valid('bank', 'card'),
-  payment_tenure: Joi.number().positive().required()
+  payment_channel: Joi.string().required().valid('bank', 'card')
 });
 
 const loanIdParams = Joi.object().keys({
@@ -68,6 +67,14 @@ const loanRenegotiation = Joi.object().keys({
   new_loan_duration_in_month: Joi.number().positive().required()
 });
 
+const successfulEventPayment = Joi.object().keys({
+  ticket_id: Joi.string().required(),
+  user_id: Joi.string().required(),
+  // recipients: Joi.array().required(),
+  // transaction_reference: Joi.string().required(),
+  reference: Joi.string().required()
+});
+
 export default  {
   loanApplication,
   loanIdParams,
@@ -82,5 +89,6 @@ export default  {
   rescheduleExtensionId,
   loanRescheduleParams,
   loanRenegotiation,
-  loanForEventApplication
+  loanForEventApplication,
+  successfulEventPayment
 };
