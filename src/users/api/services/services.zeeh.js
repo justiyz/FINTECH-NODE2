@@ -49,7 +49,7 @@ const zeehBVNVerificationCheck = async(bvn, user) => {
   }
 };
 
-const zeehNINVerificationCheck = async(nin, user) =>{
+const zeehNINVerificationCheck = async (nin, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, nin);
@@ -67,7 +67,7 @@ const zeehNINVerificationCheck = async(nin, user) =>{
     return data;
 
   } catch (error) {
-    logger.error(`${enums.CURRENT_TIME_STAMP} Error querying BVN for this reason ====>>> ${error}`);
+    logger.error(`${enums.CURRENT_TIME_STAMP} Error querying NIN for this reason ====>>> ${error}`);
     return error;
   }
 };
