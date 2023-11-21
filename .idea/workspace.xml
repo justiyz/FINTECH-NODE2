@@ -3,7 +3,7 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="ChangeListManager">
+  <component name="ChangeListManager"> 
     <list default="true" id="3f77793f-beb1-4c05-92c1-a5671e770c57" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.eslintrc.json" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.github/workflows/cd.yml" afterDir="false" />
@@ -700,7 +700,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings">
+  <component name="Git.Settings"> 
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitToolBoxStore">
@@ -802,16 +802,5 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
+  </component> 
 </project>

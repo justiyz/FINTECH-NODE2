@@ -52,6 +52,17 @@ pipeline {
         stage('docker build/push container image') {
             steps {
                 script {
+
+                    env.deployName=''
+                    env.SvcName=''
+
+                    if(REPO_NAME=='seedfi-backend') {
+                    env.deployName='seedfi-api' 
+                    env.SvcName='seedfi-backend' 
+                    } else if(REPO_NAME=='seedfi-underwriting') {
+                    env.deployName='api' 
+                    env.SvcName='seedfi-underwriting'
+                    } 
                     
                     sh '''
                     grep version package.json
@@ -112,6 +123,21 @@ pipeline {
 
                     }
 
+                    env.deployName=''
+                    env.SvcName=''
+
+                    if(REPO_NAME=='seedfi-backend') {
+                    env.deployName='seedfi-api' 
+                    env.SvcName='seedfi-backend' 
+                    } else if(REPO_NAME=='seedfi-underwriting') {
+                    env.deployName='api' 
+                    env.SvcName='seedfi-underwriting'
+                    } 
+
+                    println("deployName: ${env.deployName}")
+                    println("SvcName: ${env.SvcName}")
+                    println("================================================================================")
+
                     def secrets = [
                         [path: 'secret/jenkins/github', engineVersion: 2, secretValues: [
                             [envVar: 'GIT_TOKEN', vaultKey: 'token']]],
@@ -160,7 +186,6 @@ pipeline {
                                 ls -al ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                                 sed -i "s~ image:.*~ image: ${dockerTag}~" ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
                                 grep ' image:' ${REPO_NAME}/kubernetes/${DEPLOYMENT_ENV}/${DEPLOYMENT_YAML}
-                                cat KUBE_CONFIG_FILE
                             '''
 
                             // if (REPO_NAME == 'seedfi-backend') {
@@ -205,8 +230,10 @@ pipeline {
     }
     post {
         failure {
+
             script {
-                Send a failure message to Microsoft Teams
+
+                // Send a failure message to Microsoft Teams
                 def payload = [
                     '@type': 'MessageCard',
                     '@context': 'http://schema.org/extensions',
@@ -216,7 +243,7 @@ pipeline {
                 ]
                 def jsonPayload = groovy.json.JsonOutput.toJson(payload)
      
-                Send the message to Microsoft Teams
+                // Send the message to Microsoft Teams
                 sh """
                     curl -X POST -H 'Content-Type: application/json' -d '${jsonPayload}' ${env.MSTEAMS_WEBHOOK_URL}
                """
