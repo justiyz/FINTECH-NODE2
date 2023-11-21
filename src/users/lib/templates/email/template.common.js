@@ -22,20 +22,21 @@ const heading = {
   changePin: 'Pin Change Successful',
   resetPin: 'Pin Reset Successful',
   rejectedDebitCardNotUsersCard: 'Rejected Debit Card',
-  ticketBookedForYou: 'Hurray! Ticket Booked'
+  ticketBookedForYou: 'Hurray! Ticket Booked',
+  eventBooking: 'Hurray! Ticket(s) Booked'
 };
 
 export const commonTemplate = (messageType, data) => {
   let headerText;
   switch (messageType) {
-  case `${messageType}`:
-    headerText = heading[messageType];
-    break;
-  default:
-    headerText = '';
-    break;
+    case `${messageType}`:
+      headerText = heading[messageType];
+      break;
+    default:
+      headerText = '';
+      break;
   }
-  
+
   return `
   <html lang="en">
   <head>

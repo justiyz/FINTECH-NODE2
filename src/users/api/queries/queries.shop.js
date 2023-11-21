@@ -19,7 +19,19 @@ export default {
   getTicketCategories: `
     SELECT *
     FROM ticket_categories
-    WHERE ticket_id =$1
+    WHERE ticket_id = $1
+  `,
+
+  getBookedTicketCategory: `
+    SELECT *
+    FROM ticket_categories
+    WHERE ticket_category_id = $1
+  `,
+
+  getTicketInformation: `
+    SELECT *
+    FROM tickets
+    WHERE ticket_id = $1
   `,
 
   getUserTickets: `

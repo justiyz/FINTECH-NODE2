@@ -7,7 +7,7 @@ import AdminMailService from '../../../admins/api/services/services.email';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import { fetchSeedfiPaystackBalance, createTransferRecipient } from '../services/service.paystack';
-
+const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config;
 /**
  * check loan exists by id
  * @param {Request} req - The request from the endpoint.
@@ -283,35 +283,44 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
 export const validateLoanAmountAndTenor = async(req, res, next) => {
   const { user, body } = req;
   try {
-    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
-      maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails)
-    ]);
-    if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) {
+    // const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
+    //   maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
+    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_maximum_loan_amount'),
+    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_maximum_loan_amount'),
+    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_minimum_loan_amount'),
+    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_minimum_loan_amount'),
+    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'maximum_loan_tenor'),
+    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'minimum_loan_tenor')
+    // ]);
+    const tierOneMaximumLoanAmountDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]);
+    const tierTwoMaximumLoanAmountDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]);
+    const tierOneMinimumLoanAmountDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]);
+    const tierTwoMinimumLoanAmountDetails= await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]);
+    const maximumLoanTenorDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]);
+    const minimumLoanTenorDetails= await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ]);
+    //
+    // console.log(tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
+    //     maximumLoanTenorDetails, minimumLoanTenorDetails)
+    if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails[0].value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor
       validateLoanAmountAndTenor.middleware.loan.js`);
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails.value)) {
+    if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails[0].value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration greater than allowable maximum tenor
       validateLoanAmountAndTenor.middleware.loan.js`);
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(user.tier) === 1) {
-      req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails.value);
-      req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
+      req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails[0].value);
+      req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails[0].value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 1 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
     }
     if (Number(user.tier) === 2) {
-      req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails.value);
-      req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
+      req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails[0].value);
+      req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails[0].value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 2 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
@@ -417,8 +426,8 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
 export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
   try {
     const { user } = req;
-    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn);
-    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
+    const userBvn = await processAnyData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn[0].bvn));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user bvn checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
     const allBlackListedBvns = await processAnyData(loanQueries.fetchAllBlackListedBvnsBlacklistedBvn, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched platform blacklisted bvns checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
@@ -627,6 +636,17 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof LoanMiddleware
  */
+
+// export const availableTicketsMiddleware = async(req, res, next) => {
+//   try {
+//     const { user } = req;
+//
+//   } catch (error) {
+//     error.label = enums.TICKET_REQUESTED_HIGHER_THAN_AVAILABLE_UNITS;
+//     logger.error(`checking if available tickets can fulfil order::${enums.CHECK_AVAILABLE_TICKETS_MIDDLEWARE}`, error.message);
+//     return next(error);
+//   }
+// };
 export const additionalUserChecksForLoan = async(req, res, next) => {
   try {
     const { user } = req;

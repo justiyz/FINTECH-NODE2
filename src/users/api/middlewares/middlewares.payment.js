@@ -22,6 +22,7 @@ import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule, generateClusterLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
 import adminShopQueries from "../../../admins/api/queries/queries.shop";
+import {RETRIEVE_TICKET_URL_FROM_DATABASE} from "../../lib/enums/lib.enum.labels";
 
 /**
  * verify the legibility of the webhook response if from Paystack
@@ -99,16 +100,59 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
   }
 };
 
+export const getTicketUrls = async(req, res, next) => {
+  try {
+    let ticket_urls = 1;
+  } catch (error) {
+    error.label = enums.RETRIEVE_TICKET_URL_FROM_DATABASE;
+    logger.error(`failed to get ticket urls from the database:::${enums.RETRIEVE_TICKET_URL_FROM_DATABASE}`, error.message);
+    return next(error);
+  }
+};
+
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    const { body, params } = req;
-    const ticket_id = req.query.ticket_id;
-    const user_id = req.query.user_id;
-    await processOneOrNoneData(adminShopQueries.updateEventStatus,
-      [ user_id, ticket_id ]);
-    const data = {};
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
-    return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
+    // check if ticket is already active
+    const { ticket_id, user_id, reference } = req.body;
+    const { user } = req;
+    let ticket_urls = '';
+    const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
+    // update ticket loan status
+    await processAnyData(loanQueries.updateTicketLoanStatus, [ ticket_record[0].loan_id, user_id ]);
+    // update first repayment record
+    const [ repayment_record ] = await processAnyData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
+    // create first repayment record
+    await processAnyData(loanQueries.updatePersonalLoanPaymentTable,
+        [
+            user_id,
+            repayment_record.loan_id,
+            repayment_record.principal_payment,
+            'debit',
+            'ticket loan',
+            'part loan repayment',
+            'paystack'
+        ]
+    );
+    // update event status
+    await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
+
+    // send notification email
+    for (let ticketRecordKey in ticket_record) {
+      ticket_urls = ticket_urls + `<img src="${ticket_record[ticketRecordKey].ticket_url} />`
+    }
+    const data = {
+      first_name: user.first_name,
+      email: user.email,
+      ticket_urls: ticket_urls
+    };
+    await MailService('Ticket Information', 'eventBooking', { ...data });
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
+    req.ticket_update = {
+      ticket_record
+    };
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
+    return next();
   } catch (error) {
     error.label = enums.EVENT_PAYMENT_UNSUCCESSFUL;
     logger.error(`Failed to purchase event ticket successful:::${enums.FAILED_TO_PAY_FOR_TICKET}`, error.label);

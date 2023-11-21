@@ -7,6 +7,8 @@ import * as shopCategories from '../controllers/controllers.shop';
 import Schema from '../../lib/schemas/lib.schema.shop';
 import loanSchema from '../../lib/schemas/lib.schema.loan';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
+import * as paymentMiddleware from '../middlewares/middlewares.payment';
+// import {availableTicketsMiddleware} from "../middlewares/middlewares.loan";
 
 const router = Router();
 
@@ -53,7 +55,7 @@ router.post(
   '/ticket/:ticket_id/book',
   AuthMiddleware.validateAuthToken,
   AuthMiddleware.isCompletedKyc('confirm'),
-  // UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkIfAccountDetailsExists,
   Model(loanSchema.loanForEventApplication, 'payload'),
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
@@ -62,12 +64,13 @@ router.post(
   UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.checkUserAdvancedKycUpdate,
   // LoanMiddleware.checkIfUserHasActivePersonalLoan,
-  // LoanMiddleware.validateLoanAmountAndTenor,
-  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  // LoanMiddleware.availableTicketsMiddleware not to be used,
+  LoanMiddleware.validateLoanAmountAndTenor,
+  // LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
-  LoanMiddleware.checkIfUserHasClusterDiscount,
+  // LoanMiddleware.checkIfUserHasClusterDiscount,
   // UserMiddleware.checkIfCardOrUserExist,
-  LoanMiddleware.additionalUserChecksForLoan,
+  // LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
   shopCategories.createTicketSubscription
 );
@@ -93,6 +96,8 @@ router.delete(
 router.post(
   '/ticket/payment-successful',
   AuthMiddleware.validateAuthToken,
+  Model(loanSchema.successfulEventPayment, 'payload'),
+  paymentMiddleware.ticketPurchaseUpdate,
   shopCategories.ticketPurchaseUpdate
 );
 

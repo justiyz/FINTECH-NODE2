@@ -597,6 +597,35 @@ export const paystackInitiateRefundTestResponse = (transaction_id) => {
   return result;
 };
 
+export const seedfiUnderwritingApprovedLoanApplicationTestResponse2 = (payload) => {
+  const data = {
+    status: 200,
+    statusText: 'OK',
+    data: {
+      loan_application_id: payload.loan_application_id,
+      loan_duration_in_month: payload.loan_duration_in_month,
+      loan_amount: payload.loan_amount,
+      orr_score: 81.99,
+      final_decision: 'APPROVED',
+      pricing_band: 36,
+      monthly_interest: 0.03,
+      fees: {
+        processing_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
+        insurance_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
+        advisory_fee: parseFloat(0.01 * parseFloat(payload.loan_amount)),
+        processing_fee_percentage: 0.01,
+        insurance_fee_percentage: 0.01,
+        advisory_fee_percentage: 0.01
+      },
+      monthly_repayment: (payload.loan_amount/parseFloat(payload.loan_duration_in_month)).toFixed(2),
+      // monthly_repayment: ((payload.loan_amount * 0.7)/parseFloat(payload.loan_duration_in_month)).toFixed(2),
+      // first_installment: (payload.loan_amount * 0.3).toFixed(2),
+      max_approval: parseFloat(payload.loan_amount)
+    }
+  };
+
+  return data;
+};
 export const seedfiUnderwritingApprovedLoanApplicationTestResponse = (payload) => {
   const data = {
     status: 200,
