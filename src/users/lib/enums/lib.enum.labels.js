@@ -27,6 +27,8 @@ export const GENERATE_MONO_ACCOUNT_ID_SERVICE = 'MonoService::generateMonoAccoun
 export const CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE = 'YouVerifyService::createUserYouVerifyCandidate';
 export const INITIATE_YOU_VERIFY_ADDRESS_VERIFICATION_SERVICE = 'YouVerifyService::initiateUserYouVerifyAddressVerification';
 export const DOJAH_BVN_VERIFICATION_SERVICE = 'DojahService::dojahBvnVerificationCheck';
+export const DOJAH_NIN_VERIFICATION_SERVICE = 'DojahService::dojahNINVerificationCheck';
+export const DOJAH_VIN_VERIFICATION_SERVICE = 'DojahService::dojahVINVerificationCheck';
 export const ZEEH_BVN_VERIFICATION_SERVICE = 'ZeehService::zeehBnvVerificationCheck';
 export const PAYSTACK_FETCH_BANKS_SERVICE = 'PaystackService::fetchBanks';
 export const PAYSTACK_RESOLVE_BANK_ACCOUNT_NAME_SERVICE = 'PaystackService::resolveAccount';
@@ -46,6 +48,7 @@ export const IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE = 'UserMiddleware::isUploadedIm
 export const IS_VERIFIED_BVN_MIDDLEWARE = 'UserMiddleware::isVerifiedBvn';
 export const VERIFY_BVN_MIDDLEWARE = 'UserMiddleware::verifyBvn';
 export const UPDATE_BVN_CONTROLLER = 'UserController::updateBvn';
+export const VERIFY_USER_IDENTITY_DOCUMENT = 'UserController::documentVerification';
 export const UPDATE_USER_FCM_TOKEN_CONTROLLER = 'UserController::updateUserFcmToken';
 export const UPDATE_LOAN_STATUS_TO_OVERDUE_CONTROLLER = 'CronController::updateLoanStatusToOverdue';
 export const UPDATE_CLUSTER_LOAN_STATUS_TO_OVERDUE_CONTROLLER = 'CronController::updateClusterLoanStatusToOverdue';
@@ -228,6 +231,7 @@ export const FETCH_USER_REFERRAL_HISTORY_CONTROLLER = 'UserController::fetchUser
 export const USER_CLAIMS_REFERRAL_POINTS_CONTROLLER = 'UserController::userClaimsReferralPoints';
 export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlertNotification';
 export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount';
+export const CHECK_NIN_LENGTH_MIDDLEWARE = 'UserController::checkIfTheLengthOfTheNinIsCorrect';
 
 
 // Admin related labels

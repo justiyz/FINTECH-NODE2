@@ -605,7 +605,8 @@ export const ticketBookedForYou = (data) => `
 </tr>
 `;
 
-export const eventBooking = (data) => `<html lang="en">
+export const eventBooking = (data) => `
+<html lang="en">
     <head>
         <style>
             body {
@@ -649,7 +650,7 @@ export const eventBooking = (data) => `<html lang="en">
         <div class="greetings"><span class="gray">Hi ${data.first_name}</span> <span class="size_24">Thank You for Booking Your Event Ticket with Us!</span></div>
         <div class="gray bold">Your ticket is attached to this email. Please keep it handy for a seamless entry on the day of the event.</div>
 
-        <a href="#">Click here for your tickets.</a>
+        ${data.ticket_urls}
         <span class="gray w-60 bold">If you have any questions or need further assistance, feel free to reach out to our dedicated support team at hello@theseedfi.com. We're here to ensure you have an amazing experience!</span>
         <span class="gray">You are receiving this email because you opt in via our website.</span>
         <span class="gray">© 2023 SeedFi. All rights reserved.You received this email because you signed up for an app that helps you create your emails.</span>

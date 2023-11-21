@@ -29,12 +29,12 @@ const heading = {
 export const commonTemplate = (messageType, data) => {
   let headerText;
   switch (messageType) {
-  case `${messageType}`:
-    headerText = heading[messageType];
-    break;
-  default:
-    headerText = '';
-    break;
+    case `${messageType}`:
+      headerText = heading[messageType];
+      break;
+    default:
+      headerText = '';
+      break;
   }
 
   return `

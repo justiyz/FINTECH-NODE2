@@ -15,7 +15,7 @@ import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
-import { zeehBVNVerificationCheck } from "../services/services.zeeh";
+import * as zeehService from '../services/services.zeeh';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -194,7 +194,7 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
 export const verifyBvn = async(req, res, next) => {
   try {
     const { body: { bvn },  user } = req;
-    const data = await zeehBVNVerificationCheck(bvn.trim(), user);
+    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
     if (data.status !== 'success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
@@ -1131,3 +1131,6 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     return next(error);
   }
 };
+
+
+

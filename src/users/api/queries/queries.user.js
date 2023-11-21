@@ -253,7 +253,7 @@ export default {
       verification_url,
       issued_date,
       expiry_date
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
      `,
 
   addDocumentTOUserUploadedDocuments: `
@@ -261,7 +261,7 @@ export default {
       user_id,
       document_title,
       image_url
-    ) VALUES ($1, $2, $3)`,
+    ) VALUES ($1, $2, $3) RETURNING *`,
 
   fetchUserAddressDetails: `
     SELECT
@@ -396,6 +396,22 @@ export default {
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn,
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
+  
+  
+  userIdentityVerification: `
+    UPDATE users
+    SET
+    updated_at = NOW(),
+    image_url = $2,
+    tier = $3,
+    is_uploaded_identity_card = true,
+    is_uploaded_selfie_image = true
+    WHERE user_id = $1
+    RETURNING user_id, first_name, last_name, image_url, is_uploaded_identity_card, is_uploaded_selfie_image,
+    is_created_password, is_created_pin, is_completed_kyc, status
+    `,
+  
+  
 
   updateUserTierValue: `
     UPDATE users

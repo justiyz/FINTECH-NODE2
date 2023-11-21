@@ -686,6 +686,15 @@
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/vite.config.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/vite.config.js.timestamp-1683017275825.mjs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/Dashboard/Loans/ManuallyCreateLoanApplication/index.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/20231108103637-create-ticket-reference.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/20231114160136-add-loan-id-to-ticket.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/20231120052311-addTicketURLColumn.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231108103637-create-ticket-reference-down.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231108103637-create-ticket-reference-up.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231114160136-add-loan-id-to-ticket-down.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231114160136-add-loan-id-to-ticket-up.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231120052311-addTicketURLColumn-down.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231120052311-addTicketURLColumn-up.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/.env.local" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/env.local.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/docker-compose.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/server.js" afterDir="false" />
@@ -693,7 +702,43 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/index.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/seedfi-api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/seedfi-api.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controllers.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.model.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/services/service.seedfiUnderwriting.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/service.seedfiUnderwriting.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/services/services.email.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/services.email.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/express/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/express/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/logger/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/logger/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/template.common.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/template.common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/response/response.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/response/response.user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -755,7 +800,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="npm.migrate:create">
     <configuration name="migrate:create" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
@@ -798,5 +843,16 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

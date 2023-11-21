@@ -146,6 +146,7 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
       ticket_urls: ticket_urls
     };
     await MailService('Ticket Information', 'eventBooking', { ...data });
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
     req.ticket_update = {
       ticket_record
