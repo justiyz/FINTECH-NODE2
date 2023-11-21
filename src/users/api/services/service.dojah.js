@@ -62,7 +62,6 @@ const dojahVINVerification = async (vin, user) => {
 };
 
 const dojahNINVerification = async (nin, user) => {
-
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyNinTestResponse(user, nin);
@@ -75,8 +74,6 @@ const dojahNINVerification = async (nin, user) => {
         accept: 'application/json',
         AppId: config.SEEDFI_DOJAH_APP_ID,
         Authorization: config.SEEDFI_DOJAH_SECRET_KEY,
-        // AppId: dojahAppId,
-        // Authorization: dojahSecretKey,
         'Accept-Encoding': 'gzip,deflate,compress'
       }
     };
