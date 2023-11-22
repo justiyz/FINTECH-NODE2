@@ -280,7 +280,6 @@ export const generateTicketPDF = async(ticket_id, ticket_category_id, user, tick
       ServerSideEncryption: 'AES256',
       Location: `https://photow-profile-images.s3.us-west-2.amazonaws.com/${outputpath}`,
       key: outputpath,
-      Key: outputpath,
       Bucket: 'p-prof-img'
     };
     return data.Location.trim();
@@ -568,7 +567,6 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     const userDefaultAccountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
     // calculate amount to be booked
     const booking_amount = await getBookingTotalPrice(req.body.tickets);
-    // const booking_amount_plus_charges = booking_amount; // process applicable charges
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, ['loan application']);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
@@ -646,7 +644,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       data.monthly_repayment = monthly_repayment;
       const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
-const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);
+      const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);
       body.initial_payment = loan_repayment_schedule[0];
       req.first_repayment = first_installment;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);

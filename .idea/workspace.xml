@@ -3,7 +3,7 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="ChangeListManager"> 
+  <component name="ChangeListManager">
     <list default="true" id="3f77793f-beb1-4c05-92c1-a5671e770c57" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.eslintrc.json" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.github/workflows/cd.yml" afterDir="false" />
@@ -694,13 +694,29 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controller.cron.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controller.cron.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.cluster.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.cluster.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.payment.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.cluster.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.cluster.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings"> 
+  <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitToolBoxStore">
@@ -744,22 +760,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Applications/MAMP/htdocs/seedfi-api&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/farmcrowdyweb/Library/Application Support/JetBrains/Toolbox/apps/WebStorm/ch-0/232.9921.42/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Applications/MAMP/htdocs/seedfi-api",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs.mocha.mocha_node_package_dir": "/Applications/MAMP/htdocs/seedfi-api/node_modules/mocha",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Users/farmcrowdyweb/Library/Application Support/JetBrains/Toolbox/apps/WebStorm/ch-0/232.9921.42/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="npm.migrate:create">
+}]]></component>
+  <component name="RunManager" selected="Mocha..Payment middleware catch block unit testings">
+    <configuration name="middlewares.payment.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" working-dir="$PROJECT_DIR$/src/users/api/middlewares">
+      <method v="2" />
+    </configuration>
     <configuration name="migrate:create" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
@@ -780,8 +800,44 @@
       <envs />
       <method v="2" />
     </configuration>
+    <configuration name=".Payment middleware catch block unit testings" type="mocha-javascript-test-runner" temporary="true" nameIsGenerated="true">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <mocha-package>$PROJECT_DIR$/node_modules/mocha</mocha-package>
+      <working-directory>$PROJECT_DIR$</working-directory>
+      <pass-parent-env>true</pass-parent-env>
+      <ui>bdd</ui>
+      <extra-mocha-options />
+      <test-kind>SUITE</test-kind>
+      <test-file>$PROJECT_DIR$/tests/unit/middlewares/unit.middlewares.payment.js</test-file>
+      <test-names>
+        <name value="" />
+        <name value="Payment middleware catch block unit testings" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name=".Payment middleware catch block unit testings.should call paystackWebhookVerification" type="mocha-javascript-test-runner" temporary="true" nameIsGenerated="true">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <mocha-package>$PROJECT_DIR$/node_modules/mocha</mocha-package>
+      <working-directory>$PROJECT_DIR$</working-directory>
+      <pass-parent-env>true</pass-parent-env>
+      <ui>bdd</ui>
+      <extra-mocha-options />
+      <test-kind>TEST</test-kind>
+      <test-file>$PROJECT_DIR$/tests/unit/middlewares/unit.middlewares.payment.js</test-file>
+      <test-names>
+        <name value="" />
+        <name value="Payment middleware catch block unit testings" />
+        <name value="should call paystackWebhookVerification" />
+      </test-names>
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Mocha..Payment middleware catch block unit testings" />
+        <item itemvalue="Mocha..Payment middleware catch block unit testings.should call paystackWebhookVerification" />
+        <item itemvalue="Node.js.middlewares.payment.js" />
         <item itemvalue="npm.migrate:up" />
         <item itemvalue="npm.migrate:create" />
       </list>
@@ -802,5 +858,16 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component> 
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
 </project>

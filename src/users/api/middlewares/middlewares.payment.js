@@ -76,7 +76,7 @@ export const verifyPaystackPaymentStatus = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} verifyPaystackPaymentStatus.middlewares.payment.js`);
       const result = await confirmPaystackPaymentStatusByReference(body.data.reference);
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: verify transaction status response returned verifyPaystackPaymentStatus.middlewares.payment.js`);
-      const user = await processOneOrNoneData(userQueries.getUserByEmail);
+      const user = await processOneOrNoneData(userQueries.getUserByEmail, [ body.data.customer.email.trim() ]);
       if (result.data.status !== 'success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: transaction was not successful verifyPaystackPaymentStatus.middlewares.payment.js`);
         await processAnyData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
@@ -113,14 +113,13 @@ export const getTicketUrls = async(req, res, next) => {
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
     // check if ticket is already active
-    const { ticket_id, user_id, reference } = req.body;
-    const { user } = req;
+    const { body : {ticket_id, user_id, reference }, user }  = req;
     let ticket_urls = '';
-    const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
+    const ticket_record = await processOneOrNoneData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
     // update ticket loan status
-    await processAnyData(loanQueries.updateTicketLoanStatus, [ ticket_record[0].loan_id, user_id ]);
+    await processAnyData(loanQueries.updateTicketLoanStatus, [ ticket_record.loan_id, user_id ]);
     // update first repayment record
-    const [ repayment_record ] = await processAnyData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
+    const [ repayment_record ] = await processAnyData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record.loan_id ]);
     // create first repayment record
     await processAnyData(loanQueries.updatePersonalLoanPaymentTable,
         [
@@ -138,8 +137,9 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
 
     // send notification email
     for (let ticketRecordKey in ticket_record) {
-      ticket_urls = ticket_urls + `<img src="${ticket_record[ticketRecordKey].ticket_url} />`
+      ticket_urls = ticket_urls + `<a href="${ticket_record[ticketRecordKey].ticket_url}>${ticket_record[ticketRecordKey].ticket_url}</a>`
     }
+
     const data = {
       first_name: user.first_name,
       email: user.email,
@@ -180,7 +180,7 @@ export const verifyTransactionPaymentRecord = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record not existing in the DB verifyTransactionPaymentRecord.middlewares.payment.js`);
         return ApiResponse.error(res, enums.PAYMENT_RECORD_NOT_FOUND, body.otp ? enums.HTTP_BAD_REQUEST : enums.HTTP_OK, enums.VERIFY_TRANSACTION_PAYMENT_RECORD_MIDDLEWARE);
       }
-      const user = await processOneOrNoneData(userQueries.getUserByUserId);
+      const user = await processOneOrNoneData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: successfully fetched user from the DB verifyTransactionPaymentRecord.middlewares.payment.js`);
       if (body.event && body.event.includes('refund')) {
         if (!paymentRecord.is_initiated_refund) {
@@ -482,21 +482,25 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         const loanPaymentTrackingPayload = await PaymentPayload.trackLoanPayment(paymentRecord, loanDetails);
         const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, paymentRecord.user_id);
         repaymentSchedule.forEach(async(schedule) => {
-          await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule);
+          await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule, [
+              schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+            schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
+            schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
+          ]);
           return schedule;
         });
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan repayment schedule update successfully in the DB
         processPersonalLoanTransferPayments.middlewares.payment.js`);
         await Promise.all([
-          processOneOrNoneData(loanQueries.updateLoanDisbursementTable),
-          processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable),
-          processOneOrNoneData(loanQueries.updateActivatedLoanDetails),
-          processOneOrNoneData(loanQueries.updateUserLoanStatus),
-          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus)
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable, loanPaymentTrackingPayload),
+          processOneOrNoneData(loanQueries.updateActivatedLoanDetails, [ paymentRecord.loan_id ]),
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, 'active' ]),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ])
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB
         processPersonalLoanTransferPayments.middlewares.payment.js`);
-        const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+        const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'successful_loan_request_point' ]);
         const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount,
           [ rewardDetails.reward_id, parseFloat(paymentRecord.amount) ]);
         const actualPoint = rewardRangeDetails.point;
@@ -521,8 +525,8 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
       if (body.event === 'transfer.failed') {
         const loanDisbursementTrackingPayload = await PaymentPayload.trackLoanDisbursement(body, paymentRecord, loanDetails, 'fail');
         await Promise.all([
-          processOneOrNoneData(loanQueries.updateLoanDisbursementTable),
-          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus)
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ])
         ]);
         const reference = uuidv4();
         await processAnyData(loanQueries.initializeBankTransferPayment, [ paymentRecord.user_id, loanDetails.amount_requested, 'paystack', reference,
@@ -533,7 +537,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: transfer initiate via paystack returns response
         processPersonalLoanTransferPayments.middlewares.payment.js`);
         if (result.status === true && result.message === 'Transfer has been queued') {
-          await processOneOrNoneData(loanQueries.updateProcessingLoanDetails);
+          await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ paymentRecord.loan_id ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan details status set to processing in the DB
           processPersonalLoanTransferPayments.middlewares.payment.js`);
           userActivityTracking(paymentRecord.user_id, 45, 'success');
@@ -544,8 +548,8 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
       if (body.event === 'transfer.reversed') {
         const loanDisbursementTrackingPayload = await PaymentPayload.trackLoanDisbursement(body, paymentRecord, loanDetails, 'reversed');
         await Promise.all([
-          processOneOrNoneData(loanQueries.updateLoanDisbursementTable),
-          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus)
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ])
         ]);
         userActivityTracking(paymentRecord.user_id, 46, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED, enums.HTTP_OK);
@@ -586,7 +590,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       processPersonalLoanRepayments.middlewares.payment.js`);
       if (paymentRecord.payment_type === 'part_loan_repayment' || paymentRecord.payment_type === 'automatic_loan_repayment') {
         const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ paymentRecord.loan_id, paymentRecord.user_id ]);
-        const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments);
+        const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ paymentRecord.loan_id, paymentRecord.user_id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments
         processPersonalLoanRepayments.middlewares.payment.js`);
         const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
@@ -603,12 +607,12 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         processPersonalLoanRepayments.middlewares.payment.js`);
         if (checkIfUserOnClusterLoan) {
           const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
-          processOneOrNoneData(loanQueries.updateUserLoanStatus);
+          await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
         if (!checkIfUserOnClusterLoan) {
           const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
-          processOneOrNoneData(loanQueries.updateUserLoanStatus);
+          await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusOption]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
         await MailService('Successful loan repayment', 'successfulRepayment',
@@ -617,7 +621,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
         if (statusType === 'completed') {
-          const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
           processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
@@ -642,15 +646,15 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
       processPersonalLoanRepayments.middlewares.payment.js`);
       if (!checkIfUserOnClusterLoan) {
-        processOneOrNoneData(loanQueries.updateUserLoanStatus);
+        processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, 'inactive' ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to inactive processPersonalLoanRepayments.middlewares.payment.js`);
       }
       if (checkIfUserOnClusterLoan) {
         const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
-        processOneOrNoneData(loanQueries.updateUserLoanStatus);
+        processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
       }
-      const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+      const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
       const rewardPoint = parseFloat(rewardDetails.point);
       processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
@@ -698,7 +702,7 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
       if (body.event === 'transfer.success') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event}
         processClusterLoanTransferPayments.middlewares.payment.js`);
-        const clusterTotalLoanObligation = await processOneOrNoneData(clusterQueries.totalClusterOutstandingLoanAmount);
+        const clusterTotalLoanObligation = await processOneOrNoneData(clusterQueries.totalClusterOutstandingLoanAmount, [ paymentRecord.loan_id ]);
         const clusterSchedules = [];
         await qualifiedClusterMembers.map(async(member) => {
           const clusterLoanDisbursementTrackingPayload = await PaymentPayload.trackClusterLoanDisbursement(body, member, paymentRecord, 'success');
@@ -706,10 +710,10 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
           const repaymentSchedule = await generateClusterLoanRepaymentSchedule(member);
           clusterSchedules.push(...repaymentSchedule);
           await Promise.all([
-            processOneOrNoneData(clusterQueries.updateClusterLoanDisbursementTable),
-            processOneOrNoneData(clusterQueries.updateClusterLoanPaymentTable),
-            processOneOrNoneData(clusterQueries.updateClusterLoanStatus),
-            processOneOrNoneData(loanQueries.updateUserLoanStatus)
+            processOneOrNoneData(clusterQueries.updateClusterLoanDisbursementTable, clusterLoanDisbursementTrackingPayload),
+            processOneOrNoneData(clusterQueries.updateClusterLoanPaymentTable, clusterLoanPaymentTrackingPayload),
+            processOneOrNoneData(clusterQueries.updateClusterLoanStatus, [ member.user_id, member.cluster_id, 'active', member.total_outstanding_amount ]),
+            processOneOrNoneData(loanQueries.updateUserLoanStatus, [ member.user_id, 'active' ])
           ]);
           return member;
         });
@@ -717,16 +721,16 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         await processAnyData(clusterQueries.updateActivatedGeneralLoanDetails, [ paymentRecord.loan_id ]);
         await processAnyData(clusterQueries.updateGeneralClusterLoanDetails, [ generalClusterLoanDetails.cluster_id,
           parseFloat(clusterTotalLoanObligation.cluster_total_outstanding_amount), parseFloat(generalClusterLoanDetails.total_amount_requested) ]);
-        await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus);
+        await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ]);
         await Promise.all([
           clusterSchedules.map(async(schedule) => {
-            await processOneOrNoneData(clusterQueries.updateDisbursedClusterLoanRepaymentSchedule);
+            await processOneOrNoneData(clusterQueries.updateDisbursedClusterLoanRepaymentSchedule, Object.values(schedule));
             return schedule;
           })
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB
         processClusterLoanTransferPayments.middlewares.payment.js`);
-        const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+        const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'successful_loan_request_point' ]);
         await qualifiedClusterMembers.map(async(member) => {
           const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount,
             [ rewardDetails.reward_id, parseFloat(member.amount_requested) ]);
@@ -751,9 +755,9 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         processClusterLoanTransferPayments.middlewares.payment.js`);
         await qualifiedClusterMembers.map(async(member) => {
           const clusterLoanDisbursementTrackingPayload = await PaymentPayload.trackClusterLoanDisbursement(body, member, paymentRecord, 'fail');
-          await processOneOrNoneData(clusterQueries.updateClusterLoanDisbursementTable);
+          await processOneOrNoneData(clusterQueries.updateClusterLoanDisbursementTable, clusterLoanDisbursementTrackingPayload);
         });
-        await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus);
+        await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
         const reference = uuidv4();
         await processAnyData(loanQueries.initializeBankTransferPayment, [ paymentRecord.user_id, generalClusterLoanDetails.total_amount_requested, 'paystack', reference,
           'cluster_loan_disbursement', 'requested cluster loan facility disbursement', paymentRecord.loan_id ]);
@@ -763,7 +767,7 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: transfer initiate via paystack returns response
         processClusterLoanTransferPayments.middlewares.payment.js`);
         if (result.status === true && result.message === 'Transfer has been queued') {
-          await processOneOrNoneData(loanQueries.updateProcessingLoanDetails);
+          await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ paymentRecord.loan_id ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan details status set to processing in the DB
           processClusterLoanTransferPayments.middlewares.payment.js`);
           userActivityTracking(paymentRecord.user_id, 45, 'success');
@@ -776,9 +780,9 @@ export const processClusterLoanTransferPayments = async(req, res, next) => {
         processClusterLoanTransferPayments.middlewares.payment.js`);
         await qualifiedClusterMembers.map(async(member) => {
           const clusterLoanDisbursementTrackingPayload = await PaymentPayload.trackClusterLoanDisbursement(body, member, paymentRecord, 'reversed');
-          await processOneOrNoneData(clusterQueries.updateClusterLoanDisbursementTable);
+          await processOneOrNoneData(clusterQueries.updateClusterLoanDisbursementTable, clusterLoanDisbursementTrackingPayload);
         });
-        await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus);
+        await processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ]);
         userActivityTracking(paymentRecord.user_id, 46, 'success');
         return ApiResponse.success(res, enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED, enums.HTTP_OK);
       }
@@ -821,7 +825,8 @@ export const processClusterLoanRepayments = async(req, res, next) => {
       const isClusterAdmin = clusterLoanDetails.is_loan_initiator ? true : false;
       if (paymentRecord.payment_type === 'part_cluster_loan_repayment' || paymentRecord.payment_type === 'automatic_cluster_loan_repayment') {
         const [ nextClusterLoanRepayment ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ paymentRecord.loan_id, paymentRecord.user_id ]);
-        const outstandingClusterLoanRepaymentCount = await processOneOrNoneData(clusterQueries.existingUnpaidClusterLoanRepayments);
+        const outstandingClusterLoanRepaymentCount = await processOneOrNoneData(clusterQueries.existingUnpaidClusterLoanRepayments,
+            [ paymentRecord.loan_id, paymentRecord.user_id ]);
         const otherExistingOverDueRepayments = await processAnyData(clusterQueries.fetchOtherLoanOverDueRepayments ,
           [ clusterLoanDetails.loan_id, nextClusterLoanRepayment.loan_repayment_id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding cluster loan repayments
@@ -847,21 +852,21 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         processClusterLoanRepayments.middlewares.payment.js`);
         if (checkIfUserOnPersonalLoan) {
           const statusChoice = checkIfUserOnPersonalLoan.status === 'ongoing' ? 'active' : 'over due';
-          processOneOrNoneData(loanQueries.updateUserLoanStatus);
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processClusterLoanRepayments.middlewares.payment.js`);
         }
         if (!checkIfUserOnPersonalLoan) {
           const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
-          processOneOrNoneData(loanQueries.updateUserLoanStatus);
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusOption ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processClusterLoanRepayments.middlewares.payment.js`);
         }
         const [ clusterRunningLoanMembersCount, clusterLoanMembersCompletedLoan ] = await Promise.all([
-          processOneOrNoneData(clusterQueries.getCountOfRunningLoanClusterMembers),
+          processOneOrNoneData(clusterQueries.getCountOfRunningLoanClusterMembers, [ clusterLoanDetails.loan_id ]),
           processAnyData(clusterQueries.fetchClusterMembersCompletedLoanByClusterIs, [ clusterLoanDetails.loan_id ])
         ]);
         if (statusType === 'completed' && ((parseFloat(clusterLoanMembersCompletedLoan.length)) >= (parseFloat(clusterRunningLoanMembersCount.count)))) {
-          await processOneOrNoneData(clusterQueries.updateGeneralLoanCompletedAt);
-          await processOneOrNoneData(clusterQueries.updateGeneralClustersStatus);
+          await processOneOrNoneData(clusterQueries.updateGeneralLoanCompletedAt, [ clusterLoanDetails.loan_id ]);
+          await processOneOrNoneData(clusterQueries.updateGeneralClustersStatus, [ clusterLoanDetails.cluster_id ]);
         }
         await MailService('Successful loan repayment', 'successfulRepayment',
           { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(clusterLoanDetails.amount_requested).toFixed(2) });
@@ -871,7 +876,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
         sendClusterNotification(paymentRecord, cluster, { is_admin: isClusterAdmin }, `${user.first_name} ${user.last_name} repays part loan payment`,
           'cluster-loan-part-payment', { });
         if (statusType === 'completed') {
-          const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
           processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
@@ -906,23 +911,23 @@ export const processClusterLoanRepayments = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: cluster loan repayment and payment details updated successfully
       processClusterLoanRepayments.middlewares.payment.js`);
       if (!checkIfUserOnPersonalLoan) {
-        processOneOrNoneData(loanQueries.updateUserLoanStatus);
+        processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, 'inactive' ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to inactive processClusterLoanRepayments.middlewares.payment.js`);
       }
       if (checkIfUserOnPersonalLoan) {
         const statusChoice = checkIfUserOnPersonalLoan.status === 'ongoing' ? 'active' : checkIfUserOnPersonalLoan.status === 'over due'?  'over due' : 'inactive';
-        processOneOrNoneData(loanQueries.updateUserLoanStatus);
+        processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusChoice ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processClusterLoanRepayments.middlewares.payment.js`);
       }
       const [ clusterRunningLoanMembersCount ,clusterLoanMembersCompletedLoan ] = await Promise.all([
-        processOneOrNoneData(clusterQueries.getCountOfRunningLoanClusterMembers),
+        processOneOrNoneData(clusterQueries.getCountOfRunningLoanClusterMembers, [ clusterLoanDetails.loan_id ]),
         processAnyData(clusterQueries.fetchClusterMembersCompletedLoanByClusterIs, [ clusterLoanDetails.loan_id ])
       ]);
       if ((parseFloat(clusterLoanMembersCompletedLoan.length)) >= parseFloat(clusterRunningLoanMembersCount.count)) {
-        await processOneOrNoneData(clusterQueries.updateGeneralLoanCompletedAt);
-        await processOneOrNoneData(clusterQueries.updateGeneralClustersStatus);
+        await processOneOrNoneData(clusterQueries.updateGeneralLoanCompletedAt, [ clusterLoanDetails.loan_id ]);
+        await processOneOrNoneData(clusterQueries.updateGeneralClustersStatus, [ clusterLoanDetails.cluster_id ]);
       }
-      const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+      const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'complete_loan_repayment_point' ]);
       const rewardPoint = parseFloat(rewardDetails.point);
       processUserRewardPointBonus(user, 'Repayment point', rewardPoint, 'repayment'); // process reward awarding, function is written above
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards

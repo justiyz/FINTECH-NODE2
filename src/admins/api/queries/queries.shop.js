@@ -222,14 +222,15 @@ export default {
   `,
 
   getTicketByReference: `
-    SELECT *
+    SELECT user_tickets.loan_id, user_tickets.principal_payment
     FROM user_tickets
+    LEFT JOIN tickets ON tickets.ticket_id = user_tickets.ticket_id
     WHERE
-        transaction_reference = $1
+        user_tickets.transaction_reference = $1
     AND
-        user_id = $2
+        user_tickets.user_id = $2
     AND
-        ticket_id = $3
+        user_tickets.ticket_id = $3
   `,
 
   updateEventStatus: `
