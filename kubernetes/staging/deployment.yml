@@ -170,7 +170,7 @@ spec:
         - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL
           value: 'https://www.googleapis.com/oauth2/v1/certs'
         - name: SEEDFI_PROD_UNDERWRITING_SERVICE_BASE_URL
-          value: 'https://underwriting.theseedfi.com'
+          value: 'https://stg-underwriting.theseedfi.com'
         - name: SEEDFI_PROD_ADMIN_EMAIL_ADDRESS
           value: 'admin@tdlc.ng'
         - name: SEEDFI_PROD_AMAZON_S3_BUCKET_REGION
