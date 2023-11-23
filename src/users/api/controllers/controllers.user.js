@@ -511,8 +511,10 @@ export const nationalIdentificationNumberVerification = async (document, user, r
     ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
     user_data = ninResponse.data.entity;
   }
+
   if (ninResponse.status === 'success' || ninResponse.status === 200) {
-    if (checkIfUserDetailsMatchNinResponse(user_data, user)) {
+
+    if (await checkIfUserDetailsMatchNinResponse(user_data, user)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       const data = await uploadImageToS3Bucket(user, document, user_data);
