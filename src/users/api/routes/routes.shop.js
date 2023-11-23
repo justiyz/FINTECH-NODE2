@@ -64,7 +64,6 @@ router.post(
   UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.checkUserAdvancedKycUpdate,
   // LoanMiddleware.checkIfUserHasActivePersonalLoan,
-  // LoanMiddleware.availableTicketsMiddleware not to be used,
   LoanMiddleware.validateLoanAmountAndTenor,
   LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
