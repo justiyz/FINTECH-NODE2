@@ -548,6 +548,7 @@ export const cancel_ticket_booking = async (req, res, next) => {
 
 const getBookingTotalPrice = async (ticket_bookings) => {
   let booking_amount = 0;
+
   for (const ticket_record_id in ticket_bookings) {
     let unit_size = ticket_bookings[ticket_record_id].units;
     for (let counter = 0; counter < unit_size; counter += 1) {
@@ -573,8 +574,8 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
 
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
