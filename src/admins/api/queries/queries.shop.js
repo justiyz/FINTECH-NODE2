@@ -220,9 +220,26 @@ export default {
         units,
         ticket_category_status
   `,
+  getFirstRepaymentAmount:`
+    SELECT user_tickets.loan_id, user_tickets.principal_payment
+    FROM user_tickets
+    LEFT JOIN tickets ON tickets.ticket_id = user_tickets.ticket_id
+    WHERE
+        user_tickets.transaction_reference = $1
+    AND
+        user_tickets.user_id = $2
+    AND
+        user_tickets.ticket_id = $3
+  `,
+
+  getTicketLoanOutstandingAmount: `
+    SELECT total_outstanding_amount, status
+    FROM personal_loans
+    WHERE loan_id = $1
+  `,
 
   getTicketByReference: `
-    SELECT *
+    SELECT loan_id, user_ticket_id, ticket_url
     FROM user_tickets
     WHERE
         transaction_reference = $1
@@ -230,6 +247,19 @@ export default {
         user_id = $2
     AND
         ticket_id = $3
+  `,
+
+  getTicketByReference_x: `
+    SELECT user_tickets.loan_id, user_tickets.user_ticket_id, personal_loans.total_outstanding_amount
+    FROM user_tickets
+    LEFT JOIN tickets ON tickets.ticket_id = user_tickets.ticket_id
+    LEFT JOIN personal_loans on user_tickets.loan_id = personal_loans.loan_id
+    WHERE
+        user_tickets.transaction_reference = $1
+    AND
+        user_tickets.user_id = $2
+    AND
+        user_tickets.ticket_id = $3
   `,
 
   updateEventStatus: `

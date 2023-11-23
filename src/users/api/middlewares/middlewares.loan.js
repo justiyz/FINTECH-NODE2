@@ -283,44 +283,35 @@ export const checkIfUserHasActivePersonalLoan = async(req, res, next) => {
 export const validateLoanAmountAndTenor = async(req, res, next) => {
   const { user, body } = req;
   try {
-    // const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
-    //   maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
-    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_maximum_loan_amount'),
-    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_maximum_loan_amount'),
-    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_minimum_loan_amount'),
-    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_minimum_loan_amount'),
-    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'maximum_loan_tenor'),
-    //   processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'minimum_loan_tenor')
-    // ]);
-    const tierOneMaximumLoanAmountDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]);
-    const tierTwoMaximumLoanAmountDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]);
-    const tierOneMinimumLoanAmountDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]);
-    const tierTwoMinimumLoanAmountDetails= await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]);
-    const maximumLoanTenorDetails = await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]);
-    const minimumLoanTenorDetails= await processAnyData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ]);
-    //
-    // console.log(tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
-    //     maximumLoanTenorDetails, minimumLoanTenorDetails)
-    if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails[0].value)) {
+    const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
+      maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ])
+    ]);
+    if (Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor
       validateLoanAmountAndTenor.middleware.loan.js`);
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_LESSER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
-    if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails[0].value)) {
+    if (Number(body.duration_in_months || body.new_loan_duration_in_month) > Number(maximumLoanTenorDetails.value)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration greater than allowable maximum tenor
       validateLoanAmountAndTenor.middleware.loan.js`);
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(user.tier) === 1) {
-      req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails[0].value);
-      req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails[0].value);
+      req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails.value);
+      req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 1 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
     }
     if (Number(user.tier) === 2) {
-      req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails[0].value);
-      req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails[0].value);
+      req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails.value);
+      req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 2 user maximum allowable loan amount
       validateLoanAmountAndTenor.middleware.loan.js`);
       return next();
@@ -355,15 +346,16 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user is yet to take up to 2 previous loans checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
-
-    const employedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'employed_loan_amount_percentage_limit');
-    const selfEmployedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'self_employed_loan_amount_percentage_limit');
-    const unemployedUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'unemployed_loan_amount_percentage_limit');
-    const retiredUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'retired_loan_amount_percentage_limit');
-    const studentUserLoanAmountLimit = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'student_loan_amount_percentage_limit');
-    const tierOneMaximumLoanAmountDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_one_maximum_loan_amount');
-    const tierTwoMaximumLoanAmountDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, 'tier_two_maximum_loan_amount');
-
+    const [ employedUserLoanAmountLimit, selfEmployedUserLoanAmountLimit, unemployedUserLoanAmountLimit, retiredUserLoanAmountLimit,
+      studentUserLoanAmountLimit, tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails ] = await Promise.all([
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'employed_loan_amount_percentage_limit' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'self_employed_loan_amount_percentage_limit' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'unemployed_loan_amount_percentage_limit' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'retired_loan_amount_percentage_limit' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'student_loan_amount_percentage_limit' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ])
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: constant limit values fetched from the DB checkIfEmploymentTypeLimitApplies.middleware.loan.js`);
     const tierMaximumLoanAmountChoice = Number(user.tier) === 1 ? tierOneMaximumLoanAmountDetails : tierTwoMaximumLoanAmountDetails;
     const employedUserAllowableAmount = ((parseFloat(employedUserLoanAmountLimit.value) / 100) * (parseFloat(tierMaximumLoanAmountChoice.value)));
@@ -426,8 +418,8 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
 export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
   try {
     const { user } = req;
-    const userBvn = await processAnyData(loanQueries.fetchUserBvn, [ user.user_id ]);
-    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn[0].bvn));
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user bvn checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
     const allBlackListedBvns = await processAnyData(loanQueries.fetchAllBlackListedBvnsBlacklistedBvn, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched platform blacklisted bvns checkIfUserBvnNotBlacklisted.middlewares.loan.js`);

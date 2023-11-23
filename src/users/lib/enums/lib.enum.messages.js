@@ -412,4 +412,5 @@ export const DELETE_TICKET_INFORMATION = 'deleted ticket information successfull
 export const EVENT_PAYMENT_SUCCESSFUL = 'payment for tickets was successfully made';
 export const EVENT_PAYMENT_UNSUCCESSFUL = 'payment for tickets was not successful made';
 export const EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT = (user_id) => `ticket(s) booked successfully for ${user_id}`;
+export const TICKET_ALREADY_ACTIVE = 'ticket(s) already activated';
 

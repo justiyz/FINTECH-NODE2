@@ -210,7 +210,7 @@ export const completeProfile = async(req, res, next) => {
       const [ clusterInviter ] = await processAnyData(userQueries.getUserByUserId, [ checkIfUserHasPhoneNumberClusterInvite.inviter_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster information and cluster inviter information fetched completeProfile.controllers.auth.js`);
       const inviteInfo = {inviter: clusterInviter.first_name, name: cluster.name};
-      await processOneOrNoneData(authQueries.updateInvitedUserUserId);
+      await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasPhoneNumberClusterInvite.id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
       sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation(), user.fcm_token);
       sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
@@ -223,18 +223,19 @@ export const completeProfile = async(req, res, next) => {
       const [ clusterInviter ] = await processAnyData(userQueries.getUserByUserId, [ checkIfUserHasEmailClusterInvite.inviter_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster information and cluster inviter information fetched completeProfile.controllers.auth.js`);
       const inviteInfo = {inviter: clusterInviter.first_name, name: cluster.name};
-      await processOneOrNoneData(authQueries.updateInvitedUserUserId);
+      await processOneOrNoneData(authQueries.updateInvitedUserUserId, [ checkIfUserHasEmailClusterInvite.id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitee user id updated in the cluster invitees table completeProfile.controllers.auth.js`);
       sendPushNotification(user.user_id, PushNotifications.clusterMemberInvitation(), user.fcm_token);
       sendUserPersonalNotification(user, `${cluster.name} cluster invite`, PersonalNotifications.inviteClusterMember(inviteInfo), 'cluster-invitation', { ...cluster });
       userActivityTracking(req.user.user_id, 81, 'success');
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster invitation push and personal notifications sent to user completeProfile.controllers.auth.js`);
     }
-    const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails);
+    const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'sign_up_point' ]);
     const rewardPoint = parseFloat(rewardDetails.point);
     const rewardDescription = 'Welcome point';
-    await processOneOrNoneData(authQueries.updateRewardPoints);
-    await processOneOrNoneData(authQueries.updateUserPoints);
+    await processOneOrNoneData(authQueries.updateRewardPoints,
+        [ user.user_id, null, rewardPoint, rewardDescription, null, 'welcome' ]);
+    await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
     sendUserPersonalNotification(user, 'Welcome point',
       PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'welcome'), 'point-rewards', {});
     sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'welcome'), user.fcm_token);

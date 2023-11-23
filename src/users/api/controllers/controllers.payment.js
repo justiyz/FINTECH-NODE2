@@ -20,7 +20,7 @@ export const initializeCardTokenizationPayment = async(req, res, next) => {
     const { user } = req;
     const reference = uuidv4();
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference generated initializeCardTokenizationPayment.controllers.payment.js`);
-    const cardTokenizationChargeDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails);
+    const cardTokenizationChargeDetails = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'card_tokenization_charge' ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: default card tokenization amount fetched initializeCardTokenizationPayment.controllers.payment.js`);
     const tokenizingAmount = parseFloat(cardTokenizationChargeDetails.value);
     await processAnyData(paymentQueries.initializeCardPayment, [ user.user_id, tokenizingAmount, 'paystack', reference, 'card_tokenization', 'for addition of debit card'  ]);
