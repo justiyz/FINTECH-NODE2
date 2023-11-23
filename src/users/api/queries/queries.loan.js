@@ -662,6 +662,18 @@ export default {
     AND clusters.is_created_by_admin = false
     LIMIT 1`,
 
+  getPendingLoanInformation: `
+    SELECT total_outstanding_amount, loan_id
+    FROM personal_loans
+    WHERE
+        loan_id = $1
+    AND
+        user_id = $2
+    AND
+        status = 'pending'
+
+  `,
+
   updateTicketLoanStatus: `
     UPDATE personal_loans
     SET
@@ -673,12 +685,15 @@ export default {
         loan_decision = 'MANUAL',
         is_rescheduled = false,
         reschedule_count = 0,
-        used_previous_eligibility_details = false
+        used_previous_eligibility_details = false,
+        total_outstanding_amount = $3
     WHERE
         loan_id = $1
     AND
         user_id = $2
-    RETURNING *
+    AND
+        status = 'pending'
+    RETURNING total_outstanding_amount
   `,
 
   updateFirstRepaymentRecordStatus: `
@@ -688,7 +703,9 @@ export default {
         updated_at = NOW(),
         payment_at = NOW()
     WHERE
-        loan_id = $1 AND repayment_order = 1
+        loan_id = $1
+    AND
+        repayment_order = 1
     RETURNING loan_id, loan_repayment_id, principal_payment
   `,
 

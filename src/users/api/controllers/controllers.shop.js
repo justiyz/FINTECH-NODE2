@@ -26,7 +26,7 @@ const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 import {
   DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
   FAILED_TO_BOOK_TICKETS,
-  SEND_TICKET_NOTIFICATIONS, TICKET_UNITS_OVERSHOT
+  SEND_TICKET_NOTIFICATIONS, TICKET_ALREADY_ACTIVE, TICKET_UNITS_OVERSHOT
 } from "../../lib/enums/lib.enum.messages";
 import {
   CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER,
@@ -578,16 +578,9 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn, [
-      user.user_id,
-      booking_amount,
-      booking_amount,
-      'Ticket Loan',
-      body.duration_in_months,
-      body.duration_in_months,
-      0,
-      0
-    ]);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn,
+        [ user.user_id, booking_amount, booking_amount, 'Ticket Loan', body.duration_in_months, body.duration_in_months, 0, 0 ]
+    );
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
@@ -661,11 +654,13 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
 };
 
 export const ticketPurchaseUpdate = async (req, res, next) => {
+  if(req.ticket_already_active) {
+    return ApiResponse.error(res, enums.TICKET_ALREADY_ACTIVE, enums.HTTP_OK)
+  }
   try {
     const { user_id } = req.body;
     let ticket_update = req.ticket_update;
     const data = { ticket_update };
-
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {
@@ -674,8 +669,7 @@ export const ticketPurchaseUpdate = async (req, res, next) => {
     return next(error);
   }
 };
-// after payment successful
-// change the status of the ticket
+
 // send email notifications to recipients
 
 // there will be a requery endpoint that'll be called on the web

@@ -418,8 +418,8 @@ export const checkIfEmploymentTypeLimitApplies = async(req, res, next) => {
 export const checkIfUserBvnNotBlacklisted = async(req, res, next) => {
   try {
     const { user } = req;
-    const userBvn = await processAnyData(loanQueries.fetchUserBvn, [ user.user_id ]);
-    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn[0].bvn));
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userDecryptedBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user bvn checkIfUserBvnNotBlacklisted.middlewares.loan.js`);
     const allBlackListedBvns = await processAnyData(loanQueries.fetchAllBlackListedBvnsBlacklistedBvn, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched platform blacklisted bvns checkIfUserBvnNotBlacklisted.middlewares.loan.js`);

@@ -112,45 +112,42 @@ export const getTicketUrls = async(req, res, next) => {
 
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    // check if ticket is already active
     const { body : {ticket_id, user_id, reference }, user }  = req;
-    let ticket_urls = '';
-    const ticket_record = await processOneOrNoneData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
+    const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
+    const ticketLoanRecord = await processOneOrNoneData(adminShopQueries.getTicketLoanOutstandingAmount, [ ticket_record[0].loan_id ]);
+    // check if ticket is already active
+    if(ticketLoanRecord.status === 'ongoing') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: Ticket purchase is already activated  ticketPurchaseUpdate.middlewares.payment.js`);
+      req.ticket_already_active = true;
+      return next();
+    }
+    const totalOutstandingAmount = parseFloat(ticketLoanRecord.total_outstanding_amount);
+    let outstanding_amount = totalOutstandingAmount - (0.3 * totalOutstandingAmount);
+
     // update ticket loan status
-    await processAnyData(loanQueries.updateTicketLoanStatus, [ ticket_record.loan_id, user_id ]);
+    await processOneOrNoneData(loanQueries.updateTicketLoanStatus, [ ticket_record[0].loan_id, user_id, outstanding_amount ]);
+
     // update first repayment record
-    const [ repayment_record ] = await processAnyData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record.loan_id ]);
+    const repaymentRecord = await processOneOrNoneData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
+
     // create first repayment record
-    await processAnyData(loanQueries.updatePersonalLoanPaymentTable,
-        [
-            user_id,
-            repayment_record.loan_id,
-            repayment_record.principal_payment,
-            'debit',
-            'ticket loan',
-            'part loan repayment',
-            'paystack'
-        ]
+    await processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable,
+        [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]
     );
+
     // update event status
     await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
 
     // send notification email
-    for (let ticketRecordKey in ticket_record) {
-      ticket_urls = ticket_urls + `<a href="${ticket_record[ticketRecordKey].ticket_url}>${ticket_record[ticketRecordKey].ticket_url}</a>`
-    }
-
-    const data = {
-      first_name: user.first_name,
-      email: user.email,
-      ticket_urls: ticket_urls
-    };
+    let ticket_urls = '';
+    const ticketUrls = ticket_record.map(ticket => `<a href="${ticket.ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`).join('');
+    // for (let ticketRecordKey in ticket_record) {
+    //   ticket_urls = ticket_urls + `<a href="${ticket_record[ticketRecordKey].ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`
+    // }
+    const data = { first_name: user.first_name, email: user.email, ticket_urls: ticketUrls };
     await MailService('Ticket Information', 'eventBooking', { ...data });
-
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
-    req.ticket_update = {
-      ticket_record
-    };
+    req.ticket_update = { ticket_record };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return next();
   } catch (error) {

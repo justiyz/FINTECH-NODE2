@@ -695,21 +695,14 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controller.cron.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controller.cron.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.cluster.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.cluster.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.payment.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.cluster.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.cluster.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

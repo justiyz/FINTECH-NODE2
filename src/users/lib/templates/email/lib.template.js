@@ -613,6 +613,6 @@ export const eventBooking = (data) => `
     <td style="color: #84868c; padding-top: 15px;">Your ticket is attached to this email. Please keep it handy for a seamless entry on the day of the event.</td>
 </tr>
 <tr>
-    <td style="padding-top: 15px;">${data.tickect_urls}<a href="${data.tickect_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a></td>
+    <td style="padding-top: 15px;">${data.tickect_urls}</td>
 </tr>
 `;
