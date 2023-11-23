@@ -286,7 +286,7 @@ export const generateTicketPDF = async(ticket_id, ticket_category_id, user, tick
   }
   const payload = Buffer.from(ticketHtmlPDF, 'binary');
   const ticket_data  = await S3.uploadFile(outputpath, payload, 'application/pdf');
-  return ticket_data;
+  return ticket_data.Location;
 }
 
 
@@ -304,7 +304,7 @@ export const createTicketSubscription = async(req, res, next) => {
     for (const ticket of tickets) {
       const {ticket_id, ticket_category_id, units} = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
-        const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
+        const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticketCounter}|${ticket_category_id}`;
 
         // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
         const theQRCode = await generateQRCode(barcodeString);
@@ -315,7 +315,7 @@ export const createTicketSubscription = async(req, res, next) => {
 
         // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
-          const bookedTicket = await createUserTicket(
+          await createUserTicket(
             req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
