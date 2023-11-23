@@ -723,4 +723,15 @@ export default {
       FROM user_bank_accounts
       WHERE user_id =$1 AND is_default = true`,
 
+  fetchLoanIDFromUserTickets: `
+    SELECT ticket_id, loan_id
+    FROM user_tickets
+    WHERE
+        ticket_id = $1
+    AND
+        user_id = $2
+    AND
+        status = 'inactive'
+  `
+
 };

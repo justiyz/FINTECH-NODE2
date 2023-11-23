@@ -8,6 +8,8 @@ import Schema from '../../lib/schemas/lib.schema.shop';
 import loanSchema from '../../lib/schemas/lib.schema.loan';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as paymentMiddleware from '../middlewares/middlewares.payment';
+import * as LoanController from '../controllers/controllers.loan'
+import {cancelShopLoanApplication} from "../controllers/controllers.loan";
 // import {availableTicketsMiddleware} from "../middlewares/middlewares.loan";
 
 const router = Router();
@@ -15,8 +17,6 @@ const router = Router();
 router.get(
   '/shop-categories',
   AuthMiddleware.validateAuthToken,
-  // AuthMiddleware.isCompletedKyc('confirm'),
-  // Model(Schema.shopCategory, 'params'),
   shopCategories.shopCategories
 );
 
@@ -90,6 +90,7 @@ router.post(
 router.delete(
   '/:ticket_id/delete',
   AuthMiddleware.validateAuthToken,
+    LoanController.cancelShopLoanApplication,
   shopCategories.cancel_ticket_booking
 );
 

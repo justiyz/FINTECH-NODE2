@@ -213,6 +213,24 @@ export const cancelLoanApplication = async(req, res, next) => {
   }
 };
 
+export const cancelShopLoanApplication = async(req, res, next) => {
+  try {
+    const { user, params: { ticket_id } } = req;
+    const loanIds = await processAnyData(loanQueries.fetchLoanIDFromUserTickets, [ ticket_id, user.user_id ]);
+    for (let counter = 0; counter < Object.keys(loanIds).length; counter++) {
+      await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [ loanIds, user.user_id ]);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
+    userActivityTracking(req.user.user_id, 43, 'success');
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 43, 'fail');
+    error.label = enums.CANCEL_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`cancelling loan application process failed::${enums.CANCEL_LOAN_APPLICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 /**
  * update activated loan application details
  * @param {Request} req - The request from the endpoint.
