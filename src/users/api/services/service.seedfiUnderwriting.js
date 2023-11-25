@@ -6,7 +6,6 @@ import * as userMockedTestResponses from '../../../../tests/response/response.us
 const { SEEDFI_NODE_ENV } = config;
 
 const loanApplicationEligibilityCheckV2 = async(payload) => {
-  console.log('Eligibility Check: ', payload);
   try {
     if (SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse2(payload);
