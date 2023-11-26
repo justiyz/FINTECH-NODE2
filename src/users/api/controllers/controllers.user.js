@@ -541,7 +541,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successfull documentVerification.controller.user.js`);
-      userActivityTracking(user.user_id, 109, 'success');
+      userActivityTracking(user.user_id, 119, 'success');
       return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...response, tier_upgraded});
 
     } else {
@@ -644,7 +644,7 @@ export const votersIdentificationNumberVerification = async (document_id, state,
     //   }
     // }
   } catch (error) {
-    userActivityTracking(user.user_id, 109, 'fail');
+    userActivityTracking(user.user_id, 119, 'fail');
     error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
     logger.error(`user identity document verification failed::${ enums.VERIFY_USER_IDENTITY_DOCUMENT }`, error.message);
     // return next(error);

@@ -64,7 +64,7 @@ router.post(
   UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.checkUserAdvancedKycUpdate,
   // LoanMiddleware.checkIfUserHasActivePersonalLoan,
-  LoanMiddleware.validateLoanAmountAndTenor,
+  // LoanMiddleware.validateLoanAmountAndTenor,
   LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
   LoanMiddleware.checkIfUserHasClusterDiscount,
@@ -72,6 +72,14 @@ router.post(
   LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
   shopCategories.createTicketSubscription
+);
+
+router.post(
+  '/ticket/payment-successful',
+  AuthMiddleware.validateAuthToken,
+  Model(loanSchema.successfulEventPayment, 'payload'),
+  paymentMiddleware.ticketPurchaseUpdate,
+  shopCategories.ticketPurchaseUpdate
 );
 
 router.get(
@@ -91,14 +99,6 @@ router.delete(
   AuthMiddleware.validateAuthToken,
     LoanController.cancelShopLoanApplication,
   shopCategories.cancel_ticket_booking
-);
-
-router.post(
-  '/ticket/payment-successful',
-  AuthMiddleware.validateAuthToken,
-  Model(loanSchema.successfulEventPayment, 'payload'),
-  paymentMiddleware.ticketPurchaseUpdate,
-  shopCategories.ticketPurchaseUpdate
 );
 
 export default router;

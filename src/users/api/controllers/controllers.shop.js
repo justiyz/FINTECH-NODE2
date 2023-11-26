@@ -1,9 +1,8 @@
 import {processAnyData, processNoneData} from "../services/services.db";
-// import shopQueries from '../../queries/queries.shop';
 import adminShopQueries from '../../../admins/api/queries/queries.shop';
 import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import {createRepaymentSchedule, createShopRepaymentSchedule} from '../../../admins/api/controllers/controllers.loan';
+import { createShopRepaymentSchedule } from '../../../admins/api/controllers/controllers.loan';
 import {
   calculateAmountPlusPaystackTransactionCharge,
   initializeBankTransferPayment,
@@ -21,33 +20,20 @@ import LoanPayload from "../../lib/payloads/lib.payload.loan";
 import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import * as html_pdf from 'html-pdf'
-const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
-import {
-  DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
-  FAILED_TO_BOOK_TICKETS,
-  SEND_TICKET_NOTIFICATIONS, TICKET_ALREADY_ACTIVE, TICKET_UNITS_OVERSHOT
-} from "../../lib/enums/lib.enum.messages";
-import {
-  CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER,
-  EVENT_PAYMENT_SUCCESSFUL
-} from "../../lib/enums/lib.enum.labels";
-import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib/utils/lib.util.helpers";
-import AdminMailService from "../../../admins/api/services/services.email";
 import config from "../../config";
-import {createUserEmploymentDetails} from "./controllers.user";
-import {ticketPDFTemplate} from "../../lib/templates/offerLetter";
+import { ticketPDFTemplate } from "../../lib/templates/offerLetter";
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
+import { uniqueID } from "mocha/lib/utils";
+import { cloudinary } from '../services/service.cloudinary';
+const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 const puppeteer = require('puppeteer');
-import * as S3 from '../../api/services/services.s3';
-import * as UserHash from "../../lib/utils/lib.util.hash";
-
-// const html_pdf = require('html-pdf');
-// var html = fs.readFileSync('./test/businesscard.html', 'utf8');
 
 export const shopCategories = async (req, res, next) => {
   try {
     const {user} = req;
-    let shop_categories = await processAnyData(shopQueries.shopCategories, [req.query.status]);
+    let shop_categories = await processAnyData(shopQueries.shopCategories, [ req.query.status ]);
     const data = {
       shop_categories
     };
@@ -266,27 +252,54 @@ export const getTicketSubscriptionSummary = async (req, res, next) => {
     return next(error);
   }
 };
-export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
-  const ticket_category = await processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]);
-  const ticket_record = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
-  const dateObject = new Date();
-  const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
-  const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticket_category, user, ticket_record)
-  const outputpath = `files/tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
-  // generate ticket pdf
-  if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
-    const data = {
-      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
-      ServerSideEncryption: 'AES256',
-      Location: `https://photow-profile-images.s3.us-west-2.amazonaws.com/${outputpath}`,
-      key: outputpath,
-      Bucket: 'p-prof-img'
-    };
-    return data.Location.trim();
+
+export const imageFromHtml = async (htmlContent) => {
+  try {
+    const tempDir = os.tmpdir()
+    if (!fs.existsSync(tempDir)) {
+      console.error(`Error: Temporary directory does not exist - ${tempDir}`);
+      fs.mkdirSync(tempDir);
+    }
+    // Create a new page
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    let uId = uniqueID();
+    let outputpath = uId+'.jpg';
+    // const imagePath = path.join(tempDir, 'outputpath.jpg');
+    const imagePath = path.join(tempDir, outputpath);
+    await page.screenshot({ path: imagePath, type: 'jpeg' });
+
+    await browser.close();
+    return imagePath
+
+  } catch (error) {
+    console.error('Error during Puppeteer operation:', error);
   }
-  const payload = Buffer.from(ticketHtmlPDF, 'binary');
-  const ticket_data  = await S3.uploadFile(outputpath, payload, 'application/pdf');
-  return ticket_data.Location;
+
+}
+
+export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
+  try {
+    const [ticketCategory, ticketRecord] = await Promise.all([
+      processOneOrNoneData(shopQueries.getBookedTicketCategory, [ticket_category_id]),
+      processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]),
+    ]);
+    const dateObject = new Date();
+    const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
+
+    const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticketCategory, user, ticketRecord);
+    // use puppeteer to generate image from the html file
+    const newlyGeneratedFile = await imageFromHtml(ticketHtmlPDF);
+    // generate ticket pdf
+    const cloudinary_payload = await cloudinary.uploader.upload(newlyGeneratedFile)
+    console.log(cloudinary_payload);
+    return cloudinary_payload.secure_url;
+  } catch (error) {
+    console.error('Error generating ticket:', error);
+    throw error; // Re-throw the error to propagate it up the call stack
+  }
+
 }
 
 
@@ -312,7 +325,7 @@ export const createTicketSubscription = async(req, res, next) => {
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         // generate ticket document
         let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
-
+        console.log(new_ticket_file_url);
         // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
           await createUserTicket(
@@ -323,7 +336,6 @@ export const createTicketSubscription = async(req, res, next) => {
           ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
-
         // TODO
         // add an "else" statement for handling cases where no available tickets.
       }
@@ -337,19 +349,14 @@ export const createTicketSubscription = async(req, res, next) => {
       await initializeCardPayment(user, amountWithTransactionCharges, reference) :
       await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
     const data = {
-      'tickets': ticketPurchaseLogs,
       'total_amount': totalAmountToBePaid,
       'payment': payment_operation
     };
-
-    // When payment is successful,  update ticket/loan status
-    // now change ticket status to successful/ongoing
-
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
-    error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
+    // error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
     logger.error(`Failed to create ticket subscription: ${ error.message }`);
     return next(error);
   }
@@ -570,12 +577,13 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     const booking_amount = await getBookingTotalPrice(req.body.tickets);
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, ['loan application']);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
+
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
-
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
+
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
@@ -590,7 +598,6 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
     const result = await loanApplicationEligibilityCheckV2(payload);
     const { data } = result;
-
     if (result.status !== 200) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [loanApplicationDetails.loan_id, user.user_id]);
@@ -675,65 +682,65 @@ export const ticketPurchaseUpdate = async (req, res, next) => {
 
 // there will be a requery endpoint that'll be called on the web
 
-export const checkUserTicketLoanEligibility_ = async (req, res, next) => {
-  // const { user, body } = req;
-  const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
-    userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
-  const userDefaultAccountDetails = await getUserDefaultAccountDetails(user.user_id);
-  const bookingAmount = await calculateBookingAmount(req.body.tickets);
-  const admins = await getAdminsForNotification('loan application');
-  try {
-    const userBvn = await getUserBvn(user.user_id);
-    const userMonoId = userDefaultAccountDetails.mono_account_id || '';
-    const previouslyDefaultedCount = await checkPreviousLoanDefault(user.user_id);
-
-    const loanApplicationDetails = await initiateLoanApplication(user, body, bookingAmount);
-
-    const payload = await prepareLoanEligibilityPayload(
-        user,
-        body,
-        userDefaultAccountDetails,
-        loanApplicationDetails,
-        previouslyDefaultedCount,
-        createUserEmploymentDetails
-    );
-
-    const result = await checkLoanEligibility(payload);
-    const { data } = result;
-
-    if (result.status !== 200) {
-      handleFailedLoanApplication(
-          res,
-          user.user_id,
-          loanApplicationDetails.loan_id,
-          result,
-          admins
-      );
-    }
-
-    if (data.final_decision === 'DECLINED') {
-      handleDeclinedLoanApplication(res, user, data, loanApplicationDetails);
-    }
-
-    if (data.final_decision === 'APPROVED') {
-      handleApprovedLoanApplication(
-          res,
-          user,
-          data,
-          loanApplicationDetails,
-          bookingAmount,
-          body
-      );
-      return next();
-    }
-  } catch (error) {
-    handleLoanApplicationError(req, res, next, user.user_id, error);
-    // userActivityTracking(req.user.user_id, 18, 'fail');
-    // error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
-    // logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
-    // return next(error);
-  }
-};
+// export const checkUserTicketLoanEligibility_ = async (req, res, next) => {
+//   // const { user, body } = req;
+//   const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
+//     userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
+//   const userDefaultAccountDetails = await getUserDefaultAccountDetails(user.user_id);
+//   const bookingAmount = await calculateBookingAmount(req.body.tickets);
+//   const admins = await getAdminsForNotification('loan application');
+//   try {
+//     const userBvn = await getUserBvn(user.user_id);
+//     const userMonoId = userDefaultAccountDetails.mono_account_id || '';
+//     const previouslyDefaultedCount = await checkPreviousLoanDefault(user.user_id);
+//
+//     const loanApplicationDetails = await initiateLoanApplication(user, body, bookingAmount);
+//
+//     const payload = await prepareLoanEligibilityPayload(
+//         user,
+//         body,
+//         userDefaultAccountDetails,
+//         loanApplicationDetails,
+//         previouslyDefaultedCount,
+//         createUserEmploymentDetails
+//     );
+//
+//     const result = await checkLoanEligibility(payload);
+//     const { data } = result;
+//
+//     if (result.status !== 200) {
+//       handleFailedLoanApplication(
+//           res,
+//           user.user_id,
+//           loanApplicationDetails.loan_id,
+//           result,
+//           admins
+//       );
+//     }
+//
+//     if (data.final_decision === 'DECLINED') {
+//       handleDeclinedLoanApplication(res, user, data, loanApplicationDetails);
+//     }
+//
+//     if (data.final_decision === 'APPROVED') {
+//       handleApprovedLoanApplication(
+//           res,
+//           user,
+//           data,
+//           loanApplicationDetails,
+//           bookingAmount,
+//           body
+//       );
+//       return next();
+//     }
+//   } catch (error) {
+//     handleLoanApplicationError(req, res, next, user.user_id, error);
+//     // userActivityTracking(req.user.user_id, 18, 'fail');
+//     // error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
+//     // logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
+//     // return next(error);
+//   }
+// };
 
 function handleLoanApplicationError(req, res, next, user_id, error) {
   userActivityTracking(req.user.user_id, 18, 'fail');
