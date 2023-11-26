@@ -744,22 +744,6 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-<<<<<<< HEAD
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Applications/MAMP/htdocs/seedfi-api&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs.mocha.mocha_node_package_dir&quot;: &quot;/Applications/MAMP/htdocs/seedfi-api/node_modules/mocha&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/farmcrowdyweb/Library/Application Support/JetBrains/Toolbox/apps/WebStorm/ch-0/232.9921.42/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-=======
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
@@ -776,7 +760,6 @@
     "nodejs_package_manager_path": "npm",
     "ts.external.directory.path": "/Users/farmcrowdyweb/Library/Application Support/JetBrains/Toolbox/apps/WebStorm/ch-0/232.9921.42/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
->>>>>>> fix/repayment-job
   }
 }</component>
   <component name="RunManager" selected="Mocha..Payment middleware catch block unit testings">
@@ -856,11 +839,7 @@
       <updated>1699349967828</updated>
       <workItem from="1699349969039" duration="98105000" />
       <workItem from="1700022273927" duration="9789000" />
-<<<<<<< HEAD
-      <workItem from="1700820946372" duration="531000" />
-=======
       <workItem from="1700834509883" duration="44851000" />
->>>>>>> fix/repayment-job
     </task>
     <servers />
   </component>
@@ -883,12 +862,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js</url>
-<<<<<<< HEAD
-          <line>284</line>
-=======
           <line>341</line>
           <properties lambdaOrdinal="-1" />
->>>>>>> fix/repayment-job
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
