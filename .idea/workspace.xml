@@ -694,17 +694,7 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/services/service.seedfiUnderwriting.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/service.seedfiUnderwriting.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/monitor/lib.monitor.operations.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/monitor/lib.monitor.operations.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -850,7 +840,7 @@
       <updated>1699349967828</updated>
       <workItem from="1699349969039" duration="98105000" />
       <workItem from="1700022273927" duration="9789000" />
-      <workItem from="1700834509883" duration="40364000" />
+      <workItem from="1700834509883" duration="43983000" />
     </task>
     <servers />
   </component>
