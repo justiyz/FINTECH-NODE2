@@ -293,6 +293,7 @@ export const generateTicketPDF = async(ticket_id, ticket_category_id, user, tick
     const newlyGeneratedFile = await imageFromHtml(ticketHtmlPDF);
     // generate ticket pdf
     const cloudinary_payload = await cloudinary.uploader.upload(newlyGeneratedFile)
+    console.log(cloudinary_payload);
     return cloudinary_payload.secure_url;
   } catch (error) {
     console.error('Error generating ticket:', error);
@@ -324,6 +325,7 @@ export const createTicketSubscription = async(req, res, next) => {
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         // generate ticket document
         let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
+        console.log(new_ticket_file_url);
         // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
           await createUserTicket(
