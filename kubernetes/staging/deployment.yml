@@ -204,6 +204,12 @@ spec:
           value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
         - name: SEEDFI_PROD_BANK_ACCOUNT_STATEMENT_PROCESSOR
           value: 'okra'
+        - name: SEEDFI_PROD_CLOUDINARY_CLOUD_NAME
+          value: 'dtri0jdvp'
+        - name: SEEDFI_PROD_CLOUDINARY_API_KEY
+          value: '469438334949249'
+        - name: SEEDFI_PROD_CLOUDINARY_API_SECRET
+          value: 'Yw2lrK1HbZIGrQ-dRl3G79cw2Co'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
