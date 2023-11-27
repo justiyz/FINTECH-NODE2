@@ -598,7 +598,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
     console.log(payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: payload ${JSON.stringify(payload)}`);
-    const result = await loanApplicationEligibilityCheckV2(payload);
+    const result = await loanApplicationEligibilityCheckV2('The underwriting payload: ', payload);
     console.log(result);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: result ${JSON.stringify(result)}`);
     const { data } = result;
