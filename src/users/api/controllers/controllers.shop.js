@@ -325,7 +325,6 @@ export const createTicketSubscription = async(req, res, next) => {
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         // generate ticket document
         let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
-        console.log(new_ticket_file_url);
         // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
           await createUserTicket(
@@ -596,10 +595,8 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
-    console.log(payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: payload ${JSON.stringify(payload)}`);
     const result = await loanApplicationEligibilityCheckV2(payload);
-    console.log(result);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: result ${JSON.stringify(result)}`);
     const { data } = result;
     if (result.status !== 200) {
