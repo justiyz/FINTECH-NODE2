@@ -66,6 +66,12 @@ export default {
     WHERE loan_id = $1
     AND user_id = $2`,
 
+  deleteInitiatedLoanApplicationPaymentSchedule: `
+    DELETE FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+  `,
+
   fetchUserBvn: `
     SELECT bvn
     FROM users

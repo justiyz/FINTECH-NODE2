@@ -10,6 +10,7 @@ import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as paymentMiddleware from '../middlewares/middlewares.payment';
 import * as LoanController from '../controllers/controllers.loan'
 import {cancelShopLoanApplication} from "../controllers/controllers.loan";
+import {checkAvailableNumberOfTicketsBeforePurchase} from "../middlewares/middlewares.loan";
 // import {availableTicketsMiddleware} from "../middlewares/middlewares.loan";
 
 const router = Router();
@@ -69,6 +70,7 @@ router.post(
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
   LoanMiddleware.checkIfUserHasClusterDiscount,
   // UserMiddleware.checkIfCardOrUserExist,
+  LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
   LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
   shopCategories.createTicketSubscription
