@@ -7,6 +7,8 @@ import AdminMailService from '../../../admins/api/services/services.email';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import { fetchSeedfiPaystackBalance, createTransferRecipient } from '../services/service.paystack';
+import adminShopQueries from "../../../admins/api/queries/queries.shop";
+import {CHECK_AVAILABLE_TICKET_UNITS, CHECK_AVAILABLE_TICKET_UNITS_MESSAGE} from "../../lib/enums/lib.enum.labels";
 const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config;
 /**
  * check loan exists by id
@@ -472,6 +474,34 @@ export const checkRescheduleExtensionExists = async(req, res, next) => {
   }
 };
 
+async function getAvailableTicketUnits(ticketCategoryId) {
+  return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
+}
+export const checkAvailableNumberOfTicketsBeforePurchase = async(req, res, next) => {
+  try {
+    const tickets = req.body.tickets;
+    for (const ticket in tickets) {
+      const { ticket_category_id, units } = tickets[ticket];
+      const availableTickets = await getAvailableTicketUnits(ticket_category_id);
+      if(units > availableTickets.units) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}::: Requested tickets[${units}] more than available tickets [${availableTickets.units}].`);
+        return ApiResponse.error(
+            res,
+            enums.REQUESTED_NUMBER_OF_TICKETS_NOT_AVAILABLE,
+            enums.HTTP_UNAUTHORIZED,
+            enums.TICKET_PURCHASE_SHOP_CONTROLLER
+        )
+      }
+    }
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 120, 'fail');
+    error.label = enums.CHECK_AVAILABLE_TICKET_UNITS;
+    logger.error(`available tickets not enough to fulfill order::${enums.CHECK_AVAILABLE_TICKET_UNITS_MESSAGE}`, error.message);
+    return next(error);
+  }
+};
+
 /**
  * check loan application status is currently ongoing or over due
  * @param {Request} req - The request from the endpoint.
@@ -629,16 +659,6 @@ export const checkIfUserHasClusterDiscount = async(req, res, next) => {
  * @memberof LoanMiddleware
  */
 
-// export const availableTicketsMiddleware = async(req, res, next) => {
-//   try {
-//     const { user } = req;
-//
-//   } catch (error) {
-//     error.label = enums.TICKET_REQUESTED_HIGHER_THAN_AVAILABLE_UNITS;
-//     logger.error(`checking if available tickets can fulfil order::${enums.CHECK_AVAILABLE_TICKETS_MIDDLEWARE}`, error.message);
-//     return next(error);
-//   }
-// };
 export const additionalUserChecksForLoan = async(req, res, next) => {
   try {
     const { user } = req;
