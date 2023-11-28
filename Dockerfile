@@ -1,5 +1,9 @@
 FROM node:16.17.1
 
+# Install necessary dependencies
+RUN apt-get update && \
+    apt-get install -y libnss3
+
 # Create app directory
 RUN mkdir -p /usr/src/seedfi-backend
 WORKDIR /usr/src/seedfi-backend
