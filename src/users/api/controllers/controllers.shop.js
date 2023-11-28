@@ -269,10 +269,12 @@ export const imageFromHtml = async (htmlContent) => {
     // // Create a new page
     const browser = await puppeteer.launch(
         {
-          headless: 'new',
+          headless: true,
           args: [
-              '--no-sandbox',
-            '--disable-setuid-sandbox'
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--disable-setuid-sandbox",
+            "--no-sandbox",
           ]
         }
     );
