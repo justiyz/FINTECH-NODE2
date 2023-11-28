@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: seedfi-api
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
   template:
@@ -120,6 +120,16 @@ spec:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
+        - name: SEEDFI_PROD_ZEEH_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              key: zeehpublickey
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_ZEEH_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: zeehsecretkey
+              name: seedfi-api-config
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
         #     secretKeyRef:
@@ -160,7 +170,7 @@ spec:
         - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL
           value: 'https://www.googleapis.com/oauth2/v1/certs'
         - name: SEEDFI_PROD_UNDERWRITING_SERVICE_BASE_URL
-          value: 'https://underwriting.theseedfi.com'
+          value: 'https://stg-underwriting.theseedfi.com'
         - name: SEEDFI_PROD_ADMIN_EMAIL_ADDRESS
           value: 'admin@tdlc.ng'
         - name: SEEDFI_PROD_AMAZON_S3_BUCKET_REGION
@@ -185,11 +195,15 @@ spec:
           value: 'com.theseedfi.app'
         - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
           value: 'seedfi-backend'
+        - name: SEEDFI_PROD_ZEEH_URL
+          value: 'https://api.zeeh.africa/api/v1'
         - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 
         - name: SEEDFI_PROD_NEW_DEVICE_LOGIN_WAVER_USERS
           value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
+        - name: SEEDFI_PROD_BANK_ACCOUNT_STATEMENT_PROCESSOR
+          value: 'okra'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api

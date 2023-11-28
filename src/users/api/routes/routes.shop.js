@@ -8,6 +8,9 @@ import Schema from '../../lib/schemas/lib.schema.shop';
 import loanSchema from '../../lib/schemas/lib.schema.loan';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as paymentMiddleware from '../middlewares/middlewares.payment';
+import * as LoanController from '../controllers/controllers.loan'
+import {cancelShopLoanApplication} from "../controllers/controllers.loan";
+import {checkAvailableNumberOfTicketsBeforePurchase} from "../middlewares/middlewares.loan";
 // import {availableTicketsMiddleware} from "../middlewares/middlewares.loan";
 
 const router = Router();
@@ -15,8 +18,6 @@ const router = Router();
 router.get(
   '/shop-categories',
   AuthMiddleware.validateAuthToken,
-  // AuthMiddleware.isCompletedKyc('confirm'),
-  // Model(Schema.shopCategory, 'params'),
   shopCategories.shopCategories
 );
 
@@ -64,15 +65,23 @@ router.post(
   UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.checkUserAdvancedKycUpdate,
   // LoanMiddleware.checkIfUserHasActivePersonalLoan,
-  // LoanMiddleware.availableTicketsMiddleware not to be used,
-  LoanMiddleware.validateLoanAmountAndTenor,
-  // LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  // LoanMiddleware.validateLoanAmountAndTenor,
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted,
-  // LoanMiddleware.checkIfUserHasClusterDiscount,
+  LoanMiddleware.checkIfUserHasClusterDiscount,
   // UserMiddleware.checkIfCardOrUserExist,
-  // LoanMiddleware.additionalUserChecksForLoan,
+  LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
+  LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
   shopCategories.createTicketSubscription
+);
+
+router.post(
+  '/ticket/payment-successful',
+  AuthMiddleware.validateAuthToken,
+  Model(loanSchema.successfulEventPayment, 'payload'),
+  paymentMiddleware.ticketPurchaseUpdate,
+  shopCategories.ticketPurchaseUpdate
 );
 
 router.get(
@@ -90,15 +99,8 @@ router.post(
 router.delete(
   '/:ticket_id/delete',
   AuthMiddleware.validateAuthToken,
+    LoanController.cancelShopLoanApplication,
   shopCategories.cancel_ticket_booking
-);
-
-router.post(
-  '/ticket/payment-successful',
-  AuthMiddleware.validateAuthToken,
-  Model(loanSchema.successfulEventPayment, 'payload'),
-  paymentMiddleware.ticketPurchaseUpdate,
-  shopCategories.ticketPurchaseUpdate
 );
 
 export default router;

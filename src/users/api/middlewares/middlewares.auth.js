@@ -80,10 +80,10 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
  * @memberof AuthMiddleware
  */
 const recordUserInvalidOtpInputCount = async(res, user) => {
-  await processOneOrNoneData(authQueries.updateUserInvalidOtpCount);
+  await processOneOrNoneData(authQueries.updateUserInvalidOtpCount, [ user.user_id ]);
   if (user.invalid_verification_token_count >= 4) { // at 5th attempt or greater perform action
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has entered invalid otp more than required limit recordUserInvalidOtpInputCount.middlewares.auth.js`);
-    await processOneOrNoneData(authQueries.deactivateUserAccount);
+    await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
     return ApiResponse.error(res, enums.ACCOUNT_DEACTIVATED, enums.HTTP_UNAUTHORIZED, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
   }
 };
@@ -363,7 +363,7 @@ export const compareDeviceToken = async(req, res, next) => {
       if (user && (user.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it
         checkOtpVerificationRequestCount.middlewares.auth.js`);
-        await processOneOrNoneData(authQueries.deactivateUserAccount);
+        await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
         return ApiResponse.error(res, enums.USER_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE);
       }
       const otp =  Helpers.generateOtp();
@@ -610,7 +610,7 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
     if (user && (user.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it
       checkOtpVerificationRequestCount.middlewares.auth.js`);
-      await processOneOrNoneData(authQueries.deactivateUserAccount);
+      await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
       return ApiResponse.error(res, enums.USER_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user otp verification request still within limit checkOtpVerificationRequestCount.middlewares.auth.js`);

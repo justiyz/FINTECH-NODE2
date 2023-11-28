@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3f77793f-beb1-4c05-92c1-a5671e770c57" name="Changes" comment="">
+    <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.eslintrc.json" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.github/workflows/cd.yml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/.github/workflows/node.js.yml" afterDir="false" />
@@ -686,15 +686,6 @@
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/vite.config.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/______seedfi-admin-dashboard/vite.config.js.timestamp-1683017275825.mjs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/Dashboard/Loans/ManuallyCreateLoanApplication/index.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/20231108103637-create-ticket-reference.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/20231114160136-add-loan-id-to-ticket.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/20231120052311-addTicketURLColumn.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231108103637-create-ticket-reference-down.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231108103637-create-ticket-reference-up.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231114160136-add-loan-id-to-ticket-down.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231114160136-add-loan-id-to-ticket-up.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231120052311-addTicketURLColumn-down.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/migrations/sqls/20231120052311-addTicketURLColumn-up.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/.env.local" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/env.local.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/docker-compose.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/server.js" afterDir="false" />
@@ -702,42 +693,17 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/pages/index.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/seedfi-api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/seedfi-api.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controllers.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.shop.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.payment.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.auth.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.shop.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.loan.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.shop.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/services/service.seedfiUnderwriting.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/service.seedfiUnderwriting.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/services/services.email.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/services.email.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/express/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/express/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/logger/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/logger/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/monitor/lib.monitor.operations.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/monitor/lib.monitor.operations.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/payloads/lib.payload.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/lib.template.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/email/template.common.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/email/template.common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/templates/offerLetter/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/response/response.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/response/response.user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -745,114 +711,14 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="GitToolBoxStore">
-    <option name="recentBranches">
-      <RecentBranches>
-        <option name="branchesForRepo">
-          <list>
-            <RecentBranchesForRepo>
-              <option name="branches">
-                <list>
-                  <RecentBranch>
-                    <option name="branchName" value="feature/feature-ticket-purchase" />
-                    <option name="lastUsedInstant" value="1700133315" />
-                  </RecentBranch>
-                  <RecentBranch>
-                    <option name="branchName" value="fix/card-tokenization" />
-                    <option name="lastUsedInstant" value="1700133314" />
-                  </RecentBranch>
-                </list>
-              </option>
-              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
-            </RecentBranchesForRepo>
-          </list>
-        </option>
-      </RecentBranches>
-    </option>
-  </component>
-  <component name="MarkdownSettingsMigration">
-    <option name="stateVersion" value="1" />
-  </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 2
-}</component>
-  <component name="ProjectId" id="2XqI1QQ2RpOOGjAKgAZQrswdlgj" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
-  <component name="ProjectViewState">
-    <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showLibraryContents" value="true" />
-  </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Applications/MAMP/htdocs/seedfi-api&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/farmcrowdyweb/Library/Application Support/JetBrains/Toolbox/apps/WebStorm/ch-0/232.9921.42/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "node.js.selected.package.tslint": "(autodetect)",
+    "ts.external.directory.path": "/Users/farmcrowdyweb/Library/Application Support/JetBrains/Toolbox/apps/WebStorm/ch-0/232.9921.42/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external"
   }
-}</component>
-  <component name="RunManager" selected="npm.migrate:create">
-    <configuration name="migrate:create" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migrate:create" />
-      </scripts>
-      <node-interpreter value="project" />
-      <envs />
-      <method v="2" />
-    </configuration>
-    <configuration name="migrate:up" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migrate:up" />
-      </scripts>
-      <node-interpreter value="project" />
-      <envs />
-      <method v="2" />
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="npm.migrate:up" />
-        <item itemvalue="npm.migrate:create" />
-      </list>
-    </recent_temporary>
-  </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+}]]></component>
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="3f77793f-beb1-4c05-92c1-a5671e770c57" name="Changes" comment="" />
-      <created>1699349967828</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1699349967828</updated>
-      <workItem from="1699349969039" duration="98105000" />
-      <workItem from="1700022273927" duration="9789000" />
-    </task>
     <servers />
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
 </project>

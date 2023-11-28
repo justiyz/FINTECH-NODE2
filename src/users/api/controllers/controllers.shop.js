@@ -1,9 +1,8 @@
 import {processAnyData, processNoneData} from "../services/services.db";
-// import shopQueries from '../../queries/queries.shop';
 import adminShopQueries from '../../../admins/api/queries/queries.shop';
 import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import {createRepaymentSchedule, createShopRepaymentSchedule} from '../../../admins/api/controllers/controllers.loan';
+import { createShopRepaymentSchedule } from '../../../admins/api/controllers/controllers.loan';
 import {
   calculateAmountPlusPaystackTransactionCharge,
   initializeBankTransferPayment,
@@ -21,33 +20,27 @@ import LoanPayload from "../../lib/payloads/lib.payload.loan";
 import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import * as html_pdf from 'html-pdf'
-const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
-import {
-  DELETE_TICKET_INFORMATION, EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT,
-  FAILED_TO_BOOK_TICKETS,
-  SEND_TICKET_NOTIFICATIONS, TICKET_UNITS_OVERSHOT
-} from "../../lib/enums/lib.enum.messages";
-import {
-  CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER,
-  EVENT_PAYMENT_SUCCESSFUL
-} from "../../lib/enums/lib.enum.labels";
-import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from "../../lib/utils/lib.util.helpers";
-import AdminMailService from "../../../admins/api/services/services.email";
 import config from "../../config";
-import {createUserEmploymentDetails} from "./controllers.user";
-import {ticketPDFTemplate} from "../../lib/templates/offerLetter";
+import { ticketPDFTemplate } from "../../lib/templates/offerLetter";
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
+import { uniqueID } from "mocha/lib/utils";
+import { cloudinary } from '../services/service.cloudinary';
+import {
+  REQUESTED_NUMBER_OF_TICKETS_NOT_AVAILABLE,
+  UNDERWRITING_SERVICE_FAILURE
+} from "../../lib/enums/lib.enum.messages";
+import {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED} from "../../lib/enums/lib.enum.status";
+import {TICKET_PURCHASE_SHOP_CONTROLLER} from "../../lib/enums/lib.enum.labels";
+const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 const puppeteer = require('puppeteer');
-import * as S3 from '../../api/services/services.s3';
-import * as UserHash from "../../lib/utils/lib.util.hash";
 
-// const html_pdf = require('html-pdf');
-// var html = fs.readFileSync('./test/businesscard.html', 'utf8');
 
 export const shopCategories = async (req, res, next) => {
   try {
     const {user} = req;
-    let shop_categories = await processAnyData(shopQueries.shopCategories, [req.query.status]);
+    let shop_categories = await processAnyData(shopQueries.shopCategories, [ req.query.status ]);
     const data = {
       shop_categories
     };
@@ -266,46 +259,72 @@ export const getTicketSubscriptionSummary = async (req, res, next) => {
     return next(error);
   }
 };
-export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
-  const ticket_category = await processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]);
-  const ticket_record = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
-  const dateObject = new Date();
-  const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
-  const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticket_category, user, ticket_record)
-  const outputpath = `files/tickets/${ticket_category.ticket_id}/${user.user_id}.pdf`;
-  // generate ticket pdf
-  if (config.SEEDFI_NODE_ENV === 'development' || config.SEEDFI_NODE_ENV === 'test') {
-    const data = {
-      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
-      ServerSideEncryption: 'AES256',
-      Location: `https://photow-profile-images.s3.us-west-2.amazonaws.com/${outputpath}`,
-      key: outputpath,
-      Key: outputpath,
-      Bucket: 'p-prof-img'
-    };
-    return data.Location.trim();
+
+export const imageFromHtml = async (htmlContent) => {
+  try {
+    const tempDir = os.tmpdir()
+    if (!fs.existsSync(tempDir)) {
+      console.error(`Error: Temporary directory does not exist - ${tempDir}`);
+      fs.mkdirSync(tempDir);
+    }
+    // Create a new page
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    let uId = uniqueID();
+    let outputpath = uId+'.jpg';
+    // const imagePath = path.join(tempDir, 'outputpath.jpg');
+    const imagePath = path.join(tempDir, outputpath);
+    await page.screenshot({ path: imagePath, type: 'jpeg' });
+
+    await browser.close();
+    return imagePath
+
+  } catch (error) {
+    console.error('Error during Puppeteer operation:', error);
   }
-  const payload = Buffer.from(ticketHtmlPDF, 'binary');
-  const ticket_data  = await S3.uploadFile(outputpath, payload, 'application/pdf');
-  return ticket_data;
+
 }
 
-
-export const createTicketSubscription = async(req, res, next) => {
+export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
   try {
-    const tickets = req.body.tickets;
-    const payment_channel = req.body.payment_channel;
-    const reference = uuidv4();
-    const ticketPurchaseLogs = [];
-    let totalAmountToBePaid = 0;
-    let loan_id = req.body.initial_payment.loan_id;
-    const { user } = req;
-    // check if tickets available can fulfill order
+    const [ticketCategory, ticketRecord] = await Promise.all([
+      processOneOrNoneData(shopQueries.getBookedTicketCategory, [ticket_category_id]),
+      processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]),
+    ]);
+    const dateObject = new Date();
+    const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
+
+    const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticketCategory, user, ticketRecord);
+    // use puppeteer to generate image from the html file
+    const newlyGeneratedFile = await imageFromHtml(ticketHtmlPDF);
+    // generate ticket pdf
+    const cloudinary_payload = await cloudinary.uploader.upload(newlyGeneratedFile)
+    return cloudinary_payload.secure_url;
+  } catch (error) {
+    throw error; // Re-throw the error to propagate it up the call stack
+    return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, error);
+  }
+
+}
+
+async function getAvailableTicketUnits(ticketCategoryId) {
+  return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
+}
+export const createTicketSubscription = async(req, res, next) => {
+  const tickets = req.body.tickets;
+  const payment_channel = req.body.payment_channel;
+  const reference = uuidv4();
+  const ticketPurchaseLogs = [];
+  let loan_id = req.body.initial_payment.loan_id;
+  const { user } = req;
+  let totalAmountToBePaid = 0;
+  try {
     // loop ticket id and check if number available is greater than the number being requested by the user
     for (const ticket of tickets) {
       const {ticket_id, ticket_category_id, units} = ticket;
       for (let ticketCounter = 1; ticketCounter <= units; ticketCounter++) {
-        const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticket_category_id}`;
+        const barcodeString = `${ticket_id}|${req.user.user_id}|${req.user.first_name}|${req.user.last_name}|${ticketCounter}|${ticket_category_id}`;
 
         // logger.info(`User ticket QR Code successfully created. current total amount: ${totalAmountToBePaid}`);
         const theQRCode = await generateQRCode(barcodeString);
@@ -313,10 +332,9 @@ export const createTicketSubscription = async(req, res, next) => {
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         // generate ticket document
         let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
-
         // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
-          const bookedTicket = await createUserTicket(
+          await createUserTicket(
             req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
@@ -324,7 +342,6 @@ export const createTicketSubscription = async(req, res, next) => {
           ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
-
         // TODO
         // add an "else" statement for handling cases where no available tickets.
       }
@@ -338,19 +355,16 @@ export const createTicketSubscription = async(req, res, next) => {
       await initializeCardPayment(user, amountWithTransactionCharges, reference) :
       await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
     const data = {
-      'tickets': ticketPurchaseLogs,
       'total_amount': totalAmountToBePaid,
       'payment': payment_operation
     };
-
-    // When payment is successful,  update ticket/loan status
-    // now change ticket status to successful/ongoing
-
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
-    error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
+    // error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
+    await processAnyData(loanQueries.deleteInitiatedLoanApplicationPaymentSchedule, [ loan_id, user.user_id ]);
+    await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loan_id, user.user_id ]);
     logger.error(`Failed to create ticket subscription: ${ error.message }`);
     return next(error);
   }
@@ -359,10 +373,6 @@ export const createTicketSubscription = async(req, res, next) => {
 async function generateQRCode(barcodeString) {
   // create and upload ticket
   return QRCode.toDataURL(barcodeString);
-}
-
-async function getAvailableTicketUnits(ticketCategoryId) {
-  return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
 }
 
 async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCoverage, paymentTenure, qrCode, reference, loan_id, ticket_url) {
@@ -549,6 +559,7 @@ export const cancel_ticket_booking = async (req, res, next) => {
 
 const getBookingTotalPrice = async (ticket_bookings) => {
   let booking_amount = 0;
+
   for (const ticket_record_id in ticket_bookings) {
     let unit_size = ticket_bookings[ticket_record_id].units;
     for (let counter = 0; counter < unit_size; counter += 1) {
@@ -566,13 +577,13 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
     const userDefaultAccountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
+    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     // calculate amount to be booked
     const booking_amount = await getBookingTotalPrice(req.body.tickets);
-    // const booking_amount_plus_charges = booking_amount; // process applicable charges
     const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, ['loan application']);
+
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
-    const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
@@ -580,80 +591,92 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     body.amount = booking_amount;
     body.loan_reason = 'event booking';
     body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn, [
-      user.user_id,
-      booking_amount,
-      booking_amount,
-      'Ticket Loan',
-      body.duration_in_months,
-      body.duration_in_months,
-      0,
-      0
-    ]);
+
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn,
+        [ user.user_id, booking_amount, booking_amount, 'Ticket Loan', body.duration_in_months, body.duration_in_months, 0, 0 ]
+    );
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
       userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    const result = await loanApplicationEligibilityCheck(payload);
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: ${JSON.stringify(body)}`);
-    const result = await loanApplicationEligibilityCheckV2(payload);
-    const { data } = result;
+    if(result.status === 200 && result.statusText === 'OK') {
+      const { data } = result;
+      if (data.final_decision === 'APPROVED') {
+        logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
+        const monthly_repayment = (booking_amount * 0.7)/body.duration_in_months;
+        const first_installment = (booking_amount * 0.3).toFixed(2);
 
-    if (result.status !== 200) {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
-      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [loanApplicationDetails.loan_id, user.user_id]);
-      if (result.status >= 500 || result.response.status >= 500) {
-        logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: returned response from underwriting is of a 500 plus status
-        checkUserLoanEligibility.controllers.loan.js`);
-        admins.map((admin) => {
-          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
-        });
+        logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
+        data.monthly_repayment = monthly_repayment;
+        const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
+        const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
+
+        const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);
+        body.initial_payment = loan_repayment_schedule[0];
+        req.first_repayment = first_installment;
+
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
+        userActivityTracking(req.user.user_id, 37, 'success');
+        userActivityTracking(req.user.user_id, 39, 'success');
+        return next();
+      }
+
+      else if (data.final_decision === 'DECLINED') {
+        await processAnyData(loanQueries.deleteInitiatedLoanApplicationPaymentSchedule, [ loanApplicationDetails.loan_id, user.user_id ]);
+        await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan checkUserLoanEligibility.controllers.loan.js`);
+        const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(data);
+        const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication, declinedDecisionPayload);
         userActivityTracking(req.user.user_id, 37, 'fail');
-        return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+        userActivityTracking(req.user.user_id, 40, 'success');
+        // Declined Loan Information update
+        const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
+        return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
       }
-      if (result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
+    }
+
+    else if (result.status >= 400 && result.status <= 500) {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: Info: returned response from underwriting is a 400 plus status checkUserLoanEligibility.controllers.loan.js`)
+      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
+      admins.map((admin) => {
+        sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
+            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
+      });
+      userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_FAILURE, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+    }
+
+    else if (result.status >= 500) {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: returned response from underwriting is of a 500 plus status
+        checkUserLoanEligibility.controllers.loan.js`);
+      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
+      admins.map((admin) => {
+        sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
+            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
+      });
+      userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+    }
+
+
+    else  {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
+      if (result.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.'
+          || result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.')
+      {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
+              [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
         });
       }
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: User initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
 
-    if (data.final_decision === 'DECLINED') {
-      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan
-      checkUserLoanEligibility.controllers.loan.js`);
-      const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(data);
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserDeclinedDecisionLoanApplication, declinedDecisionPayload);
-      userActivityTracking(req.user.user_id, 37, 'fail');
-      userActivityTracking(req.user.user_id, 40, 'success');
-      // Declined Loan Information update
-      const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
-      return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
-    }
 
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan
-    checkUserLoanEligibility.controllers.loan.js`);
-    const monthly_repayment = (booking_amount * 0.7)/body.duration_in_months;
-    const first_installment = (booking_amount * 0.3).toFixed(2);
-    if (data.final_decision === 'APPROVED') {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval
-      checkUserLoanEligibility.controllers.loan.js`);
-      data.monthly_repayment = monthly_repayment;
-      const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
-const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);
-      body.initial_payment = loan_repayment_schedule[0];
-      req.first_repayment = first_installment;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'success');
-      userActivityTracking(req.user.user_id, 39, 'success');
-      return next();
-    }
   } catch (error) {
     userActivityTracking(req.user.user_id, 18, 'fail');
     error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
@@ -663,11 +686,13 @@ const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDet
 };
 
 export const ticketPurchaseUpdate = async (req, res, next) => {
+  if(req.ticket_already_active) {
+    return ApiResponse.error(res, enums.TICKET_ALREADY_ACTIVE, enums.HTTP_OK)
+  }
   try {
     const { user_id } = req.body;
     let ticket_update = req.ticket_update;
     const data = { ticket_update };
-
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return ApiResponse.success(res, enums.EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT(user_id), enums.HTTP_OK, data);
   } catch (error) {
@@ -676,316 +701,6 @@ export const ticketPurchaseUpdate = async (req, res, next) => {
     return next(error);
   }
 };
-// after payment successful
-// change the status of the ticket
-// send email notifications to recipients
-
-// there will be a requery endpoint that'll be called on the web
-
-export const checkUserTicketLoanEligibility_ = async (req, res, next) => {
-  // const { user, body } = req;
-  const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
-    userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
-  const userDefaultAccountDetails = await getUserDefaultAccountDetails(user.user_id);
-  const bookingAmount = await calculateBookingAmount(req.body.tickets);
-  const admins = await getAdminsForNotification('loan application');
-  try {
-    const userBvn = await getUserBvn(user.user_id);
-    const userMonoId = userDefaultAccountDetails.mono_account_id || '';
-    const previouslyDefaultedCount = await checkPreviousLoanDefault(user.user_id);
-
-    const loanApplicationDetails = await initiateLoanApplication(user, body, bookingAmount);
-
-    const payload = await prepareLoanEligibilityPayload(
-        user,
-        body,
-        userDefaultAccountDetails,
-        loanApplicationDetails,
-        previouslyDefaultedCount,
-        createUserEmploymentDetails
-    );
-
-    const result = await checkLoanEligibility(payload);
-    const { data } = result;
-
-    if (result.status !== 200) {
-      handleFailedLoanApplication(
-          res,
-          user.user_id,
-          loanApplicationDetails.loan_id,
-          result,
-          admins
-      );
-    }
-
-    if (data.final_decision === 'DECLINED') {
-      handleDeclinedLoanApplication(res, user, data, loanApplicationDetails);
-    }
-
-    if (data.final_decision === 'APPROVED') {
-      handleApprovedLoanApplication(
-          res,
-          user,
-          data,
-          loanApplicationDetails,
-          bookingAmount,
-          body
-      );
-      return next();
-    }
-  } catch (error) {
-    handleLoanApplicationError(req, res, next, user.user_id, error);
-    // userActivityTracking(req.user.user_id, 18, 'fail');
-    // error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
-    // logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
-    // return next(error);
-  }
-};
-
-function handleLoanApplicationError(req, res, next, user_id, error) {
-  userActivityTracking(req.user.user_id, 18, 'fail');
-  error.label = enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER;
-  logger.error(`checking user ticket loan application eligibility failed::${enums.CHECK_USER_TICKET_LOAN_ELIGIBILITY_CONTROLLER}`, error.message);
-  return next(error);
-}
-
-// Define the extracted functions below...
-
-async function getUserDefaultAccountDetails(userId) {
-  return await processOneOrNoneData(
-      loanQueries.fetchBankAccountDetailsByUserId,
-      userId
-  );
-}
-
-async function calculateBookingAmount(tickets) {
-  return await getBookingTotalPrice(tickets);
-}
-
-async function getAdminsForNotification(notificationType) {
-  return await processAnyData(notificationQueries.fetchAdminsForNotification, [
-    notificationType,
-  ]);
-}
-
-async function getUserBvn(userId) {
-  return await processOneOrNoneData(loanQueries.fetchUserBvn, [userId]);
-}
-
-async function checkPreviousLoanDefault(userId) {
-  const [userPreviouslyDefaulted] = await processAnyData(
-      loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment,
-      [userId]
-  );
-  return parseFloat(userPreviouslyDefaulted.count);
-}
-
-async function initiateLoanApplication(user, body, bookingAmount) {
-  body.amount = bookingAmount;
-  body.loan_reason = 'event booking';
-  body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
-
-  return await processOneOrNoneData(
-      loanQueries.initiatePersonalLoanApplicationWithReturn,
-      [
-        user.user_id,
-        bookingAmount,
-        bookingAmount,
-        'Ticket Loan',
-        body.duration_in_months,
-        body.duration_in_months,
-        0,
-        0,
-      ]
-  );
-}
-
-async function prepareLoanEligibilityPayload(
-    user,
-    body,
-    userDefaultAccountDetails,
-    loanApplicationDetails,
-    previouslyDefaultedCount
-) {
-  const userBvn = await getUserBvn(user.user_id);
-  const userMonoId =
-      userDefaultAccountDetails.mono_account_id === null
-          ? ''
-          : userDefaultAccountDetails.mono_account_id;
-
-  return await LoanPayload.checkUserEligibilityPayload(
-      user,
-      body,
-      userDefaultAccountDetails,
-      loanApplicationDetails,
-      userEmploymentDetails,
-      userBvn,
-      userMonoId,
-      userLoanDiscount,
-      clusterType,
-      userMinimumAllowableAMount,
-      userMaximumAllowableAmount,
-      previousLoanCount,
-      previouslyDefaultedCount
-  );
-}
-
-async function checkLoanEligibility(payload) {
-  return await loanApplicationEligibilityCheckV2(payload);
-}
-
-function handleFailedLoanApplication(
-    res,
-    userId,
-    loanId,
-    result,
-    admins
-) {
-  logger.info(
-      `${enums.CURRENT_TIME_STAMP}, ${userId}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`
-  );
-
-  processNoneData(loanQueries.deleteInitiatedLoanApplication, [
-    loanId,
-    userId,
-  ]);
-
-  if (result.status >= 500 || result.response.status >= 500) {
-    logger.info(
-        `${enums.CURRENT_TIME_STAMP}, ${userId}:::Info: returned response from underwriting is of a 500 plus status checkUserLoanEligibility.controllers.loan.js`
-    );
-
-    admins.map((admin) => {
-      sendNotificationToAdmin(
-          admin.admin_id,
-          'Failed Loan Application',
-          adminNotification.loanApplicationDownTime(),
-          [`${user.first_name} ${user.last_name}`],
-          'failed-loan-application'
-      );
-    });
-
-    userActivityTracking(req.user.user_id, 37, 'fail');
-    ApiResponse.error(
-        res,
-        enums.UNDERWRITING_SERVICE_NOT_AVAILABLE,
-        enums.HTTP_SERVICE_UNAVAILABLE,
-        enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER
-    );
-  }
-
-  if (
-      result.response.data?.message ===
-      'Service unavailable loan application can\'t be completed. Please try again later.'
-  ) {
-    admins.map((admin) => {
-      sendNotificationToAdmin(
-          admin.admin_id,
-          'Failed Loan Application',
-          adminNotification.loanApplicationDownTime(),
-          [`${user.first_name} ${user.last_name}`],
-          'failed-loan-application'
-      );
-    });
-  }
-
-  logger.info(
-      `${enums.CURRENT_TIME_STAMP}, ${userId}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`
-  );
-  userActivityTracking(req.user.user_id, 37, 'fail');
-  ApiResponse.error(
-      res,
-      result.response.data.message,
-      result.response.status,
-      enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER
-  );
-}
-
-async function handleDeclinedLoanApplication(
-    res,
-    user,
-    data,
-    updatedLoanDetails
-) {
-  logger.info(
-      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is not eligible for loan checkUserLoanEligibility.controllers.loan.js`
-  );
-
-  const declinedDecisionPayload = LoanPayload.processDeclinedLoanDecisionUpdatePayload(
-      data
-  );
-  const updatedLoanDetailsflu = await processOneOrNoneData(
-      loanQueries.updateUserDeclinedDecisionLoanApplication,
-      declinedDecisionPayload
-  );
-
-  userActivityTracking(req.user.user_id, 37, 'fail');
-  userActivityTracking(req.user.user_id, 40, 'success');
-
-  const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(
-      user,
-      data,
-      updatedLoanDetailsflu.status,
-      'DECLINED'
-  );
-
-  ApiResponse.success(
-      res,
-      enums.LOAN_APPLICATION_DECLINED_DECISION,
-      enums.HTTP_OK,
-      returnData
-  );
-}
-
-async function handleApprovedLoanApplication(
-    res,
-    user,
-    data,
-    updatedLoanDetails,
-    bookingAmount,
-    body
-) {
-  logger.info(
-      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`
-  );
-
-  const approvedDecisionPayload = LoanPayload.processLoanDecisionUpdatePayload(
-      data,
-      bookingAmount,
-      0,
-      'pending'
-  );
-  let updatedLoanDetailsx = await processOneOrNoneData(
-      loanQueries.updateUserManualOrApprovedDecisionLoanApplication,
-      approvedDecisionPayload
-  );
-
-  const monthlyRepayment =
-      (bookingAmount * 0.7) / body.duration_in_months;
-  const firstInstallment = (bookingAmount * 0.3).toFixed(2);
-
-  const loanRepaymentSchedule = await createShopRepaymentSchedule(
-      updatedLoanDetailsx,
-      user,
-      firstInstallment,
-      monthlyRepayment
-  );
-
-  body.initial_payment = loanRepaymentSchedule[0];
-  req.firstRepayment = firstInstallment;
-
-  logger.info(
-      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`
-  );
-
-  userActivityTracking(req.user.user_id, 37, 'success');
-  userActivityTracking(req.user.user_id, 39, 'success');
-
-  ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK);
-}
-
-
-
 
 
 

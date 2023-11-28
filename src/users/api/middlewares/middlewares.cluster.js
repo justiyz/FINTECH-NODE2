@@ -354,7 +354,7 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
       ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster can no longer be joined or members added to the this cluster
         userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
-        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment);
+        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestClusterJoiningClosed(cluster.name), requestingNMemberDetails.fcm_token);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member rejected and push notification sent to requesting member
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
@@ -365,7 +365,7 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
       if (requestingUsersCurrentClusterType) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting user already belongs to this cluster type
         userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
-        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment);
+        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.USER_ALREADY_BELONG_TO_THE_CLUSTER_TYPE(cluster.type), enums.HTTP_CONFLICT,
           enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
@@ -377,20 +377,20 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
       if (currentClusterMember) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting user already belongs to this cluster
         userTakesRequestToJoinClusterDecision.middlewares.cluster.js`);
-        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment);
+        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         userActivityTracking(req.user.user_id, activityType, 'fail');
         return ApiResponse.error(res, enums.USER_ALREADY_CLUSTER_MEMBER, enums.HTTP_CONFLICT, enums.USER_TAKES_REQUEST_TO_JOIN_CLUSTER_DECISION_MIDDLEWARE);
       }
-      await processOneOrNoneData(clusterQueries.recordUserVoteDecision);
+      await processOneOrNoneData(clusterQueries.recordUserVoteDecision, [ ticket_id, votingTicketDetails.cluster_id, user.user_id, clusterMember.is_admin, body.decision ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user voting decision recorded successfully
       userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      const currentVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketVotes);
+      const currentVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketVotes, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes counted from the DB
       userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const decisionType = body.decision === 'yes' ? 'accepted' : 'declined';
       const [ hasAdminVotedYes ] = await processAnyData(clusterQueries.checkIfAdminHasVotedYes, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if admin has voted from the DB userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-      const currentNonAdminYesVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketYesVotesByNonAdmins);
+      const currentNonAdminYesVoteCount = await processOneOrNoneData(clusterQueries.fetchCurrentTicketYesVotesByNonAdmins, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: current number of casted votes by non cluster admin counted from the DB
       userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
       const [ formerClusterMember ] = await processAnyData(clusterQueries.fetchDeactivatedClusterMemberDetails,
@@ -405,10 +405,10 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin and or another cluster member has accepted requesting member
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await Promise.all([
-          formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember) :
-            processOneOrNoneData(clusterQueries.createClusterMember),
-          processOneOrNoneData(clusterQueries.incrementClusterMembersCount),
-          processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment)
+          formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]) :
+              processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
+          processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ votingTicketDetails.cluster_id ]),
+          processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestAccepted(cluster.name), requestingNMemberDetails.fcm_token);
         sendUserPersonalNotification(requestingNMemberDetails, 'Join cluster request accepted', PersonalNotifications.joinClusterRequestAccepted(cluster),
@@ -418,13 +418,14 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: requesting cluster member created and push notification sent to requesting member
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         if ((!cluster.is_created_by_admin) && (Number(cluster.members.length) + 1 === 5) && (!cluster.cluster_creator_received_membership_count_reward)) {
-          const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails);
+          const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_member_increase' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
           const rewardDescription = 'Cluster membership increase point';
-          await processOneOrNoneData(authQueries.updateRewardPoints);
-          await processOneOrNoneData(authQueries.updateUserPoints);
+          await processOneOrNoneData(authQueries.updateRewardPoints,
+              [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+          await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
           const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
-          await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints);
+          await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster.cluster_id ]);
           sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point',
             PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
           sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`),
@@ -439,7 +440,7 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         // since admin must accept for requesting member to be accepted
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster admin has either rejected requesting member or the request does not meet with the
         acceptance criteria of one member and admin userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
-        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment);
+        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendPushNotification(requestingNMemberDetails.user_id, PushNotifications.joinClusterRequestRejected(cluster.name), requestingNMemberDetails.fcm_token);
         sendUserPersonalNotification(requestingNMemberDetails, 'Join cluster request rejected', PersonalNotifications.joinClusterRequestRejected(cluster),
           'join-cluster-rejected', {  });
@@ -632,7 +633,7 @@ export const requestToDeleteCluster = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: vote recorded requestToDeleteCluster.middleware.cluster.js`);
       if (body.decision === 'yes') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion request requestToDeleteCluster.middleware.cluster.js`);
-        await processOneOrNoneData(clusterQueries.recordUserVoteDecision);
+        await processOneOrNoneData(clusterQueries.recordUserVoteDecision, payload);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accepted to delete cluster`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member accept to delete cluster group and all notifications sent successfully
         requestToDeleteCluster.middleware.cluster.js`);
@@ -644,8 +645,8 @@ export const requestToDeleteCluster = async(req, res, next) => {
           const clusterMembersToken = await collateUsersFcmTokens(cluster.members);
           await Promise.allSettled([
             processAnyData(clusterQueries.removeClusterMembers, [ req.cluster.cluster_id ]),
-            processOneOrNoneData(clusterQueries.deleteAcluster),
-            processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment)
+            processOneOrNoneData(clusterQueries.deleteAcluster, [ req.cluster.cluster_id ]),
+            processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
           ]);
           sendMulticastPushNotification(PushNotifications.clusterDeletedSuccessfully(cluster), clusterMembersToken, 'cluster-deleted', cluster.cluster_id);
           sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} cluster deleted`, 'delete-cluster', {});
@@ -659,7 +660,7 @@ export const requestToDeleteCluster = async(req, res, next) => {
       if (body.decision === 'no') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster deletion requestToDeleteCluster.middleware.cluster.js`);
         await processAnyData(clusterQueries.recordUserVoteDecision, payload);
-        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment);
+        await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined request to delete cluster`, 'delete-cluster', {});
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: cluster member has declined request to delete cluster and notifications sent successfully
         requestToDeleteCluster.middleware.cluster.js`);
@@ -702,10 +703,10 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} request to become new cluster admin
         newAdminClusterAcceptance.middleware.cluster.js`);
         await Promise.all([
-          processOneOrNoneData(clusterQueries.newAdmin),
-          processOneOrNoneData(clusterQueries.setAdmin),
-          processOneOrNoneData(clusterQueries.removeAdmin),
-          processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment)
+          processOneOrNoneData(clusterQueries.newAdmin, [ votingTicketDetails.cluster_id, user.user_id ]),
+          processOneOrNoneData(clusterQueries.setAdmin, [ votingTicketDetails.cluster_id, user.user_id ]),
+          processOneOrNoneData(clusterQueries.removeAdmin, [ votingTicketDetails.cluster_id, cluster.admin ]),
+          processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
         sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} accepted to become new cluster admin`, 'admin-cluster', {});
         sendPushNotification(currentAdminDetails.user_id, PushNotifications.clusterNewAdminSelectionAccepted(user, cluster.name), currentAdminDetails.fcm_token);
@@ -717,7 +718,7 @@ export const newAdminClusterAcceptance = async(req, res, next) => {
         return ApiResponse.success(res, enums.CLUSTER_ADMIN_ACCEPTANCE(decisionType), enums.HTTP_OK,
           { user_id: user.user_id, decision: 'accepted', cluster_id: cluster.cluster_id });
       }
-      await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment);
+      await processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} suggest to become an admin  newAdminClusterAcceptance.middleware.cluster.js`);
       sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} declined to become admin`, 'admin-cluster', {});
       sendPushNotification(currentAdminDetails.user_id, PushNotifications.clusterNewAdminSelectionDeclined(user, cluster.name), currentAdminDetails.fcm_token);
@@ -859,8 +860,8 @@ export const totalLoanAmountVerificationAndBreakdown = async(req, res, next) => 
   try {
     const { user, cluster, body } = req;
     const [ clusterMaximumLoanAmountDetails, clusterMinimumLoanAmountDetails ] = await Promise.all([
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails),
-      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails)
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'cluster_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'cluster_minimum_loan_amount' ])
     ]);
     if ((parseFloat(body.total_amount) > (parseFloat(parseFloat(clusterMaximumLoanAmountDetails.value))))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: confirms that cluster loan request is greater than cluster maximum allowable amount

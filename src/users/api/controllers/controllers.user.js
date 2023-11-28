@@ -6,7 +6,7 @@ import userQueries from '../queries/queries.user';
 import {processAnyData, processOneOrNoneData} from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
-import * as Hash from '../../lib/utils/lib.util.hash'; 
+import * as Hash from '../../lib/utils/lib.util.hash';
 import {userActivityTracking} from '../../lib/monitor';
 import config from '../../config';
 import {fetchBanks} from '../services/service.paystack';
@@ -26,7 +26,7 @@ import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
 
-const {SEEDFI_NODE_ENV} = config;
+const { SEEDFI_NODE_ENV } = config;
 
 /**
  * update user device fcm token
@@ -41,7 +41,7 @@ export const updateFcmToken = async (req, res, next) => {
     const {user, body} = req;
     await processAnyData(authQueries.setSameFcmTokenNull, [body.fcm_token.trim()]); // this is done to prevent two fcm tokens being attached to multiple accounts
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully set other accounts with same fcm token to null updateFcmToken.controllers.user.js`);
-    await processOneOrNoneData(userQueries.updateUserFcmToken, [user.user_id, body.fcm_token.trim()]);
+    await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token.trim() ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user fcm token to the database updateFcmToken.controllers.user.js`);
     const data = {
       user_id: user.user_id,
@@ -511,8 +511,10 @@ export const nationalIdentificationNumberVerification = async (document, user, r
     ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
     user_data = ninResponse.data.entity;
   }
-  if (ninResponse.status === 'success' || ninResponse.status === 200) {      
-    if (checkIfUserDetailsMatchNinResponse(user_data, user)) {
+
+  if (ninResponse.status === 'success' || ninResponse.status === 200) {
+
+    if (await checkIfUserDetailsMatchNinResponse(user_data, user)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       const data = await uploadImageToS3Bucket(user, document, user_data);
@@ -539,7 +541,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successfull documentVerification.controller.user.js`);
-      userActivityTracking(user.user_id, 109, 'success');
+      userActivityTracking(user.user_id, 119, 'success');
       return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...response, tier_upgraded});
 
     } else {
@@ -592,7 +594,7 @@ export const checkIfUserDetailsMatchVINResponse = async (user_data, user) => {
   return (
     user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
     // user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-    user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') 
+    user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0')
     // user_data.date_of_birth === user.date_of_birth
   );
 }
@@ -642,7 +644,7 @@ export const votersIdentificationNumberVerification = async (document_id, state,
     //   }
     // }
   } catch (error) {
-    userActivityTracking(user.user_id, 109, 'fail');
+    userActivityTracking(user.user_id, 119, 'fail');
     error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
     logger.error(`user identity document verification failed::${ enums.VERIFY_USER_IDENTITY_DOCUMENT }`, error.message);
     // return next(error);
@@ -780,7 +782,7 @@ export const updateUserAddressVerificationStatus = async (req, res, next) => {
       // user needs address to have been verified and uploaded utility bill verified to move to tier 2
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ userDetails.user_id }:::Info: user tier value updated
       updateUserAddressVerificationStatus.controller.user.js`);
-      await processOneOrNoneData(userQueries.updateUserTierValue, [userDetails.user_id, tierChoice]);
+      await processOneOrNoneData(userQueries.updateUserTierValue, [ userDetails.user_id, tierChoice ]);
       sendPushNotification(userDetails.user_id, PushNotifications.successfulYouVerifyAddressVerification(), userDetails.fcm_token);
       sendUserPersonalNotification(userDetails, `${ userDetails.first_name } address verification successful`,
         PersonalNotifications.userAddressVerificationSuccessful(userDetails, userAddressDetails), 'address-verification-successful', {});
@@ -797,7 +799,7 @@ export const updateUserAddressVerificationStatus = async (req, res, next) => {
     }
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ userDetails.user_id }:::Info: user address verification failed
     updateUserAddressVerificationStatus.controller.user.js`);
-    await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [userAddressDetails.user_id, 'failed', true, false]);
+    await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [ userAddressDetails.user_id, 'failed', true, false ]);
     sendPushNotification(userDetails.user_id, PushNotifications.failedYouVerifyAddressVerification(), userDetails.fcm_token);
     sendUserPersonalNotification(userDetails, `${ userDetails.first_name } address verification failed`,
       PersonalNotifications.userAddressVerificationFailed(userDetails, userAddressDetails), 'address-verification-failed', {});
@@ -873,7 +875,7 @@ export const getProfile = async(req, res, next) => {
     fetchUserInformationDetails.controller.user.js`);
     user.bvn = userBvn.bvn !== null ? await Hash.decrypt(decodeURIComponent(userBvn.bvn)) : '';
     user.is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
-      true : false;        
+      true : false;
     const data = {
       userProfileDetails: user,
       employmentDetails: userEmploymentDetail,
@@ -1063,7 +1065,7 @@ export const createNextOfKin = async (req, res, next) => {
 export const createUserEmploymentDetails = async (req, res, next) => {
   try {
     const payload = UserPayload.employmentDetails(req.body, req.user);
-    const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [req.user.user_id]);
+    const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
     if (result) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::Info:
       User already created employment type in the DB. createUserEmploymentDetails.controller.user.js`);
@@ -1093,7 +1095,7 @@ export const createUserEmploymentDetails = async (req, res, next) => {
  */
 export const updateEmploymentDetails = async (req, res, next) => {
   try {
-    const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [req.user.user_id]);
+    const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
     const payload = UserPayload.updateEmploymentDetails(req.body, result);
     const data = await processAnyData(userQueries.updateEmploymentDetails, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::Info:
@@ -1122,7 +1124,7 @@ export const updateMonoAccountId = async (req, res, next) => {
     const result = await generateMonoAccountId(body);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: User mono id generate request response returned. updateMonoAccountId.controller.user.js`);
     if (result && result.id) {
-      const data = await processOneOrNoneData(userQueries.updateUserMonoAccountId, [user.user_id, result.id.trim()]);
+      const data = await processOneOrNoneData(userQueries.updateUserMonoAccountId, [ user.user_id, result.id.trim() ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: User mono id updated successfully in the DB. updateMonoAccountId.controller.user.js`);
       userActivityTracking(req.user.user_id, 92, 'success');
       return ApiResponse.success(res, enums.UPDATE_USER_MONO_ID, enums.HTTP_OK, data);
@@ -1244,8 +1246,8 @@ export const userClaimsReferralPoints = async (req, res, next) => {
     }
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:: user has unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
     const [updatedReferralValues] = await Promise.all([
-      processOneOrNoneData(userQueries.updateUserClaimedPoints, [user.user_id, parseFloat(referralDetails.unclaimed_reward_points)]),
-      processOneOrNoneData(userQueries.trackPointClaiming, [user.user_id, parseFloat(referralDetails.unclaimed_reward_points)])
+      processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
+      processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
     ]);
     await MailService('Reward points claimed', 'rewardPointsClaiming', {
       ...user, just_claimed_points: referralDetails.unclaimed_reward_points,
@@ -1273,7 +1275,7 @@ export const userClaimsReferralPoints = async (req, res, next) => {
 export const deleteUserAccount = async (req, res, next) => {
   try {
     const {user} = req;
-    const deletedUser = await processOneOrNoneData(userQueries.deleteUserOwnAccount, [user.user_id]);
+    const deletedUser = await processOneOrNoneData(userQueries.deleteUserOwnAccount, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:: successfully deleted user account in the DB. deleteUserAccount.controller.user.js`);
     userActivityTracking(req.user.user_id, 108, 'success');
     return ApiResponse.success(res, enums.DELETE_USER_OWN_ACCOUNT, enums.HTTP_OK, deletedUser);
