@@ -30,180 +30,186 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: SEEDFI_PROD_DATABASE_URL
+        - name: SEEDFI_DEV_DATABASE_URL
           valueFrom:
             secretKeyRef:
               key: databaseurl
               name: seedfi-api-config
-        - name: SEEDFI_PROD_ENCODING_AUTHENTICATION_SECRET
+        - name: SEEDFI_DEV_ENCODING_AUTHENTICATION_SECRET
           valueFrom:
             secretKeyRef:
               key: authenticationsecret
               name: seedfi-api-config
-        - name: SEEDFI_PROD_SENDGRID_API_KEY
+        - name: SEEDFI_DEV_SENDGRID_API_KEY
           valueFrom:
             secretKeyRef:
               key: sendgridapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_PAYSTACK_SECRET_KEY
+        - name: SEEDFI_DEV_PAYSTACK_SECRET_KEY
           valueFrom:
             secretKeyRef:
               key: paystacksecretkey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_DOJAH_SECRET_KEY
+        - name: SEEDFI_DEV_DOJAH_SECRET_KEY
           valueFrom:
             secretKeyRef:
               key: dojahsecretkey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY_ID
           valueFrom:
             secretKeyRef:
               key: accountprivatekeyid
               name: seedfi-api-config
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY
           valueFrom:
             secretKeyRef:
               key: privatekey
               name: seedfi-config-map
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_CLIENT_CERT_URL
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_CLIENT_CERT_URL
           valueFrom:
             secretKeyRef:
               key: clientcerturl
               name: seedfi-api-config
-        - name: SEEDFI_PROD_UNDERWRITING_SERVICE_API_KEY
+        - name: SEEDFI_DEV_UNDERWRITING_SERVICE_API_KEY
           valueFrom:
             secretKeyRef:
               key: underwritingserviceapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_AMAZON_S3_ACCESS_KEY_ID
+        - name: SEEDFI_DEV_AMAZON_S3_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
               key: accesskeyid
               name: seedfi-api-config
-        - name: SEEDFI_PROD_AMAZON_S3_SECRET_ACCESS_KEY
+        - name: SEEDFI_DEV_AMAZON_S3_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
               key: secretaccesskey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_DOJAH_APP_ID
+        - name: SEEDFI_DEV_DOJAH_APP_ID
           valueFrom:
             secretKeyRef:
               key: dojahappid
               name: seedfi-api-config
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_CLIENT_ID
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_CLIENT_ID
           valueFrom:
             secretKeyRef:
               key: firebaseclientid
               name: seedfi-api-config
-        - name: SEEDFI_PROD_TERMII_API_KEY
+        - name: SEEDFI_DEV_TERMII_API_KEY
           valueFrom:
             secretKeyRef:
               key: termiiapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_YOU_VERIFY_API_KEY
+        - name: SEEDFI_DEV_YOU_VERIFY_API_KEY
           valueFrom:
             secretKeyRef:
               key: youverifyapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_YOU_VERIFY_WEBHOOK_SIGNING_KEY
+        - name: SEEDFI_DEV_YOU_VERIFY_WEBHOOK_SIGNING_KEY
           valueFrom:
             secretKeyRef:
               key: youverifywebhooksigningkey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_MONO_APP_SECRET_KEY
+        - name: SEEDFI_DEV_MONO_APP_SECRET_KEY
           valueFrom:
             secretKeyRef:
               key: monoappsecretkey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_FIREBASE_WEB_API_KEY
+        - name: SEEDFI_DEV_FIREBASE_WEB_API_KEY
           valueFrom:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_ZEEH_PUBLIC_KEY
+        - name: SEEDFI_DEV_ZEEH_PUBLIC_KEY
           valueFrom:
             secretKeyRef:
               key: zeehpublickey
               name: seedfi-api-config
-        - name: SEEDFI_PROD_ZEEH_SECRET_KEY
+        - name: SEEDFI_DEV_ZEEH_SECRET_KEY
           valueFrom:
             secretKeyRef:
               key: zeehsecretkey
               name: seedfi-api-config
-        # - name: SEEDFI_PROD_DATADOG_API_KEY
+        # - name: SEEDFI_DEV_DATADOG_API_KEY
         #   valueFrom:
         #     secretKeyRef:
         #       key: datadogapikey
         #       name: seedfi-api-config
         - name: SEEDFI_NODE_ENV
-          value: 'production'
-        - name: SEEDFI_PROD_PORT
+          value: 'development'
+        - name: SEEDFI_DEV_PORT
           value: '4500'
-        - name: SEEDFI_PROD_MESSAGE_FORWARDING
+        - name: SEEDFI_DEV_MESSAGE_FORWARDING
           value: 'true'
-        - name: SEEDFI_PROD_BCRYPT_SALT_ROUND
+        - name: SEEDFI_DEV_BCRYPT_SALT_ROUND
           value: '10'
-        - name: SEEDFI_PROD_SENDGRID_FROM
+        - name: SEEDFI_DEV_SENDGRID_FROM
           value: 'hello@theseedfi.com'
-        - name: SEEDFI_PROD_BACKEND_BASE_URL
+        - name: SEEDFI_DEV_BACKEND_BASE_URL
           value: 'https://api.theseedfi.com'
-        - name: SEEDFI_PROD_VERIFY_EMAIL_MOBILE_REDIRECT_URL
+        - name: SEEDFI_DEV_VERIFY_EMAIL_MOBILE_REDIRECT_URL
           value: 'https://theseedfi.page.link/email-verification'
-        - name: SEEDFI_PROD_ADMIN_WEB_BASE_URL
+        - name: SEEDFI_DEV_ADMIN_WEB_BASE_URL
           value: 'https://admin.theseedfi.com'
-        - name: SEEDFI_PROD_PAYSTACK_APIS_BASE_URL
+        - name: SEEDFI_DEV_PAYSTACK_APIS_BASE_URL
           value: 'https://api.paystack.co'
-        - name: SEEDFI_PROD_DOJAH_APIS_BASE_URL
+        - name: SEEDFI_DEV_DOJAH_APIS_BASE_URL
           value: 'https://api.dojah.io' 
-        - name: SEEDFI_PROD_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL
+        - name: SEEDFI_DEV_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL
           value: 'https://standard.paystack.co/close'
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_TYPE
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_TYPE
           value: 'service_account'
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_PROJECT_ID
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_PROJECT_ID
           value: 'seedfi-1f4cc'
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL 
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL 
           value: 'firebase-adminsdk-wqjyv@seedfi-1f4cc.iam.gserviceaccount.com'
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_AUTH_URI
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_AUTH_URI
           value: 'https://accounts.google.com/o/oauth2/auth'
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_TOKEN_URI
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_TOKEN_URI
           value: 'https://oauth2.googleapis.com/token'
-        - name: SEEDFI_PROD_FIREBASE_SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL
+        - name: SEEDFI_DEV_FIREBASE_SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL
           value: 'https://www.googleapis.com/oauth2/v1/certs'
-        - name: SEEDFI_PROD_UNDERWRITING_SERVICE_BASE_URL
+        - name: SEEDFI_DEV_UNDERWRITING_SERVICE_BASE_URL
           value: 'https://stg-underwriting.theseedfi.com'
-        - name: SEEDFI_PROD_ADMIN_EMAIL_ADDRESS
+        - name: SEEDFI_DEV_ADMIN_EMAIL_ADDRESS
           value: 'admin@tdlc.ng'
-        - name: SEEDFI_PROD_AMAZON_S3_BUCKET_REGION
+        - name: SEEDFI_DEV_AMAZON_S3_BUCKET_REGION
           value: 'eu-west-1'
-        - name: SEEDFI_PROD_AMAZON_S3_BUCKET
+        - name: SEEDFI_DEV_AMAZON_S3_BUCKET
           value: 'seedfi-upload'
-        - name: SEEDFI_PROD_FIREBASE_DATABASE_URL
+        - name: SEEDFI_DEV_FIREBASE_DATABASE_URL
           value: 'https://seedfi.firebaseio.com'  
-        - name: SEEDFI_PROD_TERMII_SMS_URL 
+        - name: SEEDFI_DEV_TERMII_SMS_URL 
           value: 'https://api.ng.termii.com/api/sms/send'
-        - name: SEEDFI_PROD_TERMII_SENDER_ID
+        - name: SEEDFI_DEV_TERMII_SENDER_ID
           value: 'N-Alert'  
-        - name: SEEDFI_PROD_YOU_VERIFY_BASE_URL
+        - name: SEEDFI_DEV_YOU_VERIFY_BASE_URL
           value: 'https://api.youverify.co'
-        - name: SEEDFI_PROD_MONO_BASE_URL
+        - name: SEEDFI_DEV_MONO_BASE_URL
           value: 'https://api.withmono.com' 
-        - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_DOMAIN_URI_PREFIX
+        - name: SEEDFI_DEV_FIREBASE_DYNAMIC_LINK_DOMAIN_URI_PREFIX
           value: 'https://cluster.theseedfi.com' 
-        - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_ANDROID_PACKAGE_NAME
+        - name: SEEDFI_DEV_FIREBASE_DYNAMIC_LINK_ANDROID_PACKAGE_NAME
           value: 'com.theseedfi.app'   
-        - name: SEEDFI_PROD_FIREBASE_DYNAMIC_LINK_IOS_BUNDLE_ID
+        - name: SEEDFI_DEV_FIREBASE_DYNAMIC_LINK_IOS_BUNDLE_ID
           value: 'com.theseedfi.app'
-        - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
+        - name: SEEDFI_DEV_DATADOG_APPLICATION_NAME
           value: 'seedfi-backend'
-        - name: SEEDFI_PROD_ZEEH_URL
+        - name: SEEDFI_DEV_ZEEH_URL
           value: 'https://api.zeeh.africa/api/v1'
-        - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
+        - name: SEEDFI_DEV_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 
-        - name: SEEDFI_PROD_NEW_DEVICE_LOGIN_WAVER_USERS
+        - name: SEEDFI_DEV_NEW_DEVICE_LOGIN_WAVER_USERS
           value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
-        - name: SEEDFI_PROD_BANK_ACCOUNT_STATEMENT_PROCESSOR
+        - name: SEEDFI_DEV_BANK_ACCOUNT_STATEMENT_PROCESSOR
           value: 'okra'
+        - name: SEEDFI_DEV_CLOUDINARY_CLOUD_NAME
+          value: 'dtri0jdvp'
+        - name: SEEDFI_DEV_CLOUDINARY_API_KEY
+          value: '469438334949249'
+        - name: SEEDFI_DEV_CLOUDINARY_API_SECRET
+          value: 'Yw2lrK1HbZIGrQ-dRl3G79cw2Co'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
