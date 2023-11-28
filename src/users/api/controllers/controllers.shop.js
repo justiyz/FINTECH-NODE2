@@ -33,8 +33,8 @@ import {
 } from "../../lib/enums/lib.enum.messages";
 import {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED} from "../../lib/enums/lib.enum.status";
 import {TICKET_PURCHASE_SHOP_CONTROLLER} from "../../lib/enums/lib.enum.labels";
+import * as puppeteer from 'puppeteer';
 const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
-const puppeteer = require('puppeteer');
 
 
 export const shopCategories = async (req, res, next) => {
@@ -264,17 +264,16 @@ export const imageFromHtml = async (htmlContent) => {
   try {
     const tempDir = os.tmpdir()
     if (!fs.existsSync(tempDir)) {
-      console.error(`Error: Temporary directory does not exist - ${tempDir}`);
       fs.mkdirSync(tempDir);
     }
-    // Create a new page
+    // // Create a new page
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setContent(htmlContent);
     let uId = uniqueID();
     let outputpath = uId+'.jpg';
-    // const imagePath = path.join(tempDir, 'outputpath.jpg');
     const imagePath = path.join(tempDir, outputpath);
+
     await page.screenshot({ path: imagePath, type: 'jpeg' });
 
     await browser.close();
@@ -348,6 +347,7 @@ export const createTicketSubscription = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Total amount to be paid by user is N${totalAmountToBePaid}`);
     // changes started from here
+
     totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
     const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
@@ -359,6 +359,7 @@ export const createTicketSubscription = async(req, res, next) => {
       'payment': payment_operation
     };
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
+
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
