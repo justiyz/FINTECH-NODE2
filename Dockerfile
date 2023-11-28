@@ -27,8 +27,8 @@ FROM node:16.17.1
 #   rm -rf /var/lib/apt/lists/*
 
 # Specify Puppeteer version
-ENV PUPPETEER_VERSION=21.5.0
-ENV CHROME_VERSION=119.0.6045.105-1
+ENV PUPPETEER_VERSION=19.8.0
+ENV CHROME_VERSION=112.0.5614.0-1
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
