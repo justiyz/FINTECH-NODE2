@@ -2,8 +2,7 @@ FROM node:16.17.1
 
 # Install necessary dependencies
 RUN apt-get update && \
-    apt-get install -y libnss3 && \
-    apt-get install -y libatk-1.0.so.0
+    apt-get install -y libnss3 libatk1.0-0
 
 # Create app directory
 RUN mkdir -p /usr/src/seedfi-backend
