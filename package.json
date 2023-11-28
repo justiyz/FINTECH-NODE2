@@ -1,6 +1,6 @@
 {
   "name": "seedfi-backend",
-  "version": "3.5.02",
+  "version": "3.5.03",
   "description": "A money lending application",
   "author": "Enyata Nexus Engineering Team",
   "license": "ISC",
@@ -76,7 +76,7 @@
     "node-cron": "^3.0.2",
     "node-fetch": "^3.3.2",
     "pg-promise": "^10.15.4",
-    "puppeteer": "^18.2.1",
+    "puppeteer": "^21.5.2",
     "qrcode": "^1.5.3",
     "sharp": "^0.32.6",
     "uuid": "^9.0.0",
