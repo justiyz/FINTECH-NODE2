@@ -1015,7 +1015,42 @@ export default {
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
         $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
         )
-        RETURNING *`
+        RETURNING *`,
+
+
+  fetchUserCurrentPersonalLoans: `
+  SELECT
+    id,
+    loan_id,
+    user_id,
+    amount_requested,
+    loan_reason,
+    loan_tenor_in_months,
+    status,
+    loan_decision,
+    to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+  FROM personal_loans
+  WHERE user_id = $1
+  AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+  ORDER BY created_at DESC`,
+
+  fetchUserCurrentClusterLoans: `
+  SELECT
+    id,
+    loan_id,
+    member_loan_id,
+    user_id,
+    cluster_id,
+    cluster_name,
+    amount_requested,
+    loan_tenor_in_months,
+    status,
+    loan_decision,
+    to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+  FROM cluster_member_loans
+  WHERE user_id = $1
+  AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+  ORDER BY created_at DESC`
 };
 
 

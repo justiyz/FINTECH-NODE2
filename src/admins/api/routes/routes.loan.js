@@ -182,4 +182,10 @@ router.post(
   LoanController.manuallyInitiatePersonalLoanApplication
 );
 
+router.get(
+  '/:user_id/current-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  LoanController.fetchUserCurrentLoans
+);
+
 export default router;

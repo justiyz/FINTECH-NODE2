@@ -761,6 +761,34 @@ export const fetchSingleClusterMemberRescheduledLoan = async(req, res, next) => 
   }
 };
 
+/**
+ * fetches current loans of a single member on the platform
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+
+export const fetchUserCurrentLoans = async(req, res, next) => {
+  try {
+    const { params: {user_id}, admin } = req;
+    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [ user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current personal loan facilities fetched fetchUserCurrentLoans.admin.controllers.loan.js`);
+    const currentClusterLoans = await processAnyData(loanQueries.fetchUserCurrentClusterLoans, [ user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current cluster loan facilities fetched fetchUserCurrentLoans.admin.controllers.loan.js`);
+    const data = {
+      currentPersonalLoans,
+      currentClusterLoans
+    };
+    return ApiResponse.success(res, enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_USER_CURRENT_LOANS_CONTROLLER;
+    logger.error(`fetching current loan facilities failed::${enums.FETCH_USER_CURRENT_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 
 /**
  * Manually create loan records for loans that have been issued offline
