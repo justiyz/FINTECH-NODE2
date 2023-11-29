@@ -2,7 +2,7 @@ FROM node:16.17.1
 
 # Specify Puppeteer version
 ENV PUPPETEER_VERSION=19.8.0
-ENV CHROME_VERSION=117.0.5938.149-1
+ENV CHROME_VERSION=119.0.6045.105-1
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
