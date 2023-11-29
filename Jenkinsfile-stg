@@ -7,7 +7,7 @@ pipeline {
         
         REPO_NAME = 'seedfi-backend'
         DEPLOYMENT_ENV = 'staging'
-        SCM_BRANCH = 'snapshot'
+        SCM_BRANCH = 'fix-generate-pdf'
         NAMESPACE = 'staging'
         DOCKER_ENV = 'staging'
         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
