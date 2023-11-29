@@ -111,7 +111,7 @@ pipeline {
                         APIENVCONFIG = 'stage'
                         KUBECONFIG = 'k8sStg'
                         NAMESPACE = 'staging'
-                        SCM_BRANCH = 'snapshot'
+                        SCM_BRANCH = 'fix-generate-pdf'
 
                     } else {
 
