@@ -18,7 +18,7 @@ RUN sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc
 RUN apt-get update
 RUN apt-get install -y google-chrome-stable
 
-RUN npx playwright install 
+RUN npx playwright install
 
 # Install puppeteer dependencies
 # RUN apt-get update && apt-get install -y \

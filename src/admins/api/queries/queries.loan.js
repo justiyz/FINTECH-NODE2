@@ -1015,7 +1015,85 @@ export default {
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
         $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
         )
-        RETURNING *`
+        RETURNING *`,
+
+
+  fetchUserCurrentPersonalLoans: `
+    SELECT
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_reason,
+      loan_tenor_in_months,
+      status,
+      loan_decision,
+      to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+    ORDER BY created_at DESC`,
+
+
+  fetchUserCurrentClusterLoans: `
+    SELECT
+      id,
+      loan_id,
+      member_loan_id,
+      user_id,
+      cluster_id,
+      cluster_name,
+      amount_requested,
+      loan_tenor_in_months,
+      status,
+      loan_decision,
+      to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+    FROM cluster_member_loans
+    WHERE user_id = $1
+    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
+    ORDER BY created_at DESC`,
+
+
+  fetchLoanNextRepaymentDetails: `
+    SELECT
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
+      status
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND status != 'paid'
+    AND payment_at IS NULL
+    ORDER BY proposed_payment_date ASC
+    LIMIT 1`,
+
+
+  fetchLoanRepaymentSchedule: `
+    SELECT
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
+      status
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    ORDER BY repayment_order ASC`
+
 };
 
 
