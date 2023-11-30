@@ -13,6 +13,9 @@ import { generateElevenDigits } from '../../lib/utils/lib.util.helpers';
  * @memberof FirebaseService
  */
 export const sendPushNotification = async(user_id, content, fcm_token) => {
+  if (config.SEEDFI_NODE_ENV === 'development') {
+    return;
+  }
   try {
     if (!fcm_token || config.SEEDFI_NODE_ENV === 'test') {
       return;
@@ -147,7 +150,7 @@ export const sendClusterNotification = async(user, cluster, clusterMemberDetails
  * @memberof FirebaseService
  */
 export const sendUserPersonalNotification = async(user, title, content, type, extra_data) => {
-  if (config.SEEDFI_NODE_ENV === 'test') {
+  if (config.SEEDFI_NODE_ENV === 'development') {
     return;
   }
   const chatId = generateElevenDigits();
