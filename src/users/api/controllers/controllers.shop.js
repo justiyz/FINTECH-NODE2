@@ -34,6 +34,7 @@ import {
 import {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED} from "../../lib/enums/lib.enum.status";
 import {TICKET_PURCHASE_SHOP_CONTROLLER} from "../../lib/enums/lib.enum.labels";
 import * as puppeteer from 'puppeteer';
+import { chromium } from 'playwright';
 const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
 
 
@@ -292,10 +293,27 @@ export const imageFromHtml = async (htmlContent) => {
   } catch (error) {
     console.error('Error during Puppeteer operation:', error);
   }
-
 }
 
-export const generateTicketPDF = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
+export const imageFromHtml2 = async (htmlContent) => {
+  try {
+    let browser = await chromium.launch();
+    let page = await browser.newPage();
+    const tempDir = os.tmpdir();
+    await page.setContent(htmlContent);
+    await page.setViewportSize({ width: 1280, height: 1080 });
+    let uId = uniqueID();
+    let outputpath = uId +'.jpg';
+    const imagePath = path.join(tempDir, outputpath);
+    await page.screenshot({ path: imagePath, type: 'jpeg' });
+    await browser.close();
+    return imagePath;
+  } catch (error) {
+    console.error('Error ImageFromHtml function during image QR Image generation operation:', error);
+  }
+};
+
+export const generateTicketImage = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
   try {
     const [ticketCategory, ticketRecord] = await Promise.all([
       processOneOrNoneData(shopQueries.getBookedTicketCategory, [ticket_category_id]),
@@ -306,13 +324,13 @@ export const generateTicketPDF = async(ticket_id, ticket_category_id, user, tick
 
     const ticketHtmlPDF = await ticketPDFTemplate(ticket_qr_code, formattedDate, ticketCategory, user, ticketRecord);
     // use puppeteer to generate image from the html file
-    const newlyGeneratedFile = await imageFromHtml(ticketHtmlPDF);
+    const newlyGeneratedFile = await imageFromHtml2(ticketHtmlPDF);
     // generate ticket pdf
     const cloudinary_payload = await cloudinary.uploader.upload(newlyGeneratedFile)
     return cloudinary_payload.secure_url;
   } catch (error) {
     throw error; // Re-throw the error to propagate it up the call stack
-    return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, error);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_BAD_REQUEST, error);
   }
 
 }
@@ -340,7 +358,7 @@ export const createTicketSubscription = async(req, res, next) => {
         // get available tickets from the database
         const availableTickets = await getAvailableTicketUnits(ticket_category_id);
         // generate ticket document
-        let new_ticket_file_url = await generateTicketPDF(ticket_id, ticket_category_id, user, theQRCode);
+        let new_ticket_file_url = await generateTicketImage(ticket_id, ticket_category_id, user, theQRCode);
         // save booked ticket information in the database
         if (availableTickets && availableTickets.units >= units) {
           await createUserTicket(
@@ -674,8 +692,9 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
 
     else  {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
-      if (result.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.'
-          || result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.')
+      if (result.code === 'ECONNRESET')
+      // if (result.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.'
+      //     || result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.')
       {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
@@ -684,7 +703,8 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       }
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: User initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+
+      return ApiResponse.error(res, result.status, result.request.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
 
 
