@@ -4,11 +4,11 @@ FROM node:16.17.1
 ENV PUPPETEER_VERSION=19.8.0
 ENV CHROME_VERSION=119.0.6045.105-1
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
+## Install dependencies
+#RUN apt-get update && apt-get install -y \
+#    wget \
+#    gnupg \
+#    && rm -rf /var/lib/apt/lists/*
 
 # Install Chromium
 RUN wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb
@@ -95,6 +95,6 @@ COPY . /usr/src/seedfi-backend
 # ENV PUPPETEER_DOWNLOAD_PATH=/usr/local/chromium
 
 EXPOSE 4500
-USER app
+#USER app
 CMD [ "npm", "start" ]
 
