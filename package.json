@@ -77,8 +77,12 @@
     "node-fetch": "^3.3.2",
     "nvm": "^0.0.4",
     "pg-promise": "^10.15.4",
+<<<<<<< HEAD
     "playwright": "^1.40.1",
     "puppeteer": "^19.8.0",
+=======
+    "puppeteer": "^21.5.0", 
+>>>>>>> a1c7932 (update)
     "puppeteer-core": "^21.5.2",
     "qrcode": "^1.5.3",
     "sharp": "^0.32.6",
