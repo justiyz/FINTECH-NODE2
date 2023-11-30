@@ -28,6 +28,7 @@ FROM node:16.17.1
 
 # Specify Puppeteer version
 ENV PUPPETEER_VERSION=21.5.0
+ENV CHROME_VERSION=119.0.6045.105-1
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -36,12 +37,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Chromium
-RUN apt-get update && apt-get install -y wget gnupg && \
-  wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
-  sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
-  apt-get update && \
-  apt-get install -y google-chrome-stable=119.0.6045.105-1 --no-install-recommends && \
-  rm -rf /var/lib/apt/lists/*
+RUN wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb
+RUN apt-get -y update
+RUN apt-get install -y ./google-chrome-stable_${CHROME_VERSION}_amd64.deb
 
 
 RUN groupadd -r app && useradd -rm -g app -G audio,video app
