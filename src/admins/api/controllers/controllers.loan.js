@@ -13,6 +13,7 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import dayjs from 'dayjs';
 import {
   generateLoanRepaymentSchedule,
   generateLoanRepaymentScheduleForShop,
@@ -785,6 +786,30 @@ export const fetchUserCurrentLoans = async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_USER_CURRENT_LOANS_CONTROLLER;
     logger.error(`fetching current loan facilities failed::${enums.FETCH_USER_CURRENT_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+export const fetchPersonalLoanDetails = async(req, res, next) => {
+  try {
+    const { admin, loanApplication,  params: { loan_id } } = req;
+    const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user next loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
+    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
+    const next_repayment_date = (!selectedStatuses.includes(loanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') :
+      dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
+    loanApplication.next_repayment_date = next_repayment_date;
+    const data = {
+      nextLoanRepaymentDetails: nextRepaymentDetails,
+      loanDetails: loanApplication,
+      loanRepaymentDetails
+    };
+    return ApiResponse.success(res, enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'), enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_PERSONAL_LOAN_DETAILS_CONTROLLER;
+    logger.error(`fetching details of a personal loan failed::${enums.FETCH_PERSONAL_LOAN_DETAILS_CONTROLLER}`, error.message);
     return next(error);
   }
 };
