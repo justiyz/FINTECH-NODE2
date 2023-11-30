@@ -299,17 +299,19 @@ export const imageFromHtml2 = async (htmlContent) => {
   try {
     let browser = await chromium.launch();
     let page = await browser.newPage();
-    const tempDir = os.tmpdir();
     await page.setContent(htmlContent);
-    await page.setViewportSize({ width: 1280, height: 1080 });
+    await page.setViewportSize({ width: 600, height: 800 });
+
     let uId = uniqueID();
-    let outputpath = uId +'.jpg';
-    const imagePath = path.join(tempDir, outputpath);
+    let outputPath = uId +'.jpg';
+    const tempDir = os.tmpdir();
+    const imagePath = path.join(tempDir, outputPath);
     await page.screenshot({ path: imagePath, type: 'jpeg' });
     await browser.close();
+
     return imagePath;
   } catch (error) {
-    console.error('Error ImageFromHtml function during image QR Image generation operation:', error);
+    console.error('Error ImageFromHtml2 function during image QR Image generation operation:', error);
   }
 };
 
@@ -342,7 +344,7 @@ export const createTicketSubscription = async(req, res, next) => {
   const tickets = req.body.tickets;
   const payment_channel = req.body.payment_channel;
   const reference = uuidv4();
-  const ticketPurchaseLogs = [];
+  // const ticketPurchaseLogs = [];
   let loan_id = req.body.initial_payment.loan_id;
   const { user } = req;
   let totalAmountToBePaid = 0;
@@ -366,7 +368,7 @@ export const createTicketSubscription = async(req, res, next) => {
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
-          ticketPurchaseLogs.push(new_ticket_file_url);
+          // ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
         // TODO
@@ -382,10 +384,7 @@ export const createTicketSubscription = async(req, res, next) => {
     const payment_operation = payment_channel === 'card' ?
       await initializeCardPayment(user, amountWithTransactionCharges, reference) :
       await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
-    const data = {
-      'total_amount': totalAmountToBePaid,
-      'payment': payment_operation
-    };
+    const data = { 'total_amount': totalAmountToBePaid, 'payment': payment_operation };
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
 
     return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
