@@ -239,14 +239,13 @@ export default {
   `,
 
   getTicketByReference: `
-    SELECT loan_id, user_ticket_id, ticket_url
+    SELECT DISTINCT user_tickets.loan_id, user_tickets.user_ticket_id, user_tickets.ticket_url, tickets.ticket_name
     FROM user_tickets
+    JOIN tickets ON tickets.ticket_id = user_tickets.ticket_id
     WHERE
-        transaction_reference = $1
+        user_tickets.transaction_reference = $1
     AND
-        user_id = $2
-    AND
-        ticket_id = $3
+        user_tickets.user_id = $2
   `,
 
   getTicketByReference_x: `

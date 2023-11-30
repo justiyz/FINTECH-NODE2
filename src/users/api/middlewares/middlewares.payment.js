@@ -129,26 +129,19 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
 
     // update first repayment record
     const repaymentRecord = await processOneOrNoneData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
-
     // create first repayment record
     await processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable,
-        [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]
-    );
-
+        [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]);
     // update event status
     await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
 
     // send notification email
-    let ticket_urls = '';
     const ticketUrls = ticket_record.map(ticket => `<a href="${ticket.ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`).join('');
-    // for (let ticketRecordKey in ticket_record) {
-    //   ticket_urls = ticket_urls + `<a href="${ticket_record[ticketRecordKey].ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`
-    // }
     const data = { first_name: user.first_name, email: user.email, ticket_urls: ticketUrls };
     await MailService('Ticket Information', 'eventBooking', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
     req.ticket_update = { ticket_record };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return next();
   } catch (error) {
     error.label = enums.EVENT_PAYMENT_UNSUCCESSFUL;
