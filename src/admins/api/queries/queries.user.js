@@ -59,7 +59,7 @@ export default {
       is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
       is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
       number_of_children, marital_status, loan_status, verification_token_request_count, invalid_verification_token_count,
-       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created, (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points
+       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created, (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points, bvn
     FROM users
     WHERE user_id = $1`,
 
@@ -147,7 +147,8 @@ export default {
         to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
         users.loan_status,
         employment_type.employment_type,
-        users.status
+        users.status,
+        users.bvn
       FROM users
       LEFT JOIN employment_type
       ON users.user_id = employment_type.user_id
@@ -218,6 +219,15 @@ export default {
       image_url
     ) VALUES ($1, $2, $3, $4)
     RETURNING id, user_id, document_title, uploaded_by, created_at`,
+
+  uploadProductImage: `
+    INSERT INTO uploaded_documents (
+        uploaded_by,
+        document_title,
+        image_url
+    ) VALUES ($1, $2, $3)
+    RETURNING id, file_id, image_url, uploaded_by, created_at
+  `,
 
   fetchUploadedUserDocuments: `
       SELECT

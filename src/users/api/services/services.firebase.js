@@ -216,7 +216,7 @@ export const updateNotificationReadBoolean = async(user, params, body) => {
  * @memberof FirebaseService
  */
 export const sendNotificationToAdmin = async(admin_id, title, message, customer_name, type, extra_data) => {
-  if (config.SEEDFI_NODE_ENV === 'test') {
+  if (config.SEEDFI_NODE_ENV != 'production') {
     return;
   }
 

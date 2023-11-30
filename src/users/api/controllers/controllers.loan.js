@@ -18,7 +18,7 @@ import { initiateTransfer, initializeCardPayment, initializeBankAccountChargeFor
 } from '../services/service.paystack';
 import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
-
+import * as Hash from "../../lib/utils/lib.util.hash";
 /**
  * check if user is eligible for loan
  * @param {Request} req - The request from the endpoint.
@@ -39,10 +39,9 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication,
-      [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
+        [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-      userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
@@ -206,6 +205,24 @@ export const cancelLoanApplication = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 43, 'success');
     return ApiResponse.success(res, enums.LOAN_APPLICATION_CANCELLING_SUCCESSFUL, enums.HTTP_OK, cancelLoanProcess);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 43, 'fail');
+    error.label = enums.CANCEL_LOAN_APPLICATION_CONTROLLER;
+    logger.error(`cancelling loan application process failed::${enums.CANCEL_LOAN_APPLICATION_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+export const cancelShopLoanApplication = async(req, res, next) => {
+  try {
+    const { user, params: { ticket_id } } = req;
+    const loanIds = await processAnyData(loanQueries.fetchLoanIDFromUserTickets, [ ticket_id, user.user_id ]);
+    for (let counter = 0; counter < Object.keys(loanIds).length; counter++) {
+      await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [ loanIds, user.user_id ]);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
+    userActivityTracking(req.user.user_id, 43, 'success');
+    return next();
   } catch (error) {
     userActivityTracking(req.user.user_id, 43, 'fail');
     error.label = enums.CANCEL_LOAN_APPLICATION_CONTROLLER;
@@ -599,7 +616,7 @@ export const loanReschedulingSummary = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next loan repayment details fetched loanReschedulingSummary.controllers.loan.js`);
     const returnData = await LoanPayload.loanReschedulingRequestSummaryResponse(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment);
     const rescheduleRequest = await processOneOrNoneData(loanQueries.createRescheduleRequest,
-      [ existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
+        [ existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request saved in the DB loanReschedulingSummary.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 94, 'success');
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY, enums.HTTP_OK, { ...returnData, reschedule_id: rescheduleRequest.reschedule_id });
@@ -641,7 +658,7 @@ export const processLoanRescheduling = async(req, res, next) => {
     await Promise.all([
       userUnpaidRepayments.map((repayment) => {
         processOneOrNoneData(loanQueries.updateNewRepaymentDate,
-          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+            [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
         return repayment;
       }),
       processOneOrNoneData(loanQueries.updateLoanWithRescheduleDetails, [ existingLoanApplication.loan_id, Number(loanRescheduleRequest.extension_in_days),

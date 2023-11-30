@@ -27,14 +27,14 @@ export const initializeCardTokenizationPayment = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initializeCardTokenizationPayment.controllers.payment.js`);
     const paystackAmountFormatting = parseFloat(tokenizingAmount) * 100; // Paystack requires amount to be in kobo for naira payment
     const result = await initializeCardPayment(user, paystackAmountFormatting, reference);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
     initializeCardTokenizationPayment.controllers.payment.js`);
     if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack initialized initializeCardTokenizationPayment.controllers.payment.js`);
       userActivityTracking(user.user_id, 32, 'success');
       return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack failed to be initialized 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: card payment via paystack failed to be initialized
     initializeCardTokenizationPayment.controllers.payment.js`);
     userActivityTracking(user.user_id, 32, 'fail');
     return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIALIZE_CARD_TOKENIZATION_PAYMENT_CONTROLLER);

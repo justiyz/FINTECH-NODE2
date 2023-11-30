@@ -145,11 +145,8 @@ export const initiateClusterLoanRepayment = async () => {
     return;
   } catch (error) {
     error.label = enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER;
-    logger.error(
-      `initiating cluster loan repayment for loan repayments which are due for repayment
-    failed::${enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`,
-      error.message
-    );
+    logger.error(`initiating cluster loan repayment for loan repayments which are due for repayment
+    failed::${enums.INITIATE_CLUSTER_LOAN_REPAYMENT_CONTROLLER}`, error.message);
     return;
   }
 };
@@ -268,7 +265,7 @@ export const nonPerformingPersonalLoans = async () => {
           'non-performing-loans'
         );
       }
-      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [user.user_id, user.loan_id, user.loan_repayment_id, null, 'individual loan']);
+      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [ user.user_id, user.loan_id, user.loan_repayment_id, null, 'individual loan' ]);
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent  notification to admin and users nonPerformingLoans.controllers.cron.js`);
     await processOneOrNoneData(cronQueries.recordCronTrail, [null, 'SNPLNNTADM', 'send non performing loan notifications to admins']);
@@ -311,7 +308,7 @@ export const nonPerformingClusterLoans = async () => {
           'non-performing-loans'
         );
       }
-      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [user.user_id, user.member_loan_id, user.loan_repayment_id, user.loan_id, 'cluster loan']);
+      await processOneOrNoneData(cronQueries.recordLoanAsNpl, [ user.user_id, user.member_loan_id, user.loan_repayment_id, user.loan_id, 'cluster loan' ]);
     });
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully sent notification to admin and users nonPerformingClusterLoans.controllers.cron.js`);

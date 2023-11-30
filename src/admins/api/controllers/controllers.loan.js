@@ -13,7 +13,12 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
-import { generateLoanRepaymentSchedule, generateOfferLetterPDF } from '../../../users/lib/utils/lib.util.helpers';
+import dayjs from 'dayjs';
+import {
+  generateLoanRepaymentSchedule,
+  generateLoanRepaymentScheduleForShop,
+  generateOfferLetterPDF
+} from '../../../users/lib/utils/lib.util.helpers';
 import { userActivityTracking } from '../../../users/lib/monitor';
 import { FAILED_TO_CREATE_MANUAL_LOAN_RECORD, LOAN_APPLICATION_MANUAL_DECISION, MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN } from '../../../users/lib/enums/lib.enum.messages';
 /**
@@ -818,6 +823,58 @@ export const fetchSingleClusterMemberRescheduledLoan = async (req, res, next) =>
 };
 
 /**
+ * fetches current loans of a single member on the platform
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+
+export const fetchUserCurrentLoans = async(req, res, next) => {
+  try {
+    const { params: {user_id}, admin } = req;
+    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [ user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current personal loan facilities fetched fetchUserCurrentLoans.admin.controllers.loan.js`);
+    const currentClusterLoans = await processAnyData(loanQueries.fetchUserCurrentClusterLoans, [ user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current cluster loan facilities fetched fetchUserCurrentLoans.admin.controllers.loan.js`);
+    const data = {
+      currentPersonalLoans,
+      currentClusterLoans
+    };
+    return ApiResponse.success(res, enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_USER_CURRENT_LOANS_CONTROLLER;
+    logger.error(`fetching current loan facilities failed::${enums.FETCH_USER_CURRENT_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+export const fetchPersonalLoanDetails = async(req, res, next) => {
+  try {
+    const { admin, loanApplication,  params: { loan_id } } = req;
+    const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user next loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
+    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
+    const next_repayment_date = (!selectedStatuses.includes(loanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') :
+      dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
+    loanApplication.next_repayment_date = next_repayment_date;
+    const data = {
+      nextLoanRepaymentDetails: nextRepaymentDetails,
+      loanDetails: loanApplication,
+      loanRepaymentDetails
+    };
+    return ApiResponse.success(res, enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'), enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_PERSONAL_LOAN_DETAILS_CONTROLLER;
+    logger.error(`fetching details of a personal loan failed::${enums.FETCH_PERSONAL_LOAN_DETAILS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * Manually create loan records for loans that have been issued offline
  *   Function Name: ManuallyInitiatePersonalLoanApplication
  *   Steps (1 -8)
@@ -857,7 +914,6 @@ async function createLoanApplication(userDetails, body) {
   const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
   const totalInterestAmount = calculateTotalInterestAmount(totalMonthlyRepayment, body.amount);
   const totalAmountRepayable = calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
-
   const loanApplicationDetails = await processOneOrNoneData(loanQueries.manuallyInitiatePersonalLoanApplication, [
     userDetails.user_id,
     parseFloat(body.amount),
@@ -888,7 +944,7 @@ async function createLoanApplication(userDetails, body) {
 }
 
 // Function to create repayment schedule
-async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
+export async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
   const repaymentSchedule = await generateLoanRepaymentSchedule(loanApplicationDetails, userDetails.user_id);
   for (const schedule of repaymentSchedule) {
     await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [
@@ -903,6 +959,26 @@ async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
       schedule.post_payment_outstanding_amount,
       schedule.proposed_payment_date,
       schedule.proposed_payment_date,
+    ]);
+  }
+  return repaymentSchedule;
+}
+
+export async function createShopRepaymentSchedule(loanApplicationDetails, userDetails, activationCharge, monthly_installment) {
+  const repaymentSchedule = await generateLoanRepaymentScheduleForShop(loanApplicationDetails, userDetails.user_id, activationCharge, monthly_installment);
+  for (const schedule of repaymentSchedule) {
+    await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [
+      schedule.loan_id,
+      schedule.user_id,
+      schedule.repayment_order,
+      schedule.principal_payment,
+      schedule.interest_payment,
+      schedule.fees,
+      schedule.total_payment_amount,
+      schedule.pre_payment_outstanding_amount,
+      schedule.post_payment_outstanding_amount,
+      schedule.proposed_payment_date,
+      schedule.proposed_payment_date
     ]);
   }
   return repaymentSchedule;
