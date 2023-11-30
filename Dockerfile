@@ -27,7 +27,7 @@ FROM node:16.17.1
 #   rm -rf /var/lib/apt/lists/*
 
 # Specify Puppeteer version
-#ENV PUPPETEER_VERSION=19.8.0
+ENV PUPPETEER_VERSION=21.5.0
 
 ## Install dependencies
 #RUN apt-get update && apt-get install -y \
@@ -35,17 +35,16 @@ FROM node:16.17.1
 #    gnupg \
 #    && rm -rf /var/lib/apt/lists/*
 
-## Install Chromium
-#RUN wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
-#    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
-#    apt-get update && \
-#    apt-get install -y \
-#      google-chrome-stable=${PUPPETEER_VERSION} \
-#      --no-install-recommends \
-#    && rm -rf /var/lib/apt/lists/*
-#
-#
-#RUN groupadd -r app && useradd -rm -g app -G audio,video app
+# Install Chromium
+RUN apt-get update && apt-get install -y wget gnupg && \
+  wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
+  sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
+  apt-get update && \
+  apt-get install -y google-chrome-stable=119.0.6045.105-1 --no-install-recommends && \
+  rm -rf /var/lib/apt/lists/*
+
+
+RUN groupadd -r app && useradd -rm -g app -G audio,video app
 
 # Create app directory
 RUN mkdir -p /usr/src/seedfi-backend
