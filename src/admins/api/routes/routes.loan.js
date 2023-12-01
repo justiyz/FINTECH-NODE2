@@ -182,4 +182,28 @@ router.post(
   LoanController.manuallyInitiatePersonalLoanApplication
 );
 
+router.get(
+  '/:user_id/current-loans',
+  AuthMiddleware.validateAdminAuthToken,
+  LoanController.adminFetchUserCurrentLoans
+);
+
+router.get(
+  '/:loan_id/personal/details',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.loanIdParams, 'params'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanController.adminFetchPersonalLoanDetails
+);
+
+router.post(
+  '/:loan_id/:payment_channel_id/initiate-repayment',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.loanRepaymentParams, 'params'),
+  Model(Schema.loanRepaymentType, 'query'),
+  LoanMiddleware.checkIfLoanExists,
+  UserMiddleware.checkIfCardOrUserExist,
+  LoanController.adminInitiateManualCardLoanRepayment
+);
+
 export default router;
