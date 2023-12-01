@@ -185,7 +185,7 @@ router.post(
 router.get(
   '/:user_id/current-loans',
   AuthMiddleware.validateAdminAuthToken,
-  LoanController.fetchUserCurrentLoans
+  LoanController.adminFetchUserCurrentLoans
 );
 
 router.get(
@@ -193,7 +193,17 @@ router.get(
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.loanIdParams, 'params'),
   LoanMiddleware.checkIfLoanExists,
-  LoanController.fetchPersonalLoanDetails
+  LoanController.adminFetchPersonalLoanDetails
+);
+
+router.post(
+  '/:loan_id/:payment_channel_id/initiate-repayment',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.loanRepaymentParams, 'params'),
+  Model(Schema.loanRepaymentType, 'query'),
+  LoanMiddleware.checkIfLoanExists,
+  UserMiddleware.checkIfCardOrUserExist,
+  LoanController.adminInitiateManualCardOrBankLoanRepayment
 );
 
 export default router;

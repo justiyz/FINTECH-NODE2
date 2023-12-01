@@ -146,6 +146,15 @@ const manuallyInitiatedLoanApplication = Joi.object().keys({
   renegotiation_count: Joi.number().default(0)
 });
 
+const loanRepaymentParams = Joi.object().keys({
+  loan_id: Joi.string().required(),
+  payment_channel_id: Joi.string().required()
+});
+
+const loanRepaymentType = Joi.object().keys({
+  payment_type: Joi.string().required().valid('full', 'part')
+  // payment_channel: Joi.string().required().valid('card', 'bank')
+});
 
 
 export default {
@@ -164,5 +173,7 @@ export default {
   fetchRepaidClusterLoans,
   fetchClusterDetails,
   manuallyInitiatedLoanApplication,
-  manuallyCreateLoanRepaymentSchedule
+  manuallyCreateLoanRepaymentSchedule,
+  loanRepaymentParams,
+  loanRepaymentType
 };

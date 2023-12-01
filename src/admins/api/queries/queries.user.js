@@ -416,7 +416,26 @@ export default {
       SELECT COUNT(reward_id) AS total_count
       FROM reward_points_tracking
       WHERE user_id = $1
-  `
+  `,
+
+  fetchBankAccountDetailsByUserId: `
+      SELECT
+        id,
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name,
+        is_default,
+        is_disbursement_account,
+        created_at
+      FROM user_bank_accounts
+      WHERE user_id =$1`,
+
+  fetchCardsById: `
+      SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
+      FROM user_debit_cards
+      WHERE id = $1`
 };
 
 
