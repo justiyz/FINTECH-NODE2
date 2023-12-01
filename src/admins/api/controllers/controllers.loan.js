@@ -994,7 +994,7 @@ export const manuallyInitiatePersonalLoanApplication = async(req, res, next) => 
  * @returns {object} - Returns details of an initiate paystack payment
  * @memberof LoanController
  */
-export const adminInitiateManualCardOrBankLoanRepayment = async(req, res, next) => {
+export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
   const { admin, loanApplication, params: { loan_id }, query: { payment_type }, userDebitCard } = req;
   const payment_channel = 'card';
   try {

@@ -203,7 +203,7 @@ router.post(
   Model(Schema.loanRepaymentType, 'query'),
   LoanMiddleware.checkIfLoanExists,
   UserMiddleware.checkIfCardOrUserExist,
-  LoanController.adminInitiateManualCardOrBankLoanRepayment
+  LoanController.adminInitiateManualCardLoanRepayment
 );
 
 export default router;
