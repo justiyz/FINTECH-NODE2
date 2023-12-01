@@ -45,11 +45,13 @@ spec:
             secretKeyRef:
               key: sendgridapikey
               name: seedfi-api-config
+        # - name: SEEDFI_DEV_PAYSTACK_SECRET_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       key: paystacksecretkey
+        #       name: seedfi-api-config
         - name: SEEDFI_DEV_PAYSTACK_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              key: paystacksecretkey
-              name: seedfi-api-config
+          value: 'sk_test_d91f4618973f5d8c724716d82a9e93148b95d051'
         - name: SEEDFI_DEV_DOJAH_SECRET_KEY
           valueFrom:
             secretKeyRef:
