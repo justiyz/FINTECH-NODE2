@@ -7,7 +7,7 @@ import {
   calculateAmountPlusPaystackTransactionCharge,
   initializeBankTransferPayment,
   initializeCardPayment
-} from "../services/service.paystack";
+} from '../services/service.paystack';
 import enums from '../../lib/enums';
 import {v4 as uuidv4} from 'uuid';
 import {userActivityTracking} from '../../lib/monitor';
@@ -15,24 +15,18 @@ import {processOneOrNoneData} from '../../../admins/api/services/services.db';
 import QRCode from 'qrcode';
 import MailService from '../services/services.email';
 import notificationQueries from "../queries/queries.notification";
-import loanQueries from "../queries/queries.loan";
-import LoanPayload from "../../lib/payloads/lib.payload.loan";
-import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
+import loanQueries from '../queries/queries.loan';
+import LoanPayload from '../../lib/payloads/lib.payload.loan';
+import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from '../services/service.seedfiUnderwriting';
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import config from "../../config";
-import { ticketPDFTemplate } from "../../lib/templates/offerLetter";
+import config from '../../config';
+import { ticketPDFTemplate } from '../../lib/templates/offerLetter';
 import path from 'path';
 import os from 'os';
 import fs from 'fs';
-import { uniqueID } from "mocha/lib/utils";
+import { uniqueID } from 'mocha/lib/utils';
 import { cloudinary } from '../services/service.cloudinary';
-import {
-  REQUESTED_NUMBER_OF_TICKETS_NOT_AVAILABLE,
-  UNDERWRITING_SERVICE_FAILURE
-} from "../../lib/enums/lib.enum.messages";
-import {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED} from "../../lib/enums/lib.enum.status";
-import {TICKET_PURCHASE_SHOP_CONTROLLER} from "../../lib/enums/lib.enum.labels";
 import * as puppeteer from 'puppeteer';
 import { chromium } from 'playwright';
 const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
@@ -665,7 +659,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       }
     }
 
-    else if (result.status >= 400 && result.status <= 500) {
+    else if (result.status >= 400 && result.status < 500) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: Info: returned response from underwriting is a 400 plus status checkUserLoanEligibility.controllers.loan.js`)
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
       admins.map((admin) => {
