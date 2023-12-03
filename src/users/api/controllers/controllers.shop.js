@@ -654,7 +654,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
         userActivityTracking(req.user.user_id, 37, 'fail');
         userActivityTracking(req.user.user_id, 40, 'success');
         // Declined Loan Information update
-        const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
+        const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails, 'DECLINED');
         return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
       }
     }

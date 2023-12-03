@@ -26,9 +26,9 @@ const loanApplicationEligibilityCheckV2 = async(payload) => {
   }
 };
 const loanApplicationEligibilityCheck = async(payload) => {
-  // if (SEEDFI_NODE_ENV === 'development') {
-  //   return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
-  // }
+  if (SEEDFI_NODE_ENV === 'development') {
+    return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
+  }
   try {
     const headers = {
       'Authorization': `Api-Key ${config.SEEDFI_UNDERWRITING_SERVICE_API_KEY}`,

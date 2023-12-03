@@ -35,6 +35,11 @@ const bvnVerification = Joi.object().keys({
   bvn: Joi.string().required().length(11)
 });
 
+const idDocumentVerification = Joi.object().keys({
+  document_id: Joi.string().required(),
+  document_type: Joi.string().required().valid('nin', 'voters_card', 'international_passport')
+});
+
 const verifyEmail = Joi.object().keys({
   email: Joi.string().email().required()
 });
@@ -66,15 +71,15 @@ const addressVerification = Joi.object().keys({
 const updateUsersProfile = Joi.object().keys({
   first_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
     'string.pattern.base': 'Invalid first name input'
-  }).optional(), 
+  }).optional(),
   middle_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
     'string.pattern.base': 'Invalid middle name input'
-  }).optional(), 
+  }).optional(),
   last_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9-]+$')).messages({
     'string.pattern.base': 'Invalid last name input'
   }).optional(),
   date_of_birth: Joi.date().optional(),
-  gender: Joi.string().optional().valid('male', 'female'), 
+  gender: Joi.string().optional().valid('male', 'female'),
   number_of_children: Joi.number().required(),
   marital_status: Joi.string().required()
 });
@@ -123,7 +128,7 @@ const employmentDetails = Joi.object().keys({
   then: Joi.object({
     school_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
       'string.pattern.base': 'Invalid school name input'
-    }).required(), 
+    }).required(),
     date_started: Joi.string().required()
   })
 });
@@ -141,7 +146,7 @@ const updateEmploymentDetails = Joi.object().keys({
   then: Joi.object({
     school_name: Joi.string().regex(new RegExp('^[a-zA-Z0-9 .-]+$')).messages({
       'string.pattern.base': 'Invalid school name input'
-    }).optional(), 
+    }).optional(),
     date_started: Joi.string().optional()
   })
 });
@@ -175,5 +180,6 @@ export default  {
   employmentDetails,
   updateEmploymentDetails,
   updateMonoId,
-  tierLoanValue
+  tierLoanValue,
+  idDocumentVerification
 };
