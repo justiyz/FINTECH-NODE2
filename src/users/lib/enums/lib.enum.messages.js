@@ -87,6 +87,7 @@ export const VERIFY_EMAIL = 'Email verified successfully.';
 export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
 export const EMAIL_NOT_VERIFIED = 'User email not verified, kindly verify email to continue';
 export const ID_UPLOAD_VERIFICATION = 'User id successfully verified';
+export const AVAILABLE_VERIFICATION_MEANS = 'Returned list of available verification means';
 export const CHECK_USER_ID_VERIFICATION = 'User Id already verified,  kindly contact support team if you want to update id.';
 export const CHECK_USER_ADDRESS_VERIFICATION = 'User address already verified,  kindly contact support team if you want to update address info.';
 export const CHECK_USER_UTILITY_BILL_VERIFICATION = 'User uploaded utility bill already verified, kindly contact support team if you want to update utility bill details';

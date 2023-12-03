@@ -2,6 +2,10 @@ import enums from '../../lib/enums';
 import config from '../../config';
 import axios from 'axios';
 import * as userMockedTestResponses from '../../../../tests/response/response.user';
+import {
+  dojahVerifyInternationPassportResponse,
+  zeehVerifyInternationalPassportResponse
+} from "../../../../tests/response/response.user";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -49,6 +53,36 @@ const zeehBVNVerificationCheck = async(bvn, user) => {
   }
 };
 
+const zeehPassportNumberVerificationCheck = async (user, document_id) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return userMockedTestResponses.zeehVerifyInternationalPassportResponse(user, document_id);
+    }
+
+    const options = {
+      method: 'POST',
+      url: `https://api.zeeh.africa/api/v1/passport/live/lookup/${config.SEEDFI_ZEEH_PUBLIC_KEY}`,
+      headers: {
+        accept: 'application/json',
+        'zeeh-private-key': config.SEEDFI_ZEEH_SECRET_KEY,
+        'content-type': 'application/json',
+        publicKey: config.SEEDFI_ZEEH_PUBLIC_KEY
+      },
+      data: {
+        passportNumber: document_id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        dob: user.date_of_birth
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`${enums.CURRENT_TIME_STAMP} Error querying Internation Passport Number for this reason ====>>> ${error}`);
+    return error;
+  }
+};
+
 const zeehNINVerificationCheck = async (nin, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
@@ -73,7 +107,7 @@ const zeehNINVerificationCheck = async (nin, user) => {
 };
 
 const zeehVINVerificationCheck = async (vin, user, state) => {
- 
+
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       // return userMockedTestResponses.zeehVerifyVINTestResponse(user, vin);
@@ -89,7 +123,7 @@ const zeehVINVerificationCheck = async (vin, user, state) => {
       }
     };
     const { data } = await axios(options);
-    return data;    
+    return data;
 
   } catch (error) {
     logger.error(`${enums.CURRENT_TIME_STAMP} Error querying Voters Identity Number (VIN) for this reason ====>>> ${error}`);
@@ -102,5 +136,6 @@ export {
   zeehBVNVerificationCheck,
   zeehNINVerificationCheck,
   zeehDriversLicenseVerificationCheck,
-  zeehVINVerificationCheck
+  zeehVINVerificationCheck,
+  zeehPassportNumberVerificationCheck
 };

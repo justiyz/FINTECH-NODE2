@@ -4,6 +4,7 @@ import Schema from '../../lib/schemas/lib.schema.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
+import {availableVerificationMeans} from "../controllers/controllers.user";
 
 const router = Router();
 
@@ -130,19 +131,19 @@ router.post(
   UserController.idUploadVerification
 );
 
+router.get(
+    '/active-verification-means',
+    AuthMiddleware.validateAuthToken,
+    UserController.availableVerificationMeans
+);
 
 router.post(
   '/verify-document',
   AuthMiddleware.validateAuthToken,
-  // Model(Schema.bvnVerification, 'payload'),
-
-  // Model(Schema.idVerification, 'payload'),
+  Model(Schema.idDocumentVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   // UserMiddleware.isUploadedImageSelfie('confirm'),
-  // UserMiddleware.isUploadedVerifiedId('complete'),
-
-  // UserMiddleware.isVerifiedBvn('complete'),
-  // UserMiddleware.isBvnPreviouslyExisting,
+  UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.documentVerification
 
 );
