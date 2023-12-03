@@ -374,13 +374,10 @@ function getNumericValue(input) {
   logger.info(`AmountRequestType ${input}:::Info: Logs the amount to be passed to paystack plus charges`);
   logger.info(`Datatype of AmountRequestType ${typeof input}:::Info: Logs the amount to be passed to paystack plus charges`);
   if (typeof input === 'string' || typeof input === 'object') {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return Number(input);
   } else if (typeof input === 'number') {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return input;
   } else {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return NaN; // Return NaN for unsupported types
   }
 }

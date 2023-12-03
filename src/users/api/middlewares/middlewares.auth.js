@@ -535,7 +535,7 @@ export const comparePin = async(req, res, next) => {
 
 /**
  * check if pin sent matches user's pin in the DB
- * @param {Request} type - The request from the endpoint.
+ * @param {string} type - The request from the endpoint.
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
