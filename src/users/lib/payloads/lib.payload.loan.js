@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import config from '../../config';
+const { SEEDFI_NODE_ENV } = config;
 
 const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
                                           userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
@@ -13,7 +15,7 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'marital_status': user.marital_status,
   'number_of_dependants': user.number_of_children,
   'account_number': userDefaultAccountDetails.account_number,
-  'bvn': await Hash.decrypt(decodeURIComponent(userBvn.bvn)),
+  'bvn': (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') ? 12312312345 : await Hash.decrypt(decodeURIComponent(userBvn.bvn)),
   'firstName': user.first_name,
   'lastName': user.last_name,
   'dateOfBirth': user.date_of_birth,
@@ -34,40 +36,6 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'bank_statement_service_choice': body.bank_statement_service_choice,
   'tier': user.tier
 });
-const checkUserEligibilityPayloadx = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-  userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
-  user_id: user.user_id,
-  loan_application_id: loanApplicationDetails.loan_id,
-  loan_duration_in_month: `${body.duration_in_months}`,
-  loan_amount: parseFloat(body.amount),
-  loan_reason: body.loan_reason,
-  monthly_income: userEmploymentDetails.monthly_income,
-  employment_type: userEmploymentDetails.employment_type,
-  marital_status: user.marital_status,
-  number_of_dependants: user.number_of_children,
-  account_number: userDefaultAccountDetails.account_number,
-  bvn: await Hash.decrypt(decodeURIComponent(userBvn.bvn)),
-  firstName: user.first_name,
-  lastName: user.last_name,
-  dateOfBirth: user.date_of_birth,
-  email: user.email,
-  address: '',
-  phoneNumber: user.phone_number,
-  gender: user.gender,
-  user_mono_account_id: userMonoId == undefined ? null : userMonoId,
-  loan_type: 'individual',
-  interest_rate_type: userLoanDiscount == undefined ? null : userLoanDiscount.interest_rate_type,
-  interest_rate_value: userLoanDiscount == undefined ? null :  userLoanDiscount.interest_rate_value,
-  general_loan_id: null,
-  cluster_type: clusterType,
-  user_maximum_allowable_amount: userMaximumAllowableAmount,
-  user_minimum_allowable_amount: userMinimumAllowableAMount,
-  previous_loan_count: previousLoanCount,
-  previous_loan_defaulted_count: previouslyDefaultedCount,
-  bank_statement_service_choice: body.bank_statement_service_choice,
-  tier: user.tier
-});
-
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
   data.loan_application_id,
   data.orr_score,

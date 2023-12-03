@@ -29,7 +29,7 @@ import { uniqueID } from 'mocha/lib/utils';
 import { cloudinary } from '../services/service.cloudinary';
 import * as puppeteer from 'puppeteer';
 import { chromium } from 'playwright';
-const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
+const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR, SEEDFI_NODE_ENV } = config;
 
 
 export const shopCategories = async (req, res, next) => {
@@ -619,8 +619,8 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     );
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-      userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    let payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
+          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
 
     if(result.status === 200 && result.statusText === 'OK') {
