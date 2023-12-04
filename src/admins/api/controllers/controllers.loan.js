@@ -14,6 +14,10 @@ import { adminActivityTracking } from '../../lib/monitor';
 import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
+
+import { initializeBankAccountChargeForLoanRepayment, initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
+
 import {
   generateLoanRepaymentSchedule,
   generateLoanRepaymentScheduleForShop,
@@ -831,7 +835,7 @@ export const fetchSingleClusterMemberRescheduledLoan = async (req, res, next) =>
  * @memberof AdminLoanController
  */
 
-export const fetchUserCurrentLoans = async(req, res, next) => {
+export const adminFetchUserCurrentLoans = async(req, res, next) => {
   try {
     const { params: {user_id}, admin } = req;
     const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [ user_id ]);
@@ -850,7 +854,7 @@ export const fetchUserCurrentLoans = async(req, res, next) => {
   }
 };
 
-export const fetchPersonalLoanDetails = async(req, res, next) => {
+export const adminFetchPersonalLoanDetails = async(req, res, next) => {
   try {
     const { admin, loanApplication,  params: { loan_id } } = req;
     const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id ]);
@@ -1027,6 +1031,76 @@ export const manuallyInitiatePersonalLoanApplication = async (req, res, next) =>
   } catch (error) {
     error.label = enums.FAILED_TO_CREATE_MANUAL_LOAN_RECORD;
     logger.error(`creating loan application record failed:::${enums.FAILED_TO_CREATE_MANUAL_LOAN_RECORD}`, error.message);
+    return next(error);
+  }
+
+};
+
+/**
+ * initiate manual loan repayment via existing card or bank account
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of an initiate paystack payment
+ * @memberof LoanController
+ */
+export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
+  const { admin, loanApplication, params: { loan_id }, query: { payment_type }, userDebitCard } = req;
+  const payment_channel = 'card';
+  try {
+    if (loanApplication.status === 'ongoing' || loanApplication.status === 'over due') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan has a status of ${loanApplication.status} so repayment is possible
+      adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      const reference = uuidv4();
+      const user = await processOneOrNoneData(userQueries.getUserByUserId, [ loanApplication.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetch loan user adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan next repayment details fetched
+       adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      const paymentAmount = payment_type === 'full' ? parseFloat(loanApplication.total_outstanding_amount).toFixed(2)
+        : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
+      const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: payment amount properly formatted
+      adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`,
+        `user repays part of or all of existing personal loan facility via ${payment_channel}`, loan_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: payment reference and amount saved in the DB
+      adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      const result =  await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: payment initialize via paystack returns response
+      adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repayment via paystack initialized
+         adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+        // userActivityTracking(req.user.user_id, activityType, 'success');
+        return ApiResponse.success(res, result.message, enums.HTTP_OK, {
+          user_id: loanApplication.user_id,
+          amount: parseFloat(paymentAmount).toFixed(2),
+          payment_type,
+          payment_channel,
+          reference: result.data.reference,
+          status: result.data.status,
+          display_text: result.data.display_text || ''
+        });
+      }
+      if (result.response && result.response.status === 400) {
+        // userActivityTracking(req.user.user_id, activityType, 'fail');
+        return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repayment via paystack failed to be initialized
+      adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+      // userActivityTracking(req.user.user_id, activityType, 'fail');
+      return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan has a status of ${loanApplication.status} and repayment is not possible
+    adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+    // userActivityTracking(req.user.user_id, activityType, 'fail');
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(loanApplication.status),
+      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+  } catch (error) {
+    // userActivityTracking(req.user.user_id, activityType, 'fail');
+    error.label = enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER;
+    logger.error(`initiating loan repayment manually using saved card or bank account failed::${enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER}`, error.message);
     return next(error);
   }
 };
