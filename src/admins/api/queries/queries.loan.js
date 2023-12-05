@@ -1092,7 +1092,22 @@ export default {
       status
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
-    ORDER BY repayment_order ASC`
+    ORDER BY repayment_order ASC`,
+
+
+  initializeBankTransferPayment: `
+      INSERT INTO paystack_payment_histories (
+          user_id,
+          amount,
+          payment_platform,
+          transaction_reference,
+          payment_type,
+          payment_status,
+          refund_status,
+          transaction_type,
+          payment_reason,
+          loan_id
+      ) VALUES ($1, $2, $3, $4, $5, 'pending', 'pending', 'debit', $6, $7)`
 
 };
 

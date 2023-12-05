@@ -5,7 +5,7 @@ export const forgotPassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-      Hi ${data.first_name},
+      Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -42,7 +42,7 @@ export const resetPassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -69,7 +69,7 @@ export const changePassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -96,7 +96,7 @@ export const changePin = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -124,7 +124,7 @@ export const resetPin = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -151,7 +151,7 @@ export const verifyEmail = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -200,7 +200,7 @@ export const requestVerifyEmail = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -221,7 +221,7 @@ export const rejectedDebitCard = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -251,7 +251,7 @@ export const loanDisbursement = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -314,7 +314,7 @@ export const failedCardDebit = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -345,7 +345,7 @@ export const failedChargePayment = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -377,7 +377,7 @@ export const successfulRepayment = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -410,7 +410,7 @@ export const completedRepayment = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -439,7 +439,7 @@ export const failedAddressVerification = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -473,7 +473,7 @@ export const successfulAddressVerification = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -501,7 +501,7 @@ export const loanRescheduled = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -531,7 +531,7 @@ export const rewardPointsClaiming = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -546,7 +546,7 @@ export const rejectedDebitCardNotUsersCard = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -576,7 +576,7 @@ export const ticketBookedForYou = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>

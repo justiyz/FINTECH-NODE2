@@ -2,8 +2,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import config from '../../../users/config/index';
 import Crypto from 'crypto';
+import CryptoJS from 'crypto-js';
 
-const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config; 
+
+const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config;
 
 export const generateAdminAuthToken = (admin, permissions) => {
   try {
@@ -38,5 +40,10 @@ export const generateAdminResetPasswordToken = (admin) => {
   } catch (error) {
     return error;
   }
+};
+
+export const decrypt = async(ciphertext) => {
+  const bytes = CryptoJS.AES.decrypt(ciphertext.toString(), SEEDFI_ENCODING_AUTHENTICATION_SECRET);
+  return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 };
 
