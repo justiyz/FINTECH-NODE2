@@ -394,9 +394,9 @@ export const verifyEmail = async (req, res, next) => {
 
 export const availableVerificationMeans = async (req, res, next) => {
   const verification_means =  [
-      'nin', 'international_passport'
+      'nin'
   ];
-
+// , 'international_passport'
   return ApiResponse.success(res, enums.AVAILABLE_VERIFICATION_MEANS, enums.HTTP_OK, verification_means);
 };
 
