@@ -41,10 +41,36 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0)
     RETURNING *`,
 
+  initiatePersonalLoanApplicationWithReturn: `
+    INSERT INTO personal_loans(
+        user_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months, reschedule_count, renegotiation_count, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0, 'pending')
+    RETURNING user_id, loan_id, amount_requested, initial_amount_requested, loan_reason, loan_tenor_in_months, initial_loan_tenor_in_months`,
+
+  initiatePersonalLoanApplicationV2: `
+    INSERT INTO personal_loans(
+        user_id,
+        amount_requested,
+        initial_amount_requested,
+        loan_reason,
+        loan_tenor_in_months,
+        initial_loan_tenor_in_months,
+        reschedule_count,
+        renegotiation_count,
+        total_repayment_amount
+    ) VALUES ($1, $2, $3, $4, $5, $6, 0, 0, $7)
+    RETURNING *`,
+
   deleteInitiatedLoanApplication: `
     DELETE FROM personal_loans
     WHERE loan_id = $1
     AND user_id = $2`,
+
+  deleteInitiatedLoanApplicationPaymentSchedule: `
+    DELETE FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+  `,
 
   fetchUserBvn: `
     SELECT bvn
@@ -640,5 +666,78 @@ export default {
     AND cluster_members.is_left = false
     AND clusters.type = $2
     AND clusters.is_created_by_admin = false
-    LIMIT 1`
+    LIMIT 1`,
+
+  getPendingLoanInformation: `
+    SELECT total_outstanding_amount, loan_id
+    FROM personal_loans
+    WHERE
+        loan_id = $1
+    AND
+        user_id = $2
+    AND
+        status = 'pending'
+
+  `,
+
+  updateTicketLoanStatus: `
+    UPDATE personal_loans
+    SET
+        is_loan_disbursed = true,
+        loan_disbursed_at = NOW(),
+        is_renegotiated = false,
+        updated_at = NOW(),
+        status = 'ongoing',
+        loan_decision = 'MANUAL',
+        is_rescheduled = false,
+        reschedule_count = 0,
+        used_previous_eligibility_details = false,
+        total_outstanding_amount = $3
+    WHERE
+        loan_id = $1
+    AND
+        user_id = $2
+    AND
+        status = 'pending'
+    RETURNING total_outstanding_amount
+  `,
+
+  updateFirstRepaymentRecordStatus: `
+    UPDATE personal_loan_payment_schedules
+    SET
+        status = 'paid',
+        updated_at = NOW(),
+        payment_at = NOW()
+    WHERE
+        loan_id = $1
+    AND
+        repayment_order = 1
+    RETURNING loan_id, loan_repayment_id, principal_payment
+  `,
+
+  fetchBankAccountDetailsByUserId: `
+      SELECT
+        id,
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name,
+        is_default,
+        is_disbursement_account,
+        created_at
+      FROM user_bank_accounts
+      WHERE user_id =$1 AND is_default = true`,
+
+  fetchLoanIDFromUserTickets: `
+    SELECT ticket_id, loan_id
+    FROM user_tickets
+    WHERE
+        ticket_id = $1
+    AND
+        user_id = $2
+    AND
+        status = 'inactive'
+  `
+
 };

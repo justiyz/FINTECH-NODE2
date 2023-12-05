@@ -131,8 +131,8 @@ export const verifyAccount = async(req, res, next) => {
     if (body.fcm_token && body.fcm_token.length > 0) {
       await processAnyData(authQueries.setSameFcmTokenNull, [ body.fcm_token.trim() ]); // this is done to prevent two fcm tokens being attached to multiple accounts
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully set other accounts with same fcm token to null verifyAccount.controllers.auth.js`);
-    } 
-    const payload = !referralCode ? AuthPayload.verifyUserAccountOnNewDevice(user, refreshToken, body) : 
+    }
+    const payload = !referralCode ? AuthPayload.verifyUserAccountOnNewDevice(user, refreshToken, body) :
       AuthPayload.verifyUserAccountAfterSignup(user, refreshToken, body, referralCode);
     !referralCode ? await processAnyData(authQueries.verifyUserAccountOnNewDevice, payload) : await processAnyData(authQueries.verifyUserAccountAfterSignup, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully verified users account in the database verifyAccount.controllers.auth.js`);
@@ -140,7 +140,7 @@ export const verifyAccount = async(req, res, next) => {
     const next_profile_update = dayjs().isAfter(dayjs(user.next_profile_update));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user updated details fetched from the database verifyAccount.controllers.auth.js`);
     userActivityTracking(user.user_id, 2, 'success');
-    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK, 
+    return ApiResponse.success(res, enums.USER_ACCOUNT_VERIFIED, enums.HTTP_OK,
       { ...newUserDetails, refresh_token: refreshToken, is_updated_advanced_kyc: false, next_profile_update, token, tokenExpireAt });
   } catch (error) {
     userActivityTracking(req.user.user_id, 2, 'fail');
@@ -173,7 +173,7 @@ export const login = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully converted time from epoch time to a readable format login.controllers.auth.js`);
     const [ loggedInUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user login login.controllers.auth.js`);
-    const is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ? 
+    const is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
       true : false;
     userActivityTracking(user.user_id, 15, 'success');
     return ApiResponse.success(res, enums.USER_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...loggedInUser, is_updated_advanced_kyc, token, tokenExpireAt });
@@ -233,10 +233,10 @@ export const completeProfile = async(req, res, next) => {
     const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'sign_up_point' ]);
     const rewardPoint = parseFloat(rewardDetails.point);
     const rewardDescription = 'Welcome point';
-    await processOneOrNoneData(authQueries.updateRewardPoints, 
-      [ user.user_id, null, rewardPoint, rewardDescription, null, 'welcome' ]);
+    await processOneOrNoneData(authQueries.updateRewardPoints,
+        [ user.user_id, null, rewardPoint, rewardDescription, null, 'welcome' ]);
     await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
-    sendUserPersonalNotification(user, 'Welcome point', 
+    sendUserPersonalNotification(user, 'Welcome point',
       PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'welcome'), 'point-rewards', {});
     sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'welcome'), user.fcm_token);
     userActivityTracking(user.user_id, 102, 'success');
@@ -302,12 +302,12 @@ export const generateResetToken = (type = '') => async(req, res, next) => {
   try {
     const { user } = req;
     const token = Hash.generateResetToken(user);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
     successfully generated password token generateResetToken.middlewares.auth.js`);
     const tokenExpiration = await JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp;
     const myDate = new Date(tokenExpiration * 1000);
     const tokenExpireAt = dayjs(myDate);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully fetched token expiration time and converted it generateResetToken.middlewares.auth.js`);
     userActivityTracking(req.user.user_id, 20, 'success');
     return ApiResponse.success(res, enums.GENERATE_RESET_PASSWORD_TOKEN(`${type}`), enums.HTTP_OK, { token, tokenExpireAt });
@@ -333,12 +333,12 @@ export const resetPassword = async(req, res, next) => {
     const hash = Hash.hashData(body.password.trim());
     if (!user.is_verified_email) {
       await processAnyData(authQueries.verifyUserEmail, [ user.user_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       user email successfully verified. resetPassword.controllers.auth.js`);
     }
-    
+
     await processAnyData(authQueries.resetPassword, [ user.user_id, hash ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully reset user password in the db. resetPassword.controllers.auth.js`);
     await MailService('Password Reset Successful', 'resetPassword', { ...user });
     userActivityTracking(req.user.user_id, 9, 'success');
@@ -364,7 +364,7 @@ export const changePassword = async(req, res, next) => {
     const { user, body } = req;
     const hash = Hash.hashData(body.newPassword.trim());
     await processAnyData(authQueries.changePassword, [ user.user_id, hash ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully changed user password in the db. changePassword.controllers.auth.js`);
     await MailService('Password Change Successful', 'changePassword', { ...user });
     userActivityTracking(req.user.user_id, 10, 'success');
@@ -390,7 +390,7 @@ export const createPin = async(req, res, next) => {
     const { user, body } = req;
     const hash = Hash.hashData(body.pin.trim());
     await processAnyData(authQueries.createPin, [ user.user_id, hash ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully created user user pin in the db. createPin.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 11, 'success');
     return ApiResponse.success(res, enums.CREATE_PIN, enums.HTTP_CREATED);
@@ -415,7 +415,7 @@ export const changePin = async(req, res, next) => {
     const { user, body } = req;
     const hash = Hash.hashData(body.newPin.trim());
     await processAnyData(authQueries.changePin, [ user.user_id, hash ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully changed user pin in the db. changePin.controllers.auth.js`);
     await MailService('Pin Change Successful', 'changePin', { ...user });
     userActivityTracking(req.user.user_id, 14, 'success');
@@ -438,7 +438,7 @@ Confirm user password
  */
 export const confirmPassword = (req, res, next) => {
   try {
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info:
     successfully confirm user password in the db. confirmPassword.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 30, 'success');
     const data = {
@@ -464,7 +464,7 @@ Confirm user pin
  */
 export const confirmPin = async(req, res, next) => {
   try {
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info:
     successfully confirm user pin in the db. confirmPin.controllers.auth.js`);
     userActivityTracking(req.user.user_id, 31, 'success');
     const data = {
@@ -530,7 +530,7 @@ export const resetPin = async(req, res, next) => {
     const { user, body } = req;
     const hash = Hash.hashData(body.pin.trim());
     await processAnyData(authQueries.resetPin, [ user.user_id, hash ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     successfully reset user pin in the resetPin.controllers.auth.js`);
     await MailService('Pin Reset Successful', 'resetPin', { ...user });
     userActivityTracking(req.user.user_id, 13, 'success');

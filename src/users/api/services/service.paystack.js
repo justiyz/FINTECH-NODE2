@@ -53,9 +53,9 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    const amountRequestedType = parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
-    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -65,7 +65,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: amountToBeCharged,
+        amount: amountRequestedType,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -87,7 +87,8 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+    const amountRequestedType = parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million
     const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
@@ -373,13 +374,10 @@ function getNumericValue(input) {
   logger.info(`AmountRequestType ${input}:::Info: Logs the amount to be passed to paystack plus charges`);
   logger.info(`Datatype of AmountRequestType ${typeof input}:::Info: Logs the amount to be passed to paystack plus charges`);
   if (typeof input === 'string' || typeof input === 'object') {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return Number(input);
   } else if (typeof input === 'number') {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return input;
   } else {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return NaN; // Return NaN for unsupported types
   }
 }

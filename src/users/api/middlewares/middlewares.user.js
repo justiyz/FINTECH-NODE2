@@ -15,6 +15,7 @@ import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
+import * as zeehService from '../services/services.zeeh';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -193,34 +194,36 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
 export const verifyBvn = async(req, res, next) => {
   try {
     const { body: { bvn },  user } = req;
-    const data = await dojahBvnVerificationCheck(bvn.trim(), user);
+    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
-    if (data.status !== 200) {
+    if (data.status !== 'success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    // eslint-disable-next-line max-len
+    // if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase() || user.first_name.trim().toLowerCase() !== data.data.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    if (user.first_name.trim().toLowerCase() !== data.data.firstName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.last_name.trim().toLowerCase() !== data.data.entity.last_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    if (user.last_name.trim().toLowerCase() !== data.data.lastName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's last name don't match bvn last name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.middle_name !== null && user.middle_name.trim().toLowerCase() !== data.data.entity.middle_name.replace(/\s+/g, '').trim().toLowerCase()) {
+    if (user.middle_name !== null && user.middle_name.trim().toLowerCase() !== data.data.middleName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's middle name don't match bvn middle name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (user.gender.trim().toLowerCase() !== data.data.entity.gender.trim().toLowerCase()) {
+    if (user.gender.trim().toLowerCase() !== data.data.gender.trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's gender does not match bvn returned gender verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    if (dayjs(user.date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.entity.date_of_birth.trim()).format('YYYY-MM-DD')) {
+    if (dayjs(user.date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's date of birth does not match bvn returned date of birth verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
@@ -490,7 +493,7 @@ export const checkIfAccountDetailsExists = async(req, res, next) => {
     if (!payment_channel || payment_channel === 'bank') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
-      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id || payment_channel_id ]);
+      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsByUserId, [ user.user_id ]);
       if (!accountIdExists) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
         return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
@@ -1128,3 +1131,6 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     return next(error);
   }
 };
+
+
+

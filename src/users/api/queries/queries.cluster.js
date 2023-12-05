@@ -1,10 +1,10 @@
 export default {
   checkIfClusterIsUnique: `
-    SELECT 
+    SELECT
         id,
         cluster_id,
         name,
-        description, 
+        description,
         type,
         unique_code,
         status,
@@ -14,11 +14,11 @@ export default {
     WHERE unique_code = $1`,
 
   checkIfClusterNameIsUnique: `
-    SELECT 
+    SELECT
         id,
         cluster_id,
         name,
-        description, 
+        description,
         type,
         unique_code,
         status,
@@ -53,11 +53,11 @@ export default {
     RETURNING *`,
 
   checkIfClusterExists: `
-    SELECT 
+    SELECT
         id,
         cluster_id,
         name,
-        description, 
+        description,
         type,
         maximum_members,
         current_members,
@@ -75,10 +75,11 @@ export default {
         is_deleted
     FROM clusters
     WHERE cluster_id = $1
+    AND status != 'deactivated'
     OR unique_code = $1`,
 
   fetchActiveClusterMembers: `
-    SELECT 
+    SELECT
       cluster_members.id,
       cluster_members.cluster_id,
       cluster_members.user_id,
@@ -97,7 +98,7 @@ export default {
     AND is_left = FALSE`,
 
   fetchUserClusterType: `
-    SELECT 
+    SELECT
       cluster_members.id,
       cluster_members.user_id,
       cluster_members.status AS member_status,
@@ -110,7 +111,7 @@ export default {
       clusters.is_created_by_admin,
       clusters.status AS cluster_status
     FROM cluster_members
-    LEFT JOIN clusters 
+    LEFT JOIN clusters
     ON clusters.cluster_id = cluster_members.cluster_id
     WHERE cluster_members.user_id = $1
     AND cluster_members.is_left = FALSE
@@ -119,7 +120,7 @@ export default {
     LIMIT 1`,
 
   fetchActiveClusterMemberDetails: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       user_id,
@@ -134,7 +135,7 @@ export default {
     AND is_left = FALSE`,
 
   fetchDeactivatedClusterMemberDetails: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       user_id,
@@ -149,7 +150,7 @@ export default {
     AND is_left = TRUE`,
 
   fetchClusterDecisionType: `
-    SELECT 
+    SELECT
       id,
       name,
       description
@@ -167,7 +168,7 @@ export default {
     RETURNING ticket_id`,
 
   fetchClusterDecisionTicketByTicketId: `
-    SELECT 
+    SELECT
       id,
       ticket_id,
       cluster_id,
@@ -181,7 +182,7 @@ export default {
     WHERE ticket_id = $1`,
 
   checkIfDecisionTicketPreviouslyRaisedAndStillOpened: `
-    SELECT 
+    SELECT
       id,
       ticket_id,
       cluster_id,
@@ -198,7 +199,7 @@ export default {
 
   updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite: `
     UPDATE cluster_decision_tickets
-    SET 
+    SET
       updated_at = NOW(),
       is_concluded = TRUE
     WHERE ticket_raised_by = $1
@@ -207,7 +208,7 @@ export default {
     AND is_concluded = FALSE`,
 
   checkIfUserPreviouslyVoted: `
-    SELECT 
+    SELECT
       id,
       decision_ticket,
       cluster_id,
@@ -220,20 +221,20 @@ export default {
 
   incrementClusterMembersCount: `
     UPDATE clusters
-    SET 
+    SET
       updated_at = NOW(),
       current_members = current_members::int + 1
     WHERE cluster_id = $1`,
 
   decrementClusterMembersCount: `
     UPDATE clusters
-    SET 
+    SET
       updated_at = NOW(),
       current_members = current_members::int - 1
     WHERE cluster_id = $1`,
 
   fetchCurrentTicketVotes: `
-    SELECT 
+    SELECT
       COUNT(id)
     FROM cluster_decision_votes
     WHERE decision_ticket = $1`,
@@ -259,14 +260,14 @@ export default {
 
   updateClusterCreatorReceivedMembershipRewardPoints: `
     UPDATE clusters
-    SET 
+    SET
       updated_at = NOW(),
       cluster_creator_received_membership_count_reward = true
     WHERE cluster_id = $1`,
 
   updateClusterInvitationStatus: `
     UPDATE cluster_invitees
-    SET 
+    SET
       updated_at = NOW(),
       is_joined = $3,
       is_declined = $4
@@ -276,7 +277,7 @@ export default {
     AND is_declined = FALSE`,
 
   fetchCurrentTicketYesVotesByNonAdmins: `
-    SELECT 
+    SELECT
       COUNT(id)
     FROM cluster_decision_votes
     WHERE decision_ticket = $1
@@ -284,7 +285,7 @@ export default {
     AND is_cluster_admin = FALSE`,
 
   checkIfAdminHasVotedYes: `
-    SELECT 
+    SELECT
       id,
       decision_ticket,
       cluster_id,
@@ -307,14 +308,14 @@ export default {
 
   updateDecisionTicketFulfillment: `
     UPDATE cluster_decision_tickets
-    SET 
+    SET
       updated_at = NOW(),
       is_concluded = TRUE
     WHERE ticket_id = $1`,
 
   reinstateClusterMember: `
     UPDATE cluster_members
-    SET 
+    SET
       updated_at = NOW(),
       status = 'active',
       loan_status = 'inactive',
@@ -347,10 +348,11 @@ export default {
       created_at
     FROM clusters
     WHERE is_deleted = FALSE
+    AND status != 'deactivated'
     ORDER BY created_at DESC`,
 
   fetchUserClusters: `
-    SELECT 
+    SELECT
       clusters.id,
       clusters.cluster_id,
       clusters.name,
@@ -365,7 +367,7 @@ export default {
     FROM clusters
     LEFT JOIN cluster_members
     ON clusters.cluster_id = cluster_members.cluster_id
-    WHERE cluster_members.user_id = $1 
+    WHERE cluster_members.user_id = $1
     AND clusters.is_deleted = FALSE
     AND cluster_members.is_left = FALSE
     ORDER BY clusters.loan_status DESC`,
@@ -377,12 +379,12 @@ export default {
       is_left,
       is_admin
     FROM cluster_members
-    WHERE user_id = $1 
-    AND cluster_id = $2  
+    WHERE user_id = $1
+    AND cluster_id = $2
     AND is_left = FALSE`,
 
   fetchUserCreatedClusters: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       name,
@@ -395,12 +397,12 @@ export default {
       minimum_monthly_income,
       created_at
     FROM clusters
-    WHERE created_by = $1 
+    WHERE created_by = $1
     AND is_deleted = FALSE
     ORDER BY created_at DESC `,
 
   fetchClusterDetails: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       name,
@@ -413,13 +415,13 @@ export default {
       image_url,
       unique_code
     FROM clusters
-    WHERE cluster_id = $1 
+    WHERE cluster_id = $1
     AND is_deleted = FALSE`,
   selectClusterById: `
-    SELECT 
+    SELECT
         cluster_id,
         name,
-        description, 
+        description,
         type,
         unique_code,
         status,
@@ -438,7 +440,7 @@ export default {
     `,
 
   checkIfClusterMemberAlreadyExist: `
-    SELECT 
+    SELECT
       *
     FROM cluster_members
     WHERE user_id = $1
@@ -446,7 +448,7 @@ export default {
     AND is_left = TRUE`,
 
   checkIfClusterMemberIsAdmin: `
-      SELECT 
+      SELECT
         cluster_id,
         user_id,
         loan_status,
@@ -456,9 +458,9 @@ export default {
       WHERE user_id = $1
       AND cluster_id = $2
       AND is_admin = TRUE`,
-      
+
   fetchClusterMembers: `
-    SELECT 
+    SELECT
       cluster_members.user_id,
       INITCAP(TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name))) AS name,
       to_char(DATE(cluster_members.created_at)::date, 'MON DD YYYY') AS date_joined,
@@ -475,9 +477,9 @@ export default {
 	  AND cluster_members.is_left = false`,
 
   leaveCluster: `
-      UPDATE 
+      UPDATE
          cluster_members
-      SET 
+      SET
       updated_at = NOW(),
       is_left = TRUE,
       status = 'inactive'
@@ -485,7 +487,7 @@ export default {
 
   deleteAcluster: `
       UPDATE clusters
-      SET 
+      SET
         updated_at = NOW(),
         is_deleted = TRUE,
         status = 'inactive',
@@ -504,39 +506,39 @@ export default {
         minimum_monthly_income = $6
       WHERE cluster_id = $1
       RETURNING name, description, maximum_members, loan_goal_target, minimum_monthly_income`,
-      
+
   initiateDeleteCluster: `
       UPDATE clusters
-      SET 
+      SET
         updated_at = NOW(),
         deletion_reason = $2
       WHERE cluster_id = $1
   `,
   newAdmin: `
   UPDATE clusters
-  SET 
+  SET
     updated_at = NOW(),
     admin = $2
   WHERE cluster_id = $1
 `,
   setAdmin: `
   UPDATE cluster_members
-  SET 
+  SET
     updated_at = NOW(),
     is_admin = TRUE
   WHERE cluster_id = $1 AND user_id = $2
 `,
   removeAdmin: `
   UPDATE cluster_members
-  SET 
+  SET
   is_admin = FALSE,
     updated_at = NOW()
-  WHERE cluster_id = $1 
+  WHERE cluster_id = $1
   AND user_id = $2
 `,
   removeClusterMembers: `
     UPDATE cluster_members
-    SET 
+    SET
       updated_at = NOW(),
       is_left = TRUE,
       status = 'inactive'
@@ -554,7 +556,7 @@ export default {
     RETURNING ticket_id`,
 
   fetchUserActiveClusterLoans: `
-    SELECT 
+    SELECT
       id,
       member_loan_id,
       loan_id,
@@ -573,14 +575,14 @@ export default {
   initiateClusterLoanApplication: `
     INSERT INTO cluster_loans(
       cluster_id, cluster_name, initiator_id, total_amount_requested, loan_tenor_in_months, sharing_type, initial_total_amount_requested,
-      initial_loan_tenor_in_months 
+      initial_loan_tenor_in_months
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *
     `,
 
   createClusterMemberLoanApplication: `
     INSERT INTO cluster_member_loans(
-      loan_id, cluster_id, cluster_name, user_id, sharing_type, amount_requested, loan_tenor_in_months, initial_amount_requested, 
+      loan_id, cluster_id, cluster_name, user_id, sharing_type, amount_requested, loan_tenor_in_months, initial_amount_requested,
       initial_loan_tenor_in_months, total_cluster_amount, is_loan_initiator
     ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *`,
@@ -597,7 +599,7 @@ export default {
 
   updateUserDeclinedDecisionClusterLoanApplication: `
     UPDATE cluster_member_loans
-    SET 
+    SET
         updated_at = NOW(),
         percentage_orr_score = $2,
         status = $3,
@@ -610,7 +612,7 @@ export default {
 
   updateDeclinedDecisionGeneralClusterLoanApplication: `
     UPDATE cluster_loans
-    SET 
+    SET
         updated_at = NOW(),
         status = $2,
         rejection_reason = $3,
@@ -620,14 +622,14 @@ export default {
 
   updateClusterLoanApplicationClusterInterest: `
     UPDATE cluster_loans
-    SET 
+    SET
         updated_at = NOW(),
         percentage_interest_rate = $2
     WHERE loan_id = $1`,
 
   updateUserManualOrApprovedDecisionClusterLoanApplication: `
     UPDATE cluster_member_loans
-    SET 
+    SET
         updated_at = NOW(),
         total_repayment_amount = $2,
         total_interest_amount = $3,
@@ -653,14 +655,14 @@ export default {
 
   updateClusterLoanOfferLetter: `
     UPDATE cluster_member_loans
-    SET 
+    SET
       updated_at = NOW(),
       offer_letter_url = $3
     WHERE member_loan_id = $1
     AND user_id = $2`,
 
   fetchClusterActiveLoans: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       cluster_id,
@@ -673,7 +675,7 @@ export default {
       total_repayment_amount,
       total_interest_amount,
       total_monthly_repayment,
-      (SELECT SUM(total_outstanding_amount) FROM cluster_member_loans WHERE cluster_id = cluster_loans.cluster_id 
+      (SELECT SUM(total_outstanding_amount) FROM cluster_member_loans WHERE cluster_id = cluster_loans.cluster_id
       AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'pending')) AS cluster_total_outstanding_amount,
       status,
       is_loan_disbursed,
@@ -685,7 +687,7 @@ export default {
     AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'pending')`,
 
   fetchClusterLoanSummary: `
-    SELECT 
+    SELECT
       cluster_member_loans.id,
       cluster_member_loans.loan_id,
       cluster_member_loans.cluster_id,
@@ -710,7 +712,7 @@ export default {
     ORDER BY cluster_member_loans.total_outstanding_amount DESC`,
 
   fetchClusterLoanDetails: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       cluster_id,
@@ -735,7 +737,7 @@ export default {
     AND loan_id = $2`,
 
   fetchClusterLoanDetailsByLoanInitiator: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       cluster_id,
@@ -760,7 +762,7 @@ export default {
     AND initiator_id = $2`,
 
   fetchClusterMemberLoanDetailsByLoanId: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       member_loan_id,
@@ -815,12 +817,12 @@ export default {
     SET
       updated_at = NOW(),
       is_renegotiated = TRUE,
-      percentage_pricing_band = $2, 
-      monthly_interest = $3, 
-      monthly_repayment = $4, 
-      processing_fee = $5, 
+      percentage_pricing_band = $2,
+      monthly_interest = $3,
+      monthly_repayment = $4,
+      processing_fee = $5,
       insurance_fee = $6,
-      advisory_fee = $7, 
+      advisory_fee = $7,
       percentage_processing_fee = $8,
       percentage_insurance_fee = $9,
       percentage_advisory_fee = $10,
@@ -832,7 +834,7 @@ export default {
       renegotiation_count = $16
     WHERE member_loan_id = $1
     RETURNING *`,
-  
+
   fetchSumOfAllocatedLoanAmount: `
     SELECT SUM(amount_requested) AS total_allocated_amount
     FROM cluster_member_loans
@@ -840,7 +842,7 @@ export default {
 
   cancelGeneralLoanApplication: `
     UPDATE cluster_loans
-    SET 
+    SET
       updated_at = NOW(),
       status = 'cancelled'
     WHERE loan_id = $1
@@ -848,7 +850,7 @@ export default {
 
   cancelAllClusterMembersLoanApplication: `
     UPDATE cluster_member_loans
-    SET 
+    SET
       updated_at = NOW(),
       status = 'cancelled',
       is_taken_loan_request_decision = true
@@ -856,28 +858,28 @@ export default {
 
   declineClusterMemberLoanApplicationDecision: `
     UPDATE cluster_member_loans
-    SET 
+    SET
       updated_at = NOW(),
       status = 'cancelled',
       is_taken_loan_request_decision = true
     WHERE member_loan_id = $1`,
 
   checkForOutstandingClusterLoanDecision: `
-    SELECT * 
-    FROM cluster_member_loans 
+    SELECT *
+    FROM cluster_member_loans
     WHERE loan_id = $1
     AND (is_taken_loan_request_decision = false OR status = 'in review')`,
 
   updateGeneralLoanApplicationCanDisburseLoan: `
     UPDATE cluster_loans
-    SET 
+    SET
       updated_at = NOW(),
       can_disburse_loan = true
     WHERE loan_id = $1`,
 
   acceptClusterMemberLoanApplication: `
     UPDATE cluster_member_loans
-    SET 
+    SET
       updated_at = NOW(),
       accepted_loan_request = true,
       is_taken_loan_request_decision = true
@@ -912,7 +914,7 @@ export default {
 
   updateProcessingClusterLoanDetails: `
     UPDATE cluster_loans
-    SET 
+    SET
       updated_at = NOW(),
       total_amount_requested = $2,
       total_repayment_amount = $3,
@@ -924,14 +926,14 @@ export default {
 
   updateClusterMembersProcessingLoanDetails: `
     UPDATE cluster_member_loans
-    SET 
+    SET
       updated_at = NOW(),
       total_cluster_amount = $2,
       status = 'processing'
     WHERE loan_id = $1`,
 
   fetchQualifiedClusterMemberLoanDetails: `
-    SELECT 
+    SELECT
       id,
       loan_id,
       member_loan_id,
@@ -977,12 +979,12 @@ export default {
     AND accepted_loan_request = TRUE`,
 
   totalClusterOutstandingLoanAmount: `
-    SELECT 
+    SELECT
       SUM(total_outstanding_amount) AS cluster_total_outstanding_amount
     FROM cluster_member_loans
     WHERE loan_id = $1
     AND status = 'processing'
-    AND accepted_loan_request = TRUE`, 
+    AND accepted_loan_request = TRUE`,
 
   updateClusterLoanDisbursementTable: `
     INSERT INTO cluster_member_loan_disbursements(
@@ -1016,8 +1018,8 @@ export default {
 
   updateDisbursedClusterLoanRepaymentSchedule: `
     INSERT INTO cluster_member_loan_payment_schedules(
-      cluster_id, member_loan_id, loan_id, user_id, repayment_order, principal_payment, interest_payment, fees, 
-      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount, 
+      cluster_id, member_loan_id, loan_id, user_id, repayment_order, principal_payment, interest_payment, fees,
+      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount,
       proposed_payment_date, pre_reschedule_proposed_payment_date
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 
@@ -1051,7 +1053,7 @@ export default {
     WHERE cluster_id = $1`,
 
   fetchClusterLoanRepaymentSchedule: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       cluster_id,
@@ -1072,7 +1074,7 @@ export default {
     ORDER BY repayment_order ASC`,
 
   fetchClusterLoanNextRepaymentDetails: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       cluster_id,
@@ -1097,7 +1099,7 @@ export default {
 
   updateClusterLoanStatus: `
     UPDATE cluster_members
-    SET 
+    SET
       updated_at = NOW(),
       loan_status = $3,
       loan_obligation = $4
@@ -1105,7 +1107,7 @@ export default {
     AND cluster_id = $2`,
 
   existingUnpaidClusterLoanRepayments: `
-    SELECT 
+    SELECT
       COUNT(id)
     FROM cluster_member_loan_payment_schedules
     WHERE member_loan_id = $1
@@ -1114,7 +1116,7 @@ export default {
     AND payment_at IS NULL`,
 
   fetchOtherLoanOverDueRepayments: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       cluster_id,
@@ -1128,7 +1130,7 @@ export default {
     AND loan_repayment_id != $2`,
 
   fetchOtherMembersLoanOverDueRepayments: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       cluster_id,
@@ -1188,7 +1190,7 @@ export default {
     AND payment_at IS NULL`,
 
   fetchClusterMembersCompletedLoanByClusterIs: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       loan_id,
@@ -1202,7 +1204,7 @@ export default {
 
   updateGeneralLoanCompletedAt: `
     UPDATE cluster_loans
-    SET 
+    SET
       updated_at = NOW(),
       status = 'completed',
       completed_at = Now()
@@ -1211,7 +1213,7 @@ export default {
 
   updateGeneralClustersStatus: `
     UPDATE clusters
-    SET 
+    SET
       updated_at = NOW(),
       loan_status = 'inactive',
       loan_amount = 0
@@ -1224,13 +1226,13 @@ export default {
     RETURNING *`,
 
   fetchClusterLoanRescheduleRequest: `
-    SELECT 
+    SELECT
       id,
       reschedule_id,
-      cluster_id, 
+      cluster_id,
       member_loan_id,
-      loan_id, 
-      user_id, 
+      loan_id,
+      user_id,
       extension_in_days,
       is_accepted
     FROM cluster_member_rescheduled_loan
@@ -1238,7 +1240,7 @@ export default {
     AND member_loan_id = $2`,
 
   fetchUserUnpaidClusterLoanRepayments: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       cluster_id,

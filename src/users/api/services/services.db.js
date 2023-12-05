@@ -12,7 +12,6 @@ export const processAnyData = (query, payload) =>  db.any(query, payload);
 /**
  * Process db.oneOrNone calls to the database
  * @param {String} query - The request from the endpoint.
- * @param {Array} payload - The response returned by the method.
  * @returns { Promise<JSON> } - A Promise response with the queried data or no data
  * @memberof UserPostgresDbService
  */
