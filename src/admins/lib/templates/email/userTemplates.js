@@ -29,7 +29,7 @@ export const completeKyc = () => `
 export const sendLoanApprovalMail = (data) => `
 <tr>
   <td style="padding-bottom: 30px;">
-    Hello ${data.first_name},
+    Hello <span style="text-transform: capitalize">${data.first_name}</span>,
   </td>
 </tr>
 
@@ -53,7 +53,7 @@ export const sendLoanApprovalMail = (data) => `
 export const sendLoanDisapprovalMail = (data) => `
 <tr>
   <td style="padding-bottom: 30px;">
-    Hello ${data.first_name},
+    Hello <span style="text-transform: capitalize">${data.first_name}</span>,
   </td>
 </tr>
 
@@ -77,7 +77,7 @@ export const sendLoanDisapprovalMail = (data) => `
 export const utilityBillDeclinedMail = (data) => `
 <tr>
   <td style="padding-bottom: 30px;">
-    Hello ${data.first_name},
+    Hello <span style="text-transform: capitalize">${data.first_name}</span>,
   </td>
 </tr>
 
@@ -101,7 +101,7 @@ export const utilityBillDeclinedMail = (data) => `
 export const utilityBillApprovalMail = (data) => `
 <tr>
   <td style="padding-bottom: 30px;">
-    Hello ${data.first_name},
+    Hello <span style="text-transform: capitalize">${data.first_name}</span>,
   </td>
 </tr>
 
@@ -152,7 +152,7 @@ export const adminClusterInvite = (data) => `
 export const adminSentNotification = (data) => `
 <tr>
   <td style="padding-bottom: 30px;">
-    Hello ${data.first_name},
+    Hello <span style="text-transform: capitalize">${data.first_name}</span>,
   </td>
 </tr>
 
