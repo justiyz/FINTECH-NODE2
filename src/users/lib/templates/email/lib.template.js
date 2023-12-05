@@ -584,7 +584,7 @@ export const ticketBookedForYou = (data) => `
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
     <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-      Your ticket for ${data.ticket_name} has been booked!<br />
+      Your ticket for ${data['ticket_name']} has been booked!<br />
       however, this added card does not bear your registered name on SeedFi.<br />
       Kindly add a card that bears your registered name.
     </span>
@@ -596,10 +596,10 @@ export const ticketBookedForYou = (data) => `
     <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">card details</p><br />
     <span
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-      <b>Event Title:</b> ${data.ticket_name}, <br />
-      <img src="${data.ticket_image_url}">
-      <b>Date:</b> ${data.event_date}, <br />
-      ${data.ticket_description}
+      <b>Event Title:</b> ${data['ticket_name']}, <br />
+      <img src="${data['ticket_image_url']}">
+      <b>Date:</b> ${data['event_date']}, <br />
+      ${data['ticket_description']}
     </span>
   </td>
 </tr>
@@ -613,6 +613,6 @@ export const eventBooking = (data) => `
     <td style="color: #84868c; padding-top: 15px;">Your ticket is attached to this email. Please keep it handy for a seamless entry on the day of the event.</td>
 </tr>
 <tr>
-    <td style="padding-top: 15px;">${data.tickect_urls}</td>
+    <td style="padding-top: 15px;">${data['ticket_urls']}</td>
 </tr>
 `;
