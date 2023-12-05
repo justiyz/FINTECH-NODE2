@@ -64,8 +64,8 @@ router.post(
   UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('confirm'),
   UserMiddleware.checkUserAdvancedKycUpdate,
-  // LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
-  // LoanMiddleware.validateLoanAmountAndTenor, // only on live
+  LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
+  LoanMiddleware.validateLoanAmountAndTenor, // only on live
   LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   // LoanMiddleware.checkIfUserBvnNotBlacklisted, // only on live
   LoanMiddleware.checkIfUserHasClusterDiscount,
