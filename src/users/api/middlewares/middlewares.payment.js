@@ -606,7 +606,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
         await MailService('Successful loan repayment', 'successfulRepayment',
-          { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+          { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.total_repayment_amount).toFixed(2) });
         sendUserPersonalNotification(user, 'Part loan repayment successful',
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
@@ -650,7 +650,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
       processPersonalLoanRepayments.middlewares.payment.js`);
       await MailService('Successful loan repayment', 'successfulRepayment',
-        { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+        { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.total_repayment_amount).toFixed(2) });
       sendUserPersonalNotification(user, 'Full loan repayment successful',
         PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
       sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
