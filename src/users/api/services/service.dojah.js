@@ -89,7 +89,6 @@ const dojahNINVerification = async (nin, user) => {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyNinTestResponse(user, nin);
     }
-
     const options = {
       method: 'GET',
       url: `https://api.dojah.io/api/v1/kyc/nin?nin=${ nin }`,
