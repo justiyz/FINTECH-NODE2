@@ -204,6 +204,8 @@ spec:
           value: 'seedfi-backend' 
         - name: SEEDFI_DEV_NEW_DEVICE_LOGIN_WAVER_USERS
           value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
+        - name: SEEDFI_DEV_SHOP_PERCENTAGE
+          value: '0.4'
         - name: SEEDFI_DEV_BANK_ACCOUNT_STATEMENT_PROCESSOR
           value: 'okra'
         - name: SEEDFI_DEV_CLOUDINARY_CLOUD_NAME
