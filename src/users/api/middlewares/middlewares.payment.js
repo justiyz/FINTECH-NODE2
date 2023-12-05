@@ -136,7 +136,7 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
     await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
 
     // send notification email
-    const ticketUrls = ticket_record.map(ticket => `<a href="${ticket.ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`).join('');
+    const ticketUrls = ticket_record.map(ticket => `<a href="${ticket.ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket [].</a><br/>`).join('');
     const data = { first_name: user.first_name, email: user.email, ticket_urls: ticketUrls };
     await MailService('Ticket Information', 'eventBooking', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);

@@ -29,7 +29,7 @@ import { uniqueID } from 'mocha/lib/utils';
 import { cloudinary } from '../services/service.cloudinary';
 import * as puppeteer from 'puppeteer';
 import { chromium } from 'playwright';
-const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR, SEEDFI_NODE_ENV } = config;
+const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR, SEEDFI_NODE_ENV, SEEDFI_SHOP_PERCENTAGE } = config;
 
 
 export const shopCategories = async (req, res, next) => {
@@ -210,6 +210,7 @@ export const fetchTicketCategories = async (req, res, next) => {
     const ticket_categories = await processAnyData(shopQueries.getTicketCategories, req.params.ticket_id);
     const data = {
       'tickets': ticket_categories,
+      'initial_payment_percentage': SEEDFI_SHOP_PERCENTAGE * 100,
       'ticket_with_least_price': await findTicketWithLowestPrice(ticket_categories) // ticket_with_least_price
     };
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::Info: user ticket categories fetched successfully fetchTicketCategories.controller.shop.js`);
@@ -627,9 +628,10 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       const { data } = result;
       if (data.final_decision === 'APPROVED') {
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
-        const monthly_repayment = (booking_amount * 0.7)/body.duration_in_months;
-        const first_installment = (booking_amount * 0.3).toFixed(2);
-
+        const initial_deposit = SEEDFI_SHOP_PERCENTAGE;
+        const other_deposits = 1 - initial_deposit;
+        const monthly_repayment = (booking_amount * other_deposits)/body.duration_in_months;
+        const first_installment  = (booking_amount * initial_deposit).toFixed(2);
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
         data.monthly_repayment = monthly_repayment;
         const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
