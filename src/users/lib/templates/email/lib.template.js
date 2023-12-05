@@ -428,7 +428,7 @@ export const completedRepayment = (data) => `
       <b>Loan Purpose:</b> ${data.loan_reason}<br />
       <b>Loan Amount:</b> ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
       <b>Loan Duration:</b> ${parseFloat(data.loan_duration)}<br />
-      <b>Interest Rate:</b> ${parseFloat(data.interest_rate)}%<br />
+
       <b>Total Repayment:</b> ₦${parseFloat(data.total_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
       <b>Monthly Repayment</b>: ₦${parseFloat(data.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
     </span>
