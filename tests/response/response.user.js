@@ -659,7 +659,7 @@ export const zeehVerifyBvnTestResponse = (user, bvn) => {
       middle_name: user.middle_name !== null ? user.middle_name : '',
       gender: user.gender,
       date_of_birth: user.date_of_birth,
-      phone_number: user.phone_number,
+      phone_number1: user.phone_number,
       photo: '/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a\n' +
         'HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy\n' +
         'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAHSAV4DASIA\n' +

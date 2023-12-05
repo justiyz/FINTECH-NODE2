@@ -460,12 +460,23 @@ export const checkIfTheLengthOfTheNinIsCorrect = async (nin, user, res, next) =>
 }
 
 export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
-  return (
-    user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
-    user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-    user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
-    user_data.date_of_birth === user.date_of_birth
-  );
+  if(user_data.partner === 'zeeh') {
+    return (
+        user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+        user_data.phone_number1.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
+        user_data.date_of_birth === user.date_of_birth
+    );
+  }
+  if(user_data.partner === 'dojah') {
+    return (
+        user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+        user_data.phone_number.replace('234', '0') === user.phone_number.replace('+234', '0') &&
+        user_data.date_of_birth === user.date_of_birth
+    );
+  }
+
 }
 
 export const checkIfUserDetailsMatchDocumentCheckResponse = async (user_data, user) => {
@@ -617,17 +628,16 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   let ninResponse;
   ninResponse = await callTheZeehAfricaNINVerificationCheck(document.document_id, user);
   user_data = ninResponse.data;
-
+  user_data.partner = 'zeeh';
   if (ninResponse.status !== 'success') {
     ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
     user_data = ninResponse.data.entity;
+    user_data.partner = 'dojah';
   }
 
   if (ninResponse.status === 'success' || ninResponse.status === 200) {
-
     if (await checkIfUserDetailsMatchNinResponse(user_data, user)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
-
       const data = await uploadImageToS3Bucket(user, document, user_data);
       const updateIdVerification = [
         user.user_id, document.document_type, document.document_id,
