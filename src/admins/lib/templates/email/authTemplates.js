@@ -4,7 +4,7 @@ export const login = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -42,7 +42,7 @@ export const forgotPassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -79,7 +79,7 @@ export const resetPassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -106,7 +106,7 @@ export const changePassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -157,7 +157,7 @@ export const  insufficientBalance = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -167,13 +167,13 @@ export const  insufficientBalance = (data) => `
     <span>Kindly fund your paystack wallet balance for loan disbursement</span>
   </td>
 </tr>
-  
+
 <tr style="font-weight: 500; font-size: 16px; line-height: 160%; color: #84868c">
   <td>
     <span>current balance: <b>${data.currentBalance}</b></span>
   </td>
 </tr>
-  
+
 <tr style="font-weight: 500; font-size: 16px; line-height: 160%; color: #84868c">
   <td>
     Kindly login to your paystack dashboard to fund balance
@@ -183,7 +183,7 @@ export const  insufficientBalance = (data) => `
 export const  manualLoanApproval = (data) => `
 <tr>
   <td style="padding-bottom: 30px;">
-    Hello ${data.first_name},
+    Hello <span style="text-transform: capitalize">${data.first_name}</span>,
   </td>
 </tr>
 
@@ -192,6 +192,6 @@ export const  manualLoanApproval = (data) => `
     <p>
     There is ${data.type} loan application from ${data.loanUser} that requires manual approval<br/>
     Kindly click <a href="${config.SEEDFI_ADMIN_WEB_BASE_URL}/dashboard/loan-applications/management">here</a> to take decision on the loan application
-    </p>  
+    </p>
   </td>
 </tr>`;
