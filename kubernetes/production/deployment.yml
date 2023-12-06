@@ -224,6 +224,8 @@ spec:
           value: 'seedfi-backend'
         - name: SEEDFI_ZEEH_URL
           value: 'https://api.zeeh.africa/api/v1'
+        - name: SEEDFI_PROD_SHOP_PERCENTAGE
+          value: '0.4'
         - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 
