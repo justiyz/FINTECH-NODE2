@@ -799,7 +799,6 @@ export const votersIdentificationNumberVerification = async (document_id, state,
 export const documentVerification = async (req, res, next) => {
   try {
     const {user, body} = req;
-
     if (body.document_type == 'nin') {
       await nationalIdentificationNumberVerification(body, user, res, next);
     } else if (body.document_type == 'international_passport') {
