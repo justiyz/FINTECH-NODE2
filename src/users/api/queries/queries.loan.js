@@ -160,7 +160,9 @@ export default {
       completed_at
     FROM personal_loans
     WHERE loan_id = $1
-    AND user_id = $2`,
+    AND user_id = $2
+    AND (status = 'ongoing' OR status = 'over due')
+    `,
 
   updateDisbursedLoanRepaymentSchedule: `
     INSERT INTO personal_loan_payment_schedules(

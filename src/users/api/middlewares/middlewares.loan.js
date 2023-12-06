@@ -9,6 +9,7 @@ import { userActivityTracking } from '../../lib/monitor';
 import { fetchSeedfiPaystackBalance, createTransferRecipient } from '../services/service.paystack';
 import adminShopQueries from "../../../admins/api/queries/queries.shop";
 import {CHECK_AVAILABLE_TICKET_UNITS, CHECK_AVAILABLE_TICKET_UNITS_MESSAGE} from "../../lib/enums/lib.enum.labels";
+import {LOAN_APPLICATION_NOT_EXISTING_FOR_USER} from "../../lib/enums/lib.enum.messages";
 const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config;
 /**
  * check loan exists by id
@@ -31,7 +32,7 @@ export const checkUserLoanApplicationExists = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user
     checkUserLoanApplicationExists.middlewares.loan.js`);
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_FOR_USER, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE;
     logger.error(`checking if loan application exists failed::${enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE}`, error.message);

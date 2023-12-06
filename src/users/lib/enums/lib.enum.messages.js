@@ -135,6 +135,7 @@ export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_APPLICATION_NOT_EXISTING_FOR_USER = 'loan application does not exist for user, or not eligible for repayment';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER = 'Loan application not existing for cluster';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
 export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_STATUS =
