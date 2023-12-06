@@ -448,7 +448,7 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
         userActivityTracking(req.user.user_id, 71, 'success');
         return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
+      logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 71, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
     }

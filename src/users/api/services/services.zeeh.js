@@ -90,9 +90,10 @@ const zeehNINVerificationCheck = async (nin, user) => {
     }
     const options = {
       method: 'GET',
-      url: `${config.SEEDFI_ZEEH_URL}/nin/live/lookup/${config.SEEDFI_ZEEH_PUBLIC_KEY}?nin=${nin}`,
+      url: `${config.SEEDFI_ZEEH_URL}/api/v1/nin/live/lookup/${config.SEEDFI_ZEEH_PUBLIC_KEY}?nin=${nin}`,
       headers: {
         accept: 'application/json',
+        'Content-Type': 'application/json',
         'zeeh-private-key': config.SEEDFI_ZEEH_SECRET_KEY,
         publicKey: config.SEEDFI_ZEEH_PUBLIC_KEY
       }
@@ -101,7 +102,7 @@ const zeehNINVerificationCheck = async (nin, user) => {
     return data;
 
   } catch (error) {
-    logger.error(`${enums.CURRENT_TIME_STAMP} Error querying NIN for this reason ====>>> ${error}`);
+    logger.error(`${enums.CURRENT_TIME_STAMP} Error querying NIN for this reason ====>>> ${error.message}`);
     return error;
   }
 };
