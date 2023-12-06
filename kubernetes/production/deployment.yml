@@ -120,16 +120,16 @@ spec:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
-        - name: SEEDFI_ZEEH_PUBLIC_KEY
-          valueFrom:
-            secretKeyRef:
-              key: zeehpublickey
-              name: seedfi-api-config
-        - name: SEEDFI_ZEEH_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              key: zeehsecretkey
-              name: seedfi-api-config
+        # - name: SEEDFI_ZEEH_PUBLIC_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       key: zeehpublickey
+        #       name: seedfi-api-config
+        # - name: SEEDFI_ZEEH_SECRET_KEY
+        #   valueFrom:
+        #     secretKeyRef:
+        #       key: zeehsecretkey
+        #       name: seedfi-api-config
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
         #     secretKeyRef:
