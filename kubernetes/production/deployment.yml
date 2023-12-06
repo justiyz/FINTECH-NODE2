@@ -222,7 +222,7 @@ spec:
           value: 'com.theseedfi.app'
         - name: SEEDFI_PROD_DATADOG_APPLICATION_NAME
           value: 'seedfi-backend'
-        - name: SEEDFI_ZEEH_URL
+        - name: SEEDFI_PROD_ZEEH_URL
           value: 'https://api.zeeh.africa/api/v1'
         - name: SEEDFI_PROD_SHOP_PERCENTAGE
           value: '0.4'
