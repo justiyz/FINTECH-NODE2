@@ -464,20 +464,13 @@ export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
     return (
         user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
         user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-        (
-            user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') ||
-            user_data.phone_number1?.replace('+234', '0') === user.phone_number.replace('+234', '0') ||
-            user_data.phone_number1?.replace('234', '0') === user.phone_number.replace('+234', '0') ||
-            user_data.phone_number === user.phone_number.replace('+234', '0') ||
-            user_data.phone_number?.replace('234', '0') === user.phone_number.replace('+234', '0')
-        ) && user_data.date_of_birth === user.date_of_birth
+        user_data.date_of_birth === user.date_of_birth
     );
   }
   if(user_data.partner === 'dojah') {
     return (
         user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
         user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-        user_data.phone_number.replace('234', '0') === user.phone_number.replace('+234', '0') &&
         user_data.date_of_birth === user.date_of_birth
     );
   }
