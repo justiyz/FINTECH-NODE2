@@ -120,16 +120,43 @@ spec:
             secretKeyRef:
               key: firebasewebapikey
               name: seedfi-api-config
-        # - name: SEEDFI_ZEEH_PUBLIC_KEY
-        #   valueFrom:
-        #     secretKeyRef:
-        #       key: zeehpublickey
-        #       name: seedfi-api-config
-        # - name: SEEDFI_ZEEH_SECRET_KEY
-        #   valueFrom:
-        #     secretKeyRef:
-        #       key: zeehsecretkey
-        #       name: seedfi-api-config
+        - name: SEEDFI_PROD_ZEEH_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              key: zeehpublickey
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_ZEEH_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: zeehsecretkey
+              name: seedfi-api-config
+
+        - name: SEEDFI_PROD_ZEEH_APP_ID
+          valueFrom:
+            secretKeyRef:
+              key: zeehappid
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_CLOUDINARY_UPLOAD_URI
+          valueFrom:
+            secretKeyRef:
+              key: cloudinaryuploadurl
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_CLOUDINARY_CLOUD_NAME
+          valueFrom:
+            secretKeyRef:
+              key: cloudinarycloudname
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_CLOUDINARY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: cloudinaryapikey
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_CLOUDINARY_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: cloudinaryapisecret
+              name: seedfi-api-config
+        
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
         #     secretKeyRef:
@@ -197,6 +224,8 @@ spec:
           value: 'seedfi-backend'
         - name: SEEDFI_ZEEH_URL
           value: 'https://api.zeeh.africa/api/v1'
+        - name: SEEDFI_PROD_SHOP_PERCENTAGE
+          value: '0.4'
         - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 
