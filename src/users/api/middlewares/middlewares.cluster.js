@@ -421,15 +421,15 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
           const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_member_increase' ]);
           const rewardPoint = parseFloat(rewardDetails.point);
           const rewardDescription = 'Cluster membership increase point';
-          await processOneOrNoneData(authQueries.updateRewardPoints,
-              [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
-          await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
-          const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
-          await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster.cluster_id ]);
-          sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point',
-            PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
-          sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`),
-            clusterCreator.fcm_token);
+          // await processOneOrNoneData(authQueries.updateRewardPoints,
+          //     [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+          // await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+          // const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
+          // await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster.cluster_id ]);
+          // sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point',
+          //   PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
+          // sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`),
+          //   clusterCreator.fcm_token);
           userActivityTracking(clusterCreator.user_id, 107, 'success');
         }
         userActivityTracking(req.user.user_id, activityType, 'success');
