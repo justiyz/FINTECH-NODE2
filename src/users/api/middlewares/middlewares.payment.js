@@ -583,14 +583,21 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ paymentRecord.loan_id, paymentRecord.user_id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments
         processPersonalLoanRepayments.middlewares.payment.js`);
-        const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+
+        const isCustomPartRepayment =  paymentRecord.payment_type === 'part_loan_repayment' && paymentRecord.amount < nextRepayment.total_payment_amount;
+
+        let statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+
+        statusType = isCustomPartRepayment ? 'ongoing' : statusType;
+
         const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
         const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
         const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
         await Promise.all([
           processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
             loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
-          processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]),
+            //TODO: deduct paymentRecord.amount from a field(get field) in the personal loan repayment schedule table
+          isCustomPartRepayment ? null : processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
