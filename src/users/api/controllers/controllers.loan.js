@@ -18,7 +18,7 @@ import { initiateTransfer, initializeCardPayment, initializeBankAccountChargeFor
 } from '../services/service.paystack';
 import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import * as Hash from "../../lib/utils/lib.util.hash";
+
 /**
  * check if user is eligible for loan
  * @param {Request} req - The request from the endpoint.
@@ -432,6 +432,10 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
       initiateManualLoanRepayment.controllers.loan.js`);
       const reference = uuidv4();
       const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
+      if (nextRepaymentDetails === undefined) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: failed to fetch loan next repayment details initiateManualLoanRepayment.controllers.loan.js`);
+        return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_FOR_USER, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
+      }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan next repayment details fetched initiateManualLoanRepayment.controllers.loan.js`);
       const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2)
         : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
@@ -448,7 +452,7 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
         userActivityTracking(req.user.user_id, 71, 'success');
         return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
       }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
+      logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 71, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
     }

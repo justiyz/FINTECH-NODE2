@@ -436,11 +436,11 @@ const processUserRewardPointBonus = async(user, rewardDescription, rewardPoint, 
   if (userWasReferred) {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user was referred to the platform processUserRewardPointBonus.middlewares.payment.js`);
     const referenceUserDetails = await processOneOrNoneData(userQueries.getUserByUserId);
-    await processOneOrNoneData(authQueries.updateRewardPoints);
-    await processOneOrNoneData(authQueries.updateUserPoints);
-    sendUserPersonalNotification(referenceUserDetails, `${type} point`,
-      PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, type), 'point-rewards', {});
-    sendPushNotification(referenceUserDetails.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, type), referenceUserDetails.fcm_token);
+    // await processOneOrNoneData(authQueries.updateRewardPoints);
+    // await processOneOrNoneData(authQueries.updateUserPoints);
+    // sendUserPersonalNotification(referenceUserDetails, `${type} point`,
+    //   PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, type), 'point-rewards', {});
+    // sendPushNotification(referenceUserDetails.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, type), referenceUserDetails.fcm_token);
     const activityType = type === 'repayment' ? 104 : 103;
     userActivityTracking(referenceUserDetails.user_id, activityType, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: referred user awarded referral reward point and notified

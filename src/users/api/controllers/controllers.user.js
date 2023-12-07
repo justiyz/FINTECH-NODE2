@@ -464,7 +464,6 @@ export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
     return (
         user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
         user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-        user_data.phone_number1.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
         user_data.date_of_birth === user.date_of_birth
     );
   }
@@ -472,7 +471,6 @@ export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
     return (
         user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
         user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-        user_data.phone_number.replace('234', '0') === user.phone_number.replace('+234', '0') &&
         user_data.date_of_birth === user.date_of_birth
     );
   }
@@ -627,12 +625,17 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   let user_data;
   let ninResponse;
   ninResponse = await callTheZeehAfricaNINVerificationCheck(document.document_id, user);
-  user_data = ninResponse.data;
-  user_data.partner = 'zeeh';
+  if(ninResponse.status === 'success') {
+    user_data = ninResponse.data;
+    user_data.partner = 'zeeh';
+  }
   if (ninResponse.status !== 'success') {
     ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:: ${ninResponse}`);
     user_data = ninResponse.data.entity;
-    user_data.partner = 'dojah';
+    if(user_data) {
+      user_data.partner = 'dojah';
+    }
   }
 
   if (ninResponse.status === 'success' || ninResponse.status === 200) {
@@ -789,7 +792,6 @@ export const votersIdentificationNumberVerification = async (document_id, state,
 export const documentVerification = async (req, res, next) => {
   try {
     const {user, body} = req;
-
     if (body.document_type == 'nin') {
       await nationalIdentificationNumberVerification(body, user, res, next);
     } else if (body.document_type == 'international_passport') {
