@@ -50,11 +50,12 @@ const resolveAccount = async(account_number, bank_code, user) => {
 
 const initializeCardPayment = async(user, paystackAmountFormatting, reference) => {
   try {
-    // if (SEEDFI_NODE_ENV === 'test') {
-    //   return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
-    // }
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
+    }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     const amountRequestedType = parseFloat(paystackAmountFormatting);
+    const amountToBePaid = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
@@ -65,7 +66,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: amountRequestedType,
+        amount: amountToBePaid,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -89,8 +90,9 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     const amountRequestedType = parseFloat(paystackAmountFormatting);
+    const amountToBePaid = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
-    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
+    // const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -100,7 +102,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
       },
       data: {
         email: user.email,
-        amount: amountToBeCharged,
+        amount: amountToBePaid,
         currency: 'NGN',
         reference,
         channels: [ 'bank_transfer' ],
