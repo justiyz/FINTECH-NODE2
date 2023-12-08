@@ -207,9 +207,9 @@ pipeline {
 
                             SVCDIR = "${REPO_NAME}/kubernetes/services"
                             dir(SVCDIR) {
-                                env.svcNameYaml = 'api.yml'
+                                env.svcNameYaml = 'stg-api.yml'
                                 if (REPO_NAME == 'seedfi-backend') {
-                                    env.svcNameYaml = 'api.yml'
+                                    env.svcNameYaml = 'stg-api.yml'
                                 }
 
                                 if (svcNameYaml) {
