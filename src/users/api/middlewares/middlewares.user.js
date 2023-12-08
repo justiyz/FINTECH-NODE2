@@ -841,7 +841,8 @@ export const checkIfCardOrUserExist = async(req, res, next) => {
     if (!payment_channel || payment_channel === 'card') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for card repayment checkIfCardOrUserExist.middlewares.user.js`);
-      const userCard = await processOneOrNoneData(userQueries.fetchCardsById, [ id || payment_channel_id ]);
+      const query_params = [ id || payment_channel_id, user.user_id ];
+      const userCard = await processOneOrNoneData(userQueries.fetchCardsByIdOrUserId, query_params);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully fetched a user's card checkIfCardOrUserExist.middlewares.user.js`);
       if (userCard === null) {

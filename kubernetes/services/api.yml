@@ -5,7 +5,7 @@ metadata:
     app: seedfi-api
   name: seedfi-api
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:804744606457:certificate/a1f1e8e8-d622-4f95-a364-64f4d8db451a"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-west-1:804744606457:certificate/b57d5d4f-568b-433c-acc6-ffe56497c042"
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
 spec:
   ports:
