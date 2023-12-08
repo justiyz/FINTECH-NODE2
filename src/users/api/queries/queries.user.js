@@ -396,8 +396,8 @@ export default {
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn,
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
-  
-  
+
+
   userIdentityVerification: `
     UPDATE users
     SET
@@ -410,8 +410,8 @@ export default {
     RETURNING user_id, first_name, last_name, image_url, is_uploaded_identity_card, is_uploaded_selfie_image,
     is_created_password, is_created_pin, is_completed_kyc, status
     `,
-  
-  
+
+
 
   updateUserTierValue: `
     UPDATE users
@@ -440,6 +440,13 @@ export default {
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
       WHERE id = $1
+  `,
+
+  fetchCardsByIdOrUserId: `
+      SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
+      FROM user_debit_cards
+      WHERE id = $1
+      AND user_id = $2
   `,
 
   setExistingCardDefaultFalse: `
