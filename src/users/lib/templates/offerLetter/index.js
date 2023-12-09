@@ -221,7 +221,9 @@ Not, without SeedFi’s prior written consent, make any offer of employment or e
       Yours Sincerely,  <br />
       For: SeedFi.
     </p>
-
+    <p>
+    <img style="max-width:100px" src="https://res.cloudinary.com/dgjetyffp/image/upload/v1702113946/Image_drydwb.jpg" alt="signature" />
+    </p>
     <p>
       Pelumi Alli <br />
       CEO
