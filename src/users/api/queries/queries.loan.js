@@ -746,7 +746,6 @@ export default {
       updated_at = NOW(),
       payment_at = Now(),
       post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT,
-      status = 'paid'
     WHERE loan_repayment_id = $1`,
 
 };
