@@ -104,6 +104,23 @@ export const editUserStatus = async(req, res, next) => {
   }
 };
 
+export const decryptUserBVN = async(req, res, next) => {
+  try {
+    const user_id = req.query.user_id;
+    const user_bvn_data = await processOneOrNoneData(userQueries.fechUserBVNRecord, [ user_id ]);
+    const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data.bvn));
+    const data = {
+      bvn: user_bvn_data.bvn,
+      unhashed: result
+    }
+    return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FAILED_TO_FETCH_USER_BVN;
+    logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
+    return next(error);
+  }
+};
+
 /**
  * return user profile details
  * @param {Request} req - The request from the endpoint.
