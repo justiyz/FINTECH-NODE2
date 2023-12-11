@@ -9,8 +9,9 @@ import * as Hash from '../../src/users/lib/utils/lib.util.hash';
 import { receiveChargeSuccessWebHookOne, receiveChargeSuccessWebHookTwo, receiveChargeSuccessWebHookThree, receiveChargeSuccessWebHookNotUserName,
   receiveRefundSuccessWebHook, receiveRefundProcessingWebHook, receiveRefundPendingWebHook, receiveChargeSuccessWebHookOneUserTwo
 } from '../payload/payload.payment';
-import { receiveAddressVerificationWebhookResponse, receiveAddressVerificationWrongEventWebhookResponse, 
+import { receiveAddressVerificationWebhookResponse, receiveAddressVerificationWrongEventWebhookResponse,
   receiveAddressVerificationNotVerifiedWebhookResponse } from '../payload/payload.user';
+import {FAILED_TO_PROCESS_EMAIL_VERIFICATION} from "../../src/users/lib/enums/lib.enum.messages";
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -302,7 +303,7 @@ describe('User', () => {
     });
     it('should verify bvn for user three successfully', (done) => {
       chai.request(app)
-        .post('/api/v1/user/upload-selfie') 
+        .post('/api/v1/user/upload-selfie')
         .set({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_THREE_ACCESS_TOKEN}`
@@ -715,7 +716,7 @@ describe('User', () => {
           expect(res.statusCode).to.equal(400);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal(enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN);
+          expect(res.body.message).to.equal(enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION);
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });
@@ -1332,7 +1333,7 @@ describe('User', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.SEEDFI_USER_ONE_ACCESS_TOKEN}`
         })
-        .query({ 
+        .query({
           type: 'moving'
         })
         .end((err, res) => {
@@ -2975,7 +2976,7 @@ describe('User', () => {
           done();
         });
     });
-  
+
   });
   describe('remove saved debit card', () => {
     it('Should remove a saved debit card.', (done) => {
@@ -3609,7 +3610,7 @@ describe('User', () => {
           done();
         });
     });
-    
+
     it('Should create user one next of kin successfully', (done) => {
       chai.request(app)
         .post('/api/v1/user/next-of-kin')
