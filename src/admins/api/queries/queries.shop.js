@@ -46,6 +46,8 @@ export default {
         tickets.ticket_status
     FROM
         tickets
+    WHERE
+        tickets.ticket_status = 'active'
     ORDER BY
         tickets.event_date ASC;
   `,

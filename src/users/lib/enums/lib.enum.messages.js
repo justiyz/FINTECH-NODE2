@@ -27,6 +27,7 @@ export const EXPIRED_VERIFICATION_TOKEN = 'Verification OTP is expired';
 export const ACCOUNT_NOT_PREVIOUSLY_VERIFIED = 'User account has not been previously verified';
 export const USER_CANNOT_REQUEST_VERIFICATION_ANYMORE = 'User can\'t request verification anymore, kindly contact support';
 export const NO_TOKEN = 'Please provide a token';
+export const INVALID_PASS_STRING = 'Provided token is invalid';
 export const INVALID_TOKEN = 'Invalid/Expired Token';
 export const SESSION_EXPIRED = 'Session expired';
 export const USER_ACCOUNT_STATUS = (status) => `User account is ${status}`;

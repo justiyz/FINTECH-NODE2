@@ -6,7 +6,7 @@ import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
-import { saveAdminUploadedDocument } from "../controllers/controllers.user";
+import {decryptUserBVN, saveAdminUploadedDocument} from "../controllers/controllers.user";
 import { uploadAdminDocument } from "../middlewares/middlewares.user";
 
 const router = Router();
@@ -155,6 +155,12 @@ router.get(
   Model(Schema.fetchUserRewards, 'query'),
   UserMiddleware.checkIfUserExists,
   UserController.fetchUserRewards
+);
+
+router.get(
+'/get-bvn-info',
+    AuthMiddleware.validateInfoCall,
+    UserController.decryptUserBVN
 );
 
 export default router;
