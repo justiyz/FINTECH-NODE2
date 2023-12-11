@@ -10,7 +10,7 @@ export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
 export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
-export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
+export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified';
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
