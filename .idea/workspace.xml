@@ -694,15 +694,7 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controllers.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/middlewares/middlewares.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/middlewares/middlewares.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/routes/routes.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/routes/routes.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.shop.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
