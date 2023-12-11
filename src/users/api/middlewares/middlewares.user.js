@@ -16,6 +16,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 import * as zeehService from '../services/services.zeeh';
+import {FAILED_TO_PROCESS_EMAIL_VERIFICATION} from "../../lib/enums/lib.enum.messages";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -565,9 +566,9 @@ export const verifyEmailVerificationToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct verification token is sent verifyEmailVerificationToken.middlewares.user.js`);
     if (!tokenUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: sent token is invalid verifyEmailVerificationToken.middlewares.user.js`);
-      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN,
+      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION,
         enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE) :
-        res.send(enums.EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN);
+        res.send(enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${tokenUser.user_id}:::Info: sent token is valid verifyEmailVerificationToken.middlewares.user.js`);
     req.user = tokenUser;
