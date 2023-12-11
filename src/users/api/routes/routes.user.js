@@ -142,10 +142,9 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.idDocumentVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
-  // UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.documentVerification
-
 );
 
 router.post(
