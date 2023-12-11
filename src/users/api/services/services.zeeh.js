@@ -32,7 +32,7 @@ const zeehDriversLicenseVerificationCheck = async(license_number, user) => {
 };
 const zeehBVNVerificationCheck = async(bvn, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+    if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, bvn);
     }
     const response = await zeehSDK.getBvnInformation({
@@ -85,7 +85,7 @@ const zeehPassportNumberVerificationCheck = async (user, document_id) => {
 
 const zeehNINVerificationCheck = async (nin, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+    if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, nin);
     }
     const options = {
