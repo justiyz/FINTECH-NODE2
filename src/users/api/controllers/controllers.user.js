@@ -641,6 +641,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   if (ninResponse.status === 'success' || ninResponse.status === 200) {
     if (await checkIfUserDetailsMatchNinResponse(user_data, user)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+      logger.info(`${document} ${user_data}`);
       const data = await uploadImageToS3Bucket(user, document, user_data);
       const updateIdVerification = [
         user.user_id, document.document_type, document.document_id,
