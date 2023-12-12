@@ -11,6 +11,7 @@ COPY package.json /usr/src/seedfi-backend/
 COPY . /usr/src/seedfi-backend
 RUN rm -rf node_modules
 RUN npm install
+RUN npm install sharp@0.32.6
 
 # install chrome and playwright
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
