@@ -1045,7 +1045,7 @@ export const manuallyInitiatePersonalLoanApplication = async (req, res, next) =>
  * @memberof LoanController
  */
 export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
-  const { admin, loanApplication, params: { loan_id }, query: { payment_type }, userDebitCard } = req;
+  const { admin, loanApplication, params: { loan_id }, query: { payment_type, custom_amount }, userDebitCard } = req;
   const payment_channel = 'card';
   try {
     if (loanApplication.status === 'ongoing' || loanApplication.status === 'over due') {
@@ -1057,8 +1057,22 @@ export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
       const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan next repayment details fetched
        adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
-      const paymentAmount = payment_type === 'full' ? parseFloat(loanApplication.total_outstanding_amount).toFixed(2)
+      if(nextRepaymentDetails.status !== 'over due'){
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repayment is not over due
+        adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+        return ApiResponse.error(res, enums.LOAN_REPAYMENT_NOT_OVER_DUE(nextRepaymentDetails.status), enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+      }
+      let paymentAmount = payment_type === 'full' ? parseFloat(loanApplication.total_outstanding_amount).toFixed(2)
         : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
+
+      paymentAmount = payment_type === 'part' && custom_amount ? parseFloat(custom_amount).toFixed(2) : paymentAmount;
+
+      if(custom_amount && custom_amount * 100 > nextRepaymentDetails.total_payment_amount * 100){
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: custom amount is greater than repayment amount
+        adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+        return ApiResponse.error(res, enums.CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+      }
+
       const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: payment amount properly formatted
       adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
