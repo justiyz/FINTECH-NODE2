@@ -50,7 +50,7 @@ router.get(
 );
 
 router.post(
-  '/ticket/:ticket_id/:payment_channel_id/book',
+  '/ticket/:ticket_id/book',
   AuthMiddleware.validateAuthToken,
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.checkIfAccountDetailsExists,
