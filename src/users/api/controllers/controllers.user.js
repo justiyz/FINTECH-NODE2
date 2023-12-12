@@ -1171,7 +1171,7 @@ export const createNextOfKin = async (req, res, next) => {
   try {
     const {body, user} = req;
     const payload = UserPayload.createNextOfKin(body, user);
-    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin);
+    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
     userActivityTracking(req.user.user_id, 89, 'success');
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully created user's next of kin createNextOfKin.controller.user.js`);
     return ApiResponse.success(res, enums.NEXT_OF_KIN_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, nextOfKin);
