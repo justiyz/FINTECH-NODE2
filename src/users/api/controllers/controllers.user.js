@@ -26,6 +26,7 @@ import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
 import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import * as UserHash from "../../lib/utils/lib.util.hash";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -641,6 +642,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   if (ninResponse.status === 'success' || ninResponse.status === 200) {
     if (await checkIfUserDetailsMatchNinResponse(user_data, user)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+      logger.info(`${document} ${user_data}`);
       const data = await uploadImageToS3Bucket(user, document, user_data);
       const updateIdVerification = [
         user.user_id, document.document_type, document.document_id,
@@ -1408,6 +1410,24 @@ export const deleteUserAccount = async (req, res, next) => {
     userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.DELETE_USER_ACCOUNT_CONTROLLER;
     logger.error(`Deleting user account failed:::${ enums.DELETE_USER_ACCOUNT_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+export const decryptUserBVN = async(req, res, next) => {
+  try {
+    const user_id = req.query.user_id;
+    const user_bvn_data = await processOneOrNoneData(userQueries.fetchUserBvn, [ user_id ]);
+    const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
+
+    const data = {
+      bvn: user_bvn_data.bvn,
+      unhashed: result
+    }
+    return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FAILED_TO_FETCH_USER_BVN;
+    logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
     return next(error);
   }
 };

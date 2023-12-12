@@ -694,7 +694,13 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/services/service.paystack.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/service.paystack.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kubernetes/staging/deployment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/kubernetes/staging/deployment.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controllers.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/middlewares/middlewares.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/middlewares/middlewares.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/routes/routes.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/routes/routes.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -713,6 +719,14 @@
               <option name="branches">
                 <list>
                   <RecentBranch>
+                    <option name="branchName" value="fix/ticket-category" />
+                    <option name="lastUsedInstant" value="1701970272" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="fix/paystack-card-payment" />
+                    <option name="lastUsedInstant" value="1701887565" />
+                  </RecentBranch>
+                  <RecentBranch>
                     <option name="branchName" value="fix/ticket-email-bug" />
                     <option name="lastUsedInstant" value="1701779012" />
                   </RecentBranch>
@@ -723,14 +737,6 @@
                   <RecentBranch>
                     <option name="branchName" value="fix/tick-notif" />
                     <option name="lastUsedInstant" value="1701360553" />
-                  </RecentBranch>
-                  <RecentBranch>
-                    <option name="branchName" value="snapshot" />
-                    <option name="lastUsedInstant" value="1701360515" />
-                  </RecentBranch>
-                  <RecentBranch>
-                    <option name="branchName" value="fix/email-notif" />
-                    <option name="lastUsedInstant" value="1701360514" />
                   </RecentBranch>
                 </list>
               </option>

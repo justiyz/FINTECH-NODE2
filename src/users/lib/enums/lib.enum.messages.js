@@ -9,8 +9,10 @@ export const ACCOUNT_EXIST = 'Account already exist, kindly contact support team
 export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
-export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
-export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified';
+export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support'; 
+export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
+export const VERIFICATION_TOKEN_INVALID = 'Email has been verified OR verification token is invalid';
+export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. '; 
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
@@ -27,6 +29,7 @@ export const EXPIRED_VERIFICATION_TOKEN = 'Verification OTP is expired';
 export const ACCOUNT_NOT_PREVIOUSLY_VERIFIED = 'User account has not been previously verified';
 export const USER_CANNOT_REQUEST_VERIFICATION_ANYMORE = 'User can\'t request verification anymore, kindly contact support';
 export const NO_TOKEN = 'Please provide a token';
+export const INVALID_PASS_STRING = 'Provided token is invalid';
 export const INVALID_TOKEN = 'Invalid/Expired Token';
 export const SESSION_EXPIRED = 'Session expired';
 export const USER_ACCOUNT_STATUS = (status) => `User account is ${status}`;
@@ -135,6 +138,7 @@ export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_APPLICATION_NOT_EXISTING_FOR_USER = 'loan application does not exist for user, or not eligible for repayment';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER = 'Loan application not existing for cluster';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
 export const CLUSTER_LOAN_DISBURSEMENT_CANNOT_BE_PROCESSED_DUE_TO_LOAN_STATUS =

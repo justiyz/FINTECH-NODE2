@@ -66,7 +66,6 @@ router.post(
   LoanMiddleware.checkIfEmploymentTypeLimitApplies,
   LoanMiddleware.checkIfUserBvnNotBlacklisted, // only on live
   LoanMiddleware.checkIfUserHasClusterDiscount,
-  UserMiddleware.checkIfCardOrUserExist, // only on live
   LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
   LoanMiddleware.additionalUserChecksForLoan,
   shopCategories.checkUserTicketLoanEligibility,
