@@ -9,10 +9,10 @@ export const ACCOUNT_EXIST = 'Account already exist, kindly contact support team
 export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
-export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
+export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support'; 
 export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
 export const VERIFICATION_TOKEN_INVALID = 'Email has been verified OR verification token is invalid';
-export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. ';
+export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. '; 
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
@@ -420,5 +420,7 @@ export const EVENT_PAYMENT_SUCCESSFUL = 'payment for tickets was successfully ma
 export const EVENT_PAYMENT_UNSUCCESSFUL = 'payment for tickets was not successful made';
 export const EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT = (user_id) => `ticket(s) booked successfully for ${user_id}`;
 export const TICKET_ALREADY_ACTIVE = 'ticket(s) already activated';
+export const LOAN_REPAYMENT_NOT_OVER_DUE = (status) => `Next loan repayment status is ${status}, thus repayment cannot be processed`;
+export const CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT = 'Custom amount cannot be greater than repayment amount';
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 
