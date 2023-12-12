@@ -50,11 +50,11 @@ router.get(
 );
 
 router.post(
-  '/ticket/:ticket_id/book',
+  '/ticket/:ticket_id/:payment_channel_id/book',
   AuthMiddleware.validateAuthToken,
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.checkIfAccountDetailsExists,
-  Model(loanSchema.loanForEventApplication, 'payload'),
+  Model(loanSchema.loanForEventApplication, 'params'),
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
   AuthMiddleware.isPinCreated('confirm'),
