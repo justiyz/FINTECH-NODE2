@@ -214,6 +214,8 @@ spec:
           value: '469438334949249'
         - name: SEEDFI_DEV_CLOUDINARY_API_SECRET
           value: 'Yw2lrK1HbZIGrQ-dRl3G79cw2Co'
+        - name: SEEDFI_DEV_UNDERWRITING_APP_ACCESS_TOKEN
+          value: '973f5d8c724716d82a'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
