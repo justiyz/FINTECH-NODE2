@@ -157,10 +157,5 @@ router.get(
   UserController.fetchUserRewards
 );
 
-router.get(
-'/get-bvn-info',
-    AuthMiddleware.validateInfoCall,
-    UserController.decryptUserBVN
-);
 
 export default router;

@@ -26,6 +26,7 @@ import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
 import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import * as UserHash from "../../lib/utils/lib.util.hash";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -1409,6 +1410,24 @@ export const deleteUserAccount = async (req, res, next) => {
     userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.DELETE_USER_ACCOUNT_CONTROLLER;
     logger.error(`Deleting user account failed:::${ enums.DELETE_USER_ACCOUNT_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+export const decryptUserBVN = async(req, res, next) => {
+  try {
+    const user_id = req.query.user_id;
+    const user_bvn_data = await processOneOrNoneData(userQueries.fetchUserBvn, [ user_id ]);
+    const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
+
+    const data = {
+      bvn: user_bvn_data.bvn,
+      unhashed: result
+    }
+    return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FAILED_TO_FETCH_USER_BVN;
+    logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
     return next(error);
   }
 };
