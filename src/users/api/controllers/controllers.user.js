@@ -26,7 +26,6 @@ import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
 import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
-import * as UserHash from "../../lib/utils/lib.util.hash";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -546,7 +545,9 @@ export const uploadImageToS3Bucket = async (user, document, user_data) => {
     const jpegBuffer = await sharp(imageBuffer).jpeg().toBuffer();
 
     const data = await S3.uploadFile(url, jpegBuffer, contentType);
+
     if (data.Location) {
+
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
     } else {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: failed to upload image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
