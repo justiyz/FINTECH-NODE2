@@ -26,6 +26,7 @@ import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
 import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import * as UserHash from "dotenv";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -1414,7 +1415,7 @@ export const deleteUserAccount = async (req, res, next) => {
     return next(error);
   }
 };
-
+// decrypt bvn
 export const decryptUserBVN = async(req, res, next) => {
   try {
     const user_id = req.query.user_id;
@@ -1422,7 +1423,7 @@ export const decryptUserBVN = async(req, res, next) => {
     const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
 
     const data = {
-      bvn: user_bvn_data.bvn,
+      bvn: user_bvn_data['bvn'],
       unhashed: result
     }
     return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
