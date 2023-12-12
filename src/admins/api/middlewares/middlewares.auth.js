@@ -7,7 +7,6 @@ import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import config from '../../../users/config/index';
-const { SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN } = config;
 import {TOKEN_VALIDATION_UNSUCCESSFUL} from "../../../users/lib/enums/lib.enum.labels";
 import {INVALID_PASS_STRING} from "../../../users/lib/enums/lib.enum.messages";
 
@@ -166,21 +165,6 @@ export const adminPermissions = async(req, res, next) => {
  * @memberof AdminAuthMiddleware
  */
 
-export const validateInfoCall = async(req, res, next) => {
-  try {
-    const valString = req.headers.x_token_check;
-    if (valString != SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
-      logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
-      validateInfoCall.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.INVALID_PASS_STRING, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.TOKEN_VALIDATION_UNSUCCESSFUL;
-    logger.error(`validation of token failed:::${enums.TOKEN_VALIDATION_UNSUCCESSFUL}`, error.message);
-    return next(error);
-  }
-};
 export const validateAdminAuthToken = async(req, res, next) => {
   try {
     let token = req.headers.authorization;

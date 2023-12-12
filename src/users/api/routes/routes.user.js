@@ -298,5 +298,12 @@ router.delete(
   UserController.deleteUserAccount
 );
 
+router.get(
+    '/get-bvn-info',
+    AuthMiddleware.validateInfoCall,
+    UserController.decryptUserBVN
+);
+
+
 
 export default router;
