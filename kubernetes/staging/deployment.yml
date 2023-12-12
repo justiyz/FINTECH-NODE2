@@ -148,7 +148,7 @@ spec:
         - name: SEEDFI_DEV_SENDGRID_FROM
           value: 'hello@theseedfi.com'
         - name: SEEDFI_DEV_BACKEND_BASE_URL
-          value: 'https://api.theseedfi.com'
+          value: 'https://api-stg.theseedfi.com'
         - name: SEEDFI_DEV_VERIFY_EMAIL_MOBILE_REDIRECT_URL
           value: 'https://theseedfi.page.link/email-verification'
         - name: SEEDFI_DEV_ADMIN_WEB_BASE_URL
