@@ -26,6 +26,7 @@ import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
 import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -538,13 +539,18 @@ export const uploadImageToS3Bucket = async (user, document, user_data) => {
     const contentType = 'image/jpeg'; // You can change this to 'image/png' if needed
     const url = `files/user-documents/${user.user_id}/${document.document_type}/${user.user_id}-${full_name}`;
 
+    console.log('photo base64',user_data.photo);
     // Convert base64 image to buffer
     const imageBuffer = Buffer.from(user_data.photo, 'base64');
-
+   console.log('imageBuffer',imageBuffer);
     // Convert the image to JPEG format using sharp
     const jpegBuffer = await sharp(imageBuffer).jpeg().toBuffer();
 
+    console.log('jpegBuffer',jpegBuffer);
+
     const data = await S3.uploadFile(url, jpegBuffer, contentType);
+
+    console.log('aws data',data);
 
     if (data.Location) {
 
@@ -1414,18 +1420,24 @@ export const deleteUserAccount = async (req, res, next) => {
     return next(error);
   }
 };
-
+// decrypt bvn
 export const decryptUserBVN = async(req, res, next) => {
   try {
     const user_id = req.query.user_id;
     const user_bvn_data = await processOneOrNoneData(userQueries.fetchUserBvn, [ user_id ]);
-    const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
-
-    const data = {
-      bvn: user_bvn_data.bvn,
-      unhashed: result
+    if(user_bvn_data) {
+      const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
+      const data = {
+        'bvn': user_bvn_data['bvn'],
+        'unhashed': result
+      }
+      return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    } else {
+      logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Error: error response returned from account id generation decryptUserBVN.controller.user.js`);
+      userActivityTracking(req.user.user_id, 92, 'fail');
+      return ApiResponse.error(res, 'failed to decrypt user BVN', 400);
     }
-    return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+
   } catch (error) {
     error.label = enums.FAILED_TO_FETCH_USER_BVN;
     logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
