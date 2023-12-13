@@ -539,18 +539,13 @@ export const uploadImageToS3Bucket = async (user, document, user_data) => {
     const contentType = 'image/jpeg'; // You can change this to 'image/png' if needed
     const url = `files/user-documents/${user.user_id}/${document.document_type}/${user.user_id}-${full_name}`;
 
-    console.log('photo base64',user_data.photo);
     // Convert base64 image to buffer
     const imageBuffer = Buffer.from(user_data.photo, 'base64');
-   console.log('imageBuffer',imageBuffer);
+
     // Convert the image to JPEG format using sharp
     const jpegBuffer = await sharp(imageBuffer).jpeg().toBuffer();
 
-    console.log('jpegBuffer',jpegBuffer);
-
     const data = await S3.uploadFile(url, jpegBuffer, contentType);
-
-    console.log('aws data',data);
 
     if (data.Location) {
 
