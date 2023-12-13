@@ -54,7 +54,6 @@ router.post(
   AuthMiddleware.validateAuthToken,
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.checkIfAccountDetailsExists,
-  Model(loanSchema.loanForEventApplication, 'params'),
   Model(loanSchema.loanForEventApplication, 'payload'),
   UserMiddleware.isEmailVerified('authenticate'),
   UserMiddleware.isUploadedImageSelfie('confirm'),

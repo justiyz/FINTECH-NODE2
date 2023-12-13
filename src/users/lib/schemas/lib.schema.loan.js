@@ -12,11 +12,6 @@ const loanForEventApplication = Joi.object().keys({
   tickets: Joi.array().required(),
   insurance_coverage: Joi.boolean().required(),
   payment_channel: Joi.string().required().valid('bank', 'card'),
-  payment_channel_id: Joi.string().when('payment_channel', {
-    is: 'card',
-    then: Joi.string().required(),
-    otherwise: Joi.string().optional()
-  })
 });
 
 const loanIdParams = Joi.object().keys({
