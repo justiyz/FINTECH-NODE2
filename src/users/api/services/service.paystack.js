@@ -50,7 +50,7 @@ const resolveAccount = async(account_number, bank_code, user) => {
 
 const initializeCardPayment = async(user, paystackAmountFormatting, reference) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+    if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
     }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);

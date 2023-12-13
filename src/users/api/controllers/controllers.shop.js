@@ -373,7 +373,6 @@ export const createTicketSubscription = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Total amount to be paid by user is N${totalAmountToBePaid}`);
     // changes started from here
 
-    totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
     const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
     const payment_operation = payment_channel === 'card' ?
