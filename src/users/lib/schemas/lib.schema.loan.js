@@ -75,6 +75,11 @@ const successfulEventPayment = Joi.object().keys({
   reference: Joi.string().required()
 });
 
+const shopRepaymentParams = Joi.object().keys({
+  payment_channel_id: Joi.string().required(),
+  ticket_id: Joi.string().required()
+});
+
 export default  {
   loanApplication,
   loanIdParams,
@@ -90,5 +95,6 @@ export default  {
   loanRescheduleParams,
   loanRenegotiation,
   loanForEventApplication,
-  successfulEventPayment
+  successfulEventPayment,
+  shopRepaymentParams
 };
