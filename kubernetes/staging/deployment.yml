@@ -54,7 +54,8 @@ spec:
         #       key: paystacksecretkey
         #       name: seedfi-api-config
         - name: SEEDFI_DEV_PAYSTACK_SECRET_KEY
-          value: 'sk_test_d91f4618973f5d8c724716d82a9e93148b95d051'
+          value: 'sk_test_fb99111fe6fbaea2a846c3d0e2d5528d9b5c4eeb'
+        #  value: 'sk_test_d91f4618973f5d8c724716d82a9e93148b95d051'
         - name: SEEDFI_DEV_DOJAH_SECRET_KEY
           valueFrom:
             secretKeyRef:
