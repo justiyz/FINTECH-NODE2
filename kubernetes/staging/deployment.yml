@@ -30,11 +30,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
+        # - name: SEEDFI_DEV_DATABASE_URL
+        #   valueFrom:
+        #     secretKeyRef:
+        #       key: databaseurl
+        #       name: seedfi-api-config
         - name: SEEDFI_DEV_DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              key: databaseurl
-              name: seedfi-api-config
+          value: 'postgres://seedfiuser:seedfi123@52.86.0.109/ope-test'
+          
         - name: SEEDFI_DEV_ENCODING_AUTHENTICATION_SECRET
           valueFrom:
             secretKeyRef:
