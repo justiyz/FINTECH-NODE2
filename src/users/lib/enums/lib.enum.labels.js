@@ -235,6 +235,8 @@ export const USER_CLAIMS_REFERRAL_POINTS_CONTROLLER = 'UserController::userClaim
 export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlertNotification';
 export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount';
 export const CHECK_NIN_LENGTH_MIDDLEWARE = 'UserController::checkIfTheLengthOfTheNinIsCorrect';
+export const VALIDATE_RECOVER_REQUEST_MIDDLEWARE = 'AuthMiddleware::validateRecovaRequest';
+
 
 
 // Admin related labels

@@ -10,7 +10,7 @@ import { sendSms } from '../services/service.sms';
 import { verifyAccountOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
-const { SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN } = config;
+const { SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN, SEEDFI_RECOVA_BEARER_TOKEN } = config;
 
 /**
  * generate user referral code
@@ -630,6 +630,23 @@ export const validateInfoCall = async(req, res, next) => {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
       validateInfoCall.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_PASS_STRING, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.TOKEN_VALIDATION_UNSUCCESSFUL;
+    logger.error(`validation of token failed:::${enums.TOKEN_VALIDATION_UNSUCCESSFUL}`, error.message);
+    return next(error);
+  }
+};
+
+export const validateRecovaRequest = async(req, res, next) => {
+  try {
+    const token = req.headers.authorization;
+    console.log(token, SEEDFI_RECOVA_BEARER_TOKEN);
+    if (!token || token != SEEDFI_RECOVA_BEARER_TOKEN) {
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
+      validateRecovaRequest.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.INVALID_PASS_STRING, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_RECOVER_REQUEST_MIDDLEWARE);
     }
     return next();
   } catch (error) {
