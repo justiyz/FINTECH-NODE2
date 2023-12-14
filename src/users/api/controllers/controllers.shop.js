@@ -4,9 +4,9 @@ import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import { createShopRepaymentSchedule } from '../../../admins/api/controllers/controllers.loan';
 import {
-  calculateAmountPlusPaystackTransactionCharge,
+  calculateAmountPlusPaystackTransactionCharge, initializeBankAccountChargeForLoanRepayment,
   initializeBankTransferPayment,
-  initializeCardPayment
+  initializeCardPayment, initializeDebitCarAuthChargeForLoanRepayment
 } from '../services/service.paystack';
 import enums from '../../lib/enums';
 import {v4 as uuidv4} from 'uuid';
@@ -339,9 +339,10 @@ export const createTicketSubscription = async(req, res, next) => {
   const tickets = req.body.tickets;
   const payment_channel = req.body.payment_channel;
   const reference = uuidv4();
+  const activityType = payment_channel === 'card' ? 71: 73;
   // const ticketPurchaseLogs = [];
   let loan_id = req.body.initial_payment.loan_id;
-  const { user } = req;
+  const { user, userDebitCard, accountDetails } = req;
   let totalAmountToBePaid = 0;
   try {
     // loop ticket id and check if number available is greater than the number being requested by the user
@@ -374,14 +375,45 @@ export const createTicketSubscription = async(req, res, next) => {
     // changes started from here
 
     const paystackAmountFormatting = totalAmountToBePaid * 100;
-    const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
-    const payment_operation = payment_channel === 'card' ?
-      await initializeCardPayment(user, amountWithTransactionCharges, reference) :
-      await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
-    const data = { 'total_amount': totalAmountToBePaid, 'payment': payment_operation };
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
+    // const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
 
-    return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
+    // Muting Operation to initialize payment
+    // const payment_operation = payment_channel === 'card' ?
+    //   await initializeCardPayment(user, paystackAmountFormatting, reference) :
+    //   await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
+    // const data = { 'total_amount': totalAmountToBePaid, 'payment': payment_operation };
+    // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
+    // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
+    // operation to initiate charge
+
+    const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
+        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+    console.log('paystack result: ', result);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      await userActivityTracking(req.user.user_id, activityType, 'success');
+      return ApiResponse.success(
+          res,
+          result.message, enums.HTTP_OK,
+          {
+            user_id: user.user_id,
+            amount: parseFloat(totalAmountToBePaid).toFixed(2),
+            payment_type,
+            payment_channel, reference: result.data.reference, status: result.data.status, display_text: result.data.display_text || ''
+      });
+    }
+    if (result.response && result.response.status === 400) {
+      await userActivityTracking(user.user_id, activityType, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    await userActivityTracking(user.user_id, activityType, 'fail');
+    return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     // error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
