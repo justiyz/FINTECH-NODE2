@@ -10,6 +10,7 @@ import { sendSms } from '../services/service.sms';
 import { verifyAccountOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
+const { SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN } = config;
 
 /**
  * generate user referral code
@@ -618,6 +619,22 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
   } catch (error) {
     error.label = enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE;
     logger.error(`checking if user OTP verification request is still within limit failed::${enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const validateInfoCall = async(req, res, next) => {
+  try {
+    const valString = req.headers.x_token_check;
+    if (valString != SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
+      validateInfoCall.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.INVALID_PASS_STRING, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.TOKEN_VALIDATION_UNSUCCESSFUL;
+    logger.error(`validation of token failed:::${enums.TOKEN_VALIDATION_UNSUCCESSFUL}`, error.message);
     return next(error);
   }
 };

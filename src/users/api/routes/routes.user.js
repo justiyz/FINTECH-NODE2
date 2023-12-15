@@ -142,10 +142,9 @@ router.post(
   AuthMiddleware.validateAuthToken,
   Model(Schema.idDocumentVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
-  // UserMiddleware.isUploadedImageSelfie('confirm'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.documentVerification
-
 );
 
 router.post(
@@ -298,6 +297,13 @@ router.delete(
   UserMiddleware.checkIfUserBelongsToAnyCluster,
   UserController.deleteUserAccount
 );
+
+router.get(
+    '/get-bvn-info',
+    AuthMiddleware.validateInfoCall,
+    UserController.decryptUserBVN
+);
+
 
 
 export default router;

@@ -104,6 +104,7 @@ export const editUserStatus = async(req, res, next) => {
   }
 };
 
+
 /**
  * return user profile details
  * @param {Request} req - The request from the endpoint.

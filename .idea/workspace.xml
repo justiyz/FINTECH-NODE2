@@ -694,8 +694,7 @@
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/modules/DashboardRoutes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-admin-dashboard/src/routes/paths.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.loan.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/api/services/service.paystack.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/services/service.paystack.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -714,6 +713,14 @@
               <option name="branches">
                 <list>
                   <RecentBranch>
+                    <option name="branchName" value="fix/direct-payment" />
+                    <option name="lastUsedInstant" value="1702558970" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="fix/ticket-category" />
+                    <option name="lastUsedInstant" value="1701970272" />
+                  </RecentBranch>
+                  <RecentBranch>
                     <option name="branchName" value="fix/paystack-card-payment" />
                     <option name="lastUsedInstant" value="1701887565" />
                   </RecentBranch>
@@ -724,14 +731,6 @@
                   <RecentBranch>
                     <option name="branchName" value="fix/eligibility-control-check" />
                     <option name="lastUsedInstant" value="1701503751" />
-                  </RecentBranch>
-                  <RecentBranch>
-                    <option name="branchName" value="fix/tick-notif" />
-                    <option name="lastUsedInstant" value="1701360553" />
-                  </RecentBranch>
-                  <RecentBranch>
-                    <option name="branchName" value="snapshot" />
-                    <option name="lastUsedInstant" value="1701360515" />
                   </RecentBranch>
                 </list>
               </option>

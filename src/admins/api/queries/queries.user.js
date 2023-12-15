@@ -104,6 +104,12 @@ export default {
     FROM address_verification
     WHERE user_id = $1`,
 
+  fechUserBVNRecord: `
+    SELECT bvn
+    FROM users
+    WHERE user_id = $1
+  `,
+
   fetchUserBankAccounts: `
       SELECT
         id,

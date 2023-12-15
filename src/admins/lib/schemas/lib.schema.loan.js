@@ -152,8 +152,12 @@ const loanRepaymentParams = Joi.object().keys({
 });
 
 const loanRepaymentType = Joi.object().keys({
-  payment_type: Joi.string().required().valid('full', 'part')
-  // payment_channel: Joi.string().required().valid('card', 'bank')
+  payment_type: Joi.string().required().valid('full', 'part'),
+  custom_amount: Joi.number().when('payment_type', {
+    is: 'part',
+    then: Joi.number().optional(),
+    otherwise: Joi.forbidden()
+  })
 });
 
 
