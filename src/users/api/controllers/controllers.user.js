@@ -133,7 +133,7 @@ export const updateBvn = async (req, res, next) => {
   try {
     const {body: {bvn}, user} = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-    const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
+    const tierChoice = (user.is_completed_kyc) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     const tier_upgraded = tierChoice === '1' ? true : false;
     const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn, tierChoice]);
