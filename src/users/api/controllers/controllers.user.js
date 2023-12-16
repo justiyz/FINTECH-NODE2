@@ -134,14 +134,13 @@ export const updateBvn = async (req, res, next) => {
     const {body: {bvn}, user} = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
-    const tierChoice = (user.is_completed_kyc) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
-    const tier_upgraded = tierChoice === '1' ? true : false;
-    const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn, tierChoice]);
+    // const tier_upgraded = tierChoice === '1' ? true : false;
+    const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
 
-    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...updateBvn, tier_upgraded});
+    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...updateBvn});
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
@@ -664,8 +663,9 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_admin_uploaded_documents created successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       //user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
-      const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
-      const tier_upgraded = tierChoice === 2 ? true : false;
+      // const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
+      const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? 1 : user.tier;
+      const tier_upgraded = tierChoice === 1 ? true : false;
       const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
