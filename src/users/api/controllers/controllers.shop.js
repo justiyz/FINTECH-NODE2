@@ -401,7 +401,7 @@ export const createTicketSubscription = async(req, res, next) => {
           {
             user_id: user.user_id,
             amount: parseFloat(totalAmountToBePaid).toFixed(2),
-            payment_type,
+            payment_type: 'part',
             payment_channel, reference: result.data.reference, status: result.data.status, display_text: result.data.display_text || ''
       });
     }
