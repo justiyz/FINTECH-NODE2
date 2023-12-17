@@ -75,7 +75,6 @@ export default {
       SET
         updated_at = NOW(),
         is_verified_bvn = TRUE,
-        tier = $3,
         bvn = $2
       WHERE user_id = $1
       RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
