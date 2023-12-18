@@ -25,6 +25,8 @@ import * as dojahService from '../services/service.dojah'
 import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
+import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -131,14 +133,14 @@ export const updateBvn = async (req, res, next) => {
   try {
     const {body: {bvn}, user} = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-    const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
+    // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
-    const tier_upgraded = tierChoice === '1' ? true : false;
-    const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn, tierChoice]);
+    // const tier_upgraded = tierChoice === '1' ? true : false;
+    const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
 
-    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...updateBvn, tier_upgraded});
+    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...updateBvn});
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
@@ -391,6 +393,14 @@ export const verifyEmail = async (req, res, next) => {
   }
 };
 
+export const availableVerificationMeans = async (req, res, next) => {
+  const verification_means =  [
+      'nin'
+  ];
+// , 'international_passport'
+  return ApiResponse.success(res, enums.AVAILABLE_VERIFICATION_MEANS, enums.HTTP_OK, verification_means);
+};
+
 /**
  * user id verification
  * @param {Request} req - The request from the endpoint.
@@ -427,6 +437,17 @@ export const idUploadVerification = async (req, res, next) => {
   }
 };
 
+export const checkIfTheLengthOfThePassportNumberIsCorrect = async (passportNumber, user, res, next) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now checking the length/format of the Passport Number checkIfTheLengthOfThePassportNumberIsCorrect.middlewares.user.js`);
+  // const ipnRegex = /^\s{9}$/ // Matches exactly 9 digits
+  const ipnRegex = /^[a-zA-Z0-9]{9}$/ // Matches exactly 9 digits
+  if (!ipnRegex.test(passportNumber)) {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: Passport Number is not in the correct format/length {internationPassportVerification} documentVerification.controller.user.js`);
+    return false;
+  }
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: International Passport Number is in the correct format/length {internationPassportVerification} documentVerification.controller.user.js`);
+  return true;
+}
 
 export const checkIfTheLengthOfTheNinIsCorrect = async (nin, user, res, next) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now checking the length/format of the NIN checkIfTheLengthOfTheNinIsCorrect.middlewares.user.js`);
@@ -440,11 +461,29 @@ export const checkIfTheLengthOfTheNinIsCorrect = async (nin, user, res, next) =>
 }
 
 export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
+  if(user_data.partner === 'zeeh') {
+    return (
+        user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+        user_data.date_of_birth === user.date_of_birth
+    );
+  }
+  if(user_data.partner === 'dojah') {
+    return (
+        user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+        user_data.date_of_birth === user.date_of_birth
+    );
+  }
+
+}
+
+export const checkIfUserDetailsMatchDocumentCheckResponse = async (user_data, user) => {
   return (
-    user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
-    user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-    user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
-    user_data.date_of_birth === user.date_of_birth
+      user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+      user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+      // user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
+      user_data.date_of_birth === user.dob
   );
 }
 
@@ -458,6 +497,28 @@ export const callTheZeehAfricaNINVerificationCheck = async (nin, user) => {
   }
   return response;
 }
+
+export const callTheDojahInternationPassportVerificationCheck = async (user_data, user) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user passport number with dojah  {passportNumberVerification} documentVerification.controller.user.js`);
+  const response = await dojahService.dojahPassportNumberVerificationCheck(user_data, user);
+  if (response.status === 'success') {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user passport number with dojah successful {passportNumberVerification} documentVerification.controller.user.js`);
+  } else {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user passport number with dojah failed {passportNumberVerification} documentVerification.controller.user.js`);
+  }
+  return response;
+};
+
+export const callTheZeehAfricaInternationPassportVerificationCheck = async (user, document_id) => {
+  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user passport number with zeeh africa  {passportNumberVerification} documentVerification.controller.user.js`);
+  const response = await zeehService.zeehPassportNumberVerificationCheck(user, document_id);
+  if (response.status === 'success') {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user passport number with zeeh africa successful {passportNumberVerification} documentVerification.controller.user.js`);
+  } else {
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user passport number with zeeh africa failed {passportNumberVerification} documentVerification.controller.user.js`);
+  }
+  return response;
+};
 
 export const callTheDojahNINVerificationCheck = async (nin, user) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user NIN with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
@@ -485,7 +546,9 @@ export const uploadImageToS3Bucket = async (user, document, user_data) => {
     const jpegBuffer = await sharp(imageBuffer).jpeg().toBuffer();
 
     const data = await S3.uploadFile(url, jpegBuffer, contentType);
+
     if (data.Location) {
+
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully uploaded image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
     } else {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: failed to upload image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
@@ -497,6 +560,66 @@ export const uploadImageToS3Bucket = async (user, document, user_data) => {
   }
 };
 
+export const internationPassportVerification = async (req, res, next) => {
+  const { body, user } = req;
+  logger.info('Now running InternationalPassportVerification');
+  if (! await checkIfTheLengthOfThePassportNumberIsCorrect(body.document_id, user, res, next)) {
+    return ApiResponse.error(res, 'Passport Number must be exactly 9 digits long and consist of numbers and letters', enums.HTTP_BAD_REQUEST, enums.CHECK_NIN_LENGTH_MIDDLEWARE);
+  }
+  let user_data;
+  let internationalPassportVerificationResponse;
+
+  internationalPassportVerificationResponse = await callTheZeehAfricaInternationPassportVerificationCheck(user, body.document_id);
+  user_data = internationalPassportVerificationResponse.data;
+
+  if (internationalPassportVerificationResponse.status !== 'success') {
+    internationalPassportVerificationResponse = await callTheDojahInternationPassportVerificationCheck(body.document_id, user);
+    user_data = internationalPassportVerificationResponse.entity;
+  }
+  if(internationalPassportVerificationResponse.status === 'success' || internationalPassportVerificationResponse.status === 200) {
+    if (await checkIfUserDetailsMatchDocumentCheckResponse(user, user_data)) {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {internationPassportVerification} documentVerification.controller.user.js`);
+
+      const data = await uploadImageToS3Bucket(user, body, user_data);
+      const updateIdVerification = [
+        user.user_id, body.document_type, body.document_id,
+        data.Location, null, null, null
+      ];
+
+
+      await processAnyData(userQueries.updateIdVerification, updateIdVerification);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_national_id_details created successfully {internationPassportVerification} documentVerification.controller.user.js`);
+
+      const fileExt = path.extname(user_data.photo.trim());
+      const documen_t = encodeURIComponent(
+          await Hash.encrypt({document_url: user_data.photo.trim(), document_extension: fileExt})
+      );
+
+      await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [user.user_id, 'valid identification', documen_t]);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_admin_uploaded_documents created successfully {internationPassportVerification} documentVerification.controller.user.js`);
+
+      //user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
+      const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
+      const tier_upgraded = tierChoice === 2 ? true : false;
+      const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {internationPassportVerification} documentVerification.controller.user.js`);
+
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successful documentVerification.controller.user.js`);
+      userActivityTracking(user.user_id, 119, 'success');
+      return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...response, tier_upgraded});
+
+    } else {
+      const errorMessage = 'user details does not match the details on the provided Internation Passport ';
+      logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::::Info: ${ errorMessage } {internationPassportVerification} documentVerification.controller.user.js`);
+      return ApiResponse.error(res, errorMessage, enums.HTTP_BAD_REQUEST, enums.USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED);
+    }
+  } else {
+    const errorMessage = 'user id verification initiation failed ';
+    logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: ${ errorMessage } {internationPassportVerification} documentVerification.controller.user.js`);
+    return ApiResponse.error(res, 'user id verification failed', enums.HTTP_SERVICE_UNAVAILABLE, enums.USER_IDENTITY_DOCUMENT_VERIFICATION_FAILED);
+  }
+};
+
 export const nationalIdentificationNumberVerification = async (document, user, res, next) => {
   logger.info('Now running nationalIdentificationNumberVerification');
   if (! await checkIfTheLengthOfTheNinIsCorrect(document.document_id, user, res, next)) {
@@ -505,18 +628,23 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   let user_data;
   let ninResponse;
   ninResponse = await callTheZeehAfricaNINVerificationCheck(document.document_id, user);
-  user_data = ninResponse.data;
-
+  if(ninResponse.status === 'success') {
+    user_data = ninResponse.data;
+    user_data.partner = 'zeeh';
+  }
   if (ninResponse.status !== 'success') {
     ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:: ${ninResponse}`);
     user_data = ninResponse.data.entity;
+    if(user_data) {
+      user_data.partner = 'dojah';
+    }
   }
 
   if (ninResponse.status === 'success' || ninResponse.status === 200) {
-
     if (await checkIfUserDetailsMatchNinResponse(user_data, user)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
-
+      logger.info(`${document} ${user_data}`);
       const data = await uploadImageToS3Bucket(user, document, user_data);
       const updateIdVerification = [
         user.user_id, document.document_type, document.document_id,
@@ -535,8 +663,9 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_admin_uploaded_documents created successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       //user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
-      const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
-      const tier_upgraded = tierChoice === 2 ? true : false;
+      // const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
+      const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? 1 : user.tier;
+      const tier_upgraded = tierChoice === 1 ? true : false;
       const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
@@ -668,11 +797,12 @@ export const votersIdentificationNumberVerification = async (document_id, state,
 export const documentVerification = async (req, res, next) => {
   try {
     const {user, body} = req;
-
     if (body.document_type == 'nin') {
       await nationalIdentificationNumberVerification(body, user, res, next);
+    } else if (body.document_type == 'international_passport') {
+      await internationPassportVerification(req, res, next);
     } else if (body.document_type == 'voters_card') {
-      await votersIdentificationNumberVerification(body.document_id, user, 'lagos', res);
+      await votersIdentificationNumberVerification(body.document_id, user, body.state, res);
     } else {
       logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: invalid document type passed documentVerification.controller.user.js`);
       return ApiResponse.error(res, 'Enter a valid document type', enums.HTTP_BAD_REQUEST);
@@ -1042,7 +1172,7 @@ export const createNextOfKin = async (req, res, next) => {
   try {
     const {body, user} = req;
     const payload = UserPayload.createNextOfKin(body, user);
-    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin);
+    const nextOfKin = await processOneOrNoneData(userQueries.createNextOfKin, payload);
     userActivityTracking(req.user.user_id, 89, 'success');
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully created user's next of kin createNextOfKin.controller.user.js`);
     return ApiResponse.success(res, enums.NEXT_OF_KIN_CREATED_SUCCESSFULLY, enums.HTTP_CREATED, nextOfKin);
@@ -1283,6 +1413,30 @@ export const deleteUserAccount = async (req, res, next) => {
     userActivityTracking(req.user.user_id, 108, 'fail');
     error.label = enums.DELETE_USER_ACCOUNT_CONTROLLER;
     logger.error(`Deleting user account failed:::${ enums.DELETE_USER_ACCOUNT_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+// decrypt bvn
+export const decryptUserBVN = async(req, res, next) => {
+  try {
+    const user_id = req.query.user_id;
+    const user_bvn_data = await processOneOrNoneData(userQueries.fetchUserBvn, [ user_id ]);
+    if(user_bvn_data) {
+      const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
+      const data = {
+        'bvn': user_bvn_data['bvn'],
+        'unhashed': result
+      }
+      return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    } else {
+      logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Error: error response returned from account id generation decryptUserBVN.controller.user.js`);
+      userActivityTracking(req.user.user_id, 92, 'fail');
+      return ApiResponse.error(res, 'failed to decrypt user BVN', 400);
+    }
+
+  } catch (error) {
+    error.label = enums.FAILED_TO_FETCH_USER_BVN;
+    logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
     return next(error);
   }
 };

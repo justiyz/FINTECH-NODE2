@@ -5,7 +5,7 @@ export const forgotPassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-      Hi ${data.first_name},
+      Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -42,7 +42,7 @@ export const resetPassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -69,7 +69,7 @@ export const changePassword = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -96,7 +96,7 @@ export const changePin = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -124,7 +124,7 @@ export const resetPin = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -151,7 +151,7 @@ export const verifyEmail = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -200,7 +200,7 @@ export const requestVerifyEmail = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -221,7 +221,7 @@ export const rejectedDebitCard = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -251,7 +251,7 @@ export const loanDisbursement = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -314,7 +314,7 @@ export const failedCardDebit = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -345,7 +345,7 @@ export const failedChargePayment = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -377,7 +377,7 @@ export const successfulRepayment = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -410,7 +410,7 @@ export const completedRepayment = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -428,7 +428,7 @@ export const completedRepayment = (data) => `
       <b>Loan Purpose:</b> ${data.loan_reason}<br />
       <b>Loan Amount:</b> ₦${parseFloat(data.total_loan_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
       <b>Loan Duration:</b> ${parseFloat(data.loan_duration)}<br />
-      <b>Interest Rate:</b> ${parseFloat(data.interest_rate)}%<br />
+
       <b>Total Repayment:</b> ₦${parseFloat(data.total_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}<br />
       <b>Monthly Repayment</b>: ₦${parseFloat(data.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
     </span>
@@ -439,7 +439,7 @@ export const failedAddressVerification = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -473,7 +473,7 @@ export const successfulAddressVerification = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -501,7 +501,7 @@ export const loanRescheduled = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -531,7 +531,7 @@ export const rewardPointsClaiming = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -546,7 +546,7 @@ export const rejectedDebitCardNotUsersCard = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -576,7 +576,7 @@ export const ticketBookedForYou = (data) => `
 <tr>
   <td>
     <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
-    Hi ${data.first_name},
+    Hi <span style="text-transform: capitalize">${data.first_name}</span>,
     </h2>
   </td>
 </tr>
@@ -584,7 +584,7 @@ export const ticketBookedForYou = (data) => `
 <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
   <td>
     <span style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-      Your ticket for ${data.ticket_name} has been booked!<br />
+      Your ticket for ${data['ticket_name']} has been booked!<br />
       however, this added card does not bear your registered name on SeedFi.<br />
       Kindly add a card that bears your registered name.
     </span>
@@ -596,10 +596,10 @@ export const ticketBookedForYou = (data) => `
     <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">card details</p><br />
     <span
       style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
-      <b>Event Title:</b> ${data.ticket_name}, <br />
-      <img src="${data.ticket_image_url}">
-      <b>Date:</b> ${data.event_date}, <br />
-      ${data.ticket_description}
+      <b>Event Title:</b> ${data['ticket_name']}, <br />
+      <img src="${data['ticket_image_url']}">
+      <b>Date:</b> ${data['event_date']}, <br />
+      ${data['ticket_description']}
     </span>
   </td>
 </tr>
@@ -613,6 +613,6 @@ export const eventBooking = (data) => `
     <td style="color: #84868c; padding-top: 15px;">Your ticket is attached to this email. Please keep it handy for a seamless entry on the day of the event.</td>
 </tr>
 <tr>
-    <td style="padding-top: 15px;">${data.tickect_urls}</td>
+    <td style="padding-top: 15px;">${data['ticket_urls']}</td>
 </tr>
 `;

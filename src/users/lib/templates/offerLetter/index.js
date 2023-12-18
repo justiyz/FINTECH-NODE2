@@ -170,6 +170,14 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
     <li>Borrower’s account is debited monthly for loan repayment</li>
   </ol>
 
+  <h4 style="margin-bottom: 20px;">QORE RECOVA MANDATE</h4>
+
+  <p>
+  By drawing on the facility granted to you, SeedFi requests to setup a direct debit mandate of <strong>₦${parseFloat(loanDetails.total_repayment_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} ( Naira only)</strong> against all your accounts linked to your BVN as a condition for approving your <strong>₦${parseFloat(loanDetails.total_repayment_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} ( Naira only)</strong> loan request.
+  </p>
+
+
+
   <ol type="A" style="padding-left: 15px;">
         <li>
           <h4>Other Conditions</h4>
@@ -221,7 +229,9 @@ Not, without SeedFi’s prior written consent, make any offer of employment or e
       Yours Sincerely,  <br />
       For: SeedFi.
     </p>
-
+    <p>
+    <img style="max-width:100px" src="https://res.cloudinary.com/dgjetyffp/image/upload/v1702113946/Image_drydwb.jpg" alt="signature" />
+    </p>
     <p>
       Pelumi Alli <br />
       CEO

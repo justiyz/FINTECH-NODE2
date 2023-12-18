@@ -29,7 +29,7 @@ const fetchBanks = async() => {
 
 const resolveAccount = async(account_number, bank_code, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.paystackResolveAccountNumberTestResponse(account_number, user);
     }
     const options = {
@@ -55,6 +55,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
     }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     const amountRequestedType = parseFloat(paystackAmountFormatting);
+    const amountToBePaid = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
     const options = {
       method: 'post',
@@ -65,7 +66,7 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
       },
       data: {
         email: user.email,
-        amount: amountRequestedType,
+        amount: amountToBePaid,
         currency: 'NGN',
         reference,
         channels: [ 'card' ],
@@ -89,8 +90,9 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     }
     // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     const amountRequestedType = parseFloat(paystackAmountFormatting);
+    const amountToBePaid = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
-    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
+    // const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -100,7 +102,7 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
       },
       data: {
         email: user.email,
-        amount: amountToBeCharged,
+        amount: amountToBePaid,
         currency: 'NGN',
         reference,
         channels: [ 'bank_transfer' ],
@@ -284,9 +286,10 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.initiateChargeViaCardAuthTokenPaystackTestResponse(reference);
     }
-    const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
+
+    // const amountRequestedType = SEEDFI_NODE_ENV === 'development' ? 10000 : parseFloat(paystackAmountFormatting);
     // this is because paystack will not process transaction greater than 1 Million in test environment
-    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
+    const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/charge_authorization`,
@@ -301,6 +304,7 @@ const initializeDebitCarAuthChargeForLoanRepayment = async(user, paystackAmountF
         authorization_code: await Hash.decrypt(decodeURIComponent(debitCardDetails.auth_token))
       }
     };
+
     const { data } = await axios(options);
     return data;
   } catch (error) {
@@ -374,13 +378,10 @@ function getNumericValue(input) {
   logger.info(`AmountRequestType ${input}:::Info: Logs the amount to be passed to paystack plus charges`);
   logger.info(`Datatype of AmountRequestType ${typeof input}:::Info: Logs the amount to be passed to paystack plus charges`);
   if (typeof input === 'string' || typeof input === 'object') {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return Number(input);
   } else if (typeof input === 'number') {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return input;
   } else {
-    logger.info(`The type of input to be processed: ${typeof input}. The value of input to be processed: ${input}`);
     return NaN; // Return NaN for unsupported types
   }
 }

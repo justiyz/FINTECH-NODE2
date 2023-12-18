@@ -44,7 +44,7 @@ export const createShopCategory = async(req, res, next) => {
 
 export const getEventsList = async(req, res, next) => {
   try {
-    let events = await processAnyData(shopQueries.getAllEvents);
+    let events = await processAnyData(shopQueries.getAllEventsAdmin);
     for (const event_record_id in events) {
       events[event_record_id].tickets = await processAnyData(shopQueries.getTicketCategories, events[event_record_id].ticket_id);
     }

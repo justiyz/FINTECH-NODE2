@@ -4,10 +4,10 @@ import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import { createShopRepaymentSchedule } from '../../../admins/api/controllers/controllers.loan';
 import {
-  calculateAmountPlusPaystackTransactionCharge,
+  calculateAmountPlusPaystackTransactionCharge, initializeBankAccountChargeForLoanRepayment,
   initializeBankTransferPayment,
-  initializeCardPayment
-} from "../services/service.paystack";
+  initializeCardPayment, initializeDebitCarAuthChargeForLoanRepayment
+} from '../services/service.paystack';
 import enums from '../../lib/enums';
 import {v4 as uuidv4} from 'uuid';
 import {userActivityTracking} from '../../lib/monitor';
@@ -15,27 +15,21 @@ import {processOneOrNoneData} from '../../../admins/api/services/services.db';
 import QRCode from 'qrcode';
 import MailService from '../services/services.email';
 import notificationQueries from "../queries/queries.notification";
-import loanQueries from "../queries/queries.loan";
-import LoanPayload from "../../lib/payloads/lib.payload.loan";
-import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from "../services/service.seedfiUnderwriting";
+import loanQueries from '../queries/queries.loan';
+import LoanPayload from '../../lib/payloads/lib.payload.loan';
+import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from '../services/service.seedfiUnderwriting';
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import config from "../../config";
-import { ticketPDFTemplate } from "../../lib/templates/offerLetter";
+import config from '../../config';
+import { ticketPDFTemplate } from '../../lib/templates/offerLetter';
 import path from 'path';
 import os from 'os';
 import fs from 'fs';
-import { uniqueID } from "mocha/lib/utils";
+import { uniqueID } from 'mocha/lib/utils';
 import { cloudinary } from '../services/service.cloudinary';
-import {
-  REQUESTED_NUMBER_OF_TICKETS_NOT_AVAILABLE,
-  UNDERWRITING_SERVICE_FAILURE
-} from "../../lib/enums/lib.enum.messages";
-import {HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED} from "../../lib/enums/lib.enum.status";
-import {TICKET_PURCHASE_SHOP_CONTROLLER} from "../../lib/enums/lib.enum.labels";
 import * as puppeteer from 'puppeteer';
 import { chromium } from 'playwright';
-const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR } = config;
+const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR, SEEDFI_NODE_ENV, SEEDFI_SHOP_PERCENTAGE } = config;
 
 
 export const shopCategories = async (req, res, next) => {
@@ -216,6 +210,7 @@ export const fetchTicketCategories = async (req, res, next) => {
     const ticket_categories = await processAnyData(shopQueries.getTicketCategories, req.params.ticket_id);
     const data = {
       'tickets': ticket_categories,
+      'initial_payment_percentage': SEEDFI_SHOP_PERCENTAGE * 100,
       'ticket_with_least_price': await findTicketWithLowestPrice(ticket_categories) // ticket_with_least_price
     };
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::Info: user ticket categories fetched successfully fetchTicketCategories.controller.shop.js`);
@@ -299,17 +294,19 @@ export const imageFromHtml2 = async (htmlContent) => {
   try {
     let browser = await chromium.launch();
     let page = await browser.newPage();
-    const tempDir = os.tmpdir();
     await page.setContent(htmlContent);
-    await page.setViewportSize({ width: 1280, height: 1080 });
+    await page.setViewportSize({ width: 600, height: 800 });
+
     let uId = uniqueID();
-    let outputpath = uId +'.jpg';
-    const imagePath = path.join(tempDir, outputpath);
+    let outputPath = uId +'.jpg';
+    const tempDir = os.tmpdir();
+    const imagePath = path.join(tempDir, outputPath);
     await page.screenshot({ path: imagePath, type: 'jpeg' });
     await browser.close();
+
     return imagePath;
   } catch (error) {
-    console.error('Error ImageFromHtml function during image QR Image generation operation:', error);
+    console.error('Error ImageFromHtml2 function during image QR Image generation operation:', error);
   }
 };
 
@@ -342,9 +339,10 @@ export const createTicketSubscription = async(req, res, next) => {
   const tickets = req.body.tickets;
   const payment_channel = req.body.payment_channel;
   const reference = uuidv4();
-  const ticketPurchaseLogs = [];
+  const activityType = payment_channel === 'card' ? 71: 73;
+  // const ticketPurchaseLogs = [];
   let loan_id = req.body.initial_payment.loan_id;
-  const { user } = req;
+  const { user, userDebitCard, accountDetails } = req;
   let totalAmountToBePaid = 0;
   try {
     // loop ticket id and check if number available is greater than the number being requested by the user
@@ -366,7 +364,7 @@ export const createTicketSubscription = async(req, res, next) => {
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
           totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
-          ticketPurchaseLogs.push(new_ticket_file_url);
+          // ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
         // TODO
@@ -376,19 +374,46 @@ export const createTicketSubscription = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Total amount to be paid by user is N${totalAmountToBePaid}`);
     // changes started from here
 
-    totalAmountToBePaid = req.body?.initial_payment?.total_payment_amount;
     const paystackAmountFormatting = totalAmountToBePaid * 100;
-    const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
-    const payment_operation = payment_channel === 'card' ?
-      await initializeCardPayment(user, amountWithTransactionCharges, reference) :
-      await initializeBankTransferPayment(user, amountWithTransactionCharges, reference);
-    const data = {
-      'total_amount': totalAmountToBePaid,
-      'payment': payment_operation
-    };
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
+    // const amountWithTransactionCharges = await calculateAmountPlusPaystackTransactionCharge(paystackAmountFormatting);
 
-    return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
+    // Muting Operation to initialize payment
+    // const payment_operation = payment_channel === 'card' ?
+    //   await initializeCardPayment(user, paystackAmountFormatting, reference) :
+    //   await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
+    // const data = { 'total_amount': totalAmountToBePaid, 'payment': payment_operation };
+    // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ req.user.user_id }:::User tickets created successfully.`);
+    // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
+    // operation to initiate charge
+
+    const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
+        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+    console.log('paystack result: ', result);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+      await userActivityTracking(req.user.user_id, activityType, 'success');
+      return ApiResponse.success(
+          res,
+          result.message, enums.HTTP_OK,
+          {
+            user_id: user.user_id,
+            amount: parseFloat(totalAmountToBePaid).toFixed(2),
+            payment_type: 'part',
+            payment_channel, reference: result.data.reference, status: result.data.status, display_text: result.data.display_text || ''
+      });
+    }
+    if (result.response && result.response.status === 400) {
+      await userActivityTracking(user.user_id, activityType, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized
+      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    await userActivityTracking(user.user_id, activityType, 'fail');
+    return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+
   } catch (error) {
     await userActivityTracking(req.user.user_id, 113, 'fail');
     // error.label = enums.FAILED_TO_CREATE_TICKET_SUBSCRIPTION;
@@ -626,17 +651,18 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     );
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-      userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+    let payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
+          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
     const result = await loanApplicationEligibilityCheck(payload);
 
     if(result.status === 200 && result.statusText === 'OK') {
       const { data } = result;
       if (data.final_decision === 'APPROVED') {
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
-        const monthly_repayment = (booking_amount * 0.7)/body.duration_in_months;
-        const first_installment = (booking_amount * 0.3).toFixed(2);
-
+        const initial_deposit = SEEDFI_SHOP_PERCENTAGE;
+        const other_deposits = 1 - initial_deposit;
+        const monthly_repayment = (booking_amount * other_deposits)/body.duration_in_months;
+        const first_installment  = (booking_amount * initial_deposit).toFixed(2);
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
         data.monthly_repayment = monthly_repayment;
         const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
@@ -661,12 +687,12 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
         userActivityTracking(req.user.user_id, 37, 'fail');
         userActivityTracking(req.user.user_id, 40, 'success');
         // Declined Loan Information update
-        const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails.status, 'DECLINED');
+        const returnData = await LoanPayload.loanApplicationDeclinedDecisionResponse(user, data, updatedLoanDetails, 'DECLINED');
         return ApiResponse.success(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_OK, returnData);
       }
     }
 
-    else if (result.status >= 400 && result.status <= 500) {
+    else if (result.status >= 400 && result.status < 500) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: Info: returned response from underwriting is a 400 plus status checkUserLoanEligibility.controllers.loan.js`)
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
       admins.map((admin) => {

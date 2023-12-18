@@ -31,9 +31,6 @@ router.get(
 router.get(
   '/ticket-list',
   AuthMiddleware.validateAuthToken,
-  // LoanMiddleware.checkUserLoanApplicationExists,
-  // UserMiddleware.checkIfAccountDetailsExists,
-  // UserMiddleware.checkIfCardOrUserExist,
   Model(Schema.ticketList, 'params'),
   shopCategories.fetchTickets
 );
@@ -45,35 +42,37 @@ router.get(
   shopCategories.fetchUserTickets
 );
 
+router.post(
+    '/ticket/:ticket_id/:payment_channel_id/book',
+    AuthMiddleware.validateAuthToken,
+    AuthMiddleware.isCompletedKyc('confirm'),
+    UserMiddleware.checkIfAccountDetailsExists,
+    Model(loanSchema.shopRepaymentParams, 'params'),
+    Model(loanSchema.loanForEventApplication, 'payload'),
+    UserMiddleware.isEmailVerified('authenticate'),
+    UserMiddleware.isUploadedImageSelfie('confirm'),
+    AuthMiddleware.isPinCreated('confirm'),
+    UserMiddleware.isVerifiedBvn('confirm'),
+    UserMiddleware.isUploadedVerifiedId('confirm'),
+    UserMiddleware.checkUserAdvancedKycUpdate,
+    LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
+    LoanMiddleware.validateLoanAmountAndTenor, // only on live
+    LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+    LoanMiddleware.checkIfUserBvnNotBlacklisted, // only on live
+    LoanMiddleware.checkIfUserHasClusterDiscount,
+    LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
+    LoanMiddleware.additionalUserChecksForLoan,
+    UserMiddleware.checkIfAccountDetailsExists,
+    UserMiddleware.checkIfCardOrUserExist, // new added for the charge flow
+    shopCategories.checkUserTicketLoanEligibility,
+    shopCategories.createTicketSubscription
+);
+
 router.get(
   '/ticket/:ticket_id',
   AuthMiddleware.validateAuthToken,
   Model(Schema.ticketId, 'params'),
   shopCategories.fetchTicketCategories
-);
-
-router.post(
-  '/ticket/:ticket_id/book',
-  AuthMiddleware.validateAuthToken,
-  AuthMiddleware.isCompletedKyc('confirm'),
-  UserMiddleware.checkIfAccountDetailsExists,
-  Model(loanSchema.loanForEventApplication, 'payload'),
-  UserMiddleware.isEmailVerified('authenticate'),
-  UserMiddleware.isUploadedImageSelfie('confirm'),
-  AuthMiddleware.isPinCreated('confirm'),
-  UserMiddleware.isVerifiedBvn('confirm'),
-  UserMiddleware.isUploadedVerifiedId('confirm'),
-  UserMiddleware.checkUserAdvancedKycUpdate,
-  // LoanMiddleware.checkIfUserHasActivePersonalLoan,
-  // LoanMiddleware.validateLoanAmountAndTenor,
-  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
-  // LoanMiddleware.checkIfUserBvnNotBlacklisted,
-  LoanMiddleware.checkIfUserHasClusterDiscount,
-  // UserMiddleware.checkIfCardOrUserExist,
-  LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
-  LoanMiddleware.additionalUserChecksForLoan,
-  shopCategories.checkUserTicketLoanEligibility,
-  shopCategories.createTicketSubscription
 );
 
 router.post(

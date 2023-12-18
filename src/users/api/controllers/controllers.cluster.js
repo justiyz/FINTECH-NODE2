@@ -138,15 +138,15 @@ export const joinClusterOnInvitation = async(req, res, next) => {
         const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_member_increase' ]);
         const rewardPoint = parseFloat(rewardDetails.point);
         const rewardDescription = 'Cluster membership increase point';
-        await processOneOrNoneData(authQueries.updateRewardPoints,
-            [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
-        await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+        // await processOneOrNoneData(authQueries.updateRewardPoints,
+        //     [ cluster.created_by, null, rewardPoint, rewardDescription, null, 'cluster membership increase' ]);
+        // await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
         const [ clusterCreator ] = await processAnyData(userQueries.getUserByUserId, [ cluster.created_by ]);
-        await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster_id ]);
-        sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point',
-          PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
-        sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`),
-          clusterCreator.fcm_token);
+        // await processOneOrNoneData(clusterQueries.updateClusterCreatorReceivedMembershipRewardPoints, [ cluster_id ]);
+        // sendUserPersonalNotification(clusterCreator, 'Cluster membership increase point',
+        //   PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, `cluster membership increase up to ${5}`), 'point-rewards', {});
+        // sendPushNotification(clusterCreator.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, `cluster membership increase up to ${5}`),
+        //   clusterCreator.fcm_token);
         userActivityTracking(req.user.user_id, 107, 'success');
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user added to new cluster and all notifications sent successfully
@@ -193,12 +193,12 @@ export const createCluster = async(req, res, next) => {
     const rewardDetails = await processOneOrNoneData(authQueries.fetchClusterRelatedRewardPointDetails, [ 'cluster_creation' ]);
     const rewardPoint = parseFloat(rewardDetails.point);
     const rewardDescription = 'Create cluster point';
-    await processOneOrNoneData(authQueries.updateRewardPoints,
-        [ user.user_id, null, rewardPoint, rewardDescription, null, 'cluster creation' ]);
-    await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
-    sendUserPersonalNotification(user, 'Create cluster point',
-      PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'cluster creation'), 'point-rewards', {});
-    sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'cluster creation'), user.fcm_token);
+    // await processOneOrNoneData(authQueries.updateRewardPoints,
+    //     [ user.user_id, null, rewardPoint, rewardDescription, null, 'cluster creation' ]);
+    // await processOneOrNoneData(authQueries.updateUserPoints, [ user.user_id, parseFloat(rewardPoint), parseFloat(rewardPoint) ]);
+    // sendUserPersonalNotification(user, 'Create cluster point',
+    //   PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, 'cluster creation'), 'point-rewards', {});
+    // sendPushNotification(user.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, 'cluster creation'), user.fcm_token);
     createClusterNotification(user, body, newClusterDetails, clusterMemberDetails,
       `${user.first_name} ${user.last_name} created ${body.type} cluster ${body.name}`, 'create-cluster', {});
     userActivityTracking(req.user.user_id, activityType, 'success');
@@ -773,6 +773,9 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: details of user cluster member cluster loan prepared
     fetchClusterMemberLoanDetails.controllers.cluster.js`);
     const [ nextRepaymentDetails ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ existingLoanApplication.member_loan_id, user.user_id ]);
+    if(typeof nextRepaymentDetails == 'undefined') {
+      return ApiResponse.error(res, 'Repayment Information Not Found.', '404', enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
     const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [ existingLoanApplication.member_loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);

@@ -36,6 +36,29 @@ const dojahBvnVerificationCheck = async (bvn, user) => {
   }
 };
 
+const dojahPassportNumberVerificationCheck = async (passport_number, user) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return userMockedTestResponses.dojahVerifyInternationPassportResponse(user, passport_number);
+    }
+    const options = {
+      method: 'GET',
+      url: `${config.SEEDFI_DOJAH_APIS_BASE_URL}/api/v1/kyc/passport?passport_number=${passport_number}&surname=${user.last_name}`,
+      headers: {
+        accept: 'application/json',
+        Authorization: config.SEEDFI_DOJAH_SECRET_KEY,
+        AppId: config.SEEDFI_DOJAH_APP_ID
+      }
+    };
+
+    const {data} = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to Dojah API for bvn validation failed::${ enums.DOJAH_BVN_VERIFICATION_SERVICE }`, error.message);
+    return error;
+  }
+};
+
 const dojahVINVerification = async (vin, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
@@ -66,7 +89,6 @@ const dojahNINVerification = async (nin, user) => {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyNinTestResponse(user, nin);
     }
-
     const options = {
       method: 'GET',
       url: `https://api.dojah.io/api/v1/kyc/nin?nin=${ nin }`,
@@ -85,4 +107,4 @@ const dojahNINVerification = async (nin, user) => {
   }
 }
 
-export {dojahBvnVerificationCheck, dojahVINVerification as dojahVINVerification, dojahNINVerification};
+export {dojahBvnVerificationCheck, dojahVINVerification as dojahVINVerification, dojahNINVerification, dojahPassportNumberVerificationCheck};

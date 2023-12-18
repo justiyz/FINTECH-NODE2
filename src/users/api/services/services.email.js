@@ -3,6 +3,9 @@ import config from '../../config/index';
 import { commonTemplate } from '../../lib/templates/email/template.common';
 
 const MailService = async(subject, messageType, data) => {
+  // if (config.SEEDFI_NODE_ENV === 'development') {
+  //   return;
+  // }
   const msg = {
     to: data.email,
     cc: '',

@@ -1,8 +1,7 @@
 export default {
   shopCategories: `
     SELECT id, shop_category_id, category_name, status, category_description
-    FROM shop_categories
-    WHERE status = true`,
+    FROM shop_categories`,
 
   getShopDetails: `
     SELECT id, shop_category_id, category_name, status, category_description
@@ -35,10 +34,11 @@ export default {
   `,
 
   getUserTickets: `
-    SELECT *
+    SELECT user_tickets.*, personal_loans.status as loan_status
     FROM user_tickets
-    WHERE user_id = $1
-    AND status = $2
+    JOIN personal_loans ON personal_loans.loan_id = user_tickets.loan_id
+    WHERE user_tickets.user_id = $1
+    AND user_tickets.status = $2
     ORDER BY id ASC
   `,
 

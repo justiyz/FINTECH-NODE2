@@ -28,6 +28,26 @@ export default {
       updated_at
     FROM tickets;
   `,
+  getAllEventsAdmin: `
+    SELECT tickets.id,
+        tickets.ticket_id,
+        tickets.ticket_name,
+        tickets.ticket_description,
+        tickets.ticket_image_url,
+        tickets.insurance_coverage,
+        tickets.processing_fee,
+        tickets.ticket_status,
+        tickets.event_date,
+        tickets.event_location,
+        tickets.event_time,
+        tickets.created_at,
+        tickets.updated_at,
+        tickets.ticket_status
+    FROM
+        tickets
+    ORDER BY
+        tickets.event_date ASC;
+  `,
 
   getAllEvents: `
     SELECT tickets.id,
@@ -46,6 +66,8 @@ export default {
         tickets.ticket_status
     FROM
         tickets
+    WHERE
+        tickets.ticket_status = 'active'
     ORDER BY
         tickets.event_date ASC;
   `,
@@ -239,14 +261,13 @@ export default {
   `,
 
   getTicketByReference: `
-    SELECT loan_id, user_ticket_id, ticket_url
+    SELECT DISTINCT user_tickets.loan_id, user_tickets.user_ticket_id, user_tickets.ticket_url, tickets.ticket_name
     FROM user_tickets
+    JOIN tickets ON tickets.ticket_id = user_tickets.ticket_id
     WHERE
-        transaction_reference = $1
+        user_tickets.transaction_reference = $1
     AND
-        user_id = $2
-    AND
-        ticket_id = $3
+        user_tickets.user_id = $2
   `,
 
   getTicketByReference_x: `

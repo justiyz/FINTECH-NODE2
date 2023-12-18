@@ -129,26 +129,19 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
 
     // update first repayment record
     const repaymentRecord = await processOneOrNoneData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
-
     // create first repayment record
     await processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable,
-        [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]
-    );
-
+        [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]);
     // update event status
     await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
 
     // send notification email
-    let ticket_urls = '';
-    const ticketUrls = ticket_record.map(ticket => `<a href="${ticket.ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`).join('');
-    // for (let ticketRecordKey in ticket_record) {
-    //   ticket_urls = ticket_urls + `<a href="${ticket_record[ticketRecordKey].ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket.</a>`
-    // }
+    const ticketUrls = ticket_record.map(ticket => `<a href="${ticket.ticket_url}" style="text-decoration: underline; color: blue; cursor: pointer;">Click here for your ticket [].</a><br/>`).join('');
     const data = { first_name: user.first_name, email: user.email, ticket_urls: ticketUrls };
     await MailService('Ticket Information', 'eventBooking', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan record ${ticket_record[0].loan_id} now ongoing`);
     req.ticket_update = { ticket_record };
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
+    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: payment successful loan status updated, ticket status updated for user shopCategories.ticketPurchaseUpdate.shop.js`);
     return next();
   } catch (error) {
     error.label = enums.EVENT_PAYMENT_UNSUCCESSFUL;
@@ -443,11 +436,11 @@ const processUserRewardPointBonus = async(user, rewardDescription, rewardPoint, 
   if (userWasReferred) {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user was referred to the platform processUserRewardPointBonus.middlewares.payment.js`);
     const referenceUserDetails = await processOneOrNoneData(userQueries.getUserByUserId);
-    await processOneOrNoneData(authQueries.updateRewardPoints);
-    await processOneOrNoneData(authQueries.updateUserPoints);
-    sendUserPersonalNotification(referenceUserDetails, `${type} point`,
-      PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, type), 'point-rewards', {});
-    sendPushNotification(referenceUserDetails.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, type), referenceUserDetails.fcm_token);
+    // await processOneOrNoneData(authQueries.updateRewardPoints);
+    // await processOneOrNoneData(authQueries.updateUserPoints);
+    // sendUserPersonalNotification(referenceUserDetails, `${type} point`,
+    //   PersonalNotifications.userEarnedRewardPointMessage(rewardPoint, type), 'point-rewards', {});
+    // sendPushNotification(referenceUserDetails.user_id, PushNotifications.rewardPointPushNotification(rewardPoint, type), referenceUserDetails.fcm_token);
     const activityType = type === 'repayment' ? 104 : 103;
     userActivityTracking(referenceUserDetails.user_id, activityType, 'success');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: referred user awarded referral reward point and notified
@@ -590,14 +583,20 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ paymentRecord.loan_id, paymentRecord.user_id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments
         processPersonalLoanRepayments.middlewares.payment.js`);
-        const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+
+        const isCustomPartRepayment =  paymentRecord.payment_type === 'part_loan_repayment' && paymentRecord.amount < nextRepayment.total_payment_amount;
+
+        let statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+
+        statusType = isCustomPartRepayment ? 'ongoing' : statusType;
+
         const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
         const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
         const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
         await Promise.all([
           processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
             loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
-          processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]),
+          isCustomPartRepayment ? processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, paymentRecord.amount ]) : processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
@@ -613,7 +612,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
         await MailService('Successful loan repayment', 'successfulRepayment',
-          { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+          { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.total_repayment_amount).toFixed(2) });
         sendUserPersonalNotification(user, 'Part loan repayment successful',
           PersonalNotifications.partLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
         sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);
@@ -657,7 +656,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
       processPersonalLoanRepayments.middlewares.payment.js`);
       await MailService('Successful loan repayment', 'successfulRepayment',
-        { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.amount_requested).toFixed(2) });
+        { ...user, amount_paid: parseFloat(paymentRecord.amount).toFixed(2), total_loan_amount: parseFloat(loanDetails.total_repayment_amount).toFixed(2) });
       sendUserPersonalNotification(user, 'Full loan repayment successful',
         PersonalNotifications.fullLoanRepaymentSuccessful({ amount: parseFloat(paymentRecord.amount) }), 'successful-repayment', { });
       sendPushNotification(user.user_id, PushNotifications.successfulLoanRepayment(), user.fcm_token);

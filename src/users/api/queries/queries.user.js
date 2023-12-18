@@ -8,6 +8,14 @@ export default {
   FROM users
   WHERE phone_number = $1`,
 
+  getUserByUserIdRefined: `
+    SELECT id, phone_number, user_id, email, title, INITCAP(first_name) AS first_name, INITCAP(middle_name) AS middle_name, INITCAP(last_name) AS last_name,
+      tier, gender, date_of_birth, image_url, is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, number_of_children, marital_status, loan_status, device_token,
+      to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update, verification_token_request_count, invalid_verification_token_count
+   FROM users
+   WHERE user_id = $1`,
+
   getUserByUserId: `
     SELECT id, phone_number, user_id, email, title, INITCAP(first_name) AS first_name, INITCAP(middle_name) AS middle_name, INITCAP(last_name) AS last_name,
       tier, gender, date_of_birth, image_url, is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
@@ -67,7 +75,6 @@ export default {
       SET
         updated_at = NOW(),
         is_verified_bvn = TRUE,
-        tier = $3,
         bvn = $2
       WHERE user_id = $1
       RETURNING id, user_id, first_name, middle_name, last_name, email, tier,
@@ -396,8 +403,8 @@ export default {
     RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn,
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
-  
-  
+
+
   userIdentityVerification: `
     UPDATE users
     SET
@@ -410,8 +417,8 @@ export default {
     RETURNING user_id, first_name, last_name, image_url, is_uploaded_identity_card, is_uploaded_selfie_image,
     is_created_password, is_created_pin, is_completed_kyc, status
     `,
-  
-  
+
+
 
   updateUserTierValue: `
     UPDATE users
@@ -440,6 +447,13 @@ export default {
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
       WHERE id = $1
+  `,
+
+  fetchCardsByIdOrUserId: `
+      SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
+      FROM user_debit_cards
+      WHERE id = $1
+      AND user_id = $2
   `,
 
   setExistingCardDefaultFalse: `
