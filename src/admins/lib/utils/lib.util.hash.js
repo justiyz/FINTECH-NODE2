@@ -42,6 +42,14 @@ export const generateAdminResetPasswordToken = (admin) => {
   }
 };
 
+export const encrypt = async(data) => {
+  try {
+    return CryptoJS.AES.encrypt(JSON.stringify(data), SEEDFI_ENCODING_AUTHENTICATION_SECRET).toString();
+  } catch (error) {
+    return error;
+  }
+};
+
 export const decrypt = async(ciphertext) => {
   const bytes = CryptoJS.AES.decrypt(ciphertext.toString(), SEEDFI_ENCODING_AUTHENTICATION_SECRET);
   return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
