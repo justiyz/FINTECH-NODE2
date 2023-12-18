@@ -14,6 +14,7 @@ import adminSettingsRoute from '../../../admins/api/routes/routes.settings';
 import bvnRoute from '../../../admins/api/routes/routes.bvn';
 import AdminClusterRoute from '../../../admins/api/routes/routes.cluster';
 import adminShopRoutes from '../../../admins/api/routes/routes.shop';
+import adminMerchantRoute from '../../../admins/api/routes/routes.merchant';
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use('/admin/settings', adminSettingsRoute);
 router.use('/admin/bvn', bvnRoute);
 router.use('/admin/cluster', AdminClusterRoute);
 router.use('/admin/shop', adminShopRoutes);
+router.use('/admin/merchant', adminMerchantRoute);
 
 export default router;
