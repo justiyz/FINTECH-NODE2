@@ -9,10 +9,18 @@ const router = Router();
 
 router.get(
   '/loan-due-amount/:loan_reference',
-  Model(Schema.fetchLoanDueAmountParams, 'params'),
   AuthMiddleware.validateRecovaRequest,
+  Model(Schema.fetchLoanDueAmountParams, 'params'),
   RecovaMiddleware.checkLoanExists,
   RecovaController.fetchLoanDueAmount
+);
+
+router.post(
+  '/mandate-created',
+  AuthMiddleware.validateRecovaRequest,
+  Model(Schema.mandateCreatedPayload, 'payload'),
+  RecovaMiddleware.checkLoanExists,
+  RecovaController.handleMandateCreated
 );
 
 

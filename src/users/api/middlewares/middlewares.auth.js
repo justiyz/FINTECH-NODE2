@@ -642,7 +642,6 @@ export const validateInfoCall = async(req, res, next) => {
 export const validateRecovaRequest = async(req, res, next) => {
   try {
     const token = req.headers.authorization;
-    console.log(token, SEEDFI_RECOVA_BEARER_TOKEN);
     if (!token || token != SEEDFI_RECOVA_BEARER_TOKEN) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
       validateRecovaRequest.admin.middlewares.auth.js`);
