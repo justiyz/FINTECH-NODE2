@@ -1,17 +1,18 @@
 import { Router } from 'express';
-import Model from '../middlewares/middlewares.model';
-import Schema from '../../lib/schemas/lib.schema.loan';
+import * as RecovaController from '../controllers/controllers.recova';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
-import * as UserMiddleware from '../middlewares/middlewares.user';
-import * as PaymentMiddleware from '../middlewares/middlewares.payment';
-import * as LoanMiddleware from '../middlewares/middlewares.loan';
-import * as LoanController from '../controllers/controllers.loan';
+import * as RecovaMiddleware from '../middlewares/middlewares.recova';
+import Schema from '../../lib/schemas/lib.schema.recova';
+import Model from '../middlewares/middlewares.model';
+
 const router = Router();
 
 router.get(
   '/loan-due-amount/:loan_reference',
+  Model(Schema.fetchLoanDueAmountParams, 'params'),
   AuthMiddleware.validateRecovaRequest,
-  (req, res) => {console.log('loan-due-amount');}
+  RecovaMiddleware.checkLoanExists,
+  RecovaController.fetchLoanDueAmount
 );
 
 
