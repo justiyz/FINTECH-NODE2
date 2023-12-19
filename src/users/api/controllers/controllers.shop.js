@@ -143,12 +143,13 @@ async function fetchUserTicketsData(userId, status) {
 }
 
 async function enrichUserTicketData(user_ticket) {
-  const least_ticket_priced_ticket = await processAnyData(
+  const [least_ticket_priced_ticket] = await processAnyData(
     adminShopQueries.getPriceOfLeastValueTicket, user_ticket.ticket_id);
   const ticket_category = await processOneOrNoneData(
     adminShopQueries.getTicketCategoryTypeById, [user_ticket.ticket_id, user_ticket.ticket_category_id]);
   const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
     adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
+    console.log('least_ticket_priced_ticket: ', least_ticket_priced_ticket);
 
   // if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;
@@ -156,7 +157,7 @@ async function enrichUserTicketData(user_ticket) {
     user_ticket.event_time = event_time;
     user_ticket.ticket_image_url = ticket_image_url;
     user_ticket.event_date = event_date;
-    user_ticket.lowest_ticket_price = least_ticket_priced_ticket.length ? least_ticket_priced_ticket[0].ticket_price : null;
+    user_ticket.lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
     user_ticket.ticket_category_type = ticket_category.ticket_category_type;
   // }
 
