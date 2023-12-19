@@ -96,12 +96,14 @@ export const fetchTickets = async (req, res, next) => {
     const {user} = req;
     let tickets = await processAnyData(adminShopQueries.getAllEvents, [req.body.status, req.query.ticket_id]);
     for (const tick in tickets) {
-      const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
-      if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
-        tickets[tick].lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
-      } else {
-        tickets[tick].lowest_ticket_price = 0;
-      }
+      const [least_ticket_priced_ticket] = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
+      tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+
+      // if (typeof least_ticket_priced_ticket !== 'undefined') {
+      //   tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+      // } else {
+      //   tickets[tick].lowest_ticket_price = 0;
+      // }
     }
     const data = {
       'tickets': tickets
