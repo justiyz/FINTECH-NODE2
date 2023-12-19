@@ -26,7 +26,7 @@ VALUES
     ('EDTMERCH', 'edit merchant account info', 'admin edited a merchant account info'),
     ('ACTMERCH', 'activate merchant account', 'admin activated a merchant account'),
     ('DACTMERCH', 'deactivate merchant account', 'admin deactivated a merchant account'),
-    ('EDTMERCHINTR', 'edit merchant interest rate', 'admin edited a merchant interest rate');
+    ('EDMERCHINT', 'edit merchant interest rate', 'admin edited a merchant interest rate');
 
 INSERT INTO admin_resources
     (name)
