@@ -41,6 +41,7 @@ export const handleMandateCreated = async (req, res, next) => {
       loanReference: loan_reference,
       amountDue: loanDetails.total_outstanding_amount
     };
+
     return ApiResponse.json(res, enums.LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.FETCH_LOAN_DUE_AMOUNT_CONTROLLER;
