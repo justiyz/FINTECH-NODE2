@@ -150,15 +150,16 @@ async function enrichUserTicketData(user_ticket) {
   const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
     adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
 
-  if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
+  // if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;
     user_ticket.event_location = event_location;
     user_ticket.event_time = event_time;
     user_ticket.ticket_image_url = ticket_image_url;
     user_ticket.event_date = event_date;
-    user_ticket.lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
+    user_ticket.lowest_ticket_price = least_ticket_priced_ticket.length ? least_ticket_priced_ticket[0].ticket_price : null;
     user_ticket.ticket_category_type = ticket_category.ticket_category_type;
-  }
+  // }
+
 }
 export const _fetchUserTickets = async (req, res, next) => {
   try {
