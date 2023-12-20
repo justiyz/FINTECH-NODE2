@@ -408,3 +408,5 @@ export const DELETE_EVENT_RECORD = 'ShopController::removeTicketRecord';
 export const FAILED_TO_PAY_FOR_TICKET = 'ShopController::ticketPurchaseUpdateFailure';
 export const EVENT_PAYMENT_SUCCESSFUL = 'ShopController::ticketPurchaseUpdateSuccess';
 export const FETCH_LOAN_DUE_AMOUNT_CONTROLLER = 'RecovaController::fetchLoanDueAmount';
+export const HANDLE_MANDATE_CREATED_CONTROLLER = 'RecovaController::handleMandateCreated';
+

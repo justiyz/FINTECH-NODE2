@@ -424,6 +424,7 @@ export const TICKET_ALREADY_ACTIVE = 'ticket(s) already activated';
 export const LOAN_REPAYMENT_NOT_OVER_DUE = (status) => `Next loan repayment status is ${status}, thus repayment cannot be processed`;
 export const CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT = 'Custom amount cannot be greater than repayment amount';
 export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
+export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
 
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 

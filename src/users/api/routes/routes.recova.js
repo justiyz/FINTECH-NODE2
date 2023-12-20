@@ -23,5 +23,13 @@ router.post(
   RecovaController.handleMandateCreated
 );
 
+router.post(
+  '/loan-balance-update',
+  AuthMiddleware.validateRecovaRequest,
+  Model(Schema.mandateCreatedPayload, 'payload'),
+  RecovaMiddleware.checkLoanExists,
+  RecovaController.handleMandateCreated
+);
+
 
 export default router;

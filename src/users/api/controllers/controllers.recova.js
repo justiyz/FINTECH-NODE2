@@ -1,6 +1,7 @@
-import {processAnyData, processNoneData} from "../services/services.db";
+import {processAnyData, processNoneData, processOneOrNoneData} from "../services/services.db";
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
+import loanMandateQueries from '../queries/queries.recova';
 
 
 /**
@@ -36,16 +37,16 @@ export const fetchLoanDueAmount = async (req, res, next) => {
  */
 export const handleMandateCreated = async (req, res, next) => {
   try {
-    const { params: {loan_reference}, loanDetails} = req;
-    const data = {
-      loanReference: loan_reference,
-      amountDue: loanDetails.total_outstanding_amount
-    };
-
-    return ApiResponse.json(res, enums.LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
+    const {body: {institutionCode}, loanDetails} = req;
+    const data = [
+      loanDetails.loan_id,
+      institutionCode
+    ];
+    await processOneOrNoneData(loanMandateQueries.createLoanMandate, data);
+    return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
   } catch (error) {
-    error.label = enums.FETCH_LOAN_DUE_AMOUNT_CONTROLLER;
-    logger.error(`Fetch loan due amount failed::${ enums.FETCH_LOAN_DUE_AMOUNT_CONTROLLER }`, error.message);
+    error.label = enums.HANDLE_MANDATE_CREATED_CONTROLLER;
+    logger.error(`Handle mandate created failed::${ enums.HANDLE_MANDATE_CREATED_CONTROLLER }`, error.message);
     return next(error);
   }
 };
