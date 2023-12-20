@@ -28,8 +28,8 @@ const fetchLoans = Joi.object().keys({
   tier: Joi.number().optional().valid(1, 2),
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
-  export: Joi.string().optional().valid('true')
-
+  export: Joi.string().optional().valid('true'),
+  loan_reason: Joi.string().optional().valid('Ticket Loan', 'Personal loan', 'business loan')
 });
 
 const fetchRepaidLoans = Joi.object().keys({
