@@ -1,4 +1,4 @@
-import {processAnyData, processNoneData, processOneOrNoneData} from "../services/services.db";
+import {processOneOrNoneData} from "../services/services.db";
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import loanMandateQueries from '../queries/queries.recova';
