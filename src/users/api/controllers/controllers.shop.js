@@ -367,7 +367,7 @@ export const createTicketSubscription = async(req, res, next) => {
             req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
-          totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
+          totalAmountToBePaid = totalAmountToBePaid + (parseFloat(availableTickets.ticket_price * SEEDFI_SHOP_PERCENTAGE));
           // ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
@@ -390,9 +390,13 @@ export const createTicketSubscription = async(req, res, next) => {
     // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
     // operation to initiate charge
 
-    const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
-        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
-    console.log('paystack result: ', result);
+    const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard);
+
+    // const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
+    //     await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+
+
+    // console.log('paystack result: ', result);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
       initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
