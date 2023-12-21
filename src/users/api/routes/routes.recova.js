@@ -28,7 +28,7 @@ router.post(
   AuthMiddleware.validateRecovaRequest,
   Model(Schema.loanBalanceUpdate, 'payload'),
   RecovaMiddleware.checkLoanExists,
-  RecovaController.handleMandateCreated
+  RecovaController.loanBalanceUpdate
 );
 
 
