@@ -399,7 +399,7 @@ export const createTicketSubscription = async(req, res, next) => {
     // console.log('paystack result: ', result);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
-      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    createTicketSubscription.controllers.shop.js`);
     if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       await userActivityTracking(req.user.user_id, activityType, 'success');

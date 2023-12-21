@@ -9,10 +9,10 @@ export const ACCOUNT_EXIST = 'Account already exist, kindly contact support team
 export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
-export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support'; 
+export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
 export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
 export const VERIFICATION_TOKEN_INVALID = 'Email has been verified OR verification token is invalid';
-export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. '; 
+export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. ';
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
@@ -138,6 +138,7 @@ export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_NOT_EXISTING = 'loan does not exist';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_USER = 'loan application does not exist for user, or not eligible for repayment';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER = 'Loan application not existing for cluster';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
@@ -422,5 +423,9 @@ export const EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT = (user_id) => `ticke
 export const TICKET_ALREADY_ACTIVE = 'ticket(s) already activated';
 export const LOAN_REPAYMENT_NOT_OVER_DUE = (status) => `Next loan repayment status is ${status}, thus repayment cannot be processed`;
 export const CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT = 'Custom amount cannot be greater than repayment amount';
+export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
+export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
+export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
+
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 

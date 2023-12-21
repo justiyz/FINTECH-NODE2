@@ -788,4 +788,43 @@ export default {
       post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT,
     WHERE loan_repayment_id = $1`,
 
+
+  fetchLoanDetailsByLoanId: `
+    SELECT
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      initial_amount_requested,
+      loan_reason,
+      loan_tenor_in_months,
+      total_repayment_amount,
+      total_interest_amount,
+      percentage_orr_score,
+      percentage_pricing_band,
+      monthly_interest,
+      processing_fee,
+      insurance_fee,
+      advisory_fee,
+      monthly_repayment,
+      total_outstanding_amount,
+      extra_interests,
+      status,
+      loan_decision,
+      is_loan_disbursed,
+      loan_disbursed_at,
+      offer_letter_url,
+      max_possible_approval,
+      is_rescheduled,
+      is_renegotiated,
+      reschedule_extension_days,
+      reschedule_count,
+      renegotiation_count,
+      reschedule_loan_tenor_in_months,
+      reschedule_at,
+      completed_at
+    FROM personal_loans
+    WHERE loan_id = $1
+    `,
+
 };

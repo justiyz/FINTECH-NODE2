@@ -125,6 +125,7 @@ export const SET_DEFAULT_CARD_CONTROLLER = 'UserController::setDefaultCard';
 export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
 export const HOMEPAGE_DETAILS_CONTROLLER = 'UserController::homepageDetails';
 export const CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
+export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
 export const CHECK_IF_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterLoanApplicationExists';
 export const FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE = 'ClusterMiddleware::fetchGeneralClusterNewLoanAmountValues';
 export const CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfMemberClusterLoanApplicationExists';
@@ -235,6 +236,8 @@ export const USER_CLAIMS_REFERRAL_POINTS_CONTROLLER = 'UserController::userClaim
 export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlertNotification';
 export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount';
 export const CHECK_NIN_LENGTH_MIDDLEWARE = 'UserController::checkIfTheLengthOfTheNinIsCorrect';
+export const VALIDATE_RECOVER_REQUEST_MIDDLEWARE = 'AuthMiddleware::validateRecovaRequest';
+
 
 
 // Admin related labels
@@ -299,7 +302,7 @@ export const FETCH_ADMIN_UPLOADED_USER_DOCUMENTS_CONTROLLER = 'AdminUserControll
 export const USER_ORR_BREAKDOWN_CONTROLLER = 'AdminUserController::fetchUserOrrBreakdown';
 export const USER_KYC_DETAILS_CONTROLLER = 'AdminUserController::fetchUserKycDetails';
 export const VERIFY_USER_UTILITY_BILL_CONTROLLER = 'AdminUserController::verifyUserUtilityBill';
-export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfLoanExists';
+export const CHECK_LOAN_EXISTS_RECOVA_MIDDLEWARE = 'RecovaMiddleware::checkLoanExists';
 export const CHECK_CLUSTER_MEMBER_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfClusterMemberLoanExists';
 export const CHECK_CLUSTER_LOAN_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkIfClusterLoanExists ';
 export const USER_ORR_SCORE_BREAKDOWN_SERVICE = 'SeedfiUnderwritingService::userOrrScoreBreakdown';
@@ -404,3 +407,7 @@ export const EDIT_EVENT_TICKET_CATEGORY = 'ShopController::editEventTicketCatego
 export const DELETE_EVENT_RECORD = 'ShopController::removeTicketRecord';
 export const FAILED_TO_PAY_FOR_TICKET = 'ShopController::ticketPurchaseUpdateFailure';
 export const EVENT_PAYMENT_SUCCESSFUL = 'ShopController::ticketPurchaseUpdateSuccess';
+export const FETCH_LOAN_DUE_AMOUNT_CONTROLLER = 'RecovaController::fetchLoanDueAmount';
+export const HANDLE_MANDATE_CREATED_CONTROLLER = 'RecovaController::handleMandateCreated';
+export const LOAN_BALANCE_UPDATE_CONTROLLER = 'RecovaController::loanBalanceUpdate';
+
