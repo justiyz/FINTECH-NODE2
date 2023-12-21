@@ -96,12 +96,14 @@ export const fetchTickets = async (req, res, next) => {
     const {user} = req;
     let tickets = await processAnyData(adminShopQueries.getAllEvents, [req.body.status, req.query.ticket_id]);
     for (const tick in tickets) {
-      const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
-      if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
-        tickets[tick].lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
-      } else {
-        tickets[tick].lowest_ticket_price = 0;
-      }
+      const [least_ticket_priced_ticket] = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
+      tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+
+      // if (typeof least_ticket_priced_ticket !== 'undefined') {
+      //   tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+      // } else {
+      //   tickets[tick].lowest_ticket_price = 0;
+      // }
     }
     const data = {
       'tickets': tickets
@@ -143,22 +145,24 @@ async function fetchUserTicketsData(userId, status) {
 }
 
 async function enrichUserTicketData(user_ticket) {
-  const least_ticket_priced_ticket = await processAnyData(
+  const [least_ticket_priced_ticket] = await processAnyData(
     adminShopQueries.getPriceOfLeastValueTicket, user_ticket.ticket_id);
   const ticket_category = await processOneOrNoneData(
     adminShopQueries.getTicketCategoryTypeById, [user_ticket.ticket_id, user_ticket.ticket_category_id]);
   const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
     adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
+    console.log('least_ticket_priced_ticket: ', least_ticket_priced_ticket);
 
-  if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
+  // if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;
     user_ticket.event_location = event_location;
     user_ticket.event_time = event_time;
     user_ticket.ticket_image_url = ticket_image_url;
     user_ticket.event_date = event_date;
-    user_ticket.lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
+    user_ticket.lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
     user_ticket.ticket_category_type = ticket_category.ticket_category_type;
-  }
+  // }
+
 }
 export const _fetchUserTickets = async (req, res, next) => {
   try {
@@ -363,7 +367,7 @@ export const createTicketSubscription = async(req, res, next) => {
             req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
-          totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
+          totalAmountToBePaid = totalAmountToBePaid + (parseFloat(availableTickets.ticket_price * SEEDFI_SHOP_PERCENTAGE));
           // ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
@@ -386,9 +390,13 @@ export const createTicketSubscription = async(req, res, next) => {
     // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
     // operation to initiate charge
 
-    const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
-        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
-    console.log('paystack result: ', result);
+    const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard);
+
+    // const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
+    //     await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+
+
+    // console.log('paystack result: ', result);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
       initiateManualCardOrBankLoanRepayment.controllers.loan.js`);

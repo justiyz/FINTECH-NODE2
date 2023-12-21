@@ -129,9 +129,10 @@ export default {
   AND (personal_loans.status = $2 OR $2 IS NULL)
   AND ((personal_loans.created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   AND (users.tier = $5 OR $5 IS NULL)
+  AND (personal_loans.loan_reason = $6 OR $6 IS NULL)
   ORDER BY personal_loans.created_at DESC
-  OFFSET $6
-  LIMIT $7
+  OFFSET $7
+  LIMIT $8
    `,
 
   getLoansCount: `
