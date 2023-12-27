@@ -31,5 +31,6 @@ router.post(
   RecovaController.loanBalanceUpdate
 );
 
+// TODO: implement cancel mandate endpoint
 
 export default router;
