@@ -106,18 +106,22 @@ export default {
         bank_code
       FROM user_bank_accounts
       WHERE user_id = $1
+      AND is_deleted = false
       AND account_number = $2
       AND bank_code = $3`,
 
   checkMaximumExistingAccountCounts: `
       SELECT COUNT(id)
       FROM user_bank_accounts
-      WHERE user_id = $1`,
+      WHERE user_id = $1
+      AND is_deleted = false
+      `,
 
   checkMaximumExistingCardsCounts: `
       SELECT COUNT(id)
       FROM user_debit_cards
-      WHERE user_id = $1`,
+      WHERE user_id = $1
+      AND is_deleted = false`,
 
   fetchBankAccountDetails: `
       SELECT
@@ -166,7 +170,9 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id =$1`,
+      WHERE user_id =$1
+      AND is_deleted = false
+      `,
 
   fetchBankAccountDetailsById: `
       SELECT
@@ -186,7 +192,9 @@ export default {
       UPDATE user_bank_accounts
       SET is_deleted = true
       WHERE user_id = $1
-      AND id = $2`,
+      AND id = $2
+      AND is_deleted = false
+      `,
 
   setExistingAccountDefaultFalse: `
       UPDATE user_bank_accounts
@@ -450,6 +458,7 @@ export default {
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
       WHERE id = $1
+      AND is_deleted = false
   `,
 
   fetchCardsByIdOrUserId: `
@@ -457,6 +466,7 @@ export default {
       FROM user_debit_cards
       WHERE id = $1
       AND user_id = $2
+      AND is_deleted = false
   `,
 
   setExistingCardDefaultFalse: `
