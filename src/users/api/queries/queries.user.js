@@ -132,6 +132,7 @@ export default {
         created_at
       FROM user_bank_accounts
       WHERE user_id = $1
+      AND is_deleted = false
       ORDER BY is_default DESC`,
 
   fetchUserDebitCards: `
@@ -150,6 +151,7 @@ export default {
         created_at
       FROM user_debit_cards
       WHERE user_id = $1
+      AND is_deleted = false
       ORDER BY is_default DESC`,
 
     fetchBankAccountDetailsByUserId: `
@@ -181,7 +183,8 @@ export default {
       WHERE id =$1`,
 
   deleteBankAccountDetails: `
-      DELETE FROM user_bank_accounts
+      UPDATE user_bank_accounts
+      SET is_deleted = true
       WHERE user_id = $1
       AND id = $2`,
 
@@ -473,7 +476,8 @@ export default {
       RETURNING id, user_id, is_default, card_type`,
 
   removeCard: `
-      DELETE FROM user_debit_cards
+      UPDATE user_debit_cards
+      SET is_deleted = true
       WHERE user_id = $1 AND id = $2`,
 
   updateSecondaryCardDefault: `
