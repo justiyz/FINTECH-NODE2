@@ -637,7 +637,7 @@ const getBookingTotalPrice = async (ticket_bookings) => {
 export const checkUserTicketLoanEligibility = async (req, res, next) => {
   try {
     const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
-      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
+      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, params: {ticket_id} } = req;
     const userDefaultAccountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     // calculate amount to be booked
@@ -665,12 +665,19 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
 
     if(result.status === 200 && result.statusText === 'OK') {
       const { data } = result;
+
       if (data.final_decision === 'APPROVED') {
+        if(data.max_approval < booking_amount) {
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Applied for ${parseFloat(booking_amount).toFixed(2)}, elligible for ${parseFloat(data.max_approval).toFixed(2)}  checkUserLoanEligibility.controllers.loan.js`);
+          return ApiResponse.error(res, `You're not eligible for the requested amount. Kindly try a lower amount`, 403, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+        }
+        const ticket = await processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]);
+
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
         const initial_deposit = SEEDFI_SHOP_PERCENTAGE;
         const other_deposits = 1 - initial_deposit;
         const monthly_repayment = (booking_amount * other_deposits)/body.duration_in_months;
-        const first_installment  = (booking_amount * initial_deposit).toFixed(2);
+        const first_installment  = ((booking_amount * initial_deposit) + parseFloat(ticket.processing_fee)).toFixed(2)
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
         data.monthly_repayment = monthly_repayment;
         const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');

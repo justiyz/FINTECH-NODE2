@@ -19,7 +19,7 @@ export const generateReferralCode = (size) => {
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
 export const generateLoanRepaymentScheduleForShop = async(existingLoanApplication, user_id, activationCharge, monthly_installment) => {
-  let activationChargePlusCharges = parseFloat(activationCharge) + 100;
+  let activationChargePlusCharges = parseFloat(activationCharge);
   let repaymentOrder = 1;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested) - activationCharge;
   let immediateOutstanding = parseFloat(activationCharge) + parseFloat(preOutstandingLoanAmount);
