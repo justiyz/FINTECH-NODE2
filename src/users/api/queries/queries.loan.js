@@ -14,6 +14,7 @@ export default {
     FROM user_bank_accounts
     WHERE user_id = $1
     AND is_default = true
+    AND is_deleted = false
     LIMIT 1`,
 
   fetchUserDefaultDebitCard: `
@@ -26,6 +27,7 @@ export default {
       created_at
     FROM user_debit_cards
     WHERE user_id = $1
+    AND is_deleted = false
     AND is_default = true
     LIMIT 1`,
 
@@ -361,6 +363,7 @@ export default {
     FROM user_bank_accounts
     WHERE user_id = $1
     AND (is_disbursement_account = TRUE OR is_default = TRUE)
+    AND is_deleted = false
     ORDER BY created_at DESC
     LIMIT 1`,
 
@@ -767,7 +770,8 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id =$1 AND is_default = true`,
+      WHERE user_id =$1 AND is_default = true AND is_deleted = false
+      `,
 
   fetchLoanIDFromUserTickets: `
     SELECT ticket_id, loan_id

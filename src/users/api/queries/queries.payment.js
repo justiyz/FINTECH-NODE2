@@ -1,8 +1,8 @@
 export default {
   initializeCardPayment: `
     INSERT INTO paystack_payment_histories (
-        user_id, 
-        amount, 
+        user_id,
+        amount,
         payment_platform,
         transaction_reference,
         payment_type,
@@ -13,7 +13,7 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, 'pending', 'pending', 'credit', $6)`,
 
   fetchTransactionByReference: `
-    SELECT 
+    SELECT
         id,
         user_id,
         amount,
@@ -33,21 +33,23 @@ export default {
     WHERE transaction_reference = $1`,
 
   fetchUserSavedCard: `
-    SELECT 
+    SELECT
         id,
         user_id,
         is_default
     FROM user_debit_cards
     WHERE user_id = $1
+    AND is_deleted = false
     LIMIT 1`,
 
   checkIfCardPreviouslySaved: `
-    SELECT 
+    SELECT
         id,
         user_id,
         is_default
     FROM user_debit_cards
     WHERE user_id = $1
+    AND is_deleted = false
     AND card_type = $2
     AND expiry_month = $3
     AND expiry_year = $4
@@ -56,7 +58,7 @@ export default {
 
   updateUserCardAuthToken: `
     UPDATE user_debit_cards
-    SET 
+    SET
         updated_at = NOW(),
         auth_token = $7
     WHERE user_id = $1
@@ -95,7 +97,7 @@ export default {
         updated_at = NOW(),
         is_initiated_refund = TRUE
     WHERE transaction_reference = $1`,
- 
+
   updateTransactionRefundStatus: `
     UPDATE paystack_payment_histories
     SET
