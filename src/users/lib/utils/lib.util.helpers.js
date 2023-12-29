@@ -153,7 +153,10 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;
   const houseAddressStreet = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.house_number} ${userOfferLetterAddressDetail.street} Street,` || '';
   const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
-  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState);
+
+  const bvn = config.SEEDFI_NODE_ENV == 'production' ? await decrypt(decodeURIComponent(userOfferLetterDetail.bvn)): '12345678';
+  console.log('bvn', bvn)
+  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState, bvn);
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     const data = {
       ETag: '"68bec848a3eea33f3ccfad41c1242691"',
