@@ -148,14 +148,15 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const genderType = userOfferLetterDetail.gender === 'male' ? 'Sir' : 'Ma';
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     userOfferLetterDetail.bvn = '12345678910'
+  }else{
+    userOfferLetterDetail.bvn = await decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
   }
   const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;
   const houseAddressStreet = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.house_number} ${userOfferLetterAddressDetail.street} Street,` || '';
   const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
 
-  const bvn = config.SEEDFI_NODE_ENV == 'production' ? await decrypt(decodeURIComponent(userOfferLetterDetail.bvn)): '12345678';
-  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState, bvn);
+  const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState);
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     const data = {
       ETag: '"68bec848a3eea33f3ccfad41c1242691"',
