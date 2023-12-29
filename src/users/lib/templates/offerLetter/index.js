@@ -52,7 +52,7 @@ export const ticketPDFTemplate = (ticket_qr_code, purchase_date, ticket_category
    </body>
 </html>`
 
-export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState) => {
+export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState, bvn) => {
   return `
     <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +99,7 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
     </tr>
     <tr>
       <td width="30%" height="40px">Bank Verification Number:</td>
-      <td>${await decrypt(decodeURIComponent(userOfferLetterDetail.bvn))}</td>
+      <td>${bvn}</td>
     </tr>
     <tr>
       <td width="30%" height="40px">Amount:</td>
