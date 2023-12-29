@@ -155,7 +155,6 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
 
   const bvn = config.SEEDFI_NODE_ENV == 'production' ? await decrypt(decodeURIComponent(userOfferLetterDetail.bvn)): '12345678';
-  console.log('bvn', bvn)
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState, bvn);
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     const data = {
