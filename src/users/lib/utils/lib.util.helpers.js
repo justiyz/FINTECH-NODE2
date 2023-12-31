@@ -19,7 +19,7 @@ export const generateReferralCode = (size) => {
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
 export const generateLoanRepaymentScheduleForShop = async(existingLoanApplication, user_id, activationCharge, monthly_installment) => {
-  let activationChargePlusCharges = parseFloat(activationCharge) + 100;
+  let activationChargePlusCharges = parseFloat(activationCharge);
   let repaymentOrder = 1;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested) - activationCharge;
   let immediateOutstanding = parseFloat(activationCharge) + parseFloat(preOutstandingLoanAmount);
@@ -148,11 +148,14 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const genderType = userOfferLetterDetail.gender === 'male' ? 'Sir' : 'Ma';
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     userOfferLetterDetail.bvn = '12345678910'
+  }else{
+    userOfferLetterDetail.bvn = await decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
   }
   const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;
   const houseAddressStreet = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.house_number} ${userOfferLetterAddressDetail.street} Street,` || '';
   const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
+
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState);
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     const data = {

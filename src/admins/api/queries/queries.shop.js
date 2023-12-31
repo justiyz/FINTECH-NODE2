@@ -121,11 +121,13 @@ export default {
     WHERE ticket_id = $1
     AND ticket_category_id = $2
   `,
+
   getPriceOfLeastValueTicket: `
     SELECT ticket_price
     FROM ticket_categories
     WHERE ticket_id = $1
-    AND ticket_category_type = 'regular'
+    ORDER BY ticket_price ASC
+    LIMIT 1
   `,
 
   deleteTicketInformationRecord: `

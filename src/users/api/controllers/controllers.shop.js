@@ -96,12 +96,14 @@ export const fetchTickets = async (req, res, next) => {
     const {user} = req;
     let tickets = await processAnyData(adminShopQueries.getAllEvents, [req.body.status, req.query.ticket_id]);
     for (const tick in tickets) {
-      const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
-      if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
-        tickets[tick].lowest_ticket_price = least_ticket_priced_ticket[0].ticket_price;
-      } else {
-        tickets[tick].lowest_ticket_price = 0;
-      }
+      const [least_ticket_priced_ticket] = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
+      tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+
+      // if (typeof least_ticket_priced_ticket !== 'undefined') {
+      //   tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+      // } else {
+      //   tickets[tick].lowest_ticket_price = 0;
+      // }
     }
     const data = {
       'tickets': tickets
@@ -143,12 +145,13 @@ async function fetchUserTicketsData(userId, status) {
 }
 
 async function enrichUserTicketData(user_ticket) {
-  const least_ticket_priced_ticket = await processAnyData(
+  const [least_ticket_priced_ticket] = await processAnyData(
     adminShopQueries.getPriceOfLeastValueTicket, user_ticket.ticket_id);
   const ticket_category = await processOneOrNoneData(
     adminShopQueries.getTicketCategoryTypeById, [user_ticket.ticket_id, user_ticket.ticket_category_id]);
   const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
     adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
+    console.log('least_ticket_priced_ticket: ', least_ticket_priced_ticket);
 
   // if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;
@@ -156,7 +159,7 @@ async function enrichUserTicketData(user_ticket) {
     user_ticket.event_time = event_time;
     user_ticket.ticket_image_url = ticket_image_url;
     user_ticket.event_date = event_date;
-    user_ticket.lowest_ticket_price = least_ticket_priced_ticket.length ? least_ticket_priced_ticket[0].ticket_price : null;
+    user_ticket.lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
     user_ticket.ticket_category_type = ticket_category.ticket_category_type;
   // }
 
@@ -364,7 +367,7 @@ export const createTicketSubscription = async(req, res, next) => {
             req.user.user_id, ticket_id, ticket_category_id, req.body.insurance_coverage,
             req.body.duration_in_months, theQRCode, reference, loan_id, new_ticket_file_url
           );
-          totalAmountToBePaid = totalAmountToBePaid + parseFloat(availableTickets.ticket_price);
+          totalAmountToBePaid = totalAmountToBePaid + (parseFloat(availableTickets.ticket_price * SEEDFI_SHOP_PERCENTAGE));
           // ticketPurchaseLogs.push(new_ticket_file_url);
           await updateAvailableTicketUnits(ticket_category_id, availableTickets.units - 1);
         }
@@ -387,12 +390,16 @@ export const createTicketSubscription = async(req, res, next) => {
     // return ApiResponse.success(res, enums.CREATE_USER_TICKET_SUCCESSFULLY, enums.HTTP_OK, data);
     // operation to initiate charge
 
-    const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
-        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
-    console.log('paystack result: ', result);
+    const result = await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard);
+
+    // const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
+    //     await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+
+
+    // console.log('paystack result: ', result);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
-      initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
+    createTicketSubscription.controllers.shop.js`);
     if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       await userActivityTracking(req.user.user_id, activityType, 'success');
@@ -630,7 +637,7 @@ const getBookingTotalPrice = async (ticket_bookings) => {
 export const checkUserTicketLoanEligibility = async (req, res, next) => {
   try {
     const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
-      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount } = req;
+      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, params: {ticket_id} } = req;
     const userDefaultAccountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     // calculate amount to be booked
@@ -658,12 +665,19 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
 
     if(result.status === 200 && result.statusText === 'OK') {
       const { data } = result;
+
       if (data.final_decision === 'APPROVED') {
+        if(data.max_approval < booking_amount) {
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Applied for ${parseFloat(booking_amount).toFixed(2)}, elligible for ${parseFloat(data.max_approval).toFixed(2)}  checkUserLoanEligibility.controllers.loan.js`);
+          return ApiResponse.error(res, `You're not eligible for the requested amount. Kindly try a lower amount`, 403, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+        }
+        const ticket = await processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]);
+
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
         const initial_deposit = SEEDFI_SHOP_PERCENTAGE;
         const other_deposits = 1 - initial_deposit;
         const monthly_repayment = (booking_amount * other_deposits)/body.duration_in_months;
-        const first_installment  = (booking_amount * initial_deposit).toFixed(2);
+        const first_installment  = ((booking_amount * initial_deposit) + parseFloat(ticket.processing_fee)).toFixed(2)
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
         data.monthly_repayment = monthly_repayment;
         const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');

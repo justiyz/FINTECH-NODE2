@@ -123,6 +123,7 @@ export default {
         created_at
       FROM user_bank_accounts
       WHERE user_id = $1
+      AND is_deleted = false
       ORDER BY is_default DESC`,
 
   fetchUserDebitCards: `
@@ -436,7 +437,9 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id =$1`,
+      WHERE user_id =$1
+      AND is_deleted = false
+      `,
 
   fetchCardsById: `
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
