@@ -234,7 +234,8 @@ export default {
     SET
       updated_at = NOW(),
       payment_at = Now(),
-      status = 'paid'
+      status = 'paid',
+      post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 
   updateAllLoanRepaymentOnFullPayment: `
