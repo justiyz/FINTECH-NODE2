@@ -1,6 +1,6 @@
 export default {
   fetchAllOverdueLoanRepayments: `
-    SELECT 
+    SELECT
         id,
         loan_repayment_id,
         loan_id,
@@ -14,7 +14,7 @@ export default {
     AND payment_at IS NULL`,
 
   fetchAllOverdueClusterLoanRepayments: `
-    SELECT 
+    SELECT
         id,
         loan_repayment_id,
         loan_id,
@@ -30,7 +30,7 @@ export default {
     AND payment_at IS NULL`,
 
   fetchLoanNextRepayment: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       loan_id,
@@ -46,9 +46,9 @@ export default {
     AND payment_at IS NULL
     ORDER BY proposed_payment_date ASC
     LIMIT 1`,
-  
+
   fetchClusterLoanNextRepayment: `
-    SELECT 
+    SELECT
       id,
       loan_repayment_id,
       loan_id,
@@ -111,7 +111,7 @@ export default {
       loan_status = 'over due'
     WHERE cluster_id = $1
     AND user_id = $2`,
-    
+
   updateGeneralClusterLoanStatusOverDue: `
     UPDATE clusters
     SET
@@ -120,7 +120,7 @@ export default {
     WHERE cluster_id = $1`,
 
   fetchAllQualifiedClusterLoanRepayments: `
-    SELECT 
+    SELECT
         id,
         loan_repayment_id,
         loan_id,
@@ -138,7 +138,7 @@ export default {
 
 
   fetchAllQualifiedRepayments: `
-    SELECT 
+    SELECT
         id,
         loan_repayment_id,
         loan_id,
@@ -153,7 +153,7 @@ export default {
     AND payment_at IS NULL`,
 
   fetchUserSavedDebitCardsToken: `
-    SELECT 
+    SELECT
         id,
         user_id,
         is_default,
@@ -163,6 +163,7 @@ export default {
         auth_token
     FROM user_debit_cards
     WHERE user_id = $1
+    AND is_deleted = false
     ORDER BY is_default DESC
     LIMIT 1`,
 
@@ -190,13 +191,13 @@ export default {
       cluster_loan_id,
       type
     ) VALUES ($1, $2, $3, $4, $5)`,
-    
+
   updatePromoStatusToActive: `
     UPDATE system_promos
     SET updated_at = NOW(),
         status = 'active'
-    WHERE start_date::DATE = NOW()::DATE 
-    AND NOT is_deleted 
+    WHERE start_date::DATE = NOW()::DATE
+    AND NOT is_deleted
     AND status = 'inactive'
 
     `,
@@ -204,10 +205,10 @@ export default {
     UPDATE system_promos
     SET updated_at = NOW(),
         status = 'ended'
-    WHERE end_date::DATE = NOW()::DATE 
-    AND NOT is_deleted 
+    WHERE end_date::DATE = NOW()::DATE
+    AND NOT is_deleted
     AND status = 'active'
     `
 };
-  
-  
+
+

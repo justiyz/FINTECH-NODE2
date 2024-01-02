@@ -220,6 +220,8 @@ spec:
           value: 'Yw2lrK1HbZIGrQ-dRl3G79cw2Co'
         - name: SEEDFI_DEV_UNDERWRITING_APP_ACCESS_TOKEN
           value: '973f5d8c724716d82a'
+        - name: SEEDFI_DEV_RECOVA_BEARER_TOKEN
+          value: 'Token'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api

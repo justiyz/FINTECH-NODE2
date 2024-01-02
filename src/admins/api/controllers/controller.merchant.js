@@ -113,7 +113,7 @@ export const fetchMerchants = async (req, res, next) => {
         req.query.search,
         req.query.status,
         offset,
-        page
+        perPage
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Successfully fetched merchants from the DB fetchMerchants.admin.controllers.merchant.js`);
