@@ -15,6 +15,21 @@ export default {
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
   `,
+  fetchSingleMerchant: `
+    SELECT 
+      merchant_id,
+      business_name,
+      email,
+      phone_number,
+      status,
+      interest_rate,
+      address,
+      secret_key,
+      orr_score_threshold,
+      created_at
+    FROM merchants
+    WHERE merchant_id = $1;
+  `,
   fetchAndSearchMerchants: `
     SELECT 
     count(*) OVER() AS total,
@@ -26,6 +41,7 @@ export default {
     interest_rate,
     address,
     secret_key,
+    orr_score_threshold,
     created_at
     FROM merchants
     WHERE

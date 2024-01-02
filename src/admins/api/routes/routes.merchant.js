@@ -49,15 +49,13 @@ router.get(
   MerchantController.resolveBankAccountNumber
 );
 
-// router.get(
-//   '/:id',
-//   AuthMiddleware.validateAdminAuthToken,
-//   (req, res) => {
-//     res.status(200).json({
-//       message: 'Fetched merchant successfully'
-//     })
-//   }
-// );
+router.get(
+  '/:merchant_id',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchSingleMerchant
+);
 
 // ============== PATCH =================== //
 router.patch(

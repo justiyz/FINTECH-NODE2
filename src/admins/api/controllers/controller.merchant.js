@@ -137,12 +137,44 @@ export const fetchMerchants = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Complete request to fetch all merchants fetchMerchants.admin.controllers.merchant.js`);
     return ApiResponse.success(
       res,
-      enums.FETCHED_MERCHANTS_SUCCESSFULLY,
+      enums.FETCHED_MERCHANT_SUCCESSFULLY,
       enums.HTTP_OK,
       result
     );
   } catch (error) {
+    error.label = enums.FETCH_MERCHANT_CONTROLLER;
     logger.error(`Fetch merchants failed:::${enums.FETCH_MERCHANT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Fetch single merchant by ID
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object} - Return a single merchants details.
+ * @memberof AdminMerchantController
+ */
+export const fetchSingleMerchant = async (req, res, next) => {
+  try {
+    const { admin } = req;
+    const merchantId =req.params.merchant_id;
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Initiate request to fetch single merchant from DB fetchSingleMerchant.admin.controllers.merchant.js`);
+    const merchant = await processOneOrNoneData(
+      merchantQueries.fetchSingleMerchant,
+      [ merchantId ]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Successfully fetched merchant from the DB fetchSingleMerchant.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      enums.FETCHED_MERCHANT_SUCCESSFULLY,
+      enums.HTTP_OK,
+      merchant
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchSingleMerchant';
+    logger.error(`Fetch single merchant failed:::MerchantController::fetchSingleMerchant`, error.message);
     return next(error);
   }
 };
@@ -167,7 +199,7 @@ export const fetchAvailableBankList = async (req, res, next) => {
       data.data
     );
   } catch (error) {
-    error.label = enums.FETCH_BANKS_CONTROLLER;
+    error.label = 'MerchantController::fetchAvailableBankList';
     logger.error(`fetching list of banks from paystack failed:::MerchantController::fetchAvailableBankList`, error.message);
     return next(error);
   }
