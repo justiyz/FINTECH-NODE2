@@ -16,8 +16,13 @@ const createMerchant = Joi.object().keys({
       'string.empty': 'Phone Number is not allowed to be empty'
     }).required(),
   interest_rate: Joi.string().required().label('Interest Rate'),
+  orr_score_threshold: Joi.string().required().label('ORR score'),
   address: Joi.string().required().label('Address'),
   secret_key: Joi.string().required().label('API Key'),
+  // bank account details
+  bank_name: Joi.string().optional().label('Bank Name'),
+  bank_code: Joi.number().optional().label('Bank Code'),
+  account_number: Joi.string().optional().label('Account number'),
 });
 
 const generateMerchantKey = Joi.object().keys({
@@ -50,10 +55,15 @@ const updateMerchant = Joi.object().keys({
   address: Joi.string().optional().label('Address'),
 });
 
+const resolveAccountNumber = Joi.object().keys({
+  account_number: Joi.string().required(),
+  bank_code: Joi.string().required()
+});
 
 export default {
   createMerchant,
   generateMerchantKey,
   fetchMerchants,
   updateMerchant,
+  resolveAccountNumber,
 };

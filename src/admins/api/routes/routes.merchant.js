@@ -15,6 +15,7 @@ router.post(
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
   MerchantMiddleware.validateCreateMerchantSecretKey,
+  MerchantMiddleware.validateMerchantBankAccount,
   MerchantController.createMerchant
 );
 
@@ -33,6 +34,19 @@ router.get(
   Model(Schema.fetchMerchants, 'query'),
   RolesMiddleware.adminAccess('merchants', 'read'),
   MerchantController.fetchMerchants
+);
+
+router.get(
+  '/list-banks',
+  AuthMiddleware.validateAdminAuthToken,
+  MerchantController.fetchAvailableBankList
+);
+
+router.get(
+  '/resolve-account-number',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.resolveAccountNumber, 'query'),
+  MerchantController.resolveBankAccountNumber
 );
 
 // router.get(

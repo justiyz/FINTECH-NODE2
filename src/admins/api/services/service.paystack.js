@@ -125,10 +125,80 @@ function getNumericValue(input) {
   }
 }
 
+const createTransferRecipient = async(userDisbursementAccountDetails) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackUserRecipientCodeCreationTestResponse(userDisbursementAccountDetails);
+    }
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transferrecipient`,
+      data: {
+        type: 'nuban',
+        name: userDisbursementAccountDetails.account_name,
+        account_number: userDisbursementAccountDetails.account_number,
+        bank_code: userDisbursementAccountDetails.bank_code,
+        currency: 'NGN'
+      },
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`calling paystack create transfer recipient failed::${enums.CREATE_TRANSFER_RECEIPT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const fetchBanks = async() => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackFetchBankListsTestResponse();
+    }
+    const options = {
+      method: 'get',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/bank?country=nigeria`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API for fetch list of banks failed::${enums.PAYSTACK_FETCH_BANKS_SERVICE}`, error.message);
+    return error;
+  }
+};
+
+const resolveAccount = async(account_number, bank_code) => {
+  try {
+    const options = {
+      method: 'get',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/bank/resolve?account_number=${account_number}&bank_code=${bank_code}`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to resolve bank account name enquiry failed::${enums.PAYSTACK_RESOLVE_BANK_ACCOUNT_NAME_SERVICE}`, error.message);
+    return error;
+  }
+};
+
 
 
 
 export {
+  fetchBanks,
+  resolveAccount,
+  createTransferRecipient,
   initializeBankAccountChargeForLoanRepayment,
   initializeDebitCarAuthChargeForLoanRepayment
 };

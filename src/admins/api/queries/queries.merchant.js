@@ -6,10 +6,11 @@ export default {
       phone_number,
       interest_rate,
       address,
-      secret_key
+      secret_key,
+      orr_score_threshold
     ) VALUES (
-      $1, $2, $3, $4, $5, $6
-    )
+      $1, $2, $3, $4, $5, $6, $7
+    ) RETURNING merchant_id;
   `,
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
