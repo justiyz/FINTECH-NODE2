@@ -1057,6 +1057,7 @@ export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
       const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan next repayment details fetched
        adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
+
       if(nextRepaymentDetails.status !== 'over due'){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repayment is not over due
         adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
@@ -1067,7 +1068,7 @@ export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
 
       paymentAmount = payment_type === 'part' && custom_amount ? parseFloat(custom_amount).toFixed(2) : paymentAmount;
 
-      if(custom_amount && custom_amount * 100 > nextRepaymentDetails.total_payment_amount * 100){
+      if(custom_amount && custom_amount * 100 > nextRepaymentDetails.post_payment_outstanding_amount * 100){
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: custom amount is greater than repayment amount
         adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
         return ApiResponse.error(res, enums.CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
