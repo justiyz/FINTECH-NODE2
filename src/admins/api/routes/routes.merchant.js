@@ -15,7 +15,7 @@ router.post(
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
   MerchantMiddleware.validateCreateMerchantSecretKey,
-  MerchantMiddleware.validateMerchantBankAccount,
+  MerchantMiddleware.validateMerchantBankAccount('create'),
   MerchantController.createMerchant
 );
 
@@ -64,6 +64,7 @@ router.patch(
   Model(Schema.updateMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'update'),
   MerchantMiddleware.checkIfMerchantExists,
+  MerchantMiddleware.validateMerchantBankAccount('update'),
   MerchantController.updateMerchant
 );
 

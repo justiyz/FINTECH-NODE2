@@ -17,7 +17,7 @@ export default {
   `,
   fetchSingleMerchant: `
     SELECT 
-      merchant_id,
+      merchants.merchant_id,
       business_name,
       email,
       phone_number,
@@ -26,9 +26,16 @@ export default {
       address,
       secret_key,
       orr_score_threshold,
-      created_at
+      merchants.created_at,
+      json_build_object(
+        'bank_name', ba.bank_name,
+        'bank_code', ba.bank_code,
+        'account_number', ba.account_number,
+        'account_name', ba.account_name
+      ) AS bank_account
     FROM merchants
-    WHERE merchant_id = $1;
+    LEFT JOIN merchant_bank_accounts ba ON merchants.merchant_id = ba.merchant_id
+    WHERE merchants.merchant_id = $1;
   `,
   fetchAndSearchMerchants: `
     SELECT 
@@ -40,7 +47,6 @@ export default {
     status,
     interest_rate,
     address,
-    secret_key,
     orr_score_threshold,
     created_at
     FROM merchants
@@ -65,6 +71,7 @@ export default {
       phone_number = $4,
       interest_rate = $5,
       address = $6,
+      orr_score_threshold = $7,
       updated_at = now()
     WHERE merchant_id = $1
     RETURNING
@@ -72,9 +79,10 @@ export default {
       business_name,
       email,
       phone_number,
+      status,
       interest_rate,
       address,
-      secret_key,
+      orr_score_threshold,
       created_at
   `,
 };

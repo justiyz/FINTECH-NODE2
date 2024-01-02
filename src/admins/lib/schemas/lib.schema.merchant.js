@@ -52,7 +52,12 @@ const updateMerchant = Joi.object().keys({
       'string.empty': 'Phone Number is not allowed to be empty'
     }).optional(),
   interest_rate: Joi.string().optional().label('Interest Rate'),
+  orr_score_threshold: Joi.string().optional().label('ORR score'),
   address: Joi.string().optional().label('Address'),
+  // bank account details
+  bank_name: Joi.string().optional().label('Bank Name'),
+  bank_code: Joi.number().optional().label('Bank Code'),
+  account_number: Joi.string().optional().label('Account number'),
 });
 
 const resolveAccountNumber = Joi.object().keys({
