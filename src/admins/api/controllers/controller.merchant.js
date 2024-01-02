@@ -1,8 +1,9 @@
 import dayjs from 'dayjs';
 import momentTZ from 'moment-timezone';
 import merchantQueries from '../queries/queries.merchant';
+import merchanBankAccountQueries from '../queries/queries.merchant-bank-account';
 import roleQueries from '../queries/queries.role';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
@@ -13,6 +14,7 @@ import MerchantPayload from '../../lib/payloads/lib.payload.merchant';
 import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import { fetchBanks, resolveAccount, createTransferRecipient } from '../services/service.paystack';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -28,10 +30,11 @@ export const createMerchant = async (req, res, next) => {
   try {
     const { admin } = req;
     const payload = MerchantPayload.createMerchant(req.body);
-    await processAnyData(
+    const { merchant_id } = await processOneOrNoneData(
       merchantQueries.createMerchant,
       payload
     );
+    req.body.merchant_id = merchant_id;
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: merchant successfully created createMerchant.admin.controllers.merchant.js`);
     const description = descriptions.create_merchant(
       `${admin.first_name} ${admin.last_name}`,
@@ -43,6 +46,9 @@ export const createMerchant = async (req, res, next) => {
       'success',
       description
     );
+    if (req.body.account_details_added) {
+      await createMerchantBankAccount(admin, req.body);
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Complete request CreateMerchant.admin.controllers.merchant.js`);
     return ApiResponse.success(
       res,
@@ -131,12 +137,111 @@ export const fetchMerchants = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Complete request to fetch all merchants fetchMerchants.admin.controllers.merchant.js`);
     return ApiResponse.success(
       res,
-      enums.FETCHED_MERCHANTS_SUCCESSFULLY,
+      enums.FETCHED_MERCHANT_SUCCESSFULLY,
       enums.HTTP_OK,
       result
     );
   } catch (error) {
+    error.label = enums.FETCH_MERCHANT_CONTROLLER;
     logger.error(`Fetch merchants failed:::${enums.FETCH_MERCHANT_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Fetch single merchant by ID
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object} - Return a single merchants details.
+ * @memberof AdminMerchantController
+ */
+export const fetchSingleMerchant = async (req, res, next) => {
+  try {
+    const { admin } = req;
+    const merchantId =req.params.merchant_id;
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Initiate request to fetch single merchant from DB fetchSingleMerchant.admin.controllers.merchant.js`);
+    const merchant = await processOneOrNoneData(
+      merchantQueries.fetchSingleMerchant,
+      [ merchantId ]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Successfully fetched merchant from the DB fetchSingleMerchant.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      enums.FETCHED_MERCHANT_SUCCESSFULLY,
+      enums.HTTP_OK,
+      merchant
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchSingleMerchant';
+    logger.error(`Fetch single merchant failed:::MerchantController::fetchSingleMerchant`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch available bank lists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON response of the details of the list of available banks
+ * @memberof AdminMerchantController
+ */
+export const fetchAvailableBankList = async (req, res, next) => {
+  try {
+    const { admin } = req;
+    const data = await fetchBanks();
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info: bank lists returned from paystack fetchAvailableBankList.controller.merchant.js`);
+    return ApiResponse.success(
+      res,
+      data.message,
+      enums.HTTP_OK,
+      data.data
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchAvailableBankList';
+    logger.error(`fetching list of banks from paystack failed:::MerchantController::fetchAvailableBankList`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch name attached to a bank account number
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminMerchantController
+ */
+export const resolveBankAccountNumber = async(req, res, next) => {
+  try {
+    const { admin, query } = req;
+    const accountNumber = query.account_number;
+    const bankCode = query.bank_code;
+    const data = await resolveAccount(
+      accountNumber.trim(),
+      bankCode.trim(),
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: account number resolve response returned from paystack resolveBankAccountNumberName.admin.controllers.merchant.js`);
+    if (data?.status !== true) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: account number not resolved successfully by paystack resolveBankAccountNumberName.admin.controllers.merchant.js`);
+      return ApiResponse.error(
+        res,
+        'Could not resolve account number',
+        enums.HTTP_UNPROCESSABLE_ENTITY,
+        'MerchantController::resolveBankAccountNumber'
+      );
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: account number resolved successfully by paystack resolveBankAccountNumberName.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      data.message,
+      enums.HTTP_OK,
+      data.data
+    );    
+  } catch (error) {
+    error.label = 'MerchantController::resolveBankAccountNumberName';
+    logger.error(`Resolving bank account name from paystack failed:::MerchantController::resolveBankAccountNumberName`, error.message);
     return next(error);
   }
 };
@@ -183,4 +288,36 @@ export const updateMerchant = async (req, res, next) => {
     logger.error(`Update merchant details failed:::${enums.FETCH_MERCHANT_CONTROLLER}`, error.message);
     return next(error);
   }
+};
+
+/**
+ * Create merchant bank account details
+ * @param {Object} admin - Admin details.
+ * @param {Object} payload - Bank account details to be created.
+ * @returns {Promise<void | Error>}
+ * @memberof AdminMerchantController
+ */
+const createMerchantBankAccount = async (admin, payload) => {
+  try {
+    // create transfer recipient
+    const { account_name, account_number, bank_code } = payload;
+    const { data } = await createTransferRecipient({
+      account_name,
+      account_number,
+      bank_code,
+    });
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated CreateMerchantBankAccount.admin.controllers.merchant.js`);
+    payload.transfer_recipient_code = data.recipient_code;
+    // create merchant bank account
+    const bankAccountDetails = MerchantPayload.addMerchantBankAccount(payload);
+    await processAnyData(
+      merchanBankAccountQueries.addBankAccount,
+      bankAccountDetails
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account saved successfully CreateMerchantBankAccount.admin.controllers.merchant.js`);
+  } catch (error) {
+    error.label = 'MerchantController::CreateMerchantBankAccount';
+    logger.error(`creating merchant bank account failed:::MerchantController::CreateMerchantBankAccount`, error.message);
+    return error;
+  } 
 };

@@ -15,6 +15,7 @@ router.post(
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
   MerchantMiddleware.validateCreateMerchantSecretKey,
+  MerchantMiddleware.validateMerchantBankAccount,
   MerchantController.createMerchant
 );
 
@@ -35,15 +36,26 @@ router.get(
   MerchantController.fetchMerchants
 );
 
-// router.get(
-//   '/:id',
-//   AuthMiddleware.validateAdminAuthToken,
-//   (req, res) => {
-//     res.status(200).json({
-//       message: 'Fetched merchant successfully'
-//     })
-//   }
-// );
+router.get(
+  '/list-banks',
+  AuthMiddleware.validateAdminAuthToken,
+  MerchantController.fetchAvailableBankList
+);
+
+router.get(
+  '/resolve-account-number',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.resolveAccountNumber, 'query'),
+  MerchantController.resolveBankAccountNumber
+);
+
+router.get(
+  '/:merchant_id',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchSingleMerchant
+);
 
 // ============== PATCH =================== //
 router.patch(
