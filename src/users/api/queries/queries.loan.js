@@ -239,6 +239,7 @@ export default {
       repayment_order,
       total_payment_amount,
       proposed_payment_date,
+      post_payment_outstanding_amount,
       pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
       to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
@@ -275,7 +276,8 @@ export default {
     SET
       updated_at = NOW(),
       payment_at = Now(),
-      status = 'paid'
+      status = 'paid',
+      post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 
   updateAllLoanRepaymentOnFullPayment: `
@@ -789,7 +791,7 @@ export default {
     SET
       updated_at = NOW(),
       payment_at = Now(),
-      post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT,
+      post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 
 
