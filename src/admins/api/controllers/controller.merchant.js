@@ -262,10 +262,12 @@ export const updateMerchant = async (req, res, next) => {
       status,
       phone_number,
       interest_rate,
-      address
+      address,
+      orr_score_threshold,
+      account_details_added,
     } = req.body;
 
-    const updatedMerchantDetails = await processAnyData(
+    const updatedMerchantDetails = await processOneOrNoneData(
       merchantQueries.updateMerchant,
       [
         merchant.merchant_id,
@@ -273,10 +275,19 @@ export const updateMerchant = async (req, res, next) => {
         status || merchant.status,
         phone_number || merchant.phone_number,
         interest_rate || merchant.interest_rate,
-        address || merchant.address
+        address || merchant.address,
+        orr_score_threshold || merchant.orr_score_threshold
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant details has been edited and updated in the DB. updateMerchant.admin.controllers.merchant.js`);
+    if (account_details_added) {
+      req.body.merchant_id = merchant.merchant_id;
+      const updateStatus = await updateMerchantBankAccount(admin, req.body);
+      if (typeof(updateStatus) !== 'boolean') {
+        const err = updateStatus;
+        throw err;
+      }
+    }
 
     return ApiResponse.success(
       res,
@@ -294,7 +305,7 @@ export const updateMerchant = async (req, res, next) => {
  * Create merchant bank account details
  * @param {Object} admin - Admin details.
  * @param {Object} payload - Bank account details to be created.
- * @returns {Promise<void | Error>}
+ * @returns {Promise<Boolean | Error>}
  * @memberof AdminMerchantController
  */
 const createMerchantBankAccount = async (admin, payload) => {
@@ -315,9 +326,43 @@ const createMerchantBankAccount = async (admin, payload) => {
       bankAccountDetails
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account saved successfully CreateMerchantBankAccount.admin.controllers.merchant.js`);
+    return true;
   } catch (error) {
     error.label = 'MerchantController::CreateMerchantBankAccount';
     logger.error(`creating merchant bank account failed:::MerchantController::CreateMerchantBankAccount`, error.message);
+    return error;
+  } 
+};
+
+/**
+ * Create merchant bank account details
+ * @param {Object} admin - Admin details.
+ * @param {Object} payload - Bank account details to be created.
+ * @returns {Promise<Boolean | Error>}
+ * @memberof AdminMerchantController
+ */
+const updateMerchantBankAccount = async (admin, payload) => {
+  try {
+    // create transfer recipient
+    const { account_name, account_number, bank_code } = payload;
+    const { data } = await createTransferRecipient({
+      account_name,
+      account_number,
+      bank_code,
+    });
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated updateMerchantBankAccount.admin.controllers.merchant.js`);
+    payload.transfer_recipient_code = data.recipient_code;
+    // create merchant bank account
+    const bankAccountDetails = MerchantPayload.addMerchantBankAccount(payload);
+    await processOneOrNoneData(
+      merchanBankAccountQueries.updateBankAccount,
+      bankAccountDetails
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account saved successfully updateMerchantBankAccount.admin.controllers.merchant.js`);
+    return true;
+  } catch (error) {
+    error.label = 'MerchantController::updateMerchantBankAccount';
+    logger.error(`updating merchant bank account failed:::MerchantController::updateMerchantBankAccount`, error.message);
     return error;
   } 
 };

@@ -11,7 +11,16 @@ export default {
       $1, $2, $3, $4, $5, $6
     );
   `,
-  findByMerchantIdAndBankCodeAndAccountNumber: `
+  updateBankAccount: `
+    UPDATE merchant_bank_accounts SET
+      bank_name = $2,
+      bank_code = $3,
+      account_number = $4,
+      account_name = $5,
+      transfer_recipient_code = $6
+    WHERE merchant_id = $1;
+  `,
+  findDuplicateBankAccount: `
     SELECT
       merchant_id,
       bank_name,

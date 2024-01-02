@@ -1,4 +1,5 @@
 import merchantQueries from '../queries/queries.merchant';
+import merchantBankAccountQueries from '../queries/queries.merchant-bank-account';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
@@ -94,7 +95,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const validateMerchantBankAccount = async (req, res, next) => {
+export const validateMerchantBankAccount = (type = '') => async (req, res, next) => {
   try {
     const { admin, body } = req;
     const { account_number, bank_name, bank_code } = body;
@@ -116,6 +117,23 @@ export const validateMerchantBankAccount = async (req, res, next) => {
         enums.HTTP_UNPROCESSABLE_ENTITY,
         'MerchantMiddleware::validateMerchantBankAccount'
       );
+    }
+    // check for duplicate records
+    if (type == 'update') {
+      const merchantId = req.params.merchant_id;
+      const existingBankAccount = await processOneOrNoneData(
+        merchantBankAccountQueries.findDuplicateBankAccount,
+        [merchantId, bank_code, account_number]
+      );
+
+      if (existingBankAccount) {
+        return ApiResponse.error(
+          res,
+          'Duplicate bank account not allowed',
+          enums.HTTP_BAD_REQUEST,
+          'MerchantMiddleware::validateMerchantBankAccount'
+        );
+      }
     }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account validation successful validateMerchantBankAccount.admin.middlewares.merchant.js`);
     req.body.account_name = data.account_name;
