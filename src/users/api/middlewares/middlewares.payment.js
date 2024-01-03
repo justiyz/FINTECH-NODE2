@@ -594,7 +594,6 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
         const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
         const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
-        console.log(customRepaymentCompleted, statusType, paymentDescriptionType)
         await Promise.all([
           processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
             loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
