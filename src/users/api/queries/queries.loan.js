@@ -746,7 +746,6 @@ export default {
     UPDATE personal_loan_payment_schedules
     SET
       updated_at = NOW(),
-      payment_at = Now(),
       post_payment_outstanding_amount = post_payment_outstanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 

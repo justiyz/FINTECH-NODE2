@@ -1084,7 +1084,7 @@ export const adminInitiateManualCardLoanRepayment = async(req, res, next) => {
       const result =  await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: payment initialize via paystack returns response
       adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
-      if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
+      if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success')) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repayment via paystack initialized
          adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
         // userActivityTracking(req.user.user_id, activityType, 'success');
