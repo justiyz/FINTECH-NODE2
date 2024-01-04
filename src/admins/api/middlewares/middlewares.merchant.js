@@ -129,7 +129,7 @@ export const validateMerchantBankAccount = (type = '') => async (req, res, next)
       if (existingBankAccount) {
         return ApiResponse.error(
           res,
-          'Duplicate bank account not allowed',
+          'Bank account already added for this merchant',
           enums.HTTP_BAD_REQUEST,
           'MerchantMiddleware::validateMerchantBankAccount'
         );

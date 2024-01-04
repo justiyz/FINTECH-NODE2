@@ -46,7 +46,7 @@ export default {
   fetchAndSearchMerchants: `
     SELECT 
     count(*) OVER() AS total,
-    merchant_id,
+    merchants.merchant_id,
     business_name,
     email,
     phone_number,
@@ -58,8 +58,15 @@ export default {
     processing_fee,
     insurance_fee,
     advisory_fee,
-    created_at
+    merchants.created_at,
+    json_build_object(
+      'bank_name', ba.bank_name,
+      'bank_code', ba.bank_code,
+      'account_number', ba.account_number,
+      'account_name', ba.account_name
+    ) AS bank_account
     FROM merchants
+    LEFT JOIN merchant_bank_accounts ba ON merchants.merchant_id = ba.merchant_id
     WHERE
       (
         $1 IS NULL
@@ -117,22 +124,25 @@ export default {
     FROM users
     LEFT JOIN employment_type
     ON users.user_id = employment_type.user_id
-    WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
-      OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
-      OR email ILIKE TRIM($1)
-      OR phone_number ILIKE TRIM($1)
-      OR $1 IS NULL)
-    AND (users.status = $2 OR $2 IS NULL)
+    WHERE
+      (
+        TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR email ILIKE TRIM($1)
+        OR phone_number ILIKE TRIM($1)
+        OR $1 IS NULL
+      )
+      AND (users.status = $2 OR $2 IS NULL)
     ORDER BY users.created_at DESC
     OFFSET $3
     LIMIT $4;
   `,
   fetchMerchantUsersCount: `
-    SELECT COUNT(user_id) AS total_count
+    SELECT COUNT(*) AS total_count
     FROM users
     WHERE
       (
@@ -142,6 +152,8 @@ export default {
         OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
         OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+        OR email ILIKE TRIM($1)
+        OR phone_number ILIKE TRIM($1)
         OR $1 IS NULL
       )
       AND (status = $2 OR $2 IS NULL);
