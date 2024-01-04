@@ -57,6 +57,15 @@ router.get(
   MerchantController.fetchSingleMerchant
 );
 
+router.get(
+  '/:merchant_id/users',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.fetchMerchantUsers, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantUsers
+);
+
 // ============== PATCH =================== //
 router.patch(
   '/:merchant_id',
