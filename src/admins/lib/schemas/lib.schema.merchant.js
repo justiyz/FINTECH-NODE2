@@ -17,6 +17,9 @@ const createMerchant = Joi.object().keys({
     }).required(),
   interest_rate: Joi.string().required().label('Interest Rate'),
   orr_score_threshold: Joi.string().required().label('ORR score'),
+  processing_fee: Joi.number().required().label('Processing fee'),
+  insurance_fee: Joi.number().required().label('Insurance fee'),
+  advisory_fee: Joi.number().required().label('Advisory fee'),
   address: Joi.string().required().label('Address'),
   secret_key: Joi.string().required().label('API Key'),
   // bank account details
@@ -60,6 +63,9 @@ const updateMerchant = Joi.object().keys({
     }).optional(),
   interest_rate: Joi.string().optional().label('Interest Rate'),
   orr_score_threshold: Joi.string().optional().label('ORR score'),
+  processing_fee: Joi.number().optional().label('Processing fee'),
+  insurance_fee: Joi.number().optional().label('Insurance fee'),
+  advisory_fee: Joi.number().optional().label('Advisory fee'),
   address: Joi.string().optional().label('Address'),
   // bank account details
   bank_name: Joi.string().optional().label('Bank Name'),

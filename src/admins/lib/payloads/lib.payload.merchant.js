@@ -7,6 +7,9 @@ export default {
     body.address.trim(),
     body.secret_key.trim(),
     body.orr_score_threshold.trim(),
+    body.processing_fee,
+    body.insurance_fee,
+    body.advisory_fee,
   ],
   addMerchantBankAccount: (body) => [
     body.merchant_id.trim(),

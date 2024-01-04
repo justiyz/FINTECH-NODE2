@@ -301,6 +301,9 @@ export const updateMerchant = async (req, res, next) => {
       interest_rate,
       address,
       orr_score_threshold,
+      processing_fee,
+      insurance_fee,
+      advisory_fee,
       account_details_added,
     } = req.body;
 
@@ -313,7 +316,10 @@ export const updateMerchant = async (req, res, next) => {
         phone_number || merchant.phone_number,
         interest_rate || merchant.interest_rate,
         address || merchant.address,
-        orr_score_threshold || merchant.orr_score_threshold
+        orr_score_threshold || merchant.orr_score_threshold,
+        processing_fee || merchant.processing_fee,
+        insurance_fee || merchant.insurance_fee,
+        advisory_fee || merchant.advisory_fee,
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant details has been edited and updated in the DB. updateMerchant.admin.controllers.merchant.js`);
