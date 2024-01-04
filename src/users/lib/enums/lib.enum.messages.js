@@ -41,6 +41,7 @@ export const BVN_PREVIOUSLY_VERIFIED = 'User bvn has been previously verified';
 export const BVN_NOT_PREVIOUSLY_VERIFIED = 'User is yet to verify bvn, kindly do this first';
 export const BVN_USED_BY_ANOTHER_USER = 'This BVN has been used by another user';
 export const USER_BVN_NOT_MATCHING_RETURNED_BVN = 'Kindly ensure your profile details match your BVN record';
+export const USER_BVN_BLACKLISTED = 'We are unable to process your information. Please contact your Financial Institution'
 export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_CREDENTIALS = (type) => `User ${type} have not been created.`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
