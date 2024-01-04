@@ -42,6 +42,13 @@ const fetchMerchants = Joi.object().keys({
   search: Joi.string()
 });
 
+const fetchMerchantUsers = Joi.object().keys({
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  search: Joi.string().optional(),
+  status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
+});
+
 const updateMerchant = Joi.object().keys({
   business_name: Joi.string().optional(),
   status: Joi.string().optional().valid('pending', 'active', 'deactivated'),
@@ -69,6 +76,7 @@ export default {
   createMerchant,
   generateMerchantKey,
   fetchMerchants,
+  fetchMerchantUsers,
   updateMerchant,
   resolveAccountNumber,
 };

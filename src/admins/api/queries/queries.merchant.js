@@ -85,4 +85,48 @@ export default {
       orr_score_threshold,
       created_at
   `,
+  fetchMerchantUsers: `
+    SELECT
+      users.id,
+      users.user_id,
+      TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+      users.email,
+      users.tier,
+      to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
+      users.loan_status,
+      employment_type.employment_type,
+      users.status,
+      users.bvn
+    FROM users
+    LEFT JOIN employment_type
+    ON users.user_id = employment_type.user_id
+    WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
+      OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
+      OR email ILIKE TRIM($1)
+      OR phone_number ILIKE TRIM($1)
+      OR $1 IS NULL)
+    AND (users.status = $2 OR $2 IS NULL)
+    ORDER BY users.created_at DESC
+    OFFSET $3
+    LIMIT $4;
+  `,
+  fetchMerchantUsersCount: `
+    SELECT COUNT(user_id) AS total_count
+    FROM users
+    WHERE
+      (
+        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
+        OR $1 IS NULL
+      )
+      AND (status = $2 OR $2 IS NULL);
+  `,
 };

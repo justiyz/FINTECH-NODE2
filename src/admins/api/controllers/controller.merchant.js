@@ -159,7 +159,7 @@ export const fetchMerchants = async (req, res, next) => {
 export const fetchSingleMerchant = async (req, res, next) => {
   try {
     const { admin } = req;
-    const merchantId =req.params.merchant_id;
+    const merchantId = req.params.merchant_id;
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Initiate request to fetch single merchant from DB fetchSingleMerchant.admin.controllers.merchant.js`);
     const merchant = await processOneOrNoneData(
       merchantQueries.fetchSingleMerchant,
@@ -175,6 +175,43 @@ export const fetchSingleMerchant = async (req, res, next) => {
   } catch (error) {
     error.label = 'MerchantController::fetchSingleMerchant';
     logger.error(`Fetch single merchant failed:::MerchantController::fetchSingleMerchant`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Fetch users for a specific merchant
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object} - Return a list of users.
+ * @memberof AdminMerchantController
+ */
+export const fetchMerchantUsers = async (req, res, next) => {
+  try {
+    const { query, admin } = req;
+    // const merchantId = req.params.merchant_id;
+    const payload  = MerchantPayload.fetchMerchantUsers(query);
+    const [ users, [ usersCount ] ] = await Promise.all([
+      processAnyData(merchantQueries.fetchMerchantUsers, payload),
+      processAnyData(merchantQueries.fetchMerchantUsersCount, payload)
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully fetched users from the DB fetchMerchantUsers.admin.controllers.merchant.js`);
+    const data = {
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(usersCount.total_count),
+      total_pages: AdminHelpers.calculatePages(Number(usersCount.total_count), Number(req.query.per_page) || 10),
+      users
+    };
+    return ApiResponse.success(
+      res,
+      enums.USERS_FETCHED_SUCCESSFULLY,
+      enums.HTTP_OK,
+      data
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchMerchantUsers';
+    logger.error(`Fetching merchant users failed:::MerchantController::fetchMerchantUsers`, error.message);
     return next(error);
   }
 };
