@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  seedfi-db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_DB: seedfi
+    ports:
+      - '5432:5432'
+    volumes:
+      - seedfi:/var/lib/postgresql/data
+    
+
+  seedfi-adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - seedfi-db
+
+  seedfi-test:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_DB: seedfi_test
+    ports:
+      - '5433:5432'
+    volumes:
+      - seedfi_test:/var/lib/postgresql/data
+
+volumes:
+  seedfi:
+  seedfi_test:
