@@ -18,6 +18,7 @@ export default {
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
   `,
+  fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
   fetchSingleMerchant: `
     SELECT 
       merchants.merchant_id,

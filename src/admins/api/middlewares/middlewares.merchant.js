@@ -47,6 +47,38 @@ export const validateCreateMerchantSecretKey = async (req, res, next) => {
 };
 
 /**
+ * Check for duplicate merchant details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminMerchantMiddleware
+ */
+export const checkForDuplicateMerchant = async (req, res, next) => {
+  try {
+    const { admin } = req;
+    const { email, phone_number } = req.body;
+    const existingMerchant = await processOneOrNoneData(
+      merchantQueries.fetchMerchantByEmailAndPhoneNo,
+      [email, phone_number]
+    );
+    if (existingMerchant) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} already exists checkForDuplicateMerchant.admin.middlewares.merchant.js`);
+      return ApiResponse.error(
+        res,
+        'Merchant with this email or phone number already exists',
+        enums.HTTP_UNPROCESSABLE_ENTITY
+      )
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist checkForDuplicateMerchant.admin.middlewares.merchant.js`);
+    return next();
+  } catch (error) {
+    logger.error(`checking for duplicate merchant email or phone number in the DB failed::AdminMerchantMiddleware::checkForDuplicateMerchant`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * Check if merchant exists
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

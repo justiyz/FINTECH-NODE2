@@ -14,6 +14,7 @@ router.post(
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
+  MerchantMiddleware.checkForDuplicateMerchant,
   MerchantMiddleware.validateCreateMerchantSecretKey,
   MerchantMiddleware.validateMerchantBankAccount('create'),
   MerchantController.createMerchant
