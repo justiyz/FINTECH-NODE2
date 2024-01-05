@@ -22,10 +22,11 @@ router.post(
   PaymentMiddleware.processClusterLoanTransferPayments,
   PaymentMiddleware.processPersonalLoanRepayments,
   PaymentMiddleware.processClusterLoanRepayments,
+  PaymentMiddleware.processMerchantUserLoanTransferPayments,
   PaymentMiddleware.handleTransactionRefundResponse,
   PaymentMiddleware.updatePaymentHistoryStatus,
   PaymentMiddleware.saveCardAuth,
-  PaymentMiddleware.raiseRefundForCardTokenization,
+  PaymentMiddleware.raiseRefundForCardTokenization, 
   PaymentController.finalWebhookResponse
   // ,
   // PaymentMiddleware.
