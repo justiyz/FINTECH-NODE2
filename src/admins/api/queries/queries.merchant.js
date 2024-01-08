@@ -190,4 +190,22 @@ export default {
       )
       AND (users.status = $2 OR $2 IS NULL);
   `,
+  fetchMerchantUserActiveLoan: `
+    SELECT id, loan_id FROM personal_loans pl
+    WHERE pl.user_id = $1 AND
+    pl.status IN ('pending', 'approved', 'ongoing', 'over due');
+  `,
+  fetchMerchantUserLoanRepaymentSchedule: `
+    SELECT
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      status,
+      payment_at
+    FROM "personal_loan_payment_schedules" schedules
+    WHERE schedules.loan_id = $1
+    ORDER BY repayment_order ASC;
+  `,
 };

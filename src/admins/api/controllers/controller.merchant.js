@@ -268,6 +268,40 @@ export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
 };
 
 /**
+ * fetch merchant user repayment schedule
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user payment history.
+ * @memberof AdminMerchantController
+ */
+export const fetchUserRepaymentSchedule = async(req, res, next) => {
+  try {
+    const { admin, user } = req;
+    const activeLoan = await processOneOrNoneData(
+      merchantQueries.fetchMerchantUserActiveLoan,
+      [user.user_id]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
+    const data = await processAnyData(
+      merchantQueries.fetchMerchantUserLoanRepaymentSchedule,
+      [activeLoan?.loan_id]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      'User repayment schedule fetched successfully',
+      enums.HTTP_OK,
+      data
+    );
+  } catch (error) {
+    error.label = 'AdminMerchantController::fetchUserRepaymentSchedule';
+    logger.error(`Error fetching user payment schedule from DB:::${error.label}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * fetch available bank lists
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

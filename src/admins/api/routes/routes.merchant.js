@@ -71,9 +71,18 @@ router.get(
   '/:merchant_id/user/creditscore-breakdown',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('merchants', 'read'),
-  Model(Schema.fetchUserCreditscoreBreakdown, 'query'),
+  Model(Schema.filterByUserId, 'query'),
   MerchantMiddleware.checkIfMerchantUserExists,
   MerchantController.fetchUserCreditScoreBreakdown
+);
+
+router.get(
+  '/:merchant_id/user/repayment-schedule',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.filterByUserId, 'query'),
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.fetchUserRepaymentSchedule
 );
 
 // ============== PATCH =================== //

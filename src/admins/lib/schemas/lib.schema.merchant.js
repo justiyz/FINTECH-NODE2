@@ -52,7 +52,7 @@ const fetchMerchantUsers = Joi.object().keys({
   status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
 });
 
-const fetchUserCreditscoreBreakdown = Joi.object().keys({
+const filterByUserId = Joi.object().keys({
   user_id: Joi.string().required(),
 });
 
@@ -87,7 +87,7 @@ export default {
   generateMerchantKey,
   fetchMerchants,
   fetchMerchantUsers,
-  fetchUserCreditscoreBreakdown,
+  filterByUserId,
   updateMerchant,
   resolveAccountNumber,
 };
