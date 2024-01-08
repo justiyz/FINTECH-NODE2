@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import momentTZ from 'moment-timezone';
 import merchantQueries from '../queries/queries.merchant';
 import merchanBankAccountQueries from '../queries/queries.merchant-bank-account';
-import roleQueries from '../queries/queries.role';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
@@ -15,6 +14,7 @@ import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import { fetchBanks, resolveAccount, createTransferRecipient } from '../services/service.paystack';
+import { userCreditScoreBreakdown } from '../services/services.seedfiCreditscoring';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -46,9 +46,16 @@ export const createMerchant = async (req, res, next) => {
       'success',
       description
     );
-    if (req.body.account_details_added) {
-      await createMerchantBankAccount(admin, req.body);
+
+    const bankAccountAdded = await addMerchantBankAccount(admin, req.body);
+    if (bankAccountAdded !== true) {
+      return ApiResponse.error(
+        res,
+        'Error occured adding merchant bank account',
+        enums.HTTP_INTERNAL_SERVER_ERROR,
+      );
     }
+
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Complete request CreateMerchant.admin.controllers.merchant.js`);
     return ApiResponse.success(
       res,
@@ -217,6 +224,84 @@ export const fetchMerchantUsers = async (req, res, next) => {
 };
 
 /**
+ * fetch merchant user credit score breakdown
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user credit score breakdown.
+ * @memberof AdminMerchantController
+ */
+export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
+  try {
+    const { admin, user } = req;
+    const payload = {
+      first_name: user.first_name,
+      last_name: user.last_name,
+      bvn: user.bvn,
+      date_of_birth: user.date_of_birth,
+      phone_number: user.phone_number,
+      gender: user.gender
+    }
+    const result = await userCreditScoreBreakdown(payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if user credit score breakdown is available from the creditscoring service fetchUserCreditScoreBreakdown.admin.controller.merchant.js`);
+    if (result.status !== 200 || !(result.data?.credit_score)) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: error occured fetching user credit score breakdown from creditscoring service fetchUserCreditScoreBreakdown.admin.controllers.merchant.js`);
+      return ApiResponse.error(
+        res,
+        'Error occured fetching user ORR breakdown',
+        enums.HTTP_BAD_GATEWAY,
+        result.data
+      );
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully retreived creditscore breakdown from creditscoring service fetchUserCreditScoreBreakdown.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      'User credit score breakdown fetched successfully',
+      enums.HTTP_OK,
+      result.data
+    );
+  } catch (error) {
+    error.label = 'AdminMerchantController::fetchUserCreditScoreBreakdown';
+    logger.error(`Error fetching user credit score breakdown:::${error.label}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetch merchant user repayment schedule
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user payment history.
+ * @memberof AdminMerchantController
+ */
+export const fetchUserRepaymentSchedule = async(req, res, next) => {
+  try {
+    const { admin, user } = req;
+    const activeLoan = await processOneOrNoneData(
+      merchantQueries.fetchMerchantUserActiveLoan,
+      [user.user_id]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
+    const data = await processAnyData(
+      merchantQueries.fetchMerchantUserLoanRepaymentSchedule,
+      [activeLoan?.loan_id]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      'User repayment schedule fetched successfully',
+      enums.HTTP_OK,
+      data
+    );
+  } catch (error) {
+    error.label = 'AdminMerchantController::fetchUserRepaymentSchedule';
+    logger.error(`Error fetching user payment schedule from DB:::${error.label}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * fetch available bank lists
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -323,12 +408,16 @@ export const updateMerchant = async (req, res, next) => {
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant details has been edited and updated in the DB. updateMerchant.admin.controllers.merchant.js`);
+    
     if (account_details_added) {
       req.body.merchant_id = merchant.merchant_id;
-      const updateStatus = await updateMerchantBankAccount(admin, req.body);
-      if (typeof(updateStatus) !== 'boolean') {
-        const err = updateStatus;
-        throw err;
+      const updateSuccessful = await addMerchantBankAccount(admin, req.body);
+      if (updateSuccessful !== true) {
+        return ApiResponse.error(
+          res,
+          'Error occured updating merchant bank account',
+          enums.HTTP_INTERNAL_SERVER_ERROR,
+        );
       }
     }
 
@@ -339,7 +428,8 @@ export const updateMerchant = async (req, res, next) => {
       updatedMerchantDetails
     );
   } catch (error) {
-    logger.error(`Update merchant details failed:::${enums.FETCH_MERCHANT_CONTROLLER}`, error.message);
+    error.label = 'MerchantController::updateMerchant';
+    logger.error(`Update merchant details failed:::${error.label}`, error.message);
     return next(error);
   }
 };
@@ -351,61 +441,39 @@ export const updateMerchant = async (req, res, next) => {
  * @returns {Promise<Boolean | Error>}
  * @memberof AdminMerchantController
  */
-const createMerchantBankAccount = async (admin, payload) => {
+const addMerchantBankAccount = async (admin, payload) => {
   try {
     // create transfer recipient
-    const { account_name, account_number, bank_code } = payload;
+    const { account_name, account_number, bank_code, existingBankAccount } = payload;
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: initiate request to generate recipient code addMerchantBankAccount.admin.controllers.merchant.js`);
     const { data } = await createTransferRecipient({
       account_name,
       account_number,
       bank_code,
     });
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated CreateMerchantBankAccount.admin.controllers.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated addMerchantBankAccount.admin.controllers.merchant.js`);
     payload.transfer_recipient_code = data.recipient_code;
-    // create merchant bank account
     const bankAccountDetails = MerchantPayload.addMerchantBankAccount(payload);
-    await processAnyData(
-      merchanBankAccountQueries.addBankAccount,
-      bankAccountDetails
-    );
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account saved successfully CreateMerchantBankAccount.admin.controllers.merchant.js`);
+    if (!existingBankAccount) {
+      // create merchant bank account
+      await processAnyData(
+        merchanBankAccountQueries.addBankAccount,
+        bankAccountDetails
+      );
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account created successfully addMerchantBankAccount.admin.controllers.merchant.js`);
+    } else {
+      // update merchant bank account
+      await processOneOrNoneData(
+        merchanBankAccountQueries.updateBankAccount,
+        bankAccountDetails
+      );
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account updated successfully addMerchantBankAccount.admin.controllers.merchant.js`);
+    }
+    
     return true;
   } catch (error) {
-    error.label = 'MerchantController::CreateMerchantBankAccount';
-    logger.error(`creating merchant bank account failed:::MerchantController::CreateMerchantBankAccount`, error.message);
+    error.label = 'MerchantController::addMerchantBankAccount';
+    logger.error(`Add merchant bank account failed:::MerchantController::addMerchantBankAccount`, error.message);
     return error;
-  } 
-};
-
-/**
- * Create merchant bank account details
- * @param {Object} admin - Admin details.
- * @param {Object} payload - Bank account details to be created.
- * @returns {Promise<Boolean | Error>}
- * @memberof AdminMerchantController
- */
-const updateMerchantBankAccount = async (admin, payload) => {
-  try {
-    // create transfer recipient
-    const { account_name, account_number, bank_code } = payload;
-    const { data } = await createTransferRecipient({
-      account_name,
-      account_number,
-      bank_code,
-    });
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated updateMerchantBankAccount.admin.controllers.merchant.js`);
-    payload.transfer_recipient_code = data.recipient_code;
-    // create merchant bank account
-    const bankAccountDetails = MerchantPayload.addMerchantBankAccount(payload);
-    await processOneOrNoneData(
-      merchanBankAccountQueries.updateBankAccount,
-      bankAccountDetails
-    );
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account saved successfully updateMerchantBankAccount.admin.controllers.merchant.js`);
-    return true;
-  } catch (error) {
-    error.label = 'MerchantController::updateMerchantBankAccount';
-    logger.error(`updating merchant bank account failed:::MerchantController::updateMerchantBankAccount`, error.message);
-    return error;
-  } 
+  }
 };

@@ -18,6 +18,7 @@ export default {
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
   `,
+  fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
   fetchSingleMerchant: `
     SELECT 
       merchants.merchant_id,
@@ -109,21 +110,51 @@ export default {
       advisory_fee,
       created_at
   `,
+  fetchMerchantUserById: `
+    SELECT
+      users.id,
+      users.user_id,
+      users.first_name,
+      users.last_name,
+      users.middle_name,
+      TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+      users.date_of_birth,
+      users.gender,
+      users.email,
+      users.phone_number,
+      users.tier,
+      users.loan_status,
+      users.status,
+      users.bvn
+    FROM merchant_users AS mu
+    LEFT JOIN users ON mu.user_id = users.user_id
+    WHERE mu.user_id = $1 AND mu.merchant_id = $2;
+  `,
   fetchMerchantUsers: `
     SELECT
       users.id,
       users.user_id,
+      users.first_name,
+      users.last_name,
+      users.middle_name,
       TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+      users.date_of_birth,
+      users.gender,
       users.email,
+      users.phone_number,
       users.tier,
-      to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
       users.loan_status,
       employment_type.employment_type,
       users.status,
-      users.bvn
-    FROM users
-    LEFT JOIN employment_type
-    ON users.user_id = employment_type.user_id
+      users.bvn,
+      pl.amount_requested AS loan_amount,
+      pl.loan_tenor_in_months AS loan_duration,
+      pl.loan_disbursed_at AS date_received
+    FROM merchant_users AS mu
+    LEFT JOIN users ON mu.user_id = users.user_id
+    LEFT JOIN employment_type ON users.user_id = employment_type.user_id
+    LEFT JOIN personal_loans pl ON users.user_id = pl.user_id
+      AND pl.status IN ('pending', 'approved', 'ongoing', 'over due')
     WHERE
       (
         TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
@@ -143,19 +174,38 @@ export default {
   `,
   fetchMerchantUsersCount: `
     SELECT COUNT(*) AS total_count
-    FROM users
+    FROM merchant_users AS mu
+    LEFT JOIN users ON mu.user_id = users.user_id
     WHERE
       (
-        TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(first_name, ' ', last_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', first_name, ' ', middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(last_name, ' ', middle_name, ' ', first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', first_name, ' ', last_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(middle_name, ' ', last_name, ' ', first_name)) ILIKE TRIM($1)
-        OR email ILIKE TRIM($1)
-        OR phone_number ILIKE TRIM($1)
+        TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR users.email ILIKE TRIM($1)
+        OR users.phone_number ILIKE TRIM($1)
         OR $1 IS NULL
       )
-      AND (status = $2 OR $2 IS NULL);
+      AND (users.status = $2 OR $2 IS NULL);
+  `,
+  fetchMerchantUserActiveLoan: `
+    SELECT id, loan_id FROM personal_loans pl
+    WHERE pl.user_id = $1 AND
+    pl.status IN ('pending', 'approved', 'ongoing', 'over due');
+  `,
+  fetchMerchantUserLoanRepaymentSchedule: `
+    SELECT
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      status,
+      payment_at
+    FROM "personal_loan_payment_schedules" schedules
+    WHERE schedules.loan_id = $1
+    ORDER BY repayment_order ASC;
   `,
 };

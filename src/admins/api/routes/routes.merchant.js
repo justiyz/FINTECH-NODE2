@@ -14,6 +14,7 @@ router.post(
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
+  MerchantMiddleware.checkForDuplicateMerchant,
   MerchantMiddleware.validateCreateMerchantSecretKey,
   MerchantMiddleware.validateMerchantBankAccount('create'),
   MerchantController.createMerchant
@@ -64,6 +65,24 @@ router.get(
   Model(Schema.fetchMerchantUsers, 'query'),
   MerchantMiddleware.checkIfMerchantExists,
   MerchantController.fetchMerchantUsers
+);
+
+router.get(
+  '/:merchant_id/user/creditscore-breakdown',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.filterByUserId, 'query'),
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.fetchUserCreditScoreBreakdown
+);
+
+router.get(
+  '/:merchant_id/user/repayment-schedule',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.filterByUserId, 'query'),
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.fetchUserRepaymentSchedule
 );
 
 // ============== PATCH =================== //

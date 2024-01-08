@@ -23,9 +23,9 @@ const createMerchant = Joi.object().keys({
   address: Joi.string().required().label('Address'),
   secret_key: Joi.string().required().label('API Key'),
   // bank account details
-  bank_name: Joi.string().optional().label('Bank Name'),
-  bank_code: Joi.number().optional().label('Bank Code'),
-  account_number: Joi.string().optional().label('Account number'),
+  bank_name: Joi.string().required().label('Bank Name'),
+  bank_code: Joi.number().required().label('Bank Code'),
+  account_number: Joi.string().required().label('Account number'),
 });
 
 const generateMerchantKey = Joi.object().keys({
@@ -50,6 +50,10 @@ const fetchMerchantUsers = Joi.object().keys({
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
   status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
+});
+
+const filterByUserId = Joi.object().keys({
+  user_id: Joi.string().required(),
 });
 
 const updateMerchant = Joi.object().keys({
@@ -83,6 +87,7 @@ export default {
   generateMerchantKey,
   fetchMerchants,
   fetchMerchantUsers,
+  filterByUserId,
   updateMerchant,
   resolveAccountNumber,
 };
