@@ -67,6 +67,15 @@ router.get(
   MerchantController.fetchMerchantUsers
 );
 
+router.get(
+  '/:merchant_id/user/creditscore-breakdown',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.fetchUserCreditscoreBreakdown, 'query'),
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.fetchUserCreditScoreBreakdown
+);
+
 // ============== PATCH =================== //
 router.patch(
   '/:merchant_id',
