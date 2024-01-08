@@ -156,39 +156,41 @@ export default {
     LEFT JOIN personal_loans pl ON users.user_id = pl.user_id
       AND pl.status IN ('pending', 'approved', 'ongoing', 'over due')
     WHERE
-      (
-        TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR email ILIKE TRIM($1)
-        OR phone_number ILIKE TRIM($1)
-        OR $1 IS NULL
+      mu.merchant_id = $1
+      AND (
+        $2 IS NULL
+        OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($2)
+        OR email ILIKE TRIM($2)
+        OR phone_number ILIKE TRIM($2)
       )
-      AND (users.status = $2 OR $2 IS NULL)
+      AND (users.status = $3 OR $3 IS NULL)
     ORDER BY users.created_at DESC
-    OFFSET $3
-    LIMIT $4;
+    OFFSET $4
+    LIMIT $5;
   `,
   fetchMerchantUsersCount: `
     SELECT COUNT(*) AS total_count
     FROM merchant_users AS mu
     LEFT JOIN users ON mu.user_id = users.user_id
     WHERE
-      (
-        TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
-        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
-        OR users.email ILIKE TRIM($1)
-        OR users.phone_number ILIKE TRIM($1)
-        OR $1 IS NULL
+      mu.merchant_id = $1
+      AND (
+        $2 IS NULL
+        OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($2)
+        OR users.email ILIKE TRIM($2)
+        OR users.phone_number ILIKE TRIM($2)
       )
-      AND (users.status = $2 OR $2 IS NULL);
+      AND (users.status = $3 OR $3 IS NULL);
   `,
   fetchMerchantUserActiveLoan: `
     SELECT id, loan_id FROM personal_loans pl
