@@ -30,7 +30,7 @@ router.post(
 
 // ============== GET =================== //
 router.get(
-  '',
+  '/',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.fetchMerchants, 'query'),
   RolesMiddleware.adminAccess('merchants', 'read'),

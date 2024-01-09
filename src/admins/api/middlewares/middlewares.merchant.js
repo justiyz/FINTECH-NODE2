@@ -186,14 +186,16 @@ export const validateMerchantBankAccount = (type = '') => async (req, res, next)
     }
 
     if (type === 'update' && accountDetailsAdded) {
-      // check for duplicate records
       const merchantId = req.params.merchant_id;
       const existingBankAccount = await processOneOrNoneData(
-        merchantBankAccountQueries.findDuplicateBankAccount,
-        [merchantId, bank_code, account_number]
+        merchantBankAccountQueries.findMerchantBankAccount,
+        [merchantId]
       );
-
-      if (existingBankAccount) {
+      // check for duplicate records
+      if (
+        existingBankAccount.bank_code == bank_code &&
+        existingBankAccount.account_number == account_number
+      ) {
         return ApiResponse.error(
           res,
           'Bank account already added for this merchant',

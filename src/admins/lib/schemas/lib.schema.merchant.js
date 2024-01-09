@@ -20,6 +20,7 @@ const createMerchant = Joi.object().keys({
   processing_fee: Joi.number().required().label('Processing fee'),
   insurance_fee: Joi.number().required().label('Insurance fee'),
   advisory_fee: Joi.number().required().label('Advisory fee'),
+  customer_loan_max_amount: Joi.number().required().label('Limit per customer'),
   address: Joi.string().required().label('Address'),
   secret_key: Joi.string().required().label('API Key'),
   // bank account details
@@ -70,6 +71,7 @@ const updateMerchant = Joi.object().keys({
   processing_fee: Joi.number().optional().label('Processing fee'),
   insurance_fee: Joi.number().optional().label('Insurance fee'),
   advisory_fee: Joi.number().optional().label('Advisory fee'),
+  customer_loan_max_amount: Joi.number().optional().label('Limit per customer'),
   address: Joi.string().optional().label('Address'),
   // bank account details
   bank_name: Joi.string().optional().label('Bank Name'),
