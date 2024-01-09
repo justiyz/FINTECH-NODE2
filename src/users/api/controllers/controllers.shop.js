@@ -6,7 +6,7 @@ import { createShopRepaymentSchedule } from '../../../admins/api/controllers/con
 import {
   calculateAmountPlusPaystackTransactionCharge, initializeBankAccountChargeForLoanRepayment,
   initializeBankTransferPayment,
-  initializeCardPayment, initializeDebitCarAuthChargeForLoanRepayment
+  initializeCardPayment, initializeDebitCarAuthChargeForLoanRepayment, initiateTransfer
 } from '../services/service.paystack';
 import enums from '../../lib/enums';
 import {v4 as uuidv4} from 'uuid';
@@ -346,7 +346,7 @@ export const createTicketSubscription = async(req, res, next) => {
   const activityType = payment_channel === 'card' ? 71: 73;
   // const ticketPurchaseLogs = [];
   let loan_id = req.body.initial_payment.loan_id;
-  const { user, userDebitCard, accountDetails } = req;
+  const { user, userDebitCard, accountDetails, userTransferRecipient, existingLoanApplication } = req;
   let totalAmountToBePaid = 0;
   try {
     // loop ticket id and check if number available is greater than the number being requested by the user
@@ -403,6 +403,10 @@ export const createTicketSubscription = async(req, res, next) => {
     if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       await userActivityTracking(req.user.user_id, activityType, 'success');
+
+      //disburse loan amount to ticket merchant//account
+      await disburseTicketLoan(user, loan_id, userTransferRecipient, existingLoanApplication, next);
+
       return ApiResponse.success(
           res,
           result.message, enums.HTTP_OK,
@@ -429,6 +433,43 @@ export const createTicketSubscription = async(req, res, next) => {
     await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loan_id, user.user_id ]);
     logger.error(`Failed to create ticket subscription: ${ error.message }`);
     return next(error);
+  }
+};
+
+const disburseTicketLoan = async (user, loan_id, userTransferRecipient, existingLoanApplication, next) => {
+  try {
+    // const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication } = req;
+    const reference = uuidv4();
+    await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference,
+      'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment initialized in the DB initiateLoanDisbursement.controllers.loan.js`);
+    const result = await initiateTransfer(userTransferRecipient, existingLoanApplication, reference);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: transfer initiate via paystack returns response disburseTicketLoan.controllers.shop.js`);
+    if (result.status === true && result.message === 'Transfer has been queued') {
+      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ loan_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details status set to processing in the DB disburseTicketLoan.controllers.shop.js`);
+      userActivityTracking(user.user_id, 44, 'success');
+      return  { ...updatedLoanDetails , reference }
+    }
+    if (result.response.status === 400 && result.response.data.message === 'Your balance is not enough to fulfil this request') {
+      const data = {
+        email: config.SEEDFI_ADMIN_EMAIL_ADDRESS,
+        currentBalance: 'Kindly login to confirm'
+      };
+      await AdminMailService('Insufficient Paystack Balance', 'insufficientBalance', { ...data });
+    }
+    if (result.response.data.message !== 'Your balance is not enough to fulfil this request') {
+      userActivityTracking(user.user_id, 44, 'fail');
+      throw new Error(result.response.data.message);
+    }
+    userActivityTracking(user.user_id, 44, 'fail');
+    throw new Error(result.response.data.message);
+  } catch (error) {
+    userActivityTracking(user.user_id, 44, 'fail');
+    error.label = enums.INITIATE_LOAN_DISBURSEMENT_CONTROLLER;
+    logger.error(`updating activated loan application details failed::${enums.INITIATE_LOAN_DISBURSEMENT_CONTROLLER}`, error.message);
+    throw new Error(error.message);
   }
 };
 
@@ -658,6 +699,8 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
         [ user.user_id, booking_amount, booking_amount, 'Ticket Loan', body.duration_in_months, body.duration_in_months, 0, 0 ]
     );
 
+    req.params.loan_id = loanApplicationDetails.loan_id;
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     let payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
           userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
@@ -667,10 +710,10 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       const { data } = result;
 
       if (data.final_decision === 'APPROVED') {
-        if(data.max_approval < booking_amount) {
-          logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Applied for ${parseFloat(booking_amount).toFixed(2)}, elligible for ${parseFloat(data.max_approval).toFixed(2)}  checkUserLoanEligibility.controllers.loan.js`);
-          return ApiResponse.error(res, `You're not eligible for the requested amount. Kindly try a lower amount`, 403, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
-        }
+        // if(data.max_approval < booking_amount) {
+        //   logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Applied for ${parseFloat(booking_amount).toFixed(2)}, elligible for ${parseFloat(data.max_approval).toFixed(2)}  checkUserLoanEligibility.controllers.loan.js`);
+        //   return ApiResponse.error(res, `You're not eligible for the requested amount. Kindly try a lower amount`, 403, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+        // }
         const ticket = await processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]);
 
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
@@ -680,7 +723,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
         const first_installment  = ((booking_amount * initial_deposit) + parseFloat(ticket.processing_fee)).toFixed(2)
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
         data.monthly_repayment = monthly_repayment;
-        const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'pending');
+        const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'approved');
         const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateUserManualOrApprovedDecisionLoanApplication, approvedDecisionPayload);
 
         const loan_repayment_schedule = await createShopRepaymentSchedule(updatedLoanDetails, user, first_installment, monthly_repayment);

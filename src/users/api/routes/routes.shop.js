@@ -55,7 +55,7 @@ router.post(
     UserMiddleware.isVerifiedBvn('confirm'),
     UserMiddleware.isUploadedVerifiedId('confirm'),
     UserMiddleware.checkUserAdvancedKycUpdate,
-    LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
+    // LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
     LoanMiddleware.validateLoanAmountAndTenor, // only on live
     LoanMiddleware.checkIfEmploymentTypeLimitApplies,
     LoanMiddleware.checkIfUserBvnNotBlacklisted, // only on live
@@ -65,6 +65,11 @@ router.post(
     UserMiddleware.checkIfAccountDetailsExists,
     UserMiddleware.checkIfCardOrUserExist, // new added for the charge flow
     shopCategories.checkUserTicketLoanEligibility,
+
+    LoanMiddleware.checkUserLoanApplicationExists,
+    LoanMiddleware.checkIfLoanApplicationStatusIsCurrentlyApproved,
+    LoanMiddleware.checkSeedfiPaystackBalance,
+    LoanMiddleware.generateBNPLLoanDisbursementRecipient,
     shopCategories.createTicketSubscription
 );
 
