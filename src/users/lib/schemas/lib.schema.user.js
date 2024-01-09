@@ -35,6 +35,11 @@ const bvnVerification = Joi.object().keys({
   bvn: Joi.string().required().length(11)
 });
 
+const sendBvnOtp = Joi.object().keys({
+  bvn: Joi.string().required().length(11),
+  date_of_birth: Joi.string().required()
+});
+
 const idDocumentVerification = Joi.object().keys({
   document_id: Joi.string().required(),
   document_type: Joi.string().required().valid('nin', 'voters_card', 'international_passport')
@@ -181,5 +186,6 @@ export default  {
   updateEmploymentDetails,
   updateMonoId,
   tierLoanValue,
-  idDocumentVerification
+  idDocumentVerification,
+  sendBvnOtp
 };
