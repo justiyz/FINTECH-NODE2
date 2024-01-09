@@ -587,9 +587,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
 
         const customRepaymentCompleted = paymentRecord.payment_type == 'part_loan_repayment' && parseFloat(paymentRecord.amount) >= parseFloat(nextRepayment.post_payment_outstanding_amount) ;
 
-        let statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+        const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
 
-        statusType = customRepaymentCompleted ? 'completed' : statusType;
 
         const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
         const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
