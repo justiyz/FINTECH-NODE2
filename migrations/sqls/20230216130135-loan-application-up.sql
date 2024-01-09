@@ -81,3 +81,4 @@ VALUES
     ('PLONMNAPP', 'personal loan subjected to manual approval', 'users personal loan subjected to manual approval'),
     ('RNGPSLOAN', 'renegotiate personal loan', 'user renegotiates personal loan'),
     ('PSLOANDBSD', 'personal loan disbursed', 'personal loan disbursed to user');
+
