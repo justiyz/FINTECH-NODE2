@@ -585,7 +585,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments
         processPersonalLoanRepayments.middlewares.payment.js`);
 
-        const customRepaymentCompleted = paymentRecord.payment_type == 'part_loan_repayment' && paymentRecord.amount >= nextRepayment.post_payment_outstanding_amount;
+        const customRepaymentCompleted = paymentRecord.payment_type == 'part_loan_repayment' && parseFloat(paymentRecord.amount) >= parseFloat(nextRepayment.post_payment_outstanding_amount) ;
 
         let statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
 
