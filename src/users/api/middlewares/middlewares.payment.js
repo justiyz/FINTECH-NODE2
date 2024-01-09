@@ -585,12 +585,23 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments
         processPersonalLoanRepayments.middlewares.payment.js`);
 
+
         let customRepaymentCompleted = paymentRecord.payment_type == 'part_loan_repayment' && parseFloat(paymentRecord.amount) >= parseFloat(nextRepayment.post_payment_outstanding_amount) ;
+
 
         customRepaymentCompleted =  parseFloat(paymentRecord.amount) == parseFloat(nextRepayment.total_payment_amount) ? true : customRepaymentCompleted;
 
         const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
 
+        console.log('customRepaymentCompleted', customRepaymentCompleted);
+        console.log('paymentRecord.amount', parseFloat(paymentRecord.amount));
+        console.log('nextRepayment.post_payment_outstanding_amount', parseFloat(nextRepayment.post_payment_outstanding_amount));
+        console.log('nextRepayment.total_payment_amount', parseFloat(nextRepayment.total_payment_amount));
+
+        logger.info(`${customRepaymentCompleted}:::Info: customRepaymentCompleted}`)
+        logger.info(`${parseFloat(paymentRecord.amount)}:::Info: paymentRecord.amount}`)
+        logger.info(`${parseFloat(nextRepayment.post_payment_outstanding_amount)}:::Info: nextRepayment.post_payment_outstanding_amount}`)
+        logger.info(`${parseFloat(nextRepayment.total_payment_amount)}:::Info: nextRepayment.total_payment_amount}`)
 
         const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
         const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
@@ -598,7 +609,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         await Promise.all([
           processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
             loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
-            !customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
+            customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
