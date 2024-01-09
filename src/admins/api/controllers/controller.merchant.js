@@ -47,7 +47,7 @@ export const createMerchant = async (req, res, next) => {
       description
     );
 
-    const bankAccountAdded = await addMerchantBankAccount(admin, req.body);
+    const bankAccountAdded = await addMerchantBankAccount(admin, req.body, true);
     if (bankAccountAdded !== true) {
       return ApiResponse.error(
         res,
@@ -441,7 +441,7 @@ export const updateMerchant = async (req, res, next) => {
  * @returns {Promise<Boolean | Error>}
  * @memberof AdminMerchantController
  */
-const addMerchantBankAccount = async (admin, payload) => {
+const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
   try {
     // create transfer recipient
     const { account_name, account_number, bank_code, existingBankAccount } = payload;
@@ -454,7 +454,7 @@ const addMerchantBankAccount = async (admin, payload) => {
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated addMerchantBankAccount.admin.controllers.merchant.js`);
     payload.transfer_recipient_code = data.recipient_code;
     const bankAccountDetails = MerchantPayload.addMerchantBankAccount(payload);
-    if (!existingBankAccount) {
+    if (!existingBankAccount && newAccount) {
       // create merchant bank account
       await processAnyData(
         merchanBankAccountQueries.addBankAccount,
