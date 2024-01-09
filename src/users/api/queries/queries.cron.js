@@ -10,7 +10,7 @@ export default {
         proposed_payment_date
     FROM personal_loan_payment_schedules
     WHERE proposed_payment_date::DATE <= NOW()::DATE
-    AND status = 'not due'
+    AND status = 'over due'
     AND payment_at IS NULL`,
 
   fetchAllOverdueClusterLoanRepayments: `
