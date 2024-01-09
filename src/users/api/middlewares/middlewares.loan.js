@@ -170,10 +170,10 @@ export const generateBNPLLoanDisbursementRecipient = async(req, res, next) => {
     const userDisbursementAccountDetails = {
       id: 'loan_disbursement_account_id',
       user_id: 'user_id',
-      bank_name: 'access bank',
-      bank_code: '044',
-      account_number: '0090202129',
-      account_name: 'tomiiwo abosede fakinlede',
+      bank_name: SEEDFI_LOAN_DISBURSEMENT_BANK_NAME,
+      bank_code: SEEDFI_LOAN_DISBURSEMENT_BANK_CODE,
+      account_number: SEEDFI_LOAN_DISBURSEMENT_ACCOUNT_NUMBER,
+      account_name: SEEDFI_LOAN_DISBURSEMENT_ACCOUNT_NAME,
       is_default: true,
       is_disbursement_account: true,
     }
