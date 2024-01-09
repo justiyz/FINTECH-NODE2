@@ -20,14 +20,15 @@ export default {
       transfer_recipient_code = $6
     WHERE merchant_id = $1;
   `,
-  findDuplicateBankAccount: `
+  findMerchantBankAccount: `
     SELECT
       merchant_id,
       bank_name,
       bank_code,
       account_number,
-      account_name
+      account_name,
+      transfer_recipient_code
     FROM merchant_bank_accounts
-    WHERE merchant_id = $1 and bank_code = $2 and account_number = $3;
+    WHERE merchant_id = $1;
   `
 };

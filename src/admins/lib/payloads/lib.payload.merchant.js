@@ -10,6 +10,7 @@ export default {
     body.processing_fee,
     body.insurance_fee,
     body.advisory_fee,
+    body.customer_loan_max_amount,
   ],
   addMerchantBankAccount: (body) => [
     body.merchant_id.trim(),
