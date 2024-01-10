@@ -16,7 +16,7 @@ const sendSms = async(sendTo, messageBody) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      data: { 
+      data: {
         to: recipient,
         from: SEEDFI_TERMII_SENDER_ID,
         sms: messageBody,
@@ -26,12 +26,12 @@ const sendSms = async(sendTo, messageBody) => {
       }
     };
     await axios(options);
-    logger.error(`${enums.CURRENT_TIME_STAMP} SMS sent to ${sendTo}`);
+    logger.info(`${enums.CURRENT_TIME_STAMP} SMS sent to ${sendTo}`);
   } catch (error) {
     logger.error(`${enums.CURRENT_TIME_STAMP} Error sending SMS for this reason ====>>> ${error.response.data.message}`);
     return error;
   }
 };
-  
+
 export { sendSms };
-  
+

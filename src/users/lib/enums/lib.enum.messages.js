@@ -9,6 +9,7 @@ export const ACCOUNT_EXIST = 'Account already exist, kindly contact support team
 export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
+export const VERIFIED = (text) => `Verified ${text}`;
 export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
 export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
 export const VERIFICATION_TOKEN_INVALID = 'Email has been verified OR verification token is invalid';
@@ -41,7 +42,8 @@ export const BVN_PREVIOUSLY_VERIFIED = 'User bvn has been previously verified';
 export const BVN_NOT_PREVIOUSLY_VERIFIED = 'User is yet to verify bvn, kindly do this first';
 export const BVN_USED_BY_ANOTHER_USER = 'This BVN has been used by another user';
 export const USER_BVN_NOT_MATCHING_RETURNED_BVN = 'Kindly ensure your profile details match your BVN record';
-export const USER_BVN_BLACKLISTED = 'We are unable to process your information. Please contact your Financial Institution'
+export const USER_BVN_BLACKLISTED = 'We are unable to process your information. Please contact your Financial Institution';
+export const UNABLE_TO_PROCESS_BVN = 'We are unable to process your information.';
 export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_CREDENTIALS = (type) => `User ${type} have not been created.`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';

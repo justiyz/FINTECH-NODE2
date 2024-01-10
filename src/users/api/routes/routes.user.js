@@ -310,6 +310,12 @@ router.post(
   UserController.sendBvnOtp
 );
 
+router.post(
+  '/verify-bvn-otp',
+  Model(Schema.verifyBvnOtp, 'payload'),
+  UserController.verifyBvnOtp
+);
+
 
 
 export default router;
