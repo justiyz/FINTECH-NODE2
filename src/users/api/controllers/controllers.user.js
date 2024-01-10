@@ -27,6 +27,11 @@ import {response} from 'express';
 import sharp from 'sharp';
 import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
+import { verifyBvnOTPSms } from '../../lib/templates/sms';
+import * as Helpers from '../../lib/utils/lib.util.helpers';
+import { sendSms } from '../services/service.sms';
+import { parsePhoneNumber } from 'awesome-phonenumber'
+
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -1438,5 +1443,91 @@ export const decryptUserBVN = async(req, res, next) => {
     error.label = enums.FAILED_TO_FETCH_USER_BVN;
     logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
     return next(error);
-  }
+  };
 };
+
+export const sendBvnOtp = async(req, res, next) => {
+  try {
+    const {body: {bvn, date_of_birth}} = req;
+    //get bvn information from provider
+    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+
+    if (data.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
+
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+    //compare bvn dob with provided dob information
+    if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
+
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+
+    //if match, send otp to user
+
+    const otp = Helpers.generateOtp();
+    const bvnHash = await Hash.encrypt(bvn.trim());
+    //check if otp exist
+    const [ existingOtp ] = await processAnyData(authQueries.getVerificationCode, [ otp ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database sendBvnOtp.controllers.user.js`);
+    if (existingOtp) {
+      return sendBvnOtp(req, res, next);
+    }
+
+    const expireAt = dayjs().add(10, 'minutes');
+    const expirationTime = dayjs(expireAt);
+
+    //update verification token on bvn otp table
+
+    const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
+    const pn = parsePhoneNumber( data.data.phoneNumber1, { regionCode: 'NG' } )
+
+    if(!pn.valid){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+
+    await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
+
+    await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
+
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, otpData);
+    }
+    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { bvn: bvn });
+  } catch (error) {
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+  }
+}
+
+
+export const verifyBvnOtp = async(req, res, next) => {
+  try {
+    const {body: {bvn, code}} = req;
+
+    const [ existingOtp ] = await processAnyData(authQueries.getValidVerificationCode, [ code ]);
+
+    if(!existingOtp){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: no existing verification code found verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
+    }
+    const decryptedBvn = await Hash.decrypt(existingOtp.verification_key);
+    if(decryptedBvn !== bvn){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn does not match record verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
+    }
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn match verification code bvn verifyBvnOtp.controller.user.js`);
+
+    await processOneOrNoneData(authQueries.deleteVerificationCode, [ existingOtp.verification_key, code ]);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code deleted verifyBvnOtp.controller.user.js`);
+
+    return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { bvn: bvn });
+  } catch (error) {
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
+  }
+}

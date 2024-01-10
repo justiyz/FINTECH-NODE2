@@ -304,6 +304,18 @@ router.get(
     UserController.decryptUserBVN
 );
 
+router.post(
+  '/send-bvn-otp',
+  Model(Schema.sendBvnOtp, 'payload'),
+  UserController.sendBvnOtp
+);
+
+router.post(
+  '/verify-bvn-otp',
+  Model(Schema.verifyBvnOtp, 'payload'),
+  UserController.verifyBvnOtp
+);
+
 
 
 export default router;

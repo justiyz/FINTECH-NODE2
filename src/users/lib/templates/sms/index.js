@@ -12,3 +12,8 @@ export const resetPinOTPSms = (data) => `Hello, kindly use this code, ${data.otp
 This code is active for ${data.otpDuration}.
 Best, SeedFi team
 `;
+
+export const verifyBvnOTPSms = (data) => `Hello, kindly use this code, ${data.otp} to verify your BVN.
+This code is active for ${data.otpDuration}.
+Best, SeedFi team
+`;
