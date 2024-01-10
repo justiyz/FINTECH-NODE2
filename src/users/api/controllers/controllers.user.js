@@ -1497,7 +1497,7 @@ export const sendBvnOtp = async(req, res, next) => {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, otpData);
     }
-    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { bvn: bvn });
+    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { bvn: bvn, otpExpire: expirationTime, otpDuration: `${10} minutes`  });
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
