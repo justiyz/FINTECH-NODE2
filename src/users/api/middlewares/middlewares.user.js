@@ -229,6 +229,7 @@ export const verifyBvn = async(req, res, next) => {
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
+    req.bvnData = data.data;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification successful verifyBvn.middlewares.user.js`);
     return next();
   } catch (error) {
