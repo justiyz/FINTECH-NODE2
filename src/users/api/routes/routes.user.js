@@ -317,10 +317,10 @@ router.post(
 );
 
 router.post(
-  '/send-user-bvn-otp',
+  '/validate-user-bvn-otp',
   AuthMiddleware.validateAuthToken,
-  Model(Schema.sendBvnOtp, 'payload'),
-  UserController.sendBvnOtp
+  Model(Schema.verifyBvnOtp, 'payload'),
+  UserController.verifyBvnOtp
 );
 
 
