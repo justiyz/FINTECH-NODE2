@@ -1513,9 +1513,16 @@ export const verifyBvnOtp = async(req, res, next) => {
       return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
     }
 
-    return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { bvn: bvn });
+    const data = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
+
+    if (data.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
+
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+    return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { bvn: bvn, email: data.data.email, phone_number: data.data.phoneNumber1,
+      first_name: data.data.firstName, last_name: data.data.lastName, middle_name: data.data.middleName, gender: data.data.gender });
   } catch (error) {
-    console.log('error',error)
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
   }
 }
