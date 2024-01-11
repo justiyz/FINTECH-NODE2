@@ -546,3 +546,95 @@ export const fetchUserRewards = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * update user profile
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user details.
+ * @memberof UserController
+ */
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const {body, admin, userDetails} = req;
+    const payload = UserPayload.updateUserProfile(body, userDetails);
+    const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info:
+    successfully updated user profile in the DB updateUserProfile.controller.user.js`);
+    return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
+  } catch (error) {
+    error.label = enums.UPDATE_USER_PROFILE_CONTROLLER;
+    logger.error(`updating user's profile failed:::${ enums.UPDATE_USER_PROFILE_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * admin update employment details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const updateEmploymentDetails = async (req, res, next) => {
+  try {
+    const {body, admin, userEmploymentDetails} = req;
+    const payload = UserPayload.updateEmploymentDetails(body, userEmploymentDetails);
+    const data = await processAnyData(userQueries.updateEmploymentDetails, payload);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
+    Admin successfully updated employment in the DB. updateEmploymentDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.UPDATE_EMPLOYMENT_DETAILS, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER;
+    logger.error(`updating user employment details failed:::${ enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * admin update residential address
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const updateResidentialAddress = async (req, res, next) => {
+  try {
+    const {body, admin, userAddressDetails} = req;
+    const payload = UserPayload.updateResidentialAddress(body, userAddressDetails);
+    const data = await processAnyData(userQueries.updateUserAddressDetails, payload);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
+    Admin successfully updated residential address in the DB. updateEmploymentDetails.controller.user.js`);
+    return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER;
+    logger.error(`updating user residential address failed:::${ enums.UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * admin update next of kin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user homepage details
+ * @memberof UserController
+ */
+export const updateNextOfKin = async (req, res, next) => {
+  try {
+    const {body, admin, userNextOfKinDetails} = req;
+    const payload = UserPayload.updateNextOfKin(body, userNextOfKinDetails);
+    const data = await processAnyData(userQueries.updateUserNextOfKin, payload);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
+    Admin successfully updated residential address in the DB. updateNextOfKin.controller.user.js`);
+    return ApiResponse.success(res, enums.NEXT_OF_KIN_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_NEXT_OF_KIN_CONTROLLER;
+    logger.error(`updating user residential address failed:::${ enums.UPDATE_NEXT_OF_KIN_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};

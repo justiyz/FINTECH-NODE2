@@ -623,7 +623,8 @@ export default {
             last_name,
             phone_number,
             email,
-            kind_of_relationship
+            kind_of_relationship,
+            user_id
         FROM next_of_kin
         WHERE user_id = $1`,
 
