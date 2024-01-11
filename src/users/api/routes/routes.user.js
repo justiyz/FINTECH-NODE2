@@ -316,6 +316,12 @@ router.post(
   UserController.verifyBvnOtp
 );
 
+router.post(
+  '/send-user-bvn-otp',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.sendBvnOtp, 'payload'),
+  UserController.sendBvnOtp
+);
 
 
 export default router;

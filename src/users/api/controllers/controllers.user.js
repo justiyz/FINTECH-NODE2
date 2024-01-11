@@ -1466,38 +1466,12 @@ export const sendBvnOtp = async(req, res, next) => {
 
     //if match, send otp to user
 
-    const otp = Helpers.generateOtp();
-    const bvnHash = await Hash.encrypt(bvn.trim());
-    //check if otp exist
-    const [ existingOtp ] = await processAnyData(authQueries.getVerificationCode, [ otp ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database sendBvnOtp.controllers.user.js`);
-    if (existingOtp) {
-      return sendBvnOtp(req, res, next);
-    }
-
-    const expireAt = dayjs().add(10, 'minutes');
-    const expirationTime = dayjs(expireAt);
-
-    //update verification token on bvn otp table
-
-    const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
-    const pn = parsePhoneNumber( data.data.phoneNumber1, { regionCode: 'NG' } )
-
-    if(!pn.valid){
-      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
-      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
-    }
-
-    await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
-
-    await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
+    const otpData = await sendOtpToBvnUser(bvn, data.data);
 
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, otpData);
     }
-    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { bvn: bvn, otpExpire: expirationTime, otpDuration: `${10} minutes`  });
+    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { bvn: bvn, otpExpire: otpData.expirationTime, otpDuration: otpData.otpDuration });
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
@@ -1530,4 +1504,35 @@ export const verifyBvnOtp = async(req, res, next) => {
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
   }
+}
+
+const sendOtpToBvnUser = async (bvn, data) => {
+  const bvnHash = await Hash.encrypt(bvn.trim());
+  const otp = Helpers.generateOtp();
+  //check if otp exist
+  const [ existingOtp ] = await processAnyData(authQueries.getVerificationCode, [ otp ]);
+  logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database sendBvnOtp.controllers.user.js`);
+  if (existingOtp) {
+    return sendBvnOtp(req, res, next);
+  }
+
+    const expireAt = dayjs().add(10, 'minutes');
+    const expirationTime = dayjs(expireAt);
+
+
+    const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
+    const pn = parsePhoneNumber( data.phoneNumber1, { regionCode: 'NG' } )
+
+    if(!pn.valid){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+
+    await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
+
+    await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
+
+    return otpData
 }
