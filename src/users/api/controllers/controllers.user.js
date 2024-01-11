@@ -136,16 +136,21 @@ export const updateSelfieImage = async (req, res, next) => {
  */
 export const updateBvn = async (req, res, next) => {
   try {
-    const {body: {bvn}, user} = req;
+    const {body: {bvn}, user, bvnData} = req;
     const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     // const tier_upgraded = tierChoice === '1' ? true : false;
-    const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
+    const otpData = await sendOtpToBvnUser(bvn, bvnData)
+    // const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
+    // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
 
-    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...updateBvn});
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...otpData});
+    }
+
+    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...otpData, otp: undefined});
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
@@ -1469,9 +1474,9 @@ export const sendBvnOtp = async(req, res, next) => {
     const otpData = await sendOtpToBvnUser(bvn, data.data);
 
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
-      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, otpData);
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, {...otpData});
     }
-    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { bvn: bvn, otpExpire: otpData.expirationTime, otpDuration: otpData.otpDuration });
+    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
@@ -1519,7 +1524,6 @@ const sendOtpToBvnUser = async (bvn, data) => {
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
 
-
     const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
     const pn = parsePhoneNumber( data.phoneNumber1, { regionCode: 'NG' } )
 
@@ -1527,6 +1531,21 @@ const sendOtpToBvnUser = async (bvn, data) => {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
+
+    function maskString(str) {
+      if (str.length <= 7) {
+        return str;
+      }
+
+      const firstFour = str.slice(0, 4);
+      const lastThree = str.slice(-3);
+      const maskedPart = '*'.repeat(str.length - 7);
+
+      return firstFour + maskedPart + lastThree;
+    }
+
+    otpData.recipientPhoneNumber = maskString(pn.number.e164);
+
 
     await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);

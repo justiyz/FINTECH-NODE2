@@ -40,7 +40,7 @@ router.post(
   UserMiddleware.isVerifiedBvn('complete'),
   UserMiddleware.isBvnPreviouslyExisting,
   UserMiddleware.verifyBvn,
-  UserMiddleware.checkIfBvnFlaggedBlacklisted,
+  // UserMiddleware.checkIfBvnFlaggedBlacklisted,
   UserController.updateBvn
 );
 
