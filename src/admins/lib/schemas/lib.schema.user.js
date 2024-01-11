@@ -77,9 +77,10 @@ const updateUserResidentialAddress = Joi.object().keys({
   landmark: Joi.string().required(),
   street: Joi.string().required(),
   city: Joi.string().required(),
+  country: Joi.string().required(),
   state: Joi.string().required(),
   lga: Joi.string().required(),
-  resident_type: Joi.string().required(),
+  type_of_residence: Joi.string().required(),
   rent_amount: Joi.number().positive().optional()
 });
 

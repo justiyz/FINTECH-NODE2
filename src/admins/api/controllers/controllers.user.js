@@ -628,10 +628,10 @@ export const updateNextOfKin = async (req, res, next) => {
   try {
     const {body, admin, userNextOfKinDetails} = req;
     const payload = UserPayload.updateNextOfKin(body, userNextOfKinDetails);
-    const data = await processAnyData(userQueries.updateUserAddressDetails, payload);
+    const data = await processAnyData(userQueries.updateUserNextOfKin, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
     Admin successfully updated residential address in the DB. updateNextOfKin.controller.user.js`);
-    return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
+    return ApiResponse.success(res, enums.NEXT_OF_KIN_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     error.label = enums.UPDATE_NEXT_OF_KIN_CONTROLLER;
     logger.error(`updating user residential address failed:::${ enums.UPDATE_NEXT_OF_KIN_CONTROLLER }`, error.message);

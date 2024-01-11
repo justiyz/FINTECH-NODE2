@@ -454,13 +454,13 @@ export default {
   updateUserProfile: `
       UPDATE users
       SET
-      updated_at = NOW(),
-      email = $2,
-      phone_number = $3,
-      date_of_birth = $4,
-      gender = $4,
-      number_of_children = $6,
-      marital_status = $7,
+        updated_at = NOW(),
+        email = $2,
+        phone_number = $3,
+        date_of_birth = $4,
+        gender = $5,
+        number_of_children = $6,
+        marital_status = $7
       WHERE user_id = $1
       RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, email, phone_number, number_of_children, marital_status, next_profile_update
    `,
@@ -490,7 +490,7 @@ export default {
       lga = $7,
       country = $8,
       type_of_residence = $9,
-      rent_amount = $10,
+      rent_amount = $10
     WHERE user_id = $1
     RETURNING *`,
 
@@ -502,7 +502,7 @@ export default {
       last_name = $3,
       phone_number = $4,
       email = $5,
-      kind_of_relationship = $6,
+      kind_of_relationship = $6
     WHERE user_id = $1
     RETURNING *`,
 };

@@ -159,7 +159,7 @@ router.get(
 
 
 router.put(
-  '/:user_id/update-details',
+  '/:user_id/details',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'update'),
   Model(Schema.userIdParams, 'params'),
@@ -169,7 +169,7 @@ router.put(
 );
 
 router.put(
-  '/:user_id/update-employment',
+  '/:user_id/employment',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'update'),
   Model(Schema.userIdParams, 'params'),
@@ -179,7 +179,7 @@ router.put(
 );
 
 router.put(
-  '/:user_id/update-resident',
+  '/:user_id/resident',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('users', 'update'),
   Model(Schema.userIdParams, 'params'),
