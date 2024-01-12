@@ -74,8 +74,9 @@ export default {
     WHERE
       (
         $1 IS NULL
-        OR TRIM(business_name) ILIKE TRIM($1 || '%')
-        OR TRIM(email) ILIKE TRIM($1 || '%')
+        OR TRIM(business_name) ILIKE TRIM('%'||$1||'%')
+        OR TRIM(email) ILIKE TRIM('%'||$1||'%')
+        OR TRIM(phone_number) ILIKE TRIM('%'||$1||'%')
       )
       AND
       (
