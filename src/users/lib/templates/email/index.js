@@ -23,6 +23,7 @@ const getTemplate = (type, data) => {
   case 'rejectedDebitCardNotUsersCard': return email.rejectedDebitCardNotUsersCard(data);
   case 'ticketBookedForYou': return email.ticketBookedForYou(data);
   case 'eventBooking': return email.eventBooking(data);
+  case 'bvnOtp': return email.bvnOtp(data);
   default: return '';
   }
 };
