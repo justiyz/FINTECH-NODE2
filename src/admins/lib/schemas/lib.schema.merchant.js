@@ -22,21 +22,10 @@ const createMerchant = Joi.object().keys({
   advisory_fee: Joi.number().required().label('Advisory fee'),
   customer_loan_max_amount: Joi.number().required().label('Limit per customer'),
   address: Joi.string().required().label('Address'),
-  secret_key: Joi.string().required().label('API Key'),
   // bank account details
   bank_name: Joi.string().required().label('Bank Name'),
   bank_code: Joi.number().required().label('Bank Code'),
   account_number: Joi.string().required().label('Account number'),
-});
-
-const generateMerchantKey = Joi.object().keys({
-  email: Joi.string()
-    .required()
-    .email()
-    .messages({
-      'string.pattern.base': 'Please enter a valid email.',
-      'string.empty': 'Email is not allowed to be empty',
-    }),
 });
 
 const fetchMerchants = Joi.object().keys({
@@ -86,7 +75,6 @@ const resolveAccountNumber = Joi.object().keys({
 
 export default {
   createMerchant,
-  generateMerchantKey,
   fetchMerchants,
   fetchMerchantUsers,
   filterByUserId,
