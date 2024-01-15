@@ -320,7 +320,7 @@ export const resolveBankAccountNumber = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: account number not resolved successfully by paystack resolveBankAccountNumberName.admin.controllers.merchant.js`);
       return ApiResponse.error(
         res,
-        'Could not resolve account number',
+        'Incorrect account number',
         enums.HTTP_UNPROCESSABLE_ENTITY,
         'MerchantController::resolveBankAccountNumber'
       );
