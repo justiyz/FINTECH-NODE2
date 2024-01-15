@@ -68,6 +68,11 @@ const updateMerchant = Joi.object().keys({
   account_number: Joi.string().optional().label('Account number'),
 });
 
+const updateMerchantUser = Joi.object().keys({
+  user_id: Joi.string().required(),
+  status: Joi.string().optional().valid('inactive', 'active', 'suspended', 'deactivated'),
+});
+
 const resolveAccountNumber = Joi.object().keys({
   account_number: Joi.string().required(),
   bank_code: Joi.string().required()
@@ -79,5 +84,6 @@ export default {
   fetchMerchantUsers,
   filterByUserId,
   updateMerchant,
+  updateMerchantUser,
   resolveAccountNumber,
 };

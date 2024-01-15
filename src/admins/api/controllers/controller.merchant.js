@@ -450,3 +450,36 @@ const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
     return error;
   }
 };
+
+/**
+ * Update merchant user details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object}
+ * @memberof AdminMerchantController
+ */
+export const updateMerchantUser = async (req, res, next) => {
+  try {
+    const { admin, user, merchant } = req;
+    const { status } = req.body;
+    await processOneOrNoneData(
+      merchantQueries.updateMerchantUsers,
+      [
+        merchant.merchant_id,
+        user.user_id,
+        status || user.status,
+      ]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant user details has been edited and updated in the DB. updateMerchantUser.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      'User updated successfully',
+      enums.HTTP_OK,
+    );
+  } catch (error) {
+    error.label = 'MerchantController::updateMerchantUser';
+    logger.error(`Update merchant user details failed:::${error.label}`, error.message);
+    return next(error);
+  }
+};

@@ -130,7 +130,7 @@ export default {
       users.phone_number,
       users.tier,
       users.loan_status,
-      users.status,
+      mu.status,
       users.bvn
     FROM merchant_users AS mu
     LEFT JOIN users ON mu.user_id = users.user_id
@@ -151,7 +151,7 @@ export default {
       users.tier,
       users.loan_status,
       employment_type.employment_type,
-      users.status,
+      mu.status,
       users.bvn,
       pl.amount_requested AS loan_amount,
       pl.loan_tenor_in_months AS loan_duration,
@@ -216,4 +216,10 @@ export default {
     WHERE schedules.loan_id = $1
     ORDER BY repayment_order ASC;
   `,
+  updateMerchantUsers: `
+    UPDATE merchant_users SET
+      status = $3,
+      updated_at = now()
+    WHERE merchant_id = $1 and user_id = $2;
+  `
 };

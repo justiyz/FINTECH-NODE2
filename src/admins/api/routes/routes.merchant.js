@@ -87,4 +87,14 @@ router.patch(
   MerchantController.updateMerchant
 );
 
+router.patch(
+  '/:merchant_id/user',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.updateMerchantUser, 'payload'),
+  RolesMiddleware.adminAccess('merchants', 'update'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.updateMerchantUser
+);
+
 export default router;
