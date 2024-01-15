@@ -36,7 +36,7 @@ spec:
         #       key: databaseurl
         #       name: seedfi-api-config
         - name: SEEDFI_DEV_DATABASE_URL
-          value: 'postgres://seedfiuser:seedfi123@52.86.0.109/ope-test'
+          value: 'postgres://seedfiuser:seedfi123@52.86.0.109/Analytics'
           
         - name: SEEDFI_DEV_ENCODING_AUTHENTICATION_SECRET
           valueFrom:
