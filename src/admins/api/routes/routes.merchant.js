@@ -15,17 +15,8 @@ router.post(
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
   MerchantMiddleware.checkForDuplicateMerchant,
-  MerchantMiddleware.validateCreateMerchantSecretKey,
   MerchantMiddleware.validateMerchantBankAccount('create'),
   MerchantController.createMerchant
-);
-
-router.post(
-  '/generate-key',
-  AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.generateMerchantKey, 'payload'),
-  RolesMiddleware.adminAccess('merchants', 'create'),
-  MerchantController.generateMerchantKey
 );
 
 // ============== GET =================== //

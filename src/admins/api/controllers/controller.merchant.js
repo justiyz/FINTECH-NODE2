@@ -29,25 +29,22 @@ const { SEEDFI_NODE_ENV } = config;
 export const createMerchant = async (req, res, next) => {
   try {
     const { admin } = req;
+    req.body.secret_key = await Hash.encrypt({ email: req.body.email });
     const payload = MerchantPayload.createMerchant(req.body);
     const { merchant_id } = await processOneOrNoneData(
       merchantQueries.createMerchant,
       payload
     );
     req.body.merchant_id = merchant_id;
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: merchant successfully created createMerchant.admin.controllers.merchant.js`);
-    const description = descriptions.create_merchant(
-      `${admin.first_name} ${admin.last_name}`,
-      `${req.body.business_name}`
-    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: merchant successfully created createMerchant.admin.controller.merchant.js`);
+    const description = descriptions.create_merchant(`${admin.first_name} ${admin.last_name}`, `${req.body.business_name}`);
     await adminActivityTracking(
       admin.admin_id,
       65,
       'success',
       description
     );
-
-    const bankAccountAdded = await addMerchantBankAccount(admin, req.body, true);
+    const bankAccountAdded = await addMerchantBankAccount(admin, req.body);
     if (bankAccountAdded !== true) {
       return ApiResponse.error(
         res,
@@ -75,32 +72,6 @@ export const createMerchant = async (req, res, next) => {
     );
     error.label = enums.CREATE_MERCHANT_CONTROLLER;
     logger.error(`Create merchant account failed:::${enums.CREATE_MERCHANT_CONTROLLER}`, error.message);
-    return next(error);
-  }
-};
-
-/**
- * Generate merchant secret key
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {Object} - Returns a new merchant secret key.
- * @memberof AdminMerchantController
- */
-export const generateMerchantKey = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    const payload = { email };
-    const secretKey = await Hash.encrypt(payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP},Info: Complete request generateMerchantKeyRequest.merchant.controllers.auth.js`);
-    return ApiResponse.success(
-      res,
-      enums.MERCHANT_KEY_GENERATED_SUCCESSFULLY,
-      enums.HTTP_OK,
-      { secretKey }
-    );
-  } catch (error) {
-    logger.error(`Generate merchant key failed:::${enums.CREATE_MERCHANT_CONTROLLER}`, error.message);
     return next(error);
   }
 };
@@ -456,7 +427,7 @@ const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant paystack transfer recipient code generated addMerchantBankAccount.admin.controllers.merchant.js`);
     payload.transfer_recipient_code = data.recipient_code;
     const bankAccountDetails = MerchantPayload.addMerchantBankAccount(payload);
-    if (!existingBankAccount && newAccount) {
+    if (!existingBankAccount) {
       // create merchant bank account
       await processAnyData(
         merchanBankAccountQueries.addBankAccount,
