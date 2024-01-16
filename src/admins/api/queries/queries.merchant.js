@@ -142,6 +142,20 @@ export default {
     WHERE mu.user_id = $1 AND mu.merchant_id = $2;
   `,
   fetchMerchantUsers: `
+    WITH loans AS (
+      SELECT
+        pl.loan_id,
+        pl.user_id,
+        pl.status,
+        pl.amount_requested,
+        pl.loan_tenor_in_months,
+        pl.loan_disbursed_at
+      FROM merchant_user_loans mul
+      LEFT JOIN personal_loans pl ON mul.loan_id = pl.loan_id
+      WHERE mul.merchant_id = $1 AND pl.status IN (
+        'pending', 'approved', 'ongoing', 'over due'
+      )
+    )
     SELECT
       users.id,
       users.user_id,
@@ -154,20 +168,20 @@ export default {
       users.email,
       users.phone_number,
       users.tier,
-      users.loan_status,
-      employment_type.employment_type,
-      mu.status,
       users.bvn,
-      pl.amount_requested AS loan_amount,
-      pl.loan_tenor_in_months AS loan_duration,
-      pl.loan_disbursed_at AS date_received
+      mu.status,
+      mu.created_at,
+      loans.status as loan_status,
+      loans.loan_id,
+      loans.amount_requested AS loan_amount,
+      loans.loan_tenor_in_months AS loan_duration,
+      loans.loan_disbursed_at AS date_received
     FROM merchant_users AS mu
     LEFT JOIN users ON mu.user_id = users.user_id
-    LEFT JOIN employment_type ON users.user_id = employment_type.user_id
-    LEFT JOIN personal_loans pl ON users.user_id = pl.user_id
-      AND pl.status IN ('pending', 'approved', 'ongoing', 'over due')
+    LEFT JOIN loans ON mu.user_id = loans.user_id
     WHERE
       mu.merchant_id = $1
+      AND ($3 IS NULL OR mu.status = $3)
       AND (
         $2 IS NULL
         OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($2)
@@ -179,8 +193,7 @@ export default {
         OR email ILIKE TRIM($2)
         OR phone_number ILIKE TRIM($2)
       )
-      AND (users.status = $3 OR $3 IS NULL)
-    ORDER BY users.created_at DESC
+    ORDER BY mu.created_at DESC
     OFFSET $4
     LIMIT $5;
   `,
@@ -190,6 +203,7 @@ export default {
     LEFT JOIN users ON mu.user_id = users.user_id
     WHERE
       mu.merchant_id = $1
+      AND ($3 IS NULL OR mu.status = $3)
       AND (
         $2 IS NULL
         OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($2)
@@ -200,8 +214,7 @@ export default {
         OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($2)
         OR users.email ILIKE TRIM($2)
         OR users.phone_number ILIKE TRIM($2)
-      )
-      AND (users.status = $3 OR $3 IS NULL);
+      );
   `,
   fetchMerchantUserActiveLoan: `
     SELECT id, loan_id FROM personal_loans pl
