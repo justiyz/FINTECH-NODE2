@@ -4,7 +4,7 @@ const loanApplication = Joi.object().keys({
   amount: Joi.number().positive().required(),
   duration_in_months: Joi.number().positive().required(),
   loan_reason: Joi.string().required(),
-  bank_statement_service_choice: Joi.string().required().valid('okra', 'mono', 'sterling')
+  bank_statement_service_choice: Joi.string().optional().valid('okra', 'mono', 'sterling')
 });
 
 const loanForEventApplication = Joi.object().keys({
