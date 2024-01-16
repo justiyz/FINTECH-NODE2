@@ -402,6 +402,7 @@ export const updateMerchant = async (req, res, next) => {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
+      merchant_loan_limit,
       account_details_added,
     } = req.body;
 
@@ -419,6 +420,7 @@ export const updateMerchant = async (req, res, next) => {
         insurance_fee || merchant.insurance_fee,
         advisory_fee || merchant.advisory_fee,
         customer_loan_max_amount || merchant.customer_loan_max_amount,
+        merchant_loan_limit || merchant.merchant_loan_limit
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant details has been edited and updated in the DB. updateMerchant.admin.controllers.merchant.js`);

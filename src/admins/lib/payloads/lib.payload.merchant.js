@@ -11,6 +11,7 @@ export default {
     body.insurance_fee,
     body.advisory_fee,
     body.customer_loan_max_amount,
+    body.merchant_loan_limit
   ],
   addMerchantBankAccount: (body) => [
     body.merchant_id.trim(),

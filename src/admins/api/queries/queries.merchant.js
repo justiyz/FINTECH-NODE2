@@ -11,9 +11,10 @@ export default {
       processing_fee,
       insurance_fee,
       advisory_fee,
-      customer_loan_max_amount
+      customer_loan_max_amount,
+      merchant_loan_limit
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
     ) RETURNING merchant_id;
   `,
   fetchMerchantByMerchantId: `
@@ -35,6 +36,7 @@ export default {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
+      merchant_loan_limit,
       merchants.created_at,
       json_build_object(
         'bank_name', ba.bank_name,
@@ -62,6 +64,7 @@ export default {
     insurance_fee,
     advisory_fee,
     customer_loan_max_amount,
+    merchant_loan_limit,
     merchants.created_at,
     json_build_object(
       'bank_name', ba.bank_name,
@@ -98,6 +101,7 @@ export default {
       insurance_fee = $9,
       advisory_fee = $10,
       customer_loan_max_amount = $11,
+      merchant_loan_limit = $12,
       updated_at = now()
     WHERE merchant_id = $1
     RETURNING
@@ -114,6 +118,7 @@ export default {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
+      merchant_loan_limit,
       created_at
   `,
   fetchMerchantUserById: `
