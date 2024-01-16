@@ -89,7 +89,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
 export const checkIfMerchantUserExists = async (req, res, next) => {
   try {
     const { admin } = req;
-    const userId = req.query.user_id;
+    const userId = req.query.user_id || req.body.user_id;
     const merchantId = req.params.merchant_id;
     const user = await processOneOrNoneData(
       merchantQueries.fetchMerchantUserById,

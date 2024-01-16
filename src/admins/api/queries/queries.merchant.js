@@ -11,9 +11,10 @@ export default {
       processing_fee,
       insurance_fee,
       advisory_fee,
-      customer_loan_max_amount
+      customer_loan_max_amount,
+      merchant_loan_limit
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
     ) RETURNING merchant_id;
   `,
   fetchMerchantByMerchantId: `
@@ -35,6 +36,7 @@ export default {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
+      merchant_loan_limit,
       merchants.created_at,
       json_build_object(
         'bank_name', ba.bank_name,
@@ -62,6 +64,7 @@ export default {
     insurance_fee,
     advisory_fee,
     customer_loan_max_amount,
+    merchant_loan_limit,
     merchants.created_at,
     json_build_object(
       'bank_name', ba.bank_name,
@@ -98,6 +101,7 @@ export default {
       insurance_fee = $9,
       advisory_fee = $10,
       customer_loan_max_amount = $11,
+      merchant_loan_limit = $12,
       updated_at = now()
     WHERE merchant_id = $1
     RETURNING
@@ -114,6 +118,7 @@ export default {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
+      merchant_loan_limit,
       created_at
   `,
   fetchMerchantUserById: `
@@ -130,7 +135,7 @@ export default {
       users.phone_number,
       users.tier,
       users.loan_status,
-      users.status,
+      mu.status,
       users.bvn
     FROM merchant_users AS mu
     LEFT JOIN users ON mu.user_id = users.user_id
@@ -151,7 +156,7 @@ export default {
       users.tier,
       users.loan_status,
       employment_type.employment_type,
-      users.status,
+      mu.status,
       users.bvn,
       pl.amount_requested AS loan_amount,
       pl.loan_tenor_in_months AS loan_duration,
@@ -215,5 +220,64 @@ export default {
     FROM "personal_loan_payment_schedules" schedules
     WHERE schedules.loan_id = $1
     ORDER BY repayment_order ASC;
+  `,
+  updateMerchantUsers: `
+    UPDATE merchant_users SET
+      status = $3,
+      updated_at = now()
+    WHERE merchant_id = $1 and user_id = $2;
+  `,
+  countMerchantLoans: `
+    SELECT count(*) as count
+    FROM merchant_user_loans as mu_loans
+    LEFT JOIN users ON mu_loans.user_id = users.user_id
+    LEFT JOIN personal_loans pl ON mu_loans.loan_id = pl.loan_id
+    WHERE
+      mu_loans.merchant_id = $1
+      AND ($2 IS NULL OR mu_loans.user_id = $2)
+      AND ($3 IS NULL OR pl.status = $3)
+      AND (
+        $4 IS NULL
+        OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($4)
+        OR email ILIKE TRIM($4)
+        OR phone_number ILIKE TRIM($4)
+      );
+  `,
+  fetchMerchantLoans: `
+    SELECT
+      users.first_name,
+      users.last_name,
+      users.middle_name,
+      pl.loan_id,
+      pl.total_repayment_amount,
+      pl.loan_disbursed_at,
+      pl.loan_tenor_in_months,
+      pl.total_outstanding_amount,
+      pl.status
+    FROM merchant_user_loans as mu_loans
+    LEFT JOIN users ON mu_loans.user_id = users.user_id
+    LEFT JOIN personal_loans pl ON mu_loans.loan_id = pl.loan_id
+    WHERE
+      mu_loans.merchant_id = $3
+      AND ($4 IS NULL OR mu_loans.user_id = $4)
+      AND ($5 IS NULL OR pl.status = $5)
+      AND (
+        $6 IS NULL
+        OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($6)
+        OR email ILIKE TRIM($6)
+        OR phone_number ILIKE TRIM($6)
+      )
+    ORDER BY mu_loans.created_at DESC
+    OFFSET $1 LIMIT $2;
   `,
 };

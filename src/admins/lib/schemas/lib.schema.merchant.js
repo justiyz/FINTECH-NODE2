@@ -21,6 +21,7 @@ const createMerchant = Joi.object().keys({
   insurance_fee: Joi.number().required().label('Insurance fee'),
   advisory_fee: Joi.number().required().label('Advisory fee'),
   customer_loan_max_amount: Joi.number().required().label('Limit per customer'),
+  merchant_loan_limit: Joi.number().required().label('Merchant loan limit'),
   address: Joi.string().required().label('Address'),
   // bank account details
   bank_name: Joi.string().required().label('Bank Name'),
@@ -42,6 +43,13 @@ const fetchMerchantUsers = Joi.object().keys({
   status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
 });
 
+const fetchMerchantLoans = Joi.object().keys({
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  search: Joi.string().optional(),
+  status: Joi.string().optional().valid('pending', 'declined', 'approved', 'ongoing', 'over due', 'completed'),
+});
+
 const filterByUserId = Joi.object().keys({
   user_id: Joi.string().required(),
 });
@@ -61,11 +69,17 @@ const updateMerchant = Joi.object().keys({
   insurance_fee: Joi.number().optional().label('Insurance fee'),
   advisory_fee: Joi.number().optional().label('Advisory fee'),
   customer_loan_max_amount: Joi.number().optional().label('Limit per customer'),
+  merchant_loan_limit: Joi.number().required().label('Merchant loan limit'),
   address: Joi.string().optional().label('Address'),
   // bank account details
   bank_name: Joi.string().optional().label('Bank Name'),
   bank_code: Joi.number().optional().label('Bank Code'),
   account_number: Joi.string().optional().label('Account number'),
+});
+
+const updateMerchantUser = Joi.object().keys({
+  user_id: Joi.string().required(),
+  status: Joi.string().optional().valid('inactive', 'active', 'suspended', 'deactivated'),
 });
 
 const resolveAccountNumber = Joi.object().keys({
@@ -77,7 +91,9 @@ export default {
   createMerchant,
   fetchMerchants,
   fetchMerchantUsers,
+  fetchMerchantLoans,
   filterByUserId,
   updateMerchant,
+  updateMerchantUser,
   resolveAccountNumber,
 };

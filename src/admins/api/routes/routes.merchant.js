@@ -76,6 +76,15 @@ router.get(
   MerchantController.fetchUserRepaymentSchedule
 );
 
+router.get(
+  '/:merchant_id/loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.fetchMerchantLoans, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantLoans
+);
+
 // ============== PATCH =================== //
 router.patch(
   '/:merchant_id',
@@ -85,6 +94,16 @@ router.patch(
   MerchantMiddleware.checkIfMerchantExists,
   MerchantMiddleware.validateMerchantBankAccount('update'),
   MerchantController.updateMerchant
+);
+
+router.patch(
+  '/:merchant_id/user',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.updateMerchantUser, 'payload'),
+  RolesMiddleware.adminAccess('merchants', 'update'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.updateMerchantUser
 );
 
 export default router;

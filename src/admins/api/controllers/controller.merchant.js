@@ -195,6 +195,47 @@ export const fetchMerchantUsers = async (req, res, next) => {
 };
 
 /**
+ * Fetch merchant loans
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object} - Returns a paginated list of merchant loans.
+ * @memberof AdminMerchantController
+ */
+export const fetchMerchantLoans = async (req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const { count } = await processOneOrNoneData(
+      merchantQueries.countMerchantLoans,
+      MerchantPayload.countMerchantLoans(req)
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully counted merchant loans from the DB fetchMerchantLoans.admin.controllers.merchant.js`);
+    const payload = MerchantPayload.fetchMerchantLoans(req);
+    const loans = await processAnyData(
+      merchantQueries.fetchMerchantLoans,
+      payload
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully fetched merchant loans from the DB fetchMerchantLoans.admin.controllers.merchant.js`);
+    const result = {
+      page: parseFloat(query.page || 1),
+      total_count: Number(count),
+      total_pages: AdminHelpers.calculatePages(Number(count), Number(payload[1])),
+      loans
+    };
+    return ApiResponse.success(
+      res,
+      'Loan(s) fetched successfully',
+      enums.HTTP_OK,
+      result
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchMerchantLoans';
+    logger.error(`Fetching merchant loans failed:::${error.label}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * fetch merchant user credit score breakdown
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -320,7 +361,7 @@ export const resolveBankAccountNumber = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: account number not resolved successfully by paystack resolveBankAccountNumberName.admin.controllers.merchant.js`);
       return ApiResponse.error(
         res,
-        'Could not resolve account number',
+        'Incorrect account number',
         enums.HTTP_UNPROCESSABLE_ENTITY,
         'MerchantController::resolveBankAccountNumber'
       );
@@ -361,6 +402,7 @@ export const updateMerchant = async (req, res, next) => {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
+      merchant_loan_limit,
       account_details_added,
     } = req.body;
 
@@ -378,6 +420,7 @@ export const updateMerchant = async (req, res, next) => {
         insurance_fee || merchant.insurance_fee,
         advisory_fee || merchant.advisory_fee,
         customer_loan_max_amount || merchant.customer_loan_max_amount,
+        merchant_loan_limit || merchant.merchant_loan_limit
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant details has been edited and updated in the DB. updateMerchant.admin.controllers.merchant.js`);
@@ -448,5 +491,38 @@ const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
     error.label = 'MerchantController::addMerchantBankAccount';
     logger.error(`Add merchant bank account failed:::MerchantController::addMerchantBankAccount`, error.message);
     return error;
+  }
+};
+
+/**
+ * Update merchant user details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object}
+ * @memberof AdminMerchantController
+ */
+export const updateMerchantUser = async (req, res, next) => {
+  try {
+    const { admin, user, merchant } = req;
+    const { status } = req.body;
+    await processOneOrNoneData(
+      merchantQueries.updateMerchantUsers,
+      [
+        merchant.merchant_id,
+        user.user_id,
+        status || user.status,
+      ]
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant user details has been edited and updated in the DB. updateMerchantUser.admin.controllers.merchant.js`);
+    return ApiResponse.success(
+      res,
+      'User updated successfully',
+      enums.HTTP_OK,
+    );
+  } catch (error) {
+    error.label = 'MerchantController::updateMerchantUser';
+    logger.error(`Update merchant user details failed:::${error.label}`, error.message);
+    return next(error);
   }
 };
