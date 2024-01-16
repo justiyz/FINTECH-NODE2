@@ -14,7 +14,7 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'employment_type': userEmploymentDetails.employment_type,
   'marital_status': user.marital_status,
   'number_of_dependants': user.number_of_children,
-  'account_number': userDefaultAccountDetails.account_number,
+  'account_number': body.bank_statement_service_choice == undefined ? "0" : userDefaultAccountDetails.account_number,
   'bvn': (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') ? 12312312345 : await Hash.decrypt(decodeURIComponent(userBvn.bvn)),
   'firstName': user.first_name,
   'lastName': user.last_name,
@@ -33,7 +33,7 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'user_minimum_allowable_amount': userMinimumAllowableAMount,
   'previous_loan_count': previousLoanCount,
   'previous_loan_defaulted_count': previouslyDefaultedCount,
-  'bank_statement_service_choice': body.bank_statement_service_choice,
+  'bank_statement_service_choice': body.bank_statement_service_choice == undefined ? null : body.bank_statement_service_choice,
   'tier': user.tier
 });
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
