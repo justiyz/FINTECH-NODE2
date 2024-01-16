@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 export const fetchLoanDueAmount = async (req, res, next) => {
   try {
     const {loanDetails} = req;
+    // TODO: return amount all next repayments that is over - due for the loan
     const data = {
       loanReference: loanDetails.loan_id,
       amountDue: loanDetails.total_outstanding_amount
@@ -64,6 +65,7 @@ export const handleMandateCreated = async (req, res, next) => {
  */
 export const loanBalanceUpdate = async (req, res, next) => {
   try {
+    // TODO: split debitedAmount into the next repayments
     const {body: {institutionCode, loanReference, debitedAmount, recoveryFee, settlementAmount, TransactionReference, narration}, loanDetails} = req;
 
     const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
