@@ -267,11 +267,17 @@ export default {
       users.last_name,
       users.middle_name,
       pl.loan_id,
-      pl.total_repayment_amount,
-      pl.loan_disbursed_at,
-      pl.loan_tenor_in_months,
-      pl.total_outstanding_amount,
-      pl.status
+      pl.amount_requested as loan_amount,
+      pl.created_at date_requested,
+      pl.loan_disbursed_at as date_disbursed,
+      (
+        SELECT SUM(amount)
+        FROM personal_loan_payments
+        WHERE loan_id = pl.loan_id
+        AND transaction_type = 'credit'
+      ) AS repayment_amount,
+      pl.total_outstanding_amount as outstanding_amount,
+      pl.status as loan_status
     FROM merchant_user_loans as mu_loans
     LEFT JOIN users ON mu_loans.user_id = users.user_id
     LEFT JOIN personal_loans pl ON mu_loans.loan_id = pl.loan_id

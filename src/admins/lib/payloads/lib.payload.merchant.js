@@ -31,7 +31,7 @@ export default {
     req.params.merchant_id,
     req.query.user_id,
     req.query.status,
-    req.query.search
+    req.query.search ? `%${req.query.search}%` : null,
   ],
   fetchMerchantLoans: (req) => {
     const page = req.query.page || 1;
@@ -43,7 +43,7 @@ export default {
       req.params.merchant_id,
       req.query.user_id,
       req.query.status,
-      req.query.search
+      req.query.search ? `%${req.query.search}%` : null,
     ]
-  },  
+  },
 };
