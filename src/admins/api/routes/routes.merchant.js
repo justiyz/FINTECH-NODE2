@@ -76,6 +76,15 @@ router.get(
   MerchantController.fetchUserRepaymentSchedule
 );
 
+router.get(
+  '/:merchant_id/loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.fetchMerchantLoans, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantLoans
+);
+
 // ============== PATCH =================== //
 router.patch(
   '/:merchant_id',

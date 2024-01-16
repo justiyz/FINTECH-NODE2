@@ -221,5 +221,58 @@ export default {
       status = $3,
       updated_at = now()
     WHERE merchant_id = $1 and user_id = $2;
-  `
+  `,
+  countMerchantLoans: `
+    SELECT count(*) as count
+    FROM merchant_user_loans as mu_loans
+    LEFT JOIN users ON mu_loans.user_id = users.user_id
+    LEFT JOIN personal_loans pl ON mu_loans.loan_id = pl.loan_id
+    WHERE
+      mu_loans.merchant_id = $1
+      AND ($2 IS NULL OR mu_loans.user_id = $2)
+      AND ($3 IS NULL OR pl.status = $3)
+      AND (
+        $4 IS NULL
+        OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($4)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($4)
+        OR email ILIKE TRIM($4)
+        OR phone_number ILIKE TRIM($4)
+      );
+  `,
+  fetchMerchantLoans: `
+    SELECT
+      users.first_name,
+      users.last_name,
+      users.middle_name,
+      pl.loan_id,
+      pl.total_repayment_amount,
+      pl.loan_disbursed_at,
+      pl.loan_tenor_in_months,
+      pl.total_outstanding_amount,
+      pl.status
+    FROM merchant_user_loans as mu_loans
+    LEFT JOIN users ON mu_loans.user_id = users.user_id
+    LEFT JOIN personal_loans pl ON mu_loans.loan_id = pl.loan_id
+    WHERE
+      mu_loans.merchant_id = $3
+      AND ($4 IS NULL OR mu_loans.user_id = $4)
+      AND ($5 IS NULL OR pl.status = $5)
+      AND (
+        $6 IS NULL
+        OR TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($6)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($6)
+        OR email ILIKE TRIM($6)
+        OR phone_number ILIKE TRIM($6)
+      )
+    ORDER BY mu_loans.created_at DESC
+    OFFSET $1 LIMIT $2;
+  `,
 };

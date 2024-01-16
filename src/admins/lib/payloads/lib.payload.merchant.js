@@ -26,4 +26,23 @@ export default {
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
+  countMerchantLoans: (req) => [
+    req.params.merchant_id,
+    req.query.user_id,
+    req.query.status,
+    req.query.search
+  ],
+  fetchMerchantLoans: (req) => {
+    const page = req.query.page || 1;
+    const perPage = req.query.per_page || 20;
+    const offset = perPage * page - perPage;
+    return [
+      offset,
+      perPage,
+      req.params.merchant_id,
+      req.query.user_id,
+      req.query.status,
+      req.query.search
+    ]
+  },  
 };

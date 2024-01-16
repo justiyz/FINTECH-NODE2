@@ -195,6 +195,47 @@ export const fetchMerchantUsers = async (req, res, next) => {
 };
 
 /**
+ * Fetch merchant loans
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object} - Returns a paginated list of merchant loans.
+ * @memberof AdminMerchantController
+ */
+export const fetchMerchantLoans = async (req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const { count } = await processOneOrNoneData(
+      merchantQueries.countMerchantLoans,
+      MerchantPayload.countMerchantLoans(req)
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully counted merchant loans from the DB fetchMerchantLoans.admin.controllers.merchant.js`);
+    const payload = MerchantPayload.fetchMerchantLoans(req);
+    const loans = await processAnyData(
+      merchantQueries.fetchMerchantLoans,
+      payload
+    );
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully fetched merchant loans from the DB fetchMerchantLoans.admin.controllers.merchant.js`);
+    const result = {
+      page: parseFloat(query.page || 1),
+      total_count: Number(count),
+      total_pages: AdminHelpers.calculatePages(Number(count), Number(payload[1])),
+      loans
+    };
+    return ApiResponse.success(
+      res,
+      'Loan(s) fetched successfully',
+      enums.HTTP_OK,
+      result
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchMerchantLoans';
+    logger.error(`Fetching merchant loans failed:::${error.label}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * fetch merchant user credit score breakdown
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
