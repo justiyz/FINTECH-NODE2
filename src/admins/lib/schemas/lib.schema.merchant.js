@@ -69,7 +69,7 @@ const updateMerchant = Joi.object().keys({
   insurance_fee: Joi.number().optional().label('Insurance fee'),
   advisory_fee: Joi.number().optional().label('Advisory fee'),
   customer_loan_max_amount: Joi.number().optional().label('Limit per customer'),
-  merchant_loan_limit: Joi.number().required().label('Merchant loan limit'),
+  merchant_loan_limit: Joi.number().optional().label('Merchant loan limit'),
   address: Joi.string().optional().label('Address'),
   // bank account details
   bank_name: Joi.string().optional().label('Bank Name'),
