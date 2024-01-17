@@ -271,7 +271,7 @@ export default {
       pl.created_at date_requested,
       pl.loan_disbursed_at as date_disbursed,
       (
-        SELECT SUM(amount)
+        SELECT COALESCE(SUM(amount), 0)
         FROM personal_loan_payments
         WHERE loan_id = pl.loan_id
         AND transaction_type = 'credit'
