@@ -27,12 +27,7 @@ const userCreditScoreBreakdown = async (payload) => {
       method: 'post',
       url: `https://stg-creditscoring.theseedfi.com/creditscoring/api/demo/calculate-credit-score/`,
       data: {
-        "first_name": "John",
-        "last_name": "Doe",
-        "bvn": "12345678901",
-        "date_of_birth": "1990-01-15",
-        "phone_number": "1234567890",
-        "gender": "Male"
+        ...payload
       },
     };
     const data = await axios(options);
