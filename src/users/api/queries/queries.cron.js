@@ -208,7 +208,11 @@ export default {
     WHERE end_date::DATE = NOW()::DATE
     AND NOT is_deleted
     AND status = 'active'
-    `
+    `,
+  updateMerchantUserLoanStatusToOverdue: `
+    UPDATE merchant_user_loans SET status = 'over due'
+    WHERE user_id = $1 AND loan_id = $2
+  `
 };
 
 
