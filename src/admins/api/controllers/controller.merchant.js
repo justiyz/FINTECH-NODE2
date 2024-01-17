@@ -249,7 +249,7 @@ export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
     const payload = {
       first_name: user.first_name,
       last_name: user.last_name,
-      bvn: user.bvn,
+      bvn: user.bvn && user.bvn.length > 11 ? await Hash.decrypt(user.bvn) : user.bvn,
       date_of_birth: user.date_of_birth,
       phone_number: user.phone_number,
       gender: user.gender
@@ -260,7 +260,7 @@ export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: error occured fetching user credit score breakdown from creditscoring service fetchUserCreditScoreBreakdown.admin.controllers.merchant.js`);
       return ApiResponse.error(
         res,
-        'Error occured fetching user ORR breakdown',
+        'Error occured fetching user credit score breakdown',
         enums.HTTP_BAD_GATEWAY,
         result.data
       );
