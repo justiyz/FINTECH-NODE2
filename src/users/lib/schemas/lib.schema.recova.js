@@ -9,6 +9,10 @@ const mandateCreatedPayload = Joi.object().keys({
   institutionCode: Joi.string().required()
 });
 
+const createMandateRequestPayload = Joi.object().keys({
+  loanReference: Joi.string().required(),
+});
+
 const loanBalanceUpdate = Joi.object().keys({
   loanReference: Joi.string().required(),
   institutionCode: Joi.string().required(),
@@ -23,5 +27,6 @@ const loanBalanceUpdate = Joi.object().keys({
 export default  {
   fetchLoanDueAmountParams,
   mandateCreatedPayload,
+  createMandateRequestPayload,
   loanBalanceUpdate
 };

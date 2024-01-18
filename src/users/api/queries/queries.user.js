@@ -816,5 +816,8 @@ export default {
       status = 'inactive',
       fcm_token = NULL
     WHERE user_id = $1
-    RETURNING user_id, email, phone_number, is_deleted, status`
+    RETURNING user_id, email, phone_number, is_deleted, status`,
+
+  fetchAllDetailsBelongingToUser: `
+    SELECT * FROM users WHERE user_id = $1`,
 };

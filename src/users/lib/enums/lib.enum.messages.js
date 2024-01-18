@@ -436,6 +436,7 @@ export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfu
 export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
 export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
 export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
+export const NO_DEFAULT_ACCOUNT = `Kindly add a bank account as default to proceed`;
 
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 
