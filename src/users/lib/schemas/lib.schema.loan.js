@@ -64,7 +64,8 @@ const loanRescheduleParams = Joi.object().keys({
 
 const loanRenegotiation = Joi.object().keys({
   new_loan_amount: Joi.number().positive().required(),
-  new_loan_duration_in_month: Joi.number().positive().required()
+  new_loan_duration_in_month: Joi.number().positive().required(),
+  loan_reason: Joi.string().required()
 });
 
 const successfulEventPayment = Joi.object().keys({
