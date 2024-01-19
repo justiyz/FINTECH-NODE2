@@ -854,6 +854,7 @@ export const initiateAddressVerification = async (req, res) => {
       return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
     }
     if (result && result.statusCode !== 201) {
+
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 83, 'fail');
       // const errorMessage = !result.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED : result.response.data.message;

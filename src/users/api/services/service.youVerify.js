@@ -16,7 +16,7 @@ const createUserYouVerifyCandidate = async(user, userBvn) => {
       headers: {
         token: `${config.SEEDFI_YOU_VERIFY_API_KEY}`
       },
-      data: { 
+      data: {
         type: 'bvn',
         idNumber: userBvn,
         subjectConsent: true
@@ -25,7 +25,7 @@ const createUserYouVerifyCandidate = async(user, userBvn) => {
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to you verify to create a user candidate 
+    logger.error(`Connecting to you verify to create a user candidate
     failed::${enums.CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE}`, error.message);
     return error;
   }
@@ -42,7 +42,7 @@ const createUserYouVerifyCandidateUsingProfile = async(user) => {
       headers: {
         token: `${config.SEEDFI_YOU_VERIFY_API_KEY}`
       },
-      data: { 
+      data: {
         firstName: user.first_name,
         lastName: user.last_name,
         mobile: '0' + user.phone_number.substring(4),
@@ -54,7 +54,7 @@ const createUserYouVerifyCandidateUsingProfile = async(user) => {
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to you verify to create a user candidate 
+    logger.error(`Connecting to you verify to create a user candidate
     failed::${enums.CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE}`, error.message);
     return error;
   }
@@ -62,7 +62,7 @@ const createUserYouVerifyCandidateUsingProfile = async(user) => {
 
 const initiateUserYouVerifyAddressVerification = async(user, body, candidateId, requestId) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.seedfiYouVerifyUserAddressVerificationRequestTestResponse(user, body, requestId, candidateId);
     }
     const options = {
@@ -71,7 +71,7 @@ const initiateUserYouVerifyAddressVerification = async(user, body, candidateId, 
       headers: {
         token: `${config.SEEDFI_YOU_VERIFY_API_KEY}`
       },
-      data: { 
+      data: {
         candidateId: candidateId,
         description: 'Verify the candidate',
         address: {
@@ -88,13 +88,13 @@ const initiateUserYouVerifyAddressVerification = async(user, body, candidateId, 
         subjectConsent: true,
         metadata: {
           requestId: requestId
-        }     
+        }
       }
     };
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to you verify to initiate address verification for user 
+    logger.error(`Connecting to you verify to initiate address verification for user
       failed::${enums.INITIATE_YOU_VERIFY_ADDRESS_VERIFICATION_SERVICE}`, error.message);
     return error;
   }
