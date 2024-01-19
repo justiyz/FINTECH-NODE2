@@ -1,0 +1,1 @@
+ALTER TABLE personal_loan_payment_schedules ADD COLUMN amount_paid NUMERIC(19,4) NULL DEFAULT 0;

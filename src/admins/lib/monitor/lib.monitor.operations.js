@@ -62,6 +62,11 @@ export const operations = {
   61: 'FTCCF', // admin failed to fetch ticket categories
   62: 'FTCFFS', // admin failed to create file for storage
   63: 'UPIMGFENV', // admin uploads image for event
-  64: 'ADMSFER' // admin failed to fetch event record
+  64: 'ADMSFER', // admin failed to fetch event record
+  65: 'CRMERCH', // admin created a merchant account
+  66: 'EDTMERCH', // admin edited a merchant account info
+  67: 'ACTMERCH', // admin activated a merchant account
+  68: 'DACTMERCH', // admin deactivated a merchant account
+  69: 'EDMERCHINT', // admin edited a merchant interest rate details
 };
 

@@ -1,0 +1,1 @@
+DROP COLUMN personal_loan_payment_schedules;

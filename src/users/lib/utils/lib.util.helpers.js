@@ -112,6 +112,7 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
     repaymentArray.push(nextRepaymentDetails);
   }
   await Promise.all([ repaymentArray ]);
+  console.log(repaymentArray)
   return repaymentArray;
 };
 

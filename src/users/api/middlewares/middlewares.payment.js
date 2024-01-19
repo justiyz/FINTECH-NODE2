@@ -964,3 +964,100 @@ export const processClusterLoanRepayments = async(req, res, next) => {
     return next(error);
   }
 };
+
+
+export const processMerchantUserLoanTransferPayments = async(req, res, next) => {
+  try {
+    const { body, paymentRecord, user } = req;
+    if (body.event.includes('transfer') && paymentRecord.payment_type === 'merchant_user_loan_disbursement') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: start processing merchant user loan transfer
+      processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+      const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+      const [ loanDetails ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ paymentRecord.loan_id, paymentRecord.user_id ]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan details fetched using loan identity
+      processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+      if (body.event === 'transfer.success') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: the webhook event sent is ${body.event}
+        processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+        const loanDisbursementTrackingPayload = await PaymentPayload.trackLoanDisbursement(body, paymentRecord, loanDetails, 'success');
+        const loanPaymentTrackingPayload = await PaymentPayload.trackLoanPayment(paymentRecord, loanDetails);
+        const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, paymentRecord.user_id);
+        repaymentSchedule.forEach(async(schedule) => {
+          await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule, [
+              schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+            schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
+            schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
+          ]);
+          return schedule;
+        });
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan repayment schedule update successfully in the DB
+        processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+        await Promise.all([
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable, loanPaymentTrackingPayload),
+          processOneOrNoneData(loanQueries.updateActivatedLoanDetails, [ paymentRecord.loan_id ]),
+          processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, 'active' ]),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'success' ])
+        ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan and payment statuses updated and recorded in the DB
+        processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+        // const rewardDetails = await processOneOrNoneData(authQueries.fetchGeneralRewardPointDetails, [ 'successful_loan_request_point' ]);
+        // const [ rewardRangeDetails ] = await processAnyData(authQueries.fetchLoanRequestPointDetailsBasedOnAmount,
+        //   [ rewardDetails.reward_id, parseFloat(paymentRecord.amount) ]);
+        // const actualPoint = rewardRangeDetails.point;
+        // if (parseFloat(actualPoint) > 0) {
+        //   processUserRewardPointBonus(user, 'Disbursement point', actualPoint, 'disbursement'); // process reward awarding, function is written above
+        // }
+        // logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user has referral and settled referral rewards
+        // processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+        const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ paymentRecord.user_id ]);
+        const data = await PaymentPayload.loanDisbursementPayload(userDetails, loanDetails);
+        // await MailService('Loan Application Successful', 'loanDisbursement', { ...data });
+        admins.map((admin) => {
+          sendNotificationToAdmin(admin.admin_id, 'Loan Disbursement', adminNotification.loanDisbursement(),
+            [ `${user.first_name} ${user.last_name}` ], 'loan-disbursement');
+        });
+        userActivityTracking(paymentRecord.user_id, 42, 'success');
+        return ApiResponse.success(res, enums.BANK_TRANSFER_SUCCESS_STATUS_RECORDED, enums.HTTP_OK);
+      }
+      if (body.event === 'transfer.failed') {
+        const loanDisbursementTrackingPayload = await PaymentPayload.trackLoanDisbursement(body, paymentRecord, loanDetails, 'fail');
+        await Promise.all([
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ])
+        ]);
+        const reference = uuidv4();
+        await processAnyData(loanQueries.initializeBankTransferPayment, [ paymentRecord.user_id, loanDetails.amount_requested, 'paystack', reference,
+          'personal_loan_disbursement', 'requested personal loan facility disbursement', paymentRecord.loan_id ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan payment re-initialized in the DB
+        processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+        const result = await initiateTransfer(body.data.recipient.recipient_code, loanDetails, reference);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: transfer initiate via paystack returns response
+        processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+        if (result.status === true && result.message === 'Transfer has been queued') {
+          await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ paymentRecord.loan_id ]);
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan details status set to processing in the DB
+          processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+          userActivityTracking(paymentRecord.user_id, 45, 'success');
+          userActivityTracking(paymentRecord.user_id, 44, 'success');
+          return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL, enums.HTTP_OK, { reference });
+        }
+      }
+      if (body.event === 'transfer.reversed') {
+        const loanDisbursementTrackingPayload = await PaymentPayload.trackLoanDisbursement(body, paymentRecord, loanDetails, 'reversed');
+        await Promise.all([
+          processOneOrNoneData(loanQueries.updateLoanDisbursementTable, loanDisbursementTrackingPayload),
+          processOneOrNoneData(paymentQueries.updateTransactionPaymentStatus, [ body.data.reference, body.data.id, 'fail' ])
+        ]);
+        userActivityTracking(paymentRecord.user_id, 46, 'success');
+        return ApiResponse.success(res, enums.BANK_TRANSFER_REVERSED_PAYMENT_RECORDED, enums.HTTP_OK);
+      }
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} processMerchantUserLoanTransferPayments.middlewares.payment.js`);
+    return next();
+  } catch (error) {
+    error.label = enums.PROCESS_PERSONAL_LOAN_TRANSFER_PAYMENTS_MIDDLEWARE;
+    logger.error(`processing transfer webhook responses failed:::${enums.PROCESS_PERSONAL_LOAN_TRANSFER_PAYMENTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

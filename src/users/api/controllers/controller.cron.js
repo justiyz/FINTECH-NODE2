@@ -33,6 +33,7 @@ export const updateLoanStatusToOverdue = async () => {
         await processOneOrNoneData(cronQueries.updateLoanWithOverDueStatus, [application.loan_id, application.user_id]);
         await processOneOrNoneData(cronQueries.updateUserLoanStatusOverDue, [application.user_id]);
         await processOneOrNoneData(cronQueries.recordLoanDefaulting, [application.user_id, application.loan_id, application.loan_repayment_id, null, 'individual loan']);
+        await processOneOrNoneData(cronQueries.updateMerchantUserLoanStatusToOverdue, [application.user_id, application.loan_id])
         await processOneOrNoneData(cronQueries.recordCronTrail, [application.user_id, 'ODLNSETOD', 'user loan repayment is past and loan status set to over due']);
         userActivityTracking(application.user_id, 78, 'success');
         return application;

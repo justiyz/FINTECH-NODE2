@@ -427,6 +427,12 @@ export const EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT = (user_id) => `ticke
 export const TICKET_ALREADY_ACTIVE = 'ticket(s) already activated';
 export const LOAN_REPAYMENT_NOT_OVER_DUE = (status) => `Next loan repayment status is ${status}, thus repayment cannot be processed`;
 export const CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT = 'Custom amount cannot be greater than repayment amount';
+export const MERCHANT_CREATED_SUCCESSFULLY = 'Merchant created successfully';
+export const MERCHANT_KEY_GENERATED_SUCCESSFULLY = 'Merchant key generated successfully';
+export const FETCHED_MERCHANT_SUCCESSFULLY = 'Fetched merchant(s) successfully';
+export const INVALID_MERCHANT_API_KEY = 'Invalid merchant API key';
+export const MERCHANT_NOT_FOUND = 'Merchant account not found';
+export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfully';
 export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
 export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
 export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
