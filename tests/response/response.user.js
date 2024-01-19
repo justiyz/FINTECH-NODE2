@@ -205,7 +205,7 @@ export const paystackResolveAccountNumberTestResponse = (account_number, user) =
     message: 'Account number resolved',
     data: {
       'account_number': account_number,
-      'account_name': `${ user.first_name.toUpperCase() } ${ user.middle_name.toUpperCase() } ${ user.last_name.toUpperCase() }`,
+      'account_name': `${ user.firt_name ? user.first_name.toUpperCase() : '' } ${ user.midddle_name ? user.middle_name.toUpperCase() : '' } ${ user.last_name ? user.last_name.toUpperCase() : '' }`,
       // This will only pass for users with middle name and won't pass for users without middle name
       'bank_id': 9
     }
