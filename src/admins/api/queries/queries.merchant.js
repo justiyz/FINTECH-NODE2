@@ -228,6 +228,7 @@ export default {
       user_id,
       repayment_order,
       total_payment_amount,
+      amount_paid,
       status,
       payment_at
     FROM "personal_loan_payment_schedules" schedules

@@ -6,33 +6,42 @@ import enums from '../../../users/lib/enums';
 import { resolveAccount } from '../services/service.paystack';
 
 /**
- * Check for duplicate merchant details
+ * Validate merchant details before creation
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
  * @param {Next} next - Call the next operation.
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const checkForDuplicateMerchant = async (req, res, next) => {
+export const validateCreateMerchant = async (req, res, next) => {
   try {
     const { admin } = req;
-    const { email, phone_number } = req.body;
+    const { email, phone_number, merchant_loan_limit, customer_loan_max_amount } = req.body;
     const existingMerchant = await processOneOrNoneData(
       merchantQueries.fetchMerchantByEmailAndPhoneNo,
       [email, phone_number]
     );
     if (existingMerchant) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} already exists checkForDuplicateMerchant.admin.middlewares.merchant.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} already exists validateCreateMerchant.admin.middlewares.merchant.js`);
       return ApiResponse.error(
         res,
         'Merchant with this email or phone number already exists',
         enums.HTTP_UNPROCESSABLE_ENTITY
       )
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist checkForDuplicateMerchant.admin.middlewares.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist validateCreateMerchant.admin.middlewares.merchant.js`);
+    if (customer_loan_max_amount >= merchant_loan_limit) {
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: validation failed, merchant limit less than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
+      return ApiResponse.error(
+        res,
+        'Merchant limit cannot be less than customer limit',
+        enums.HTTP_UNPROCESSABLE_ENTITY
+      );
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: validation successful, merchant limit greater than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
     return next();
   } catch (error) {
-    logger.error(`checking for duplicate merchant email or phone number in the DB failed::AdminMerchantMiddleware::checkForDuplicateMerchant`, error.message);
+    logger.error(`validating merchant details failed::AdminMerchantMiddleware::validateCreateMerchant`, error.message);
     return next(error);
   }
 };
