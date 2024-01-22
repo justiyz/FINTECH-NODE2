@@ -124,59 +124,66 @@ export const loanBalanceUpdate = async (req, res, next) => {
 export const createMandateConsentRequest = async (req, res, next) => {
   const {body: {loan_id}, loanDetails, user} = req;
 
-  const [ userDetails ] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [ user.user_id ]);
+  try {
 
-  const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id ]);
-  logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
+    const [ userDetails ] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [ user.user_id ]);
 
-  const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
-  logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
 
-  if(!accountDetails) {
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
-    return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
+
+    if(!accountDetails) {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
+      return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    }
+    const collectionPaymentSchedules = loanRepaymentDetails.map((repayment) => {
+      return {
+        repaymentDate: repayment.proposed_repayment_date,
+        repaymentAmountInNaira: repayment.total_repayment_amount
+      };
+    })
+    const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
+
+    const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+
+    if (bvnData.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed createMandateConsentRequest.controller.recova.js`);
+
+      return ApiResponse.error(res, 'Unable to process bvn', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    }
+    //call recova service to create mandate
+    const data = {
+      "bvn": bvn,
+      "businessRegistrationNumber": "string",
+      "taxIdentificationNumber": "string",
+      "loanReference": loanDetails.loan_id,
+      "customerID": userDetails.id,
+      "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
+      "customerEmail": userDetails.email,
+      "phoneNumber": userDetails.phone_number,
+      "loanAmount": loanDetails.loan_amount,
+      "totalRepaymentExpected": loanDetails.total_repayment_amount,
+      "loanTenure": loanDetails.loan_tenor_in_months,
+      "linkedAccountNumber": bvnData.data.nuban,
+      "repaymentType": "Recovery",
+      "preferredRepaymentBankCBNCode": accountDetails.bank_code,
+      "preferredRepaymentAccount": accountDetails.account_number,
+      "collectionPaymentSchedules": collectionPaymentSchedules
+    }
+
+    const result = await recovaService.createConsentRequest(data);
+
+    if(result.requestStatus.toLowerCase() === 'initiated') {
+      await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, '094', result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
+      return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
+    }
+
+    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+  } catch (error) {
+    logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Error: ${error.message} createMandateConsentRequest.controller.recova.js`);
+    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+
   }
-  const collectionPaymentSchedules = loanRepaymentDetails.map((repayment) => {
-    return {
-      repaymentDate: repayment.proposed_repayment_date,
-      repaymentAmountInNaira: repayment.total_repayment_amount
-    };
-  })
-  const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
-
-  const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-
-  if (bvnData.status !== 'success') {
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed createMandateConsentRequest.controller.recova.js`);
-
-    return ApiResponse.error(res, 'Unable to process bvn', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
-  }
-  //call recova service to create mandate
-  const data = {
-    "bvn": bvn,
-    "businessRegistrationNumber": "string",
-    "taxIdentificationNumber": "string",
-    "loanReference": loanDetails.loan_id,
-    "customerID": userDetails.id,
-    "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
-    "customerEmail": userDetails.email,
-    "phoneNumber": userDetails.phone_number,
-    "loanAmount": loanDetails.loan_amount,
-    "totalRepaymentExpected": loanDetails.total_repayment_amount,
-    "loanTenure": loanDetails.loan_tenor_in_months,
-    "linkedAccountNumber": bvnData.data.nuban,
-    "repaymentType": "Recovery",
-    "preferredRepaymentBankCBNCode": accountDetails.bank_code,
-    "preferredRepaymentAccount": accountDetails.account_number,
-    "collectionPaymentSchedules": collectionPaymentSchedules
-  }
-
-  const result = await recovaService.createConsentRequest(data);
-
-  if(result.requestStatus.toLowerCase() === 'initiated') {
-    await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, '094', result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
-    return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
-  }
-
-  return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
 }

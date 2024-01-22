@@ -22,8 +22,28 @@ const createConsentRequest = async (payload) => {
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Recova::${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
-    return error;
+    logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
+    throw error;
+  }
+};
+
+const cancelMandate = async (payload) => {
+  try {
+    const options = {
+      method: 'post',
+      url: `${SEEDFI_RECOVA_BASE_URL}/Mandate/CancelMandateByLoanReference/${payload}?comment=null'`,
+      headers: {
+        Authorization: SEEDFI_RECOVA_BEARER_TOKEN,
+        accept: 'application/json',
+        // 'Accept-Encoding': 'gzip,deflate,compress'
+      },
+      data: null
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
+    throw error;
   }
 };
 
