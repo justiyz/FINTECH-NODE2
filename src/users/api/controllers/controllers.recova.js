@@ -167,7 +167,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       "loanAmount": loanDetails.loan_amount,
       "totalRepaymentExpected": loanDetails.total_repayment_amount,
       "loanTenure": loanDetails.loan_tenor_in_months,
-      "linkedAccountNumber": bvnData.data.nuban,
+      "linkedAccountNumber": bvnData.data.nuban || accountDetails.account_number,
       "repaymentType": "Recovery",
       "preferredRepaymentBankCBNCode": accountDetails.bank_code,
       "preferredRepaymentAccount": accountDetails.account_number,

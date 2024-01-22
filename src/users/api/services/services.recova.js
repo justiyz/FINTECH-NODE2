@@ -22,6 +22,7 @@ const createConsentRequest = async (payload) => {
     const { data } = await axios(options);
     return data;
   } catch (error) {
+
     logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
     throw error;
   }
@@ -48,5 +49,6 @@ const cancelMandate = async (payload) => {
 };
 
 export {
-  createConsentRequest
+  createConsentRequest,
+  cancelMandate
 };
