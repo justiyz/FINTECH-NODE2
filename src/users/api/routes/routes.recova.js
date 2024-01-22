@@ -31,6 +31,14 @@ router.post(
   RecovaController.loanBalanceUpdate
 );
 
+router.post(
+  '/create-mandate-consent-request',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.createMandateRequestPayload, 'payload'),
+  RecovaMiddleware.checkLoanExists,
+  RecovaController.createMandateConsentRequest
+);
+
 // TODO: implement cancel mandate endpoint
 
 export default router;

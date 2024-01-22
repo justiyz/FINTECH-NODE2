@@ -2,8 +2,13 @@ import {processOneOrNoneData, processAnyData} from "../services/services.db";
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import loanMandateQueries from '../queries/queries.recova';
+import userQueries from '../queries/queries.user';
 import loanQueries from '../queries/queries.loan';
+import * as Hash from '../../lib/utils/lib.util.hash';
+import  * as zeehService from '../services/services.zeeh';
+import * as recovaService from '../services/services.recova';
 import dayjs from 'dayjs';
+import config from '../../config';
 
 
 
@@ -41,12 +46,12 @@ export const fetchLoanDueAmount = async (req, res, next) => {
  */
 export const handleMandateCreated = async (req, res, next) => {
   try {
-    const {body: {institutionCode}, loanDetails} = req;
+    const {loanDetails} = req;
     const data = [
-      loanDetails.loan_id,
-      institutionCode
+      'mandate created',
+      loanDetails.loan_id
     ];
-    await processOneOrNoneData(loanMandateQueries.createLoanMandate, data);
+    await processOneOrNoneData(loanMandateQueries.updateLoanMandateRequestStatus, data);
     return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
   } catch (error) {
     error.label = enums.HANDLE_MANDATE_CREATED_CONTROLLER;
@@ -107,3 +112,79 @@ export const loanBalanceUpdate = async (req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * update user device fcm token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the users updated fcm token
+ * @memberof RecovaController
+ */
+
+export const createMandateConsentRequest = async (req, res, next) => {
+  const {body: {loan_id}, loanDetails, user} = req;
+
+  try {
+
+    const [ userDetails ] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [ user.user_id ]);
+
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id, user.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
+
+    const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
+
+    if(!accountDetails) {
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
+      return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    }
+    const collectionPaymentSchedules = loanRepaymentDetails.map((repayment) => {
+      return {
+        repaymentDate: repayment.proposed_repayment_date,
+        repaymentAmountInNaira: repayment.total_repayment_amount
+      };
+    })
+    const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
+
+    const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+
+    if (bvnData.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed createMandateConsentRequest.controller.recova.js`);
+
+      return ApiResponse.error(res, 'Unable to process bvn', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    }
+    //call recova service to create mandate
+    const data = {
+      "bvn": bvn,
+      "businessRegistrationNumber": "string",
+      "taxIdentificationNumber": "string",
+      "loanReference": loanDetails.loan_id,
+      "customerID": userDetails.id,
+      "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
+      "customerEmail": userDetails.email,
+      "phoneNumber": userDetails.phone_number,
+      "loanAmount": loanDetails.loan_amount,
+      "totalRepaymentExpected": loanDetails.total_repayment_amount,
+      "loanTenure": loanDetails.loan_tenor_in_months,
+      "linkedAccountNumber": bvnData.data.nuban,
+      "repaymentType": "Recovery",
+      "preferredRepaymentBankCBNCode": accountDetails.bank_code,
+      "preferredRepaymentAccount": accountDetails.account_number,
+      "collectionPaymentSchedules": collectionPaymentSchedules
+    }
+
+    const result = await recovaService.createConsentRequest(data);
+
+    if(result.requestStatus.toLowerCase() === 'initiated') {
+      await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
+      return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
+    }
+
+    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+  } catch (error) {
+    logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Error: ${error.message} createMandateConsentRequest.controller.recova.js`);
+    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+
+  }
+}
