@@ -22,6 +22,8 @@ import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule, generateClusterLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
 import adminShopQueries from "../../../admins/api/queries/queries.shop";
+import * as recovaService from '../services/services.recova';
+
 import {RETRIEVE_TICKET_URL_FROM_DATABASE} from "../../lib/enums/lib.enum.labels";
 
 /**
@@ -612,6 +614,9 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
             customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
+        if(statusType == 'completed'){
+          await recovaService.cancelMandate(paymentRecord.loan_id)
+        }
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
         processPersonalLoanRepayments.middlewares.payment.js`);
         if (checkIfUserOnClusterLoan) {
