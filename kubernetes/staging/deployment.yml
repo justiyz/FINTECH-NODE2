@@ -220,8 +220,12 @@ spec:
           value: 'Yw2lrK1HbZIGrQ-dRl3G79cw2Co'
         - name: SEEDFI_DEV_UNDERWRITING_APP_ACCESS_TOKEN
           value: '973f5d8c724716d82a'
+        - name: SEEDFI_DEV_RECOVA_INSTITUTION_CODE
+          value: '094'
+        - name: SEEDFI_DEV_RECOVA_BASE_URL
+          value: 'https://staging.recova.ng/recova_ofi_handshake/api'
         - name: SEEDFI_DEV_RECOVA_BEARER_TOKEN
-          value: 'Token'
+          value: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBUElLZXkiOiIyYTE1ODNiZi0yZjRhLTRmNjctYTY2Ni1kNWU4MWFhY2E1OTUiLCJCZWxscyI6IlhSS1hTR0VIQVhUUiIsIkluc3RpdHV0aW9uSWQiOiIzMDE0MCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6Ik9GSSIsImp0aSI6IjVkMzI1OTdmLWE3YjgtNDQyNS1iZWEzLTQ3ODNiYzNlMjBhZSIsImV4cCI6MjAyMTExNjIzMywiaXNzIjoic3RhZ2luZy5yZWNvdmEubmciLCJhdWQiOiJzdGFnaW5nLnJlY292YS5uZyJ9.CvEsWOhQbke8-jqvcxqMNFGFbzuKSPyJA2JsVS3f5hM'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
