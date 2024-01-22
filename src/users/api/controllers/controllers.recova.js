@@ -8,6 +8,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import  * as zeehService from '../services/services.zeeh';
 import * as recovaService from '../services/services.recova';
 import dayjs from 'dayjs';
+import config from '../../config';
 
 
 
@@ -176,7 +177,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     const result = await recovaService.createConsentRequest(data);
 
     if(result.requestStatus.toLowerCase() === 'initiated') {
-      await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, '094', result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
+      await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
       return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
     }
 
