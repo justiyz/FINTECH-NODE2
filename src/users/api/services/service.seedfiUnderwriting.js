@@ -26,7 +26,7 @@ const loanApplicationEligibilityCheckV2 = async(payload) => {
   }
 };
 const loanApplicationEligibilityCheck = async(payload) => {
-  if (SEEDFI_NODE_ENV === 'development') {
+  if (SEEDFI_NODE_ENV === 'test') {
     return userMockedTestResponses.seedfiUnderwritingApprovedLoanApplicationTestResponse(payload);
   }
   try {
