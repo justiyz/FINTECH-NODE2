@@ -189,6 +189,13 @@ router.get(
 );
 
 router.get(
+  '/:user_id/loan-history',
+  AuthMiddleware.validateAdminAuthToken,
+  LoanController.adminFetchUserLoanHistory
+);
+
+
+router.get(
   '/:loan_id/personal/details',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.loanIdParams, 'params'),

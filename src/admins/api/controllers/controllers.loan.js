@@ -854,6 +854,34 @@ export const adminFetchUserCurrentLoans = async(req, res, next) => {
   }
 };
 
+/**
+ * fetches current loans of a single member on the platform
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns success response.
+ * @memberof AdminLoanController
+ */
+
+export const adminFetchUserLoanHistory = async(req, res, next) => {
+  try {
+    const { params: {user_id}, admin } = req;
+    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserPersonalLoanHistory, [ user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current personal loan facilities fetched adminFetchUserLoanHistory.admin.controllers.loan.js`);
+    const currentClusterLoans = await processAnyData(loanQueries.fetchUserClusterLoanHistory, [ user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current cluster loan facilities fetched adminFetchUserLoanHistory.admin.controllers.loan.js`);
+    const data = {
+      currentPersonalLoans,
+      currentClusterLoans
+    };
+    return ApiResponse.success(res, enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_USER_CURRENT_LOANS_CONTROLLER;
+    logger.error(`fetching current loan facilities failed::${enums.FETCH_USER_CURRENT_LOANS_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
 export const adminFetchPersonalLoanDetails = async(req, res, next) => {
   try {
     const { admin, loanApplication,  params: { loan_id } } = req;
