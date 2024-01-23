@@ -1461,7 +1461,7 @@ export const sendBvnOtp = async(req, res, next) => {
     if (data.status !== 'success') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
 
-      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+      return ApiResponse.error(res, enums.UNABLE_TO_VERIFY_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
     //compare bvn dob with provided dob information
     if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
