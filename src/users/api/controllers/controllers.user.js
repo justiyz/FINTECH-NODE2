@@ -842,6 +842,8 @@ export const initiateAddressVerification = async (req, res) => {
     const candidateId = (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) ? userAddressDetails.you_verify_candidate_id :
       userYouVerifyCandidateDetails.id;
     const requestId = uuidv4();
+    return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, userAddressDetails);
+
     const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user candidate details successfully created with youVerify

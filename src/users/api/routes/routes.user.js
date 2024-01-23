@@ -155,8 +155,8 @@ router.post(
   UserMiddleware.isUploadedImageSelfie('confirm'),
   UserMiddleware.isVerifiedBvn('confirm'),
   UserMiddleware.isUploadedVerifiedId('confirm'),
-  // UserMiddleware.isVerifiedAddressDetails('complete'),
-  // UserMiddleware.createUserAddressYouVerifyCandidate,
+  UserMiddleware.isVerifiedAddressDetails('complete'),
+  UserMiddleware.createUserAddressYouVerifyCandidate,
   UserController.initiateAddressVerification
 );
 
