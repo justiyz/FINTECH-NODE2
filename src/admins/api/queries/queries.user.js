@@ -184,6 +184,7 @@ export default {
         SELECT
         users.id,
         users.user_id,
+        users.email,
         TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
         users.tier,
         to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
