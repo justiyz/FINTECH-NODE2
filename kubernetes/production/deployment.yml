@@ -156,6 +156,11 @@ spec:
             secretKeyRef:
               key: cloudinaryapisecret
               name: seedfi-api-config
+        - name: SEEDFI_PROD_UNDERWRITING_APP_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: underwritingappaccesstoken
+              name: seedfi-api-config
         
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
