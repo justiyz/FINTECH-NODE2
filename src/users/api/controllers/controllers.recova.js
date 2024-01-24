@@ -24,9 +24,13 @@ export const fetchLoanDueAmount = async (req, res, next) => {
   try {
     const {loanDetails} = req;
     // TODO: return amount all next repayments that is over - due for the loan
+    const [nextLoanRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Recova:::Info: user loan repayment details fetched fetchLoanDueAmount.controllers.recova.js`);
+
+    const amountDue = nextLoanRepaymentDetails.status == 'over due' ? nextLoanRepaymentDetails.total_payment_amount : 0;
     const data = {
       loanReference: loanDetails.loan_id,
-      amountDue: loanDetails.total_outstanding_amount
+      amountDue: amountDue
     };
     return ApiResponse.json(res, enums.LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
@@ -164,7 +168,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
       "customerEmail": userDetails.email,
       "phoneNumber": userDetails.phone_number,
-      "loanAmount": loanDetails.loan_amount,
+      "loanAmount": loanDetails.amount_requested,
       "totalRepaymentExpected": loanDetails.total_repayment_amount,
       "loanTenure": loanDetails.loan_tenor_in_months,
       "linkedAccountNumber": bvnData.data.nuban || accountDetails.account_number,
@@ -175,16 +179,15 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const result = await recovaService.createConsentRequest(data);
-
-    if(result.requestStatus.toLowerCase() === 'initiated') {
-      await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
-      return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
+    if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
+      const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
+      return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
     }
 
-    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    return ApiResponse.error(res, 'Unable to save initiated consent request', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
   } catch (error) {
     logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Error: ${error.message} createMandateConsentRequest.controller.recova.js`);
-    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    return ApiResponse.error(res, 'Unable to initiate consent request', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
 
   }
 }

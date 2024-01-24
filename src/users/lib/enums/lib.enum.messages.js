@@ -435,6 +435,7 @@ export const MERCHANT_NOT_FOUND = 'Merchant account not found';
 export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfully';
 export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
 export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
+export const CONSENT_REQUEST_INITIATED_SUCCESSFULLY = `Consent request initiated successfully`;
 export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
 export const NO_DEFAULT_ACCOUNT = `Kindly add a bank account as default to proceed`;
 

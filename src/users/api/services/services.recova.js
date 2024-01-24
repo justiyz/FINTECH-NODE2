@@ -20,9 +20,11 @@ const createConsentRequest = async (payload) => {
       data: payload
     };
     const { data } = await axios(options);
+console.log('result', data)
+
     return data;
   } catch (error) {
-
+    console.log(error);
     logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
     throw error;
   }
