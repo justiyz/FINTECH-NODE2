@@ -844,30 +844,30 @@ export const initiateAddressVerification = async (req, res) => {
     const requestId = uuidv4();
     return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, userAddressDetails);
 
-    const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
-    if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user candidate details successfully created with youVerify
-      initiateAddressVerification.controller.user.js`);
-      const payload = UserPayload.updateAddressVerification(body, user, requestId, candidateId, result.data);
-      const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address details updated in the DB but still awaiting verification
-      initiateAddressVerification.controller.user.js`);
-      userActivityTracking(req.user.user_id, 83, 'success');
-      return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
-    }
-    if (result && result.statusCode !== 201) {
+    // const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
+    // if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
+    //   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user candidate details successfully created with youVerify
+    //   initiateAddressVerification.controller.user.js`);
+    //   const payload = UserPayload.updateAddressVerification(body, user, requestId, candidateId, result.data);
+    //   const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
+    //   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address details updated in the DB but still awaiting verification
+    //   initiateAddressVerification.controller.user.js`);
+    //   userActivityTracking(req.user.user_id, 83, 'success');
+    //   return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
+    // }
+    // if (result && result.statusCode !== 201) {
 
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
-      userActivityTracking(req.user.user_id, 83, 'fail');
-      // const errorMessage = !result.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED : result.response.data.message;
-      // const errorCode = !result.response.data ? enums.HTTP_FORBIDDEN : result.response.data.statusCode;
-      return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED, enums.HTTP_FORBIDDEN, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
-    }
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address verification could not be initiated with youVerify
-    initiateAddressVerification.controller.user.js`);
-    userActivityTracking(req.user.user_id, 83, 'fail');
-    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
-      enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+    //   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
+    //   userActivityTracking(req.user.user_id, 83, 'fail');
+    //   // const errorMessage = !result.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED : result.response.data.message;
+    //   // const errorCode = !result.response.data ? enums.HTTP_FORBIDDEN : result.response.data.statusCode;
+    //   return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED, enums.HTTP_FORBIDDEN, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+    // }
+    // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address verification could not be initiated with youVerify
+    // initiateAddressVerification.controller.user.js`);
+    // userActivityTracking(req.user.user_id, 83, 'fail');
+    // return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
+    //   enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
   } catch (error) {
     error.label = enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER;
     logger.error(`initiating user address verification failed:::${ enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER }`, error.message);
