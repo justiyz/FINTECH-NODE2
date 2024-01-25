@@ -78,7 +78,7 @@ export const loanBalanceUpdate = async (req, res, next) => {
     const {body: {institutionCode, loanReference, debitedAmount, recoveryFee, settlementAmount, TransactionReference, narration}, loanDetails} = req;
 
     const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
-    console.log(loanDetails.loan_id, loanDetails.user_id)
+
     const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
     const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ loanDetails.loan_id, loanDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Recova:::Info: fetched next repayment details and the count for all outstanding repayments
@@ -88,6 +88,9 @@ export const loanBalanceUpdate = async (req, res, next) => {
 
     const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
     const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
+
+    //total outstanding repayment amount
+
 
     await Promise.all([
       processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ loanDetails.user_id, loanDetails.loan_id, parseFloat(debitedAmount/100), 'debit',
@@ -116,6 +119,64 @@ export const loanBalanceUpdate = async (req, res, next) => {
     return next(error);
   }
 };
+
+
+export const loanBalanceUpdateAlgo  = async(req, res, next) => {
+  const {body: {institutionCode, loanReference, debitedAmount, recoveryFee, settlementAmount, TransactionReference, narration}, loanDetails} = req;
+
+  const unCompletedRepayments = await processAnyData(loanQueries.fetchExistingUnpaidRepayments, [ req.loanDetails.loan_id, req.loanDetails.user_id ]);
+  const sumExistingUnpaidRepayments = await processOneOrNoneData(loanQueries.sumExistingUnpaidRepayments, [ req.loanDetails.loan_id, req.loanDetails.user_id ]);
+  let outstanding = parseFloat(loanDetails.total_outstanding_amount);
+  let payment = parseFloat(debitedAmount);
+  const paidRepaymentNotInRecord = parseFloat(sumExistingUnpaidRepayments.sum) - outstanding
+
+  let currentRepaymentIndex = 0
+  let currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount) - paidRepaymentNotInRecord;
+  outstanding = outstanding - payment; //new total outstanding amount
+  let fullyPaidRepayments = [];
+
+  while (payment > 0 && currentRepaymentIndex < unCompletedRepayments.length) {
+    if(payment >= currentRepayment){
+      fullyPaidRepayments.push(unCompletedRepayments[currentRepaymentIndex].loan_repayment_id);
+    }
+    payment = payment - currentRepayment;
+    currentRepaymentIndex++;
+    if(currentRepaymentIndex < unCompletedRepayments.length){
+      currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount);
+    }
+  }
+
+  const statusType = outstanding > 0 ? 'ongoing' : 'completed';
+  const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
+  const paymentDescriptionType = outstanding > 0 ? 'part loan repayment' : 'full loan repayment';
+
+
+  await Promise.all([
+    statusType === 'completed' ? await recovaService.cancelMandate(loanDetails.loan_id) : null,
+    processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ loanDetails.user_id, loanDetails.loan_id, parseFloat(debitedAmount), 'debit',
+      loanDetails.loan_reason, paymentDescriptionType, `recova loan balance update` ]),
+    processAnyData(loanQueries.updateFullyPaidLoanRepayment, [ fullyPaidRepayments ]) ,
+    processAnyData(loanQueries.updateLoanWithRepayment, [ loanDetails.loan_id, loanDetails.user_id, statusType, parseFloat(debitedAmount), completedAtType ])
+  ]);
+
+  logger.info(`Recova:::Info: loan, loan repayment and payment details updated successfully
+    processPersonalLoanRepayments.middlewares.payment.js`);
+
+    const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
+
+    if (checkIfUserOnClusterLoan) {
+      const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
+      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusChoice ]);
+      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+    }
+    if (!checkIfUserOnClusterLoan) {
+      const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
+      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusOption]);
+      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+    }
+
+  return ApiResponse.json(res, enums.LOAN_BALANCE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, {});
+}
 
 /**
  * update user device fcm token

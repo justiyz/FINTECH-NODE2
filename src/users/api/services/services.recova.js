@@ -24,13 +24,13 @@ console.log('result', data)
 
     return data;
   } catch (error) {
-    console.log(error);
     logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
     throw error;
   }
 };
 
 const cancelMandate = async (payload) => {
+  if(SEEDFI_NODE_ENV === 'development') return null
   try {
     const options = {
       method: 'post',
@@ -45,7 +45,8 @@ const cancelMandate = async (payload) => {
     const { data } = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
+    logger.error(`Recova::Error ${error.message} ${ enums.CANCEL_MANDATE_SERVICE }`, error.message);
+    logger.error(`Recova::Error ${error.response.data.message} ${ enums.CANCEL_MANDATE_SERVICE }`, error.message);
     throw error;
   }
 };

@@ -240,6 +240,7 @@ export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount
 export const CHECK_NIN_LENGTH_MIDDLEWARE = 'UserController::checkIfTheLengthOfTheNinIsCorrect';
 export const VALIDATE_RECOVER_REQUEST_MIDDLEWARE = 'AuthMiddleware::validateRecovaRequest';
 export const CREATE_CONSENT_REQUEST_SERVICE = 'RecovaService::createConsentRequest';
+export const CANCEL_MANDATE_SERVICE = 'RecovaService::cancelMandateService';
 export const CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER = 'RecovaController::createMandateConsentRequest';
 
 
