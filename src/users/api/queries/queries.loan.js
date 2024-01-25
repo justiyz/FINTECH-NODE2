@@ -280,6 +280,15 @@ export default {
       post_payment_outstanding_amount = post_payment_outstanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 
+
+  updateFullyPaidLoanRepayment: `
+    UPDATE personal_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      payment_at = Now(),
+      status = 'paid'
+    WHERE loan_repayment_id = ANY($1::VARCHAR[])`,
+
   updateAllLoanRepaymentOnFullPayment: `
     UPDATE personal_loan_payment_schedules
     SET
@@ -294,6 +303,25 @@ export default {
   existingUnpaidRepayments: `
     SELECT
       COUNT(id)
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL`,
+
+  fetchExistingUnpaidRepayments: `
+    SELECT
+     *
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL
+    ORDER BY proposed_payment_date ASC`,
+
+  sumExistingUnpaidRepayments: `
+    SELECT
+      SUM(total_payment_amount)
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
     AND user_id = $2

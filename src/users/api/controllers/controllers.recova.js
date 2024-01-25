@@ -24,9 +24,13 @@ export const fetchLoanDueAmount = async (req, res, next) => {
   try {
     const {loanDetails} = req;
     // TODO: return amount all next repayments that is over - due for the loan
+    const [nextLoanRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Recova:::Info: user loan repayment details fetched fetchLoanDueAmount.controllers.recova.js`);
+
+    const amountDue = nextLoanRepaymentDetails.status == 'over due' ? nextLoanRepaymentDetails.total_payment_amount : 0;
     const data = {
       loanReference: loanDetails.loan_id,
-      amountDue: loanDetails.total_outstanding_amount
+      amountDue: amountDue
     };
     return ApiResponse.json(res, enums.LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
@@ -74,7 +78,7 @@ export const loanBalanceUpdate = async (req, res, next) => {
     const {body: {institutionCode, loanReference, debitedAmount, recoveryFee, settlementAmount, TransactionReference, narration}, loanDetails} = req;
 
     const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
-    console.log(loanDetails.loan_id, loanDetails.user_id)
+
     const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
     const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ loanDetails.loan_id, loanDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Recova:::Info: fetched next repayment details and the count for all outstanding repayments
@@ -84,6 +88,9 @@ export const loanBalanceUpdate = async (req, res, next) => {
 
     const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
     const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
+
+    //total outstanding repayment amount
+
 
     await Promise.all([
       processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ loanDetails.user_id, loanDetails.loan_id, parseFloat(debitedAmount/100), 'debit',
@@ -112,6 +119,64 @@ export const loanBalanceUpdate = async (req, res, next) => {
     return next(error);
   }
 };
+
+
+export const loanBalanceUpdateAlgo  = async(req, res, next) => {
+  const {body: {institutionCode, loanReference, debitedAmount, recoveryFee, settlementAmount, TransactionReference, narration}, loanDetails} = req;
+
+  const unCompletedRepayments = await processAnyData(loanQueries.fetchExistingUnpaidRepayments, [ req.loanDetails.loan_id, req.loanDetails.user_id ]);
+  const sumExistingUnpaidRepayments = await processOneOrNoneData(loanQueries.sumExistingUnpaidRepayments, [ req.loanDetails.loan_id, req.loanDetails.user_id ]);
+  let outstanding = parseFloat(loanDetails.total_outstanding_amount);
+  let payment = parseFloat(debitedAmount);
+  const paidRepaymentNotInRecord = parseFloat(sumExistingUnpaidRepayments.sum) - outstanding
+
+  let currentRepaymentIndex = 0
+  let currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount) - paidRepaymentNotInRecord;
+  outstanding = outstanding - payment; //new total outstanding amount
+  let fullyPaidRepayments = [];
+
+  while (payment > 0 && currentRepaymentIndex < unCompletedRepayments.length) {
+    if(payment >= currentRepayment){
+      fullyPaidRepayments.push(unCompletedRepayments[currentRepaymentIndex].loan_repayment_id);
+    }
+    payment = payment - currentRepayment;
+    currentRepaymentIndex++;
+    if(currentRepaymentIndex < unCompletedRepayments.length){
+      currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount);
+    }
+  }
+
+  const statusType = outstanding > 0 ? 'ongoing' : 'completed';
+  const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
+  const paymentDescriptionType = outstanding > 0 ? 'part loan repayment' : 'full loan repayment';
+
+
+  await Promise.all([
+    statusType === 'completed' ? await recovaService.cancelMandate(loanDetails.loan_id) : null,
+    processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ loanDetails.user_id, loanDetails.loan_id, parseFloat(debitedAmount), 'debit',
+      loanDetails.loan_reason, paymentDescriptionType, `recova loan balance update` ]),
+    processAnyData(loanQueries.updateFullyPaidLoanRepayment, [ fullyPaidRepayments ]) ,
+    processAnyData(loanQueries.updateLoanWithRepayment, [ loanDetails.loan_id, loanDetails.user_id, statusType, parseFloat(debitedAmount), completedAtType ])
+  ]);
+
+  logger.info(`Recova:::Info: loan, loan repayment and payment details updated successfully
+    processPersonalLoanRepayments.middlewares.payment.js`);
+
+    const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
+
+    if (checkIfUserOnClusterLoan) {
+      const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
+      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusChoice ]);
+      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+    }
+    if (!checkIfUserOnClusterLoan) {
+      const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
+      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusOption]);
+      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+    }
+
+  return ApiResponse.json(res, enums.LOAN_BALANCE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, {});
+}
 
 /**
  * update user device fcm token
@@ -164,10 +229,10 @@ export const createMandateConsentRequest = async (req, res, next) => {
       "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
       "customerEmail": userDetails.email,
       "phoneNumber": userDetails.phone_number,
-      "loanAmount": loanDetails.loan_amount,
+      "loanAmount": loanDetails.amount_requested,
       "totalRepaymentExpected": loanDetails.total_repayment_amount,
       "loanTenure": loanDetails.loan_tenor_in_months,
-      "linkedAccountNumber": bvnData.data.nuban,
+      "linkedAccountNumber": bvnData.data.nuban || accountDetails.account_number,
       "repaymentType": "Recovery",
       "preferredRepaymentBankCBNCode": accountDetails.bank_code,
       "preferredRepaymentAccount": accountDetails.account_number,
@@ -175,16 +240,15 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const result = await recovaService.createConsentRequest(data);
-
-    if(result.requestStatus.toLowerCase() === 'initiated') {
-      await processOneOrNoneData(loanQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
-      return ApiResponse.json(res, enums.MANDATE_CREATED_SUCCESSFULLY, enums.HTTP_OK, {});
+    if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
+      const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
+      return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
     }
 
-    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    return ApiResponse.error(res, 'Unable to save initiated consent request', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
   } catch (error) {
     logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Error: ${error.message} createMandateConsentRequest.controller.recova.js`);
-    return ApiResponse.error(res, 'Unable to create mandate', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    return ApiResponse.error(res, 'Unable to initiate consent request', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
 
   }
 }
