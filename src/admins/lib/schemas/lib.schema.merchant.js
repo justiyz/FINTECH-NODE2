@@ -15,13 +15,15 @@ const createMerchant = Joi.object().keys({
       'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
       'string.empty': 'Phone Number is not allowed to be empty'
     }).required(),
-  interest_rate: Joi.string().required().label('Interest Rate'),
-  orr_score_threshold: Joi.string().required().label('ORR score'),
-  processing_fee: Joi.number().required().label('Processing fee'),
-  insurance_fee: Joi.number().required().label('Insurance fee'),
-  advisory_fee: Joi.number().required().label('Advisory fee'),
-  customer_loan_max_amount: Joi.number().required().label('Limit per customer'),
-  merchant_loan_limit: Joi.number().required().label('Merchant loan limit'),
+  interest_rate: Joi.number().required().label('Interest Rate'),
+  orr_score_threshold: Joi.string().required().regex(/^\d+$/).messages({
+    'string.pattern.base': 'ORR score must be a number',
+  }).label('ORR score'),
+  processing_fee: Joi.number().positive().min(100).required().label('Processing fee'),
+  insurance_fee: Joi.number().positive().min(100).required().label('Insurance fee'),
+  advisory_fee: Joi.number().positive().min(100).required().label('Advisory fee'),
+  customer_loan_max_amount: Joi.number().positive().min(100).required().label('Limit per customer'),
+  merchant_loan_limit: Joi.number().positive().min(100).required().label('Merchant loan limit'),
   address: Joi.string().required().label('Address'),
   // bank account details
   bank_name: Joi.string().required().label('Bank Name'),
