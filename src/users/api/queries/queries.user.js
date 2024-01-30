@@ -186,7 +186,7 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE id =$1`,
+      WHERE id =$1 AND user_id = $2`,
 
   deleteBankAccountDetails: `
       UPDATE user_bank_accounts

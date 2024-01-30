@@ -496,7 +496,7 @@ export const checkIfAccountDetailsExists = async(req, res, next) => {
     if (!payment_channel || payment_channel === 'bank') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
-      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsByUserId, [ user.user_id ]);
+      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id, user.user_id ]);
       if (!accountIdExists) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
         return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
