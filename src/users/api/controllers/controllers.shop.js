@@ -151,7 +151,7 @@ async function enrichUserTicketData(user_ticket) {
     adminShopQueries.getTicketCategoryTypeById, [user_ticket.ticket_id, user_ticket.ticket_category_id]);
   const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
     adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
-    console.log('least_ticket_priced_ticket: ', least_ticket_priced_ticket);
+    // console.log('least_ticket_priced_ticket: ', least_ticket_priced_ticket);
 
   // if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
     user_ticket.ticket_name = ticket_name;

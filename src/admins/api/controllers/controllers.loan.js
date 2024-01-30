@@ -5,26 +5,30 @@ import loanPayload from '../../lib/payloads/lib.payload.loans';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
-import { processAnyData, processOneOrNoneData } from '../services/services.db';
+import {processAnyData, processOneOrNoneData} from '../services/services.db';
 import MailService from '../services/services.email';
-import { sendPushNotification, sendUserPersonalNotification, sendClusterNotification, sendMulticastPushNotification } from '../services/services.firebase';
+import {
+  sendClusterNotification,
+  sendMulticastPushNotification,
+  sendPushNotification,
+  sendUserPersonalNotification
+} from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
-import { adminActivityTracking } from '../../lib/monitor';
-import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
+import {adminActivityTracking} from '../../lib/monitor';
+import {loanOrrScoreBreakdown} from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import dayjs from 'dayjs';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
-import { initializeBankAccountChargeForLoanRepayment, initializeDebitCarAuthChargeForLoanRepayment } from '../services/service.paystack';
+import {initializeDebitCarAuthChargeForLoanRepayment} from '../services/service.paystack';
 
 import {
-  generateLoanRepaymentSchedule,
   generateLoanRepaymentScheduleForShop,
-  generateOfferLetterPDF
+  generateLoanRepaymentScheduleV2
 } from '../../../users/lib/utils/lib.util.helpers';
-import { userActivityTracking } from '../../../users/lib/monitor';
-import { FAILED_TO_CREATE_MANUAL_LOAN_RECORD, LOAN_APPLICATION_MANUAL_DECISION, MANUAL_LOAN_APPLICATION_MANUAL_BY_ADMIN } from '../../../users/lib/enums/lib.enum.messages';
+import {userActivityTracking} from '../../../users/lib/monitor';
+
 /**
  * approve loan applications manually by admin
  * @param {Request} req - The request from the endpoint.
@@ -921,8 +925,13 @@ export const adminFetchPersonalLoanDetails = async(req, res, next) => {
  */
 
 // Function to calculate total fees
-function calculateTotalFees(processingFee, insuranceFee, advisoryFee) {
-  return parseFloat(processingFee) + parseFloat(insuranceFee) + parseFloat(advisoryFee);
+// function calculateTotalFees(processingFee, insuranceFee, advisoryFee) {
+function calculateTotalFees(body) {
+  const processingFee = (body.percentage_processing_fee/100) * body.amount;
+  const insuranceFee = (body.percentage_insurance_fee/100) * body.amount;
+  const advisoryFee = (body.percentage_advisory_fee/100) * body.amount;
+
+  return processingFee + insuranceFee + advisoryFee;
 }
 
 // Function to calculate total monthly repayment
@@ -940,13 +949,198 @@ function calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees) {
   return parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
 }
 
-// Function to create loan application
+/**
+ *
+ * @param monthly_interest
+ * @param loan_amount
+ * @returns {number}
+ */
+function monthly_interest(monthly_interest, loan_amount) {
+  return monthly_interest * loan_amount
+}
+
+function figure_denominator(monthly_interest, loan_duration) {
+  const bas_e = 1-(1+monthly_interest);
+  return Math.pow(bas_e, -loan_duration)
+}
+
+/**
+ *
+ * @param all_in_pricing
+ * @param period
+ * @param loan_amount
+ * @returns {number}
+ */
+export const monthly_repayment_numerator = (all_in_pricing, period, loan_amount) => {
+  const monthly_interest_r_value = reducing_monthly_interest_function(all_in_pricing, period);
+  return monthly_interest_r_value * loan_amount;
+};
+
+export const monthly_repayment_denominator = (monthly_interest, time_period) => {
+  return 1 - Math.pow(1 + monthly_interest, -time_period);
+};
+
+/**
+ *
+ * @param all_in_pricing
+ * @param period (year)
+ * @returns {number}
+ */
+export const reducing_monthly_interest_function = (all_in_pricing, period) => {
+  return all_in_pricing/period;
+}
+
+/**
+ *
+ * @param all_in_pricing
+ * @param period
+ * @param loan_amount
+ * @param monthly_interest
+ * @param loan_duration
+ * @returns {number}
+ */
+export const monthly_repayment = (all_in_pricing, period, loan_amount, monthly_interest, loan_duration) => {
+  return (monthly_repayment_numerator(all_in_pricing, period, loan_amount)/monthly_repayment_denominator(monthly_interest, loan_duration)).toFixed(2)
+}
+
+/**
+ *
+ * @param monthly_repayment
+ * @param interest
+ * @returns {number}
+ */
+export const principal_calculation = (monthly_repayment, interest) => {
+  return monthly_repayment - interest
+}
+
+/**
+ *
+ * @returns {number}
+ */
+function repayment_date() {
+  const currentDate = new Date();
+  return currentDate.getTime();
+}
+
+
+function principal_repayment_calculation(monthly_repayment_amount, reducing_monthly_interest, loan_amount) {
+  return monthly_repayment_amount-(reducing_monthly_interest * loan_amount)
+}
+
+function total_repayment_due_calculation(total_monthly_repayment, fees) {
+  let sum = total_monthly_repayment + fees;
+  return parseFloat(sum).toFixed(2);
+}
+
+function reducing_monthly_interest_calculation(reducing_monthly_interest, outstanding_loan_amount) {
+  return reducing_monthly_interest * outstanding_loan_amount;
+}
+
+function outstanding_loan_amount_calculation(loan_amount, principal_payment) {
+  return parseFloat(loan_amount - principal_payment).toFixed(2);
+}
+
+function principal_payment_calculation(monthly_repayment_amount, reducing_monthly_interest) {
+  return monthly_repayment_amount - reducing_monthly_interest;
+}
+
+function new_total_payment_due(principal_payment, reducing_monthly_interest, fees) {
+  return principal_payment + reducing_monthly_interest + fees;
+}
+
+function calcute_interest(reducing_monthly_interest, loan_amount) {
+  return Number(reducing_monthly_interest * loan_amount).toFixed(2);
+}
+
+function churn_loan_amount(requested_loan_amount, outstanding_loan_amount) {
+  return Number(requested_loan_amount - outstanding_loan_amount).toFixed(2);
+}
+
+/**
+ *
+ * @returns {boolean}
+ * @param userDetails
+ * @param body
+ */
+// export const repayment_information_churning_beta = (req, existingLoanApplication) => {
+//   const { body } = req;
+//   const loan_amount = body.amount;
+//   let totalFee = calculateTotalFees(body)
+//   let subsequentFee = 0;
+//   // let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
+//   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.total_outstanding_amount);
+//   const all_in_pricing = 48/100;
+//   const time_period = 12;
+//   let reducing_monthly_interest = reducing_monthly_interest_function(all_in_pricing, time_period);
+//   // let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
+//   let monthly_repayment_amount = monthly_repayment(all_in_pricing, time_period, loan_amount, reducing_monthly_interest, loan_duration);
+//   // let monthlyRepayment = parseFloat(existingLoanApplication.monthly_repayment);
+//   const loan_duration = body.duration_in_months;
+//   let monthlyRepayment = monthly_repayment(all_in_pricing, time_period, loan_amount, reducing_monthly_interest, loan_duration);
+//   // let monthlyInterest = parseFloat(existingLoanApplication.monthly_interest);
+//   let monthlyInterest = reducing_monthly_interest_function(all_in_pricing, time_period);
+//
+//   let new_principal_payment = 0;
+//   let pre_record_counter = 1;
+//   console.log('Repayment Order: ', pre_record_counter);
+//   console.log('Repayment Date: ', dayjs().format('YYYY-MM-DD'));
+//   console.log('Principal: ', churn_loan_amount(loan_amount, 0))
+//   console.log('Fees: ', totalFee)
+//   console.log("Monthly Repayment: ", monthly_repayment_amount );
+//   let principal_payment = principal_repayment_calculation(monthly_repayment_amount, reducing_monthly_interest, loan_amount);
+//   console.log('Principal Payment: ', principal_payment);
+//   console.log('Interest: ', calcute_interest(reducing_monthly_interest, loan_amount));
+//   console.log('Total Payment Due: ', total_repayment_due_calculation(monthly_repayment_amount, totalFee));
+//   let outstanding_loan_amount = churn_loan_amount(loan_amount, principal_payment); // loan_amount - principal_payment;
+//   console.log('Outstanding Loan: ', outstanding_loan_amount);
+//   console.log('.......................... ')
+//   totalFee = 0;
+//
+//   let repaymentArray = [{
+//     loan_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
+//     user_id,
+//     repayment_order: 1,
+//     principal_payment: parseFloat(parseFloat(firstPrincipalPayment).toFixed(2)),
+//     interest_payment: parseFloat(parseFloat(firstRepaymentInterest).toFixed(2)),
+//     fees: parseFloat(parseFloat(totalFee).toFixed(2)),
+//     total_payment_amount: parseFloat(parseFloat(firstRepaymentDue).toFixed(2)),
+//     pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
+//     post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
+//     proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD')
+//   }];
+//
+//   for (let record_counter = 1; record_counter < loan_duration; record_counter++) {
+//     console.log('Repayment Order: ', pre_record_counter + record_counter);
+//     console.log('Repayment Date: ', dayjs().add(30, 'days').format('YYYY-MM-DD'));
+//     console.log('Principal: ', outstanding_loan_amount)
+//     console.log('Fees: ', fees)
+//     monthly_repayment_amount = monthly_repayment(all_in_pricing, time_period, loan_amount, reducing_monthly_interest, loan_duration);
+//     console.log("Monthly Repayment: ", monthly_repayment_amount );
+//     principal_payment = monthly_repayment_amount - calcute_interest(reducing_monthly_interest, outstanding_loan_amount);
+//     console.log('Principal Payment: ', principal_payment);
+//     console.log('Interest: ', calcute_interest(reducing_monthly_interest, outstanding_loan_amount));
+//     new_principal_payment = principal_payment_calculation(monthly_repayment_amount, reducing_monthly_interest)
+//     outstanding_loan_amount = outstanding_loan_amount_calculation(outstanding_loan_amount, principal_payment)
+//     console.log('Total Payment Due: ', new_total_payment_due(new_principal_payment, reducing_monthly_interest, fees))
+//     console.log('Outstanding Loan: ', outstanding_loan_amount);
+//     console.log('.......................... ')
+//   }
+//   return true;
+// }
+
 async function createLoanApplication(userDetails, body) {
-  const totalFees = calculateTotalFees(body.processing_fee, body.insurance_fee, body.advisory_fee);
-  const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
+  const loan_amount = body.amount;
+  const all_in_pricing = (body.monthly_interest * body.duration_in_months)/100;
+  const time_period = body.duration_in_months;
+  const loan_duration = body.duration_in_months;
+  let totalFees = calculateTotalFees(body)
+  let reducing_monthly_interest = reducing_monthly_interest_function(all_in_pricing, time_period);
+  let monthly_repayment_amount = monthly_repayment(all_in_pricing, time_period, loan_amount, reducing_monthly_interest, loan_duration);
+
+  const totalMonthlyRepayment = calculateTotalMonthlyRepayment(monthly_repayment_amount, body.duration_in_months);
   const totalInterestAmount = calculateTotalInterestAmount(totalMonthlyRepayment, body.amount);
   const totalAmountRepayable = calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
-  const loanApplicationDetails = await processOneOrNoneData(loanQueries.manuallyInitiatePersonalLoanApplication, [
+  return await processOneOrNoneData(loanQueries.manuallyInitiatePersonalLoanApplication, [
     userDetails.user_id,
     parseFloat(body.amount),
     body.loan_reason,
@@ -958,26 +1152,24 @@ async function createLoanApplication(userDetails, body) {
     body.percentage_insurance_fee,
     body.percentage_advisory_fee,
     body.monthly_interest,
-    body.processing_fee,
-    body.insurance_fee,
-    body.advisory_fee,
-    body.monthly_repayment,
+    (body.percentage_processing_fee / 100) * body.amount,
+    (body.percentage_insurance_fee / 100) * body.amount,
+    (body.percentage_advisory_fee / 100) * body.amount,
+    monthly_repayment_amount,
     body.loan_decision,
     body.is_loan_disbursed,
     body.loan_disbursed_at,
-    body.total_outstanding_amount,
+    totalAmountRepayable,
     body.status,
     false,
     body.initial_amount_requested,
     body.initial_loan_tenor_in_months,
   ]);
-
-  return loanApplicationDetails;
 }
 
 // Function to create repayment schedule
 export async function createRepaymentSchedule(loanApplicationDetails, userDetails) {
-  const repaymentSchedule = await generateLoanRepaymentSchedule(loanApplicationDetails, userDetails.user_id);
+  const repaymentSchedule = await generateLoanRepaymentScheduleV2(loanApplicationDetails, userDetails.user_id);
   for (const schedule of repaymentSchedule) {
     await processOneOrNoneData(loanQueries.createDisbursedLoanRepaymentSchedule, [
       schedule.loan_id,
@@ -1034,19 +1226,35 @@ function prepareResponseData(loanApplicationDetails, body, totalMonthlyRepayment
   };
 }
 
+
+// export const manuallyInitiatePersonalLoanApplication_exp = async (req, res, next) => {
+//   const loan_period = 12;
+//   try {
+//     const { body } = req;
+//     const [userDetails] = await processAnyData(userQueries.getUserByUserId, [req.body.user_id]);
+//     // const loanApplicationDetails = await createLoanApplicationV2(userDetails, body, loan_period);
+//     const loanApplicationDetails =  repayment_information_churning_beta(req, loan);
+//     console.log(loanApplicationDetails);
+//     return true;
+//
+//   } catch (error) {
+//     error.label = enums.FAILED_TO_CREATE_MANUAL_LOAN_RECORD;
+//     logger.error(`creating loan application record failed:::${enums.FAILED_TO_CREATE_MANUAL_LOAN_RECORD}`, error.message);
+//     return next(error);
+//   }
+// };
 // Main function
 export const manuallyInitiatePersonalLoanApplication = async (req, res, next) => {
   try {
     const { body } = req;
     const [userDetails] = await processAnyData(userQueries.getUserByUserId, [req.body.user_id]);
-
     const loanApplicationDetails = await createLoanApplication(userDetails, body);
     const repaymentSchedule = await createRepaymentSchedule(loanApplicationDetails, userDetails);
 
     const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
     const totalAmountRepayable = calculateTotalAmountRepayable(
       loanApplicationDetails.totalMonthlyRepayment,
-      calculateTotalFees(body.processing_fee, body.insurance_fee, body.advisory_fee)
+      calculateTotalFees(body)
     );
     const totalInterestAmount = calculateTotalInterestAmount(loanApplicationDetails.totalMonthlyRepayment, body.amount);
 
