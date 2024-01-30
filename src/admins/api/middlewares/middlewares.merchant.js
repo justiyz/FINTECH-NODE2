@@ -30,7 +30,7 @@ export const validateCreateMerchant = async (req, res, next) => {
       )
     }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist validateCreateMerchant.admin.middlewares.merchant.js`);
-    if (customer_loan_max_amount >= merchant_loan_limit) {
+    if (+customer_loan_max_amount >= +merchant_loan_limit) {
       logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: validation failed, merchant limit less than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
       return ApiResponse.error(
         res,
