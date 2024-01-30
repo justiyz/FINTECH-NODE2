@@ -4,7 +4,7 @@ import config from '../../config';
 const { SEEDFI_NODE_ENV } = config;
 
 const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-                                          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
+                                          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails) => ({
   'user_id': user.user_id,
   'loan_application_id': loanApplicationDetails.loan_id,
   'loan_duration_in_month': `${body.duration_in_months}`,
@@ -34,7 +34,8 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'previous_loan_count': previousLoanCount,
   'previous_loan_defaulted_count': previouslyDefaultedCount,
   'bank_statement_service_choice': body.bank_statement_service_choice == undefined ? null : body.bank_statement_service_choice,
-  'tier': user.tier
+  'tier': user.tier,
+  'max_amount_for_no_credit_history': maximumAmountForNoCreditHistoryDetails
 });
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
   data.loan_application_id,
