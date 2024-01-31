@@ -161,6 +161,41 @@ spec:
             secretKeyRef:
               key: underwritingappaccesstoken
               name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_ACCOUNT_NUMBER
+          valueFrom: loandisbursementaccountnumber
+            secretKeyRef:
+              key: 
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_ACCOUNT_NAME
+          valueFrom:
+            secretKeyRef:
+              key: loandisbursementaccountname
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_BANK_CODE
+          valueFrom:
+            secretKeyRef:
+              key: loandisbursementbankcode
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_BANK_NAME
+          valueFrom:
+            secretKeyRef:
+              key: loandisbursementbankname
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_RECOVA_INSTITUTION_CODE
+          valueFrom:
+            secretKeyRef:
+              key: recovainstitutioncode
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_RECOVA_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: recovabaseurl
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_RECOVA_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: recovabearertoken
+              name: seedfi-api-config
         
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
