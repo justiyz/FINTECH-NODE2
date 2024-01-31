@@ -162,9 +162,9 @@ spec:
               key: underwritingappaccesstoken
               name: seedfi-api-config
         - name: SEEDFI_PROD_LOAN_DISBURSEMENT_ACCOUNT_NUMBER
-          valueFrom: loandisbursementaccountnumber
+          valueFrom: 
             secretKeyRef:
-              key: 
+              key: loandisbursementaccountnumber
               name: seedfi-api-config
         - name: SEEDFI_PROD_LOAN_DISBURSEMENT_ACCOUNT_NAME
           valueFrom:
