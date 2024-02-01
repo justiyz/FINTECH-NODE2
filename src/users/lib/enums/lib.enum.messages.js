@@ -16,6 +16,7 @@ export const VERIFICATION_TOKEN_INVALID = 'Email has been verified OR verificati
 export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. ';
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
+export const SUCCESSFUL_VERIFICATION = 'BVN information verified';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
 export const EVENT_EXISTS = 'Event Record Exists';
 export const INVALID_AUTHORIZATION = 'Invalid Authorization Token';

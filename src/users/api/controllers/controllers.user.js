@@ -25,7 +25,7 @@ import * as dojahService from '../services/service.dojah'
 import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
-import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import {AVAILABLE_VERIFICATION_MEANS, SUCCESSFUL_VERIFICATION} from "../../lib/enums/lib.enum.messages";
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { verifyBvnOTPSms } from '../../lib/templates/sms';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
@@ -1482,6 +1482,28 @@ export const sendBvnOtp = async(req, res, next) => {
     return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+  }
+}
+
+export const verifyBvnInfo = async(req, res, next) => {
+  try {
+    const {body: {bvn, first_name, last_name }} = req;
+    const result = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    if (result.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+
+    }
+
+    if(
+      result.data.firstName.toLowerCase() === first_name
+      && result.data.lastName.toLowerCase() === last_name
+      && result.data.bvn.toLowerCase() === bvn
+    ) {
+      return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
+    }
+  } catch (error) {
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
   }
 }
 
