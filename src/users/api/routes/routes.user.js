@@ -317,6 +317,13 @@ router.post(
 );
 
 router.post(
+  '/verify-bvn-otp-beta',
+  AuthMiddleware.validateInfoCall,
+  Model(Schema.verifyBVNInformation, 'payload'),
+  UserController.verifyBvnInfo
+);
+
+router.post(
   '/validate-user-bvn-otp',
   AuthMiddleware.validateAuthToken,
   Model(Schema.verifyBvnOtp, 'payload'),
