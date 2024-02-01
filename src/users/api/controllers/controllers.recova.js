@@ -227,7 +227,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       "bvn": bvn,
       "businessRegistrationNumber": "string",
       "taxIdentificationNumber": "string",
-      "loanReference": loanDetails.loan_id+"-loan-mandate",
+      "loanReference": loanDetails.loan_id,
       "customerID": userDetails.id,
       "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
       "customerEmail": userDetails.email,
