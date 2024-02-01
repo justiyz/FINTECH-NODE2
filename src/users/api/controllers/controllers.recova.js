@@ -27,6 +27,8 @@ export const fetchLoanDueAmount = async (req, res, next) => {
     const [nextLoanRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Recova:::Info: user loan repayment details fetched fetchLoanDueAmount.controllers.recova.js`);
 
+    if(!nextLoanRepaymentDetails) return ApiResponse.error(res, 'No next repayment', enums.HTTP_BAD_REQUEST, enums.FETCH_LOAN_DUE_AMOUNT_CONTROLLER);
+
     const amountDue = nextLoanRepaymentDetails.status == 'over due' ? nextLoanRepaymentDetails.total_payment_amount : 0;
     const data = {
       loanReference: loanDetails.loan_id,
@@ -194,7 +196,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     const [ userDetails ] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [ user.user_id ]);
 
-    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id, user.user_id ]);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loanDetails.loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
 
     const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
@@ -205,9 +207,10 @@ export const createMandateConsentRequest = async (req, res, next) => {
       return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
     const collectionPaymentSchedules = loanRepaymentDetails.map((repayment) => {
+
       return {
-        repaymentDate: repayment.proposed_repayment_date,
-        repaymentAmountInNaira: repayment.total_repayment_amount
+        repaymentDate: repayment.proposed_payment_date,
+        repaymentAmountInNaira: parseFloat(repayment.principal_payment)
       };
     })
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
@@ -224,7 +227,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       "bvn": bvn,
       "businessRegistrationNumber": "string",
       "taxIdentificationNumber": "string",
-      "loanReference": loanDetails.loan_id,
+      "loanReference": loanDetails.loan_id+"-loan-mandate",
       "customerID": userDetails.id,
       "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
       "customerEmail": userDetails.email,
@@ -240,6 +243,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const result = await recovaService.createConsentRequest(data);
+    console.log('result', result)
     if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
       const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
       return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);

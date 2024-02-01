@@ -678,7 +678,7 @@ const getBookingTotalPrice = async (ticket_bookings) => {
 export const checkUserTicketLoanEligibility = async (req, res, next) => {
   try {
     const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
-      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, params: {ticket_id} } = req;
+      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, maximumAmountForNoCreditHistoryDetails, params: {ticket_id} } = req;
     const userDefaultAccountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     // calculate amount to be booked
@@ -703,7 +703,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     let payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount);
+          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails);
     const result = await loanApplicationEligibilityCheck(payload);
 
     if(result.status === 200 && result.statusText === 'OK') {
