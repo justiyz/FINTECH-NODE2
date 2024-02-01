@@ -219,6 +219,7 @@ export default {
       user_id,
       repayment_order,
       total_payment_amount,
+      principal_payment,
       proposed_payment_date,
       pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
