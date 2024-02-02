@@ -272,12 +272,21 @@ export default {
       pl.created_at date_requested,
       pl.loan_disbursed_at as date_disbursed,
       (
-        SELECT COALESCE(SUM(amount), 0)
-        FROM personal_loan_payments
+        SELECT COALESCE(SUM(amount_paid), 0)
+        FROM personal_loan_payment_schedules
         WHERE loan_id = pl.loan_id
-        AND transaction_type = 'credit'
       ) AS repayment_amount,
-      pl.total_outstanding_amount as total_amount,
+      (
+        SELECT COALESCE(SUM(total_payment_amount)) - COALESCE(SUM(amount_paid), 0)
+        FROM personal_loan_payment_schedules
+        WHERE loan_id = pl.loan_id
+      ) AS outstanding_amount,
+      (
+        pl.total_repayment_amount +
+        pl.processing_fee +
+        pl.insurance_fee +
+        pl.advisory_fee
+      )as total_amount,
       pl.status as loan_status
     FROM merchant_user_loans as mu_loans
     LEFT JOIN users ON mu_loans.user_id = users.user_id
