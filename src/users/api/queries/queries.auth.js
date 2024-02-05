@@ -1,12 +1,12 @@
 export default {
   getUserByVerificationToken: `
     SELECT id, email, phone_number, user_id, verification_token_expires, is_verified_email
-    FROM users 
+    FROM users
     WHERE verification_token = $1`,
 
   getUserByVerificationTokenAndUniqueField: `
     SELECT id, email, phone_number, user_id, verification_token_expires, is_verified_email, verification_token_request_count, invalid_verification_token_count
-    FROM users 
+    FROM users
     WHERE verification_token = $1
     AND user_id = $2`,
 
@@ -29,7 +29,7 @@ export default {
 
   checkIfExistingReferralCode: `
     SELECT id, user_id, referral_code
-    FROM users 
+    FROM users
     WHERE referral_code = $1`,
 
   checkIfReferralPreviouslyRecorded: `
@@ -44,9 +44,9 @@ export default {
     ) VALUES ($1, $2)`,
 
   checkIfUserWasReferred: `
-    SELECT 
-      id, 
-      referrer_user_id, 
+    SELECT
+      id,
+      referrer_user_id,
       referred_user_id,
       created_at
     FROM referral_trail
@@ -59,7 +59,7 @@ export default {
 
   updateUserPoints: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       unclaimed_reward_points = unclaimed_reward_points + $2,
       cumulative_reward_points = cumulative_reward_points + $3
@@ -120,22 +120,22 @@ export default {
 
   fetchUserPassword: `
     SELECT id, user_id, password
-    FROM users 
+    FROM users
     WHERE user_id = $1`,
 
   fetchUserPin: `
     SELECT id, user_id, pin
-    FROM users 
+    FROM users
     WHERE user_id = $1`,
 
   loginUserAccount: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       refresh_token = $2
     WHERE user_id = $1
     RETURNING id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender, date_of_birth, image_url,
-    is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin, 
+    is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
     is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code, refresh_token, loan_status, next_profile_update`,
 
   forgotPassword: `
@@ -210,7 +210,7 @@ export default {
     WHERE user_id = $1`,
 
   checkIfUserHasClusterInvite: `
-    SELECT 
+    SELECT
       id,
       cluster_id,
       inviter_id,
@@ -279,8 +279,34 @@ export default {
 
   updateUserInvalidOtpCount: `
     UPDATE users
-    SET 
+    SET
       updated_at = NOW(),
       invalid_verification_token_count = invalid_verification_token_count + 1
-    WHERE user_id = $1`
+    WHERE user_id = $1`,
+
+  getVerificationCode: `
+    SELECT *
+    FROM verification_codes
+    WHERE code = $1
+    LIMIT 1;
+  `,
+
+  upsertVerificationCode: `
+    INSERT INTO verification_codes (verification_key, code, expires_at, duration)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (verification_key)
+    DO UPDATE SET code = EXCLUDED.code, expires_at = EXCLUDED.expires_at, duration = EXCLUDED.duration;
+  `,
+
+  getValidVerificationCode: `
+    SELECT *
+    FROM verification_codes
+    WHERE code = $1
+    AND expires_at > NOW()
+    LIMIT 1;
+  `,
+
+  deleteVerificationCode: `
+    DELETE FROM verification_codes WHERE verification_key = $1 AND code = $2;
+  `
 };

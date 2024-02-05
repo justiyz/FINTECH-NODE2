@@ -91,6 +91,11 @@ export default {
       id,
       user_id,
       (CONCAT(house_number, ' ', street, ' ', city, ' city', ' ', lga, ' lga', ' ', state, ' state', ' ', country)) AS address,
+      house_number,
+      street,
+      city,
+      state,
+      country,
       is_verified_address,
       is_verified_utility_bill,
       address_image_url,
@@ -123,6 +128,7 @@ export default {
         created_at
       FROM user_bank_accounts
       WHERE user_id = $1
+      AND is_deleted = false
       ORDER BY is_default DESC`,
 
   fetchUserDebitCards: `
@@ -178,6 +184,7 @@ export default {
         SELECT
         users.id,
         users.user_id,
+        users.email,
         TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
         users.tier,
         to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
@@ -436,12 +443,69 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id =$1`,
+      WHERE user_id =$1
+      AND is_deleted = false
+      `,
 
   fetchCardsById: `
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
-      WHERE id = $1`
+      WHERE id = $1`,
+
+  updateUserProfile: `
+      UPDATE users
+      SET
+        updated_at = NOW(),
+        email = $2,
+        phone_number = $3,
+        date_of_birth = $4,
+        gender = $5,
+        number_of_children = $6,
+        marital_status = $7
+      WHERE user_id = $1
+      RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, email, phone_number, number_of_children, marital_status, next_profile_update
+   `,
+
+  updateEmploymentDetails: `
+    UPDATE employment_type
+    SET
+      updated_at = NOW(),
+      employment_type = $2,
+      company_name = $3,
+      school_name = $4,
+      date_started = $5,
+      monthly_income = $6
+    WHERE user_id = $1
+    RETURNING user_id, employment_type, next_update, monthly_income
+    `,
+
+  updateUserAddressDetails: `
+    UPDATE address_verification
+    SET
+      updated_at = NOW(),
+      street = $2,
+      state = $3,
+      city = $4,
+      house_number = $5,
+      landmark = $6,
+      lga = $7,
+      country = $8,
+      type_of_residence = $9,
+      rent_amount = $10
+    WHERE user_id = $1
+    RETURNING *`,
+
+  updateUserNextOfKin: `
+    UPDATE next_of_kin
+    SET
+      updated_at = NOW(),
+      first_name = $2,
+      last_name = $3,
+      phone_number = $4,
+      email = $5,
+      kind_of_relationship = $6
+    WHERE user_id = $1
+    RETURNING *`,
 };
 
 

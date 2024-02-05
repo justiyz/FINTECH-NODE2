@@ -16,7 +16,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 import * as zeehService from '../services/services.zeeh';
-import {FAILED_TO_PROCESS_EMAIL_VERIFICATION} from "../../lib/enums/lib.enum.messages";
+import {FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED} from "../../lib/enums/lib.enum.messages";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -229,6 +229,7 @@ export const verifyBvn = async(req, res, next) => {
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
+    req.bvnData = data.data;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification successful verifyBvn.middlewares.user.js`);
     return next();
   } catch (error) {
@@ -262,7 +263,8 @@ export const checkIfBvnFlaggedBlacklisted = async(req, res, next) => {
     if (plainBlacklistedBvns.includes(body.bvn.trim())) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously flagged blacklisted checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
       await processOneOrNoneData(userQueries.blacklistUser, [ user.user_id ]);
-      return next();
+      return ApiResponse.error(res, enums.USER_BVN_BLACKLISTED, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      // return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is clean and is not on blacklisted bvns list checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     return next();
@@ -494,7 +496,7 @@ export const checkIfAccountDetailsExists = async(req, res, next) => {
     if (!payment_channel || payment_channel === 'bank') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
-      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsByUserId, [ user.user_id ]);
+      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id, user.user_id ]);
       if (!accountIdExists) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
         return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);

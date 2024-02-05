@@ -1,6 +1,43 @@
 import config from '../../../config/index';
 import * as Hash from '../../utils/lib.util.hash';
 
+export const bvnOtp = (data) => `
+<tr>
+  <td>
+    <h2 style="font-family: 'Figtree';font-style: normal;font-weight: 500;font-size: 20px;line-height: 36px;color: #84868c;">
+      Hello,
+    </h2>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+        Kindly use the OTP below to verify your BVN,
+        OTP is active for ${data.otpDuration}. <br><br>
+        Please do not share this code with anyone.
+    </p>
+  </td>
+</tr>
+
+<tr border="0" cellspacing="0" cellpadding="0" width="100%">
+  <td style=" background-color:#f2faf1;padding: 12px 35px;width: 100%;height: 35px;border-radius: 8px;"
+  align="center">
+    <span style=" text-decoration: none; display: inline-block;font-family: 'Figtree';font-style: normal;font-weight: 700;
+      font-size: 20px;line-height: 24px;text-align: center;color: #1a201d;letter-spacing: 3px;">
+      ${data.otp}
+    </span>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;color: #84868c;margin-bottom: 30px;">
+      If you did not request a BVN validation, you can ignore this email.
+    </p>
+  </td>
+</tr>`;
+
 export const forgotPassword = (data) => `
 <tr>
   <td>

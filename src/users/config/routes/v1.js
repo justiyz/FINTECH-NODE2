@@ -14,6 +14,8 @@ import adminSettingsRoute from '../../../admins/api/routes/routes.settings';
 import bvnRoute from '../../../admins/api/routes/routes.bvn';
 import AdminClusterRoute from '../../../admins/api/routes/routes.cluster';
 import adminShopRoutes from '../../../admins/api/routes/routes.shop';
+import adminMerchantRoute from '../../../admins/api/routes/routes.merchant';
+import recovaRoutes from '../../api/routes/routes.recova';
 
 const router = Router();
 
@@ -24,6 +26,7 @@ router.use('/loan', loanRoute);
 router.use('/cluster', clusterRoute);
 router.use('/admin', adminRoute);
 router.use('/shop', shopRoutes);
+router.use('/recova', recovaRoutes);
 router.use('/admin/auth', adminAuthRoute);
 router.use('/admin/role', adminRoleRoute);
 router.use('/admin/user', adminUserRoute);
@@ -32,5 +35,6 @@ router.use('/admin/settings', adminSettingsRoute);
 router.use('/admin/bvn', bvnRoute);
 router.use('/admin/cluster', AdminClusterRoute);
 router.use('/admin/shop', adminShopRoutes);
+router.use('/admin/merchant', adminMerchantRoute);
 
 export default router;

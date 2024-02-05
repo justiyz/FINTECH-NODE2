@@ -1,0 +1,1 @@
+ALTER TABLE merchants ADD COLUMN customer_loan_max_amount INTEGER DEFAULT 0;

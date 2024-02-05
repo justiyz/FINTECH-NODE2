@@ -99,7 +99,7 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
     </tr>
     <tr>
       <td width="30%" height="40px">Bank Verification Number:</td>
-      <td>${await decrypt(decodeURIComponent(userOfferLetterDetail.bvn))}</td>
+      <td>${userOfferLetterDetail.bvn}</td>
     </tr>
     <tr>
       <td width="30%" height="40px">Amount:</td>

@@ -40,7 +40,7 @@ router.post(
   UserMiddleware.isVerifiedBvn('complete'),
   UserMiddleware.isBvnPreviouslyExisting,
   UserMiddleware.verifyBvn,
-  UserMiddleware.checkIfBvnFlaggedBlacklisted,
+  // UserMiddleware.checkIfBvnFlaggedBlacklisted,
   UserController.updateBvn
 );
 
@@ -304,6 +304,31 @@ router.get(
     UserController.decryptUserBVN
 );
 
+router.post(
+  '/send-bvn-otp',
+  Model(Schema.sendBvnOtp, 'payload'),
+  UserController.sendBvnOtp
+);
+
+router.post(
+  '/verify-bvn-otp',
+  Model(Schema.verifyBvnOtp, 'payload'),
+  UserController.verifyBvnOtp
+);
+
+router.post(
+  '/verify-bvn-otp-beta',
+  AuthMiddleware.validateInfoCall,
+  Model(Schema.verifyBVNInformation, 'payload'),
+  UserController.verifyBvnInfo
+);
+
+router.post(
+  '/validate-user-bvn-otp',
+  AuthMiddleware.validateAuthToken,
+  Model(Schema.verifyBvnOtp, 'payload'),
+  UserController.verifyBvnOtp
+);
 
 
 export default router;

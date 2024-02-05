@@ -25,8 +25,13 @@ import * as dojahService from '../services/service.dojah'
 import {error} from 'console';
 import {response} from 'express';
 import sharp from 'sharp';
-import {AVAILABLE_VERIFICATION_MEANS} from "../../lib/enums/lib.enum.messages";
+import {AVAILABLE_VERIFICATION_MEANS, SUCCESSFUL_VERIFICATION} from "../../lib/enums/lib.enum.messages";
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
+import { verifyBvnOTPSms } from '../../lib/templates/sms';
+import * as Helpers from '../../lib/utils/lib.util.helpers';
+import { sendSms } from '../services/service.sms';
+import { parsePhoneNumber } from 'awesome-phonenumber'
+
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -131,16 +136,21 @@ export const updateSelfieImage = async (req, res, next) => {
  */
 export const updateBvn = async (req, res, next) => {
   try {
-    const {body: {bvn}, user} = req;
-    const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
+    const {body: {bvn}, user, bvnData} = req;
+    // const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     // const tier_upgraded = tierChoice === '1' ? true : false;
-    const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
+    const otpData = await sendOtpToBvnUser(bvn, bvnData)
+    // const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
+    // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
 
-    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...updateBvn});
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...otpData});
+    }
+
+    return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...otpData, otp: undefined});
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
     error.label = enums.UPDATE_BVN_CONTROLLER;
@@ -832,29 +842,32 @@ export const initiateAddressVerification = async (req, res) => {
     const candidateId = (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) ? userAddressDetails.you_verify_candidate_id :
       userYouVerifyCandidateDetails.id;
     const requestId = uuidv4();
-    const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
-    if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user candidate details successfully created with youVerify
-      initiateAddressVerification.controller.user.js`);
-      const payload = UserPayload.updateAddressVerification(body, user, requestId, candidateId, result.data);
-      const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address details updated in the DB but still awaiting verification
-      initiateAddressVerification.controller.user.js`);
-      userActivityTracking(req.user.user_id, 83, 'success');
-      return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
-    }
-    if (result && result.statusCode !== 201) {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
-      userActivityTracking(req.user.user_id, 83, 'fail');
-      // const errorMessage = !result.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED : result.response.data.message;
-      // const errorCode = !result.response.data ? enums.HTTP_FORBIDDEN : result.response.data.statusCode;
-      return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED, enums.HTTP_FORBIDDEN, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
-    }
-    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address verification could not be initiated with youVerify
-    initiateAddressVerification.controller.user.js`);
-    userActivityTracking(req.user.user_id, 83, 'fail');
-    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
-      enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+    return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, userAddressDetails);
+
+    // const result = await initiateUserYouVerifyAddressVerification(user, body, candidateId, requestId);
+    // if (result && result.statusCode === 201 && result.message.toLowerCase() === 'address requested successfully!') {
+    //   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user candidate details successfully created with youVerify
+    //   initiateAddressVerification.controller.user.js`);
+    //   const payload = UserPayload.updateAddressVerification(body, user, requestId, candidateId, result.data);
+    //   const updatedUserAddress = await processOneOrNoneData(userQueries.updateUserAddressDetails, payload);
+    //   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address details updated in the DB but still awaiting verification
+    //   initiateAddressVerification.controller.user.js`);
+    //   userActivityTracking(req.user.user_id, 83, 'success');
+    //   return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, updatedUserAddress);
+    // }
+    // if (result && result.statusCode !== 201) {
+
+    //   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's address verification creation failed initiateAddressVerification.middlewares.user.js`);
+    //   userActivityTracking(req.user.user_id, 83, 'fail');
+    //   // const errorMessage = !result.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED : result.response.data.message;
+    //   // const errorCode = !result.response.data ? enums.HTTP_FORBIDDEN : result.response.data.statusCode;
+    //   return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED, enums.HTTP_FORBIDDEN, enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
+    // }
+    // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user address verification could not be initiated with youVerify
+    // initiateAddressVerification.controller.user.js`);
+    // userActivityTracking(req.user.user_id, 83, 'fail');
+    // return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
+    //   enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER);
   } catch (error) {
     error.label = enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER;
     logger.error(`initiating user address verification failed:::${ enums.INITIATE_ADDRESS_VERIFICATION_CONTROLLER }`, error.message);
@@ -1438,5 +1451,149 @@ export const decryptUserBVN = async(req, res, next) => {
     error.label = enums.FAILED_TO_FETCH_USER_BVN;
     logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
     return next(error);
-  }
+  };
 };
+
+export const sendBvnOtp = async(req, res, next) => {
+  try {
+    const {body: {bvn, date_of_birth}} = req;
+    //get bvn information from provider
+    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+
+    if (data.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
+
+      return ApiResponse.error(res, enums.UNABLE_TO_VERIFY_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+    //compare bvn dob with provided dob information
+    if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
+
+      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+
+    //if match, send otp to user
+
+    const otpData = await sendOtpToBvnUser(bvn, data.data);
+
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, {...otpData});
+    }
+    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
+  } catch (error) {
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+  }
+}
+
+export const verifyBvnInfo = async(req, res, next) => {
+  try {
+    const {body: {bvn, first_name, last_name }} = req;
+    const result = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    if (result.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+
+    }
+
+    if(
+      result.data.firstName.toLowerCase() === first_name
+      && result.data.lastName.toLowerCase() === last_name
+      && result.data.bvn.toLowerCase() === bvn
+    ) {
+      return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
+    }
+  } catch (error) {
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
+  }
+}
+
+
+export const verifyBvnOtp = async(req, res, next) => {
+  try {
+    const {body: {bvn, code}} = req;
+
+    const [ existingOtp ] = await processAnyData(authQueries.getValidVerificationCode, [ code ]);
+
+    if(!existingOtp){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: no existing verification code found verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
+    }
+    const decryptedBvn = await Hash.decrypt(existingOtp.verification_key);
+    if(decryptedBvn !== bvn){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn does not match record verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
+    }
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn match verification code bvn verifyBvnOtp.controller.user.js`);
+
+    await processOneOrNoneData(authQueries.deleteVerificationCode, [ existingOtp.verification_key, code ]);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code deleted verifyBvnOtp.controller.user.js`);
+
+    if(req.user){
+      const user = req.user
+      const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
+      const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
+      return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
+    }
+
+    const data = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
+
+    if (data.status !== 'success') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
+
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+    return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { bvn: bvn, email: data.data.email, phone_number: data.data.phoneNumber1,
+      first_name: data.data.firstName, last_name: data.data.lastName, middle_name: data.data.middleName, gender: data.data.gender });
+  } catch (error) {
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
+  }
+}
+
+const sendOtpToBvnUser = async (bvn, data) => {
+  const bvnHash = await Hash.encrypt(bvn.trim());
+  const otp = Helpers.generateOtp();
+  //check if otp exist
+  const [ existingOtp ] = await processAnyData(authQueries.getVerificationCode, [ otp ]);
+  logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database sendBvnOtp.controllers.user.js`);
+  if (existingOtp) {
+    return sendBvnOtp(req, res, next);
+  }
+
+    const expireAt = dayjs().add(10, 'minutes');
+    const expirationTime = dayjs(expireAt);
+
+    const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
+    const pn = parsePhoneNumber( data.phoneNumber1, { regionCode: 'NG' } )
+
+    if(!pn.valid){
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+
+    function maskString(str) {
+      if (str.length <= 7) {
+        return str;
+      }
+
+      const firstFour = str.slice(0, 4);
+      const lastThree = str.slice(-3);
+      const maskedPart = '*'.repeat(str.length - 7);
+
+      return firstFour + maskedPart + lastThree;
+    }
+
+    otpData.recipientPhoneNumber = maskString(pn.number.e164);
+    otpData.recipientEmail = maskString(data.email);
+
+    await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
+
+    await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
+    await MailService('BVN verification code', 'bvnOtp', {...otpData, email: data.email});
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
+
+    return otpData
+}

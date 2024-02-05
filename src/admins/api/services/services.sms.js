@@ -6,9 +6,9 @@ const { SEEDFI_NODE_ENV, SEEDFI_TERMII_API_KEY, SEEDFI_TERMII_SMS_URL, SEEDFI_TE
 
 const sendSms = async(sendTo, messageBody) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
-      return;
-    }
+    // if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+    //   return;
+    // }
     const recipient = sendTo.substring(1);
     const options = {
       method: 'post',
@@ -16,7 +16,7 @@ const sendSms = async(sendTo, messageBody) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      data: { 
+      data: {
         to: recipient,
         from: SEEDFI_TERMII_SENDER_ID,
         sms: messageBody,
@@ -32,6 +32,6 @@ const sendSms = async(sendTo, messageBody) => {
     return error;
   }
 };
-  
+
 export { sendSms };
-  
+

@@ -18,5 +18,12 @@ export default {
       message: msg,
       code
     });
-  }
+  },
+
+  json: (res, message, code, data) => res.status(code).json({
+    status: enums.SUCCESS_STATUS,
+    message,
+    code,
+    ...data
+  }),
 };

@@ -155,6 +155,56 @@ export const generateLoanDisbursementRecipient = async(req, res, next) => {
 };
 
 /**
+ * generate paystack recipient for bnpl loan to be credited
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const generateBNPLLoanDisbursementRecipient = async(req, res, next) => {
+  try {
+    const { user } = req;
+    // const [ userDisbursementAccountDetails ] = await processAnyData(loanQueries.fetchUserDisbursementAccount, [ user.user_id ]);
+
+    const userDisbursementAccountDetails = {
+      id: 'loan_disbursement_account_id',
+      user_id: 'user_id',
+      bank_name: SEEDFI_LOAN_DISBURSEMENT_BANK_NAME,
+      bank_code: SEEDFI_LOAN_DISBURSEMENT_BANK_CODE,
+      account_number: SEEDFI_LOAN_DISBURSEMENT_ACCOUNT_NUMBER,
+      account_name: SEEDFI_LOAN_DISBURSEMENT_ACCOUNT_NAME,
+      is_default: true,
+      is_disbursement_account: true,
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user disbursement account fetched successfully generateLoanDisbursementRecipient.middlewares.loan.js`);
+    const result = await createTransferRecipient(userDisbursementAccountDetails);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: response gotten from calling paystack to generate user transfer recipient code
+    generateLoanDisbursementRecipient.middlewares.loan.js`);
+    if (result.status === true && result.message === 'Transfer recipient created successfully') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code generated successfully
+      generateLoanDisbursementRecipient.middlewares.loan.js`);
+      const userPaystackTransferRecipient = result.data.recipient_code;
+      req.userTransferRecipient = userPaystackTransferRecipient;
+      return next();
+    }
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user transfer recipient code failed to be generated generateLoanDisbursementRecipient.middlewares.loan.js`);
+    if (result.response.status !== 200) {
+      userActivityTracking(user.user_id, 44, 'fail');
+      return ApiResponse.error(res, result.response.data.message, enums.HTTP_BAD_REQUEST, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
+    }
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    return ApiResponse.error(res, enums.USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE, enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE);
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 44, 'fail');
+    error.label = enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE;
+    logger.error(`generating user paystack transfer recipient failed::${enums.GENERATE_LOAN_DISBURSEMENT_RECIPIENT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check loan application status is currently approved so as to proceed with disbursement
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -287,13 +337,15 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
   const { user, body } = req;
   try {
     const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
-      maximumLoanTenorDetails, minimumLoanTenorDetails ] = await Promise.all([
+      maximumLoanTenorDetails, minimumLoanTenorDetails, tierOneMaximumAmountForNoCreditHistoryDetails, tierTwoMaximumAmountForNoCreditHistoryDetails ] = await Promise.all([
         processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
         processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
         processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
         processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
         processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ])
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_max_amount_for_no_credit_history' ]),
+        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_max_amount_for_no_credit_history' ])
     ]);
     if ((Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) && body.loan_reason != 'Salary advance loan') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor or applying for a salary advance loan
@@ -306,6 +358,7 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(user.tier) === 1) {
+      req.maximumAmountForNoCreditHistoryDetails = parseFloat(tierOneMaximumAmountForNoCreditHistoryDetails.value)
       req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails.value);
       req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 1 user maximum allowable loan amount
@@ -313,6 +366,7 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       return next();
     }
     if (Number(user.tier) === 2) {
+      req.maximumAmountForNoCreditHistoryDetails = parseFloat(tierTwoMaximumAmountForNoCreditHistoryDetails.value)
       req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails.value);
       req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 2 user maximum allowable loan amount

@@ -106,18 +106,22 @@ export default {
         bank_code
       FROM user_bank_accounts
       WHERE user_id = $1
+      AND is_deleted = false
       AND account_number = $2
       AND bank_code = $3`,
 
   checkMaximumExistingAccountCounts: `
       SELECT COUNT(id)
       FROM user_bank_accounts
-      WHERE user_id = $1`,
+      WHERE user_id = $1
+      AND is_deleted = false
+      `,
 
   checkMaximumExistingCardsCounts: `
       SELECT COUNT(id)
       FROM user_debit_cards
-      WHERE user_id = $1`,
+      WHERE user_id = $1
+      AND is_deleted = false`,
 
   fetchBankAccountDetails: `
       SELECT
@@ -132,6 +136,7 @@ export default {
         created_at
       FROM user_bank_accounts
       WHERE user_id = $1
+      AND is_deleted = false
       ORDER BY is_default DESC`,
 
   fetchUserDebitCards: `
@@ -150,6 +155,7 @@ export default {
         created_at
       FROM user_debit_cards
       WHERE user_id = $1
+      AND is_deleted = false
       ORDER BY is_default DESC`,
 
     fetchBankAccountDetailsByUserId: `
@@ -164,7 +170,9 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id =$1`,
+      WHERE user_id =$1
+      AND is_deleted = false
+      `,
 
   fetchBankAccountDetailsById: `
       SELECT
@@ -178,12 +186,15 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE id =$1`,
+      WHERE id =$1 AND user_id = $2`,
 
   deleteBankAccountDetails: `
-      DELETE FROM user_bank_accounts
+      UPDATE user_bank_accounts
+      SET is_deleted = true
       WHERE user_id = $1
-      AND id = $2`,
+      AND id = $2
+      AND is_deleted = false
+      `,
 
   setExistingAccountDefaultFalse: `
       UPDATE user_bank_accounts
@@ -447,6 +458,7 @@ export default {
       SELECT id, user_id, card_type, is_default, tokenising_platform, auth_token
       FROM user_debit_cards
       WHERE id = $1
+      AND is_deleted = false
   `,
 
   fetchCardsByIdOrUserId: `
@@ -454,6 +466,7 @@ export default {
       FROM user_debit_cards
       WHERE id = $1
       AND user_id = $2
+      AND is_deleted = false
   `,
 
   setExistingCardDefaultFalse: `
@@ -473,7 +486,8 @@ export default {
       RETURNING id, user_id, is_default, card_type`,
 
   removeCard: `
-      DELETE FROM user_debit_cards
+      UPDATE user_debit_cards
+      SET is_deleted = true
       WHERE user_id = $1 AND id = $2`,
 
   updateSecondaryCardDefault: `
@@ -609,7 +623,8 @@ export default {
             last_name,
             phone_number,
             email,
-            kind_of_relationship
+            kind_of_relationship,
+            user_id
         FROM next_of_kin
         WHERE user_id = $1`,
 
@@ -801,5 +816,8 @@ export default {
       status = 'inactive',
       fcm_token = NULL
     WHERE user_id = $1
-    RETURNING user_id, email, phone_number, is_deleted, status`
+    RETURNING user_id, email, phone_number, is_deleted, status`,
+
+  fetchAllDetailsBelongingToUser: `
+    SELECT * FROM users WHERE user_id = $1`,
 };

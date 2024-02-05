@@ -1035,6 +1035,22 @@ export default {
     AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
     ORDER BY created_at DESC`,
 
+  fetchUserPersonalLoanHistory: `
+    SELECT
+      id,
+      loan_id,
+      user_id,
+      amount_requested,
+      loan_reason,
+      loan_tenor_in_months,
+      status,
+      loan_decision,
+      to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+    FROM personal_loans
+    WHERE user_id = $1
+    AND (status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status='completed' OR status='declined')
+    ORDER BY created_at DESC`,
+
 
   fetchUserCurrentClusterLoans: `
     SELECT
@@ -1054,6 +1070,24 @@ export default {
     AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved')
     ORDER BY created_at DESC`,
 
+  fetchUserClusterLoanHistory: `
+    SELECT
+      id,
+      loan_id,
+      member_loan_id,
+      user_id,
+      cluster_id,
+      cluster_name,
+      amount_requested,
+      loan_tenor_in_months,
+      status,
+      loan_decision,
+      to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
+    FROM cluster_member_loans
+    WHERE user_id = $1
+    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed' OR status='declined')
+    ORDER BY created_at DESC`,
+
 
   fetchLoanNextRepaymentDetails: `
     SELECT
@@ -1064,6 +1098,7 @@ export default {
       repayment_order,
       total_payment_amount,
       proposed_payment_date,
+      post_payment_outstanding_amount,
       pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
       to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,

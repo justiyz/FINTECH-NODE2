@@ -4,7 +4,7 @@ const loanApplication = Joi.object().keys({
   amount: Joi.number().positive().required(),
   duration_in_months: Joi.number().positive().required(),
   loan_reason: Joi.string().required(),
-  bank_statement_service_choice: Joi.string().required().valid('okra', 'mono', 'sterling')
+  bank_statement_service_choice: Joi.string().optional().valid('okra', 'mono', 'sterling')
 });
 
 const loanForEventApplication = Joi.object().keys({
@@ -64,7 +64,8 @@ const loanRescheduleParams = Joi.object().keys({
 
 const loanRenegotiation = Joi.object().keys({
   new_loan_amount: Joi.number().positive().required(),
-  new_loan_duration_in_month: Joi.number().positive().required()
+  new_loan_duration_in_month: Joi.number().positive().required(),
+  loan_reason: Joi.string().required()
 });
 
 const successfulEventPayment = Joi.object().keys({

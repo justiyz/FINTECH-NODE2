@@ -21,7 +21,7 @@ router.post(
   AdminClusterMiddleware.generateClusterUniqueCode,
   AdminClusterController.createCluster
 );
-  
+
 
 router.get(
   '/clusters',
@@ -54,7 +54,7 @@ router.post(
 router.patch(
   '/:cluster_id/status',
   AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('cluster management', 'update'),
+  // RolesMiddleware.adminAccess('cluster management', 'update'),
   AdminClusterMiddleware.checkIfClusterExists('active'),
   Model(Schema.editClusterStatus, 'payload'),
   AdminClusterMiddleware.checkClusterCurrentStatus,

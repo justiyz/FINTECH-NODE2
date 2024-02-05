@@ -9,5 +9,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="seedfi-admin-dashboard" />
+    <orderEntry type="module" module-name="seedfi-merchant-api" />
   </component>
 </module>

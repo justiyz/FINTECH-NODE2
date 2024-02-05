@@ -9,12 +9,14 @@ export const ACCOUNT_EXIST = 'Account already exist, kindly contact support team
 export const ACCOUNT_ALREADY_VERIFIED = 'Account already verified';
 export const ACCOUNT_NOT_EXIST = (type) => `${type} account does not exist`;
 export const INVALID = (text) => `Invalid ${text}`;
-export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support'; 
+export const VERIFIED = (text) => `Verified ${text}`;
+export const ACCOUNT_DEACTIVATED = 'Account is deactivated, kindly contact support';
 export const EMAIL_EITHER_VERIFIED_OR_INVALID_TOKEN = 'Email has been verified OR verification token is invalid';
 export const VERIFICATION_TOKEN_INVALID = 'Email has been verified OR verification token is invalid';
-export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. '; 
+export const FAILED_TO_PROCESS_EMAIL_VERIFICATION = 'Failed to verify email address, please try again. ';
 export const ACCOUNT_CREATED = 'Account created successfully';
 export const VERIFICATION_OTP_RESENT = 'OTP code sent';
+export const SUCCESSFUL_VERIFICATION = 'BVN information verified';
 export const NO_AUTHORIZATION = 'Authorization Token Is Required';
 export const EVENT_EXISTS = 'Event Record Exists';
 export const INVALID_AUTHORIZATION = 'Invalid Authorization Token';
@@ -41,6 +43,9 @@ export const BVN_PREVIOUSLY_VERIFIED = 'User bvn has been previously verified';
 export const BVN_NOT_PREVIOUSLY_VERIFIED = 'User is yet to verify bvn, kindly do this first';
 export const BVN_USED_BY_ANOTHER_USER = 'This BVN has been used by another user';
 export const USER_BVN_NOT_MATCHING_RETURNED_BVN = 'Kindly ensure your profile details match your BVN record';
+export const USER_BVN_BLACKLISTED = 'We are unable to process your information. Please contact your Financial Institution';
+export const UNABLE_TO_PROCESS_BVN = 'We are unable to process your information.';
+export const UNABLE_TO_VERIFY_BVN = 'We are unable to verify your information.';
 export const ALREADY_CREATED = (type) => `${type} already created`;
 export const USER_CREDENTIALS = (type) => `User ${type} have not been created.`;
 export const USER_ACCOUNT_VERIFIED = 'Account verified successfully';
@@ -138,6 +143,7 @@ export const LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT = (status) => `Loan has a
 export const LOAN_APPLICATION_MANUAL_DECISION = 'User loan application is subject to manual decision by admin, kindly be patient for a decision to be made';
 export const LOAN_APPLICATION_APPROVED_DECISION = 'User loan application is automatically approved kindly proceed to checkout';
 export const LOAN_APPLICATION_NOT_EXISTING = 'loan application does not exist for user';
+export const LOAN_NOT_EXISTING = 'loan does not exist';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_USER = 'loan application does not exist for user, or not eligible for repayment';
 export const LOAN_APPLICATION_NOT_EXISTING_FOR_CLUSTER = 'Loan application not existing for cluster';
 export const LOAN_PAYMENT_NOT_EXISTING = 'loan payment does not exist for user';
@@ -164,7 +170,7 @@ export const CLUSTER_MEMBERS_NOT_MORE_THAN_ONE = 'Cluster loan cannot be initiat
 export const USER_PAYSTACK_LOAN_DISBURSEMENT_ISSUES = 'Loan disbursement not available at the moment, kindly try again later or contact support';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES = 'Address verification not available at the moment, kindly try again later';
 export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED = 'User address verification failed to proceed';
-export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED = 'Verification ongoing';
+export const USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_BE_PROCESSED = 'Unable to verify address';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_LOAN_REASON =
   'User has an existing approved loan, kindly cancel or proceed to disbursement for the approved existing loan application';
 export const LOAN_APPLICATION_FAILED_FOR_EXISTING_APPROVED_CLUSTER_LOAN_REASON =
@@ -235,6 +241,7 @@ export const CLUSTER_EDITED_SUCCESSFULLY = 'Cluster edited successfully';
 export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
+export const NEXT_OF_KIN_UPDATED_SUCCESSFULLY = 'Next of kin updated successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
 export const ACTION_CANNOT_BE_DONE = (reason) => `Action cannot be performed, ${reason}`;
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;
@@ -422,5 +429,17 @@ export const EVENT_RECORD_UPDATED_AFTER_SUCCESSFUL_PAYMENT = (user_id) => `ticke
 export const TICKET_ALREADY_ACTIVE = 'ticket(s) already activated';
 export const LOAN_REPAYMENT_NOT_OVER_DUE = (status) => `Next loan repayment status is ${status}, thus repayment cannot be processed`;
 export const CUSTOM_AMOUNT_GREATER_THAN_REPAYMENT_AMOUNT = 'Custom amount cannot be greater than repayment amount';
+export const MERCHANT_CREATED_SUCCESSFULLY = 'Merchant created successfully';
+export const MERCHANT_KEY_GENERATED_SUCCESSFULLY = 'Merchant key generated successfully';
+export const FETCHED_MERCHANT_SUCCESSFULLY = 'Fetched merchant(s) successfully';
+export const INVALID_MERCHANT_API_KEY = 'Invalid merchant API key';
+export const MERCHANT_NOT_FOUND = 'Merchant account not found';
+export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfully';
+export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
+export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
+export const CONSENT_REQUEST_INITIATED_SUCCESSFULLY = `Consent request initiated successfully`;
+export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
+export const NO_DEFAULT_ACCOUNT = `Kindly add a bank account as default to proceed`;
+
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 
