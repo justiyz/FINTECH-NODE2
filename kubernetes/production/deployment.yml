@@ -156,6 +156,46 @@ spec:
             secretKeyRef:
               key: cloudinaryapisecret
               name: seedfi-api-config
+        - name: SEEDFI_PROD_UNDERWRITING_APP_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: underwritingappaccesstoken
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_ACCOUNT_NUMBER
+          valueFrom: 
+            secretKeyRef:
+              key: loandisbursementaccountnumber
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_ACCOUNT_NAME
+          valueFrom:
+            secretKeyRef:
+              key: loandisbursementaccountname
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_BANK_CODE
+          valueFrom:
+            secretKeyRef:
+              key: loandisbursementbankcode
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_LOAN_DISBURSEMENT_BANK_NAME
+          valueFrom:
+            secretKeyRef:
+              key: loandisbursementbankname
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_RECOVA_INSTITUTION_CODE
+          valueFrom:
+            secretKeyRef:
+              key: recovainstitutioncode
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_RECOVA_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: recovabaseurl
+              name: seedfi-api-config
+        - name: SEEDFI_PROD_RECOVA_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: recovabearertoken
+              name: seedfi-api-config
         
         # - name: SEEDFI_PROD_DATADOG_API_KEY
         #   valueFrom:
@@ -225,7 +265,7 @@ spec:
         - name: SEEDFI_PROD_ZEEH_URL
           value: 'https://api.zeeh.africa/api/v1'
         - name: SEEDFI_PROD_SHOP_PERCENTAGE
-          value: '0.4'
+          value: '0.3'
         - name: SEEDFI_PROD_ALLOWABLE_ORIGINS
           value: 'https://app.theseedfi.com, https://api.theseedfi.com, https://admin.theseedfi.com'
           value: 'seedfi-backend' 
