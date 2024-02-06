@@ -248,6 +248,7 @@ export const CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER = 'RecovaController::crea
 // Admin related labels
 export const UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER = 'AdminUserController::updateUserResidentialAddress';
 export const UPDATE_NEXT_OF_KIN_CONTROLLER = 'AdminUserController::updateNextOfKin';
+export const UPDATE_BANK_STMT_RECORD = 'AdminUsersController::expireBankStatement';
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
 export const COMPARE_ADMIN_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::compareAdminPassword';
 export const VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::validateAdminResetPasswordToken';

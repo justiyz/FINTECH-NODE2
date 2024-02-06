@@ -1458,9 +1458,8 @@ export const sendBvnOtp = async(req, res, next) => {
   try {
     const {body: {bvn, date_of_birth}} = req;
     //get bvn information from provider
-    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-
-    if (data.status !== 'success') {
+    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
 
       return ApiResponse.error(res, enums.UNABLE_TO_VERIFY_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
@@ -1481,6 +1480,7 @@ export const sendBvnOtp = async(req, res, next) => {
     }
     return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
   } catch (error) {
+    console.log(error, 'error')
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
 }
@@ -1488,8 +1488,9 @@ export const sendBvnOtp = async(req, res, next) => {
 export const verifyBvnInfo = async(req, res, next) => {
   try {
     const {body: {bvn, first_name, last_name }} = req;
-    const result = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-    if (result.status !== 'success') {
+    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    const result = data
+    if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
 
@@ -1538,9 +1539,9 @@ export const verifyBvnOtp = async(req, res, next) => {
       return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
     }
 
-    const data = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
+    const {data} = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
 
-    if (data.status !== 'success') {
+    if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
 
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
@@ -1586,7 +1587,7 @@ const sendOtpToBvnUser = async (bvn, data) => {
     }
 
     otpData.recipientPhoneNumber = maskString(pn.number.e164);
-    otpData.recipientEmail = maskString(data.email);
+    otpData.recipientEmail = data.email ? maskString(data.email): null;
 
     await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
