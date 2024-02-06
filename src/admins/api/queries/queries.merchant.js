@@ -22,7 +22,7 @@ export default {
   `,
   fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
   fetchSingleMerchant: `
-    SELECT 
+    SELECT
       merchants.merchant_id,
       business_name,
       email,
@@ -49,7 +49,7 @@ export default {
     WHERE merchants.merchant_id = $1;
   `,
   fetchAndSearchMerchants: `
-    SELECT 
+    SELECT
     count(*) OVER() AS total,
     merchants.merchant_id,
     business_name,
@@ -264,6 +264,7 @@ export default {
   `,
   fetchMerchantLoans: `
     SELECT
+      users.user_id,
       users.first_name,
       users.last_name,
       users.middle_name,
