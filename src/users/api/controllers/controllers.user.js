@@ -1488,8 +1488,9 @@ export const sendBvnOtp = async(req, res, next) => {
 export const verifyBvnInfo = async(req, res, next) => {
   try {
     const {body: {bvn, first_name, last_name }} = req;
-    const result = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-    if (result.status !== 'success') {
+    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    const result = data
+    if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
 
