@@ -195,9 +195,9 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
 export const verifyBvn = async(req, res, next) => {
   try {
     const { body: { bvn },  user } = req;
-    const data = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
+    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
-    if (data.status !== 'success') {
+    if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);

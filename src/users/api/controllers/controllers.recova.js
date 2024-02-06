@@ -8,6 +8,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import  * as zeehService from '../services/services.zeeh';
 import * as recovaService from '../services/services.recova';
 import dayjs from 'dayjs';
+import { parsePhoneNumber } from 'awesome-phonenumber'
 import config from '../../config';
 
 
@@ -54,7 +55,7 @@ export const handleMandateCreated = async (req, res, next) => {
   try {
     const {loanDetails} = req;
     const data = [
-      'mandate created',
+      'approved',
       loanDetails.loan_id
     ];
     await processOneOrNoneData(loanMandateQueries.updateLoanMandateRequestStatus, data);
@@ -215,12 +216,17 @@ export const createMandateConsentRequest = async (req, res, next) => {
     })
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
 
-    const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    // const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
 
-    if (bvnData.status !== 'success') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed createMandateConsentRequest.controller.recova.js`);
+    // if (bvnData.status !== 'success') {
+    //   logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed createMandateConsentRequest.controller.recova.js`);
 
-      return ApiResponse.error(res, 'Unable to process bvn', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    //   return ApiResponse.error(res, 'Unable to process bvn', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    // }
+    const pn = parsePhoneNumber( userDetails.phone_number, { regionCode: 'NG' } )
+    if (!pn.valid) {
+      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's  phone number is invalid  createMandateConsentRequest.controller.user.js`);
+      return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
     //call recova service to create mandate
     const data = {
@@ -231,11 +237,11 @@ export const createMandateConsentRequest = async (req, res, next) => {
       "customerID": userDetails.id,
       "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
       "customerEmail": userDetails.email,
-      "phoneNumber": userDetails.phone_number,
+      "phoneNumber": pn.number.national.replace(/\s+/g, ''),
       "loanAmount": loanDetails.amount_requested,
       "totalRepaymentExpected": loanDetails.total_repayment_amount,
       "loanTenure": loanDetails.loan_tenor_in_months,
-      "linkedAccountNumber": bvnData.data.nuban || accountDetails.account_number,
+      "linkedAccountNumber": accountDetails.account_number,
       "repaymentType": "Collection",
       "preferredRepaymentBankCBNCode": accountDetails.bank_code,
       "preferredRepaymentAccount": accountDetails.account_number,
@@ -245,7 +251,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     const result = await recovaService.createConsentRequest(data);
     console.log('result', result)
     if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
-      const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentApprovalUrl ]);
+      const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentConfirmationUrl ]);
       return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
     }
 
