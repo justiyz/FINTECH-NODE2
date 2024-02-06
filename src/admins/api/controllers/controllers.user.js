@@ -6,15 +6,19 @@ import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
-import { userOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
+import {expireBankStatementRecord, userOrrScoreBreakdown} from '../services/services.seedfiUnderwriting';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates/personalNotification';
 import { adminActivityTracking } from '../../lib/monitor';
 import { userActivityTracking } from '../../../users/lib/monitor';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
-import { SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER } from "../../../users/lib/enums/lib.enum.labels";
+import {
+  SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER,
+  UPDATE_BANK_STMT_RECORD
+} from "../../../users/lib/enums/lib.enum.labels";
 import * as Hash from '../../../users/lib/utils/lib.util.hash';
+import {BANK_STATEMENT_EXPIRED_SUCCESSFULLY} from "../../../users/lib/enums/lib.enum.messages";
 
 /**
  * should activate and deactivate user status
@@ -638,3 +642,17 @@ export const updateNextOfKin = async (req, res, next) => {
     return next(error);
   }
 };
+
+export const expireBankStatement = async(req, res, next) => {
+  try {
+    const { params: { user_id }, admin } = req;
+    const data = await expireBankStatementRecord(user_id);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
+    Admin successfully updated user bank statement in the DB. expireBankStatement.controller.user.js`);
+    return ApiResponse.success(res, enums.BANK_STATEMENT_EXPIRED_SUCCESSFULLY, enums.HTTP_OK);
+  } catch (error) {
+    error.label = enums.UPDATE_BANK_STMT_RECORD;
+    logger.error(`updating user bank statement record failed:::${ enums.UPDATE_BANK_STMT_RECORD }`, error.message);
+    return next(error);
+  }
+}
