@@ -198,4 +198,12 @@ router.put(
   UserController.updateNextOfKin
 );
 
+router.put(
+  '/:user_id/expire-bank-statement',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.expireBankStatement
+);
+
 export default router;

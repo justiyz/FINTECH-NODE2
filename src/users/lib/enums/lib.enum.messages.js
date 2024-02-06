@@ -242,6 +242,7 @@ export const USER_CANNOT_PERFORM_ACTION = 'User cant accept admin invite';
 export const NOTIFICATION_UPDATED_SUCCESSFULLY = 'Notification updated successfully';
 export const NEXT_OF_KIN_CREATED_SUCCESSFULLY = 'Next of kin created successfully';
 export const NEXT_OF_KIN_UPDATED_SUCCESSFULLY = 'Next of kin updated successfully';
+export const BANK_STATEMENT_EXPIRED_SUCCESSFULLY = 'Bank Statement record updated successfully';
 export const CANNOT_CHANGE_NEXT_OF_KIN = 'Kindly contact support to change next of kin details';
 export const ACTION_CANNOT_BE_DONE = (reason) => `Action cannot be performed, ${reason}`;
 export const USER_PROFILE_NEXT_UPDATE = (type) => `User can only update ${type} details after 3 months`;

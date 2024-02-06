@@ -99,4 +99,20 @@ const loanCategoryOrrAverageMetrics = async(queryFromType, queryToType) => {
   }
 };
 
-export { userOrrScoreBreakdown, loanOrrScoreBreakdown, loanScoreCardBreakdown, loanCategoryOrrAverageMetrics };
+const expireBankStatementRecord = async(userID) => {
+  try {
+    const options = {
+      method: 'put',
+      url: `${config.SEEDFI_UNDERWRITING_SERVICE_BASE_URL}/v1/loan_processing_engine/expire_bank_statement/${userID}/`,
+      headers: {
+        Authorization: `Api-Key ${config.SEEDFI_UNDERWRITING_SERVICE_API_KEY}`
+      }
+    };
+    return await axios(options);
+  } catch (error) {
+    logger.error(`Connecting to seedfi underwriting service for loan category orr average failed::${enums.LOAN_CATEGORY_ORR_AVERAGE_METRICS_SERVICE}`, error.message);
+    return error;
+  }
+}
+
+export { userOrrScoreBreakdown, loanOrrScoreBreakdown, loanScoreCardBreakdown, loanCategoryOrrAverageMetrics, expireBankStatementRecord };
