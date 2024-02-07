@@ -1143,7 +1143,13 @@ export default {
           transaction_type,
           payment_reason,
           loan_id
-      ) VALUES ($1, $2, $3, $4, $5, 'pending', 'pending', 'debit', $6, $7)`
+      ) VALUES ($1, $2, $3, $4, $5, 'pending', 'pending', 'debit', $6, $7)`,
+
+
+
+    fetchLoanMandateDetails: `
+        SELECT * FROM loan_mandate WHERE loan_id = $1
+    `
 
 };
 
