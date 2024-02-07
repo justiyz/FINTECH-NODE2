@@ -55,7 +55,7 @@ export const handleMandateCreated = async (req, res, next) => {
   try {
     const {loanDetails} = req;
     const data = [
-      'approved',
+      'confirmed',
       loanDetails.loan_id
     ];
     await processOneOrNoneData(loanMandateQueries.updateLoanMandateRequestStatus, data);
@@ -211,7 +211,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
       return {
         repaymentDate: repayment.proposed_payment_date,
-        repaymentAmountInNaira: parseFloat(repayment.principal_payment)
+        repaymentAmountInNaira: parseFloat(repayment.total_payment_amount)
       };
     })
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
