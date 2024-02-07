@@ -10,27 +10,26 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import {userActivityTracking} from '../../lib/monitor';
 import config from '../../config';
 import {fetchBanks} from '../services/service.paystack';
-import {initiateUserYouVerifyAddressVerification} from '../services/service.youVerify';
-import {sendUserPersonalNotification, sendPushNotification, updateNotificationReadBoolean} from '../services/services.firebase';
+import {
+  sendPushNotification,
+  sendUserPersonalNotification,
+  updateNotificationReadBoolean
+} from '../services/services.firebase';
 import {generateMonoAccountId} from '../services/services.mono';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
-import {VERIFY_USER_IDENTITY_DOCUMENT} from '../../lib/enums/lib.enum.labels';
 import * as zeehService from '../services/services.zeeh';
 import * as S3 from "../services/services.s3";
-import {now} from "moment-timezone";
 import * as dojahService from '../services/service.dojah'
-import {error} from 'console';
-import {response} from 'express';
 import sharp from 'sharp';
-import {AVAILABLE_VERIFICATION_MEANS, SUCCESSFUL_VERIFICATION} from "../../lib/enums/lib.enum.messages";
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
-import { verifyBvnOTPSms } from '../../lib/templates/sms';
+import {verifyBvnOTPSms} from '../../lib/templates/sms';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
-import { sendSms } from '../services/service.sms';
-import { parsePhoneNumber } from 'awesome-phonenumber'
+import {sendSms} from '../services/service.sms';
+import {parsePhoneNumber} from 'awesome-phonenumber'
+import moment from "moment-timezone";
 
 
 const { SEEDFI_NODE_ENV } = config;
@@ -1472,7 +1471,6 @@ export const sendBvnOtp = async(req, res, next) => {
     }
 
     //if match, send otp to user
-
     const otpData = await sendOtpToBvnUser(bvn, data.data);
 
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
@@ -1480,26 +1478,27 @@ export const sendBvnOtp = async(req, res, next) => {
     }
     return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
   } catch (error) {
-    console.log(error, 'error')
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
 }
 
 export const verifyBvnInfo = async(req, res, next) => {
   try {
-    const {body: {bvn, first_name, last_name }} = req;
+    const {body: {bvn, first_name, last_name, date_of_birth, gender }} = req;
     const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
     const result = data
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
-
     }
-
+    const parsedDate = moment(result.data.dateOfBirth, 'DD-MMM-YYYY');
+    let result_date = parsedDate.format('YYYY-MM-DD')
     if(
       result.data.firstName.toLowerCase() === first_name
       && result.data.lastName.toLowerCase() === last_name
       && result.data.bvn.toLowerCase() === bvn
+      && result.data.gender.toLowerCase() === gender
+      && result_date === date_of_birth
     ) {
       return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
     }
