@@ -6,6 +6,8 @@ import userQueries from '../../api/queries/queries.user';
 import { offerLetterTemplate } from '../templates/offerLetter';
 import * as S3 from '../../api/services/services.s3';
 import config from '../../config';
+import * as Hash from '../../../users/lib/utils/lib.util.hash';
+
 
 export const generateOtp = () => Crypto.randomInt(0, 1000000).toString().padStart(6, '0');
 export const generateReferralCode = (size) => {
@@ -201,7 +203,7 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     userOfferLetterDetail.bvn = '12345678910'
   }else{
-    userOfferLetterDetail.bvn = await decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
+    userOfferLetterDetail.bvn = await Hash.decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
   }
   const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;
