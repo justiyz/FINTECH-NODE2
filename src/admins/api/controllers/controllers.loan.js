@@ -897,10 +897,14 @@ export const adminFetchPersonalLoanDetails = async(req, res, next) => {
     const next_repayment_date = (!selectedStatuses.includes(loanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') :
       dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
     loanApplication.next_repayment_date = next_repayment_date;
+
+    const [loanMandateDetails] = await processAnyData(loanQueries.fetchLoanMandateDetails, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
     const data = {
       nextLoanRepaymentDetails: nextRepaymentDetails,
       loanDetails: loanApplication,
-      loanRepaymentDetails
+      loanRepaymentDetails,
+      loanMandateDetails
     };
     return ApiResponse.success(res, enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'), enums.HTTP_OK, data);
   } catch (error) {
