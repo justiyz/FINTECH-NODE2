@@ -1,23 +1,23 @@
 export default {
   fetchAdminPassword: `
       SELECT id, admin_id, password
-      FROM admins 
+      FROM admins
       WHERE admin_id = $1`,
 
   fetchAdminByVerificationToken: `
       SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
-      FROM admins 
+      FROM admins
       WHERE verification_token = $1`,
 
   fetchAdminByVerificationTokenAndUniqueId: `
       SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count
-      FROM admins 
+      FROM admins
       WHERE verification_token = $1
       AND admin_id = $2`,
 
   updateLoginToken: `
       UPDATE admins
-      SET 
+      SET
         updated_at = NOW(),
         is_verified_email = TRUE,
         verification_token = $2,
@@ -27,8 +27,19 @@ export default {
       WHERE admin_id = $1
       RETURNING id, admin_id, first_name, last_name, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
 
+  updateMerchantLoginToken: `
+      UPDATE merchant_admins
+      SET
+        updated_at = NOW(),
+        is_verified_email = true,
+        verification_token = $2,
+        verification_token_expires = $3,
+        verification_token_request_count = $4,
+        invalid_verification_token_count = $5
+      WHERE merchant_admin_id = $1
+      RETURNING *`,
   fetchRolePermissions: `
-      SELECT 
+      SELECT
         admin_roles.code,
         admin_resources.name,
         admin_role_permissions.resource_id,
@@ -42,7 +53,7 @@ export default {
       AND admin_roles.status = 'active'`,
 
   fetchAdminPermissions: `
-      SELECT 
+      SELECT
         admin_user_permissions.admin_id,
         admin_resources.name,
         admin_user_permissions.resource_id,
@@ -64,7 +75,7 @@ export default {
 
   setNewAdminPassword: `
     UPDATE admins
-    SET 
+    SET
       updated_at = NOW(),
       status = 'active',
       is_created_password = TRUE,
@@ -76,4 +87,4 @@ export default {
     WHERE admin_id = $1
     RETURNING admin_id, status, is_created_password, is_verified_email, is_completed_profile`
 };
-  
+

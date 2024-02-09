@@ -11,6 +11,9 @@ import * as UserHelpers from '../../../users/lib/utils/lib.util.helpers';
 import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
+import adminQueries from "../queries/queries.admin";
+import {VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE} from "../../../users/lib/enums/lib.enum.labels";
+import {MERCHANT_ACCOUNT_STATUS} from "../../../users/lib/enums/lib.enum.messages";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -52,6 +55,22 @@ export const completeAdminLoginRequest = async(req, res, next) => {
     return next(error);
   }
 };
+
+export const completeMerchantLoginRequest = async (req, res, next ) => {
+  try {
+    const merchant  = req.merchant; // await processAnyData(adminQueries.getMerchantByEmail, [ req.body.trim().toLowerCase() ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched merchant admin details from the database completeMerchantLoginRequest.admin.middlewares.admin.js`);
+
+    req.merchant = merchant;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: merchant information saved in session`);
+
+    return next();
+  } catch (error) {
+    error.label = enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE;
+    logger.error(`getting merchants details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+}
 
 /**
  * login admin

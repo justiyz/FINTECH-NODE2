@@ -5,6 +5,9 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as MerchantMiddleware from '../middlewares/middlewares.merchant';
 import * as MerchantController from '../controllers/controller.merchant';
+import * as AuthController from "../controllers/controllers.auth";
+import * as AdminMiddleware from "../middlewares/middlewares.admin";
+import {validateUnAuthenticatedMerchant} from "../middlewares/middlewares.admin";
 
 const router = Router();
 
@@ -17,6 +20,36 @@ router.post(
   MerchantMiddleware.validateCreateMerchant,
   MerchantMiddleware.validateMerchantBankAccount('create'),
   MerchantController.createMerchant
+);
+
+router.post(
+  '/create-merchant-admin',
+  // AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.createMerchantAdmin, 'payload'),
+  MerchantController.createMerchantAdmin
+);
+
+router.post(
+  '/merchant-login',
+  Model(Schema.merchantAdminCredentials, 'payload'),
+  AdminMiddleware.validateUnAuthenticatedMerchant('login'),
+  AuthController.completeMerchantLoginRequest,
+  MerchantController.merchantAdminLogin
+);
+
+router.post(
+  '/verify-password-token',
+  Model(Schema.verifyLogin, 'payload'),
+  AuthMiddleware.verifyLoginVerificationToken,
+  AuthController.sendAdminPasswordToken
+);
+
+router.post(
+  '/set-first-password',
+  // AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.setPassword, 'payload'),
+  AuthMiddleware.checkIfChangedDefaultPassword('validate'),
+  AuthController.setPassword('first')
 );
 
 // ============== GET =================== //

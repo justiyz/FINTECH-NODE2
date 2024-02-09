@@ -17,6 +17,39 @@ export default {
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
     ) RETURNING merchant_id;
   `,
+  createMerchantAdmin: `
+      INSERT INTO merchant_admins (
+        merchant_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        gender,
+        password,
+        verification_token,
+        verification_token_expires
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
+      ) RETURNING *
+  `,
+  fetchMerchantAdminIdByMerchantEmail: `
+    SELECT
+        merchant_admins.merchant_id
+    FROM merchant_admins
+    LEFT JOIN merchants ON merchants.merchant_id = merchant_admins.merchant_id
+    WHERE
+        merchant_admins.email = $1`,
+  updateMerchantLoginToken: `
+      UPDATE merchant_admins
+      SET
+        updated_at = NOW(),
+        is_verified_email = true,
+        verification_token = $2,
+        verification_token_expires = $3,
+        verification_token_request_count = $4,
+        invalid_verification_token_count = $5
+      WHERE merchant_admin_id = $1
+      RETURNING *`,
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
   `,
