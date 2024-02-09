@@ -18,6 +18,20 @@ export const generateReferralCode = (size) => {
   }
 };
 
+export const generatePassword = (length) => {
+  // Define characters allowed in the password
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+{}|:<>?-=[];,./';
+
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    // Generate a random index to select a character from the chars string
+    const randomIndex = Crypto.randomInt(0, chars.length);
+    password += chars.charAt(randomIndex);
+  }
+
+  return password;
+}
+
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
 export const generateLoanRepaymentScheduleForShop = async(existingLoanApplication, user_id, activationCharge, monthly_installment) => {

@@ -88,4 +88,7 @@ export const create_event_record_failed = 'failed to create event record';
 export const create_event_category_record_failed = 'failed to create event category record';
 export const failed_to_fetch_ticket_categories = 'failed to fetch ticket categories';
 export const create_merchant = (adminName, merchantName) => `Admin ${adminName}, successfully added a new merchant ${merchantName}`;
+export const create_merchant_admin = (adminName, merchantName) => `Admin ${adminName}, successfully added a new merchant admin ${merchantName}`;
 export const create_merchant_failed = (adminName, merchantName) => `Admin ${adminName}, failed to add a new merchant ${merchantName}`;
+export const create_merchant_admin_failed = (adminName, merchantAdminName) => `Admin ${adminName}, failed to create a new merchant admin ${merchantAdminName}`;
+export const merchant_admin_login_failed = (adminName, merchantAdminName) => `Admin ${adminName}, failed to login for merchant admin ${merchantAdminName}`;
