@@ -11,9 +11,6 @@ import * as UserHelpers from '../../../users/lib/utils/lib.util.helpers';
 import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
-import adminQueries from "../queries/queries.admin";
-import {VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE} from "../../../users/lib/enums/lib.enum.labels";
-import {MERCHANT_ACCOUNT_STATUS} from "../../../users/lib/enums/lib.enum.messages";
 
 const { SEEDFI_NODE_ENV } = config;
 
