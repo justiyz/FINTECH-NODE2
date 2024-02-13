@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/routes/routes.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/routes/routes.merchant.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/sqls/20240212134638-addMerchantPassword-down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/sqls/20240212134638-addMerchantPassword-down.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
