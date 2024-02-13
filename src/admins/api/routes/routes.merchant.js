@@ -75,7 +75,6 @@ router.post(
   '/:merchant_id/merchant-reset-password',
   Model(Schema.merchantPassword, 'payload'),
   MerchantController.setPassword
-  // AuthMiddleware.validateMerchantForgotPasswordAndPinToken
 )
 
 router.post(
@@ -90,9 +89,6 @@ router.post(
   MerchantMiddleware.validateUnAuthenticatedMerchantV2('verify'),
   MerchantController.forgotMerchantPassword
 );
-
-router.post(
-  '/otp/verify')
 
 // ============== GET =================== //
 router.get(
