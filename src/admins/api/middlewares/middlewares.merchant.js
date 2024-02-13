@@ -299,12 +299,14 @@ export const validateUnAuthenticatedMerchant = (type = '') => async (req, res, n
       return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Merchant'),
         enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE);
     }
-    if (merchant && (merchant.status !== 'active' || merchant.is_deleted)) {
+    if (merchant && (merchant.status !== 'active')) {
+
       const merchantStatus = merchant.is_deleted ? 'deleted, kindly contact support team'  : `${merchant.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${merchant.admin_id}:::Info: successfully confirms that merchant account is ${merchantStatus} in the database
       validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(merchantStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
     }
+
     req.merchant = merchant;
     return next();
   } catch (error) {

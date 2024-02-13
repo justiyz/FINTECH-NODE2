@@ -111,6 +111,7 @@ export const setNewMerchantPassword = async (req, res, next) => {
       const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
         merchant_id, new_password
       ]);
+
       logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${merchant_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
       if (merchant_id) {
         await MailService('Password Reset Successful', 'createMerchantPassword', {
@@ -233,15 +234,18 @@ export const forgotMerchantPassword = async(req, res, next) => {
 export const merchantAdminLogin = async (req, res, next) => {
   const { body, merchant } = req;
   try {
+
     const login_token = UserHelpers.generateOtp();
     const token = await Hash.generateMerchantAuthToken(merchant);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random token generated completeAdminLoginRequest.admin.controllers.auth.js`);
     const expireAt = momentTZ().add(3, 'minutes');
     const expireTime = momentTZ(expireAt).tz('Africa/Lagos'); // .tz('Africa/Lagos').format('hh:mm a');
     merchant.verification_token_request_count = merchant.verification_token_request_count === 0 ? 1: merchant.verification_token_request_count++;
     const merchantUpdatePayload = [
-      merchant.merchant_id, token, expireTime,
-      (Number(merchant.verification_token_request_count) + 1), Number(merchant.invalid_verification_token_count), login_token
+      merchant.merchant_id,
+      (Number(merchant.verification_token_request_count) + 1),
+      login_token
     ];
 
     const [ updatedMerchant ] = await processAnyData(queriesAdmin.updateMerchantLoginTokenV2, merchantUpdatePayload);
