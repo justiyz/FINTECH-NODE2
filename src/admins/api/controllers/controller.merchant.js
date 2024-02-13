@@ -353,9 +353,10 @@ export const createMerchant = async (req, res, next) => {
     // generate password
     const password_string = Helpers.generatePassword(8);
     req.body.password = await Hash.hashData(password_string);
+
     const { merchant_id } = await processOneOrNoneData(
       merchantQueries.createMerchant,
-      payload
+      [...payload, password_string]
     );
     req.body.merchant_id = merchant_id;
     if (merchant_id) {
