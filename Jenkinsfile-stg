@@ -7,7 +7,7 @@ pipeline {
         
         REPO_NAME = 'seedfi-backend'
         DEPLOYMENT_ENV = 'staging'
-        SCM_BRANCH = 'snapshot'
+        SCM_BRANCH = 'snapshot-dev'
         NAMESPACE = 'staging'
         DOCKER_ENV = 'staging'
         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
@@ -72,7 +72,10 @@ pipeline {
                     '''
                     // Always push to Docker Hub
                     echo 'Pushing to Docker Hub'
-                    sh 'docker push $dockerTag'
+                    sh '''
+                    docker push $dockerTag
+                    docker system prune -af
+                    '''
 
                     def payload = [
                     '@type': 'MessageCard',
@@ -102,7 +105,7 @@ pipeline {
                         VAULT_ENV = 'production'
                         DOCKER_ENV = 'production'
                         DEPLOYMENT_ENV = 'production'
-                    } else if (GIT_BRANCH.equals("origin/snapshot")){
+                    } else if (GIT_BRANCH.equals("origin/snapshot-dev")){
 
                         MSTEAMS_WEBHOOK_URL = 'https://theseedfi.webhook.office.com/webhookb2/c3919713-0808-447e-955c-496c53cc5e24@5c28f91f-8925-4a6d-8e65-d759362a6554/JenkinsCI/b39e1e221c5a45deae8a2db5e69c2661/318f2aee-3f38-416e-8897-45d9eee55525'
                         VAULT_ENV = 'staging'
@@ -111,7 +114,7 @@ pipeline {
                         APIENVCONFIG = 'stage'
                         KUBECONFIG = 'k8sStg'
                         NAMESPACE = 'staging'
-                        SCM_BRANCH = 'snapshot'
+                        SCM_BRANCH = 'snapshot-dev'
 
                     } else {
 
