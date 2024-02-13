@@ -32,13 +32,11 @@ export default {
       UPDATE merchants
       SET
         updated_at = NOW(),
-        verification_token = $2,
-        verification_token_expires = $3,
-        verification_token_request_count = $4,
-        otp = $6
+        verification_token_request_count = $2,
+        otp = $3
       WHERE merchant_id = $1
       RETURNING merchant_id, business_name, email, phone_number, interest_rate, orr_score_threshold, address, status, created_at, updated_at, processing_fee, insurance_fee, advisory_fee
-      customer_loan_max_amount, merchant_loan_limit, first_name, last_name, gender, otp`,
+      customer_loan_max_amount, merchant_loan_limit, first_name, last_name, gender, otp, secret_key`,
 
   merchantLoginSuccessful: `
     SELECT merchant_id, business_name, email, phone_number, interest_rate, orr_score_threshold, address, status, created_at, updated_at, processing_fee, insurance_fee, advisory_fee
