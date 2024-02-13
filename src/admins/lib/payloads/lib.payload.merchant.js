@@ -15,6 +15,15 @@ export default {
     body.customer_loan_max_amount,
     body.merchant_loan_limit
   ],
+  onboardMerchant: (body) => [
+    body.merchant_id.trim(),
+    body.first_name.trim().toLowerCase(),
+    body.last_name.trim().toLowerCase(),
+    body.email.trim().toLowerCase(),
+    body.phone_number.trim(),
+    body.gender.trim(),
+    body.password.trim()
+  ],
   createMerchantAdmin: (body) => [
     body.merchant_id.trim(),
     body.first_name.trim().toLowerCase(),

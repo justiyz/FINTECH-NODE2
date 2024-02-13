@@ -195,3 +195,33 @@ export const  manualLoanApproval = (data) => `
     </p>
   </td>
 </tr>`;
+
+export const merchantAdminOnboarding = (data) => `
+  <tr>
+    <td style="padding-bottom: 30px;">
+      Hello <span style="text-transform: capitalize">${data.first_name}</span>,
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td style="padding-bottom: 20px">
+      <p>
+      Kindly click <a href="${config.SEEDFI_MERCHANT_ADMIN_WEB_BASE_URL}/auth/create-password?merchant_id=${data.merchant_id}&default_password=${data.default_password}&email=${data.email}">here</a> to complete your onboarding.
+      </p>
+    </td>
+  </tr>`;
+
+export const createMerchantPassword = (data) => `
+  <tr>
+    <td style="padding-bottom: 30px;">
+      Hello <span style="text-transform: capitalize">${data.first_name}</span>,
+    </td>
+  </tr>
+
+  <tr style="font-family: 'Figtree';font-style: normal;font-weight: 400;font-size: 16px;line-height: 24px;">
+    <td style="padding-bottom: 20px">
+      <p> Your password has been changed successfully.</p>
+      <p>If you did not initiate this password change, kindly reach out to support.</p>
+    </td>
+  </tr>
+`;

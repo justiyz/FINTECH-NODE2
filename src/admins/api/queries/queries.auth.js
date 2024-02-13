@@ -9,6 +9,16 @@ export default {
       FROM admins
       WHERE verification_token = $1`,
 
+  fetchMerchantByVerificationToken: `
+      SELECT id, email, merchant_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, otp
+      FROM merchants
+      WHERE verification_token = $1`,
+
+  // fetchMerchantByVerificationOTP: `
+  //     SELECT id, email, merchant_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, otp
+  //     FROM merchants
+  //     WHERE verification_token = $1 AND merchant_id = $2`,
+
   fetchAdminByVerificationTokenAndUniqueId: `
       SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count
       FROM admins

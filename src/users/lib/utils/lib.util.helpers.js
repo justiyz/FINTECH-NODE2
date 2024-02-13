@@ -20,7 +20,7 @@ export const generateReferralCode = (size) => {
 
 export const generatePassword = (length) => {
   // Define characters allowed in the password
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+{}|:<>?-=[];,./';
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()+{}|:<>?-=[]';
 
   let password = '';
   for (let i = 0; i < length; i++) {

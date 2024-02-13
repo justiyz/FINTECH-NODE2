@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS merchant_admins (
   invalid_verification_token_count INTEGER DEFAULT 0,
   verification_token_request_count INTEGER DEFAULT 0,
   is_created_password BOOLEAN DEFAULT false,
+  otp VARCHAR NULL,
   is_deleted BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

@@ -27,6 +27,26 @@ export default {
         invalid_verification_token_count = $5
       WHERE merchant_admin_id = $1
       RETURNING *`,
+
+  updateMerchantLoginTokenV2: `
+      UPDATE merchants
+      SET
+        updated_at = NOW(),
+        verification_token = $2,
+        verification_token_expires = $3,
+        verification_token_request_count = $4,
+        otp = $6
+      WHERE merchant_id = $1
+      RETURNING merchant_id, business_name, email, phone_number, interest_rate, orr_score_threshold, address, status, created_at, updated_at, processing_fee, insurance_fee, advisory_fee
+      customer_loan_max_amount, merchant_loan_limit, first_name, last_name, gender, otp`,
+
+  merchantLoginSuccessful: `
+    SELECT merchant_id, business_name, email, phone_number, interest_rate, orr_score_threshold, address, status, created_at, updated_at, processing_fee, insurance_fee, advisory_fee
+      customer_loan_max_amount, merchant_loan_limit, first_name, last_name, gender
+    FROM merchants
+    WHERE merchant_id = $1
+  `,
+
   merchantAdmins: `
     SELECT *
     FROM merchant_admins
@@ -54,7 +74,16 @@ export default {
     WHERE email = $1`,
 
   getMerchantByEmail: `
-    SELECT * FROM merchant_admins WHERE email = $1;
+    SELECT id, merchant_admin_id, merchant_id, first_name, last_name, status, email, phone_number
+     gender, is_verified_email, verification_token, verification_token_expires, invalid_verification_token_count,
+     verification_token_request_count, is_created_password, is_deleted, created_at, updated_at
+     FROM merchant_admins WHERE email = $1;
+  `,
+
+  getMerchantByEmailV2: `
+    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, verification_token_request_count, gender, created_at, updated_at
+    FROM merchants
+    WHERE email = $1;
   `,
 
   getAdminByPhoneNumber: `

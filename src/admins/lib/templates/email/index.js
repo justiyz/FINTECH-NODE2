@@ -1,5 +1,6 @@
 import * as authEmail from './authTemplates';
 import * as userEmail from './userTemplates';
+import * as merchantEmail from './'
 
 const getTemplate = (type, data) => {
   switch (type) {
@@ -17,6 +18,8 @@ const getTemplate = (type, data) => {
   case 'adminSentNotification': return userEmail.adminSentNotification(data);
   case 'changePassword': return authEmail.changePassword(data);
   case 'resetPassword': return authEmail.resetPassword(data);
+  case 'completeMerchantKyc': return authEmail.merchantAdminOnboarding(data);
+  case 'createMerchantPassword': return authEmail.createMerchantPassword(data);
   default: return '';
   }
 };

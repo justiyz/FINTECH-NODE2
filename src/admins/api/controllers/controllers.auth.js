@@ -11,9 +11,6 @@ import * as UserHelpers from '../../../users/lib/utils/lib.util.helpers';
 import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
-import adminQueries from "../queries/queries.admin";
-import {VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE} from "../../../users/lib/enums/lib.enum.labels";
-import {MERCHANT_ACCOUNT_STATUS} from "../../../users/lib/enums/lib.enum.messages";
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -175,7 +172,7 @@ export const forgotPassword = async(req, res, next) => {
  */
 export const sendAdminPasswordToken = async(req, res, next) => {
   try {
-    const { admin} = req;
+    const { admin, merchant} = req;
     const passwordToken = await Hash.generateAdminResetPasswordToken(admin);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: successfully generated password token sendAdminPasswordToken.admin.controllers.auth.js`);
     const tokenExpiration = await JSON.parse(Buffer.from(passwordToken.split('.')[1], 'base64').toString()).exp;
@@ -184,7 +181,9 @@ export const sendAdminPasswordToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched token expiration time and converted it
     sendAdminPasswordToken.admin.controllers.auth.js`);
     await adminActivityTracking(req.admin.admin_id, 18, 'success', descriptions.verify_reset_pass_otp());
-    return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken, tokenExpireAt });
+    merchant.password_token = passwordToken;
+    merchant.tokenExpireAt = tokenExpireAt
+    return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { merchant });
   } catch (error) {
     await adminActivityTracking(req.admin.admin_id, 18, 'fail', descriptions.verify_reset_pass_otp_failed());
     error.label = enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER;

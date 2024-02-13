@@ -4,26 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="">
+    <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controller.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controller.merchant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controllers.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controllers.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/middlewares/middlewares.admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/middlewares/middlewares.admin.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.admin.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/api/queries/queries.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/queries/queries.merchant.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/admins/api/routes/routes.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/routes/routes.merchant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/lib/monitor/lib.monitor.description.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/lib/monitor/lib.monitor.description.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/lib/monitor/lib.monitor.operations.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/lib/monitor/lib.monitor.operations.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/lib/payloads/lib.payload.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/lib/payloads/lib.payload.merchant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/lib/schemas/lib.schema.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/lib/schemas/lib.schema.merchant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/admins/lib/utils/lib.util.hash.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/lib/utils/lib.util.hash.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/utils/lib.util.helpers.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/app/controllers/customer.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/app/controllers/customer.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/app/middleware/customer.middleware.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/app/middleware/customer.middleware.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/app/routes/customer.router.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/app/routes/customer.router.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,21 +66,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "feature-merchant-admin",
-    "last_opened_file_path": "/Users/otjake/Sites/localhost/seedfi-backend",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature-merchant-admin&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/otjake/Sites/localhost/seedfi-backend&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -110,10 +93,23 @@
       <workItem from="1703496827479" duration="2222000" />
       <workItem from="1704369336110" duration="1852000" />
     </task>
+    <task id="LOCAL-00001" summary="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
+      <option name="closed" value="true" />
+      <created>1707806372872</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1707806372872</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In" />
+    <option name="LAST_COMMIT_MESSAGE" value="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
