@@ -117,7 +117,7 @@ const merchantPassword = Joi.object().keys({
   password: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
     'string.pattern.base': 'Invalid password combination'
   }).required().min(8),
-  confirm_password: Joi.string().required()
+  old_password: Joi.string().required()
 });
 
 const merchantAdminCredentials = Joi.object().keys({
