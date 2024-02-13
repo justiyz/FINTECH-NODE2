@@ -98,9 +98,14 @@ export const setNewMerchantPassword = async (req, res, next) => {
       const merchant = await processOneOrNoneData(merchantQueries.fetchMerchantByMerchantId, [merchant_id])
       const new_password = Hash.hashData(body.password);
       const oldPasswordValid = UserHash.compareData(body.old_password, merchant.password);
+      const oldAndNewPasswordIsEqual = UserHash.compareData(body.password, merchant.password);
 
       if(!oldPasswordValid) {
         return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
+
+      if(oldAndNewPasswordIsEqual) {
+        return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
       }
 
       const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
