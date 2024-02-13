@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import {onboardMerchant} from "../../../admins/api/controllers/controller.merchant";
 
 export const CURRENT_TIME_STAMP = `${dayjs().format('DD-MMM-YYYY, HH:mm:ss')}`;
 // User related labels
@@ -252,14 +253,17 @@ export const UPDATE_BANK_STMT_RECORD = 'AdminUsersController::expireBankStatemen
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
 export const VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE = 'completeMerchantLoginRequest::validateUnAuthenticatedAdmin';
 export const COMPARE_ADMIN_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::compareAdminPassword';
+export const COMPARE_MERCHANT_PASSWORD_MIDDLEWARE = 'MerchantAuthMiddleware::compareAdminPassword';
 export const VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::validateAdminResetPasswordToken';
 export const CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::checkIfChangedDefaultPassword';
 export const COMPLETE_ADMIN_LOGIN_REQUEST_CONTROLLER = 'AdminAuthController::completeAdminLoginRequest';
 export const VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::verifyLoginVerificationToken';
+export const VERIFY_MERCHANT_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::verifyLoginVerificationToken';
 export const TOKEN_VALIDATION_UNSUCCESSFUL = 'AdminAuthMiddleware::validateInfoCall';
 export const ADMIN_LOGIN_CONTROLLER = 'AdminAuthController::login';
 export const ADMIN_FORGOT_PASSWORD_CONTROLLER = 'AdminAuthController::forgotPassword';
 export const SET_PASSWORD_CONTROLLER = 'AdminAuthController::setPassword';
+export const CREATE_MERCHANT_PASSWORD_CONTROLLER = 'AdminAuthController::setPassword';
 export const ADMIN_PERMISSIONS_CONTROLLER = 'AdminAuthController::adminPermissions';
 export const CHECK_ADMIN_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE = 'AdminAuthMiddleware::checkAdminOtpVerificationRequestCount';
 export const COMPLETE_ADMIN_PROFILE_CONTROLLER = 'AdminAuthController::completeAdminProfile';
@@ -417,7 +421,9 @@ export const DELETE_EVENT_RECORD = 'ShopController::removeTicketRecord';
 export const FAILED_TO_PAY_FOR_TICKET = 'ShopController::ticketPurchaseUpdateFailure';
 export const EVENT_PAYMENT_SUCCESSFUL = 'ShopController::ticketPurchaseUpdateSuccess';
 export const CREATE_MERCHANT_CONTROLLER = 'MerchantController::createMerchant';
+export const ONBOARD_MERCHANT_ADMIN_CONTROLLER = 'MerchantController::onboardMerchant';
 export const CREATE_MERCHANT_ADMIN_CONTROLLER = 'MerchantController::createMerchantAdmin';
+export const UPDATE_MERCHANT_ADMIN_PASSWORD = 'MerchantController::setNewMerchantAdminPassword';
 export const VALIDATE_CREATE_MERCHANT_SECRET_KEY_MIDDLEWARE = 'AdminMerchantMiddleware::validateCreateMerchantSecretKey';
 export const CHECK_IF_MERCHANT_EXISTS_MIDDLEWARE = 'AdminMerchantMiddleware::checkIfMerchantExists';
 export const FETCH_MERCHANT_CONTROLLER = 'MerchantController::fetchMerchants';

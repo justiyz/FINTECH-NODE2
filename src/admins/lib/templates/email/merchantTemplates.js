@@ -17,19 +17,17 @@ export const commonTemplate = (messageType, data) => {
     manualLoanApproval: 'Manual Loan Approval Required',
     resetPassword: 'Password Reset Successful',
     changePassword: 'Password Change Successful',
-    completeMerchantKyc: 'Complete Admin Onboarding',
-    createMerchantPassword: 'Password Creation Successful',
-
+    completeMerchantKyc: 'Complete Merchant KYC'
   };
 
   let headerText;
   switch (messageType) {
-  case `${messageType}`:
-    headerText = heading[messageType];
-    break;
-  default:
-    headerText = '';
-    break;
+    case `${messageType}`:
+      headerText = heading[messageType];
+      break;
+    default:
+      headerText = '';
+      break;
   }
 
   return `

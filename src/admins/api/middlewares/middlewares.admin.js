@@ -36,31 +36,31 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
   }
 };
 
-export const validateUnAuthenticatedMerchant = (type = '') => async (req, res, next) => {
-  try {
-    const { body } = req;
-    const payload = body.email || req.merchant.email;
-    const [ merchant ] = await processAnyData(adminQueries.getMerchantByEmail, [ payload.trim().toLowerCase() ]);
-
-    if (!merchant && (type === 'login' || type === 'verify')) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that merchant's email is not existing in the database validateUnAuthenticatedMerchant.admin.middlewares.admin.js`);
-      return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Merchant'),
-        enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE);
-    }
-    if (merchant && (merchant.status !== 'active' || merchant.is_deleted)) {
-      const merchantStatus = merchant.is_deleted ? 'deleted, kindly contact support team'  : `${merchant.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${merchant.admin_id}:::Info: successfully confirms that merchant account is ${merchantStatus} in the database
-      validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
-      return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(merchantStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
-    }
-    req.merchant = merchant;
-    return next();
-  } catch (error) {
-    error.label = enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE;
-    logger.error(`getting merchants details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+// export const validateUnAuthenticatedMerchant = (type = '') => async (req, res, next) => {
+//   try {
+//     const { body } = req;
+//     const payload = body.email || req.merchant.email;
+//     const [ merchant ] = await processAnyData(adminQueries.getMerchantByEmail, [ payload.trim().toLowerCase() ]);
+//
+//     if (!merchant && (type === 'login' || type === 'verify')) {
+//       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that merchant's email is not existing in the database validateUnAuthenticatedMerchant.admin.middlewares.admin.js`);
+//       return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Merchant'),
+//         enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE);
+//     }
+//     if (merchant && (merchant.status !== 'active' || merchant.is_deleted)) {
+//       const merchantStatus = merchant.is_deleted ? 'deleted, kindly contact support team'  : `${merchant.status}, kindly contact support team`;
+//       logger.info(`${enums.CURRENT_TIME_STAMP}, ${merchant.admin_id}:::Info: successfully confirms that merchant account is ${merchantStatus} in the database
+//       validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
+//       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(merchantStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
+//     }
+//     req.merchant = merchant;
+//     return next();
+//   } catch (error) {
+//     error.label = enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE;
+//     logger.error(`getting merchants details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE}`, error.message);
+//     return next(error);
+//   }
+// };
 
 /**
  * check if admin exists in the DB based on admin_id

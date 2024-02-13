@@ -7,8 +7,7 @@ import * as MerchantMiddleware from '../middlewares/middlewares.merchant';
 import * as MerchantController from '../controllers/controller.merchant';
 import * as AuthController from "../controllers/controllers.auth";
 import * as AdminMiddleware from "../middlewares/middlewares.admin";
-import {validateUnAuthenticatedMerchant} from "../middlewares/middlewares.admin";
-
+import {compareMerchantPassword, verifyMerchantLoginVerificationToken} from "../middlewares/middlewares.merchant";
 const router = Router();
 
 // ============== POST =================== //
@@ -23,6 +22,13 @@ router.post(
 );
 
 router.post(
+  '/onboard-merchant-admin',
+  // AdminMiddleware.validateUnAuthenticatedAdmin,
+  Model(Schema.createMerchantAdmin, 'payload'),
+  MerchantController.onboardMerchant
+);
+
+router.post(
   '/create-merchant-admin',
   // AuthMiddleware.validateAdminAuthToken,
   Model(Schema.createMerchantAdmin, 'payload'),
@@ -32,15 +38,22 @@ router.post(
 router.post(
   '/merchant-login',
   Model(Schema.merchantAdminCredentials, 'payload'),
-  AdminMiddleware.validateUnAuthenticatedMerchant('login'),
+  MerchantMiddleware.validateUnAuthenticatedMerchant('login'),
+  MerchantMiddleware.compareMerchantPassword,
   AuthController.completeMerchantLoginRequest,
   MerchantController.merchantAdminLogin
 );
 
 router.post(
+  'verify-merchant-login',
+  Model(Schema.verifyLogin, 'payload'),
+  MerchantMiddleware.verifyMerchantLoginVerificationToken
+);
+
+router.post(
   '/verify-password-token',
   Model(Schema.verifyLogin, 'payload'),
-  AuthMiddleware.verifyLoginVerificationToken,
+  MerchantMiddleware.verifyMerchantLoginVerificationToken,
   AuthController.sendAdminPasswordToken
 );
 
@@ -51,6 +64,35 @@ router.post(
   AuthMiddleware.checkIfChangedDefaultPassword('validate'),
   AuthController.setPassword('first')
 );
+
+router.post(
+  '/:merchant_id/update_password',
+  Model(Schema.merchantPassword, 'payload'),
+  MerchantController.setNewMerchantPassword
+);
+
+router.post(
+  '/:merchant_id/merchant-reset-password',
+  Model(Schema.merchantPassword, 'payload'),
+  MerchantController.setPassword
+  // AuthMiddleware.validateMerchantForgotPasswordAndPinToken
+)
+
+router.post(
+  '/:merchant_admin_id/password/update',
+  Model(Schema.merchantAdminPassword, 'payload'),
+  MerchantController.setNewMerchantAdminPassword
+);
+
+router.post(
+  '/merchant/forgot-password',
+  Model(Schema.forgotPassword, 'payload'),
+  MerchantMiddleware.validateUnAuthenticatedMerchantV2('verify'),
+  MerchantController.forgotMerchantPassword
+);
+
+router.post(
+  '/otp/verify')
 
 // ============== GET =================== //
 router.get(
