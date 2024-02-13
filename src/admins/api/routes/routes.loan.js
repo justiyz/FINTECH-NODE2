@@ -213,4 +213,12 @@ router.post(
   LoanController.adminInitiateManualCardLoanRepayment
 );
 
+router.post(
+  '/:loan_id/create-mandate-consent-request',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.createMandateRequestPayload, 'params'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanController.createMandateConsentRequest
+);
+
 export default router;
