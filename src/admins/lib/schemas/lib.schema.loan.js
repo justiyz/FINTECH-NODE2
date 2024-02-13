@@ -160,6 +160,10 @@ const loanRepaymentType = Joi.object().keys({
   })
 });
 
+const createMandateRequestPayload = Joi.object().keys({
+  loan_id: Joi.string().required(),
+});
+
 
 export default {
   manualLoanApproval,
@@ -179,5 +183,6 @@ export default {
   manuallyInitiatedLoanApplication,
   manuallyCreateLoanRepaymentSchedule,
   loanRepaymentParams,
-  loanRepaymentType
+  loanRepaymentType,
+  createMandateRequestPayload
 };

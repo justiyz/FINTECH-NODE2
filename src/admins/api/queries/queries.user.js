@@ -506,6 +506,10 @@ export default {
       kind_of_relationship = $6
     WHERE user_id = $1
     RETURNING *`,
+
+  fetchAllDetailsBelongingToUser: `
+    SELECT * FROM users WHERE user_id = $1`,
+
 };
 
 
