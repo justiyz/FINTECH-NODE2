@@ -6,6 +6,7 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as AdminHelpers from '../../lib/utils/lib.util.helpers';
 import MerchantPayload from '../../lib/payloads/lib.payload.merchant';
 import config from '../../../users/config/index';
@@ -93,9 +94,15 @@ export const createMerchantAdmin = async (req, res, next) => {
 export const setNewMerchantPassword = async (req, res, next) => {
   const { body, params } = req;
   try {
-    if( body.password === body.confirm_password ) {
       const merchant_id = params.merchant_id;
+      const merchant = await processOneOrNoneData(merchantQueries.fetchMerchantByMerchantId, [merchant_id])
       const new_password = Hash.hashData(body.password);
+      const oldPasswordValid = UserHash.compareData(body.old_password, merchant.password);
+
+      if(!oldPasswordValid) {
+        return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
+
       const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
         merchant_id, new_password
       ]);
@@ -111,12 +118,7 @@ export const setNewMerchantPassword = async (req, res, next) => {
         res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
         enums.HTTP_OK,
         { updated_merchant });
-    } else {
-      return ApiResponse.error(
-        res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_FAILED,
-        enums.HTTP_UNPROCESSABLE_ENTITY
-      );
-    }
+
   } catch(error) {
     error.label = enums.UPDATE_MERCHANT_ADMIN_PASSWORD;
     logger.error(`Create merchant account failed:::${enums.UPDATE_MERCHANT_ADMIN_PASSWORD}`, error.message);

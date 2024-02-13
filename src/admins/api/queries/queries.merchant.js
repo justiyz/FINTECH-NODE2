@@ -65,9 +65,11 @@ export default {
         invalid_verification_token_count = $5
       WHERE merchant_admin_id = $1
       RETURNING *`,
+
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
   `,
+
   fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
   fetchSingleMerchant: `
     SELECT
