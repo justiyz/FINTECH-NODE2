@@ -6,6 +6,7 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as AdminHelpers from '../../lib/utils/lib.util.helpers';
 import MerchantPayload from '../../lib/payloads/lib.payload.merchant';
 import config from '../../../users/config/index';
@@ -93,12 +94,24 @@ export const createMerchantAdmin = async (req, res, next) => {
 export const setNewMerchantPassword = async (req, res, next) => {
   const { body, params } = req;
   try {
-    if( body.password === body.confirm_password ) {
       const merchant_id = params.merchant_id;
+      const merchant = await processOneOrNoneData(merchantQueries.fetchMerchantByMerchantId, [merchant_id])
       const new_password = Hash.hashData(body.password);
+      const oldPasswordValid = UserHash.compareData(body.old_password, merchant.password);
+      const oldAndNewPasswordIsEqual = UserHash.compareData(body.password, merchant.password);
+
+      if(!oldPasswordValid) {
+        return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
+
+      if(oldAndNewPasswordIsEqual) {
+        return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
+
       const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
         merchant_id, new_password
       ]);
+
       logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${merchant_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
       if (merchant_id) {
         await MailService('Password Reset Successful', 'createMerchantPassword', {
@@ -111,12 +124,7 @@ export const setNewMerchantPassword = async (req, res, next) => {
         res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
         enums.HTTP_OK,
         { updated_merchant });
-    } else {
-      return ApiResponse.error(
-        res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_FAILED,
-        enums.HTTP_UNPROCESSABLE_ENTITY
-      );
-    }
+
   } catch(error) {
     error.label = enums.UPDATE_MERCHANT_ADMIN_PASSWORD;
     logger.error(`Create merchant account failed:::${enums.UPDATE_MERCHANT_ADMIN_PASSWORD}`, error.message);
@@ -226,15 +234,18 @@ export const forgotMerchantPassword = async(req, res, next) => {
 export const merchantAdminLogin = async (req, res, next) => {
   const { body, merchant } = req;
   try {
+
     const login_token = UserHelpers.generateOtp();
     const token = await Hash.generateMerchantAuthToken(merchant);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random token generated completeAdminLoginRequest.admin.controllers.auth.js`);
     const expireAt = momentTZ().add(3, 'minutes');
     const expireTime = momentTZ(expireAt).tz('Africa/Lagos'); // .tz('Africa/Lagos').format('hh:mm a');
     merchant.verification_token_request_count = merchant.verification_token_request_count === 0 ? 1: merchant.verification_token_request_count++;
     const merchantUpdatePayload = [
-      merchant.merchant_id, token, expireTime,
-      (Number(merchant.verification_token_request_count) + 1), Number(merchant.invalid_verification_token_count), login_token
+      merchant.merchant_id,
+      (Number(merchant.verification_token_request_count) + 1),
+      login_token
     ];
 
     const [ updatedMerchant ] = await processAnyData(queriesAdmin.updateMerchantLoginTokenV2, merchantUpdatePayload);
@@ -353,9 +364,10 @@ export const createMerchant = async (req, res, next) => {
     // generate password
     const password_string = Helpers.generatePassword(8);
     req.body.password = await Hash.hashData(password_string);
+
     const { merchant_id } = await processOneOrNoneData(
       merchantQueries.createMerchant,
-      payload
+      [...payload, password_string]
     );
     req.body.merchant_id = merchant_id;
     if (merchant_id) {

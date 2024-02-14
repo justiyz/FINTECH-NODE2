@@ -110,6 +110,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
   try {
     const { admin } = req;
     const merchantId = req.params.merchant_id;
+    console.log(merchantId, 'merchant')
     const merchant = await processOneOrNoneData(
       merchantQueries.fetchMerchantByMerchantId,
       [merchantId]
@@ -132,6 +133,47 @@ export const checkIfMerchantExists = async (req, res, next) => {
       checkIfMerchantExists.admin.middlewares.merchant.js`
     );
     req.merchant = merchant;
+    return next();
+  } catch (error) {
+    logger.error(`checking if queried merchant id exists in the DB failed::${enums.CHECK_IF_MERCHANT_EXISTS_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
+/**
+ * Check if merchant admin exists
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminMerchantMiddleware
+ */
+export const checkIfMerchantAdminExists = async (req, res, next) => {
+  try {
+    const { admin, body: {email, phone_number} } = req;
+    const merchantId = req.params.merchant_id;
+    const merchantAdmin = await processOneOrNoneData(
+      merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
+      [email, phone_number, merchantId]
+    );
+    if (merchantAdmin) {
+      logger.info(`
+        ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+        successfully confirmed that admin for merchant: ${merchantId} exist
+        checkIfMerchantAdminExists.admin.middlewares.merchant.js`
+      );
+      return ApiResponse.error(
+        res,
+        enums.MERCHANT_ADMIN_EXIST,
+        enums.HTTP_NOT_FOUND
+      )
+    }
+    logger.info(`
+      ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+      successfully confirmed that admin for  merchant: ${merchantId} does not exist
+      checkIfMerchantAdminExists.admin.middlewares.merchant.js`
+    );
     return next();
   } catch (error) {
     logger.error(`checking if queried merchant id exists in the DB failed::${enums.CHECK_IF_MERCHANT_EXISTS_MIDDLEWARE}`, error.message);
@@ -299,12 +341,14 @@ export const validateUnAuthenticatedMerchant = (type = '') => async (req, res, n
       return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Merchant'),
         enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE);
     }
-    if (merchant && (merchant.status !== 'active' || merchant.is_deleted)) {
+    if (merchant && (merchant.status !== 'active')) {
+
       const merchantStatus = merchant.is_deleted ? 'deleted, kindly contact support team'  : `${merchant.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${merchant.admin_id}:::Info: successfully confirms that merchant account is ${merchantStatus} in the database
       validateUnAuthenticatedAdmin.admin.middlewares.admin.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(merchantStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE);
     }
+
     req.merchant = merchant;
     return next();
   } catch (error) {
