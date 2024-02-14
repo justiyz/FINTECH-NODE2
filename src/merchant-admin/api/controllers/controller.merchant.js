@@ -48,7 +48,7 @@ export const createMerchantAdmin = async (req, res, next) => {
   try {
     body.hash = await Hash.generateAdminResetPasswordToken({ email: body.email });
     const password_string = Helpers.generatePassword(8);
-    body.password = await Hash.hashData(password_string);
+    body.password =  Hash.hashData(password_string);
     body.verification_token_expires = expirationTime;
     body.verification_token = signupOtpRequest;
 

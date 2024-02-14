@@ -1,4 +1,29 @@
 export default {
+
+getAdminByEmail: `
+  SELECT id, merchant_admin_id, email, phone_number, first_name, last_name, gender,
+    is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count
+  FROM merchant_admins
+  WHERE email = $1`,
+
+deactivateAdmin: `
+    UPDATE merchant_admins
+    SET
+      updated_at = NOW(),
+      status = 'deactivated'
+    WHERE merchant_admin_id = $1`,
+
+updateAdminInvalidOtpCount: `
+    UPDATE merchant_admins
+    SET
+      updated_at = NOW(),
+      invalid_verification_token_count = invalid_verification_token_count + 1
+    WHERE merchant_admin_id = $1`,
+
+  // ==============  =================== //
+
+
+
   updateAdminProfile: `
     UPDATE admins
     SET
@@ -65,11 +90,7 @@ export default {
     WHERE admin_id = $1
     AND resource_id = $2`,
 
-  getAdminByEmail: `
-    SELECT id, admin_id, role_type, email, phone_number, first_name, last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count, invalid_verification_token_count
-    FROM merchant-admins
-    WHERE email = $1`,
+
 
   getMerchantByEmail: `
     SELECT id, merchant_admin_id, merchant_id, first_name, last_name, status, email, phone_number
@@ -765,20 +786,9 @@ export default {
       AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
   `,
 
-  deactivateAdmin: `
-    UPDATE admins
-    SET
-      updated_at = NOW(),
-      status = 'deactivated'
-    WHERE admin_id = $1`,
 
-  updateAdminInvalidOtpCount: `
-    UPDATE admins
-    SET
-      updated_at = NOW(),
-      invalid_verification_token_count = invalid_verification_token_count + 1
-    WHERE admin_id = $1`
-};
+
+  }
 
 
 
