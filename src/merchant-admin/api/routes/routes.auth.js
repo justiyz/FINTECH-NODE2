@@ -14,18 +14,6 @@ router.post(
   AuthController.setNewMerchantAdminPassword
 );
 
-
-
-
-
-
-
-
-
-
-
-// ==============  =================== //
-
 router.post(
   '/login',
   Model(Schema.login, 'payload'),
@@ -40,9 +28,21 @@ router.post(
   Model(Schema.verifyLogin, 'payload'),
   AuthMiddleware.verifyLoginVerificationToken,
   AdminMiddleware.validateUnAuthenticatedAdmin('login'),
-  AuthMiddleware.adminPermissions,
+  // AuthMiddleware.adminPermissions,
   AuthController.login
 );
+
+
+
+
+
+
+
+
+// ==============  =================== //
+
+
+
 
 router.post(
   '/set-first-password',

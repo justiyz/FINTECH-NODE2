@@ -14,19 +14,59 @@ updateMerchantAdminPassword: `
   RETURNING first_name, last_name, email, status, is_created_password
   `,
 
+fetchAdminPassword: `
+    SELECT id, merchant_admin_id, password
+    FROM merchant_admins
+    WHERE merchant_admin_id = $1`,
+
+
+fetchAdminByVerificationToken: `
+    SELECT id, email, merchant_admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
+    FROM merchant_admins
+    WHERE verification_token = $1`,
+
+
+updateLoginToken: `
+    UPDATE merchant_admins
+    SET
+      updated_at = NOW(),
+      is_verified_email = TRUE,
+      verification_token = $2,
+      verification_token_expires = $3,
+      verification_token_request_count = $4,
+      invalid_verification_token_count = $5
+    WHERE merchant_admin_id = $1
+    RETURNING id, merchant_admin_id, first_name, last_name,  email, is_created_password, is_verified_email, status`,
+
+
+fetchAdminByVerificationTokenAndUniqueId: `
+    SELECT id, email, merchant_admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count
+    FROM merchant_admins
+    WHERE verification_token = $1
+    AND merchant_admin_id = $2`,
+
+
+fetchMerchantsByMerchantAdminId: `
+    SELECT
+        merchants.merchant_id,
+        merchants.business_name,
+        merchants.status,
+        mam.created_at
+    FROM merchant_admins_merchants AS mam
+    LEFT JOIN merchants ON mam.merchant_id = merchants.merchant_id
+    WHERE
+      mam.merchant_admin_id = $1
+      AND ($2 IS NULL OR merchants.status = $2)
+    ORDER BY mam.created_at DESC
+`,
+
 
 // ================================================
 
 
-  fetchAdminPassword: `
-      SELECT id, admin_id, password
-      FROM admins
-      WHERE admin_id = $1`,
 
-  fetchAdminByVerificationToken: `
-      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
-      FROM admins
-      WHERE verification_token = $1`,
+
+
 
   fetchMerchantByVerificationToken: `
       SELECT id, email, merchant_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, otp
@@ -38,23 +78,9 @@ updateMerchantAdminPassword: `
   //     FROM merchants
   //     WHERE verification_token = $1 AND merchant_id = $2`,
 
-  fetchAdminByVerificationTokenAndUniqueId: `
-      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count
-      FROM admins
-      WHERE verification_token = $1
-      AND admin_id = $2`,
 
-  updateLoginToken: `
-      UPDATE admins
-      SET
-        updated_at = NOW(),
-        is_verified_email = TRUE,
-        verification_token = $2,
-        verification_token_expires = $3,
-        verification_token_request_count = $4,
-        invalid_verification_token_count = $5
-      WHERE admin_id = $1
-      RETURNING id, admin_id, first_name, last_name, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
+
+
 
   updateMerchantLoginToken: `
       UPDATE merchant_admins

@@ -7,19 +7,23 @@ import CryptoJS from 'crypto-js';
 
 const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config;
 
-export const generateAdminAuthToken = (admin, permissions) => {
+
+
+export const generateMerchantAdminAuthToken = (merchantAdmin, permissions = []) => {
   try {
-    const { admin_id, role_type } = admin;
-    return jwt.sign({ admin_id, role_type, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
+    const { merchant_admin_id } = merchantAdmin;
+    return jwt.sign({ merchant_admin_id, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
   } catch (error) {
     return error;
   }
 };
 
-export const generateMerchantAdminAuthToken = (merchant, permissions = null) => {
+// ================================================
+
+export const generateAdminAuthToken = (admin, permissions) => {
   try {
-    const { merchant_admin_id, role_type } = merchant;
-    return jwt.sign({ merchant_admin_id, role_type, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
+    const { admin_id, role_type } = admin;
+    return jwt.sign({ admin_id, role_type, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
   } catch (error) {
     return error;
   }
