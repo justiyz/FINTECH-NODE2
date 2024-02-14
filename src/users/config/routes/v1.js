@@ -17,6 +17,8 @@ import adminShopRoutes from '../../../admins/api/routes/routes.shop';
 import adminMerchantRoute from '../../../admins/api/routes/routes.merchant';
 import recovaRoutes from '../../api/routes/routes.recova';
 
+import merchantAdminAuthRoute from '../../../merchant-admin/api/routes/routes.auth';
+
 const router = Router();
 
 router.use('/auth', authRoute);
@@ -36,5 +38,6 @@ router.use('/admin/bvn', bvnRoute);
 router.use('/admin/cluster', AdminClusterRoute);
 router.use('/admin/shop', adminShopRoutes);
 router.use('/admin/merchant', adminMerchantRoute);
+router.use('/merchant-admin/auth', merchantAdminAuthRoute);
 
 export default router;

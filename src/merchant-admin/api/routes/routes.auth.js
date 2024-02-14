@@ -9,6 +9,24 @@ import * as AuthController from '../controllers/controllers.auth';
 const router = Router();
 
 router.post(
+  '/update-password',
+  Model(Schema.resetPassword, 'payload'),
+  AuthController.setNewMerchantAdminPassword
+);
+
+
+
+
+
+
+
+
+
+
+
+// ==============  =================== //
+
+router.post(
   '/login',
   Model(Schema.login, 'payload'),
   AdminMiddleware.validateUnAuthenticatedAdmin('login'),
