@@ -1,0 +1,2 @@
+ALTER TABLE merchant_admins DROP CONSTRAINT merchant_admins_email_key;
+ALTER TABLE merchant_admins DROP CONSTRAINT merchant_admins_phone_number_key;

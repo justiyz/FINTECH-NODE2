@@ -74,7 +74,7 @@ export const createMerchantAdmin = async (req, res, next) => {
         'temp_password': password_string,
         'otpCount': signupOtpRequest,
         'expiration': expirationTime
-    });
+      });
   } catch (error) {
     const description = descriptions.create_merchant_admin_failed(
       `Eloka Chiejina`,
@@ -430,6 +430,14 @@ export const onboardMerchant = async (req, res, next) => {
 export const createMerchant = async (req, res, next) => {
   try {
     const { admin } = req;
+    const businessName = req.body.business_name.trim().toUpperCase()
+    const initials = `${businessName.charAt(0).trim()}${businessName.charAt(1).trim()}`;
+    const existingMerchantsWithInitials = await processAnyData(merchantQueries.fetchMerchantByCodeInitials, [initials]);
+    const merchantCode = `${initials}${existingMerchantsWithInitials.length + 1}`;
+    const existingMerchantCode = await processOneOrNoneData(merchantQueries.fetchMerchantByCode, [merchantCode]);
+
+    console.log(merchantCode.toUpperCase(), 'merchantCode');
+    return
 
     req.body.secret_key = await Hash.encrypt({ email: req.body.email });
     const payload = MerchantPayload.createMerchant(req.body);
