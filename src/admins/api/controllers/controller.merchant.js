@@ -29,6 +29,7 @@ import {
 } from "../../../users/lib/enums/lib.enum.messages";
 import adminQueries from "../queries/queries.admin";
 import * as UserHelpers from "../../../users/lib/utils/lib.util.helpers";
+import {log} from 'winston';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -40,7 +41,7 @@ const { SEEDFI_NODE_ENV } = config;
  * @returns {Promise<*|undefined>}
  */
 export const createMerchantAdmin = async (req, res, next) => {
-  const { body, params: {merchant_id} } = req;
+  const { body, params: {merchant_id}, admin } = req;
   const expireAt = dayjs().add(10, 'minutes');
   const expirationTime = dayjs(expireAt);
   const signupOtpRequest =  1;
@@ -48,29 +49,40 @@ export const createMerchantAdmin = async (req, res, next) => {
   try {
     body.hash = await Hash.generateAdminResetPasswordToken({ email: body.email });
     const password_string = Helpers.generatePassword(8);
-    body.password = await Hash.hashData(password_string);
+    body.password =  Hash.hashData(password_string);
     body.verification_token_expires = expirationTime;
     body.verification_token = signupOtpRequest;
 
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated signup.controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: random OTP generated createMerchantAdmin.admin.controller.merchant.js`);
     const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database signup.controllers.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: checked if OTP is existing in the database createMerchantAdmin.admin.controller.merchant.js`);
     if (existingOtp) {
       return createMerchantAdmin(req, res, next);
     }
 
     body.merchant_id = merchant_id
     const payload = MerchantPayload.createMerchantAdmin(body);
-    const result = await processOneOrNoneData(merchantQueries.createMerchantAdmin, payload);
-    body.merchant_admin_id = result.merchant_admin_id;
-    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin successfully created createMerchantAdmin.admin.controller.merchant.js`);
-    // merchant_id, password
+    let merchantAdmin = await processOneOrNoneData(merchantQueries.fetchMerchantAdminByEmail, [body.email]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: checked if merchant admin exists createMerchantAdmin.admin.controller.merchant.js`);
+    if(!merchantAdmin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: Merchant admin does not exist createMerchantAdmin.admin.controller.merchant.js`);
+      merchantAdmin = await processOneOrNoneData(merchantQueries.createMerchantAdmin, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: Merchant admin successfully created createMerchantAdmin.admin.controller.merchant.js`);
+    }
+    const merchantAdminPivot = await processOneOrNoneData(merchantQueries.createMerchantAdminPivot, [merchant_id, merchantAdmin.merchant_admin_id]);
+    body.merchant_admin_id = merchantAdmin.merchant_admin_id;
+    logger.info(`${enums.CURRENT_TIME_STAMP}:: ${admin.admin_id} Info: merchant admin successfully created createMerchantAdmin.admin.controller.merchant.js`);
+
+    merchantAdmin.password = undefined
+    merchantAdmin.verification_token = undefined
+    merchantAdmin.verification_token_expires = undefined
     return ApiResponse.success(
       res,
       enums.MERCHANT_ADMIN_CREATED_SUCCESSFULLY,
       enums.HTTP_OK,
       {
-        'admin': result,
+        ...merchantAdminPivot,
+        'admin': merchantAdmin,
         'temp_password': password_string,
         'otpCount': signupOtpRequest,
         'expiration': expirationTime
@@ -583,6 +595,43 @@ export const fetchMerchantUsers = async (req, res, next) => {
       total_count: Number(usersCount.total_count),
       total_pages: AdminHelpers.calculatePages(Number(usersCount.total_count), Number(req.query.per_page) || 10),
       users
+    };
+    return ApiResponse.success(
+      res,
+      enums.USERS_FETCHED_SUCCESSFULLY,
+      enums.HTTP_OK,
+      data
+    );
+  } catch (error) {
+    error.label = 'MerchantController::fetchMerchantUsers';
+    logger.error(`Fetching merchant users failed:::MerchantController::fetchMerchantUsers`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * Fetch admins for a specific merchant
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {Object} - Return a list of users.
+ * @memberof AdminMerchantController
+ */
+export const fetchMerchantAdministrators = async (req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const merchantId = req.params.merchant_id;
+    const payload  = MerchantPayload.fetchMerchantAdminstrators(query);
+    const [ admins, [ adminsCount ] ] = await Promise.all([
+      processAnyData(merchantQueries.fetchMerchantAdmins, [merchantId, ...payload]),
+      processAnyData(merchantQueries.fetchMerchantAdminsCount, [merchantId, ...payload])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully fetched users from the DB fetchMerchantUsers.admin.controllers.merchant.js`);
+    const data = {
+      page: parseFloat(req.query.page) || 1,
+      total_count: Number(adminsCount.total_count),
+      total_pages: AdminHelpers.calculatePages(Number(adminsCount.total_count), Number(req.query.per_page) || 10),
+      admins
     };
     return ApiResponse.success(
       res,

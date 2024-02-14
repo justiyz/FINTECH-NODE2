@@ -25,7 +25,6 @@ export default {
     body.password.trim()
   ],
   createMerchantAdmin: (body) => [
-    body.merchant_id.trim(),
     body.first_name.trim().toLowerCase(),
     body.last_name.trim().toLowerCase(),
     body.email.trim().toLowerCase(),
@@ -44,6 +43,12 @@ export default {
     body.transfer_recipient_code.trim(),
   ],
   fetchMerchantUsers: (query) => [
+    query.search ? `%${query.search}%` : null,
+    query.status,
+    query.page ? (query.page - 1) * (query.per_page || 10) : 0,
+    query.per_page ? query.per_page : '10'
+  ],
+  fetchMerchantAdminstrators: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,

@@ -152,22 +152,15 @@ export const checkIfMerchantExists = async (req, res, next) => {
 export const checkIfMerchantAdminExists = async (req, res, next) => {
   try {
     const { admin, body: {email, phone_number}, params: {merchant_id} } = req;
-    const merchantAdmin = await processOneOrNoneData(
-      merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
-      [email, phone_number, merchant_id]
-    );
-    console.log(merchantAdmin, 'merchantAdmin')
-    if (merchantAdmin) {
-      logger.info(`
-        ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
-        successfully confirmed that admin for merchant: ${merchant_id} exist
-        checkIfMerchantAdminExists.admin.middlewares.merchant.js`
-      );
-      return ApiResponse.error(
-        res,
-        enums.MERCHANT_ADMIN_EXIST,
-        enums.HTTP_NOT_FOUND
-      )
+    // const merchantAdmin = await processOneOrNoneData(
+      // merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
+    //   [email, phone_number, merchant_id]
+    // );
+    // console.log(merchantAdmin, 'merchantAdmin')
+    //check if merchant admin is already a merchant admin
+    const existingMerchantAdmin = await processOneOrNoneData(merchantQueries.fetchMerchantAdminPivotByAdminEmail, [email, merchant_id]);
+    if(existingMerchantAdmin) {
+      return ApiResponse.error(res, `${email} is already an admin`, enums.HTTP_BAD_REQUEST, enums.CREATE_MERCHANT_ADMIN_CONTROLLER);
     }
     logger.info(`
       ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
