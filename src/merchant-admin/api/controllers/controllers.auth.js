@@ -21,6 +21,9 @@ export const setNewMerchantAdminPassword = async (req, res, next) => {
   const { body: {email, old_password, password} } = req;
   try {
       const admin = await processOneOrNoneData(authQueries.fetchMerchantAdminByEmail, [email])
+      if (!admin) {
+        return ApiResponse.error(res, 'Admin not found', enums.HTTP_NOT_FOUND, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
       const new_password = Hash.hashData(password);
       const oldPasswordValid = UserHash.compareData(old_password, admin.password);
       const oldAndNewPasswordIsEqual = UserHash.compareData(password, admin.password);
@@ -40,9 +43,9 @@ export const setNewMerchantAdminPassword = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${admin.merchant_admin_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
       if (updatedMerchantAdmin) {
         await MailService('Password Reset Successful', 'createMerchantPassword', {
-          email: req.body.email,
+          email: admin.email,
           merchant_id: admin.merchant_admin_id,
-          first_name: req.body.first_name
+          first_name: admin.first_name
         });
       }
       return ApiResponse.success(
