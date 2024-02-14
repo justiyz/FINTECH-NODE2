@@ -33,7 +33,6 @@ export default {
   `,
   createMerchantAdmin: `
       INSERT INTO merchant_admins (
-        merchant_id,
         first_name,
         last_name,
         email,
@@ -43,9 +42,19 @@ export default {
         verification_token,
         verification_token_expires
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9
+        $1, $2, $3, $4, $5, $6, $7, $8
       ) RETURNING *
   `,
+
+  createMerchantAdminPivot: `
+      INSERT INTO merchant_admins_merchants (
+        merchant_id,
+        merchant_admin_id
+      ) VALUES (
+        $1, $2
+      ) RETURNING *
+  `,
+
   fetchMerchantAdminIdByMerchantEmail: `
     SELECT
         merchant_admins.merchant_id
@@ -73,9 +82,63 @@ export default {
       SELECT * FROM merchants WHERE merchant_code ILIKE $1 || '%';
   `,
 
+  fetchMerchantAdminByEmail:
+    `SELECT * FROM merchant_admins WHERE email = $1`,
+
+  fetchMerchantAdminPivotByAdminEmail:
+  `SELECT mam.*
+  FROM merchant_admins_merchants mam
+  JOIN merchant_admins ma ON mam.merchant_admin_id = ma.merchant_admin_id
+  WHERE ma.email = $1 AND mam.merchant_id = $2`,
+
+
   fetchMerchantAdminByEmailAndPhoneNo:
     `SELECT id FROM merchant_admins WHERE (email = $1 OR phone_number = $2) AND merchant_id = $3;`,
 
+
+  fetchMerchantAdmins: `
+    SELECT
+        merchant_admins.merchant_admin_id,
+        merchant_admins.first_name,
+        merchant_admins.last_name,
+        TRIM(CONCAT(merchant_admins.first_name, ' ', merchant_admins.last_name)) AS name,
+        merchant_admins.gender,
+        merchant_admins.email,
+        merchant_admins.phone_number,
+        merchant_admins.status,
+        mam.created_at
+    FROM merchant_admins_merchants AS mam
+    LEFT JOIN merchant_admins ON mam.merchant_admin_id = merchant_admins.merchant_admin_id
+    WHERE
+      mam.merchant_id = $1
+      AND ($3 IS NULL OR merchant_admins.status = $3)
+      AND (
+        $2 IS NULL
+        OR TRIM(CONCAT(merchant_admins.first_name,  ' ', merchant_admins.last_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(merchant_admins.last_name, ' ', merchant_admins.first_name)) ILIKE TRIM($2)
+        OR merchant_admins.email ILIKE TRIM($2)
+        OR merchant_admins.phone_number ILIKE TRIM($2)
+      )
+    ORDER BY mam.created_at DESC
+    OFFSET $4
+    LIMIT $5
+  `,
+
+  fetchMerchantAdminsCount: `
+    SELECT COUNT(*) AS total_count
+    FROM merchant_admins_merchants AS mam
+    LEFT JOIN merchant_admins ON mam.merchant_admin_id = merchant_admins.merchant_admin_id
+    WHERE
+      mam.merchant_id = $1
+      AND ($3 IS NULL OR merchant_admins.status = $3)
+      AND (
+        $2 IS NULL
+        OR TRIM(CONCAT(merchant_admins.first_name,  ' ', merchant_admins.last_name)) ILIKE TRIM($2)
+        OR TRIM(CONCAT(merchant_admins.last_name, ' ', merchant_admins.first_name)) ILIKE TRIM($2)
+        OR merchant_admins.email ILIKE TRIM($2)
+        OR merchant_admins.phone_number ILIKE TRIM($2)
+      )
+    `,
 
   fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
   fetchSingleMerchant: `

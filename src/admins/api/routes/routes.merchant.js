@@ -133,6 +133,16 @@ router.get(
 );
 
 router.get(
+  '/:merchant_id/administrators',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  Model(Schema.fetchMerchantAdministrators, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantAdministrators
+);
+
+
+router.get(
   '/:merchant_id/user/creditscore-breakdown',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('merchants', 'read'),

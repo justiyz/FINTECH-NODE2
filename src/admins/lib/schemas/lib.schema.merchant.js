@@ -70,6 +70,13 @@ const fetchMerchantUsers = Joi.object().keys({
   status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
 });
 
+const fetchMerchantAdministrators = Joi.object().keys({
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  search: Joi.string().optional(),
+  status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
+});
+
 const fetchMerchantLoans = Joi.object().keys({
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
@@ -157,5 +164,6 @@ export default {
   merchantPassword,
   forgotPassword,
   verifyLogin,
-  createMerchantAdminParams
+  createMerchantAdminParams,
+  fetchMerchantAdministrators
 };
