@@ -53,6 +53,22 @@ export const completeAdminLoginRequest = async(req, res, next) => {
   }
 };
 
+export const completeMerchantLoginRequest = async (req, res, next ) => {
+  try {
+    const merchant  = req.merchant; // await processAnyData(adminQueries.getMerchantByEmail, [ req.body.trim().toLowerCase() ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched merchant admin details from the database completeMerchantLoginRequest.admin.middlewares.admin.js`);
+
+    req.merchant = merchant;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: merchant information saved in session`);
+
+    return next();
+  } catch (error) {
+    error.label = enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE;
+    logger.error(`getting merchants details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+}
+
 /**
  * login admin
  * @param {Request} req - The request from the endpoint.
@@ -156,7 +172,7 @@ export const forgotPassword = async(req, res, next) => {
  */
 export const sendAdminPasswordToken = async(req, res, next) => {
   try {
-    const { admin} = req;
+    const { admin, merchant} = req;
     const passwordToken = await Hash.generateAdminResetPasswordToken(admin);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: successfully generated password token sendAdminPasswordToken.admin.controllers.auth.js`);
     const tokenExpiration = await JSON.parse(Buffer.from(passwordToken.split('.')[1], 'base64').toString()).exp;
@@ -165,7 +181,9 @@ export const sendAdminPasswordToken = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched token expiration time and converted it
     sendAdminPasswordToken.admin.controllers.auth.js`);
     await adminActivityTracking(req.admin.admin_id, 18, 'success', descriptions.verify_reset_pass_otp());
-    return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { passwordToken, tokenExpireAt });
+    merchant.password_token = passwordToken;
+    merchant.tokenExpireAt = tokenExpireAt
+    return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { merchant });
   } catch (error) {
     await adminActivityTracking(req.admin.admin_id, 18, 'fail', descriptions.verify_reset_pass_otp_failed());
     error.label = enums.SEND_ADMIN_PASSWORD_TOKEN_CONTROLLER;

@@ -23,7 +23,8 @@ const heading = {
   resetPin: 'Pin Reset Successful',
   rejectedDebitCardNotUsersCard: 'Rejected Debit Card',
   ticketBookedForYou: 'Hurray! Ticket Booked',
-  eventBooking: 'Hurray! Ticket(s) Booked'
+  eventBooking: 'Hurray! Ticket(s) Booked',
+  bvnOtp: 'BVN Verification OTP'
 };
 
 export const commonTemplate = (messageType, data) => {

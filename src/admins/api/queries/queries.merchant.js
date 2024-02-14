@@ -12,17 +12,65 @@ export default {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
-      merchant_loan_limit
+      merchant_loan_limit,
+      password
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
     ) RETURNING merchant_id;
   `,
+  onboardMerchant: `
+    UPDATE merchants
+    SET
+        first_name = $2,
+        last_name = $3,
+        email = $4,
+        phone_number = $5,
+        gender = $6,
+        password = $7,
+        updated_at = NOW()
+    WHERE
+        merchant_id = $1
+    RETURNING first_name, last_name, email, phone_number, gender, merchant_id
+  `,
+  createMerchantAdmin: `
+      INSERT INTO merchant_admins (
+        merchant_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        gender,
+        password,
+        verification_token,
+        verification_token_expires
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
+      ) RETURNING *
+  `,
+  fetchMerchantAdminIdByMerchantEmail: `
+    SELECT
+        merchant_admins.merchant_id
+    FROM merchant_admins
+    LEFT JOIN merchants ON merchants.merchant_id = merchant_admins.merchant_id
+    WHERE
+        merchant_admins.email = $1`,
+  updateMerchantLoginToken: `
+      UPDATE merchant_admins
+      SET
+        updated_at = NOW(),
+        is_verified_email = true,
+        verification_token = $2,
+        verification_token_expires = $3,
+        verification_token_request_count = $4,
+        invalid_verification_token_count = $5
+      WHERE merchant_admin_id = $1
+      RETURNING *`,
   fetchMerchantByMerchantId: `
     SELECT * FROM merchants WHERE merchant_id = $1;
   `,
   fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
   fetchSingleMerchant: `
-    SELECT 
+    SELECT
       merchants.merchant_id,
       business_name,
       email,
@@ -48,8 +96,35 @@ export default {
     LEFT JOIN merchant_bank_accounts ba ON merchants.merchant_id = ba.merchant_id
     WHERE merchants.merchant_id = $1;
   `,
+  fetchSingleMerchantByEmail: `
+    SELECT
+      merchants.merchant_id,
+      business_name,
+      email,
+      phone_number,
+      status,
+      interest_rate,
+      address,
+      secret_key,
+      orr_score_threshold,
+      processing_fee,
+      insurance_fee,
+      advisory_fee,
+      customer_loan_max_amount,
+      merchant_loan_limit,
+      merchants.created_at,
+      json_build_object(
+        'bank_name', ba.bank_name,
+        'bank_code', ba.bank_code,
+        'account_number', ba.account_number,
+        'account_name', ba.account_name
+      ) AS bank_account
+    FROM merchants
+    LEFT JOIN merchant_bank_accounts ba ON merchants.merchant_id = ba.merchant_id
+    WHERE merchants.email = $1;
+  `,
   fetchAndSearchMerchants: `
-    SELECT 
+    SELECT
     count(*) OVER() AS total,
     merchants.merchant_id,
     business_name,
@@ -264,6 +339,7 @@ export default {
   `,
   fetchMerchantLoans: `
     SELECT
+      users.user_id,
       users.first_name,
       users.last_name,
       users.middle_name,
@@ -272,12 +348,21 @@ export default {
       pl.created_at date_requested,
       pl.loan_disbursed_at as date_disbursed,
       (
-        SELECT COALESCE(SUM(amount), 0)
-        FROM personal_loan_payments
+        SELECT COALESCE(SUM(amount_paid), 0)
+        FROM personal_loan_payment_schedules
         WHERE loan_id = pl.loan_id
-        AND transaction_type = 'credit'
       ) AS repayment_amount,
-      pl.total_outstanding_amount as total_amount,
+      (
+        SELECT COALESCE(SUM(total_payment_amount)) - COALESCE(SUM(amount_paid), 0)
+        FROM personal_loan_payment_schedules
+        WHERE loan_id = pl.loan_id
+      ) AS outstanding_amount,
+      (
+        pl.total_repayment_amount +
+        pl.processing_fee +
+        pl.insurance_fee +
+        pl.advisory_fee
+      )as total_amount,
       pl.status as loan_status
     FROM merchant_user_loans as mu_loans
     LEFT JOIN users ON mu_loans.user_id = users.user_id
@@ -300,4 +385,61 @@ export default {
     ORDER BY mu_loans.created_at DESC
     OFFSET $1 LIMIT $2;
   `,
+  updateMerchantPassword: `
+    UPDATE merchants
+    SET
+        password = $2,
+        updated_at = NOW(),
+        status = 'active',
+        is_created_password = true
+    WHERE merchant_id = $1
+    RETURNING first_name, last_name, email, merchant_id
+  `,
+
+  setNewMerchantPassword: `
+    UPDATE merchants
+    SET
+      updated_at = NOW(),
+      status = 'active',
+      is_created_password = TRUE,
+      password = $2
+    WHERE merchant_id = $1
+    RETURNING merchant_id, status, is_created_password`,
+
+  fetchMerchantPassword: `
+      SELECT id, merchant_id, password
+      FROM merchants
+      WHERE merchant_id = $1`,
+
+  getMerchantByEmailV2: `
+    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, verification_token_request_count, invalid_verification_token_count, gender, created_at, updated_at
+    FROM merchants
+    WHERE email = $1;
+  `,
+
+  fetchMerchantByVerificationOTP: `
+    SELECT id, email, merchant_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count, otp
+    FROM merchants
+    WHERE verification_token = $1 AND merchant_id = $2`,
+
+  updateMerchantInvalidOtpCount: `
+    UPDATE merchants
+    SET
+      updated_at = NOW(),
+      invalid_verification_token_count = invalid_verification_token_count + 1
+    WHERE merchant_id = $1`,
+
+  updateAdminInvalidOtpCount: `
+    UPDATE merchants
+    SET
+      updated_at = NOW(),
+      invalid_verification_token_count = invalid_verification_token_count + 1
+    WHERE merchant_id = $1`,
+
+  deactivateMerchant: `
+    UPDATE merchants
+    SET
+      updated_at = NOW(),
+      status = 'deactivated'
+    WHERE merchant_id = $1`,
 };

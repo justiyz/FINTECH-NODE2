@@ -35,13 +35,20 @@ const zeehBVNVerificationCheck = async(bvn, user) => {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, bvn);
     }
-    const response = await zeehSDK.getBvnInformation({
-      bvn: bvn,
-      publicKey: config.SEEDFI_ZEEH_PUBLIC_KEY,
-      'zeeh-private-key': config.SEEDFI_ZEEH_SECRET_KEY
-    });
-    response.data['entity'] = response.data;
-    return response.data.entity;
+    const options = {
+      method: 'POST',
+      url: `https://v2.api.zeeh.africa/nigeria_kyc/lookup_bvn_advance`,
+      headers: {
+        accept: 'application/json',
+        'Secret_Key': config.SEEDFI_ZEEH_SECRET_KEY,
+        'content-type': 'application/json',
+      },
+      data: {
+        bvn: bvn
+      }
+    };
+    const data = await axios(options);
+    return data;
   } catch (error) {
     if (error.message === 'Not Found') {
       logger.error(`${enums.CURRENT_TIME_STAMP} Error querying BVN for this reason ====>>> ${error}`);
@@ -61,7 +68,7 @@ const zeehPassportNumberVerificationCheck = async (user, document_id) => {
 
     const options = {
       method: 'POST',
-      url: `https://api.zeeh.africa/api/v1/passport/live/lookup/${config.SEEDFI_ZEEH_PUBLIC_KEY}`,
+      url: `https://v2.api.zeeh.africa/api/v1/passport/live/lookup/${config.SEEDFI_ZEEH_PUBLIC_KEY}`,
       headers: {
         accept: 'application/json',
         'zeeh-private-key': config.SEEDFI_ZEEH_SECRET_KEY,

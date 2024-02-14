@@ -1,0 +1,3 @@
+ALTER TABLE merchants DROP COLUMN IF EXISTS first_name;
+ALTER TABLE merchants DROP COLUMN IF EXISTS last_name;
+ALTER TABLE merchants DROP COLUMN IF EXISTS gender;

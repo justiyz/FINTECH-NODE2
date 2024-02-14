@@ -16,6 +16,24 @@ export const generateAdminAuthToken = (admin, permissions) => {
   }
 };
 
+export const generateMerchantAdminAuthToken = (merchant, permissions = null) => {
+  try {
+    const { merchant_admin_id, role_type } = merchant;
+    return jwt.sign({ merchant_admin_id, role_type, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
+  } catch (error) {
+    return error;
+  }
+};
+
+export const generateMerchantAuthToken = (merchant, permissions = null) => {
+  try {
+    const { merchant_id, role_type } = merchant;
+    return jwt.sign({ merchant_id, role_type, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
+  } catch (error) {
+    return error;
+  }
+};
+
 export const generateRandomString = (size) => {
   try {
     return Crypto.randomBytes(size).toString('hex');

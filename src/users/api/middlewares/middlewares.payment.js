@@ -22,6 +22,8 @@ import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule, generateClusterLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
 import adminShopQueries from "../../../admins/api/queries/queries.shop";
+import * as recovaService from '../services/services.recova';
+
 import {RETRIEVE_TICKET_URL_FROM_DATABASE} from "../../lib/enums/lib.enum.labels";
 
 /**
@@ -165,6 +167,7 @@ export const verifyTransactionPaymentRecord = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: the webhook event sent is ${body.event} verifyTransactionPaymentRecord.middlewares.payment.js`);
       const parameterTypes = body.otp ? params.reference_id : (body.data.reference || body.data.transaction_reference);
       const [ paymentRecord ] = await processAnyData(paymentQueries.fetchTransactionByReference, [ parameterTypes ]);
+
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record fetched from DB using reference verifyTransactionPaymentRecord.middlewares.payment.js`);
       if (!paymentRecord) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: payment record not existing in the DB verifyTransactionPaymentRecord.middlewares.payment.js`);
@@ -584,11 +587,23 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding repayments
         processPersonalLoanRepayments.middlewares.payment.js`);
 
-        const isCustomPartRepayment =  paymentRecord.payment_type === 'part_loan_repayment' && paymentRecord.amount < nextRepayment.total_payment_amount;
 
-        let statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+        let customRepaymentCompleted = paymentRecord.payment_type == 'part_loan_repayment' && parseFloat(paymentRecord.amount) >= parseFloat(nextRepayment.post_payment_outstanding_amount) ;
 
-        statusType = isCustomPartRepayment ? 'ongoing' : statusType;
+
+        customRepaymentCompleted =  parseFloat(paymentRecord.amount) == parseFloat(nextRepayment.total_payment_amount) ? true : customRepaymentCompleted;
+
+        const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
+
+        console.log('customRepaymentCompleted', customRepaymentCompleted);
+        console.log('paymentRecord.amount', parseFloat(paymentRecord.amount));
+        console.log('nextRepayment.post_payment_outstanding_amount', parseFloat(nextRepayment.post_payment_outstanding_amount));
+        console.log('nextRepayment.total_payment_amount', parseFloat(nextRepayment.total_payment_amount));
+
+        logger.info(`${customRepaymentCompleted}:::Info: customRepaymentCompleted}`)
+        logger.info(`${parseFloat(paymentRecord.amount)}:::Info: paymentRecord.amount}`)
+        logger.info(`${parseFloat(nextRepayment.post_payment_outstanding_amount)}:::Info: nextRepayment.post_payment_outstanding_amount}`)
+        logger.info(`${parseFloat(nextRepayment.total_payment_amount)}:::Info: nextRepayment.total_payment_amount}`)
 
         const activityType = Number(outstandingRepaymentCount.count) > 1 ? 70 : 72;
         const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
@@ -596,9 +611,12 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         await Promise.all([
           processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
             loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
-          isCustomPartRepayment ? processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, paymentRecord.amount ]) : processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]),
+            customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
+        if(statusType == 'completed'){
+          await recovaService.cancelMandate(paymentRecord.loan_id)
+        }
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
         processPersonalLoanRepayments.middlewares.payment.js`);
         if (checkIfUserOnClusterLoan) {

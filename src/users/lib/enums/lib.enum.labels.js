@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import {onboardMerchant} from "../../../admins/api/controllers/controller.merchant";
 
 export const CURRENT_TIME_STAMP = `${dayjs().format('DD-MMM-YYYY, HH:mm:ss')}`;
 // User related labels
@@ -83,6 +84,8 @@ export const UPDATE_USER_REFRESH_TOKEN_CONTROLLER = 'UserController::updateUserR
 export const VALIDATE_USER_REFRESH_TOKEN_MIDDLEWARE = 'UserMiddleware::validateRefreshToken';
 export const UPDATE_SELFIE_IMAGE_CONTROLLER = 'UserMiddleware::updateSelfieImage';
 export const FETCH_BANKS_CONTROLLER = 'UserController::fetchBanks';
+export const SEND_BVN_OTP_CONTROLLER = 'UserController::sendBvnOtp';
+export const VERIFY_BVN_OTP_CONTROLLER = 'UserController::verifyBvnOtp';
 export const CHECK_ACCOUNT_PREVIOUSLY_SAVED_MIDDLEWARE = 'UserMiddleware::checkAccountPreviouslySaved';
 export const CHECK_IF_MAXIMUM_BANK_ACCOUNTS_SAVED_MIDDLEWARE = 'UserMiddleware::checkIfMaximumBankAccountsSaved';
 export const CHECK_IF_MAXIMUM_DEBIT_CARDS_SAVED_MIDDLEWARE = 'UserMiddleware::checkIfMaximumDebitCardsSaved';
@@ -237,20 +240,30 @@ export const UPDATE_ALERT_NOTIFICATION_CONTROLLER = 'CronController::updateAlert
 export const DELETE_USER_ACCOUNT_CONTROLLER = 'UserController::deleteUserAccount';
 export const CHECK_NIN_LENGTH_MIDDLEWARE = 'UserController::checkIfTheLengthOfTheNinIsCorrect';
 export const VALIDATE_RECOVER_REQUEST_MIDDLEWARE = 'AuthMiddleware::validateRecovaRequest';
+export const CREATE_CONSENT_REQUEST_SERVICE = 'RecovaService::createConsentRequest';
+export const CANCEL_MANDATE_SERVICE = 'RecovaService::cancelMandateService';
+export const CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER = 'RecovaController::createMandateConsentRequest';
 
 
 
 // Admin related labels
+export const UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER = 'AdminUserController::updateUserResidentialAddress';
+export const UPDATE_NEXT_OF_KIN_CONTROLLER = 'AdminUserController::updateNextOfKin';
+export const UPDATE_BANK_STMT_RECORD = 'AdminUsersController::expireBankStatement';
 export const VALIDATE_UNAUTHENTICATED_ADMIN_MIDDLEWARE = 'AdminAdminMiddleware::validateUnAuthenticatedAdmin';
+export const VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE = 'completeMerchantLoginRequest::validateUnAuthenticatedAdmin';
 export const COMPARE_ADMIN_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::compareAdminPassword';
+export const COMPARE_MERCHANT_PASSWORD_MIDDLEWARE = 'MerchantAuthMiddleware::compareAdminPassword';
 export const VALIDATE_ADMIN_PASSWORD_RESET_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::validateAdminResetPasswordToken';
 export const CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE = 'AdminAuthMiddleware::checkIfChangedDefaultPassword';
 export const COMPLETE_ADMIN_LOGIN_REQUEST_CONTROLLER = 'AdminAuthController::completeAdminLoginRequest';
 export const VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::verifyLoginVerificationToken';
+export const VERIFY_MERCHANT_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE = 'AdminAuthMiddleware::verifyLoginVerificationToken';
 export const TOKEN_VALIDATION_UNSUCCESSFUL = 'AdminAuthMiddleware::validateInfoCall';
 export const ADMIN_LOGIN_CONTROLLER = 'AdminAuthController::login';
 export const ADMIN_FORGOT_PASSWORD_CONTROLLER = 'AdminAuthController::forgotPassword';
 export const SET_PASSWORD_CONTROLLER = 'AdminAuthController::setPassword';
+export const CREATE_MERCHANT_PASSWORD_CONTROLLER = 'AdminAuthController::setPassword';
 export const ADMIN_PERMISSIONS_CONTROLLER = 'AdminAuthController::adminPermissions';
 export const CHECK_ADMIN_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE = 'AdminAuthMiddleware::checkAdminOtpVerificationRequestCount';
 export const COMPLETE_ADMIN_PROFILE_CONTROLLER = 'AdminAuthController::completeAdminProfile';
@@ -408,6 +421,9 @@ export const DELETE_EVENT_RECORD = 'ShopController::removeTicketRecord';
 export const FAILED_TO_PAY_FOR_TICKET = 'ShopController::ticketPurchaseUpdateFailure';
 export const EVENT_PAYMENT_SUCCESSFUL = 'ShopController::ticketPurchaseUpdateSuccess';
 export const CREATE_MERCHANT_CONTROLLER = 'MerchantController::createMerchant';
+export const ONBOARD_MERCHANT_ADMIN_CONTROLLER = 'MerchantController::onboardMerchant';
+export const CREATE_MERCHANT_ADMIN_CONTROLLER = 'MerchantController::createMerchantAdmin';
+export const UPDATE_MERCHANT_ADMIN_PASSWORD = 'MerchantController::setNewMerchantAdminPassword';
 export const VALIDATE_CREATE_MERCHANT_SECRET_KEY_MIDDLEWARE = 'AdminMerchantMiddleware::validateCreateMerchantSecretKey';
 export const CHECK_IF_MERCHANT_EXISTS_MIDDLEWARE = 'AdminMerchantMiddleware::checkIfMerchantExists';
 export const FETCH_MERCHANT_CONTROLLER = 'MerchantController::fetchMerchants';

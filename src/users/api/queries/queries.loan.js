@@ -219,6 +219,7 @@ export default {
       user_id,
       repayment_order,
       total_payment_amount,
+      principal_payment,
       proposed_payment_date,
       pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
@@ -239,6 +240,7 @@ export default {
       repayment_order,
       total_payment_amount,
       proposed_payment_date,
+      post_payment_outstanding_amount,
       pre_reschedule_proposed_payment_date,
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
       to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
@@ -275,8 +277,18 @@ export default {
     SET
       updated_at = NOW(),
       payment_at = Now(),
-      status = 'paid'
+      status = 'paid',
+      post_payment_outstanding_amount = post_payment_outstanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
+
+
+  updateFullyPaidLoanRepayment: `
+    UPDATE personal_loan_payment_schedules
+    SET
+      updated_at = NOW(),
+      payment_at = Now(),
+      status = 'paid'
+    WHERE loan_repayment_id = ANY($1::VARCHAR[])`,
 
   updateAllLoanRepaymentOnFullPayment: `
     UPDATE personal_loan_payment_schedules
@@ -292,6 +304,25 @@ export default {
   existingUnpaidRepayments: `
     SELECT
       COUNT(id)
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL`,
+
+  fetchExistingUnpaidRepayments: `
+    SELECT
+     *
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    AND payment_at IS NULL
+    ORDER BY proposed_payment_date ASC`,
+
+  sumExistingUnpaidRepayments: `
+    SELECT
+      SUM(total_payment_amount)
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
     AND user_id = $2
@@ -788,8 +819,7 @@ export default {
     UPDATE personal_loan_payment_schedules
     SET
       updated_at = NOW(),
-      payment_at = Now(),
-      post_payment_oustanding_amount = post_payment_oustanding_amount - $2::FLOAT,
+      post_payment_outstanding_amount = post_payment_outstanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 
 

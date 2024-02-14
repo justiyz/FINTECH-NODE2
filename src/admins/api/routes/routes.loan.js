@@ -189,6 +189,13 @@ router.get(
 );
 
 router.get(
+  '/:user_id/loan-history',
+  AuthMiddleware.validateAdminAuthToken,
+  LoanController.adminFetchUserLoanHistory
+);
+
+
+router.get(
   '/:loan_id/personal/details',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.loanIdParams, 'params'),
@@ -204,6 +211,14 @@ router.post(
   LoanMiddleware.checkIfLoanExists,
   UserMiddleware.checkIfCardOrUserExist,
   LoanController.adminInitiateManualCardLoanRepayment
+);
+
+router.post(
+  '/:loan_id/create-mandate-consent-request',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.createMandateRequestPayload, 'params'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanController.createMandateConsentRequest
 );
 
 export default router;

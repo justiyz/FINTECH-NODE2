@@ -15,20 +15,42 @@ const createMerchant = Joi.object().keys({
       'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
       'string.empty': 'Phone Number is not allowed to be empty'
     }).required(),
-  interest_rate: Joi.number().required().label('Interest Rate'),
+  interest_rate: Joi.number().min(0).required().label('Interest Rate'),
   orr_score_threshold: Joi.string().required().regex(/^\d+$/).messages({
     'string.pattern.base': 'ORR score must be a number',
   }).label('ORR score'),
-  processing_fee: Joi.number().positive().min(100).required().label('Processing fee'),
-  insurance_fee: Joi.number().positive().min(100).required().label('Insurance fee'),
-  advisory_fee: Joi.number().positive().min(100).required().label('Advisory fee'),
-  customer_loan_max_amount: Joi.number().positive().min(100).required().label('Limit per customer'),
-  merchant_loan_limit: Joi.number().positive().min(100).required().label('Merchant loan limit'),
+  processing_fee: Joi.number().min(0).required().label('Processing fee'),
+  insurance_fee: Joi.number().min(0).required().label('Insurance fee'),
+  advisory_fee: Joi.number().min(0).required().label('Advisory fee'),
+  customer_loan_max_amount: Joi.number().min(0).required().label('Limit per customer'),
+  merchant_loan_limit: Joi.number().min(0).required().label('Merchant loan limit'),
   address: Joi.string().required().label('Address'),
   // bank account details
   bank_name: Joi.string().required().label('Bank Name'),
   bank_code: Joi.number().required().label('Bank Code'),
   account_number: Joi.string().required().label('Account number'),
+});
+
+const createMerchantAdmin = Joi.object().keys({
+  merchant_id: Joi.string().required().label('Merchant ID'),
+  first_name: Joi.string().required().messages({'string.empty': 'First name is not allowed to be empty'}),
+  last_name: Joi.string().required().messages({'string.empty': 'Last name is not allowed to be empty'}),
+  email: Joi.string()
+    .required()
+    .email()
+    .messages({
+      'string.pattern.base': 'Please enter a valid email.',
+      'string.empty': 'Email is not allowed to be empty',
+    }),
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).required(),
+  gender: Joi.string().optional().valid('male', 'female')
+  // ,
+  // password: Joi.string().required()
 });
 
 const fetchMerchants = Joi.object().keys({
@@ -65,13 +87,15 @@ const updateMerchant = Joi.object().keys({
       'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
       'string.empty': 'Phone Number is not allowed to be empty'
     }).optional(),
-  interest_rate: Joi.string().optional().label('Interest Rate'),
-  orr_score_threshold: Joi.string().optional().label('ORR score'),
-  processing_fee: Joi.number().optional().label('Processing fee'),
-  insurance_fee: Joi.number().optional().label('Insurance fee'),
-  advisory_fee: Joi.number().optional().label('Advisory fee'),
-  customer_loan_max_amount: Joi.number().optional().label('Limit per customer'),
-  merchant_loan_limit: Joi.number().optional().label('Merchant loan limit'),
+  interest_rate: Joi.number().min(0).optional().label('Interest Rate'),
+  orr_score_threshold: Joi.string().optional().regex(/^\d+$/).messages({
+    'string.pattern.base': 'ORR score must be a number',
+  }).label('ORR score'),
+  processing_fee: Joi.number().min(0).optional().label('Processing fee'),
+  insurance_fee: Joi.number().min(0).optional().label('Insurance fee'),
+  advisory_fee: Joi.number().min(0).optional().label('Advisory fee'),
+  customer_loan_max_amount: Joi.number().min(0).optional().label('Limit per customer'),
+  merchant_loan_limit: Joi.number().min(0).optional().label('Merchant loan limit'),
   address: Joi.string().optional().label('Address'),
   // bank account details
   bank_name: Joi.string().optional().label('Bank Name'),
@@ -89,6 +113,33 @@ const resolveAccountNumber = Joi.object().keys({
   bank_code: Joi.string().required()
 });
 
+const merchantPassword = Joi.object().keys({
+  password: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
+    'string.pattern.base': 'Invalid password combination'
+  }).required().min(8),
+  confirm_password: Joi.string().required()
+});
+
+const merchantAdminCredentials = Joi.object().keys({
+  email: Joi.string()
+  .required()
+  .email()
+  .messages({
+    'string.pattern.base': 'Please enter a valid email.',
+    'string.empty': 'Email is not allowed to be empty',
+  }),
+  password: Joi.string().required()
+});
+
+const forgotPassword = Joi.object().keys({
+  email: Joi.string().email().required()
+});
+
+const verifyLogin = Joi.object().keys({
+  otp: Joi.string().required().length(6),
+  email: Joi.string().email().required()
+});
+
 export default {
   createMerchant,
   fetchMerchants,
@@ -98,4 +149,9 @@ export default {
   updateMerchant,
   updateMerchantUser,
   resolveAccountNumber,
+  createMerchantAdmin,
+  merchantAdminCredentials,
+  merchantPassword,
+  forgotPassword,
+  verifyLogin
 };

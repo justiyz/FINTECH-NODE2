@@ -16,9 +16,12 @@ export const commonTemplate = (messageType, data) => {
     adminSentNotification: data.title,
     manualLoanApproval: 'Manual Loan Approval Required',
     resetPassword: 'Password Reset Successful',
-    changePassword: 'Password Change Successful'
+    changePassword: 'Password Change Successful',
+    completeMerchantKyc: 'Complete Admin Onboarding',
+    createMerchantPassword: 'Password Creation Successful',
+
   };
-  
+
   let headerText;
   switch (messageType) {
   case `${messageType}`:
@@ -46,13 +49,13 @@ export const commonTemplate = (messageType, data) => {
     <table role="header" width="100%">
       <tr>
         <td style="padding: 40px 40px 0px; width: 73%;">
-          <img src="https://photow-profile-images.s3.us-west-2.amazonaws.com/seedfi-logo.png" 
+          <img src="https://photow-profile-images.s3.us-west-2.amazonaws.com/seedfi-logo.png"
           width="150px"
           alt="seedfi-icon">
         </td>
       </tr>
     </table>
-    
+
     <!--   CONTENT   -->
     <table role="content" style="padding: 40px 50px; color: #363740; width: 100%;">
       <tr>
@@ -60,20 +63,20 @@ export const commonTemplate = (messageType, data) => {
           <span>${headerText}</span>
         </td>
       </tr>
-      
-      ${getTemplate(messageType, data)} 
+
+      ${getTemplate(messageType, data)}
     </table>
     <!--    FOOTER    -->
     <table role="footer" width="100%">
     <tr align="center">
       <td  style="padding: 20px 0;">
-        
+
         <div style="color: #84868c; font-weight: 300; padding: 20px 0;  border-top: 2px solid #d9ecd4">
           <span>You are receiving this email because you have signed up on the SeedFi platform. <br />
           © ${new Date(new Date()).getFullYear()}, SeedFi . All rights reserved.
           </span>
         </div>
-        
+
         <div style="color: #000; font-weight: 300;">
           <a href="#" style="text-decoration: none; color: #b5b5bd;">Terms & Conditions</a>
           <span style="padding: 0 16px;">|</span>

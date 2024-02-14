@@ -4,7 +4,7 @@ import config from '../../config';
 const { SEEDFI_NODE_ENV } = config;
 
 const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-                                          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount) => ({
+                                          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails) => ({
   'user_id': user.user_id,
   'loan_application_id': loanApplicationDetails.loan_id,
   'loan_duration_in_month': `${body.duration_in_months}`,
@@ -14,8 +14,8 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'employment_type': userEmploymentDetails.employment_type,
   'marital_status': user.marital_status,
   'number_of_dependants': user.number_of_children,
-  'account_number': userDefaultAccountDetails.account_number,
-  'bvn': (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') ? 12312312345 : await Hash.decrypt(decodeURIComponent(userBvn.bvn)),
+  'account_number': body.bank_statement_service_choice == undefined ? "0" : userDefaultAccountDetails.account_number,
+  'bvn': (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'develop') ? 12312312345 : await Hash.decrypt(decodeURIComponent(userBvn.bvn)),
   'firstName': user.first_name,
   'lastName': user.last_name,
   'dateOfBirth': user.date_of_birth,
@@ -33,8 +33,9 @@ const checkUserEligibilityPayload = async(user, body, userDefaultAccountDetails,
   'user_minimum_allowable_amount': userMinimumAllowableAMount,
   'previous_loan_count': previousLoanCount,
   'previous_loan_defaulted_count': previouslyDefaultedCount,
-  'bank_statement_service_choice': body.bank_statement_service_choice,
-  'tier': user.tier
+  'bank_statement_service_choice': body.bank_statement_service_choice == undefined ? null : body.bank_statement_service_choice,
+  'tier': user.tier,
+  'max_amount_for_no_credit_history': maximumAmountForNoCreditHistoryDetails
 });
 const processDeclinedLoanDecisionUpdatePayload = (data) => [
   data.loan_application_id,

@@ -158,4 +158,52 @@ router.get(
 );
 
 
+router.put(
+  '/:user_id/details',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.updateUsersProfile, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.updateUserProfile
+);
+
+router.put(
+  '/:user_id/employment',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.updateEmploymentDetails, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.updateEmploymentDetails
+);
+
+router.put(
+  '/:user_id/resident',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.updateUserResidentialAddress, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.updateResidentialAddress
+);
+
+router.put(
+  '/:user_id/next-of-kin',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('users', 'update'),
+  Model(Schema.userIdParams, 'params'),
+  Model(Schema.updateNextOfKin, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  UserController.updateNextOfKin
+);
+
+router.put(
+  '/:user_id/expire-bank-statement',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.userIdParams, 'params'),
+  UserMiddleware.checkIfUserExists,
+  UserController.expireBankStatement
+);
+
 export default router;

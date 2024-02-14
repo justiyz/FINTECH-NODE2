@@ -186,7 +186,7 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE id =$1`,
+      WHERE id =$1 AND user_id = $2`,
 
   deleteBankAccountDetails: `
       UPDATE user_bank_accounts
@@ -623,7 +623,8 @@ export default {
             last_name,
             phone_number,
             email,
-            kind_of_relationship
+            kind_of_relationship,
+            user_id
         FROM next_of_kin
         WHERE user_id = $1`,
 
@@ -815,5 +816,8 @@ export default {
       status = 'inactive',
       fcm_token = NULL
     WHERE user_id = $1
-    RETURNING user_id, email, phone_number, is_deleted, status`
+    RETURNING user_id, email, phone_number, is_deleted, status`,
+
+  fetchAllDetailsBelongingToUser: `
+    SELECT * FROM users WHERE user_id = $1`,
 };
