@@ -32,6 +32,7 @@ export const generatePassword = (length) => {
   return password;
 }
 
+
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
 export const generateLoanRepaymentScheduleForShop = async(existingLoanApplication, user_id, activationCharge, monthly_installment) => {
