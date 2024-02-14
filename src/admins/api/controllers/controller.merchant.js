@@ -40,7 +40,7 @@ const { SEEDFI_NODE_ENV } = config;
  * @returns {Promise<*|undefined>}
  */
 export const createMerchantAdmin = async (req, res, next) => {
-  const { body } = req;
+  const { body, params: {merchant_id} } = req;
   const expireAt = dayjs().add(10, 'minutes');
   const expirationTime = dayjs(expireAt);
   const signupOtpRequest =  1;
@@ -59,6 +59,7 @@ export const createMerchantAdmin = async (req, res, next) => {
       return createMerchantAdmin(req, res, next);
     }
 
+    body.merchant_id = merchant_id
     const payload = MerchantPayload.createMerchantAdmin(body);
     const result = await processOneOrNoneData(merchantQueries.createMerchantAdmin, payload);
     body.merchant_admin_id = result.merchant_admin_id;
@@ -348,6 +349,76 @@ export const onboardMerchant = async (req, res, next) => {
     return next(error);
   }
 };
+// /**
+//  * Create merchant account
+//  * @param {Request} req - The request from the endpoint.
+//  * @param {Response} res - The response returned by the method.
+//  * @param {Next} next - Call the next operation.
+//  * @returns {String} - Returns success message.
+//  * @memberof AdminMerchantController
+//  */
+// export const createMerchant = async (req, res, next) => {
+//   try {
+//     const { admin } = req;
+//     req.body.secret_key = await Hash.encrypt({ email: req.body.email });
+//     const payload = MerchantPayload.createMerchant(req.body);
+//     // generate password
+//     const password_string = Helpers.generatePassword(8);
+//     req.body.password = await Hash.hashData(password_string);
+
+//     const { merchant_id } = await processOneOrNoneData(
+//       merchantQueries.createMerchant,
+//       [...payload, password_string]
+//     );
+//     req.body.merchant_id = merchant_id;
+//     if (merchant_id) {
+//       await MailService('Kindly complete your merchant kyc', 'completeMerchantKyc', {
+//         email: req.body.email,
+//         merchant_id: merchant_id,
+//         default_password: password_string,
+//         first_name: req.body.first_name
+//       });
+//     }
+//     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: merchant successfully created createMerchant.admin.controller.merchant.js`);
+//     const description = descriptions.create_merchant(`${admin.first_name} ${admin.last_name}`, `${req.body.business_name}`);
+//     await adminActivityTracking(
+//       admin.admin_id,
+//       65,
+//       'success',
+//       description
+//     );
+//     const bankAccountAdded = await addMerchantBankAccount(admin, req.body);
+//     if (bankAccountAdded !== true) {
+//       return ApiResponse.error(
+//         res,
+//         'Error occurred adding merchant bank account',
+//         enums.HTTP_INTERNAL_SERVER_ERROR,
+//       );
+//     }
+
+//     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Complete request CreateMerchant.admin.controllers.merchant.js`);
+//     return ApiResponse.success(
+//       res,
+//       enums.MERCHANT_CREATED_SUCCESSFULLY,
+//       enums.HTTP_OK,
+//     );
+//   } catch (error) {
+//     const description = descriptions.create_merchant_failed(
+//       `${req.admin.first_name} ${req.admin.last_name}`,
+//       `${req.body.business_name}`
+//     );
+//     await adminActivityTracking(
+//       req.admin.admin_id,
+//       65,
+//       'fail',
+//       description
+//     );
+//     error.label = enums.CREATE_MERCHANT_CONTROLLER;
+//     logger.error(`Create merchant account failed:::${enums.CREATE_MERCHANT_CONTROLLER}`, error.message);
+//     return next(error);
+//   }
+// };
+
 /**
  * Create merchant account
  * @param {Request} req - The request from the endpoint.
@@ -361,25 +432,13 @@ export const createMerchant = async (req, res, next) => {
     const { admin } = req;
     req.body.secret_key = await Hash.encrypt({ email: req.body.email });
     const payload = MerchantPayload.createMerchant(req.body);
-    // generate password
-    const password_string = Helpers.generatePassword(8);
-    req.body.password = await Hash.hashData(password_string);
-
-    const { merchant_id } = await processOneOrNoneData(
+    const merchant = await processOneOrNoneData(
       merchantQueries.createMerchant,
-      [...payload, password_string]
+      payload
     );
-    req.body.merchant_id = merchant_id;
-    if (merchant_id) {
-      await MailService('Kindly complete your merchant kyc', 'completeMerchantKyc', {
-        email: req.body.email,
-        merchant_id: merchant_id,
-        default_password: password_string,
-        first_name: req.body.first_name
-      });
-    }
+    req.body.merchant_id = merchant.merchant_id;
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: merchant successfully created createMerchant.admin.controller.merchant.js`);
-    const description = descriptions.create_merchant(`${admin.first_name} ${admin.last_name}`, `${req.body.business_name}`);
+    const description = descriptions.create_merchant(`${admin.first_name} ${admin.last_name}`, `${merchant.business_name}`);
     await adminActivityTracking(
       admin.admin_id,
       65,
@@ -390,7 +449,7 @@ export const createMerchant = async (req, res, next) => {
     if (bankAccountAdded !== true) {
       return ApiResponse.error(
         res,
-        'Error occurred adding merchant bank account',
+        'Error occured adding merchant bank account',
         enums.HTTP_INTERNAL_SERVER_ERROR,
       );
     }
@@ -400,6 +459,7 @@ export const createMerchant = async (req, res, next) => {
       res,
       enums.MERCHANT_CREATED_SUCCESSFULLY,
       enums.HTTP_OK,
+      merchant
     );
   } catch (error) {
     const description = descriptions.create_merchant_failed(

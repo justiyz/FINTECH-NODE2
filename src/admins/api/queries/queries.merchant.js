@@ -12,11 +12,10 @@ export default {
       insurance_fee,
       advisory_fee,
       customer_loan_max_amount,
-      merchant_loan_limit,
-      password
+      merchant_loan_limit
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-    ) RETURNING merchant_id;
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+    ) RETURNING id, merchant_id, business_name, email, phone_number, interest_rate, address, orr_score_threshold, processing_fee, insurance_fee, advisory_fee, customer_loan_max_amount, merchant_loan_limit, created_at;
   `,
   onboardMerchant: `
     UPDATE merchants

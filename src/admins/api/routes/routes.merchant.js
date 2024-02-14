@@ -14,6 +14,7 @@ const router = Router();
 router.post(
   '/',
   AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.createMerchantAdminParams, 'params'),
   Model(Schema.createMerchant, 'payload'),
   RolesMiddleware.adminAccess('merchants', 'create'),
   MerchantMiddleware.validateCreateMerchant,

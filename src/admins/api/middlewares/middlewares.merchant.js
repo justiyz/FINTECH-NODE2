@@ -151,16 +151,16 @@ export const checkIfMerchantExists = async (req, res, next) => {
  */
 export const checkIfMerchantAdminExists = async (req, res, next) => {
   try {
-    const { admin, body: {email, phone_number} } = req;
-    const merchantId = req.params.merchant_id;
+    const { admin, body: {email, phone_number}, params: {merchant_id} } = req;
     const merchantAdmin = await processOneOrNoneData(
       merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
-      [email, phone_number, merchantId]
+      [email, phone_number, merchant_id]
     );
+    console.log(merchantAdmin, 'merchantAdmin')
     if (merchantAdmin) {
       logger.info(`
         ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
-        successfully confirmed that admin for merchant: ${merchantId} exist
+        successfully confirmed that admin for merchant: ${merchant_id} exist
         checkIfMerchantAdminExists.admin.middlewares.merchant.js`
       );
       return ApiResponse.error(
@@ -171,7 +171,7 @@ export const checkIfMerchantAdminExists = async (req, res, next) => {
     }
     logger.info(`
       ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
-      successfully confirmed that admin for  merchant: ${merchantId} does not exist
+      successfully confirmed that admin for  merchant: ${merchant_id} does not exist
       checkIfMerchantAdminExists.admin.middlewares.merchant.js`
     );
     return next();

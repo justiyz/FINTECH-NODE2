@@ -32,7 +32,6 @@ const createMerchant = Joi.object().keys({
 });
 
 const createMerchantAdmin = Joi.object().keys({
-  merchant_id: Joi.string().required().label('Merchant ID'),
   first_name: Joi.string().required().messages({'string.empty': 'First name is not allowed to be empty'}),
   last_name: Joi.string().required().messages({'string.empty': 'Last name is not allowed to be empty'}),
   email: Joi.string()
@@ -51,6 +50,10 @@ const createMerchantAdmin = Joi.object().keys({
   gender: Joi.string().optional().valid('male', 'female')
   // ,
   // password: Joi.string().required()
+});
+
+const createMerchantAdminParams = Joi.object().keys({
+  merchant_id: Joi.string().required().label('Merchant ID'),
 });
 
 const fetchMerchants = Joi.object().keys({
@@ -153,5 +156,6 @@ export default {
   merchantAdminCredentials,
   merchantPassword,
   forgotPassword,
-  verifyLogin
+  verifyLogin,
+  createMerchantAdminParams
 };
