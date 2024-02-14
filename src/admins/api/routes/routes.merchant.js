@@ -29,7 +29,7 @@ router.post(
 );
 
 router.post(
-  '/:merchant_id/create-merchant-admin',
+  '/:merchant_id/merchant-admin',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.createMerchantAdmin, 'payload'),
   MerchantMiddleware.checkIfMerchantExists,
