@@ -68,6 +68,13 @@ export const createMerchantAdmin = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: Merchant admin does not exist createMerchantAdmin.admin.controller.merchant.js`);
       merchantAdmin = await processOneOrNoneData(merchantQueries.createMerchantAdmin, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: Merchant admin successfully created createMerchantAdmin.admin.controller.merchant.js`);
+      await MailService('Kindly complete your merchant kyc', 'completeMerchantKyc', {
+        email: merchantAdmin.email,
+        merchant_id: merchant_id,
+        default_password: password_string,
+        first_name: merchantAdmin.first_name
+      });
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: Mail sent to merchant admin createMerchantAdmin.admin.controller.merchant.js`);
     }
     const merchantAdminPivot = await processOneOrNoneData(merchantQueries.createMerchantAdminPivot, [merchant_id, merchantAdmin.merchant_admin_id]);
     body.merchant_admin_id = merchantAdmin.merchant_admin_id;
@@ -635,7 +642,7 @@ export const fetchMerchantAdministrators = async (req, res, next) => {
     };
     return ApiResponse.success(
       res,
-      enums.USERS_FETCHED_SUCCESSFULLY,
+      enums.MERCHANT_ADMINS_FETCHED_SUCCESSFULLY,
       enums.HTTP_OK,
       data
     );
