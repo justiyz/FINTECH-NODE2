@@ -1,4 +1,23 @@
 export default {
+
+fetchMerchantAdminByEmail:
+`SELECT * FROM merchant_admins WHERE email = $1`,
+
+updateMerchantAdminPassword: `
+  UPDATE merchant_admins
+  SET
+      password = $2,
+      updated_at = NOW(),
+      status = 'active',
+      is_created_password = true
+  WHERE email = $1
+  RETURNING first_name, last_name, email, status, is_created_password
+  `,
+
+
+// ================================================
+
+
   fetchAdminPassword: `
       SELECT id, admin_id, password
       FROM admins

@@ -2,17 +2,62 @@ import dayjs from 'dayjs';
 import momentTZ from 'moment-timezone';
 import authQueries from '../queries/queries.auth';
 import roleQueries from '../queries/queries.role';
-import { processAnyData } from '../services/services.db';
+import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import MailService from '../services/services.email';
 import * as Hash from '../../lib/utils/lib.util.hash';
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import * as UserHelpers from '../../../users/lib/utils/lib.util.helpers';
 import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
 const { SEEDFI_NODE_ENV } = config;
+
+
+
+export const setNewMerchantAdminPassword = async (req, res, next) => {
+  const { body: {email, old_password, password} } = req;
+  try {
+      const admin = await processOneOrNoneData(authQueries.fetchMerchantAdminByEmail, [email])
+      const new_password = Hash.hashData(password);
+      const oldPasswordValid = UserHash.compareData(old_password, admin.password);
+      const oldAndNewPasswordIsEqual = UserHash.compareData(password, admin.password);
+
+      if(!oldPasswordValid) {
+        return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
+
+      if(oldAndNewPasswordIsEqual) {
+        return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+      }
+
+      const updatedMerchantAdmin = await processAnyData(authQueries.updateMerchantAdminPassword, [
+        email, new_password
+      ]);
+
+      logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${admin.merchant_admin_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
+      if (updatedMerchantAdmin) {
+        await MailService('Password Reset Successful', 'createMerchantPassword', {
+          email: req.body.email,
+          merchant_id: admin.merchant_admin_id,
+          first_name: req.body.first_name
+        });
+      }
+      return ApiResponse.success(
+        res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
+        enums.HTTP_OK,
+        { updatedMerchantAdmin });
+
+  } catch(error) {
+    error.label = enums.UPDATE_MERCHANT_ADMIN_PASSWORD;
+    logger.error(`Create merchant account failed:::${enums.UPDATE_MERCHANT_ADMIN_PASSWORD}`, error.message);
+    return next(error);
+  }
+}
+
+// =========================== ================  ================================== ===========================
 
 /**
  * complete admin login request
