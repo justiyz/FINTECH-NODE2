@@ -320,6 +320,7 @@ export const ROLES_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
 export const ADMINS_PER_ROLES_FETCHED_SUCCESSFULLY = 'Admins per role fetched successfully';
 export const EDIT_USER_STATUS = 'User status successfully updated.';
 export const USERS_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
+export const MERCHANT_ADMINS_FETCHED_SUCCESSFULLY = 'Merchant admins fetched successfully';
 export const FETCH_USER_ORR_BREAKDOWN = 'User ORR breakdown fetched successfully';
 export const DOCUMENT_UPLOADED_AND_SAVED_SUCCESSFULLY_FOR_USER = 'Document uploaded and saved successfully for user';
 export const ADMIN_USER_UPLOADED_DOCUMENTS_FETCHED = 'Admin uploaded user documents fetched successfully';

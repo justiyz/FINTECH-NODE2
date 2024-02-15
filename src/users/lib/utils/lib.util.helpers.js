@@ -20,7 +20,8 @@ export const generateReferralCode = (size) => {
 
 export const generatePassword = (length) => {
   // Define characters allowed in the password
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()+{}|:<>?-=[]';
+  // const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()+{}|:<>?-=[]';
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   let password = '';
   for (let i = 0; i < length; i++) {
@@ -31,6 +32,7 @@ export const generatePassword = (length) => {
 
   return password;
 }
+
 
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 

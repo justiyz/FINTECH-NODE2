@@ -25,6 +25,7 @@ export default {
     body.password.trim()
   ],
   createMerchantAdmin: (body) => [
+    body.merchant_id.trim(),
     body.first_name.trim().toLowerCase(),
     body.last_name.trim().toLowerCase(),
     body.email.trim().toLowerCase(),
@@ -48,15 +49,9 @@ export default {
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
     query.per_page ? query.per_page : '10'
   ],
-  fetchMerchantAdminstrators: (query) => [
-    query.search ? `%${query.search}%` : null,
-    query.status,
-    query.page ? (query.page - 1) * (query.per_page || 10) : 0,
-    query.per_page ? query.per_page : '10'
-  ],
   countMerchantLoans: (req) => [
-    req.params.merchant_id,
-    req.query.user_id,
+    req.merchant.merchant_id,
+    req.query.user_id ? req.query.user_id : undefined,
     req.query.status,
     req.query.search ? `%${req.query.search}%` : null,
   ],
@@ -67,8 +62,8 @@ export default {
     return [
       offset,
       perPage,
-      req.params.merchant_id,
-      req.query.user_id,
+      req.merchant.merchant_id,
+      req.query.user_id ? req.query.user_id : undefined,
       req.query.status,
       req.query.search ? `%${req.query.search}%` : null,
     ]

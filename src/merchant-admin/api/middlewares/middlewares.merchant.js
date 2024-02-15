@@ -34,23 +34,23 @@ export const validateCreateMerchant = async (req, res, next) => {
       [email, phone_number]
     );
     if (existingMerchant) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} already exists validateCreateMerchant.admin.middlewares.merchant.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} already exists validateCreateMerchant.admin.middlewares.merchant.js`);
       return ApiResponse.error(
         res,
         'Merchant with this email or phone number already exists',
         enums.HTTP_UNPROCESSABLE_ENTITY
       )
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist validateCreateMerchant.admin.middlewares.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist validateCreateMerchant.admin.middlewares.merchant.js`);
     if (+customer_loan_max_amount >= +merchant_loan_limit) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: validation failed, merchant limit less than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: validation failed, merchant limit less than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
       return ApiResponse.error(
         res,
         'Merchant limit cannot be less than customer limit',
         enums.HTTP_UNPROCESSABLE_ENTITY
       );
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: validation successful, merchant limit greater than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: validation successful, merchant limit greater than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
     return next();
   } catch (error) {
     logger.error(`validating merchant details failed::AdminMerchantMiddleware::validateCreateMerchant`, error.message);
@@ -108,16 +108,15 @@ export const validateMerchantForgotPasswordAndPinToken = async(req, res, next) =
  */
 export const checkIfMerchantExists = async (req, res, next) => {
   try {
-    const { admin } = req;
-    const merchantId = req.params.merchant_id;
-    console.log(merchantId, 'merchant')
+    const { admin, headers } = req;
+    const merchantId = headers['x-merchant-id'];
     const merchant = await processOneOrNoneData(
       merchantQueries.fetchMerchantByMerchantId,
       [merchantId]
     );
     if (!merchant) {
       logger.info(`
-        ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+        ${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}:::Info:
         successfully confirmed that merchant: ${merchantId} does not exist
         checkIfMerchantExists.admin.middlewares.merchant.js`
       );
@@ -128,7 +127,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
       )
     }
     logger.info(`
-      ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+      ${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}:::Info:
       successfully confirmed that merchant: ${merchantId} exists
       checkIfMerchantExists.admin.middlewares.merchant.js`
     );
@@ -152,18 +151,24 @@ export const checkIfMerchantExists = async (req, res, next) => {
 export const checkIfMerchantAdminExists = async (req, res, next) => {
   try {
     const { admin, body: {email, phone_number}, params: {merchant_id} } = req;
-    // const merchantAdmin = await processOneOrNoneData(
-      // merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
-    //   [email, phone_number, merchant_id]
-    // );
-    // console.log(merchantAdmin, 'merchantAdmin')
-    //check if merchant admin is already a merchant admin
-    const existingMerchantAdmin = await processOneOrNoneData(merchantQueries.fetchMerchantAdminPivotByAdminEmail, [email, merchant_id]);
-    if(existingMerchantAdmin) {
-      return ApiResponse.error(res, `${email} is already an admin`, enums.HTTP_BAD_REQUEST, enums.CREATE_MERCHANT_ADMIN_CONTROLLER);
+    const merchantAdmin = await processOneOrNoneData(
+      merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
+      [email, phone_number, merchant_id]
+    );
+    if (merchantAdmin) {
+      logger.info(`
+        ${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}:::Info:
+        successfully confirmed that admin for merchant: ${merchant_id} exist
+        checkIfMerchantAdminExists.admin.middlewares.merchant.js`
+      );
+      return ApiResponse.error(
+        res,
+        enums.MERCHANT_ADMIN_EXIST,
+        enums.HTTP_NOT_FOUND
+      )
     }
     logger.info(`
-      ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+      ${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}:::Info:
       successfully confirmed that admin for  merchant: ${merchant_id} does not exist
       checkIfMerchantAdminExists.admin.middlewares.merchant.js`
     );
@@ -184,22 +189,22 @@ export const checkIfMerchantAdminExists = async (req, res, next) => {
  */
 export const checkIfMerchantUserExists = async (req, res, next) => {
   try {
-    const { admin } = req;
+    const { admin, headers } = req;
     const userId = req.query.user_id || req.body.user_id;
-    const merchantId = req.params.merchant_id;
+    const merchantId = headers['x-merchant-id'];
     const user = await processOneOrNoneData(
       merchantQueries.fetchMerchantUserById,
       [userId, merchantId]
     );
     if (!user) {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully confirmed that user with ID ${userId} does not exist checkIfMerchantUserExists.admin.middlewares.merchant.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: successfully confirmed that user with ID ${userId} does not exist checkIfMerchantUserExists.admin.middlewares.merchant.js`);
       return ApiResponse.error(
         res,
         enums.ACCOUNT_NOT_EXIST('User'),
         enums.HTTP_NOT_FOUND
       )
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully confirmed that user with ID ${userId} exists checkIfMerchantUserExists.admin.middlewares.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: successfully confirmed that user with ID ${userId} exists checkIfMerchantUserExists.admin.middlewares.merchant.js`);
     req.user = user;
     return next();
   } catch (error) {
@@ -227,9 +232,9 @@ export const validateMerchantBankAccount = (type = '') => async (req, res, next)
     if (type === 'create' || accountDetailsAdded) {
       // resolve account details
       const { status, data } = await resolveAccount(account_number.trim(), bank_code.trim());
-      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account details resolved successfully validateMerchantBankAccount.admin.middlewares.merchant.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Merchant bank account details resolved successfully validateMerchantBankAccount.admin.middlewares.merchant.js`);
       if (status !== true) {
-        logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Incorrect merchant bank account number provided validateMerchantBankAccount.admin.middlewares.merchant.js`);
+        logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Incorrect merchant bank account number provided validateMerchantBankAccount.admin.middlewares.merchant.js`);
         return ApiResponse.error(
           res,
           'Incorrect account number',
@@ -249,7 +254,7 @@ export const validateMerchantBankAccount = (type = '') => async (req, res, next)
       req.body.existingBankAccount = existingBankAccount;
     }
 
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account validation successful validateMerchantBankAccount.admin.middlewares.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Merchant bank account validation successful validateMerchantBankAccount.admin.middlewares.merchant.js`);
     return next();
   } catch (error) {
     logger.error(`Validating merchant bank account details before creating merchant failed:::AdminMerchantMiddleware::validateMerchantBankAccount`, error.message);

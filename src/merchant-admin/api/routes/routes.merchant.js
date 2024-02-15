@@ -10,6 +10,47 @@ import * as AdminMiddleware from "../middlewares/middlewares.admin";
 import {compareMerchantPassword, verifyMerchantLoginVerificationToken} from "../middlewares/middlewares.merchant";
 const router = Router();
 
+
+
+router.get(
+  '/',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchSingleMerchant
+);
+
+router.get(
+  '/users',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('customers', 'read'),
+  Model(Schema.fetchMerchantUsers, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantUsers
+);
+
+router.get(
+  '/loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('loans', 'read'),
+  Model(Schema.fetchMerchantLoans, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantLoans
+);
+
+router.get(
+  '/repayment-schedule',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('loans', 'read'),
+  Model(Schema.filterByUserId, 'query'),
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.fetchUserRepaymentSchedule
+);
+
+
+
+// ========================================================
+
 // ============== POST =================== //
 router.post(
   '/',
@@ -94,13 +135,13 @@ router.post(
 );
 
 // ============== GET =================== //
-router.get(
-  '/',
-  AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.fetchMerchants, 'query'),
-  RolesMiddleware.adminAccess('merchants', 'read'),
-  MerchantController.fetchMerchants
-);
+// router.get(
+//   '/',
+//   AuthMiddleware.validateAdminAuthToken,
+//   Model(Schema.fetchMerchants, 'query'),
+//   RolesMiddleware.adminAccess('merchants', 'read'),
+//   MerchantController.fetchMerchants
+// );
 
 router.get(
   '/list-banks',
@@ -115,13 +156,7 @@ router.get(
   MerchantController.resolveBankAccountNumber
 );
 
-router.get(
-  '/:merchant_id',
-  AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('merchants', 'read'),
-  MerchantMiddleware.checkIfMerchantExists,
-  MerchantController.fetchSingleMerchant
-);
+
 
 router.get(
   '/:merchant_id/users',
@@ -131,16 +166,6 @@ router.get(
   MerchantMiddleware.checkIfMerchantExists,
   MerchantController.fetchMerchantUsers
 );
-
-router.get(
-  '/:merchant_id/administrators',
-  AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('merchants', 'read'),
-  Model(Schema.fetchMerchantAdministrators, 'query'),
-  MerchantMiddleware.checkIfMerchantExists,
-  MerchantController.fetchMerchantAdministrators
-);
-
 
 router.get(
   '/:merchant_id/user/creditscore-breakdown',
