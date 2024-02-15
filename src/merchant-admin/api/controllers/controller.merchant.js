@@ -576,14 +576,14 @@ export const fetchSingleMerchant = async (req, res, next) => {
  */
 export const fetchMerchantUsers = async (req, res, next) => {
   try {
-    const { query, admin } = req;
-    const merchantId = req.params.merchant_id;
+    const { query, admin, merchant } = req;
+    const merchantId = merchant.merchant_id;
     const payload  = MerchantPayload.fetchMerchantUsers(query);
     const [ users, [ usersCount ] ] = await Promise.all([
       processAnyData(merchantQueries.fetchMerchantUsers, [merchantId, ...payload]),
       processAnyData(merchantQueries.fetchMerchantUsersCount, [merchantId, ...payload])
     ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully fetched users from the DB fetchMerchantUsers.admin.controllers.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: successfully fetched users from the DB fetchMerchantUsers.admin.controllers.merchant.js`);
     const data = {
       page: parseFloat(req.query.page) || 1,
       total_count: Number(usersCount.total_count),

@@ -20,8 +20,23 @@ router.get(
   MerchantController.fetchSingleMerchant
 );
 
+router.get(
+  '/users',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('customers', 'read'),
+  Model(Schema.fetchMerchantUsers, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantUsers
+);
 
-
+router.get(
+  '/loans',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('loans', 'read'),
+  Model(Schema.fetchMerchantLoans, 'query'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchMerchantLoans
+);
 
 
 // ========================================================
