@@ -51,7 +51,7 @@ export default {
   ],
   countMerchantLoans: (req) => [
     req.merchant.merchant_id,
-    req.query.user_id,
+    req.query.user_id ? req.query.user_id : undefined,
     req.query.status,
     req.query.search ? `%${req.query.search}%` : null,
   ],
@@ -63,7 +63,7 @@ export default {
       offset,
       perPage,
       req.merchant.merchant_id,
-      req.query.user_id,
+      req.query.user_id ? req.query.user_id : undefined,
       req.query.status,
       req.query.search ? `%${req.query.search}%` : null,
     ]

@@ -620,7 +620,6 @@ export const fetchMerchantLoans = async (req, res, next) => {
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully counted merchant loans from the DB fetchMerchantLoans.admin.controllers.merchant.js`);
     const payload = MerchantPayload.fetchMerchantLoans(req);
-    console.log(payload)
     const loans = await processAnyData(
       merchantQueries.fetchMerchantLoans,
       payload
