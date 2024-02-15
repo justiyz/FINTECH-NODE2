@@ -51,6 +51,7 @@ fetchMerchantsByMerchantAdminId: `
         merchants.merchant_id,
         merchants.business_name,
         merchants.status,
+        merchants.secret_key,
         mam.created_at
     FROM merchant_admins_merchants AS mam
     LEFT JOIN merchants ON mam.merchant_id = merchants.merchant_id

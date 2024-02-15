@@ -38,6 +38,16 @@ router.get(
   MerchantController.fetchMerchantLoans
 );
 
+router.get(
+  '/repayment-schedule',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('loans', 'read'),
+  Model(Schema.filterByUserId, 'query'),
+  MerchantMiddleware.checkIfMerchantUserExists,
+  MerchantController.fetchUserRepaymentSchedule
+);
+
+
 
 // ========================================================
 
