@@ -117,7 +117,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
     );
     if (!merchant) {
       logger.info(`
-        ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+        ${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}:::Info:
         successfully confirmed that merchant: ${merchantId} does not exist
         checkIfMerchantExists.admin.middlewares.merchant.js`
       );
@@ -128,7 +128,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
       )
     }
     logger.info(`
-      ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
+      ${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}:::Info:
       successfully confirmed that merchant: ${merchantId} exists
       checkIfMerchantExists.admin.middlewares.merchant.js`
     );
