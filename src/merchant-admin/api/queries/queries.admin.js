@@ -20,6 +20,12 @@ updateAdminInvalidOtpCount: `
       invalid_verification_token_count = invalid_verification_token_count + 1
     WHERE merchant_admin_id = $1`,
 
+getAdminByAdminId: `
+    SELECT id, merchant_admin_id, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender,
+      is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count
+    FROM merchant_admins
+    WHERE merchant_admin_id = $1`,
+
   // ==============  =================== //
 
 
@@ -111,11 +117,7 @@ updateAdminInvalidOtpCount: `
     FROM admins
     WHERE phone_number = $1`,
 
-  getAdminByAdminId: `
-    SELECT id, admin_id, role_type, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender, image_url,
-      is_verified_email, is_created_password, is_completed_profile, status, is_deleted, verification_token_request_count, invalid_verification_token_count
-    FROM admins
-    WHERE admin_id = $1`,
+
 
   inviteAdmin: `
     INSERT INTO admins (

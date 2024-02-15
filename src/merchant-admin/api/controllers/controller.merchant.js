@@ -547,13 +547,11 @@ export const fetchMerchants = async (req, res, next) => {
  */
 export const fetchSingleMerchant = async (req, res, next) => {
   try {
-    const { admin } = req;
-    const merchantId = req.params.merchant_id;
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Initiate request to fetch single merchant from DB fetchSingleMerchant.admin.controllers.merchant.js`);
-    const merchant = await processOneOrNoneData(
-      merchantQueries.fetchSingleMerchant,
-      [ merchantId ]
-    );
+    const { admin, merchant } = req;
+    merchant.secret_key = undefined
+    merchant.otp = undefined
+    merchant.password = undefined
+
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Successfully fetched merchant from the DB fetchSingleMerchant.admin.controllers.merchant.js`);
     return ApiResponse.success(
       res,

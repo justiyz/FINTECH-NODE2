@@ -130,6 +130,67 @@ export const verifyLoginVerificationToken = async(req, res, next) => {
 };
 
 
+/**
+ * validate the admin auth token
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminAuthMiddleware
+ */
+
+export const validateAdminAuthToken = async(req, res, next) => {
+  try {
+    let token = req.headers.authorization;
+    if (!token) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that no authentication token was sent with the headers
+      validateAdminAuthToken.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.NO_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    if (!token.startsWith('Bearer ')) {
+      return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    if (token.startsWith('Bearer ')) {
+      token = token.slice(7, token.length);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully extracts token validateAdminAuthToken.admin.middlewares.auth.js`);
+    }
+    const decoded = UserHash.decodeToken(token);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully decoded authentication token sent using the authentication secret
+    validateAdminAuthToken.admin.middlewares.auth.js`);
+    if (decoded.message) {
+      if (decoded.message === 'jwt expired') {
+        return ApiResponse.error(res, enums.SESSION_EXPIRED, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully decoded authentication token has a message which is an
+      error message validateAdminAuthToken.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    const [ admin ] = await processAnyData(adminQueries.getAdminByAdminId, [ decoded.merchant_admin_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully fetched the users details using the decoded id
+    validateAdminAuthToken.admin.middlewares.auth.js`);
+    if (!admin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB
+      validateAdminAuthToken.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    if (admin && (admin.is_deleted || admin.status !== 'active')) {
+      const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team'  : `${admin.status}, kindly contact support team`;
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully confirms that user account is ${adminStatus} in the database
+      validateAdminAuthToken.admin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
+    }
+    req.admin = admin;
+    // req.admin.permissions = { role_permissions: decoded.role_permissions, admin_permissions: decoded.admin_permissions };
+    return next();
+  } catch (error) {
+    error.label = enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE;
+    logger.error(`Validating the admin auth token sent failed:::${enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+
+
 // ======================================================================================================== //
 
 
@@ -192,64 +253,6 @@ export const adminPermissions = async(req, res, next) => {
   }
 };
 
-/**
- * validate the admin auth token
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof AdminAuthMiddleware
- */
-
-export const validateAdminAuthToken = async(req, res, next) => {
-  try {
-    let token = req.headers.authorization;
-    if (!token) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that no authentication token was sent with the headers
-      validateAdminAuthToken.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.NO_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-    }
-    if (!token.startsWith('Bearer ')) {
-      return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-    }
-    if (token.startsWith('Bearer ')) {
-      token = token.slice(7, token.length);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully extracts token validateAdminAuthToken.admin.middlewares.auth.js`);
-    }
-    const decoded = UserHash.decodeToken(token);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully decoded authentication token sent using the authentication secret
-    validateAdminAuthToken.admin.middlewares.auth.js`);
-    if (decoded.message) {
-      if (decoded.message === 'jwt expired') {
-        return ApiResponse.error(res, enums.SESSION_EXPIRED, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-      }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully decoded authentication token has a message which is an
-      error message validateAdminAuthToken.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-    }
-    const [ admin ] = await processAnyData(adminQueries.getAdminByAdminId, [ decoded.merchant_admin_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully fetched the users details using the decoded id
-    validateAdminAuthToken.admin.middlewares.auth.js`);
-    if (!admin) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB
-      validateAdminAuthToken.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-    }
-    if (admin && (admin.is_deleted || admin.status !== 'active')) {
-      const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team'  : `${admin.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully confirms that user account is ${adminStatus} in the database
-      validateAdminAuthToken.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
-    }
-    req.admin = admin;
-    req.admin.permissions = { role_permissions: decoded.role_permissions, admin_permissions: decoded.admin_permissions };
-    return next();
-  } catch (error) {
-    error.label = enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE;
-    logger.error(`Validating the admin auth token sent failed:::${enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
 
 /**
  * check if admin has changed their default password
