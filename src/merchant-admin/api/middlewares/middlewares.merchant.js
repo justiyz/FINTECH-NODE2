@@ -108,8 +108,8 @@ export const validateMerchantForgotPasswordAndPinToken = async(req, res, next) =
  */
 export const checkIfMerchantExists = async (req, res, next) => {
   try {
-    const { admin } = req;
-    const merchantId = req.params.merchant_id;
+    const { admin, headers } = req;
+    const merchantId = headers['x-merchant-id'];
     console.log(merchantId, 'merchant')
     const merchant = await processOneOrNoneData(
       merchantQueries.fetchMerchantByMerchantId,

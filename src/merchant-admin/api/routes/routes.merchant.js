@@ -10,6 +10,22 @@ import * as AdminMiddleware from "../middlewares/middlewares.admin";
 import {compareMerchantPassword, verifyMerchantLoginVerificationToken} from "../middlewares/middlewares.merchant";
 const router = Router();
 
+
+
+router.get(
+  '/',
+  AuthMiddleware.validateAdminAuthToken,
+  RolesMiddleware.adminAccess('merchants', 'read'),
+  MerchantMiddleware.checkIfMerchantExists,
+  MerchantController.fetchSingleMerchant
+);
+
+
+
+
+
+// ========================================================
+
 // ============== POST =================== //
 router.post(
   '/',
@@ -94,13 +110,13 @@ router.post(
 );
 
 // ============== GET =================== //
-router.get(
-  '/',
-  AuthMiddleware.validateAdminAuthToken,
-  Model(Schema.fetchMerchants, 'query'),
-  RolesMiddleware.adminAccess('merchants', 'read'),
-  MerchantController.fetchMerchants
-);
+// router.get(
+//   '/',
+//   AuthMiddleware.validateAdminAuthToken,
+//   Model(Schema.fetchMerchants, 'query'),
+//   RolesMiddleware.adminAccess('merchants', 'read'),
+//   MerchantController.fetchMerchants
+// );
 
 router.get(
   '/list-banks',
@@ -115,13 +131,7 @@ router.get(
   MerchantController.resolveBankAccountNumber
 );
 
-router.get(
-  '/:merchant_id',
-  AuthMiddleware.validateAdminAuthToken,
-  RolesMiddleware.adminAccess('merchants', 'read'),
-  MerchantMiddleware.checkIfMerchantExists,
-  MerchantController.fetchSingleMerchant
-);
+
 
 router.get(
   '/:merchant_id/users',

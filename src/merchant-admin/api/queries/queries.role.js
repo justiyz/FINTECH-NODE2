@@ -1,4 +1,12 @@
 export default {
+
+  fetchMerchantAdminMembership: `
+    SELECT *
+    FROM merchant_admins_merchants
+    WHERE merchant_id = $1 AND merchant_admin_id = $2`,
+
+//================================================================================================
+
   fetchRole: `
     SELECT id, code, name, status, created_at
     FROM admin_roles
@@ -6,7 +14,7 @@ export default {
     OR code = $1`,
 
   fetchAdminResourceById: `
-    SELECT 
+    SELECT
       id,
       resource_id,
       name
@@ -24,7 +32,7 @@ export default {
     ) VALUES($1, $2, $3)`,
 
   fetchAdminResources: `
-    SELECT 
+    SELECT
       id,
       resource_id,
       name
@@ -32,14 +40,14 @@ export default {
 
   updateRoleName: `
     UPDATE admin_roles
-    SET 
+    SET
       updated_at = NOW(),
       name = $2
     WHERE code = $1`,
 
   updateRoleStatus: `
     UPDATE admin_roles
-    SET 
+    SET
       updated_at = NOW(),
       status = $2
     WHERE code = $1
@@ -72,23 +80,23 @@ export default {
   deleteRole: `
       DELETE
          FROM admin_roles
-      WHERE code = $1  
+      WHERE code = $1
   `,
 
   deleteRoleType: `
-      DELETE 
+      DELETE
         FROM admin_role_permissions
       WHERE role_type = $1
   `,
 
   fetchAdminByRoleType: `
   SELECT role_type
-    FROM admins 
+    FROM admins
   WHERE role_type = $1
   LIMIT 1`,
-  
+
   fetchRoleByCode: `
-      SELECT * 
+      SELECT *
       FROM admin_roles
       WHERE code = $1 or
   `,
@@ -102,8 +110,8 @@ export default {
         status,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date
     FROM admin_roles
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
-    AND (status = $2 OR $2 IS NULL) 
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL)
+    AND (status = $2 OR $2 IS NULL)
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     ORDER BY created_at DESC
     OFFSET $5
@@ -119,7 +127,7 @@ export default {
         status,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As date
     FROM admin_roles
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL)
     AND (status = $2 OR $2 IS NULL)
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
     ORDER BY created_at DESC
@@ -129,24 +137,24 @@ export default {
     SELECT
        COUNT(code) AS total_count
     FROM admin_roles
-    WHERE (name ILIKE TRIM($1) OR $1 IS NULL) 
-    AND (status = $2 OR $2 IS NULL) 
+    WHERE (name ILIKE TRIM($1) OR $1 IS NULL)
+    AND (status = $2 OR $2 IS NULL)
     AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
   `,
 
   getAdminsPerRole: `
-    SELECT 
+    SELECT
       admin_id,
       CONCAT(first_name, ' ', last_name) AS name,
       email,
       status,
       to_char(DATE (created_at)::date, 'Mon DD YYYY') As date,
       role_type
-    FROM admins 
-    WHERE role_type= $1 
-    AND (status = $2 OR  $2 IS NULL) 
-    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-    AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5) 
+    FROM admins
+    WHERE role_type= $1
+    AND (status = $2 OR  $2 IS NULL)
+    AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+    AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5)
     OR TRIM(CONCAT(last_name, ' ', first_name)) ILIKE TRIM($5)
     OR $5 IS NULL)
     OFFSET $6
@@ -154,14 +162,14 @@ export default {
   `,
 
   getAdminsPerRoleCount: `
-  SELECT 
+  SELECT
      COUNT(role_type) AS total_count
   FROM admins
-  WHERE role_type = $1  
-  AND (status = $2 OR $2 IS NULL) 
-  AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL)) 
-  AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5) 
-  OR TRIM(CONCAT(last_name, ' ', first_name)) ILIKE TRIM($5) 
+  WHERE role_type = $1
+  AND (status = $2 OR $2 IS NULL)
+  AND ((created_at::DATE BETWEEN $3::DATE AND $4::DATE) OR ($3 IS NULL AND $4 IS NULL))
+  AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5)
+  OR TRIM(CONCAT(last_name, ' ', first_name)) ILIKE TRIM($5)
   OR $5 IS NULL)
   `
 };
