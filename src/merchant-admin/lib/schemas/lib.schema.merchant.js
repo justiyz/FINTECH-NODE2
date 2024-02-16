@@ -82,6 +82,10 @@ const filterByUserId = Joi.object().keys({
   user_id: Joi.string().required(),
 });
 
+const fetchRepaymentSchedule = Joi.object().keys({
+  loan_id: Joi.string().required(),
+});
+
 const updateMerchant = Joi.object().keys({
   business_name: Joi.string().optional(),
   status: Joi.string().optional().valid('pending', 'active', 'deactivated'),
@@ -150,6 +154,7 @@ export default {
   fetchMerchantUsers,
   fetchMerchantLoans,
   filterByUserId,
+  fetchRepaymentSchedule,
   updateMerchant,
   updateMerchantUser,
   resolveAccountNumber,
