@@ -39,10 +39,11 @@ router.get(
 );
 
 router.get(
-  '/repayment-schedule',
+  '/loans/:loan_id/repayment-schedule',
   AuthMiddleware.validateAdminAuthToken,
   RolesMiddleware.adminAccess('loans', 'read'),
   Model(Schema.filterByUserId, 'query'),
+  Model(Schema.fetchRepaymentSchedule, 'params'),
   MerchantMiddleware.checkIfMerchantUserExists,
   MerchantController.fetchUserRepaymentSchedule
 );
