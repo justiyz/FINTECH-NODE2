@@ -39,7 +39,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication,
-        [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
+      [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails);
     const result = await loanApplicationEligibilityCheck(payload);
@@ -51,20 +51,20 @@ export const checkUserLoanEligibility = async(req, res, next) => {
         checkUserLoanEligibility.controllers.loan.js`);
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application');
+            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application', {});
         });
-        userActivityTracking(req.user.user_id, 37, 'fail');
+        await userActivityTracking(req.user.user_id, 37, 'fail');
         return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
       }
       if (result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application');
+            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application', {});
         });
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+      await userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
     const { data } = result;
     if (data.final_decision === 'DECLINED') {
