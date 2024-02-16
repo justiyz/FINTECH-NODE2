@@ -698,11 +698,13 @@ export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
  */
 export const fetchUserRepaymentSchedule = async(req, res, next) => {
   try {
-    const { admin, user } = req;
-    const activeLoan = await processOneOrNoneData(
-      merchantQueries.fetchMerchantUserActiveLoan,
-      [user.user_id]
+    const { admin, user, params: {loan_id} } = req;
+    console.log('got here')
+    const [activeLoan] = await processAnyData(
+      merchantQueries.fetchMerchantUserLoan,
+      [loan_id]
     );
+    console.log(activeLoan, 'activeLoan')
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
     const data = await processAnyData(
       merchantQueries.fetchMerchantUserLoanRepaymentSchedule,

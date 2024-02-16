@@ -305,6 +305,11 @@ export default {
     WHERE pl.user_id = $1 AND
     pl.status IN ('pending', 'approved', 'ongoing', 'over due');
   `,
+
+  fetchMerchantUserLoan: `
+    SELECT id, loan_id FROM personal_loans pl
+    WHERE pl.loan_id = $1;
+`,
   fetchMerchantUserLoanRepaymentSchedule: `
     SELECT
       loan_repayment_id,
