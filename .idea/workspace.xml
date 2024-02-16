@@ -4,8 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.loan.js" afterDir="false" />
+    <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.messages.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/app/controllers/customer.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/app/controllers/customer.controller.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/app/enums/customer.enums.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/app/enums/customer.enums.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/app/routes/customer.router.js" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/app/routes/customer.router.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +75,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "fix-snapshot-dev",
+    "git-widget-placeholder": "fix-bvn-ver",
     "last_opened_file_path": "/Users/otjake/Sites/localhost/seedfi-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -92,10 +97,23 @@
       <workItem from="1703496827479" duration="2222000" />
       <workItem from="1704369336110" duration="1852000" />
     </task>
+    <task id="LOCAL-00001" summary="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
+      <option name="closed" value="true" />
+      <created>1707806372872</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1707806372872</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In" />
+    <option name="LAST_COMMIT_MESSAGE" value="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

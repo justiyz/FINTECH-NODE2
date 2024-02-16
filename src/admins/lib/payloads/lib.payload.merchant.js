@@ -1,3 +1,5 @@
+import Joi from "joi";
+
 export default {
   createMerchant: (body) => [
     body.business_name.trim(),
@@ -13,6 +15,25 @@ export default {
     body.customer_loan_max_amount,
     body.merchant_loan_limit
   ],
+  onboardMerchant: (body) => [
+    body.merchant_id.trim(),
+    body.first_name.trim().toLowerCase(),
+    body.last_name.trim().toLowerCase(),
+    body.email.trim().toLowerCase(),
+    body.phone_number.trim(),
+    body.gender.trim(),
+    body.password.trim()
+  ],
+  createMerchantAdmin: (body) => [
+    body.first_name.trim().toLowerCase(),
+    body.last_name.trim().toLowerCase(),
+    body.email.trim().toLowerCase(),
+    body.phone_number.trim(),
+    body.gender.trim(),
+    body.password.trim(),
+    body.verification_token,
+    body.verification_token_expires
+  ],
   addMerchantBankAccount: (body) => [
     body.merchant_id.trim(),
     body.bank_name.trim(),
@@ -22,6 +43,12 @@ export default {
     body.transfer_recipient_code.trim(),
   ],
   fetchMerchantUsers: (query) => [
+    query.search ? `%${query.search}%` : null,
+    query.status,
+    query.page ? (query.page - 1) * (query.per_page || 10) : 0,
+    query.per_page ? query.per_page : '10'
+  ],
+  fetchMerchantAdminstrators: (query) => [
     query.search ? `%${query.search}%` : null,
     query.status,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,

@@ -6,6 +6,8 @@ import userQueries from '../../api/queries/queries.user';
 import { offerLetterTemplate } from '../templates/offerLetter';
 import * as S3 from '../../api/services/services.s3';
 import config from '../../config';
+import * as Hash from '../../../users/lib/utils/lib.util.hash';
+
 
 export const generateOtp = () => Crypto.randomInt(0, 1000000).toString().padStart(6, '0');
 export const generateReferralCode = (size) => {
@@ -15,6 +17,22 @@ export const generateReferralCode = (size) => {
     return error;
   }
 };
+
+export const generatePassword = (length) => {
+  // Define characters allowed in the password
+  // const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()+{}|:<>?-=[]';
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    // Generate a random index to select a character from the chars string
+    const randomIndex = Crypto.randomInt(0, chars.length);
+    password += chars.charAt(randomIndex);
+  }
+
+  return password;
+}
+
 
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
@@ -201,7 +219,7 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     userOfferLetterDetail.bvn = '12345678910'
   }else{
-    userOfferLetterDetail.bvn = await decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
+    userOfferLetterDetail.bvn = await Hash.decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
   }
   const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;

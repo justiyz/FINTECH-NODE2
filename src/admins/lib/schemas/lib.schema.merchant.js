@@ -1,7 +1,7 @@
 const Joi = require('joi')//.extend(require('@joi/date'));
 
 const createMerchant = Joi.object().keys({
-  business_name: Joi.string().required(),
+  business_name: Joi.string().min(3).required(),
   email: Joi.string()
     .required()
     .email()
@@ -31,6 +31,31 @@ const createMerchant = Joi.object().keys({
   account_number: Joi.string().required().label('Account number'),
 });
 
+const createMerchantAdmin = Joi.object().keys({
+  first_name: Joi.string().required().messages({'string.empty': 'First name is not allowed to be empty'}),
+  last_name: Joi.string().required().messages({'string.empty': 'Last name is not allowed to be empty'}),
+  email: Joi.string()
+    .required()
+    .email()
+    .messages({
+      'string.pattern.base': 'Please enter a valid email.',
+      'string.empty': 'Email is not allowed to be empty',
+    }),
+  phone_number: Joi.string()
+    .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
+    .messages({
+      'string.pattern.base': 'Phone number must contain +countryCode and extra required digits',
+      'string.empty': 'Phone Number is not allowed to be empty'
+    }).required(),
+  gender: Joi.string().optional().valid('male', 'female')
+  // ,
+  // password: Joi.string().required()
+});
+
+const createMerchantAdminParams = Joi.object().keys({
+  merchant_id: Joi.string().required().label('Merchant ID'),
+});
+
 const fetchMerchants = Joi.object().keys({
   page: Joi.number().positive(),
   per_page: Joi.number().positive().max(200),
@@ -39,6 +64,13 @@ const fetchMerchants = Joi.object().keys({
 });
 
 const fetchMerchantUsers = Joi.object().keys({
+  page: Joi.number().positive().optional(),
+  per_page: Joi.number().positive().optional(),
+  search: Joi.string().optional(),
+  status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
+});
+
+const fetchMerchantAdministrators = Joi.object().keys({
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
@@ -91,6 +123,33 @@ const resolveAccountNumber = Joi.object().keys({
   bank_code: Joi.string().required()
 });
 
+const merchantPassword = Joi.object().keys({
+  password: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
+    'string.pattern.base': 'Invalid password combination'
+  }).required().min(8),
+  old_password: Joi.string().required()
+});
+
+const merchantAdminCredentials = Joi.object().keys({
+  email: Joi.string()
+  .required()
+  .email()
+  .messages({
+    'string.pattern.base': 'Please enter a valid email.',
+    'string.empty': 'Email is not allowed to be empty',
+  }),
+  password: Joi.string().required()
+});
+
+const forgotPassword = Joi.object().keys({
+  email: Joi.string().email().required()
+});
+
+const verifyLogin = Joi.object().keys({
+  otp: Joi.string().required().length(6),
+  email: Joi.string().email().required()
+});
+
 export default {
   createMerchant,
   fetchMerchants,
@@ -100,4 +159,11 @@ export default {
   updateMerchant,
   updateMerchantUser,
   resolveAccountNumber,
+  createMerchantAdmin,
+  merchantAdminCredentials,
+  merchantPassword,
+  forgotPassword,
+  verifyLogin,
+  createMerchantAdminParams,
+  fetchMerchantAdministrators
 };
