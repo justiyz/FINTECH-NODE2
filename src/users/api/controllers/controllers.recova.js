@@ -200,7 +200,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loanDetails.loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
 
-    const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
+    const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
 
     if(!accountDetails) {
