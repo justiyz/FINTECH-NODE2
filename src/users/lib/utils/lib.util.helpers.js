@@ -211,17 +211,17 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const houseAddressState = !userOfferLetterAddressDetail ? '' : `${userOfferLetterAddressDetail.state} State.` || '';
 
   const html = await offerLetterTemplate(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState);
-  if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
-    const data = {
-      ETag: '"68bec848a3eea33f3ccfad41c1242691"',
-      ServerSideEncryption: 'AES256',
-      Location: 'https://seedfi-upload.s3.eu-west-1.amazonaws.com/files/user-documents/user-99f6ae0c885011eeb388b7c34c6838c7/loan-offer-letter/pers-loan-83de029cb48c11ee8bc15378966ce28c.pdf',
-      key: 'files/user-documents/user-99f6ae0c885011eeb388b7c34c6838c7/loan-offer-letter/pers-loan-83de029cb48c11ee8bc15378966ce28c.pdf',
-      Key: 'files/user-documents/user-99f6ae0c885011eeb388b7c34c6838c7/loan-offer-letter/pers-loan-83de029cb48c11ee8bc15378966ce28c.pdf',
-      Bucket: 'p-prof-img'
-    };
-    return data;
-  }
+  // if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
+  //   const data = {
+  //     ETag: '"68bec848a3eea33f3ccfad41c1242691"',
+  //     ServerSideEncryption: 'AES256',
+  //     Location: 'https://seedfi-upload.s3.eu-west-1.amazonaws.com/files/user-documents/user-99f6ae0c885011eeb388b7c34c6838c7/loan-offer-letter/pers-loan-83de029cb48c11ee8bc15378966ce28c.pdf',
+  //     key: 'files/user-documents/user-99f6ae0c885011eeb388b7c34c6838c7/loan-offer-letter/pers-loan-83de029cb48c11ee8bc15378966ce28c.pdf',
+  //     Key: 'files/user-documents/user-99f6ae0c885011eeb388b7c34c6838c7/loan-offer-letter/pers-loan-83de029cb48c11ee8bc15378966ce28c.pdf',
+  //     Bucket: 'p-prof-img'
+  //   };
+  //   return data;
+  // }
 
   const browser = config.SEEDFI_NODE_ENV === 'production' ? await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'}) : await puppeteer.launch();
 
