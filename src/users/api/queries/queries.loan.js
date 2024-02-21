@@ -17,6 +17,10 @@ export default {
     AND is_deleted = false
     LIMIT 1`,
 
+  fetchLoanMandateDetails: `
+    SELECT * from loan_mandate WHERE loan_id = $1,
+  `,
+
   fetchUserDefaultDebitCard: `
     SELECT
       id,
