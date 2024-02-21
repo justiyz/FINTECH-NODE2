@@ -1,16 +1,16 @@
 import * as Hash from '../../lib/utils/lib.util.hash';
 
 export default {
-  checkCardSavedPayload: (paymentRecord, body) => [ 
-    paymentRecord.user_id, 
+  checkCardSavedPayload: (paymentRecord, body) => [
+    paymentRecord.user_id,
     body.data.authorization.brand,
     body.data.authorization.exp_month,
     body.data.authorization.exp_year,
     body.data.authorization.bank,
     'paystack'
   ],
-  saveDebitCardPayload: async(paymentRecord, body, isDefaultCardChoice) => [ 
-    paymentRecord.user_id, 
+  saveDebitCardPayload: async(paymentRecord, body, isDefaultCardChoice) => [
+    paymentRecord.user_id,
     'paystack',
     encodeURIComponent(await Hash.encrypt(body.data.authorization.bin.trim())),
     encodeURIComponent(await Hash.encrypt(body.data.authorization.last4.trim())),
@@ -22,8 +22,8 @@ export default {
     body.data.authorization.account_name,
     isDefaultCardChoice
   ],
-  trackLoanDisbursement: async(body, paymentRecord, loanDetails, status) => [ 
-    paymentRecord.user_id, 
+  trackLoanDisbursement: async(body, paymentRecord, loanDetails, status) => [
+    paymentRecord.user_id,
     paymentRecord.loan_id,
     parseFloat(loanDetails.amount_requested),
     paymentRecord.id,
@@ -35,8 +35,8 @@ export default {
     body.data.transfer_code,
     status
   ],
-  trackLoanPayment: async(paymentRecord, loanDetails) => [ 
-    paymentRecord.user_id, 
+  trackLoanPayment: async(paymentRecord, loanDetails) => [
+    paymentRecord.user_id,
     paymentRecord.loan_id,
     parseFloat(loanDetails.amount_requested),
     'credit',
@@ -49,7 +49,7 @@ export default {
     email: userDetails.email,
     loanAmount: `₦${parseFloat(loanDetails.amount_requested).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     loanDuration: Number(loanDetails.loan_tenor_in_months),
-    loanPurpose: `${loanDetails.cluster_name} cluster loan`,
+    loanPurpose: `${loanDetails.loan_reason || 'Purpose not stated'}`,
     pricingBand: `${parseFloat(loanDetails.percentage_pricing_band).toFixed(2)}%`,
     monthlyInterest: `${(parseFloat(loanDetails.monthly_interest)).toFixed(2)}%`,
     totalInterestAmount: `₦${parseFloat(loanDetails.total_interest_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
@@ -60,7 +60,7 @@ export default {
     monthlyRepayment: `₦${parseFloat(loanDetails.monthly_repayment).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     offerLetterUrl: loanDetails.offer_letter_url
   }),
-  trackClusterLoanDisbursement: async(body, member, paymentRecord, status) => [ 
+  trackClusterLoanDisbursement: async(body, member, paymentRecord, status) => [
     member.user_id,
     member.cluster_id,
     member.member_loan_id,
@@ -75,7 +75,7 @@ export default {
     body.data.transfer_code,
     status
   ],
-  trackClusterLoanPayment: async(member) => [ 
+  trackClusterLoanPayment: async(member) => [
     member.user_id,
     member.cluster_id,
     member.member_loan_id,
@@ -86,19 +86,19 @@ export default {
     'cluster loan disbursement',
     'paystack transfer'
   ],
-  createClusterLoanSchedulePayload: async(member, schedule) => [ 
-    member.cluster_id, 
-    member.member_loan_id, 
-    member.loan_id, 
-    schedule.user_id, 
-    schedule.repayment_order, 
-    schedule.principal_payment, 
+  createClusterLoanSchedulePayload: async(member, schedule) => [
+    member.cluster_id,
+    member.member_loan_id,
+    member.loan_id,
+    schedule.user_id,
+    schedule.repayment_order,
+    schedule.principal_payment,
     schedule.interest_payment,
-    schedule.fees, 
-    schedule.total_payment_amount, 
-    schedule.pre_payment_outstanding_amount, 
+    schedule.fees,
+    schedule.total_payment_amount,
+    schedule.pre_payment_outstanding_amount,
     schedule.post_payment_outstanding_amount,
-    schedule.proposed_payment_date, 
+    schedule.proposed_payment_date,
     schedule.proposed_payment_date
   ]
 };
