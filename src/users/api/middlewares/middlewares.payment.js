@@ -650,6 +650,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         userActivityTracking(paymentRecord.user_id, activityType, 'success');
         return next();
       }
+
+
       await Promise.all([
         processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
           loanDetails.loan_reason, 'full loan repayment', `paystack ${body.data.channel}` ]),
@@ -657,6 +659,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, 'completed',
           parseFloat(paymentRecord.amount), dayjs().format('YYYY-MM-DD HH:mm:ss') ])
       ]);
+      await recovaService.cancelMandate(paymentRecord.loan_id)
+
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
       processPersonalLoanRepayments.middlewares.payment.js`);
       if (!checkIfUserOnClusterLoan) {
