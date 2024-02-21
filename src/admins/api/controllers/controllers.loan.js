@@ -1256,10 +1256,12 @@ function prepareResponseData(loanApplicationDetails, body, totalMonthlyRepayment
 export const manuallyInitiatePersonalLoanApplication = async (req, res, next) => {
   try {
     const { body } = req;
+    let repaymentSchedule = [];
     const [userDetails] = await processAnyData(userQueries.getUserByUserId, [req.body.user_id]);
     const loanApplicationDetails = await createLoanApplication(userDetails, body);
-    const repaymentSchedule = await createRepaymentSchedule(loanApplicationDetails, userDetails);
-
+    if(body.status === 'ongoing' ) {
+      repaymentSchedule = await createRepaymentSchedule(loanApplicationDetails, userDetails);
+    }
     const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
     const totalAmountRepayable = calculateTotalAmountRepayable(
       loanApplicationDetails.totalMonthlyRepayment,
