@@ -49,7 +49,7 @@ export default {
     email: userDetails.email,
     loanAmount: `₦${parseFloat(loanDetails.amount_requested).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     loanDuration: Number(loanDetails.loan_tenor_in_months),
-    loanPurpose: `${loanDetails.loan_reason || 'Purpose not stated'}`,
+    loanPurpose: `${loanDetails.loan_reason || ''}`,
     pricingBand: `${parseFloat(loanDetails.percentage_pricing_band).toFixed(2)}%`,
     monthlyInterest: `${(parseFloat(loanDetails.monthly_interest)).toFixed(2)}%`,
     totalInterestAmount: `₦${parseFloat(loanDetails.total_interest_amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
