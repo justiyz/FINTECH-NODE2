@@ -597,11 +597,6 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
 
         const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
 
-        console.log('customRepaymentCompleted', customRepaymentCompleted);
-        console.log('paymentRecord.amount', parseFloat(paymentRecord.amount));
-        console.log('nextRepayment.post_payment_outstanding_amount', parseFloat(nextRepayment.post_payment_outstanding_amount));
-        console.log('nextRepayment.total_payment_amount', parseFloat(nextRepayment.total_payment_amount));
-
         logger.info(`${customRepaymentCompleted}:::Info: customRepaymentCompleted}`)
         logger.info(`${parseFloat(paymentRecord.amount)}:::Info: paymentRecord.amount}`)
         logger.info(`${parseFloat(nextRepayment.post_payment_outstanding_amount)}:::Info: nextRepayment.post_payment_outstanding_amount}`)
