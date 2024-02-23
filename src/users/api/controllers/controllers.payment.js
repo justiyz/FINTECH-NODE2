@@ -3,7 +3,7 @@ import paymentQueries from '../queries/queries.payment';
 import loanQueries from '../queries/queries.loan';
 import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
-import { initializeCardPayment } from '../services/service.paystack';
+import { initializeCardPaymentWithoutCharges } from '../services/service.paystack';
 import enums from '../../lib/enums';
 import { userActivityTracking } from '../../lib/monitor';
 
@@ -26,7 +26,7 @@ export const initializeCardTokenizationPayment = async(req, res, next) => {
     await processAnyData(paymentQueries.initializeCardPayment, [ user.user_id, tokenizingAmount, 'paystack', reference, 'card_tokenization', 'for addition of debit card'  ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initializeCardTokenizationPayment.controllers.payment.js`);
     const paystackAmountFormatting = parseFloat(tokenizingAmount) * 100; // Paystack requires amount to be in kobo for naira payment
-    const result = await initializeCardPayment(user, paystackAmountFormatting, reference);
+    const result = await initializeCardPaymentWithoutCharges(user, paystackAmountFormatting, reference);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
     initializeCardTokenizationPayment.controllers.payment.js`);
     if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
