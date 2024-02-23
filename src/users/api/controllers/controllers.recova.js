@@ -249,7 +249,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const result = await recovaService.createConsentRequest(data);
-    console.log('result', result)
+
     if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
       const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentConfirmationUrl ]);
       return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
