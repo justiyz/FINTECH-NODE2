@@ -82,8 +82,9 @@ export const generateLoanRepaymentScheduleForShop = async(existingLoanApplicatio
 };
 
 export const generateLoanRepaymentSchedule = async(existingLoanApplication, user_id) => {
-  const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
-  let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  // const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
+  // let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  let totalFee = 0;
   let subsequentFee = 0;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
   let monthlyRepayment = parseFloat(existingLoanApplication.monthly_repayment);
