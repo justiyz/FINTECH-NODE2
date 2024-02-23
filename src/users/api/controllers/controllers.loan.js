@@ -83,7 +83,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
     const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
       parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
-    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     if (data.final_decision === 'MANUAL') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval
       checkUserLoanEligibility.controllers.loan.js`);
