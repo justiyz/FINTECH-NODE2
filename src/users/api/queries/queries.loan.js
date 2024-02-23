@@ -18,7 +18,7 @@ export default {
     LIMIT 1`,
 
   fetchLoanMandateDetails: `
-    SELECT * from loan_mandate WHERE loan_id = $1,
+    SELECT * from loan_mandate WHERE loan_id = $1
   `,
 
   fetchUserDefaultDebitCard: `
