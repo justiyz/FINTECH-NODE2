@@ -83,7 +83,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
     const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
       parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
-    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     if (data.final_decision === 'MANUAL') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval
       checkUserLoanEligibility.controllers.loan.js`);
@@ -166,7 +166,7 @@ export const processLoanRenegotiation = async(req, res, next) => {
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month));
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(body.new_loan_amount);
-    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total interest amount and total amount repayable calculated
     processLoanRenegotiation.controllers.loan.js`);
     const renegotiationPayload = await LoanPayload.loanRenegotiationPayload(user, body, existingLoanApplication, data);
@@ -245,7 +245,7 @@ export const initiateLoanDisbursement = async(req, res, next) => {
     const reference = uuidv4();
     const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
     let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee) //TODO .REMOVE
+    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee)
     await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference,
       'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment initialized in the DB initiateLoanDisbursement.controllers.loan.js`);

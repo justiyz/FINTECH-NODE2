@@ -25,7 +25,7 @@ export default {
   trackLoanDisbursement: async(body, paymentRecord, loanDetails, status) => [
     paymentRecord.user_id,
     paymentRecord.loan_id,
-    parseFloat(loanDetails.amount_requested),
+    parseFloat(paymentRecord.amount),
     paymentRecord.id,
     body.data.recipient.details.account_number,
     body.data.recipient.details.account_name,
@@ -38,7 +38,7 @@ export default {
   trackLoanPayment: async(paymentRecord, loanDetails) => [
     paymentRecord.user_id,
     paymentRecord.loan_id,
-    parseFloat(loanDetails.amount_requested),
+    parseFloat(paymentRecord.amount),
     'credit',
     loanDetails.loan_reason,
     'loan disbursement',
