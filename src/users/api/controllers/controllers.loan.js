@@ -245,7 +245,7 @@ export const initiateLoanDisbursement = async(req, res, next) => {
     const reference = uuidv4();
     const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
     let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee) //TODO .REMOVE
+    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee)
     await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference,
       'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment initialized in the DB initiateLoanDisbursement.controllers.loan.js`);
