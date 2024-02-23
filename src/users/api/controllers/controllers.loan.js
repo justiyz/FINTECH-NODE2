@@ -166,7 +166,7 @@ export const processLoanRenegotiation = async(req, res, next) => {
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month));
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(body.new_loan_amount);
-    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total interest amount and total amount repayable calculated
     processLoanRenegotiation.controllers.loan.js`);
     const renegotiationPayload = await LoanPayload.loanRenegotiationPayload(user, body, existingLoanApplication, data);
