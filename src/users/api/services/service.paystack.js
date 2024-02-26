@@ -88,8 +88,8 @@ const initializeCardPaymentWithoutCharges = async(user, paystackAmountFormatting
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
     }
-    const amountRequestedType = parseFloat(paystackAmountFormatting);
-    // this is because paystack will not process transaction greater than 1 Million
+    let charges = ( paystackAmountFormatting * 0.015 );
+    const amountRequestedType = parseFloat(paystackAmountFormatting + charges);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -125,7 +125,6 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     const amountRequestedType = parseFloat(paystackAmountFormatting);
     const amountToBePaid = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
-    // const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
