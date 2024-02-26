@@ -446,11 +446,16 @@ export const INVALID_MERCHANT_API_KEY = 'Invalid merchant API key';
 export const MERCHANT_NOT_FOUND = 'Merchant account not found';
 export const MERCHANT_ADMIN_EXIST = 'Merchant admin with email or phone number already exist';
 export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfully';
-export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = `Loan due amount fetched successfully`;
-export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
-export const CONSENT_REQUEST_INITIATED_SUCCESSFULLY = `Consent request initiated successfully`;
-export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
-export const NO_DEFAULT_ACCOUNT = `Kindly add a bank account as default to proceed`;
+export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = 'Loan due amount fetched successfully';
+export const MANDATE_CREATED_SUCCESSFULLY = 'Mandate created successfully';
+export const CONSENT_REQUEST_INITIATED_SUCCESSFULLY = 'Consent request initiated successfully';
+export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = 'Loan balance updated successfully';
+export const NO_DEFAULT_ACCOUNT = 'Kindly add a bank account as default to proceed';
+export const ADMIN_NOT_SUPER_ADMIN = 'You are unauthorized to perform this action';
+export const USER_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
+export const LOAN_CREATED_SUCCESSFULLY = 'Loan created successfully';
+export const USER_HAS_ONGOING_LOAN = 'User has an ongoing loan, kindly create loan for a new user';
+
 
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 

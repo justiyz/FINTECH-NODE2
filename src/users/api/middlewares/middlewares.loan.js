@@ -7,9 +7,9 @@ import AdminMailService from '../../../admins/api/services/services.email';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { userActivityTracking } from '../../lib/monitor';
 import { fetchSeedfiPaystackBalance, createTransferRecipient } from '../services/service.paystack';
-import adminShopQueries from "../../../admins/api/queries/queries.shop";
-import {CHECK_AVAILABLE_TICKET_UNITS, CHECK_AVAILABLE_TICKET_UNITS_MESSAGE} from "../../lib/enums/lib.enum.labels";
-import {LOAN_APPLICATION_NOT_EXISTING_FOR_USER} from "../../lib/enums/lib.enum.messages";
+import adminShopQueries from '../../../admins/api/queries/queries.shop';
+import {CHECK_AVAILABLE_TICKET_UNITS, CHECK_AVAILABLE_TICKET_UNITS_MESSAGE} from '../../lib/enums/lib.enum.labels';
+import {LOAN_APPLICATION_NOT_EXISTING_FOR_USER} from '../../lib/enums/lib.enum.messages';
 const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = config;
 /**
  * check loan exists by id
@@ -175,8 +175,8 @@ export const generateBNPLLoanDisbursementRecipient = async(req, res, next) => {
       account_number: SEEDFI_LOAN_DISBURSEMENT_ACCOUNT_NUMBER,
       account_name: SEEDFI_LOAN_DISBURSEMENT_ACCOUNT_NAME,
       is_default: true,
-      is_disbursement_account: true,
-    }
+      is_disbursement_account: true
+    };
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: user disbursement account fetched successfully generateLoanDisbursementRecipient.middlewares.loan.js`);
     const result = await createTransferRecipient(userDisbursementAccountDetails);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: response gotten from calling paystack to generate user transfer recipient code
@@ -338,14 +338,14 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
   try {
     const [ tierOneMaximumLoanAmountDetails, tierTwoMaximumLoanAmountDetails, tierOneMinimumLoanAmountDetails, tierTwoMinimumLoanAmountDetails,
       maximumLoanTenorDetails, minimumLoanTenorDetails, tierOneMaximumAmountForNoCreditHistoryDetails, tierTwoMaximumAmountForNoCreditHistoryDetails ] = await Promise.all([
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_max_amount_for_no_credit_history' ]),
-        processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_max_amount_for_no_credit_history' ])
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_maximum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_minimum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_minimum_loan_amount' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'maximum_loan_tenor' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'minimum_loan_tenor' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_one_max_amount_for_no_credit_history' ]),
+      processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'tier_two_max_amount_for_no_credit_history' ])
     ]);
     if ((Number(body.duration_in_months || body.new_loan_duration_in_month) < Number(minimumLoanTenorDetails.value)) && body.loan_reason != 'Salary advance loan') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user applying for a loan with a duration less than allowable minimum tenor or applying for a salary advance loan
@@ -358,7 +358,7 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_REQUESTS_FOR_LOAN_TENOR_GREATER_THAN_ALLOWABLE, enums.HTTP_BAD_REQUEST, enums.VALIDATE_LOAN_AMOUNT_AND_TENOR_MIDDLEWARE);
     }
     if (Number(user.tier) === 1) {
-      req.maximumAmountForNoCreditHistoryDetails = parseFloat(tierOneMaximumAmountForNoCreditHistoryDetails.value)
+      req.maximumAmountForNoCreditHistoryDetails = parseFloat(tierOneMaximumAmountForNoCreditHistoryDetails.value);
       req.userMinimumAllowableAMount = parseFloat(tierOneMinimumLoanAmountDetails.value);
       req.userMaximumAllowableAmount = parseFloat(tierOneMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 1 user maximum allowable loan amount
@@ -366,7 +366,7 @@ export const validateLoanAmountAndTenor = async(req, res, next) => {
       return next();
     }
     if (Number(user.tier) === 2) {
-      req.maximumAmountForNoCreditHistoryDetails = parseFloat(tierTwoMaximumAmountForNoCreditHistoryDetails.value)
+      req.maximumAmountForNoCreditHistoryDetails = parseFloat(tierTwoMaximumAmountForNoCreditHistoryDetails.value);
       req.userMinimumAllowableAMount = parseFloat(tierTwoMinimumLoanAmountDetails.value);
       req.userMaximumAllowableAmount = parseFloat(tierTwoMaximumLoanAmountDetails.value);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: set tier 2 user maximum allowable loan amount
@@ -538,14 +538,14 @@ export const checkAvailableNumberOfTicketsBeforePurchase = async(req, res, next)
     for (const ticket in tickets) {
       const { ticket_category_id, units } = tickets[ticket];
       const availableTickets = await getAvailableTicketUnits(ticket_category_id);
-      if(units > availableTickets.units) {
+      if (units > availableTickets.units) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}::: Requested tickets[${units}] more than available tickets [${availableTickets.units}].`);
         return ApiResponse.error(
-            res,
-            enums.REQUESTED_NUMBER_OF_TICKETS_NOT_AVAILABLE,
-            enums.HTTP_UNAUTHORIZED,
-            enums.TICKET_PURCHASE_SHOP_CONTROLLER
-        )
+          res,
+          enums.REQUESTED_NUMBER_OF_TICKETS_NOT_AVAILABLE,
+          enums.HTTP_UNAUTHORIZED,
+          enums.TICKET_PURCHASE_SHOP_CONTROLLER
+        );
       }
     }
     return next();

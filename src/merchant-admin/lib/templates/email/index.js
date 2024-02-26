@@ -1,6 +1,6 @@
 import * as authEmail from './authTemplates';
 import * as userEmail from './userTemplates';
-import * as merchantEmail from './'
+import * as merchantEmail from './';
 
 const getTemplate = (type, data) => {
   switch (type) {

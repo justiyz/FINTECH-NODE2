@@ -50,7 +50,7 @@ export const ticketPDFTemplate = (ticket_qr_code, purchase_date, ticket_category
          </table>
       </div>
    </body>
-</html>`
+</html>`;
 
 export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, genderType, loanType, loanPurposeType, houseAddressStreet, houseAddressState) => {
   return `

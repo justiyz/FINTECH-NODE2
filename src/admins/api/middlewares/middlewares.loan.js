@@ -120,3 +120,28 @@ export const checkIfClusterLoanExists = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * checks if admin is super admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminLoanMiddleware
+ */
+export const checkIfAdminIsSuperAdmin = async(req, res, next) => {
+  try {
+    const { admin } = req;
+    if (admin.role_type === 'SADM') {
+      logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms admin is super admin middlewares.checkIfAdminIsSuperAdmin.loan.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP},  ${admin.admin_id}:::Info: successfully confirms admin is not super admin middlewares.checkIfAdminIsSuperAdmin.loan.js`);
+    return ApiResponse.error(res, enums.ADMIN_NOT_SUPER_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_ADMIN_IS_SUPER_ADMIN_MIDDLEWARE);  
+
+  } catch (error) {
+    error.label = enums.CHECK_IF_ADMIN_IS_SUPER_ADMIN_MIDDLEWARE;
+    logger.error(`checking if admin is super admin::${enums.CHECK_IF_ADMIN_IS_SUPER_ADMIN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};

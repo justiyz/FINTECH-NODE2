@@ -14,21 +14,21 @@ import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import { fetchBanks, resolveAccount, createTransferRecipient } from '../services/service.paystack';
 import { userCreditScoreBreakdown } from '../services/services.seedfiCreditscoring';
-import * as Helpers from "../../../users/lib/utils/lib.util.helpers";
-import authQueries from "../../../users/api/queries/queries.auth";
-import queriesAdmin from "../queries/queries.admin";
-import MailService from "../services/services.email";
+import * as Helpers from '../../../users/lib/utils/lib.util.helpers';
+import authQueries from '../../../users/api/queries/queries.auth';
+import queriesAdmin from '../queries/queries.admin';
+import MailService from '../services/services.email';
 import {
   CREATE_MERCHANT_PASSWORD_CONTROLLER,
   ONBOARD_MERCHANT_ADMIN_CONTROLLER, SET_MERCHANT_PASSWORD_CONTROLLER,
   UPDATE_MERCHANT_ADMIN_PASSWORD
-} from "../../../users/lib/enums/lib.enum.labels";
+} from '../../../users/lib/enums/lib.enum.labels';
 import {
   MERCHANT_ADMIN_PASSWORD_UPDATE_FAILED,
   MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL, MERCHANT_ONBOARDED_SUCCESSFULLY
-} from "../../../users/lib/enums/lib.enum.messages";
-import adminQueries from "../queries/queries.admin";
-import * as UserHelpers from "../../../users/lib/utils/lib.util.helpers";
+} from '../../../users/lib/enums/lib.enum.messages';
+import adminQueries from '../queries/queries.admin';
+import * as UserHelpers from '../../../users/lib/utils/lib.util.helpers';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -39,7 +39,7 @@ const { SEEDFI_NODE_ENV } = config;
  * @param next
  * @returns {Promise<*|undefined>}
  */
-export const createMerchantAdmin = async (req, res, next) => {
+export const createMerchantAdmin = async(req, res, next) => {
   const { body, params: {merchant_id} } = req;
   const expireAt = dayjs().add(10, 'minutes');
   const expirationTime = dayjs(expireAt);
@@ -59,7 +59,7 @@ export const createMerchantAdmin = async (req, res, next) => {
       return createMerchantAdmin(req, res, next);
     }
 
-    body.merchant_id = merchant_id
+    body.merchant_id = merchant_id;
     const payload = MerchantPayload.createMerchantAdmin(body);
     const result = await processOneOrNoneData(merchantQueries.createMerchantAdmin, payload);
     body.merchant_admin_id = result.merchant_admin_id;
@@ -77,7 +77,7 @@ export const createMerchantAdmin = async (req, res, next) => {
       });
   } catch (error) {
     const description = descriptions.create_merchant_admin_failed(
-      `Eloka Chiejina`,
+      'Eloka Chiejina',
       `${body.first_name} ${body.last_name}`
     );
     await adminActivityTracking(
@@ -90,55 +90,55 @@ export const createMerchantAdmin = async (req, res, next) => {
     logger.error(`Create merchant account failed:::${enums.CREATE_MERCHANT_ADMIN_CONTROLLER}`, error.message);
     return next(error);
   }
-}
+};
 
-export const setNewMerchantPassword = async (req, res, next) => {
+export const setNewMerchantPassword = async(req, res, next) => {
   const { body, params } = req;
   try {
-      const merchant_id = params.merchant_id;
-      const merchant = await processOneOrNoneData(merchantQueries.fetchMerchantByMerchantId, [merchant_id])
-      const new_password = Hash.hashData(body.password);
-      const oldPasswordValid = UserHash.compareData(body.old_password, merchant.password);
-      const oldAndNewPasswordIsEqual = UserHash.compareData(body.password, merchant.password);
+    const merchant_id = params.merchant_id;
+    const merchant = await processOneOrNoneData(merchantQueries.fetchMerchantByMerchantId, [ merchant_id ]);
+    const new_password = Hash.hashData(body.password);
+    const oldPasswordValid = UserHash.compareData(body.old_password, merchant.password);
+    const oldAndNewPasswordIsEqual = UserHash.compareData(body.password, merchant.password);
 
-      if(!oldPasswordValid) {
-        return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
-      }
+    if (!oldPasswordValid) {
+      return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+    }
 
-      if(oldAndNewPasswordIsEqual) {
-        return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
-      }
+    if (oldAndNewPasswordIsEqual) {
+      return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+    }
 
-      const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
-        merchant_id, new_password
-      ]);
+    const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
+      merchant_id, new_password
+    ]);
 
-      logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${merchant_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
-      if (merchant_id) {
-        await MailService('Password Reset Successful', 'createMerchantPassword', {
-          email: req.body.email,
-          merchant_id: merchant_id,
-          first_name: req.body.first_name
-        });
-      }
-      return ApiResponse.success(
-        res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
-        enums.HTTP_OK,
-        { updated_merchant });
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${merchant_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
+    if (merchant_id) {
+      await MailService('Password Reset Successful', 'createMerchantPassword', {
+        email: req.body.email,
+        merchant_id: merchant_id,
+        first_name: req.body.first_name
+      });
+    }
+    return ApiResponse.success(
+      res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
+      enums.HTTP_OK,
+      { updated_merchant });
 
-  } catch(error) {
+  } catch (error) {
     error.label = enums.UPDATE_MERCHANT_ADMIN_PASSWORD;
     logger.error(`Create merchant account failed:::${enums.UPDATE_MERCHANT_ADMIN_PASSWORD}`, error.message);
     return next(error);
   }
-}
+};
 
-export const setPassword = (type = '') => async (req, res, next) => {
+export const setPassword = (type = '') => async(req, res, next) => {
   try {
     const { body } = req;
     const hash = await Hash.hashData(body.password.trim());
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.merchant_id}:::Info: password hashed setPassword.merchant.controllers.auth.js`);
-    const [setNewPassword ] = await processAnyData(merchantQueries.setNewMerchantPassword, [ body.merchant_id, hash ]);
+    const [ setNewPassword ] = await processAnyData(merchantQueries.setNewMerchantPassword, [ body.merchant_id, hash ]);
     const typeMonitor = type === 'first' ? 11 : 2;
     const description = descriptions.new_password();
     await MailService('Password Setup Successful', 'createMerchantPassword', { ...body });
@@ -174,10 +174,10 @@ export const setPassword = (type = '') => async (req, res, next) => {
 //     );
 //   }
 // };
-export const setNewMerchantAdminPassword = async (req, res, next) => {
+export const setNewMerchantAdminPassword = async(req, res, next) => {
   const { body, params } = req;
   try {
-    if( body.password === body.confirm_password ) {
+    if (body.password === body.confirm_password) {
       const merchant_id = params.merchant_id;
       const new_password = Hash.hashData(body.password);
       const updated_merchant = await processAnyData(merchantQueries.updateMerchantPassword, [
@@ -194,7 +194,7 @@ export const setNewMerchantAdminPassword = async (req, res, next) => {
         enums.HTTP_UNPROCESSABLE_ENTITY
       );
     }
-  } catch(error) {
+  } catch (error) {
     error.label = enums.UPDATE_MERCHANT_ADMIN_PASSWORD;
     logger.error(`Create merchant account failed:::${enums.UPDATE_MERCHANT_ADMIN_PASSWORD}`, error.message);
     return next(error);
@@ -232,7 +232,7 @@ export const forgotMerchantPassword = async(req, res, next) => {
   }
 };
 
-export const merchantAdminLogin = async (req, res, next) => {
+export const merchantAdminLogin = async(req, res, next) => {
   const { body, merchant } = req;
   try {
 
@@ -255,7 +255,7 @@ export const merchantAdminLogin = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${merchant.merchant_id}:::Info: login token set in the DB completeMerchantLoginRequest.admin.controllers.auth.js`);
     await MailService('Complete Login with OTP', 'login', { login_token, expireTime, ...merchant });
 
-    if(SEEDFI_NODE_ENV === 'production') {
+    if (SEEDFI_NODE_ENV === 'production') {
       const keys = Object.keys(updatedMerchant);
       const lastKey = keys[keys.length - 1];
       delete updatedMerchant[lastKey];
@@ -319,7 +319,7 @@ export const verifyLoginVerificationToken = async(req, res, next) => {
     return next(error);
   }
 };
-export const onboardMerchant = async (req, res, next) => {
+export const onboardMerchant = async(req, res, next) => {
   try {
     const password_string = Helpers.generatePassword(8);
     req.body.password = await Hash.hashData(password_string);
@@ -427,17 +427,17 @@ export const onboardMerchant = async (req, res, next) => {
  * @returns {String} - Returns success message.
  * @memberof AdminMerchantController
  */
-export const createMerchant = async (req, res, next) => {
+export const createMerchant = async(req, res, next) => {
   try {
     const { admin } = req;
-    const businessName = req.body.business_name.trim().toUpperCase()
+    const businessName = req.body.business_name.trim().toUpperCase();
     const initials = `${businessName.charAt(0).trim()}${businessName.charAt(1).trim()}`;
-    const existingMerchantsWithInitials = await processAnyData(merchantQueries.fetchMerchantByCodeInitials, [initials]);
+    const existingMerchantsWithInitials = await processAnyData(merchantQueries.fetchMerchantByCodeInitials, [ initials ]);
     const merchantCode = `${initials}${existingMerchantsWithInitials.length + 1}`;
-    const existingMerchantCode = await processOneOrNoneData(merchantQueries.fetchMerchantByCode, [merchantCode]);
+    const existingMerchantCode = await processOneOrNoneData(merchantQueries.fetchMerchantByCode, [ merchantCode ]);
 
     console.log(merchantCode.toUpperCase(), 'merchantCode');
-    return
+    return;
 
     req.body.secret_key = await Hash.encrypt({ email: req.body.email });
     const payload = MerchantPayload.createMerchant(req.body);
@@ -459,7 +459,7 @@ export const createMerchant = async (req, res, next) => {
       return ApiResponse.error(
         res,
         'Error occured adding merchant bank account',
-        enums.HTTP_INTERNAL_SERVER_ERROR,
+        enums.HTTP_INTERNAL_SERVER_ERROR
       );
     }
 
@@ -495,7 +495,7 @@ export const createMerchant = async (req, res, next) => {
  * @returns {Object} - Returns merchant details.
  * @memberof AdminMerchantController
  */
-export const fetchMerchants = async (req, res, next) => {
+export const fetchMerchants = async(req, res, next) => {
   try {
     const { admin } = req;
     const page = req.query.page || 1;
@@ -545,12 +545,12 @@ export const fetchMerchants = async (req, res, next) => {
  * @returns {Object} - Return a single merchants details.
  * @memberof AdminMerchantController
  */
-export const fetchSingleMerchant = async (req, res, next) => {
+export const fetchSingleMerchant = async(req, res, next) => {
   try {
     const { admin, merchant } = req;
-    merchant.secret_key = undefined
-    merchant.otp = undefined
-    merchant.password = undefined
+    merchant.secret_key = undefined;
+    merchant.otp = undefined;
+    merchant.password = undefined;
 
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Successfully fetched merchant from the DB fetchSingleMerchant.admin.controllers.merchant.js`);
     return ApiResponse.success(
@@ -561,7 +561,7 @@ export const fetchSingleMerchant = async (req, res, next) => {
     );
   } catch (error) {
     error.label = 'MerchantController::fetchSingleMerchant';
-    logger.error(`Fetch single merchant failed:::MerchantController::fetchSingleMerchant`, error.message);
+    logger.error('Fetch single merchant failed:::MerchantController::fetchSingleMerchant', error.message);
     return next(error);
   }
 };
@@ -574,14 +574,14 @@ export const fetchSingleMerchant = async (req, res, next) => {
  * @returns {Object} - Return a list of users.
  * @memberof AdminMerchantController
  */
-export const fetchMerchantUsers = async (req, res, next) => {
+export const fetchMerchantUsers = async(req, res, next) => {
   try {
     const { query, admin, merchant } = req;
     const merchantId = merchant.merchant_id;
     const payload  = MerchantPayload.fetchMerchantUsers(query);
     const [ users, [ usersCount ] ] = await Promise.all([
-      processAnyData(merchantQueries.fetchMerchantUsers, [merchantId, ...payload]),
-      processAnyData(merchantQueries.fetchMerchantUsersCount, [merchantId, ...payload])
+      processAnyData(merchantQueries.fetchMerchantUsers, [ merchantId, ...payload ]),
+      processAnyData(merchantQueries.fetchMerchantUsersCount, [ merchantId, ...payload ])
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: successfully fetched users from the DB fetchMerchantUsers.admin.controllers.merchant.js`);
     const data = {
@@ -598,7 +598,7 @@ export const fetchMerchantUsers = async (req, res, next) => {
     );
   } catch (error) {
     error.label = 'MerchantController::fetchMerchantUsers';
-    logger.error(`Fetching merchant users failed:::MerchantController::fetchMerchantUsers`, error.message);
+    logger.error('Fetching merchant users failed:::MerchantController::fetchMerchantUsers', error.message);
     return next(error);
   }
 };
@@ -611,7 +611,7 @@ export const fetchMerchantUsers = async (req, res, next) => {
  * @returns {Object} - Returns a paginated list of merchant loans.
  * @memberof AdminMerchantController
  */
-export const fetchMerchantLoans = async (req, res, next) => {
+export const fetchMerchantLoans = async(req, res, next) => {
   try {
     const { query, admin } = req;
     const { count } = await processOneOrNoneData(
@@ -662,7 +662,7 @@ export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
       date_of_birth: user.date_of_birth,
       phone_number: user.phone_number,
       gender: user.gender
-    }
+    };
     const result = await userCreditScoreBreakdown(payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: checked if user credit score breakdown is available from the creditscoring service fetchUserCreditScoreBreakdown.admin.controller.merchant.js`);
     if (result.status !== 200 || !(result.data?.credit_score)) {
@@ -699,16 +699,16 @@ export const fetchUserCreditScoreBreakdown = async(req, res, next) => {
 export const fetchUserRepaymentSchedule = async(req, res, next) => {
   try {
     const { admin, user, params: {loan_id} } = req;
-    console.log('got here')
-    const [activeLoan] = await processAnyData(
+    console.log('got here');
+    const [ activeLoan ] = await processAnyData(
       merchantQueries.fetchMerchantUserLoan,
-      [loan_id]
+      [ loan_id ]
     );
-    console.log(activeLoan, 'activeLoan')
+    console.log(activeLoan, 'activeLoan');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
     const data = await processAnyData(
       merchantQueries.fetchMerchantUserLoanRepaymentSchedule,
-      [activeLoan?.loan_id]
+      [ activeLoan?.loan_id ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: successfully retreived payment schedules from the DB fetchUserRepaymentSchedule.admin.controllers.merchant.js`);
     return ApiResponse.success(
@@ -732,7 +732,7 @@ export const fetchUserRepaymentSchedule = async(req, res, next) => {
  * @returns { JSON } - A JSON response of the details of the list of available banks
  * @memberof AdminMerchantController
  */
-export const fetchAvailableBankList = async (req, res, next) => {
+export const fetchAvailableBankList = async(req, res, next) => {
   try {
     const { admin } = req;
     const data = await fetchBanks();
@@ -745,7 +745,7 @@ export const fetchAvailableBankList = async (req, res, next) => {
     );
   } catch (error) {
     error.label = 'MerchantController::fetchAvailableBankList';
-    logger.error(`fetching list of banks from paystack failed:::MerchantController::fetchAvailableBankList`, error.message);
+    logger.error('fetching list of banks from paystack failed:::MerchantController::fetchAvailableBankList', error.message);
     return next(error);
   }
 };
@@ -765,7 +765,7 @@ export const resolveBankAccountNumber = async(req, res, next) => {
     const bankCode = query.bank_code;
     const data = await resolveAccount(
       accountNumber.trim(),
-      bankCode.trim(),
+      bankCode.trim()
     );
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: account number resolve response returned from paystack resolveBankAccountNumberName.admin.controllers.merchant.js`);
     if (data?.status !== true) {
@@ -786,7 +786,7 @@ export const resolveBankAccountNumber = async(req, res, next) => {
     );
   } catch (error) {
     error.label = 'MerchantController::resolveBankAccountNumberName';
-    logger.error(`Resolving bank account name from paystack failed:::MerchantController::resolveBankAccountNumberName`, error.message);
+    logger.error('Resolving bank account name from paystack failed:::MerchantController::resolveBankAccountNumberName', error.message);
     return next(error);
   }
 };
@@ -799,7 +799,7 @@ export const resolveBankAccountNumber = async(req, res, next) => {
  * @returns {Object} - Returns updated merchant details.
  * @memberof AdminMerchantController
  */
-export const updateMerchant = async (req, res, next) => {
+export const updateMerchant = async(req, res, next) => {
   try {
     const { admin, merchant } = req;
     const {
@@ -814,7 +814,7 @@ export const updateMerchant = async (req, res, next) => {
       advisory_fee,
       customer_loan_max_amount,
       merchant_loan_limit,
-      account_details_added,
+      account_details_added
     } = req.body;
 
     const updatedMerchantDetails = await processOneOrNoneData(
@@ -843,7 +843,7 @@ export const updateMerchant = async (req, res, next) => {
         return ApiResponse.error(
           res,
           'Error occurred updating merchant bank account',
-          enums.HTTP_INTERNAL_SERVER_ERROR,
+          enums.HTTP_INTERNAL_SERVER_ERROR
         );
       }
     }
@@ -868,7 +868,7 @@ export const updateMerchant = async (req, res, next) => {
  * @returns {Promise<Boolean | Error>}
  * @memberof AdminMerchantController
  */
-const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
+const addMerchantBankAccount = async(admin, payload, newAccount = false) => {
   try {
     // create transfer recipient
     const { account_name, account_number, bank_code, existingBankAccount } = payload;
@@ -876,7 +876,7 @@ const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
     const { data } = await createTransferRecipient({
       account_name,
       account_number,
-      bank_code,
+      bank_code
     });
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: Merchant paystack transfer recipient code generated addMerchantBankAccount.admin.controllers.merchant.js`);
     payload.transfer_recipient_code = data.recipient_code;
@@ -900,7 +900,7 @@ const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
     return true;
   } catch (error) {
     error.label = 'MerchantController::addMerchantBankAccount';
-    logger.error(`Add merchant bank account failed:::MerchantController::addMerchantBankAccount`, error.message);
+    logger.error('Add merchant bank account failed:::MerchantController::addMerchantBankAccount', error.message);
     return error;
   }
 };
@@ -913,7 +913,7 @@ const addMerchantBankAccount = async (admin, payload, newAccount = false) => {
  * @returns {Object}
  * @memberof AdminMerchantController
  */
-export const updateMerchantUser = async (req, res, next) => {
+export const updateMerchantUser = async(req, res, next) => {
   try {
     const { admin, user, merchant } = req;
     const { status } = req.body;
@@ -922,14 +922,14 @@ export const updateMerchantUser = async (req, res, next) => {
       [
         merchant.merchant_id,
         user.user_id,
-        status || user.status,
+        status || user.status
       ]
     );
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.merchant_admin_id}::Info: confirm that merchant user details has been edited and updated in the DB. updateMerchantUser.admin.controllers.merchant.js`);
     return ApiResponse.success(
       res,
       'User updated successfully',
-      enums.HTTP_OK,
+      enums.HTTP_OK
     );
   } catch (error) {
     error.label = 'MerchantController::updateMerchantUser';

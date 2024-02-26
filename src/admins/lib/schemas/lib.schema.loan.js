@@ -161,7 +161,29 @@ const loanRepaymentType = Joi.object().keys({
 });
 
 const createMandateRequestPayload = Joi.object().keys({
-  loan_id: Joi.string().required(),
+  loan_id: Joi.string().required()
+});
+
+const createManualLoan = Joi.object().keys({
+  user_id: Joi.string().required(),
+  loan_type: Joi.string().required().valid('manual'),
+  loan_amount: Joi.number().positive().required(),
+  loan_reason: Joi.string().required(),
+  loan_tenor: Joi.number().integer().min(1).max(24).required(),
+  interest_rate: Joi.number().positive().required(),
+  processing_fee: Joi.number().positive().required(),
+  insurance_fee: Joi.number().positive().required(),
+  advisory_fee: Joi.number().positive().required(),
+  loan_decision: Joi.string().required(),
+  loan_disbursed: Joi.boolean().required(),
+  loan_disbursement_date: Joi.date().max('now').required(),
+  loan_status: Joi.string().valid('ongoing', 'completed', 'overdue'),
+  initial_amount_requested: Joi.number().positive().required(),
+  initial_loan_tenor: Joi.number().integer().min(1).max(24).required()
+});
+
+export const fetchLoanPeriod = Joi.object().keys({
+  loan_tenor: Joi.number().integer().min(1).max(24).required()
 });
 
 
@@ -184,5 +206,7 @@ export default {
   manuallyCreateLoanRepaymentSchedule,
   loanRepaymentParams,
   loanRepaymentType,
-  createMandateRequestPayload
+  createMandateRequestPayload,
+  createManualLoan,
+  fetchLoanPeriod
 };

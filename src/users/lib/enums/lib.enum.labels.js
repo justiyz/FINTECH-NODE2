@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {onboardMerchant} from "../../../admins/api/controllers/controller.merchant";
+import {onboardMerchant} from '../../../admins/api/controllers/controller.merchant';
 
 export const CURRENT_TIME_STAMP = `${dayjs().format('DD-MMM-YYYY, HH:mm:ss')}`;
 // User related labels
@@ -129,6 +129,7 @@ export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
 export const HOMEPAGE_DETAILS_CONTROLLER = 'UserController::homepageDetails';
 export const CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
 export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
+export const CHECK_IF_ADMIN_IS_SUPER_ADMIN_MIDDLEWARE = 'LoanMiddleware::checkIfAdminIsSuperAdmin';
 export const CHECK_IF_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterLoanApplicationExists';
 export const FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE = 'ClusterMiddleware::fetchGeneralClusterNewLoanAmountValues';
 export const CHECK_IF_MEMBER_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfMemberClusterLoanApplicationExists';
@@ -431,4 +432,7 @@ export const UPDATE_MERCHANT_CONTROLLER = 'MerchantController::updateMerchant';
 export const FETCH_LOAN_DUE_AMOUNT_CONTROLLER = 'RecovaController::fetchLoanDueAmount';
 export const HANDLE_MANDATE_CREATED_CONTROLLER = 'RecovaController::handleMandateCreated';
 export const LOAN_BALANCE_UPDATE_CONTROLLER = 'RecovaController::loanBalanceUpdate';
+export const FETCH_USER_CONTROLLER = 'LoanController::fetchUsers';
+export const FETCH_LOAN_PERIOD_CONTROLLER = 'LoanController::fetchLoanPeriod';
+export const CREATE_MANUAL_LOAN_CONTROLLER = 'LoanController::createManualLoan';
 

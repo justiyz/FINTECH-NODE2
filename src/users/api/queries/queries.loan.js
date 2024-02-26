@@ -859,6 +859,5 @@ export default {
       completed_at
     FROM personal_loans
     WHERE loan_id = $1
-    `,
-
+    `
 };

@@ -5,7 +5,7 @@ export default {
     FROM merchant_admins_merchants
     WHERE merchant_id = $1 AND merchant_admin_id = $2`,
 
-//================================================================================================
+  // ================================================================================================
 
   fetchRole: `
     SELECT id, code, name, status, created_at

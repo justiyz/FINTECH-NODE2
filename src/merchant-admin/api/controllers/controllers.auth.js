@@ -17,48 +17,48 @@ const { SEEDFI_NODE_ENV } = config;
 
 
 
-export const setNewMerchantAdminPassword = async (req, res, next) => {
+export const setNewMerchantAdminPassword = async(req, res, next) => {
   const { body: {email, old_password, password} } = req;
   try {
-      const admin = await processOneOrNoneData(authQueries.fetchMerchantAdminByEmail, [email])
-      if (!admin) {
-        return ApiResponse.error(res, 'Admin not found', enums.HTTP_NOT_FOUND, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
-      }
-      const new_password = Hash.hashData(password);
-      const oldPasswordValid = UserHash.compareData(old_password, admin.password);
-      const oldAndNewPasswordIsEqual = UserHash.compareData(password, admin.password);
+    const admin = await processOneOrNoneData(authQueries.fetchMerchantAdminByEmail, [ email ]);
+    if (!admin) {
+      return ApiResponse.error(res, 'Admin not found', enums.HTTP_NOT_FOUND, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+    }
+    const new_password = Hash.hashData(password);
+    const oldPasswordValid = UserHash.compareData(old_password, admin.password);
+    const oldAndNewPasswordIsEqual = UserHash.compareData(password, admin.password);
 
-      if(!oldPasswordValid) {
-        return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
-      }
+    if (!oldPasswordValid) {
+      return ApiResponse.error(res, 'Old password invalid', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+    }
 
-      if(oldAndNewPasswordIsEqual) {
-        return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
-      }
+    if (oldAndNewPasswordIsEqual) {
+      return ApiResponse.error(res, 'Kindly use another password', enums.HTTP_BAD_REQUEST, enums.UPDATE_MERCHANT_ADMIN_PASSWORD);
+    }
 
-      const updatedMerchantAdmin = await processAnyData(authQueries.updateMerchantAdminPassword, [
-        email, new_password
-      ]);
+    const updatedMerchantAdmin = await processAnyData(authQueries.updateMerchantAdminPassword, [
+      email, new_password
+    ]);
 
-      logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${admin.merchant_admin_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
-      if (updatedMerchantAdmin) {
-        await MailService('Password Reset Successful', 'createMerchantPassword', {
-          email: admin.email,
-          merchant_id: admin.merchant_admin_id,
-          first_name: admin.first_name
-        });
-      }
-      return ApiResponse.success(
-        res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
-        enums.HTTP_OK,
-        { updatedMerchantAdmin });
+    logger.info(`${enums.CURRENT_TIME_STAMP}::Info: merchant admin [${admin.merchant_admin_id}] successfully updated their password createMerchantAdmin.admin.controller.merchant.js`);
+    if (updatedMerchantAdmin) {
+      await MailService('Password Reset Successful', 'createMerchantPassword', {
+        email: admin.email,
+        merchant_id: admin.merchant_admin_id,
+        first_name: admin.first_name
+      });
+    }
+    return ApiResponse.success(
+      res, enums.MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL,
+      enums.HTTP_OK,
+      { updatedMerchantAdmin });
 
-  } catch(error) {
+  } catch (error) {
     error.label = enums.UPDATE_MERCHANT_ADMIN_PASSWORD;
     logger.error(`Create merchant account failed:::${enums.UPDATE_MERCHANT_ADMIN_PASSWORD}`, error.message);
     return next(error);
   }
-}
+};
 
 /**
  * complete admin login request
@@ -116,7 +116,7 @@ export const login = async(req, res, next) => {
     const [ updatedAdmin ] = await processAnyData(authQueries.updateLoginToken, [ admin.merchant_admin_id, null, null, 0, 0 ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: login token set to null in the DB login.admin.controllers.auth.js`);
     // const [ adminRoleDetails ] = await processAnyData(roleQueries.fetchRole, [ admin.role_type ]);
-    //get admin merchants
+    // get admin merchants
     const adminMerchants  = await processAnyData(authQueries.fetchMerchantsByMerchantAdminId, [ admin.merchant_admin_id, null ]);
     await adminActivityTracking(req.admin.merchant_admin_id, 10, 'success', descriptions.login_approved(adminName));
     return ApiResponse.success(res, enums.ADMIN_LOGIN_SUCCESSFULLY, enums.HTTP_OK, { ...updatedAdmin, merchants: adminMerchants, role_name: 'merchant_admin', token });
@@ -132,7 +132,7 @@ export const login = async(req, res, next) => {
 // =========================== ================  ================================== ===========================
 
 
-export const completeMerchantLoginRequest = async (req, res, next ) => {
+export const completeMerchantLoginRequest = async(req, res, next) => {
   try {
     const merchant  = req.merchant; // await processAnyData(adminQueries.getMerchantByEmail, [ req.body.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched merchant admin details from the database completeMerchantLoginRequest.admin.middlewares.admin.js`);
@@ -146,7 +146,7 @@ export const completeMerchantLoginRequest = async (req, res, next ) => {
     logger.error(`getting merchants details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE}`, error.message);
     return next(error);
   }
-}
+};
 
 
 
@@ -236,7 +236,7 @@ export const sendAdminPasswordToken = async(req, res, next) => {
     sendAdminPasswordToken.admin.controllers.auth.js`);
     await adminActivityTracking(req.admin.merchant_admin_id, 18, 'success', descriptions.verify_reset_pass_otp());
     merchant.password_token = passwordToken;
-    merchant.tokenExpireAt = tokenExpireAt
+    merchant.tokenExpireAt = tokenExpireAt;
     return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { merchant });
   } catch (error) {
     await adminActivityTracking(req.admin.merchant_admin_id, 18, 'fail', descriptions.verify_reset_pass_otp_failed());

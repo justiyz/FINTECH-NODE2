@@ -16,7 +16,7 @@ export const checkLoanExists = async(req, res, next) => {
   try {
     const { params: { loan_reference }, body: {loanReference} } = req;
 
-    const [loanDetails] = await processAnyData(loanQueries.fetchLoanDetailsByLoanId, [loan_reference || loanReference]);
+    const [ loanDetails ] = await processAnyData(loanQueries.fetchLoanDetailsByLoanId, [ loan_reference || loanReference ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ 'Recova' }:::Info: successfully fetched loan details checkLoanExists.middleware.recova.js`);
     if (loanDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${ 'Recova' }:::Info: loan  exists

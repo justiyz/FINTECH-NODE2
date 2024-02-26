@@ -7,14 +7,14 @@ import * as userMockedTestResponses from '../../../../tests/response/response.us
 const {SEEDFI_NODE_ENV, SEEDFI_RECOVA_BASE_URL, SEEDFI_RECOVA_BEARER_TOKEN} = config;
 
 
-const createConsentRequest = async (payload) => {
+const createConsentRequest = async(payload) => {
   try {
     const options = {
       method: 'post',
       url: `${SEEDFI_RECOVA_BASE_URL}/ConsentRequest/CreateConsentRequest`,
       headers: {
         Authorization: SEEDFI_RECOVA_BEARER_TOKEN,
-        accept: 'application/json',
+        accept: 'application/json'
         // 'Accept-Encoding': 'gzip,deflate,compress'
       },
       data: payload
@@ -28,15 +28,15 @@ const createConsentRequest = async (payload) => {
   }
 };
 
-const cancelMandate = async (payload) => {
-  if(SEEDFI_NODE_ENV === 'development') return null
+const cancelMandate = async(payload) => {
+  if (SEEDFI_NODE_ENV === 'development') return null;
   try {
     const options = {
       method: 'post',
       url: `${SEEDFI_RECOVA_BASE_URL}/Mandate/CancelMandateByLoanReference/${payload}?comment=null'`,
       headers: {
         Authorization: SEEDFI_RECOVA_BEARER_TOKEN,
-        accept: 'application/json',
+        accept: 'application/json'
         // 'Accept-Encoding': 'gzip,deflate,compress'
       },
       data: null
