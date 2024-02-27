@@ -24,6 +24,7 @@ const createConsentRequest = async (payload) => {
     return data;
   } catch (error) {
     logger.error(`Recova::Error ${error.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
+    logger.error(`Recova::Error ${error.response.data.message} ${ enums.CREATE_CONSENT_REQUEST_SERVICE }`, error.message);
     throw error;
   }
 };
