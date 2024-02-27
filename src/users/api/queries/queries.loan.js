@@ -17,6 +17,10 @@ export default {
     AND is_deleted = false
     LIMIT 1`,
 
+  fetchLoanMandateDetails: `
+    SELECT * from loan_mandate WHERE loan_id = $1
+  `,
+
   fetchUserDefaultDebitCard: `
     SELECT
       id,
@@ -802,6 +806,21 @@ export default {
         created_at
       FROM user_bank_accounts
       WHERE user_id =$1 AND is_default = true AND is_deleted = false
+      `,
+
+  fetchBankAccountDetailsByUserIdForMandate: `
+      SELECT
+        id,
+        user_id,
+        bank_name,
+        bank_code,
+        account_number,
+        account_name,
+        is_default,
+        is_disbursement_account,
+        created_at
+      FROM user_bank_accounts
+      WHERE user_id =$1 AND is_deleted = false
       `,
 
   fetchLoanIDFromUserTickets: `

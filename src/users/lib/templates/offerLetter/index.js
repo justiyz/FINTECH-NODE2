@@ -119,7 +119,7 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
     </tr>
     <tr>
       <td width="30%" height="40px">Annual Percentage Rate:</td>
-      <td>${parseFloat(loanDetails.percentage_pricing_band  + loanDetails.percentage_processing_fee + loanDetails.percentage_advisory_fee + loanDetails.percentage_insurance_fee).toFixed(2)}%</td>
+      <td>${parseFloat(parseFloat(loanDetails.percentage_pricing_band)  + parseFloat(loanDetails.percentage_processing_fee) + parseFloat(loanDetails.percentage_advisory_fee) + parseFloat(loanDetails.percentage_insurance_fee)).toFixed(2)}%</td>
     </tr>
     <tr>
       <td width="30%" height="40px" style="vertical-align: top;">Rate Review:</td>

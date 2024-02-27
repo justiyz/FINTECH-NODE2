@@ -1,0 +1,27 @@
+name: merge_checker
+on: 
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:    
+      - 'master'
+      - 'main'
+      - 'snapshot'
+
+jobs:
+  job1:
+    name: check_admin
+    runs-on: ubuntu-latest
+    env:
+      NAME_ADMIN1: eloka2023
+      NAME_ADMIN2: ftomiiwo
+
+    steps:
+      - name: st1
+        if: ${{ github.actor != env.NAME_ADMIN1 && github.actor != env.NAME_ADMIN2 }}
+        run: exit 1
+      - name: st2
+        if: ${{ github.actor == env.NAME_ADMIN1 || github.actor == env.NAME_ADMIN2 }}
+        run: echo "ok"

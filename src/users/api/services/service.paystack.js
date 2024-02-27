@@ -83,6 +83,39 @@ const initializeCardPayment = async(user, paystackAmountFormatting, reference) =
   }
 };
 
+const initializeCardPaymentWithoutCharges = async(user, paystackAmountFormatting, reference) => {
+  try {
+    if (SEEDFI_NODE_ENV === 'test') {
+      return userMockedTestResponses.paystackInitializeCardPaymentTestResponse(reference);
+    }
+    let charges = ( paystackAmountFormatting * 0.015 );
+    const amountRequestedType = parseFloat(paystackAmountFormatting + charges);
+    const options = {
+      method: 'post',
+      url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
+      headers: {
+        Authorization: `Bearer ${config.SEEDFI_PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        email: user.email,
+        amount: amountRequestedType,
+        currency: 'NGN',
+        reference,
+        channels: [ 'card' ],
+        metadata: {
+          'cancel_action': config.SEEDFI_PAYSTACK_CANCEL_PAYMENT_REDIRECT_URL // This value is a paystack value "https://standard.paystack.co/close"
+        }
+      }
+    };
+    const { data } = await axios(options);
+    return data;
+  } catch (error) {
+    logger.error(`Connecting to paystack API to initialize card payment failed::${enums.PAYSTACK_INITIATE_CARD_PAYMENT_SERVICE}`, error.message);
+    return error;
+  }
+};
+
 const initializeBankTransferPayment = async(user, paystackAmountFormatting, reference) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
@@ -92,7 +125,6 @@ const initializeBankTransferPayment = async(user, paystackAmountFormatting, refe
     const amountRequestedType = parseFloat(paystackAmountFormatting);
     const amountToBePaid = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     // this is because paystack will not process transaction greater than 1 Million
-    // const amountToBeCharged = await calculateAmountPlusPaystackTransactionCharge(amountRequestedType);
     const options = {
       method: 'post',
       url: `${config.SEEDFI_PAYSTACK_APIS_BASE_URL}/transaction/initialize`,
@@ -399,5 +431,6 @@ export {
   initializeBankAccountChargeForLoanRepayment,
   initializeDebitCarAuthChargeForLoanRepayment,
   submitPaymentOtpWithReference,
-  calculateAmountPlusPaystackTransactionCharge
+  calculateAmountPlusPaystackTransactionCharge,
+  initializeCardPaymentWithoutCharges
 };

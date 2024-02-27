@@ -200,7 +200,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loanDetails.loan_id, user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
 
-    const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, user.user_id);
+    const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
 
     if(!accountDetails) {
@@ -249,7 +249,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const result = await recovaService.createConsentRequest(data);
-    console.log('result', result)
+
     if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
       const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentConfirmationUrl ]);
       return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);

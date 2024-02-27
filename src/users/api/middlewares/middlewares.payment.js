@@ -581,6 +581,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
       const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ paymentRecord.user_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: checked if user is on an active cluster loan
       processPersonalLoanRepayments.middlewares.payment.js`);
+      const [ loanMandateDetails ] = await processAnyData(loanQueries.fetchLoanMandateDetails, [ paymentRecord.loan_id]);
+
       if (paymentRecord.payment_type === 'part_loan_repayment' || paymentRecord.payment_type === 'automatic_loan_repayment') {
         const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ paymentRecord.loan_id, paymentRecord.user_id ]);
         const outstandingRepaymentCount = await processOneOrNoneData(loanQueries.existingUnpaidRepayments, [ paymentRecord.loan_id, paymentRecord.user_id ]);
@@ -594,11 +596,6 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         customRepaymentCompleted =  parseFloat(paymentRecord.amount) == parseFloat(nextRepayment.total_payment_amount) ? true : customRepaymentCompleted;
 
         const statusType = Number(outstandingRepaymentCount.count) > 1 ? 'ongoing' : 'completed';
-
-        console.log('customRepaymentCompleted', customRepaymentCompleted);
-        console.log('paymentRecord.amount', parseFloat(paymentRecord.amount));
-        console.log('nextRepayment.post_payment_outstanding_amount', parseFloat(nextRepayment.post_payment_outstanding_amount));
-        console.log('nextRepayment.total_payment_amount', parseFloat(nextRepayment.total_payment_amount));
 
         logger.info(`${customRepaymentCompleted}:::Info: customRepaymentCompleted}`)
         logger.info(`${parseFloat(paymentRecord.amount)}:::Info: paymentRecord.amount}`)
@@ -614,7 +611,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
             customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
-        if(statusType == 'completed'){
+        if(statusType == 'completed' && loanMandateDetails){
           await recovaService.cancelMandate(paymentRecord.loan_id)
         }
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
@@ -650,6 +647,8 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         userActivityTracking(paymentRecord.user_id, activityType, 'success');
         return next();
       }
+
+
       await Promise.all([
         processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
           loanDetails.loan_reason, 'full loan repayment', `paystack ${body.data.channel}` ]),
@@ -657,6 +656,9 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, 'completed',
           parseFloat(paymentRecord.amount), dayjs().format('YYYY-MM-DD HH:mm:ss') ])
       ]);
+
+      if(loanMandateDetails) await recovaService.cancelMandate(paymentRecord.loan_id);
+
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: loan, loan repayment and payment details updated successfully
       processPersonalLoanRepayments.middlewares.payment.js`);
       if (!checkIfUserOnClusterLoan) {
