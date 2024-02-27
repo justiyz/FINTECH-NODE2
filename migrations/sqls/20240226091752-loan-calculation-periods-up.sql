@@ -17,3 +17,5 @@ VALUES
 
 CREATE INDEX loan_calculation_periods_id_index ON loan_calculation_periods(id);
 CREATE INDEX loan_calculation_periods_period_index ON loan_calculation_periods(period) ;
+
+ALTER TABLE personal_loans ADD COLUMN IF NOT EXISTS is_created_by_admin BOOLEAN DEFAULT false;

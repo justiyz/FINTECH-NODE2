@@ -6,7 +6,7 @@ import loanPayload from '../../lib/payloads/lib.payload.loans';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
-import {processAnyData, processOneOrNoneData} from '../services/services.db';
+import {processAnyData, processNoneData, processOneOrNoneData} from '../services/services.db';
 import MailService from '../services/services.email';
 import {
   sendClusterNotification,
@@ -1531,7 +1531,9 @@ export const createManualLoan = async(req, res, next) => {
 
     const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
     const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully successfully createManualLoan.admin.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully createManualLoan.admin.controllers.loan.js`);
+    await processNoneData(loanQueries.updateIsCreatedByAdmin, userLoan.loan_id)
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan updated successfully createManualLoan.admin.controllers.loan.js`);
 
     const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, userLoan.loan_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);

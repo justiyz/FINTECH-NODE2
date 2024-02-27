@@ -1283,7 +1283,14 @@ export default {
           rejection_reason,
           offer_letter_url
       FROM personal_loans
-      WHERE loan_id = $1`
+      WHERE loan_id = $1`,
+
+    updateIsCreatedByAdmin: `
+          UPDATE personal_loans
+          SET updated_at = NOW(),
+          is_created_by_admin = true
+          WHERE loan_id = $1
+    `
 };
 
 
