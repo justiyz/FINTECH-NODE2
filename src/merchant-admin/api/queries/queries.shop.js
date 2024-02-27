@@ -244,7 +244,7 @@ export default {
         units,
         ticket_category_status
   `,
-  getFirstRepaymentAmount:`
+  getFirstRepaymentAmount: `
     SELECT user_tickets.loan_id, user_tickets.principal_payment
     FROM user_tickets
     LEFT JOIN tickets ON tickets.ticket_id = user_tickets.ticket_id

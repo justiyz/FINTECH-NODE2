@@ -1147,11 +1147,11 @@ export default {
 
 
 
-    fetchLoanMandateDetails: `
+  fetchLoanMandateDetails: `
         SELECT * FROM loan_mandate WHERE loan_id = $1
     `,
 
-    fetchBankAccountDetailsByUserId: `
+  fetchBankAccountDetailsByUserId: `
       SELECT
         id,
         user_id,
@@ -1180,6 +1180,110 @@ export default {
       FROM user_bank_accounts
       WHERE user_id =$1 AND is_deleted = false
       `,
+  createManualLoan: `
+          INSERT INTO personal_loans(
+                user_id,
+                amount_requested,
+                loan_reason,
+                loan_tenor_in_months,
+                total_repayment_amount,
+                total_interest_amount,
+                percentage_pricing_band,
+                percentage_processing_fee,
+                percentage_insurance_fee,
+                percentage_advisory_fee,
+                monthly_interest,
+                processing_fee,
+                insurance_fee,
+                advisory_fee,
+                monthly_repayment,
+                loan_decision,
+                is_loan_disbursed,
+                loan_disbursed_at,
+                total_outstanding_amount,
+                status,
+                initial_amount_requested,
+                initial_loan_tenor_in_months,
+                created_at
+                ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+                $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+                )
+                RETURNING *`,
+        
+  fetchUsers: `
+        SELECT
+          id,
+          user_id,
+          TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+          email,
+          tier,
+          to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
+          loan_status,
+          status,
+            bvn
+      FROM users
+      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR $1 IS NULL)
+      ORDER BY created_at DESC     
+        `,
+
+  fetchLoanPeriod: `
+      SELECT period
+      FROM loan_calculation_periods
+      WHERE period = CASE
+          WHEN $1 BETWEEN 1 AND 12 THEN 12
+          WHEN $1 BETWEEN 13 AND 24 THEN 24
+          ELSE 36
+          END; 
+   `,
+
+  checkIfUserAlreadyHasOngoingLoan: `
+        SELECT
+          id,
+          loan_id,
+          user_id,
+          loan_reason,
+          loan_tenor_in_months,
+          status,
+          created_at
+        FROM personal_loans  
+        WHERE user_id = $1
+    `,
+
+  fetchLoanDetailsByUserId: `
+          SELECT
+          id,
+          loan_id,
+          user_id,
+          round(CAST(amount_requested AS NUMERIC), 2) AS amount_requested,
+          loan_reason,
+          loan_tenor_in_months,
+          round(CAST(total_repayment_amount AS NUMERIC), 2) AS total_repayment_amount,
+          round(CAST(total_interest_amount AS NUMERIC), 2) AS total_interest_amount,
+          percentage_orr_score,
+          percentage_pricing_band AS interest_rate,
+          round(CAST(monthly_interest AS NUMERIC), 2) AS monthly_interest,
+          round(CAST(monthly_repayment AS NUMERIC), 2) AS monthly_repayment,
+          round(CAST(total_outstanding_amount AS NUMERIC), 2) AS total_outstanding_amount,
+          round(CAST(extra_interests AS NUMERIC), 2) AS extra_interests,
+          round(CAST(processing_fee AS NUMERIC), 2)  AS processing_fee,
+          round(CAST(insurance_fee AS  NUMERIC), 2) AS insurance_fee,
+          round(CAST(advisory_fee AS NUMERIC), 2) AS advisory_fee,
+          status,
+          loan_decision,
+          is_loan_disbursed,
+          to_char(DATE(loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
+          to_char(DATE (created_at)::date, 'Mon DD YYYY') As application_date,
+          rejection_reason,
+          offer_letter_url
+      FROM personal_loans
+      WHERE user_id = $1`
 };
 
 

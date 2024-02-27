@@ -16,9 +16,9 @@ import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import {
   SAVE_ADMIN_UPLOADED_DOCUMENT_CONTROLLER,
   UPDATE_BANK_STMT_RECORD
-} from "../../../users/lib/enums/lib.enum.labels";
+} from '../../../users/lib/enums/lib.enum.labels';
 import * as Hash from '../../../users/lib/utils/lib.util.hash';
-import {BANK_STATEMENT_EXPIRED_SUCCESSFULLY} from "../../../users/lib/enums/lib.enum.messages";
+import {BANK_STATEMENT_EXPIRED_SUCCESSFULLY} from '../../../users/lib/enums/lib.enum.messages';
 
 /**
  * should activate and deactivate user status
@@ -559,7 +559,7 @@ export const fetchUserRewards = async(req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-export const updateUserProfile = async (req, res, next) => {
+export const updateUserProfile = async(req, res, next) => {
   try {
     const {body, admin, userDetails} = req;
     const payload = UserPayload.updateUserProfile(body, userDetails);
@@ -582,7 +582,7 @@ export const updateUserProfile = async (req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const updateEmploymentDetails = async (req, res, next) => {
+export const updateEmploymentDetails = async(req, res, next) => {
   try {
     const {body, admin, userEmploymentDetails} = req;
     const payload = UserPayload.updateEmploymentDetails(body, userEmploymentDetails);
@@ -605,7 +605,7 @@ export const updateEmploymentDetails = async (req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const updateResidentialAddress = async (req, res, next) => {
+export const updateResidentialAddress = async(req, res, next) => {
   try {
     const {body, admin, userAddressDetails} = req;
     const payload = UserPayload.updateResidentialAddress(body, userAddressDetails);
@@ -628,7 +628,7 @@ export const updateResidentialAddress = async (req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const updateNextOfKin = async (req, res, next) => {
+export const updateNextOfKin = async(req, res, next) => {
   try {
     const {body, admin, userNextOfKinDetails} = req;
     const payload = UserPayload.updateNextOfKin(body, userNextOfKinDetails);
@@ -655,4 +655,4 @@ export const expireBankStatement = async(req, res, next) => {
     logger.error(`updating user bank statement record failed:::${ enums.UPDATE_BANK_STMT_RECORD }`, error.message);
     return next(error);
   }
-}
+};

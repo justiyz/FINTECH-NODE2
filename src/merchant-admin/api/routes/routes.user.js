@@ -6,8 +6,8 @@ import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
-import {decryptUserBVN, saveAdminUploadedDocument} from "../controllers/controllers.user";
-import { uploadAdminDocument } from "../middlewares/middlewares.user";
+import {decryptUserBVN, saveAdminUploadedDocument} from '../controllers/controllers.user';
+import { uploadAdminDocument } from '../middlewares/middlewares.user';
 
 const router = Router();
 

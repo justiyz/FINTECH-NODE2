@@ -10,4 +10,4 @@ export default {
     SET request_status = $1
     WHERE loan_id = $2;
   `
-}
+};

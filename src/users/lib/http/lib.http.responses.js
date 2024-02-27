@@ -25,5 +25,5 @@ export default {
     message,
     code,
     ...data
-  }),
+  })
 };

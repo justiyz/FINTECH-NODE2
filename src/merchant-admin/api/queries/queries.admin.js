@@ -1,26 +1,26 @@
 export default {
 
-getAdminByEmail: `
+  getAdminByEmail: `
   SELECT id, merchant_admin_id, email, phone_number, first_name, last_name, gender,
     is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count
   FROM merchant_admins
   WHERE email = $1`,
 
-deactivateAdmin: `
+  deactivateAdmin: `
     UPDATE merchant_admins
     SET
       updated_at = NOW(),
       status = 'deactivated'
     WHERE merchant_admin_id = $1`,
 
-updateAdminInvalidOtpCount: `
+  updateAdminInvalidOtpCount: `
     UPDATE merchant_admins
     SET
       updated_at = NOW(),
       invalid_verification_token_count = invalid_verification_token_count + 1
     WHERE merchant_admin_id = $1`,
 
-getAdminByAdminId: `
+  getAdminByAdminId: `
     SELECT id, merchant_admin_id, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender,
       is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count
     FROM merchant_admins
@@ -786,11 +786,11 @@ getAdminByAdminId: `
       FROM cluster_member_loan_disbursements
       WHERE status = 'success'
       AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
-  `,
+  `
 
 
 
-  }
+};
 
 
 

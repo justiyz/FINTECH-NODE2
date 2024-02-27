@@ -1147,11 +1147,11 @@ export default {
 
 
 
-    fetchLoanMandateDetails: `
+  fetchLoanMandateDetails: `
         SELECT * FROM loan_mandate WHERE loan_id = $1
     `,
 
-    fetchBankAccountDetailsByUserId: `
+  fetchBankAccountDetailsByUserId: `
       SELECT
         id,
         user_id,

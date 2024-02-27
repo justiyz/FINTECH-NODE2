@@ -1,4 +1,4 @@
-import {processOneOrNoneData, processAnyData} from "../services/services.db";
+import {processOneOrNoneData, processAnyData} from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import loanMandateQueries from '../queries/queries.recova';
@@ -8,7 +8,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import  * as zeehService from '../services/services.zeeh';
 import * as recovaService from '../services/services.recova';
 import dayjs from 'dayjs';
-import { parsePhoneNumber } from 'awesome-phonenumber'
+import { parsePhoneNumber } from 'awesome-phonenumber';
 import config from '../../config';
 
 
@@ -21,14 +21,14 @@ import config from '../../config';
  * @returns { JSON } - A JSON with the users updated fcm token
  * @memberof RecovaController
  */
-export const fetchLoanDueAmount = async (req, res, next) => {
+export const fetchLoanDueAmount = async(req, res, next) => {
   try {
     const {loanDetails} = req;
     // TODO: return amount all next repayments that is over - due for the loan
-    const [nextLoanRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
+    const [ nextLoanRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loanDetails.loan_id, loanDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Recova:::Info: user loan repayment details fetched fetchLoanDueAmount.controllers.recova.js`);
 
-    if(!nextLoanRepaymentDetails) return ApiResponse.error(res, 'No next repayment', enums.HTTP_BAD_REQUEST, enums.FETCH_LOAN_DUE_AMOUNT_CONTROLLER);
+    if (!nextLoanRepaymentDetails) return ApiResponse.error(res, 'No next repayment', enums.HTTP_BAD_REQUEST, enums.FETCH_LOAN_DUE_AMOUNT_CONTROLLER);
 
     const amountDue = nextLoanRepaymentDetails.status == 'over due' ? nextLoanRepaymentDetails.total_payment_amount : 0;
     const data = {
@@ -51,7 +51,7 @@ export const fetchLoanDueAmount = async (req, res, next) => {
  * @returns { JSON } - A JSON with the users updated fcm token
  * @memberof RecovaController
  */
-export const handleMandateCreated = async (req, res, next) => {
+export const handleMandateCreated = async(req, res, next) => {
   try {
     const {loanDetails} = req;
     const data = [
@@ -75,7 +75,7 @@ export const handleMandateCreated = async (req, res, next) => {
  * @returns { JSON } - A JSON with the users updated fcm token
  * @memberof RecovaController
  */
-export const loanBalanceUpdate = async (req, res, next) => {
+export const loanBalanceUpdate = async(req, res, next) => {
   try {
     // TODO: split debitedAmount into the next repayments
     const {body: {institutionCode, loanReference, debitedAmount, recoveryFee, settlementAmount, TransactionReference, narration}, loanDetails} = req;
@@ -92,12 +92,12 @@ export const loanBalanceUpdate = async (req, res, next) => {
     const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
     const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
 
-    //total outstanding repayment amount
+    // total outstanding repayment amount
 
 
     await Promise.all([
       processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ loanDetails.user_id, loanDetails.loan_id, parseFloat(debitedAmount/100), 'debit',
-        loanDetails.loan_reason, paymentDescriptionType, `recova loan balance update` ]),
+        loanDetails.loan_reason, paymentDescriptionType, 'recova loan balance update' ]),
       processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id ]) ,
       processAnyData(loanQueries.updateLoanWithRepayment, [ loanDetails.loan_id, loanDetails.user_id, statusType, parseFloat(debitedAmount/100), completedAtType ])
     ]);
@@ -107,12 +107,12 @@ export const loanBalanceUpdate = async (req, res, next) => {
     if (checkIfUserOnClusterLoan) {
       const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
       await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusChoice ]);
-      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+      logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
     }
     if (!checkIfUserOnClusterLoan) {
       const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
-      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusOption]);
-      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusOption ]);
+      logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
     }
 
     return ApiResponse.json(res, enums.LOAN_BALANCE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, {});
@@ -131,20 +131,20 @@ export const loanBalanceUpdateAlgo  = async(req, res, next) => {
   const sumExistingUnpaidRepayments = await processOneOrNoneData(loanQueries.sumExistingUnpaidRepayments, [ req.loanDetails.loan_id, req.loanDetails.user_id ]);
   let outstanding = parseFloat(loanDetails.total_outstanding_amount);
   let payment = parseFloat(debitedAmount);
-  const paidRepaymentNotInRecord = parseFloat(sumExistingUnpaidRepayments.sum) - outstanding
+  const paidRepaymentNotInRecord = parseFloat(sumExistingUnpaidRepayments.sum) - outstanding;
 
-  let currentRepaymentIndex = 0
+  let currentRepaymentIndex = 0;
   let currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount) - paidRepaymentNotInRecord;
-  outstanding = outstanding - payment; //new total outstanding amount
+  outstanding = outstanding - payment; // new total outstanding amount
   let fullyPaidRepayments = [];
 
   while (payment > 0 && currentRepaymentIndex < unCompletedRepayments.length) {
-    if(payment >= currentRepayment){
+    if (payment >= currentRepayment) {
       fullyPaidRepayments.push(unCompletedRepayments[currentRepaymentIndex].loan_repayment_id);
     }
     payment = payment - currentRepayment;
     currentRepaymentIndex++;
-    if(currentRepaymentIndex < unCompletedRepayments.length){
+    if (currentRepaymentIndex < unCompletedRepayments.length) {
       currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount);
     }
   }
@@ -157,7 +157,7 @@ export const loanBalanceUpdateAlgo  = async(req, res, next) => {
   await Promise.all([
     statusType === 'completed' ? await recovaService.cancelMandate(loanDetails.loan_id) : null,
     processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ loanDetails.user_id, loanDetails.loan_id, parseFloat(debitedAmount), 'debit',
-      loanDetails.loan_reason, paymentDescriptionType, `recova loan balance update` ]),
+      loanDetails.loan_reason, paymentDescriptionType, 'recova loan balance update' ]),
     processAnyData(loanQueries.updateFullyPaidLoanRepayment, [ fullyPaidRepayments ]) ,
     processAnyData(loanQueries.updateLoanWithRepayment, [ loanDetails.loan_id, loanDetails.user_id, statusType, parseFloat(debitedAmount), completedAtType ])
   ]);
@@ -165,21 +165,21 @@ export const loanBalanceUpdateAlgo  = async(req, res, next) => {
   logger.info(`Recova:::Info: loan, loan repayment and payment details updated successfully
     processPersonalLoanRepayments.middlewares.payment.js`);
 
-    const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
+  const [ checkIfUserOnClusterLoan ] = await processAnyData(loanQueries.checkUserOnClusterLoan, [ loanDetails.user_id ]);
 
-    if (checkIfUserOnClusterLoan) {
-      const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
-      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusChoice ]);
-      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
-    }
-    if (!checkIfUserOnClusterLoan) {
-      const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
-      await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusOption]);
-      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
-    }
+  if (checkIfUserOnClusterLoan) {
+    const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
+    await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusChoice ]);
+    logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
+  }
+  if (!checkIfUserOnClusterLoan) {
+    const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
+    await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ loanDetails.user_id, statusOption ]);
+    logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
+  }
 
   return ApiResponse.json(res, enums.LOAN_BALANCE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, {});
-}
+};
 
 /**
  * update user device fcm token
@@ -190,7 +190,7 @@ export const loanBalanceUpdateAlgo  = async(req, res, next) => {
  * @memberof RecovaController
  */
 
-export const createMandateConsentRequest = async (req, res, next) => {
+export const createMandateConsentRequest = async(req, res, next) => {
   const {body: {loan_id}, loanDetails, user} = req;
 
   try {
@@ -203,7 +203,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
 
-    if(!accountDetails) {
+    if (!accountDetails) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
       return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
@@ -213,7 +213,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
         repaymentDate: repayment.proposed_payment_date,
         repaymentAmountInNaira: parseFloat(repayment.total_payment_amount)
       };
-    })
+    });
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
 
     // const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
@@ -223,34 +223,39 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     //   return ApiResponse.error(res, 'Unable to process bvn', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     // }
-    const pn = parsePhoneNumber( userDetails.phone_number, { regionCode: 'NG' } )
+    const pn = parsePhoneNumber(userDetails.phone_number, { regionCode: 'NG' });
     if (!pn.valid) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's  phone number is invalid  createMandateConsentRequest.controller.user.js`);
       return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
-    //call recova service to create mandate
+    // call recova service to create mandate
     const data = {
-      "bvn": bvn,
-      "businessRegistrationNumber": "string",
-      "taxIdentificationNumber": "string",
-      "loanReference": loanDetails.loan_id,
-      "customerID": userDetails.id,
-      "customerName": `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
-      "customerEmail": userDetails.email,
-      "phoneNumber": pn.number.national.replace(/\s+/g, ''),
-      "loanAmount": loanDetails.amount_requested,
-      "totalRepaymentExpected": loanDetails.total_repayment_amount,
-      "loanTenure": loanDetails.loan_tenor_in_months,
-      "linkedAccountNumber": accountDetails.account_number,
-      "repaymentType": "Collection",
-      "preferredRepaymentBankCBNCode": accountDetails.bank_code,
-      "preferredRepaymentAccount": accountDetails.account_number,
-      "collectionPaymentSchedules": collectionPaymentSchedules
-    }
+      'bvn': bvn,
+      'businessRegistrationNumber': 'string',
+      'taxIdentificationNumber': 'string',
+      'loanReference': loanDetails.loan_id,
+      'customerID': userDetails.id,
+      'customerName': `${userDetails.first_name || ''} ${userDetails.middle_name || ''} ${userDetails.last_name || ''}`,
+      'customerEmail': userDetails.email,
+      'phoneNumber': pn.number.national.replace(/\s+/g, ''),
+      'loanAmount': loanDetails.amount_requested,
+      'totalRepaymentExpected': loanDetails.total_repayment_amount,
+      'loanTenure': loanDetails.loan_tenor_in_months,
+      'linkedAccountNumber': accountDetails.account_number,
+      'repaymentType': 'Collection',
+      'preferredRepaymentBankCBNCode': accountDetails.bank_code,
+      'preferredRepaymentAccount': accountDetails.account_number,
+      'collectionPaymentSchedules': collectionPaymentSchedules
+    };
 
     const result = await recovaService.createConsentRequest(data);
+<<<<<<< HEAD
 
     if(result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
+=======
+    console.log('result', result);
+    if (result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
+>>>>>>> da3f36c3 (endpoint to create manual loan)
       const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [ loanDetails.loan_id, config.SEEDFI_RECOVA_INSTITUTION_CODE, result.requestStatus.toLowerCase(), result.consentConfirmationUrl ]);
       return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
     }
@@ -261,4 +266,4 @@ export const createMandateConsentRequest = async (req, res, next) => {
     return ApiResponse.error(res, 'Unable to initiate consent request', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
 
   }
-}
+};

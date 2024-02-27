@@ -68,6 +68,6 @@ export const operations = {
   67: 'ACTMERCH', // admin activated a merchant account
   68: 'DACTMERCH', // admin deactivated a merchant account
   69: 'EDMERCHINT', // admin edited a merchant interest rate details
-  70: 'CRMERADM', // admin created merchant admin record
+  70: 'CRMERADM' // admin created merchant admin record
 };
 

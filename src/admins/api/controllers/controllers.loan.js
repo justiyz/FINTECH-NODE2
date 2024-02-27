@@ -1447,3 +1447,108 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
   }
 }
+
+/**
+ * fetches all users
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with all the users
+ * @memberof RecovaController
+ */
+export const fetchUsers = async(req, res, next) => {
+  try {
+    const { query, admin } = req;
+    const payload = query.search ? `%${query.search}%` : null; 
+    const users = await processAnyData(loanQueries.fetchUsers, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: users fetched successfully fetchUsers.admin.controllers.loan.js`);
+    return ApiResponse.success(res, enums.USER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, users);
+  } catch (error) {
+    error.label = enums.FETCH_USER_CONTROLLER;
+    logger.error(`fetching users failed:::${enums.FETCH_USER_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * fetches applicable loan period
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with all the users
+ * @memberof RecovaController
+ */
+export const fetchLoanPeriod = async(req, res, next) => {
+  try {
+    const { body, admin } = req;
+    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, body.loan_tenor);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully fetchLoanPeriod.admin.controllers.loan.js`);
+    return ApiResponse.success(res, enums.LOAN_PERIOD_FETCHED_SUCCESSFULLY, enums.HTTP_OK, loanPeriod);
+  } catch (error) {
+    error.label = enums.FETCH_LOAN_PERIOD_CONTROLLER;
+    logger.error(`fetching loan period failed:::${enums.FETCH_LOAN_PERIOD_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ * create manual loan
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - returns details of the created loan
+ * @memberof RecovaController
+ */
+export const createManualLoan = async(req, res, next) => {
+  try {
+    const {body, admin} = req;
+    const existingUser = await processOneOrNoneData(loanQueries.checkIfUserAlreadyHasOngoingLoan, body.user_id);
+    if (existingUser) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms user already has an ongoing loan createManualLoan.admin.controllers.loan.js`);
+      return ApiResponse.error(res, enums.USER_HAS_ONGOING_LOAN, enums.HTTP_FORBIDDEN, enums.CREATE_MANUAL_LOAN_CONTROLLER);  
+    }
+
+    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, body.loan_tenor);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully createManualLoan.admin.controllers.loan.js`);
+
+    const totalFees = helpers.calculateTotalFees(body);
+    const monthlyInterest = helpers.calculateMonthlyInterestRate(body, loanPeriod.period);
+    
+    const monthlyRepaymentNumerator = helpers.monthlyRepaymentNumerator(monthlyInterest, parseFloat(body.loan_amount));
+    const monthlyRepaymentDenominator = helpers.monthlyRepaymentDenominator(monthlyInterest, parseFloat(body.loan_tenor));
+    const monthlyRepayment = helpers.monthlyRepayment(monthlyRepaymentNumerator, monthlyRepaymentDenominator);
+
+    const totalMonthlyRepayment = helpers.calculateTotalMonthlyRepayment(monthlyRepayment, parseFloat(body.loan_tenor));
+    const totalOutstandingAmount = helpers.calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
+ 
+    const totalInterests = helpers.calculateTotalInterestAmount(totalMonthlyRepayment, parseFloat(body.loan_amount));
+    const processingFee = helpers.processingFeeValue(parseFloat(body.processing_fee), parseFloat(body.loan_amount));
+    const insuranceFee = helpers.insuranceFeeValue(parseFloat(body.insurance_fee), parseFloat(body.loan_amount));
+    const advisoryFee = helpers.advisoryFeeValue(parseFloat(body.advisory_fee), parseFloat(body.loan_amount));
+
+    const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
+    const userLoan = await processAnyData(loanQueries.createManualLoan, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully createManualLoan.admin.controllers.loan.js`);
+    
+    const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByUserId, body.user_id);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);
+    
+    const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
+    repaymentSchedule.forEach(async(schedule) => {
+      await processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
+        schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+        schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
+        schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
+      ]);
+      return schedule;
+    });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
+        createManualLoan.controller.loan.js`);
+    await userActivityTracking(body.user_id, 42, 'success');
+    return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
+  } catch (error) {
+    error.label = enums.CREATE_MANUAL_LOAN_CONTROLLER;
+    logger.error(`creating manual loan failed:::${enums.CREATE_MANUAL_LOAN_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
