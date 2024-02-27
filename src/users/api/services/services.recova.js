@@ -7,14 +7,14 @@ import * as userMockedTestResponses from '../../../../tests/response/response.us
 const {SEEDFI_NODE_ENV, SEEDFI_RECOVA_BASE_URL, SEEDFI_RECOVA_BEARER_TOKEN} = config;
 
 
-const createConsentRequest = async(payload) => {
+const createConsentRequest = async (payload) => {
   try {
     const options = {
       method: 'post',
       url: `${SEEDFI_RECOVA_BASE_URL}/ConsentRequest/CreateConsentRequest`,
       headers: {
         Authorization: SEEDFI_RECOVA_BEARER_TOKEN,
-        accept: 'application/json'
+        accept: 'application/json',
         // 'Accept-Encoding': 'gzip,deflate,compress'
       },
       data: payload
@@ -28,17 +28,7 @@ const createConsentRequest = async(payload) => {
   }
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 const cancelMandate = async (payload) => {
-=======
-const cancelMandate = async(payload) => {
-  if (SEEDFI_NODE_ENV === 'development') return null;
->>>>>>> da3f36c3 (endpoint to create manual loan)
-=======
-const cancelMandate = async(payload) => {
-  if (SEEDFI_NODE_ENV === 'development') return null;
->>>>>>> 2d37b212316e0cd939e596f8c05837ed9ba1aabf
   try {
     logger.info(`Recova:: Cancelling mandate for with loan reference ${payload}`)
     const options = {
@@ -46,7 +36,7 @@ const cancelMandate = async(payload) => {
       url: `${SEEDFI_RECOVA_BASE_URL}/Mandate/CancelMandateByLoanReference/${payload}?comment=null'`,
       headers: {
         Authorization: SEEDFI_RECOVA_BEARER_TOKEN,
-        accept: 'application/json'
+        accept: 'application/json',
         // 'Accept-Encoding': 'gzip,deflate,compress'
       },
       data: null

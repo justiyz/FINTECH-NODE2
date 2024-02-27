@@ -1530,10 +1530,10 @@ export const createManualLoan = async(req, res, next) => {
     const advisoryFee = helpers.advisoryFeeValue(parseFloat(body.advisory_fee), parseFloat(body.loan_amount));
 
     const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
-    const userLoan = await processAnyData(loanQueries.createManualLoan, payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully createManualLoan.admin.controllers.loan.js`);
-    
-    const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByUserId, body.user_id);
+    const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully successfully createManualLoan.admin.controllers.loan.js`);
+
+    const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, userLoan.loan_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);
     
     const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);

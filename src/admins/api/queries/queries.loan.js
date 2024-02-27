@@ -1209,7 +1209,7 @@ export default {
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
                 $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
                 )
-                RETURNING *`,
+                RETURNING loan_id`,
         
   fetchUsers: `
         SELECT
@@ -1244,19 +1244,19 @@ export default {
    `,
 
   checkIfUserAlreadyHasOngoingLoan: `
-        SELECT
-          id,
-          loan_id,
-          user_id,
-          loan_reason,
-          loan_tenor_in_months,
-          status,
-          created_at
-        FROM personal_loans  
-        WHERE user_id = $1
-    `,
+          SELECT
+              id,
+              loan_id,
+              user_id,
+              loan_reason,
+              loan_tenor_in_months,
+              status,
+              created_at
+          FROM personal_loans  
+          WHERE user_id = $1 AND status IN ('ongoing', 'in review', 'processing', 'approved');
+  `,
 
-  fetchLoanDetailsByUserId: `
+  fetchLoanDetailsByLoanId: `
           SELECT
           id,
           loan_id,
@@ -1283,7 +1283,7 @@ export default {
           rejection_reason,
           offer_letter_url
       FROM personal_loans
-      WHERE user_id = $1`
+      WHERE loan_id = $1`
 };
 
 

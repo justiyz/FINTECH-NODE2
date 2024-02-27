@@ -177,7 +177,7 @@ const createManualLoan = Joi.object().keys({
   loan_decision: Joi.string().required(),
   loan_disbursed: Joi.boolean().required(),
   loan_disbursement_date: Joi.date().max('now').required(),
-  loan_status: Joi.string().valid('ongoing', 'completed', 'overdue'),
+  loan_status: Joi.string().valid('ongoing', 'completed', 'overdue').required(),
   initial_amount_requested: Joi.number().positive().required(),
   initial_loan_tenor: Joi.number().integer().min(1).max(24).required()
 });
