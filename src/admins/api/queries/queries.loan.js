@@ -1290,6 +1290,13 @@ export default {
           SET updated_at = NOW(),
           is_created_by_admin = true
           WHERE loan_id = $1
+    `,
+
+    updateRepaymentStatusToPaid:`
+            UPDATE personal_loan_payment_schedules
+            SET updated_at = NOW(),
+                status = 'paid'
+            WHERE loan_id = $1
     `
 };
 

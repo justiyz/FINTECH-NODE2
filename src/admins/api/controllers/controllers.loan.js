@@ -1550,6 +1550,12 @@ export const createManualLoan = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
         createManualLoan.controller.loan.js`);
 
+    if (body.loan_status === 'completed') {
+       await processNoneData(loanQueries.updateRepaymentStatusToPaid, userLoan.loan_id)
+       logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: repayment status successfully set to paid in the DB
+        createManualLoan.controller.loan.js`);
+    }
+    
     await userActivityTracking(body.user_id, 37, 'success');
     await userActivityTracking(body.user_id, 39, 'success');
     return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
