@@ -29,11 +29,16 @@ const createConsentRequest = async(payload) => {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const cancelMandate = async (payload) => {
 =======
 const cancelMandate = async(payload) => {
   if (SEEDFI_NODE_ENV === 'development') return null;
 >>>>>>> da3f36c3 (endpoint to create manual loan)
+=======
+const cancelMandate = async(payload) => {
+  if (SEEDFI_NODE_ENV === 'development') return null;
+>>>>>>> 2d37b212316e0cd939e596f8c05837ed9ba1aabf
   try {
     logger.info(`Recova:: Cancelling mandate for with loan reference ${payload}`)
     const options = {

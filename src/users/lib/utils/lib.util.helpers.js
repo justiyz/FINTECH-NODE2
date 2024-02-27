@@ -31,7 +31,7 @@ export const generatePassword = (length) => {
   }
 
   return password;
-}
+};
 
 
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
@@ -131,7 +131,6 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
     repaymentArray.push(nextRepaymentDetails);
   }
   await Promise.all([ repaymentArray ]);
-
   return repaymentArray;
 };
 
@@ -218,9 +217,9 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const [ userOfferLetterAddressDetail ] = await processAnyData(userQueries.fetchUserOfferLetterAddressDetails, [ user.user_id ]);
   const genderType = userOfferLetterDetail.gender === 'male' ? 'Sir' : 'Ma';
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
-    userOfferLetterDetail.bvn = '12345678910'
-  }else{
-    userOfferLetterDetail.bvn = await Hash.decrypt(decodeURIComponent(userOfferLetterDetail.bvn))
+    userOfferLetterDetail.bvn = '12345678910';
+  } else {
+    userOfferLetterDetail.bvn = await Hash.decrypt(decodeURIComponent(userOfferLetterDetail.bvn));
   }
   const loanType = loanDetails.member_loan_id ? 'Cluster' : 'Individual';
   const loanPurposeType = loanDetails.cluster_name ? `${loanDetails.cluster_name} cluster loan` : loanDetails.loan_reason;
