@@ -139,11 +139,11 @@ export const offerLetterTemplate = async(loanDetails, userOfferLetterDetail, gen
     </tr>
     <tr>
       <td width="30%" height="40px">Processing Fee:</td>
-      <td>${parseFloat(loanDetails.percentage_processing_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat</td>
+      <td>${parseFloat(loanDetails.percentage_processing_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat payable upfront</td>
     </tr>
     <tr>
       <td width="30%" height="40px">Advisory Fee:</td>
-      <td>${parseFloat(loanDetails.percentage_advisory_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat</td>
+      <td>${parseFloat(loanDetails.percentage_advisory_fee).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}% flat payable upfront</td>
     </tr>
     <tr>
       <td width="30%" height="40px">Insurance Fee:</td>
