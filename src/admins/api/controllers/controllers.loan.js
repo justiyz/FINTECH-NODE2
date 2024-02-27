@@ -1544,7 +1544,9 @@ export const createManualLoan = async(req, res, next) => {
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
         createManualLoan.controller.loan.js`);
-    await userActivityTracking(body.user_id, 42, 'success');
+
+    await userActivityTracking(body.user_id, 37, 'success');
+    await userActivityTracking(body.user_id, 39, 'success');
     return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
   } catch (error) {
     error.label = enums.CREATE_MANUAL_LOAN_CONTROLLER;
