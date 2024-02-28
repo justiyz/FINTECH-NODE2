@@ -1538,11 +1538,13 @@ export const createManualLoan = async(req, res, next) => {
     
     const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
     repaymentSchedule.forEach(async(schedule) => {
-      await processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
-        schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
-        schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
-        schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
-      ]);
+      await Promise.all([
+         processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
+          schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+          schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
+          schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
+        ])
+      ])
       return schedule;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
