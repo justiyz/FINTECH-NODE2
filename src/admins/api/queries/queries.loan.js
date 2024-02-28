@@ -1204,10 +1204,11 @@ export default {
                 status,
                 initial_amount_requested,
                 initial_loan_tenor_in_months,
-                created_at
+                created_at,
+                is_created_by_admin
                 ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-                $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+                $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
                 )
                 RETURNING loan_id`,
         
@@ -1284,13 +1285,6 @@ export default {
           offer_letter_url
       FROM personal_loans
       WHERE loan_id = $1`,
-
-    updateIsCreatedByAdmin: `
-          UPDATE personal_loans
-          SET updated_at = NOW(),
-          is_created_by_admin = true
-          WHERE loan_id = $1
-    `,
 
     updateRepaymentStatusToPaid:`
             UPDATE personal_loan_payment_schedules

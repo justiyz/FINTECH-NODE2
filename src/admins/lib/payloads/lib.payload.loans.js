@@ -137,6 +137,7 @@ export default {
     body.loan_status,
     body.initial_amount_requested,
     body.initial_loan_tenor,
-    body.loan_disbursement_date
+    body.loan_disbursement_date,
+    'true'
   ]
 };
