@@ -8,9 +8,9 @@ import Schema from '../../lib/schemas/lib.schema.shop';
 import loanSchema from '../../lib/schemas/lib.schema.loan';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as paymentMiddleware from '../middlewares/middlewares.payment';
-import * as LoanController from '../controllers/controllers.loan'
-import {cancelShopLoanApplication} from "../controllers/controllers.loan";
-import {checkAvailableNumberOfTicketsBeforePurchase} from "../middlewares/middlewares.loan";
+import * as LoanController from '../controllers/controllers.loan';
+import {cancelShopLoanApplication} from '../controllers/controllers.loan';
+import {checkAvailableNumberOfTicketsBeforePurchase} from '../middlewares/middlewares.loan';
 // import {availableTicketsMiddleware} from "../middlewares/middlewares.loan";
 
 const router = Router();
@@ -43,34 +43,34 @@ router.get(
 );
 
 router.post(
-    '/ticket/:ticket_id/:payment_channel_id/book',
-    AuthMiddleware.validateAuthToken,
-    AuthMiddleware.isCompletedKyc('confirm'),
-    UserMiddleware.checkIfAccountDetailsExists,
-    Model(loanSchema.shopRepaymentParams, 'params'),
-    Model(loanSchema.loanForEventApplication, 'payload'),
-    UserMiddleware.isEmailVerified('authenticate'),
-    UserMiddleware.isUploadedImageSelfie('confirm'),
-    AuthMiddleware.isPinCreated('confirm'),
-    UserMiddleware.isVerifiedBvn('confirm'),
-    UserMiddleware.isUploadedVerifiedId('confirm'),
-    UserMiddleware.checkUserAdvancedKycUpdate,
-    // LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
-    LoanMiddleware.validateLoanAmountAndTenor, // only on live
-    LoanMiddleware.checkIfEmploymentTypeLimitApplies,
-    LoanMiddleware.checkIfUserBvnNotBlacklisted, // only on live
-    LoanMiddleware.checkIfUserHasClusterDiscount,
-    LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
-    LoanMiddleware.additionalUserChecksForLoan,
-    UserMiddleware.checkIfAccountDetailsExists,
-    UserMiddleware.checkIfCardOrUserExist, // new added for the charge flow
-    shopCategories.checkUserTicketLoanEligibility,
+  '/ticket/:ticket_id/:payment_channel_id/book',
+  AuthMiddleware.validateAuthToken,
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.checkIfAccountDetailsExists,
+  Model(loanSchema.shopRepaymentParams, 'params'),
+  Model(loanSchema.loanForEventApplication, 'payload'),
+  UserMiddleware.isEmailVerified('authenticate'),
+  UserMiddleware.isUploadedImageSelfie('confirm'),
+  AuthMiddleware.isPinCreated('confirm'),
+  UserMiddleware.isVerifiedBvn('confirm'),
+  UserMiddleware.isUploadedVerifiedId('confirm'),
+  UserMiddleware.checkUserAdvancedKycUpdate,
+  // LoanMiddleware.checkIfUserHasActivePersonalLoan, // only on live
+  LoanMiddleware.validateLoanAmountAndTenor, // only on live
+  LoanMiddleware.checkIfEmploymentTypeLimitApplies,
+  LoanMiddleware.checkIfUserBvnNotBlacklisted, // only on live
+  LoanMiddleware.checkIfUserHasClusterDiscount,
+  LoanMiddleware.checkAvailableNumberOfTicketsBeforePurchase,
+  LoanMiddleware.additionalUserChecksForLoan,
+  UserMiddleware.checkIfAccountDetailsExists,
+  UserMiddleware.checkIfCardOrUserExist, // new added for the charge flow
+  shopCategories.checkUserTicketLoanEligibility,
 
-    LoanMiddleware.checkUserLoanApplicationExists,
-    LoanMiddleware.checkIfLoanApplicationStatusIsCurrentlyApproved,
-    LoanMiddleware.checkSeedfiPaystackBalance,
-    LoanMiddleware.generateBNPLLoanDisbursementRecipient,
-    shopCategories.createTicketSubscription
+  LoanMiddleware.checkUserLoanApplicationExists,
+  LoanMiddleware.checkIfLoanApplicationStatusIsCurrentlyApproved,
+  LoanMiddleware.checkSeedfiPaystackBalance,
+  LoanMiddleware.generateBNPLLoanDisbursementRecipient,
+  shopCategories.createTicketSubscription
 );
 
 router.get(
@@ -103,7 +103,7 @@ router.post(
 router.delete(
   '/:ticket_id/delete',
   AuthMiddleware.validateAuthToken,
-    LoanController.cancelShopLoanApplication,
+  LoanController.cancelShopLoanApplication,
   shopCategories.cancel_ticket_booking
 );
 

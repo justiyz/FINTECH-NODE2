@@ -74,10 +74,10 @@ export default {
   `,
 
   fetchMerchantAdminByEmailAndPhoneNo:
-    `SELECT id FROM merchant_admins WHERE (email = $1 OR phone_number = $2) AND merchant_id = $3;`,
+    'SELECT id FROM merchant_admins WHERE (email = $1 OR phone_number = $2) AND merchant_id = $3;',
 
 
-  fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
+  fetchMerchantByEmailAndPhoneNo: 'SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;',
   fetchSingleMerchant: `
     SELECT
       merchants.merchant_id,
@@ -455,5 +455,5 @@ export default {
     SET
       updated_at = NOW(),
       status = 'deactivated'
-    WHERE merchant_id = $1`,
+    WHERE merchant_id = $1`
 };

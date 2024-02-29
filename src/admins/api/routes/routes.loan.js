@@ -221,4 +221,30 @@ router.post(
   LoanController.createMandateConsentRequest
 );
 
+router.get(
+  '/users',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  LoanController.fetchUsers
+);
+
+router.get(
+  '/loan-period',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.fetchLoanPeriod, 'payload'),
+  LoanController.fetchLoanPeriod
+);
+
+router.post(
+  '/create-loan',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.createManualLoan, 'payload'),
+  LoanController.createManualLoan
+);
+
 export default router;

@@ -21,10 +21,10 @@ import * as PersonalNotifications from '../../lib/templates/personalNotification
 import { userActivityTracking } from '../../lib/monitor';
 import { generateLoanRepaymentSchedule, generateClusterLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
-import adminShopQueries from "../../../admins/api/queries/queries.shop";
+import adminShopQueries from '../../../admins/api/queries/queries.shop';
 import * as recovaService from '../services/services.recova';
 
-import {RETRIEVE_TICKET_URL_FROM_DATABASE} from "../../lib/enums/lib.enum.labels";
+import {RETRIEVE_TICKET_URL_FROM_DATABASE} from '../../lib/enums/lib.enum.labels';
 
 /**
  * verify the legibility of the webhook response if from Paystack
@@ -114,11 +114,11 @@ export const getTicketUrls = async(req, res, next) => {
 
 export const ticketPurchaseUpdate = async(req, res, next) => {
   try {
-    const { body : {ticket_id, user_id, reference }, user }  = req;
+    const { body: {ticket_id, user_id, reference }, user }  = req;
     const ticket_record = await processAnyData(adminShopQueries.getTicketByReference, [ reference, user_id, ticket_id ]);
     const ticketLoanRecord = await processOneOrNoneData(adminShopQueries.getTicketLoanOutstandingAmount, [ ticket_record[0].loan_id ]);
     // check if ticket is already active
-    if(ticketLoanRecord.status === 'ongoing') {
+    if (ticketLoanRecord.status === 'ongoing') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: Ticket purchase is already activated  ticketPurchaseUpdate.middlewares.payment.js`);
       req.ticket_already_active = true;
       return next();
@@ -133,7 +133,7 @@ export const ticketPurchaseUpdate = async(req, res, next) => {
     const repaymentRecord = await processOneOrNoneData(loanQueries.updateFirstRepaymentRecordStatus, [ ticket_record[0].loan_id ]);
     // create first repayment record
     await processOneOrNoneData(loanQueries.updatePersonalLoanPaymentTable,
-        [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]);
+      [ user_id, repaymentRecord.loan_id, repaymentRecord.principal_payment, 'debit', 'ticket loan', 'part loan repayment', 'paystack' ]);
     // update event status
     await processAnyData(adminShopQueries.updateEventStatus, [ user_id, ticket_id, reference ]);
 
@@ -476,7 +476,7 @@ export const processPersonalLoanTransferPayments = async(req, res, next) => {
         const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, paymentRecord.user_id);
         repaymentSchedule.forEach(async(schedule) => {
           await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule, [
-              schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+            schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
             schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
             schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
           ]);
@@ -608,7 +608,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         await Promise.all([
           processAnyData(loanQueries.updatePersonalLoanPaymentTable, [ paymentRecord.user_id, paymentRecord.loan_id, parseFloat(paymentRecord.amount), 'debit',
             loanDetails.loan_reason, paymentDescriptionType, `paystack ${body.data.channel}` ]),
-            customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
+          customRepaymentCompleted ? processAnyData(loanQueries.updateNextLoanRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]) : processAnyData(loanQueries.updateNextLoanCustomRepayment, [ nextRepayment.loan_repayment_id, parseFloat(paymentRecord.amount) ]),
           processAnyData(loanQueries.updateLoanWithRepayment, [ paymentRecord.loan_id, paymentRecord.user_id, statusType, parseFloat(paymentRecord.amount), completedAtType ])
         ]);
         if(statusType == 'completed' && loanMandateDetails){
@@ -623,7 +623,7 @@ export const processPersonalLoanRepayments = async(req, res, next) => {
         }
         if (!checkIfUserOnClusterLoan) {
           const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
-          await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusOption]);
+          await processOneOrNoneData(loanQueries.updateUserLoanStatus, [ paymentRecord.user_id, statusOption ]);
           logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
         }
         await MailService('Successful loan repayment', 'successfulRepayment',
@@ -842,7 +842,7 @@ export const processClusterLoanRepayments = async(req, res, next) => {
       if (paymentRecord.payment_type === 'part_cluster_loan_repayment' || paymentRecord.payment_type === 'automatic_cluster_loan_repayment') {
         const [ nextClusterLoanRepayment ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ paymentRecord.loan_id, paymentRecord.user_id ]);
         const outstandingClusterLoanRepaymentCount = await processOneOrNoneData(clusterQueries.existingUnpaidClusterLoanRepayments,
-            [ paymentRecord.loan_id, paymentRecord.user_id ]);
+          [ paymentRecord.loan_id, paymentRecord.user_id ]);
         const otherExistingOverDueRepayments = await processAnyData(clusterQueries.fetchOtherLoanOverDueRepayments ,
           [ clusterLoanDetails.loan_id, nextClusterLoanRepayment.loan_repayment_id ]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${paymentRecord.user_id}:::Info: fetched next repayment details and the count for all outstanding cluster loan repayments
@@ -991,7 +991,7 @@ export const processMerchantUserLoanTransferPayments = async(req, res, next) => 
         const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, paymentRecord.user_id);
         repaymentSchedule.forEach(async(schedule) => {
           await processOneOrNoneData(loanQueries.updateDisbursedLoanRepaymentSchedule, [
-              schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+            schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
             schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
             schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
           ]);

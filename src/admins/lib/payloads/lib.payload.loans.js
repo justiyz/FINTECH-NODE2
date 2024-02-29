@@ -7,7 +7,7 @@ export default {
     query.tier,
     query.loan_reason,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
-    query.per_page ? query.per_page : '10',
+    query.per_page ? query.per_page : '10'
   ],
 
   fetchAllLoans: (query) => [
@@ -16,7 +16,7 @@ export default {
     query.start_date,
     query.end_date,
     query.tier,
-    query.loan_reason,
+    query.loan_reason
   ],
 
   fetchRepaidLoans: (query) => [
@@ -112,6 +112,31 @@ export default {
     query.status,
     query.start_date,
     query.end_date
-  ]
+  ],
 
+  createManualLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue, insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
+    body.user_id, 
+    body.loan_amount, 
+    body.loan_reason, 
+    body.loan_tenor, 
+    totalRepayment, 
+    totalInterest, 
+    body.interest_rate,  // same as the price_band
+    body.processing_fee, 
+    body.insurance_fee, 
+    body.advisory_fee, 
+    monthlyInterest,
+    processingFeeValue,
+    insuranceFeeValue,
+    advisoryFeeValue,
+    monthlyRepayment,
+    body.loan_decision,
+    body.loan_disbursed,
+    body.loan_disbursement_date,
+    totalOutstandingAmount,
+    body.loan_status,
+    body.initial_amount_requested,
+    body.initial_loan_tenor,
+    body.loan_disbursement_date
+  ]
 };

@@ -4,18 +4,18 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import { resolveAccount } from '../services/service.paystack';
-import * as Hash from "../../../users/lib/utils/lib.util.hash";
-import userQueries from "../../../users/api/queries/queries.user";
-import adminQueries from "../queries/queries.admin";
-import authQueries from "../queries/queries.auth";
-import * as UserHash from "../../../users/lib/utils/lib.util.hash";
-import {adminActivityTracking} from "../../lib/monitor";
-import * as descriptions from "../../lib/monitor/lib.monitor.description";
+import * as Hash from '../../../users/lib/utils/lib.util.hash';
+import userQueries from '../../../users/api/queries/queries.user';
+import adminQueries from '../queries/queries.admin';
+import authQueries from '../queries/queries.auth';
+import * as UserHash from '../../../users/lib/utils/lib.util.hash';
+import {adminActivityTracking} from '../../lib/monitor';
+import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import {
   COMPARE_MERCHANT_PASSWORD_MIDDLEWARE,
   VERIFY_MERCHANT_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE
-} from "../../../users/lib/enums/lib.enum.labels";
-import {MERCHANT_ACCOUNT_DEACTIVATED} from "../../../users/lib/enums/lib.enum.messages";
+} from '../../../users/lib/enums/lib.enum.labels';
+import {MERCHANT_ACCOUNT_DEACTIVATED} from '../../../users/lib/enums/lib.enum.messages';
 
 /**
  * Validate merchant details before creation
@@ -25,13 +25,13 @@ import {MERCHANT_ACCOUNT_DEACTIVATED} from "../../../users/lib/enums/lib.enum.me
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const validateCreateMerchant = async (req, res, next) => {
+export const validateCreateMerchant = async(req, res, next) => {
   try {
     const { admin } = req;
     const { email, phone_number, merchant_loan_limit, customer_loan_max_amount } = req.body;
     const existingMerchant = await processOneOrNoneData(
       merchantQueries.fetchMerchantByEmailAndPhoneNo,
-      [email, phone_number]
+      [ email, phone_number ]
     );
     if (existingMerchant) {
       logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} already exists validateCreateMerchant.admin.middlewares.merchant.js`);
@@ -39,7 +39,7 @@ export const validateCreateMerchant = async (req, res, next) => {
         res,
         'Merchant with this email or phone number already exists',
         enums.HTTP_UNPROCESSABLE_ENTITY
-      )
+      );
     }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Confirmed that email ${email} and phone number ${phone_number} does not exist validateCreateMerchant.admin.middlewares.merchant.js`);
     if (+customer_loan_max_amount >= +merchant_loan_limit) {
@@ -53,7 +53,7 @@ export const validateCreateMerchant = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: validation successful, merchant limit greater than customer limit validateCreateMerchant.admin.middlewares.merchant.js`);
     return next();
   } catch (error) {
-    logger.error(`validating merchant details failed::AdminMerchantMiddleware::validateCreateMerchant`, error.message);
+    logger.error('validating merchant details failed::AdminMerchantMiddleware::validateCreateMerchant', error.message);
     return next(error);
   }
 };
@@ -106,14 +106,14 @@ export const validateMerchantForgotPasswordAndPinToken = async(req, res, next) =
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const checkIfMerchantExists = async (req, res, next) => {
+export const checkIfMerchantExists = async(req, res, next) => {
   try {
     const { admin } = req;
     const merchantId = req.params.merchant_id;
-    console.log(merchantId, 'merchant')
+    console.log(merchantId, 'merchant');
     const merchant = await processOneOrNoneData(
       merchantQueries.fetchMerchantByMerchantId,
-      [merchantId]
+      [ merchantId ]
     );
     if (!merchant) {
       logger.info(`
@@ -125,7 +125,7 @@ export const checkIfMerchantExists = async (req, res, next) => {
         res,
         enums.MERCHANT_NOT_FOUND,
         enums.HTTP_NOT_FOUND
-      )
+      );
     }
     logger.info(`
       ${enums.CURRENT_TIME_STAMP},${admin.admin_id}:::Info:
@@ -149,17 +149,17 @@ export const checkIfMerchantExists = async (req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const checkIfMerchantAdminExists = async (req, res, next) => {
+export const checkIfMerchantAdminExists = async(req, res, next) => {
   try {
     const { admin, body: {email, phone_number}, params: {merchant_id} } = req;
     // const merchantAdmin = await processOneOrNoneData(
-      // merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
+    // merchantQueries.fetchMerchantAdminByEmailAndPhoneNo,
     //   [email, phone_number, merchant_id]
     // );
     // console.log(merchantAdmin, 'merchantAdmin')
-    //check if merchant admin is already a merchant admin
-    const existingMerchantAdmin = await processOneOrNoneData(merchantQueries.fetchMerchantAdminPivotByAdminEmail, [email, merchant_id]);
-    if(existingMerchantAdmin) {
+    // check if merchant admin is already a merchant admin
+    const existingMerchantAdmin = await processOneOrNoneData(merchantQueries.fetchMerchantAdminPivotByAdminEmail, [ email, merchant_id ]);
+    if (existingMerchantAdmin) {
       return ApiResponse.error(res, `${email} is already an admin`, enums.HTTP_BAD_REQUEST, enums.CREATE_MERCHANT_ADMIN_CONTROLLER);
     }
     logger.info(`
@@ -182,14 +182,14 @@ export const checkIfMerchantAdminExists = async (req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const checkIfMerchantUserExists = async (req, res, next) => {
+export const checkIfMerchantUserExists = async(req, res, next) => {
   try {
     const { admin } = req;
     const userId = req.query.user_id || req.body.user_id;
     const merchantId = req.params.merchant_id;
     const user = await processOneOrNoneData(
       merchantQueries.fetchMerchantUserById,
-      [userId, merchantId]
+      [ userId, merchantId ]
     );
     if (!user) {
       logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully confirmed that user with ID ${userId} does not exist checkIfMerchantUserExists.admin.middlewares.merchant.js`);
@@ -197,13 +197,13 @@ export const checkIfMerchantUserExists = async (req, res, next) => {
         res,
         enums.ACCOUNT_NOT_EXIST('User'),
         enums.HTTP_NOT_FOUND
-      )
+      );
     }
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: successfully confirmed that user with ID ${userId} exists checkIfMerchantUserExists.admin.middlewares.merchant.js`);
     req.user = user;
     return next();
   } catch (error) {
-    logger.error(`checking if queried user id exists in the DB failed::AdminMerchantMiddleware::checkIfMerchantUserExists`, error.message);
+    logger.error('checking if queried user id exists in the DB failed::AdminMerchantMiddleware::checkIfMerchantUserExists', error.message);
     return next(error);
   }
 };
@@ -216,7 +216,7 @@ export const checkIfMerchantUserExists = async (req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminMerchantMiddleware
  */
-export const validateMerchantBankAccount = (type = '') => async (req, res, next) => {
+export const validateMerchantBankAccount = (type = '') => async(req, res, next) => {
   try {
     const { admin, body } = req;
     const { account_number, bank_name, bank_code } = body;
@@ -244,7 +244,7 @@ export const validateMerchantBankAccount = (type = '') => async (req, res, next)
       const merchantId = req.params.merchant_id;
       const existingBankAccount = await processOneOrNoneData(
         merchantBankAccountQueries.findMerchantBankAccount,
-        [merchantId]
+        [ merchantId ]
       );
       req.body.existingBankAccount = existingBankAccount;
     }
@@ -252,7 +252,7 @@ export const validateMerchantBankAccount = (type = '') => async (req, res, next)
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: Merchant bank account validation successful validateMerchantBankAccount.admin.middlewares.merchant.js`);
     return next();
   } catch (error) {
-    logger.error(`Validating merchant bank account details before creating merchant failed:::AdminMerchantMiddleware::validateMerchantBankAccount`, error.message);
+    logger.error('Validating merchant bank account details before creating merchant failed:::AdminMerchantMiddleware::validateMerchantBankAccount', error.message);
     return next(error);
   }
 };
@@ -324,7 +324,7 @@ const recordMerchantInvalidOtpInputCount = async(res, merchant) => {
   }
 };
 
-export const validateUnAuthenticatedMerchant = (type = '') => async (req, res, next) => {
+export const validateUnAuthenticatedMerchant = (type = '') => async(req, res, next) => {
   try {
     const { body } = req;
     const payload = body.email || req.merchant.email;
@@ -351,12 +351,12 @@ export const validateUnAuthenticatedMerchant = (type = '') => async (req, res, n
   }
 };
 
-export const validateUnAuthenticatedMerchantV2 = (type = '') => async (req, res, next) => {
+export const validateUnAuthenticatedMerchantV2 = (type = '') => async(req, res, next) => {
   try {
     const { body } = req;
     const payload = body.email || req.merchant.email;
     const [ merchant ] = await processAnyData(adminQueries.getMerchantByEmailV2, [ payload.trim().toLowerCase() ]);
-    console.log(merchant)
+    console.log(merchant);
     if (!merchant && (type === 'login' || type === 'verify')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that merchant's email is not existing in the database validateUnAuthenticatedMerchant.admin.middlewares.admin.js`);
       return ApiResponse.error(res, type === 'login' ? enums.INVALID_PASSWORD : enums.ACCOUNT_NOT_EXIST('Merchant'),

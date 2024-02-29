@@ -33,7 +33,7 @@ const loanApplicationEligibilityCheck = async(payload) => {
     const headers = {
       'Authorization': `Api-Key ${config.SEEDFI_UNDERWRITING_SERVICE_API_KEY}`,
       'Content-Type': 'application/json'
-    }
+    };
     const options = {
       'method': 'post',
       'url': `${config.SEEDFI_UNDERWRITING_SERVICE_BASE_URL}/v1/loan_processing_engine/`,
