@@ -1256,10 +1256,12 @@ function prepareResponseData(loanApplicationDetails, body, totalMonthlyRepayment
 export const manuallyInitiatePersonalLoanApplication = async (req, res, next) => {
   try {
     const { body } = req;
+    let repaymentSchedule = [];
     const [userDetails] = await processAnyData(userQueries.getUserByUserId, [req.body.user_id]);
     const loanApplicationDetails = await createLoanApplication(userDetails, body);
-    const repaymentSchedule = await createRepaymentSchedule(loanApplicationDetails, userDetails);
-
+    if(body.status === 'ongoing' ) {
+      repaymentSchedule = await createRepaymentSchedule(loanApplicationDetails, userDetails);
+    }
     const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
     const totalAmountRepayable = calculateTotalAmountRepayable(
       loanApplicationDetails.totalMonthlyRepayment,
@@ -1384,10 +1386,8 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loanDetails.loan_id, loanDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${ admin.admin_id }:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
-
-    const accountDetails = await processOneOrNoneData(loanQueries.fetchBankAccountDetailsByUserId, loanDetails.user_id);
+    const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, loanDetails.user_id);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
-
     if(!accountDetails) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
       return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
@@ -1412,6 +1412,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's  phone number is invalid  createMandateConsentRequest.controller.user.js`);
       return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
+
     //call recova service to create mandate
     const data = {
       "bvn": bvn,

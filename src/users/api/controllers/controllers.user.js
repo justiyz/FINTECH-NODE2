@@ -30,6 +30,7 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import {sendSms} from '../services/service.sms';
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import moment from "moment-timezone";
+import {BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
 
 
 const { SEEDFI_NODE_ENV } = config;
@@ -1501,6 +1502,8 @@ export const verifyBvnInfo = async(req, res, next) => {
       && result_date === date_of_birth
     ) {
       return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
+    } else {
+      return ApiResponse.error(res, enums.BVN_INFORMATION_UNAVAILABLE, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
     }
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);

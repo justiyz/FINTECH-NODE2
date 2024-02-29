@@ -72,7 +72,10 @@ pipeline {
                     '''
                     // Always push to Docker Hub
                     echo 'Pushing to Docker Hub'
-                    sh 'docker push $dockerTag'
+                    sh '''
+                    docker push $dockerTag
+                    docker system prune -af
+                    '''
 
                     def payload = [
                     '@type': 'MessageCard',

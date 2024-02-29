@@ -39,7 +39,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication,
-        [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
+      [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails);
     const result = await loanApplicationEligibilityCheck(payload);
@@ -51,20 +51,20 @@ export const checkUserLoanEligibility = async(req, res, next) => {
         checkUserLoanEligibility.controllers.loan.js`);
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application');
+            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application', {});
         });
-        userActivityTracking(req.user.user_id, 37, 'fail');
+        await userActivityTracking(req.user.user_id, 37, 'fail');
         return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
       }
       if (result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application');
+            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application', {});
         });
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
-      userActivityTracking(req.user.user_id, 37, 'fail');
-      return ApiResponse.error(res, result.response.data.message, result.response.status, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
+      await userActivityTracking(req.user.user_id, 37, 'fail');
+      return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
     const { data } = result;
     if (data.final_decision === 'DECLINED') {
@@ -83,7 +83,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
     const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
       parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
-    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     if (data.final_decision === 'MANUAL') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval
       checkUserLoanEligibility.controllers.loan.js`);
@@ -166,7 +166,7 @@ export const processLoanRenegotiation = async(req, res, next) => {
     const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
     const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month));
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(body.new_loan_amount);
-    const totalAmountRepayable = parseFloat(totalMonthlyRepayment) + parseFloat(totalFees);
+    const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total interest amount and total amount repayable calculated
     processLoanRenegotiation.controllers.loan.js`);
     const renegotiationPayload = await LoanPayload.loanRenegotiationPayload(user, body, existingLoanApplication, data);
@@ -243,6 +243,9 @@ export const initiateLoanDisbursement = async(req, res, next) => {
   try {
     const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication } = req;
     const reference = uuidv4();
+    const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
+    let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee)
     await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference,
       'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment initialized in the DB initiateLoanDisbursement.controllers.loan.js`);
