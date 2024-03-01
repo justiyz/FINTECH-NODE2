@@ -1566,3 +1566,4 @@ export const createManualLoan = async(req, res, next) => {
   }
 };
 
+// to be removed in the next PR
