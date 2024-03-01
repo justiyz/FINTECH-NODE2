@@ -15,8 +15,8 @@ jobs:
     name: check_admin
     runs-on: ubuntu-latest
     env:
-      NAME_ADMIN1: eloka2023
-      NAME_ADMIN2: ftomiiwo
+      NAME_ADMIN1: ftomiiwo
+      NAME_ADMIN2: eloka2023
 
     steps:
       - name: st1
