@@ -8,12 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # runs-on: ${{ fromJSON('["ubuntu-latest", "self-hosted"]')[github.repository == 'github/docs-internal'] }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          ref: 'snapshot'
+          ref: 'development-v2'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
