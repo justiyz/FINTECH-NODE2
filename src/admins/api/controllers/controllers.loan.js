@@ -1565,3 +1565,4 @@ export const createManualLoan = async(req, res, next) => {
     return next(error);
   }
 };
+
