@@ -1462,9 +1462,11 @@ export const createMandateConsentRequest = async(req, res, next) => {
 export const fetchUsers = async(req, res, next) => {
   try {
     const { query, admin } = req;
-    const payload = query.search ? `%${query.search}%` : null; 
+    const payload = query.search ? `%${query.search}%` : null;
     const users = await processAnyData(loanQueries.fetchUsers, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: users fetched successfully fetchUsers.admin.controllers.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: Additional log for verification fetchUsers.admin.controllers.loan.js`);
+
     return ApiResponse.success(res, enums.USER_FETCHED_SUCCESSFULLY, enums.HTTP_OK, users);
   } catch (error) {
     error.label = enums.FETCH_USER_CONTROLLER;
@@ -1508,7 +1510,7 @@ export const createManualLoan = async(req, res, next) => {
     const existingUser = await processOneOrNoneData(loanQueries.checkIfUserAlreadyHasOngoingLoan, body.user_id);
     if (existingUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms user already has an ongoing loan createManualLoan.admin.controllers.loan.js`);
-      return ApiResponse.error(res, enums.USER_HAS_ONGOING_LOAN, enums.HTTP_FORBIDDEN, enums.CREATE_MANUAL_LOAN_CONTROLLER);  
+      return ApiResponse.error(res, enums.USER_HAS_ONGOING_LOAN, enums.HTTP_FORBIDDEN, enums.CREATE_MANUAL_LOAN_CONTROLLER);
     }
 
     const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, body.loan_tenor);
@@ -1516,14 +1518,14 @@ export const createManualLoan = async(req, res, next) => {
 
     const totalFees = helpers.calculateTotalFees(body);
     const monthlyInterest = helpers.calculateMonthlyInterestRate(body, loanPeriod.period);
-    
+
     const monthlyRepaymentNumerator = helpers.monthlyRepaymentNumerator(monthlyInterest, parseFloat(body.loan_amount));
     const monthlyRepaymentDenominator = helpers.monthlyRepaymentDenominator(monthlyInterest, parseFloat(body.loan_tenor));
     const monthlyRepayment = helpers.monthlyRepayment(monthlyRepaymentNumerator, monthlyRepaymentDenominator);
 
     const totalMonthlyRepayment = helpers.calculateTotalMonthlyRepayment(monthlyRepayment, parseFloat(body.loan_tenor));
     const totalOutstandingAmount = helpers.calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
- 
+
     const totalInterests = helpers.calculateTotalInterestAmount(totalMonthlyRepayment, parseFloat(body.loan_amount));
     const processingFee = helpers.processingFeeValue(parseFloat(body.processing_fee), parseFloat(body.loan_amount));
     const insuranceFee = helpers.insuranceFeeValue(parseFloat(body.insurance_fee), parseFloat(body.loan_amount));
@@ -1532,10 +1534,10 @@ export const createManualLoan = async(req, res, next) => {
     const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
     const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully createManualLoan.admin.controllers.loan.js`);
-  
+
     const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, userLoan.loan_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);
-    
+
     const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
     repaymentSchedule.forEach(async(schedule) => {
       await Promise.all([
@@ -1555,7 +1557,7 @@ export const createManualLoan = async(req, res, next) => {
        logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: repayment status successfully set to paid in the DB
         createManualLoan.controller.loan.js`);
     }
-    
+
     await userActivityTracking(body.user_id, 37, 'success');
     await userActivityTracking(body.user_id, 39, 'success');
     return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
