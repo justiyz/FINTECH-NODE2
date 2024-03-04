@@ -149,35 +149,6 @@ export const checkIfAdminIsSuperAdmin = async(req, res, next) => {
 };
 
 /**
- * check loan exists by id
- * @param {Request} req - The request from the endpoint.
- * @param {Response} res - The response returned by the method.
- * @param {Next} next - Call the next operation.
- * @returns {object} - Returns an object (error or response).
- * @memberof AdminLoanMiddleware
- */
-export const checkLoanApplicationExists = async(req, res, next) => {
-  try {
-    const { body: { loan_id, user_id  }, admin } = req;
-    const [ loan ] = await processAnyData(userLoanQueries.fetchUserLoanDetailsByLoanId, [ loan_id, user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: checked if loan application exists in the db checkLoanApplicationExists.admin.middlewares.loan.js`);
-    if (loan) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application exists and belongs to authenticated user
-      checkUserLoanApplicationExists.admin.middlewares.loan.js`);
-      req.loan = loan;
-      return next();
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan application does not exist for authenticated user
-    checkUserLoanApplicationExists.admin.middlewares.loan.js`);
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_FOR_USER, enums.HTTP_BAD_REQUEST, enums.CHECK_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
-  } catch (error) {
-    error.label = enums.CHECK_LOAN_APPLICATION_EXISTS_MIDDLEWARE;
-    logger.error(`checking if loan application exists failed::${enums.CHECK_LOAN_APPLICATION_EXISTS_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
-
-/**
  * check loan is active
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -187,7 +158,7 @@ export const checkLoanApplicationExists = async(req, res, next) => {
  */
 export const checkIfLoanIsActive = async(req, res, next) => {
    try {
-      const { body: {loan_id, user_id} , admin } = req;
+      const { params: {loan_id, user_id} , admin } = req;
       const loan = await processOneOrNoneData(loanQueries.checkIfLoanIsActive, [ user_id, loan_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan details fetched successfully
       checkIfLoanIsActive.admin.middlewares.loan.js`);
@@ -219,10 +190,10 @@ export const checkIfLoanIsActive = async(req, res, next) => {
  */
 export const checkIfAmountPaidExceedsOutstanding = async(req, res, next) => {
    try {
-      const { body: { loan_id, user_id, amount }, loan, admin } = req;
+      const { body: { loan_id, user_id, amount }, loanApplication, admin } = req;
      const result = await helpers.sumOfPaymentsRecordedOnPaymentSchedules(user_id, loan_id);
      const currentAmountPaid = result.total_recorded_amount_paid;
-     const totalAmountPendingPayment = (parseFloat(loan.total_repayment_amount) - parseFloat(currentAmountPaid)).toFixed(2);
+     const totalAmountPendingPayment = (parseFloat(loanApplication.total_repayment_amount) - parseFloat(currentAmountPaid)).toFixed(2);
      
     if(parseFloat(amount) > parseFloat(totalAmountPendingPayment)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms amount to be paid is greater than the outstanding loan amount

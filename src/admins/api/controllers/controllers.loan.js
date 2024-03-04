@@ -1579,11 +1579,11 @@ export const createManualLoan = async(req, res, next) => {
  */
 export const fetchUserOutstandingAmount = async(req, res, next) => {
     try {
-      const {body, admin} = req;
-      const loan = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, body.loan_id);
+      const { admin, loanApplication} = req;
+      const outstandingAmount = loanApplication.total_outstanding_amount;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched user loan details successfully
         fetchUserOutstandingAmount.admin.controller.loan.js`);
-      return ApiResponse.success(res, enums.OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, loan.total_outstanding_amount);
+      return ApiResponse.success(res, enums.OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, outstandingAmount);
     } catch (error) {
       error.label = enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER;
       logger.error(`fetching user outstanding amount failed::${enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER}`, error.message);
@@ -1601,8 +1601,8 @@ export const fetchUserOutstandingAmount = async(req, res, next) => {
  */
 export const updateUserPayment = async(req, res, next) => {
    try {
-    const {body: { amount, user_id, loan_id, payment_date }, admin} = req;
-    const data = await loanService.updatePayment(user_id, loan_id, amount, payment_date )
+    const { params: { user_id, loan_id}, body: { amount, payment_date }, admin, loanApplication} = req;
+    const data = await loanService.updatePayment(user_id, loan_id, amount, payment_date, loanApplication );
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repaid successfully updateUserPayment.admin.controller.loan.js`);
     return ApiResponse.success(res, enums.LOAN_REPAID_SUCCESSFULLY, enums.HTTP_OK, data);
    } catch (error) {

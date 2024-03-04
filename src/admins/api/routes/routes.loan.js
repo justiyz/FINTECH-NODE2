@@ -248,21 +248,23 @@ router.post(
 );
 
 router.get(
-  '/outstanding-amount',
+  '/:loan_id/outstanding-amount',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,
-  Model(Schema.loanId, 'payload'),
+  Model(Schema.loanId, 'params'),
+  LoanMiddleware.checkIfLoanExists,
   LoanController.fetchUserOutstandingAmount
 );
 
 router.post(
-  '/update-payment',
+  '/:loan_id/:user_id/update-payment',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'create'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.checkIfLoanIsActive, 'params'),
   Model(Schema.updatePayment, 'payload'),
-  LoanMiddleware.checkLoanApplicationExists,
+  LoanMiddleware.checkIfLoanExists,
   LoanMiddleware.checkIfLoanIsActive,
   LoanMiddleware.checkIfAmountPaidExceedsOutstanding,
   LoanController.updateUserPayment

@@ -32,18 +32,15 @@ export const processNoneData = (query, payload) => db.none(query, payload);
  */
 export const processOneOrNoneData = (query, payload) => db.oneOrNone(query, payload);
 
-export const updatePayment = async(userId, loanId, amountPaid, paymentDate) => {
-    let paymentSchedules = await processAnyData(loanQueries.userLoanRepaymentScedule, [ userId, loanId ])
+export const updatePayment = async(userId, loanId, amountPaid, paymentDate, loanApplication) => {
+    let paymentSchedules = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loanId ])
     logger.info(`${enums.CURRENT_TIME_STAMP}, :::Info: fetched user payment schedule successfully
     updatePayment.admin.service.loan.js`);
     const amountToDeduct = parseFloat(amountPaid);
 
     const paymentUpdateResult = await db.tx(async(t) => {
         const paymentRecord = await t.one(loanQueries.recordPayment, [ userId, loanId, amountPaid, paymentDate ]);
-        
-        const loan = await t.one(userLoanQueries.fetchUserLoanDetailsByLoanId, [ loanId, userId]);
-
-        const totalOutstanding = parseFloat(loan.total_repayment_amount);
+        const totalOutstanding = parseFloat(loanApplication.total_repayment_amount);
         paymentSchedules.sort(
             (a, b) => a.repayment_order - b.repayment_order
         );
@@ -64,9 +61,9 @@ export const updatePayment = async(userId, loanId, amountPaid, paymentDate) => {
 
                     if (parseFloat(amountPaid) >= parseFloat(amountToPay)) {
                         amountPaid = parseFloat(amountPaid) - parseFloat(amountToPay);
-                        updatedSchedule = await t.one(loanQueries.updateScheduleStatus, [schedule.id, paymentDate, (parseFloat(schedule.amount_paid) +  parseFloat(amountToPay)),  'paid' ]);
+                        updatedSchedule = await t.none(loanQueries.updateScheduleStatus, [schedule.id, paymentDate, (parseFloat(schedule.amount_paid) +  parseFloat(amountToPay)),  'paid' ]);
                     } else {
-                        updatedSchedule = await t.one(
+                        updatedSchedule = await t.none(
                             loanQueries.updateScheduleStatus, [schedule.id, paymentDate, (parseFloat(schedule.amount_paid) + parseFloat(amountPaid)), schedule.status]
                         );
                         amountPaid = 0;
@@ -74,7 +71,7 @@ export const updatePayment = async(userId, loanId, amountPaid, paymentDate) => {
                 }
                 sumOfPaymentsRecordedOnPaymentSchedules = await t.one(loanQueries.sumOfPaymentsRecordedOnPaymentSchedules, [userId, loanId]);         
                 if (parseFloat(sumOfPaymentsRecordedOnPaymentSchedules.total_recorded_amount_paid).toFixed(2) == parseFloat(totalOutstanding).toFixed(2)) {
-                     await t.none(loanQueries.updateLastScheduleStatus, loanId);
+                     await t.none(loanQueries.updateScheduleStatusToPaid, loanId);
                     updateLoanStatus = await t.one(loanQueries.updateLoanStatusToComplete, [loanId, userId, dayjs(paymentDate).format('YYYY-MM-DD HH:mm:ss')]);
                 }
             }
