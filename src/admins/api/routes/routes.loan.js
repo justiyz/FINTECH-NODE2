@@ -230,11 +230,11 @@ router.get(
 );
 
 router.get(
-  '/loan-period',
+  '/:loan_tenor/loan-period',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,
-  Model(Schema.fetchLoanPeriod, 'payload'),
+  Model(Schema.fetchLoanPeriod, 'params'),
   LoanController.fetchLoanPeriod
 );
 

@@ -1486,8 +1486,8 @@ export const fetchUsers = async(req, res, next) => {
  */
 export const fetchLoanPeriod = async(req, res, next) => {
   try {
-    const { body, admin } = req;
-    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, body.loan_tenor);
+    const { params, admin } = req;
+    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, params.loan_tenor);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully fetchLoanPeriod.admin.controllers.loan.js`);
     return ApiResponse.success(res, enums.LOAN_PERIOD_FETCHED_SUCCESSFULLY, enums.HTTP_OK, loanPeriod);
   } catch (error) {

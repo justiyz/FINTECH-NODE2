@@ -453,6 +453,7 @@ export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = 'Loan balance updated successfu
 export const NO_DEFAULT_ACCOUNT = 'Kindly add a bank account as default to proceed';
 export const ADMIN_NOT_SUPER_ADMIN = 'You are unauthorized to perform this action';
 export const USER_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
+export const LOAN_PERIOD_FETCHED_SUCCESSFULLY = 'Loan period fetched successfully';
 export const LOAN_CREATED_SUCCESSFULLY = 'Loan created successfully';
 export const USER_HAS_ONGOING_LOAN = 'User has an ongoing loan, kindly create loan for a new user';
 export const LOAN_IS_INACTIVE = `This loan has either been completed or declined`;
