@@ -1,6 +1,6 @@
 export default {
   fetchAdminsForNotification: `
-    SELECT  
+    SELECT
         admins.id,
         admins.admin_id,
         admin_resources.name,
@@ -11,7 +11,20 @@ export default {
     FROM admins
     LEFT JOIN admin_user_permissions ON admin_user_permissions.admin_id = admins.admin_id
     LEFT JOIN admin_resources ON admin_resources.resource_id = admin_user_permissions.resource_id
-    WHERE admin_resources.name = $1 OR admins.role_type = 'SADM'
+    WHERE admin_resources.name = $1 AND admins.role_type = 'SADM'
+    `,
+  fetchAdminsForLoanNotification: `
+    SELECT
+        admins.id,
+        admins.admin_id,
+        admins.role_type,
+        admins.email,
+        admins.first_name,
+        admins.last_name
+    FROM admins
+    LEFT JOIN admin_user_permissions ON admin_user_permissions.admin_id = admins.admin_id
+    LEFT JOIN admin_resources ON admin_resources.resource_id = admin_user_permissions.resource_id
+    WHERE admins.role_type = 'SADM'
     `,
   fetchInViewLoanApplication: `
     SELECT
@@ -27,8 +40,8 @@ export default {
     SELECT
       personal_loan_payment_schedules.id,
       personal_loan_payment_schedules.loan_repayment_id,
-      personal_loan_payment_schedules.loan_id, 
-      personal_loan_payment_schedules.user_id, 
+      personal_loan_payment_schedules.loan_id,
+      personal_loan_payment_schedules.user_id,
       personal_loan_payment_schedules.status,
       users.fcm_token,
       CONCAT(users.first_name, ' ', users.last_name) AS user_name
@@ -40,30 +53,30 @@ export default {
 
   nonPerformingClusterLoans: `
     SELECT
-      cluster_member_loan_payment_schedules.id, 
+      cluster_member_loan_payment_schedules.id,
       cluster_member_loan_payment_schedules.loan_repayment_id,
-      cluster_member_loan_payment_schedules.member_loan_id, 
+      cluster_member_loan_payment_schedules.member_loan_id,
       cluster_member_loan_payment_schedules.loan_id,
-      cluster_member_loan_payment_schedules.user_id, 
+      cluster_member_loan_payment_schedules.user_id,
       cluster_member_loan_payment_schedules.cluster_id,
       users.fcm_token,
-      cluster_member_loan_payment_schedules.status, 
+      cluster_member_loan_payment_schedules.status,
       CONCAT(users.first_name, ' ', users.last_name) AS user_name
     FROM  cluster_member_loan_payment_schedules
     LEFT JOIN users ON users.user_id = cluster_member_loan_payment_schedules.user_id
     WHERE cluster_member_loan_payment_schedules.status = 'over due'
     AND NOW()::DATE > (cluster_member_loan_payment_schedules.proposed_payment_date + interval '$1 day')::DATE
     `,
-  
+
   fetchAdminSetEnvDetails: `
-    SELECT 
+    SELECT
       id,
       env_id,
       name,
       value
     FROM admin_env_values_settings
     WHERE name = $1`,
-    
+
   fetchEndingPromo: `
     SELECT id, promo_id, name, end_date
     FROM system_promos
