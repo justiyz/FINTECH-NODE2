@@ -1486,6 +1486,8 @@ export const sendBvnOtp = async(req, res, next) => {
 export const verifyBvnInfo = async(req, res, next) => {
   try {
     const {body: {bvn, first_name, last_name, date_of_birth, gender }} = req;
+    // run a query, if result exist, return result
+
     const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
     const result = data
     if (!data.success) {
@@ -1501,6 +1503,8 @@ export const verifyBvnInfo = async(req, res, next) => {
       && result.data.gender.toLowerCase() === gender
       && result_date === date_of_birth
     ) {
+      // create a migration
+      // save information
       return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
     } else {
       return ApiResponse.error(res, enums.BVN_INFORMATION_UNAVAILABLE, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
