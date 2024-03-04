@@ -1,4 +1,9 @@
 import { db } from '../../../users/config/db';
+import * as enums from '../../../users/lib/enums/lib.enum.labels';
+import dayjs from 'dayjs';
+import loanQueries from '../queries/queries.loan';
+import userLoanQueries from '../../../users/api/queries/queries.loan';
+
 
 /**
  * Process db.any calls to the database
@@ -26,3 +31,70 @@ export const processNoneData = (query, payload) => db.none(query, payload);
  * @memberof AdminPostgresDbService
  */
 export const processOneOrNoneData = (query, payload) => db.oneOrNone(query, payload);
+
+export const updatePayment = async(userId, loanId, amountPaid, paymentDate) => {
+    let paymentSchedules = await processAnyData(loanQueries.userLoanRepaymentScedule, [ userId, loanId ])
+    logger.info(`${enums.CURRENT_TIME_STAMP}, :::Info: fetched user payment schedule successfully
+    updatePayment.admin.service.loan.js`);
+    const amountToDeduct = parseFloat(amountPaid);
+
+    const paymentUpdateResult = await db.tx(async(t) => {
+        const paymentRecord = await t.one(loanQueries.recordPayment, [ userId, loanId, amountPaid, paymentDate ]);
+        
+        const loan = await t.one(userLoanQueries.fetchUserLoanDetailsByLoanId, [ loanId, userId]);
+
+        const totalOutstanding = parseFloat(loan.total_repayment_amount);
+        paymentSchedules.sort(
+            (a, b) => a.repayment_order - b.repayment_order
+        );
+
+        let updatedSchedule;
+            let updateLoanStatus;
+            let sumOfPaymentsRecordedOnPaymentSchedules;
+            for (let index = 0; index < paymentSchedules.length; index++) {
+                const schedule = paymentSchedules[index];
+                
+           if (schedule.status === 'paid') {
+                    continue;
+                }
+                if (amountPaid == 0) break;
+
+                if (parseFloat(schedule.total_payment_amount) - parseFloat(schedule.amount_paid) > 0) {
+                    const amountToPay = parseFloat(schedule.total_payment_amount) - parseFloat(schedule.amount_paid);
+
+                    if (parseFloat(amountPaid) >= parseFloat(amountToPay)) {
+                        amountPaid = parseFloat(amountPaid) - parseFloat(amountToPay);
+                        updatedSchedule = await t.one(loanQueries.updateScheduleStatus, [schedule.id, paymentDate, (parseFloat(schedule.amount_paid) +  parseFloat(amountToPay)),  'paid' ]);
+                    } else {
+                        updatedSchedule = await t.one(
+                            loanQueries.updateScheduleStatus, [schedule.id, paymentDate, (parseFloat(schedule.amount_paid) + parseFloat(amountPaid)), schedule.status]
+                        );
+                        amountPaid = 0;
+                    }
+                }
+                sumOfPaymentsRecordedOnPaymentSchedules = await t.one(loanQueries.sumOfPaymentsRecordedOnPaymentSchedules, [userId, loanId]);         
+                if (parseFloat(sumOfPaymentsRecordedOnPaymentSchedules.total_recorded_amount_paid).toFixed(2) == parseFloat(totalOutstanding).toFixed(2)) {
+                     await t.none(loanQueries.updateLastScheduleStatus, loanId);
+                    updateLoanStatus = await t.one(loanQueries.updateLoanStatusToComplete, [loanId, userId, dayjs(paymentDate).format('YYYY-MM-DD HH:mm:ss')]);
+                }
+            }
+            await t.one(loanQueries.updateLoanOutstandingAmount, [loanId, userId, amountToDeduct]);
+
+            return t.batch([
+                paymentRecord,
+                updatedSchedule,
+                sumOfPaymentsRecordedOnPaymentSchedules,
+                updateLoanStatus
+            ]);
+
+    });
+    return {
+        payment_record: paymentUpdateResult[0],
+        total_paid: paymentUpdateResult[2],
+        updated_loan_status: paymentUpdateResult[3]
+    };
+}
+
+
+
+

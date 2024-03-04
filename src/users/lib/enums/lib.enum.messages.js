@@ -455,6 +455,10 @@ export const ADMIN_NOT_SUPER_ADMIN = 'You are unauthorized to perform this actio
 export const USER_FETCHED_SUCCESSFULLY = 'Users fetched successfully';
 export const LOAN_CREATED_SUCCESSFULLY = 'Loan created successfully';
 export const USER_HAS_ONGOING_LOAN = 'User has an ongoing loan, kindly create loan for a new user';
+export const LOAN_IS_INACTIVE = `This loan has either been completed or declined`;
+export const LOAN_OVERPAID = `Amount paid exceeds the amount expected to offset the loan `;
+export const OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY = `Outstanding amount fetched successfully`;
+export const LOAN_REPAID_SUCCESSFULLY = `Loan repaid successfully`;
 
 
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';

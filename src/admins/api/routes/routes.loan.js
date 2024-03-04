@@ -247,4 +247,25 @@ router.post(
   LoanController.createManualLoan
 );
 
+router.get(
+  '/outstanding-amount',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.loanId, 'payload'),
+  LoanController.fetchUserOutstandingAmount
+);
+
+router.post(
+  '/update-payment',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.updatePayment, 'payload'),
+  LoanMiddleware.checkLoanApplicationExists,
+  LoanMiddleware.checkIfLoanIsActive,
+  LoanMiddleware.checkIfAmountPaidExceedsOutstanding,
+  LoanController.updateUserPayment
+)
+
 export default router;
