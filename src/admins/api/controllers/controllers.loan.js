@@ -1569,8 +1569,6 @@ export const createManualLoan = async(req, res, next) => {
   }
 };
 
-// to be removed in the next PR
-
 /**
  * fetch user loan outstanding amount
  * @param {Request} req - The request from the endpoint.
