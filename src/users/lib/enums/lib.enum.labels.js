@@ -435,4 +435,9 @@ export const LOAN_BALANCE_UPDATE_CONTROLLER = 'RecovaController::loanBalanceUpda
 export const FETCH_USER_CONTROLLER = 'LoanController::fetchUsers';
 export const FETCH_LOAN_PERIOD_CONTROLLER = 'LoanController::fetchLoanPeriod';
 export const CREATE_MANUAL_LOAN_CONTROLLER = 'LoanController::createManualLoan';
+export const CHECK_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'AdminLoanMiddleware::checkLoanApplicationExists';
+export const CHECK_IF_LOAN_IS_ACTIVE_MIDDLEWARE = 'AdminLoanMiddleware::checkIfLoanIsActive';
+export const CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE = 'AdminLoanMiddleware::checkIfAmountPaidExceedsOutstanding';
+export const FETCH_OUTSTANDING_AMOUNT_CONTROLLER = 'AdminLoanController::fetchUserOutstandingAmount';
+export const UPDATE_USER_PAYMENT_CONTROLLER = 'AdminLoanController::updateUserPayment';
 

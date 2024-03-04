@@ -1,5 +1,7 @@
 import { processAnyData, processOneOrNoneData } from '../../api/services/services.db';
 import usersQueries from '../../api/queries/queries.user';
+import loanQueries from '../../api/queries/queries.loan';
+
 export const generateRandomAlphabets = (length) => {
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
@@ -134,4 +136,9 @@ export const insuranceFeeValue = (insurancePercentage, loanAmount) => {
 
 export const advisoryFeeValue = (advisoryPercentage, loanAmount) => {
   return (advisoryPercentage/100) * loanAmount;
+};
+
+export const sumOfPaymentsRecordedOnPaymentSchedules = async(user_id, loan_id) => {
+  const sumOfPaymentsRecordedOnPaymentSchedules = await processOneOrNoneData(loanQueries.sumOfPaymentsRecordedOnPaymentSchedules, [user_id, loan_id]);
+return sumOfPaymentsRecordedOnPaymentSchedules;
 };

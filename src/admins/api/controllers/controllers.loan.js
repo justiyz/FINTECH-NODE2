@@ -1,4 +1,5 @@
 import loanQueries from '../queries/queries.loan';
+import * as loanService from '../services/services.db';
 import userLoanQueries from '../../../users/api/queries/queries.loan';
 import userQueries from '../queries/queries.user';
 import clusterQueries from '../queries/queries.cluster';
@@ -1485,8 +1486,8 @@ export const fetchUsers = async(req, res, next) => {
  */
 export const fetchLoanPeriod = async(req, res, next) => {
   try {
-    const { body, admin } = req;
-    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, body.loan_tenor);
+    const { params, admin } = req;
+    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, params.loan_tenor);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully fetchLoanPeriod.admin.controllers.loan.js`);
     return ApiResponse.success(res, enums.LOAN_PERIOD_FETCHED_SUCCESSFULLY, enums.HTTP_OK, loanPeriod);
   } catch (error) {
@@ -1568,4 +1569,45 @@ export const createManualLoan = async(req, res, next) => {
   }
 };
 
-// to be removed in the next PR
+/**
+ * fetch user loan outstanding amount
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the user outstanding amount
+ * @memberof LoanController
+ */
+export const fetchUserOutstandingAmount = async(req, res, next) => {
+    try {
+      const { admin, loanApplication} = req;
+      const outstandingAmount = loanApplication.total_outstanding_amount;
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched user loan details successfully
+        fetchUserOutstandingAmount.admin.controller.loan.js`);
+      return ApiResponse.success(res, enums.OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, outstandingAmount);
+    } catch (error) {
+      error.label = enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER;
+      logger.error(`fetching user outstanding amount failed::${enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER}`, error.message);
+      return next(error);
+    }
+};
+
+/**
+ * repays user loan manually
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns { JSON } - A JSON with the repayment details
+ * @memberof LoanController
+ */
+export const updateUserPayment = async(req, res, next) => {
+   try {
+    const { params: { user_id, loan_id}, body: { amount, payment_date }, admin, loanApplication} = req;
+    const data = await loanService.updatePayment(user_id, loan_id, amount, payment_date, loanApplication );
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repaid successfully updateUserPayment.admin.controller.loan.js`);
+    return ApiResponse.success(res, enums.LOAN_REPAID_SUCCESSFULLY, enums.HTTP_OK, data);
+   } catch (error) {
+    error.label = enums.UPDATE_USER_PAYMENT_CONTROLLER;
+    logger.error(`updating user's payment failed::${enums.UPDATE_USER_PAYMENT_CONTROLLER}`, error.message);
+    return next(error);
+   }
+}

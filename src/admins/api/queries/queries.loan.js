@@ -1125,7 +1125,8 @@ export default {
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
       to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
       to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
-      status
+      status,
+      amount_paid
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
     ORDER BY repayment_order ASC`,
@@ -1291,7 +1292,63 @@ export default {
             SET updated_at = NOW(),
                 status = 'paid'
             WHERE loan_id = $1
+    `,
+
+    checkIfLoanIsActive: `
+        SELECT
+          id, 
+          total_outstanding_amount 
+        FROM personal_loans 
+        WHERE user_id = $1 AND loan_id = $2 AND status IN ('ongoing', 'over due')
+    `,
+    sumOfPaymentsRecordedOnPaymentSchedules: `
+        SELECT 
+        COALESCE(SUM(amount_paid), 0) AS total_recorded_amount_paid 
+        FROM personal_loan_payment_schedules
+        WHERE user_id = $1 AND loan_id = $2
+    `,
+
+    recordPayment: `
+        INSERT INTO personal_loan_payments 
+        (user_id, loan_id, amount, created_at, loan_purpose, transaction_type, status, payment_description, payment_means) 
+        VALUES ($1, $2, $3, $4, 'loan repayment', 'debit', 'paid', 'loan repayment', 'manual') 
+        RETURNING user_id, loan_id, amount, created_at, loan_purpose, transaction_type, status
+    `,
+
+    updateScheduleStatus: `
+        UPDATE personal_loan_payment_schedules
+        SET updated_at = NOW(),
+            status = $4, 
+            amount_paid = $3, 
+            payment_at = $2 
+        WHERE id = $1
+    `,
+
+    updateScheduleStatusToPaid:`
+      UPDATE personal_loan_payment_schedules
+      SET updated_at = NOW(),
+      status = 'paid'
+      WHERE loan_id = $1
+`,
+    updateLoanStatusToComplete: `
+      UPDATE personal_loans 
+      SET status = 'completed', 
+      completed_at = $3, 
+      updated_at = NOW() 
+      WHERE loan_id = $1 AND user_id = $2 
+      RETURNING status;  
+    `,
+
+    updateLoanOutstandingAmount: `
+        UPDATE personal_loans
+        SET
+            updated_at = NOW(),
+            total_outstanding_amount = total_outstanding_amount - $3::FLOAT
+        WHERE loan_id = $1
+        AND user_id = $2
+        RETURNING total_outstanding_amount 
     `
-};
+    };
+
 
 

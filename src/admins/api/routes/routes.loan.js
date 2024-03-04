@@ -230,11 +230,11 @@ router.get(
 );
 
 router.get(
-  '/loan-period',
+  '/:loan_tenor/loan-period',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'read'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,
-  Model(Schema.fetchLoanPeriod, 'payload'),
+  Model(Schema.fetchLoanPeriod, 'params'),
   LoanController.fetchLoanPeriod
 );
 
@@ -246,5 +246,28 @@ router.post(
   Model(Schema.createManualLoan, 'payload'),
   LoanController.createManualLoan
 );
+
+router.get(
+  '/:loan_id/outstanding-amount',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.loanId, 'params'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanController.fetchUserOutstandingAmount
+);
+
+router.post(
+  '/:loan_id/:user_id/update-payment',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.checkIfLoanIsActive, 'params'),
+  Model(Schema.updatePayment, 'payload'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanMiddleware.checkIfLoanIsActive,
+  LoanMiddleware.checkIfAmountPaidExceedsOutstanding,
+  LoanController.updateUserPayment
+)
 
 export default router;
