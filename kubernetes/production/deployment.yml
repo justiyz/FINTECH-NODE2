@@ -271,6 +271,8 @@ spec:
           value: 'seedfi-backend' 
         - name: SEEDFI_PROD_NEW_DEVICE_LOGIN_WAVER_USERS
           value: 'sotonwaoluwafemi@gmail.com, aaakinpelumi@gmail.com' 
+        - name: SEEDFI_PROD_MERCHANT_ADMIN_WEB_BASE_URL
+          value: 'https://merchant-app.theseedfi.com'
         image: seedfidevops/seedfi-api:production017
         imagePullPolicy: "Always"
         name: poucher-api
