@@ -485,8 +485,8 @@ export default {
       WHERE merchant_id = $1`,
 
   getMerchantByEmailV2: `
-    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, 
-    verification_token_request_count, invalid_verification_token_count, gender, created_at, updated_at
+    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, verification_token_request_count, 
+    invalid_verification_token_count, gender, created_at, updated_at
     FROM merchants
     WHERE email = $1;
   `,
