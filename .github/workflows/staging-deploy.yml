@@ -55,7 +55,7 @@ jobs:
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             docker pull ${{ steps.login-ecr.outputs.registry }}/stg/seedfi-api:${{ steps.determine-tag.outputs.tag }}
             docker stop stg-seedfi-backend && docker rm stg-seedfi-backend
-            docker run -id -p 4600:4500 --name seedfi-backend-test --env-file=/opt/vars/stg-seedfi.env --restart always ${{ steps.login-ecr.outputs.registry }}/stg/seedfi-api:${{ steps.determine-tag.outputs.tag }}
+            docker run -id -p 4600:4500 --name stg-seedfi-backend --env-file=/opt/vars/stg-seedfi.env --restart always ${{ steps.login-ecr.outputs.registry }}/stg/seedfi-api:${{ steps.determine-tag.outputs.tag }}
             docker image prune -f --filter "dangling=true"
 
             
