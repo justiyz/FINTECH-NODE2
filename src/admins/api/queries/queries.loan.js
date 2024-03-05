@@ -1085,7 +1085,8 @@ export default {
       to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
     FROM cluster_member_loans
     WHERE user_id = $1
-    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed' OR status='declined')
+    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' 
+    OR status = 'approved' OR status = 'completed' OR status='declined')
     ORDER BY created_at DESC`,
 
 
@@ -1167,7 +1168,7 @@ export default {
       WHERE user_id =$1 AND is_default = true AND is_deleted = false
       `,
 
-    fetchBankAccountDetailsByUserIdForMandate:`
+  fetchBankAccountDetailsByUserIdForMandate: `
       SELECT
         id,
         user_id,
@@ -1287,35 +1288,35 @@ export default {
       FROM personal_loans
       WHERE loan_id = $1`,
 
-    updateRepaymentStatusToPaid:`
+  updateRepaymentStatusToPaid: `
             UPDATE personal_loan_payment_schedules
             SET updated_at = NOW(),
                 status = 'paid'
             WHERE loan_id = $1
     `,
 
-    checkIfLoanIsActive: `
+  checkIfLoanIsActive: `
         SELECT
           id, 
           total_outstanding_amount 
         FROM personal_loans 
         WHERE user_id = $1 AND loan_id = $2 AND status IN ('ongoing', 'over due')
     `,
-    sumOfPaymentsRecordedOnPaymentSchedules: `
+  sumOfPaymentsRecordedOnPaymentSchedules: `
         SELECT 
         COALESCE(SUM(amount_paid), 0) AS total_recorded_amount_paid 
         FROM personal_loan_payment_schedules
         WHERE user_id = $1 AND loan_id = $2
     `,
 
-    recordPayment: `
+  recordPayment: `
         INSERT INTO personal_loan_payments 
         (user_id, loan_id, amount, created_at, loan_purpose, transaction_type, status, payment_description, payment_means) 
         VALUES ($1, $2, $3, $4, 'loan repayment', 'debit', 'paid', 'loan repayment', 'manual') 
         RETURNING user_id, loan_id, amount, created_at, loan_purpose, transaction_type, status
     `,
 
-    updateScheduleStatus: `
+  updateScheduleStatus: `
         UPDATE personal_loan_payment_schedules
         SET updated_at = NOW(),
             status = $4, 
@@ -1324,13 +1325,13 @@ export default {
         WHERE id = $1
     `,
 
-    updateScheduleStatusToPaid:`
+  updateScheduleStatusToPaid: `
       UPDATE personal_loan_payment_schedules
       SET updated_at = NOW(),
       status = 'paid'
       WHERE loan_id = $1
 `,
-    updateLoanStatusToComplete: `
+  updateLoanStatusToComplete: `
       UPDATE personal_loans 
       SET status = 'completed', 
       completed_at = $3, 
@@ -1339,7 +1340,7 @@ export default {
       RETURNING status;  
     `,
 
-    updateLoanOutstandingAmount: `
+  updateLoanOutstandingAmount: `
         UPDATE personal_loans
         SET
             updated_at = NOW(),
@@ -1348,7 +1349,7 @@ export default {
         AND user_id = $2
         RETURNING total_outstanding_amount 
     `
-    };
+};
 
 
 

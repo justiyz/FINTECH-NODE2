@@ -1261,9 +1261,9 @@ export const manuallyInitiatePersonalLoanApplication = async(req, res, next) => 
   try {
     const { body } = req;
     let repaymentSchedule = [];
-    const [userDetails] = await processAnyData(userQueries.getUserByUserId, [req.body.user_id]);
+    const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ req.body.user_id ]);
     const loanApplicationDetails = await createLoanApplication(userDetails, body);
-    if(body.status === 'ongoing' ) {
+    if (body.status === 'ongoing') {
       repaymentSchedule = await createRepaymentSchedule(loanApplicationDetails, userDetails);
     }
     const totalMonthlyRepayment = calculateTotalMonthlyRepayment(body.monthly_repayment, body.duration_in_months);
@@ -1390,9 +1390,9 @@ export const createMandateConsentRequest = async(req, res, next) => {
 
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loanDetails.loan_id, loanDetails.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${ admin.admin_id }:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
-    const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, loanDetails.user_id);
+    const [ accountDetails ] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, loanDetails.user_id);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
-    if(!accountDetails) {
+    if (!accountDetails) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
       return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
@@ -1417,7 +1417,7 @@ export const createMandateConsentRequest = async(req, res, next) => {
       return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
 
-    //call recova service to create mandate
+    // call recova service to create mandate
     const data = {
       'bvn': bvn,
       'businessRegistrationNumber': 'string',
@@ -1450,7 +1450,7 @@ export const createMandateConsentRequest = async(req, res, next) => {
     return ApiResponse.error(res, 'Unable to initiate consent request', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
 
   }
-}
+};
 
 /**
  * fetches all users
@@ -1514,11 +1514,8 @@ export const createManualLoan = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_HAS_ONGOING_LOAN, enums.HTTP_FORBIDDEN, enums.CREATE_MANUAL_LOAN_CONTROLLER);
     }
 
-    const loanPeriod = await processOneOrNoneData(loanQueries.fetchLoanPeriod, body.loan_tenor);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan period fetched successfully createManualLoan.admin.controllers.loan.js`);
-
     const totalFees = helpers.calculateTotalFees(body);
-    const monthlyInterest = helpers.calculateMonthlyInterestRate(body, loanPeriod.period);
+    const monthlyInterest = helpers.calculateMonthlyInterestRate(body, 12);
 
     const monthlyRepaymentNumerator = helpers.monthlyRepaymentNumerator(monthlyInterest, parseFloat(body.loan_amount));
     const monthlyRepaymentDenominator = helpers.monthlyRepaymentDenominator(monthlyInterest, parseFloat(body.loan_tenor));
@@ -1542,20 +1539,20 @@ export const createManualLoan = async(req, res, next) => {
     const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
     repaymentSchedule.forEach(async(schedule) => {
       await Promise.all([
-         processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
+        processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
           schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
           schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
           schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
         ])
-      ])
+      ]);
       return schedule;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
         createManualLoan.controller.loan.js`);
 
     if (body.loan_status === 'completed') {
-       await processNoneData(loanQueries.updateRepaymentStatusToPaid, userLoan.loan_id)
-       logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: repayment status successfully set to paid in the DB
+      await processNoneData(loanQueries.updateRepaymentStatusToPaid, userLoan.loan_id);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: repayment status successfully set to paid in the DB
         createManualLoan.controller.loan.js`);
     }
 
@@ -1578,17 +1575,17 @@ export const createManualLoan = async(req, res, next) => {
  * @memberof LoanController
  */
 export const fetchUserOutstandingAmount = async(req, res, next) => {
-    try {
-      const { admin, loanApplication} = req;
-      const outstandingAmount = loanApplication.total_outstanding_amount;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched user loan details successfully
+  try {
+    const { admin, loanApplication} = req;
+    const outstandingAmount = loanApplication.total_outstanding_amount;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched user loan details successfully
         fetchUserOutstandingAmount.admin.controller.loan.js`);
-      return ApiResponse.success(res, enums.OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, outstandingAmount);
-    } catch (error) {
-      error.label = enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER;
-      logger.error(`fetching user outstanding amount failed::${enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER}`, error.message);
-      return next(error);
-    }
+    return ApiResponse.success(res, enums.OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY, enums.HTTP_OK, outstandingAmount);
+  } catch (error) {
+    error.label = enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER;
+    logger.error(`fetching user outstanding amount failed::${enums.FETCH_OUTSTANDING_AMOUNT_CONTROLLER}`, error.message);
+    return next(error);
+  }
 };
 
 /**
@@ -1600,14 +1597,14 @@ export const fetchUserOutstandingAmount = async(req, res, next) => {
  * @memberof LoanController
  */
 export const updateUserPayment = async(req, res, next) => {
-   try {
+  try {
     const { params: { user_id, loan_id}, body: { amount, payment_date }, admin, loanApplication} = req;
-    const data = await loanService.updatePayment(user_id, loan_id, amount, payment_date, loanApplication );
+    const data = await loanService.updatePayment(user_id, loan_id, amount, payment_date, loanApplication);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repaid successfully updateUserPayment.admin.controller.loan.js`);
     return ApiResponse.success(res, enums.LOAN_REPAID_SUCCESSFULLY, enums.HTTP_OK, data);
-   } catch (error) {
+  } catch (error) {
     error.label = enums.UPDATE_USER_PAYMENT_CONTROLLER;
     logger.error(`updating user's payment failed::${enums.UPDATE_USER_PAYMENT_CONTROLLER}`, error.message);
     return next(error);
-   }
-}
+  }
+};
