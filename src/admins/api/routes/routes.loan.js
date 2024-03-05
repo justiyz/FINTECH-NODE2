@@ -229,15 +229,6 @@ router.get(
   LoanController.fetchUsers
 );
 
-router.get(
-  '/:loan_tenor/loan-period',
-  AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('loan application', 'read'),
-  LoanMiddleware.checkIfAdminIsSuperAdmin,
-  Model(Schema.fetchLoanPeriod, 'params'),
-  LoanController.fetchLoanPeriod
-);
-
 router.post(
   '/create-loan',
   AuthMiddleware.validateAdminAuthToken,
