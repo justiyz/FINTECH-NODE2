@@ -39,6 +39,10 @@ export default {
     body.gender || user.gender,
     body.number_of_children || user.number_of_children,
     body.marital_status || user.marital_status,
+    body.first_name || user.first_name,
+    body.middle_name || user.middle_name,
+    body.last_name || user.last_name,
+    body.tier || user.tier,
   ],
 
   updateEmploymentDetails: (body, result) => [

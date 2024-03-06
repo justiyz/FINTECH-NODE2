@@ -461,7 +461,11 @@ export default {
         date_of_birth = $4,
         gender = $5,
         number_of_children = $6,
-        marital_status = $7
+        marital_status = $7,
+        first_name = $8,
+        middle_name = $9,
+        last_name = $10,
+        tier = $11
       WHERE user_id = $1
       RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, email, phone_number, number_of_children, marital_status, next_profile_update
    `,

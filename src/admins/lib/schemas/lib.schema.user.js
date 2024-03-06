@@ -51,7 +51,11 @@ const updateUsersProfile = Joi.object().keys({
   date_of_birth: Joi.date().optional(),
   gender: Joi.string().optional().valid('male', 'female'),
   number_of_children: Joi.number().optional(),
-  marital_status: Joi.string().optional()
+  marital_status: Joi.string().optional(),
+  first_name: Joi.string().optional(),
+  middle_name: Joi.string().optional(),
+  last_name: Joi.string().optional(),
+  tier: Joi.number().optional()
 });
 
 const updateEmploymentDetails = Joi.object().keys({
