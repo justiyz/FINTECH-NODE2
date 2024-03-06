@@ -199,17 +199,6 @@ export const checkIfAmountPaidExceedsOutstanding = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms amount to be paid is greater than the outstanding loan amount
       checkIfAmountPaidExceedsOutstanding.admin.middlewares.loan.js`);
       return ApiResponse.error(res, enums.LOAN_OVERPAID, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE);
-<<<<<<< HEAD
-     }
-     return next()
-   } catch (error) {
-      error.label = enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE;
-      logger.error(`checking if amount paid exceeds outstanding amount failed::${enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE}`, error.message);
-      return next(error);
-   }
-};
-
-=======
     }
     return next();
   } catch (error) {
@@ -218,4 +207,4 @@ export const checkIfAmountPaidExceedsOutstanding = async(req, res, next) => {
     return next(error);
   }
 };
->>>>>>> 8bca247e (fixed eslint)
+
