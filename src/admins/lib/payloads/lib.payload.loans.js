@@ -138,5 +138,29 @@ export default {
     body.initial_amount_requested,
     body.initial_loan_tenor,
     body.loan_disbursement_date
+  ],
+
+  recordLoanDisbursement: (body, loan_id) => [
+    body.user_id,
+    body.loan_amount,
+    'manual loan',
+    null,
+    'full loan disbursement',
+    'loan disbursement',
+    loan_id
+  ],
+
+  recordDisbursedLoan: (body, loan_id, payment_id, userName) => [
+    body.user_id,
+    loan_id,
+    body.loan_amount,
+    payment_id,
+    null,
+    userName,
+    'manual loan',
+    null,
+    null,
+    null,
+    'success'
   ]
 };
