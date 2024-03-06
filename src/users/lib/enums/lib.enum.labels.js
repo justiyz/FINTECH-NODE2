@@ -440,4 +440,5 @@ export const CHECK_IF_LOAN_IS_ACTIVE_MIDDLEWARE = 'AdminLoanMiddleware::checkIfL
 export const CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE = 'AdminLoanMiddleware::checkIfAmountPaidExceedsOutstanding';
 export const FETCH_OUTSTANDING_AMOUNT_CONTROLLER = 'AdminLoanController::fetchUserOutstandingAmount';
 export const UPDATE_USER_PAYMENT_CONTROLLER = 'AdminLoanController::updateUserPayment';
+export const CREATE_PRE_APPROVED_LOAN_CONTROLLER = 'AdminLoanController::createPreApprovedLoans';
 

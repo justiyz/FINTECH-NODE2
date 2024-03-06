@@ -1,3 +1,5 @@
+// import dayjs from 'dayjs';
+
 export default {
   fetchLoans: (query) => [
     query.search ? `%${query.search}%` : null,
@@ -114,7 +116,8 @@ export default {
     query.end_date
   ],
 
-  createManualLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue, insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
+  createManualLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue,
+    insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
     body.user_id, 
     body.loan_amount, 
     body.loan_reason, 

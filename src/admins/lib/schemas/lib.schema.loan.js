@@ -166,7 +166,7 @@ const createMandateRequestPayload = Joi.object().keys({
 
 const createManualLoan = Joi.object().keys({
   user_id: Joi.string().required(),
-  loan_type: Joi.string().required().valid('manual'),
+  loan_type: Joi.string().required().valid('manual', 'pre-approved'),
   loan_amount: Joi.number().positive().required(),
   loan_reason: Joi.string().required(),
   loan_tenor: Joi.number().integer().min(1).max(24).required(),
@@ -198,7 +198,19 @@ export const updatePayment = Joi.object().keys({
 export const checkIfLoanIsActive = Joi.object().keys({
   loan_id: Joi.string().required(),
   user_id: Joi.string().required()
-})
+});
+
+const createPreApprovedLoan = Joi.object().keys({
+  user_id: Joi.string().required(),
+  loan_type: Joi.string().required().valid('pre-approved'),
+  loan_amount: Joi.number().positive().required(),
+  loan_reason: Joi.string().required(),
+  loan_tenor: Joi.number().integer().min(1).max(24).required(),
+  interest_rate: Joi.number().positive().required(),
+  processing_fee: Joi.number().positive().required(),
+  insurance_fee: Joi.number().positive().required(),
+  advisory_fee: Joi.number().positive().required()
+});
 export default {
   manualLoanApproval,
   manualLoanRejection,
@@ -223,5 +235,6 @@ export default {
   fetchLoanPeriod,
   loanId,
   checkIfLoanIsActive,
-  updatePayment
+  updatePayment,
+  createPreApprovedLoan
 };

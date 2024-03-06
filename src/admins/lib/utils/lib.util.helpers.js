@@ -139,6 +139,6 @@ export const advisoryFeeValue = (advisoryPercentage, loanAmount) => {
 };
 
 export const sumOfPaymentsRecordedOnPaymentSchedules = async(user_id, loan_id) => {
-  const sumOfPaymentsRecordedOnPaymentSchedules = await processOneOrNoneData(loanQueries.sumOfPaymentsRecordedOnPaymentSchedules, [user_id, loan_id]);
-return sumOfPaymentsRecordedOnPaymentSchedules;
+  const sumOfPaymentsRecordedOnPaymentSchedules = await processOneOrNoneData(loanQueries.sumOfPaymentsRecordedOnPaymentSchedules, [ user_id, loan_id ]);
+  return sumOfPaymentsRecordedOnPaymentSchedules;
 };

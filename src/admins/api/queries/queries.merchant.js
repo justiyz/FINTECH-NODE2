@@ -15,8 +15,13 @@ export default {
       merchant_loan_limit
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+<<<<<<< Updated upstream
     ) RETURNING id, merchant_id, business_name, email, phone_number, interest_rate, address, 
     orr_score_threshold, processing_fee, insurance_fee, advisory_fee, customer_loan_max_amount, merchant_loan_limit, created_at;
+=======
+    ) RETURNING id, merchant_id, business_name, email, phone_number, interest_rate, address, orr_score_threshold,
+     processing_fee, insurance_fee, advisory_fee, customer_loan_max_amount, merchant_loan_limit, created_at;
+>>>>>>> Stashed changes
   `,
   onboardMerchant: `
     UPDATE merchants
@@ -485,8 +490,13 @@ export default {
       WHERE merchant_id = $1`,
 
   getMerchantByEmailV2: `
+<<<<<<< Updated upstream
     SELECT id, merchant_id, first_name, last_name, status, email, phone_number,
      verification_token_request_count, invalid_verification_token_count, gender, created_at, updated_at
+=======
+    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, verification_token_request_count, 
+    invalid_verification_token_count, gender, created_at, updated_at
+>>>>>>> Stashed changes
     FROM merchants
     WHERE email = $1;
   `,
