@@ -38,6 +38,7 @@ import {userActivityTracking} from '../../../users/lib/monitor';
 import config from '../../../users/config';
 import * as helpers from '../../lib/utils/lib.util.helpers';
 
+
 /**
  * approve loan applications manually by admin
  * @param {Request} req - The request from the endpoint.
@@ -1574,6 +1575,8 @@ export const createManualLoan = async(req, res, next) => {
     const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: pre approved loan created successfully createManualLoan.admin.controllers.loan.js`);
     await userActivityTracking(body.user_id, 37, 'success');
+
+    sendPushNotification(userDetails.user_id, PushNotifications.loanApproved(body.loan_amount), userDetails.fcm_token);
     return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
 
   } catch (error) {
