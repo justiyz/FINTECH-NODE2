@@ -235,6 +235,7 @@ router.post(
   RoleMiddleware.adminAccess('loan application', 'create'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,
   Model(Schema.createManualLoan, 'payload'),
+  UserMiddleware.checkIfUserExists,
   LoanController.createManualLoan
 );
 

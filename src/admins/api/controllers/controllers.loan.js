@@ -1507,7 +1507,7 @@ export const fetchLoanPeriod = async(req, res, next) => {
  */
 export const createManualLoan = async(req, res, next) => {
   try {
-    const {body, admin} = req;
+    const {body, admin, userDetails} = req;
     const existingUser = await processOneOrNoneData(loanQueries.checkIfUserAlreadyHasOngoingLoan, body.user_id);
     if (existingUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms user already has an ongoing loan createManualLoan.admin.controllers.loan.js`);
@@ -1550,17 +1550,13 @@ export const createManualLoan = async(req, res, next) => {
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
         createManualLoan.controller.loan.js`);
-    const disbursementPayload = loanPayload.recordLoanDisbursement(body, userLoan.loan_id);
-    const disbursedLoanRecord =  await processOneOrNoneData(loanQueries.recordLoanDisbursement, disbursementPayload);
+    const paymentHistoryPayload = loanPayload.recordLoanDisbursementPaymentHistory(body, userLoan.loan_id);
+    const loanDisbursementPaymentHistory =  await processOneOrNoneData(loanQueries.recordLoanDisbursementPaymentHistory, paymentHistoryPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in paystack_payment_histories table
     createManualLoan.controller.loan.js`);
     
-    const user = await processOneOrNoneData(userQueries.getUserByUserId, body.user_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully fetched user details
-    createManualLoan.controller.loan.js`);
-
-    const disbursedLoanPayload = loanPayload.recordDisbursedLoan(body, userLoan.loan_id, disbursedLoanRecord.id, user.name);
-    await processNoneData(userLoanQueries.updateLoanDisbursementTable, disbursedLoanPayload);
+    const loanDisbursementPayload = loanPayload.recordPersonalLoanDisbursement(body, userLoan.loan_id, loanDisbursementPaymentHistory.id, userDetails.name);
+    await processNoneData(userLoanQueries.updateLoanDisbursementTable, loanDisbursementPayload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in personal_loan_disbursements table
     createManualLoan.controller.loan.js`);
     if (body.loan_status === 'completed') {

@@ -140,7 +140,7 @@ export default {
     body.loan_disbursement_date
   ],
 
-  recordLoanDisbursement: (body, loan_id) => [
+  recordLoanDisbursementPaymentHistory: (body, loan_id) => [
     body.user_id,
     body.loan_amount,
     'manual loan',
@@ -150,7 +150,7 @@ export default {
     loan_id
   ],
 
-  recordDisbursedLoan: (body, loan_id, payment_id, userName) => [
+  recordPersonalLoanDisbursement: (body, loan_id, payment_id, userName) => [
     body.user_id,
     loan_id,
     body.loan_amount,

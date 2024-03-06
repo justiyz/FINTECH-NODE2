@@ -1350,7 +1350,7 @@ export default {
         RETURNING total_outstanding_amount 
     `,
 
-  recordLoanDisbursement: `       
+  recordLoanDisbursementPaymentHistory: `       
       INSERT INTO paystack_payment_histories (
       user_id,
       amount,
