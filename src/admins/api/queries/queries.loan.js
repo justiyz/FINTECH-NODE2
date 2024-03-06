@@ -1348,6 +1348,21 @@ export default {
         WHERE loan_id = $1
         AND user_id = $2
         RETURNING total_outstanding_amount 
+    `,
+
+  recordLoanDisbursementPaymentHistory: `       
+      INSERT INTO paystack_payment_histories (
+      user_id,
+      amount,
+      payment_platform,
+      transaction_reference,
+      payment_type,
+      payment_status,
+      refund_status,
+      transaction_type,
+      payment_reason,
+      loan_id
+  ) VALUES ($1, $2, $3, $4, $5, 'success', 'pending', 'debit', $6, $7) RETURNING id
     `
 };
 

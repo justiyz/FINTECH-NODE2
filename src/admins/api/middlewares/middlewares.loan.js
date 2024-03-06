@@ -206,4 +206,5 @@ export const checkIfAmountPaidExceedsOutstanding = async(req, res, next) => {
       logger.error(`checking if amount paid exceeds outstanding amount failed::${enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE}`, error.message);
       return next(error);
    }
-}
+};
+
