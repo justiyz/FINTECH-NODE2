@@ -38,6 +38,7 @@ import {userActivityTracking} from '../../../users/lib/monitor';
 import config from '../../../users/config';
 import * as helpers from '../../lib/utils/lib.util.helpers';
 
+
 /**
  * approve loan applications manually by admin
  * @param {Request} req - The request from the endpoint.
@@ -1529,45 +1530,55 @@ export const createManualLoan = async(req, res, next) => {
     const insuranceFee = helpers.insuranceFeeValue(parseFloat(body.insurance_fee), parseFloat(body.loan_amount));
     const advisoryFee = helpers.advisoryFeeValue(parseFloat(body.advisory_fee), parseFloat(body.loan_amount));
 
-    const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, 
-      monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
-    const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully createManualLoan.admin.controllers.loan.js`);
-
-    const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, userLoan.loan_id);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);
-
-    const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
-    repaymentSchedule.forEach(async(schedule) => {
-      await Promise.all([
-        processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
-          schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
-          schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
-          schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
-        ])
-      ]);
-      return schedule;
-    });
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
-        createManualLoan.controller.loan.js`);
-    const paymentHistoryPayload = loanPayload.recordLoanDisbursementPaymentHistory(body, userLoan.loan_id);
-    const loanDisbursementPaymentHistory =  await processOneOrNoneData(loanQueries.recordLoanDisbursementPaymentHistory, paymentHistoryPayload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in paystack_payment_histories table
-    createManualLoan.controller.loan.js`);
-    
-    const loanDisbursementPayload = loanPayload.recordPersonalLoanDisbursement(body, userLoan.loan_id, loanDisbursementPaymentHistory.id, userDetails.name);
-    await processNoneData(userLoanQueries.updateLoanDisbursementTable, loanDisbursementPayload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in personal_loan_disbursements table
-    createManualLoan.controller.loan.js`);
-    if (body.loan_status === 'completed') {
-      await processNoneData(loanQueries.updateRepaymentStatusToPaid, userLoan.loan_id);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: repayment status successfully set to paid in the DB
-        createManualLoan.controller.loan.js`);
+    if (body.loan_type === 'manual') {
+      const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, 
+        monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
+      const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully createManualLoan.admin.controllers.loan.js`);
+  
+      const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, userLoan.loan_id);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);
+  
+      const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
+      repaymentSchedule.forEach(async(schedule) => {
+        await Promise.all([
+          processOneOrNoneData(userLoanQueries.updateDisbursedLoanRepaymentSchedule, [
+            schedule.loan_id, schedule.user_id, schedule.repayment_order, schedule.principal_payment, schedule.interest_payment,
+            schedule.fees, schedule.total_payment_amount, schedule.pre_payment_outstanding_amount,
+            schedule.post_payment_outstanding_amount, schedule.proposed_payment_date, schedule.proposed_payment_date
+          ])
+        ]);
+        return schedule;
+      });
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${body.user_id}:::Info: loan repayment schedule updated successfully in the DB
+          createManualLoan.controller.loan.js`);
+      const paymentHistoryPayload = loanPayload.recordLoanDisbursementPaymentHistory(body, userLoan.loan_id);
+      const loanDisbursementPaymentHistory =  await processOneOrNoneData(loanQueries.recordLoanDisbursementPaymentHistory, paymentHistoryPayload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in paystack_payment_histories table
+      createManualLoan.controller.loan.js`);
+      
+      const loanDisbursementPayload = loanPayload.recordPersonalLoanDisbursement(body, userLoan.loan_id, loanDisbursementPaymentHistory.id, userDetails.name);
+      await processNoneData(userLoanQueries.updateLoanDisbursementTable, loanDisbursementPayload);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in personal_loan_disbursements table
+      createManualLoan.controller.loan.js`);
+      if (body.loan_status === 'completed') {
+        await processNoneData(loanQueries.updateRepaymentStatusToPaid, userLoan.loan_id);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: repayment status successfully set to paid in the DB
+          createManualLoan.controller.loan.js`);
+      } 
+      await userActivityTracking(body.user_id, 37, 'success');
+      await userActivityTracking(body.user_id, 39, 'success');
+      return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);  
     }
-
+    const payload = loanPayload.createPreApprovedLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, 
+      insuranceFee, advisoryFee, monthlyRepayment);
+    const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: pre approved loan created successfully createManualLoan.admin.controllers.loan.js`);
     await userActivityTracking(body.user_id, 37, 'success');
-    await userActivityTracking(body.user_id, 39, 'success');
+
+    sendPushNotification(userDetails.user_id, PushNotifications.loanApproved(body.loan_amount), userDetails.fcm_token);
     return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
+
   } catch (error) {
     error.label = enums.CREATE_MANUAL_LOAN_CONTROLLER;
     logger.error(`creating manual loan failed:::${enums.CREATE_MANUAL_LOAN_CONTROLLER}`, error.message);

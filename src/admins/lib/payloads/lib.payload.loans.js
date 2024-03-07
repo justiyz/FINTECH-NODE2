@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export default {
   fetchLoans: (query) => [
     query.search ? `%${query.search}%` : null,
@@ -114,7 +116,8 @@ export default {
     query.end_date
   ],
 
-  createManualLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue, insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
+  createManualLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue,
+    insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
     body.user_id, 
     body.loan_amount, 
     body.loan_reason, 
@@ -138,6 +141,33 @@ export default {
     body.initial_amount_requested,
     body.initial_loan_tenor,
     body.loan_disbursement_date
+  ],
+
+  createPreApprovedLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue, 
+    insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
+    body.user_id, 
+    body.loan_amount, 
+    body.loan_reason, 
+    body.loan_tenor, 
+    totalRepayment, 
+    totalInterest, 
+    body.interest_rate,  // same as the price_band
+    body.processing_fee, 
+    body.insurance_fee, 
+    body.advisory_fee, 
+    monthlyInterest,
+    processingFeeValue,
+    insuranceFeeValue,
+    advisoryFeeValue,
+    monthlyRepayment,
+    'manual',
+    false,
+    null,
+    totalOutstandingAmount,
+    'approved',
+    body.loan_amount, 
+    body.loan_tenor, 
+    dayjs()
   ],
 
   recordLoanDisbursementPaymentHistory: (body, loan_id) => [

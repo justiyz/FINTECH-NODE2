@@ -260,6 +260,15 @@ router.post(
   LoanMiddleware.checkIfLoanIsActive,
   LoanMiddleware.checkIfAmountPaidExceedsOutstanding,
   LoanController.updateUserPayment
-)
+);
 
+router.post(
+  '/pre-approved-loan',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.createPreApprovedLoan, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  LoanController.createManualLoan
+);
 export default router;

@@ -157,27 +157,27 @@ export const checkIfAdminIsSuperAdmin = async(req, res, next) => {
  * @memberof AdminLoanMiddleware
  */
 export const checkIfLoanIsActive = async(req, res, next) => {
-   try {
-      const { params: {loan_id, user_id} , admin } = req;
-      const loan = await processOneOrNoneData(loanQueries.checkIfLoanIsActive, [ user_id, loan_id ]);
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan details fetched successfully
+  try {
+    const { params: {loan_id, user_id} , admin } = req;
+    const loan = await processOneOrNoneData(loanQueries.checkIfLoanIsActive, [ user_id, loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan details fetched successfully
       checkIfLoanIsActive.admin.middlewares.loan.js`);
 
-      if(!loan) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms loan is inactive for user
+    if (!loan) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms loan is inactive for user
         checkIfLoanIsActive.admin.middlewares.loan.js`);
-        return ApiResponse.error(res, enums.LOAN_IS_INACTIVE, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_LOAN_IS_ACTIVE_MIDDLEWARE);
-      }
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms loan is active for user
+      return ApiResponse.error(res, enums.LOAN_IS_INACTIVE, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_LOAN_IS_ACTIVE_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms loan is active for user
       checkIfLoanIsActive.admin.middlewares.loan.js`);
 
-      req.totalOutstandingAmount = loan.total_outstanding_amount;
-      return next();
-   } catch (error) {
+    req.totalOutstandingAmount = loan.total_outstanding_amount;
+    return next();
+  } catch (error) {
     error.label = enums.CHECK_IF_LOAN_IS_ACTIVE_MIDDLEWARE;
     logger.error(`checking if loan is active failed::${enums.CHECK_IF_LOAN_IS_ACTIVE_MIDDLEWARE}`, error.message);
     return next(error);
-   }
+  }
 };
 
 /**
@@ -189,22 +189,22 @@ export const checkIfLoanIsActive = async(req, res, next) => {
  * @memberof AdminLoanMiddleware
  */
 export const checkIfAmountPaidExceedsOutstanding = async(req, res, next) => {
-   try {
-      const { body: { loan_id, user_id, amount }, loanApplication, admin } = req;
-     const result = await helpers.sumOfPaymentsRecordedOnPaymentSchedules(user_id, loan_id);
-     const currentAmountPaid = result.total_recorded_amount_paid;
-     const totalAmountPendingPayment = (parseFloat(loanApplication.total_repayment_amount) - parseFloat(currentAmountPaid)).toFixed(2);
+  try {
+    const { body: { loan_id, user_id, amount }, loanApplication, admin } = req;
+    const result = await helpers.sumOfPaymentsRecordedOnPaymentSchedules(user_id, loan_id);
+    const currentAmountPaid = result.total_recorded_amount_paid;
+    const totalAmountPendingPayment = (parseFloat(loanApplication.total_repayment_amount) - parseFloat(currentAmountPaid)).toFixed(2);
      
-    if(parseFloat(amount) > parseFloat(totalAmountPendingPayment)) {
+    if (parseFloat(amount) > parseFloat(totalAmountPendingPayment)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: confirms amount to be paid is greater than the outstanding loan amount
       checkIfAmountPaidExceedsOutstanding.admin.middlewares.loan.js`);
       return ApiResponse.error(res, enums.LOAN_OVERPAID, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE);
-     }
-     return next()
-   } catch (error) {
-      error.label = enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE;
-      logger.error(`checking if amount paid exceeds outstanding amount failed::${enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE}`, error.message);
-      return next(error);
-   }
+    }
+    return next();
+  } catch (error) {
+    error.label = enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE;
+    logger.error(`checking if amount paid exceeds outstanding amount failed::${enums.CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
 };
 
