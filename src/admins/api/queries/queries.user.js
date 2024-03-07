@@ -63,6 +63,16 @@ export default {
     FROM users
     WHERE user_id = $1`,
 
+  getUserSingleByUserId: `
+    SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
+    TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name, image_url, bvn, date_of_birth,
+      is_verified_phone_number, is_verified_email, is_verified_bvn, is_uploaded_selfie_image, is_created_password, is_created_pin,
+      is_completed_kyc, is_uploaded_identity_card, status, fcm_token, is_deleted, referral_code,
+      number_of_children, marital_status, loan_status, verification_token_request_count, invalid_verification_token_count,
+       to_char(DATE (created_at)::date, 'DDth Month, YYYY') AS date_created, (unclaimed_reward_points + claimed_reward_points) AS total_available_reward_points, bvn
+    FROM users
+    WHERE user_id = $1`,
+
   getUserByUserEmailOrPhoneNumber: `
     SELECT id, phone_number, user_id, email, title, first_name, middle_name, last_name, tier, gender,
     TRIM(CONCAT(first_name, ' ', middle_name, ' ', last_name)) AS name,
@@ -458,8 +468,8 @@ export default {
         updated_at = NOW(),
         email = $2,
         phone_number = $3,
-        date_of_birth = $4,
-        gender = $5,
+        gender = $4,
+        date_of_birth = $5,
         number_of_children = $6,
         marital_status = $7,
         first_name = $8,
@@ -467,7 +477,7 @@ export default {
         last_name = $10,
         tier = $11
       WHERE user_id = $1
-      RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, email, phone_number, number_of_children, marital_status, next_profile_update
+      RETURNING user_id, first_name, middle_name, last_name, date_of_birth, gender, email, phone_number, number_of_children, marital_status, next_profile_update, tier, updated_at
    `,
 
   updateEmploymentDetails: `

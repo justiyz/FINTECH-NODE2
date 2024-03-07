@@ -35,14 +35,14 @@ export default {
     user.user_id,
     body.email || user.email,
     body.phone_number || user.phone_number,
-    body.date_of_birth || user.date_of_birth,
     body.gender || user.gender,
+    body.date_of_birth || user.date_of_birth,
     body.number_of_children || user.number_of_children,
     body.marital_status || user.marital_status,
     body.first_name || user.first_name,
-    body.middle_name || user.middle_name,
+    (body.middle_name === '') ? null : body.middle_name,
     body.last_name || user.last_name,
-    body.tier || user.tier,
+    body.tier || user.tier
   ],
 
   updateEmploymentDetails: (body, result) => [

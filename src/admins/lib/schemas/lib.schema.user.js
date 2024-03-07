@@ -53,7 +53,7 @@ const updateUsersProfile = Joi.object().keys({
   number_of_children: Joi.number().optional(),
   marital_status: Joi.string().optional(),
   first_name: Joi.string().optional(),
-  middle_name: Joi.string().optional(),
+  middle_name: Joi.string().allow('').optional(),
   last_name: Joi.string().optional(),
   tier: Joi.number().optional()
 });
