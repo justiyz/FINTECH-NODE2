@@ -270,7 +270,7 @@ export const checkIfUserExists = async(req, res, next) => {
   try {
     // const { params: { user_id } } = req;
     const user_id = req.params.user_id || req.body.user_id;
-    const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ user_id ]);
+    const [ userDetails ] = await processAnyData(userQueries.getUserSingleByUserId, [ user_id ]);
     if (userDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
         successfully confirms that user being queried exists in the DB checkIfUserExists.admin.middlewares.user.js`);
