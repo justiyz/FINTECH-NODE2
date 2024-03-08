@@ -30,10 +30,10 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import {sendSms} from '../services/service.sms';
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import moment from "moment-timezone";
-import {BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
+import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
 
 
-const { SEEDFI_NODE_ENV } = config;
+const { SEEDFI_API_VERSION } = config;
 
 /**
  * update user device fcm token
@@ -1603,4 +1603,8 @@ const sendOtpToBvnUser = async (bvn, data) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
 
     return otpData
+}
+
+export const getVersionNumber = async(req, res) => {
+  return ApiResponse.success(res, enums.API_VERSION, enums.HTTP_OK, {'version': SEEDFI_API_VERSION});
 }

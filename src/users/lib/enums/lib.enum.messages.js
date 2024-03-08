@@ -451,6 +451,7 @@ export const MANDATE_CREATED_SUCCESSFULLY = `Mandate created successfully`;
 export const CONSENT_REQUEST_INITIATED_SUCCESSFULLY = `Consent request initiated successfully`;
 export const LOAN_BALANCE_UPDATED_SUCCESSFULLY = `Loan balance updated successfully`;
 export const NO_DEFAULT_ACCOUNT = `Kindly add a bank account as default to proceed`;
+export const API_VERSION = 'API version returned successfully'
 
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 
