@@ -332,12 +332,12 @@ export const generateLoanRepaymentScheduleForManualCreation = async(existingLoan
       loan_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
       user_id,
       repayment_order: 1,
-      principal_payment: parseFloat(parseFloat(firstPrincipalPayment).toFixed(2)),
-      interest_payment: parseFloat(parseFloat(firstRepaymentInterest).toFixed(2)),
-      fees: parseFloat(parseFloat(totalFee).toFixed(2)),
-      total_payment_amount: parseFloat(parseFloat(firstRepaymentDue).toFixed(2)),
-      pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
-      post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
+      principal_payment: parseFloat(parseFloat(firstPrincipalPayment)),
+      interest_payment: parseFloat(parseFloat(firstRepaymentInterest)),
+      fees: parseFloat(parseFloat(totalFee)),
+      total_payment_amount: parseFloat(parseFloat(firstRepaymentDue)),
+      pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount)),
+      post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount)),
       proposed_payment_date: dayjs(loan_disbursement_date).add(30, 'days').format('YYYY-MM-DD')
     }
   ];
@@ -352,13 +352,13 @@ export const generateLoanRepaymentScheduleForManualCreation = async(existingLoan
     const nextRepaymentDetails = {
       loan_id: existingLoanApplication.member_loan_id ? existingLoanApplication.member_loan_id : existingLoanApplication.loan_id,
       user_id,
-      repayment_order: parseFloat(parseFloat(repaymentOrder).toFixed(2)),
-      principal_payment: parseFloat(parseFloat(nextPrincipalPayment).toFixed(2)),
-      interest_payment: parseFloat(parseFloat(nextInterestPayment).toFixed(2)),
-      fees: parseFloat(parseFloat(subsequentFee).toFixed(2)),
-      total_payment_amount: parseFloat(parseFloat(nextTotalPaymentAmount).toFixed(2)),
-      pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
-      post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
+      repayment_order: parseFloat(parseFloat(repaymentOrder)),
+      principal_payment: parseFloat(parseFloat(nextPrincipalPayment)),
+      interest_payment: parseFloat(parseFloat(nextInterestPayment)),
+      fees: parseFloat(parseFloat(subsequentFee)),
+      total_payment_amount: parseFloat(parseFloat(nextTotalPaymentAmount)),
+      pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount)),
+      post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount)),
       proposed_payment_date: dayjs(loan_disbursement_date).add(30 * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
     };
     repaymentArray.push(nextRepaymentDetails);

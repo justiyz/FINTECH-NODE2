@@ -129,6 +129,7 @@ export const REMOVE_SAVED_CARD_CONTROLLER = 'UserController::removeCard';
 export const HOMEPAGE_DETAILS_CONTROLLER = 'UserController::homepageDetails';
 export const CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
 export const CHECK_LOAN_EXISTS_MIDDLEWARE = 'LoanMiddleware::checkUserLoanApplicationExists';
+export const CHECK_IF_ADMIN_CREATED_LOAN_MIDDLEWARE = 'LoanMiddleware::checkIfAdminCreatedLoan';
 export const CHECK_IF_ADMIN_IS_SUPER_ADMIN_MIDDLEWARE = 'LoanMiddleware::checkIfAdminIsSuperAdmin';
 export const CHECK_IF_CLUSTER_LOAN_APPLICATION_EXISTS_MIDDLEWARE = 'ClusterMiddleware::checkIfClusterLoanApplicationExists';
 export const FETCH_GENERAL_CLUSTER_NEW_LOAN_AMOUNT_VALUES_MIDDLEWARE = 'ClusterMiddleware::fetchGeneralClusterNewLoanAmountValues';

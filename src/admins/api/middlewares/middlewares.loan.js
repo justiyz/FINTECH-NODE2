@@ -208,3 +208,28 @@ export const checkIfAmountPaidExceedsOutstanding = async(req, res, next) => {
   }
 };
 
+/**
+ * check if loan application was created by admin
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof AdminLoanMiddleware
+ */
+export const checkIfAdminCreatedLoan= async(req, res, next) => {
+  try {
+    const { params: { loan_id }, admin } = req;
+    const [ loanApplication ] = await processAnyData(loanQueries.fetchLoanDetailsById, [ loan_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: fetched loan details successfully checkIfAdminCreatedLoan.admin.middlewares.loan.js`);
+    if (loanApplication.is_created_by_admin) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan is created by admin checkIfAdminCreatedLoan.admin.middlewares.loan.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan was not created by admin.admin.middlewares.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_WAS_NOT_CREATED_BY_ADMIN, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ADMIN_CREATED_LOAN_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_ADMIN_CREATED_LOAN_MIDDLEWARE;
+    logger.error(`checking if admin created loan failed::${enums.CHECK_IF_ADMIN_CREATED_LOAN_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
