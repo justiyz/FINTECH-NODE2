@@ -258,6 +258,7 @@ router.post(
   Model(Schema.updatePayment, 'payload'),
   LoanMiddleware.checkIfLoanExists,
   LoanMiddleware.checkIfLoanIsActive,
+  LoanMiddleware.checkIfAdminCreatedLoan,
   LoanMiddleware.checkIfAmountPaidExceedsOutstanding,
   LoanController.updateUserPayment
 );
