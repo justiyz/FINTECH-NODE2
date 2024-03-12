@@ -445,7 +445,7 @@ export const FETCHED_MERCHANT_SUCCESSFULLY = 'Fetched merchant(s) successfully';
 export const INVALID_MERCHANT_API_KEY = 'Invalid merchant API key';
 export const MERCHANT_NOT_FOUND = 'Merchant account not found';
 export const MERCHANT_ADMIN_EXIST = 'Merchant admin with email or phone number already exist';
-export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfully';
+export const MERCHANT_UPDATED_SUCCESSFULLY = 'Merchant details updated successfully'; 
 export const LOAN_DUE_AMOUNT_FETCHED_SUCCESSFULLY = 'Loan due amount fetched successfully';
 export const MANDATE_CREATED_SUCCESSFULLY = 'Mandate created successfully';
 export const CONSENT_REQUEST_INITIATED_SUCCESSFULLY = 'Consent request initiated successfully';
@@ -460,8 +460,8 @@ export const LOAN_IS_INACTIVE = 'This loan has either been completed or declined
 export const LOAN_OVERPAID = 'Amount paid exceeds the amount expected to offset the loan ';
 export const OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY = 'Outstanding amount fetched successfully';
 export const LOAN_REPAID_SUCCESSFULLY = 'Loan repaid successfully';
-export const LOAN_WAS_NOT_CREATED_BY_ADMIN = 'Loan can not be repaid manually, user should kindly login to repay loan';
-
+export const LOAN_WAS_NOT_CREATED_BY_ADMIN = 'Loan can not be repaid manually, user should kindly login to repay loan'; 
+export const API_VERSION = 'API version returned successfully' 
 
 // export const FAILED_TO_CREATE_TICKET_SUBSCRIPTION = 'failed to create ticket subscription';
 

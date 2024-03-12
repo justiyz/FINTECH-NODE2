@@ -70,8 +70,8 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "fix-dev-rerun",
+    "WebServerToolWindowFactoryState": "false", 
+    "git-widget-placeholder": "fix-dev-rerun", 
     "last_opened_file_path": "/Users/otjake/Sites/localhost/seedfi-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

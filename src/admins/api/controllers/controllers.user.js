@@ -562,6 +562,9 @@ export const fetchUserRewards = async(req, res, next) => {
 export const updateUserProfile = async(req, res, next) => {
   try {
     const {body, admin, userDetails} = req;
+    if(body.middle_name === undefined) {
+      body.middle_name = userDetails.middle_name
+    }
     const payload = UserPayload.updateUserProfile(body, userDetails);
     const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info:

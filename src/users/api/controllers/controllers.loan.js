@@ -31,7 +31,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
   try {
     const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, maximumAmountForNoCreditHistoryDetails } = req;
-    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForLoanNotification, [ 'loan application' ]);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
