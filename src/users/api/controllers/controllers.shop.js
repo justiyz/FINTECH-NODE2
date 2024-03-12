@@ -1,4 +1,4 @@
-import {processAnyData, processNoneData} from "../services/services.db";
+import {processAnyData, processNoneData} from '../services/services.db';
 import adminShopQueries from '../../../admins/api/queries/queries.shop';
 import shopQueries from '../queries/queries.shop';
 import ApiResponse from '../../lib/http/lib.http.responses';
@@ -14,7 +14,7 @@ import {userActivityTracking} from '../../lib/monitor';
 import {processOneOrNoneData} from '../../../admins/api/services/services.db';
 import QRCode from 'qrcode';
 import MailService from '../services/services.email';
-import notificationQueries from "../queries/queries.notification";
+import notificationQueries from '../queries/queries.notification';
 import loanQueries from '../queries/queries.loan';
 import LoanPayload from '../../lib/payloads/lib.payload.loan';
 import { loanApplicationEligibilityCheck, loanApplicationEligibilityCheckV2 } from '../services/service.seedfiUnderwriting';
@@ -32,7 +32,7 @@ import { chromium } from 'playwright';
 const { SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR, SEEDFI_NODE_ENV, SEEDFI_SHOP_PERCENTAGE } = config;
 
 
-export const shopCategories = async (req, res, next) => {
+export const shopCategories = async(req, res, next) => {
   try {
     const {user} = req;
     let shop_categories = await processAnyData(shopQueries.shopCategories, [ req.query.status ]);
@@ -49,10 +49,10 @@ export const shopCategories = async (req, res, next) => {
   }
 };
 
-export const fetchShopDetails = async (req, res, next) => {
+export const fetchShopDetails = async(req, res, next) => {
   try {
     const {params: {shop_category_id}, user} = req;
-    let shopDetails = await processAnyData(shopQueries.getShopDetails, [shop_category_id]);
+    let shopDetails = await processAnyData(shopQueries.getShopDetails, [ shop_category_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: shop details fetched successfully fetchShopDetails.controller.shop.js`);
     return ApiResponse.success(res, enums.SHOP_CATEGORY_EXIST, enums.HTTP_OK, shopDetails);
   } catch (error) {
@@ -91,12 +91,12 @@ function isObjectEmpty(obj) {
   }
   return true;
 }
-export const fetchTickets = async (req, res, next) => {
+export const fetchTickets = async(req, res, next) => {
   try {
     const {user} = req;
-    let tickets = await processAnyData(adminShopQueries.getAllEvents, [req.body.status, req.query.ticket_id]);
+    let tickets = await processAnyData(adminShopQueries.getAllEvents, [ req.body.status, req.query.ticket_id ]);
     for (const tick in tickets) {
-      const [least_ticket_priced_ticket] = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
+      const [ least_ticket_priced_ticket ] = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, tickets[tick].ticket_id);
       tickets[tick].lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
 
       // if (typeof least_ticket_priced_ticket !== 'undefined') {
@@ -119,7 +119,7 @@ export const fetchTickets = async (req, res, next) => {
 };
 
 // fetch users tickets
-export const fetchUserTickets = async (req, res, next) => {
+export const fetchUserTickets = async(req, res, next) => {
   try {
     const {user} = req;
     const user_tickets = await fetchUserTicketsData(user.user_id, req.query.status);
@@ -141,40 +141,40 @@ export const fetchUserTickets = async (req, res, next) => {
 };
 
 async function fetchUserTicketsData(userId, status) {
-  return await processAnyData(shopQueries.getUserTickets, [userId, status]);
+  return await processAnyData(shopQueries.getUserTickets, [ userId, status ]);
 }
 
 async function enrichUserTicketData(user_ticket) {
-  const [least_ticket_priced_ticket] = await processAnyData(
+  const [ least_ticket_priced_ticket ] = await processAnyData(
     adminShopQueries.getPriceOfLeastValueTicket, user_ticket.ticket_id);
   const ticket_category = await processOneOrNoneData(
-    adminShopQueries.getTicketCategoryTypeById, [user_ticket.ticket_id, user_ticket.ticket_category_id]);
+    adminShopQueries.getTicketCategoryTypeById, [ user_ticket.ticket_id, user_ticket.ticket_category_id ]);
   const {ticket_name, event_location, event_time, ticket_image_url, event_date} = await processOneOrNoneData(
-    adminShopQueries.getCustomerTicketInformation, [user_ticket.ticket_id, user_ticket.user_id]);
+    adminShopQueries.getCustomerTicketInformation, [ user_ticket.ticket_id, user_ticket.user_id ]);
     // console.log('least_ticket_priced_ticket: ', least_ticket_priced_ticket);
 
   // if (typeof least_ticket_priced_ticket[0] !== 'undefined') {
-    user_ticket.ticket_name = ticket_name;
-    user_ticket.event_location = event_location;
-    user_ticket.event_time = event_time;
-    user_ticket.ticket_image_url = ticket_image_url;
-    user_ticket.event_date = event_date;
-    user_ticket.lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
-    user_ticket.ticket_category_type = ticket_category.ticket_category_type;
+  user_ticket.ticket_name = ticket_name;
+  user_ticket.event_location = event_location;
+  user_ticket.event_time = event_time;
+  user_ticket.ticket_image_url = ticket_image_url;
+  user_ticket.event_date = event_date;
+  user_ticket.lowest_ticket_price = parseFloat(least_ticket_priced_ticket.ticket_price).toFixed(2);
+  user_ticket.ticket_category_type = ticket_category.ticket_category_type;
   // }
 
 }
-export const _fetchUserTickets = async (req, res, next) => {
+export const _fetchUserTickets = async(req, res, next) => {
   try {
     const {user} = req;
     const user_tickets = await processAnyData(
-      shopQueries.getUserTickets, [user.user_id, req.query.status]);
+      shopQueries.getUserTickets, [ user.user_id, req.query.status ]);
     for (const tick in user_tickets) {
       const least_ticket_priced_ticket = await processAnyData(adminShopQueries.getPriceOfLeastValueTicket, user_tickets[tick].ticket_id);
       const ticket_category = await processOneOrNoneData(
         adminShopQueries.getTicketCategoryTypeById, [
-        user_tickets[tick].ticket_id,
-        user_tickets[tick].ticket_category_id]
+          user_tickets[tick].ticket_id,
+          user_tickets[tick].ticket_category_id ]
       );
       const {ticket_name, event_location, event_time} = await processOneOrNoneData(
         adminShopQueries.getCustomerTicketInformation,
@@ -209,7 +209,7 @@ export const _fetchUserTickets = async (req, res, next) => {
   }
 };
 
-export const fetchTicketCategories = async (req, res, next) => {
+export const fetchTicketCategories = async(req, res, next) => {
   try {
     const ticket_categories = await processAnyData(shopQueries.getTicketCategories, req.params.ticket_id);
     const data = {
@@ -245,7 +245,7 @@ function findTicketWithLowestPrice(tickets) {
 
 
 
-export const getTicketSubscriptionSummary = async (req, res, next) => {
+export const getTicketSubscriptionSummary = async(req, res, next) => {
   try {
     const ticket_information = await processAnyData(shopQueries.getTicketSummary, req.params.ticket_id);
     for (const tick_information in ticket_information) {
@@ -260,23 +260,23 @@ export const getTicketSubscriptionSummary = async (req, res, next) => {
   }
 };
 
-export const imageFromHtml = async (htmlContent) => {
+export const imageFromHtml = async(htmlContent) => {
   try {
-    const tempDir = os.tmpdir()
+    const tempDir = os.tmpdir();
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir);
     }
     // // Create a new page
     const browser = await puppeteer.launch(
-        {
-          headless: true,
-          args: [
-            "--disable-gpu",
-            "--disable-dev-shm-usage",
-            "--disable-setuid-sandbox",
-            "--no-sandbox",
-          ]
-        }
+      {
+        headless: true,
+        args: [
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--no-sandbox'
+        ]
+      }
     );
     const page = await browser.newPage();
     await page.setContent(htmlContent);
@@ -287,14 +287,14 @@ export const imageFromHtml = async (htmlContent) => {
     await page.screenshot({ path: imagePath, type: 'jpeg' });
 
     await browser.close();
-    return imagePath
+    return imagePath;
 
   } catch (error) {
     console.error('Error during Puppeteer operation:', error);
   }
-}
+};
 
-export const imageFromHtml2 = async (htmlContent) => {
+export const imageFromHtml2 = async(htmlContent) => {
   try {
     let browser = await chromium.launch();
     let page = await browser.newPage();
@@ -316,9 +316,9 @@ export const imageFromHtml2 = async (htmlContent) => {
 
 export const generateTicketImage = async(ticket_id, ticket_category_id, user, ticket_qr_code) => {
   try {
-    const [ticketCategory, ticketRecord] = await Promise.all([
-      processOneOrNoneData(shopQueries.getBookedTicketCategory, [ticket_category_id]),
-      processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]),
+    const [ ticketCategory, ticketRecord ] = await Promise.all([
+      processOneOrNoneData(shopQueries.getBookedTicketCategory, [ ticket_category_id ]),
+      processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ])
     ]);
     const dateObject = new Date();
     const formattedDate = `${dateObject.toDateString()} ${dateObject.toTimeString().split(' ')[0]}`;
@@ -327,14 +327,14 @@ export const generateTicketImage = async(ticket_id, ticket_category_id, user, ti
     // use puppeteer to generate image from the html file
     const newlyGeneratedFile = await imageFromHtml2(ticketHtmlPDF);
     // generate ticket pdf
-    const cloudinary_payload = await cloudinary.uploader.upload(newlyGeneratedFile)
+    const cloudinary_payload = await cloudinary.uploader.upload(newlyGeneratedFile);
     return cloudinary_payload.secure_url;
   } catch (error) {
     throw error; // Re-throw the error to propagate it up the call stack
     return ApiResponse.error(res, enums.LOAN_APPLICATION_DECLINED_DECISION, enums.HTTP_BAD_REQUEST, error);
   }
 
-}
+};
 
 async function getAvailableTicketUnits(ticketCategoryId) {
   return await processOneOrNoneData(adminShopQueries.getTicketUnitsAvailable, ticketCategoryId);
@@ -404,18 +404,18 @@ export const createTicketSubscription = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       await userActivityTracking(req.user.user_id, activityType, 'success');
 
-      //disburse loan amount to ticket merchant//account
+      // disburse loan amount to ticket merchant//account
       await disburseTicketLoan(user, loan_id, userTransferRecipient, existingLoanApplication, next);
 
       return ApiResponse.success(
-          res,
-          result.message, enums.HTTP_OK,
-          {
-            user_id: user.user_id,
-            amount: parseFloat(totalAmountToBePaid).toFixed(2),
-            payment_type: 'part',
-            payment_channel, reference: result.data.reference, status: result.data.status, display_text: result.data.display_text || ''
-      });
+        res,
+        result.message, enums.HTTP_OK,
+        {
+          user_id: user.user_id,
+          amount: parseFloat(totalAmountToBePaid).toFixed(2),
+          payment_type: 'part',
+          payment_channel, reference: result.data.reference, status: result.data.status, display_text: result.data.display_text || ''
+        });
     }
     if (result.response && result.response.status === 400) {
       await userActivityTracking(user.user_id, activityType, 'fail');
@@ -436,7 +436,7 @@ export const createTicketSubscription = async(req, res, next) => {
   }
 };
 
-const disburseTicketLoan = async (user, loan_id, userTransferRecipient, existingLoanApplication, next) => {
+const disburseTicketLoan = async(user, loan_id, userTransferRecipient, existingLoanApplication, next) => {
   try {
     // const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication } = req;
     const reference = uuidv4();
@@ -450,7 +450,7 @@ const disburseTicketLoan = async (user, loan_id, userTransferRecipient, existing
       const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ loan_id ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details status set to processing in the DB disburseTicketLoan.controllers.shop.js`);
       userActivityTracking(user.user_id, 44, 'success');
-      return  { ...updatedLoanDetails , reference }
+      return  { ...updatedLoanDetails , reference };
     }
     if (result.response.status === 400 && result.response.data.message === 'Your balance is not enough to fulfil this request') {
       const data = {
@@ -495,11 +495,11 @@ async function createUserTicket(userId, ticketId, ticketCategoryId, insuranceCov
 }
 
 async function updateAvailableTicketUnits(ticketCategoryId, newUnits) {
-  const slateArray = [ticketCategoryId, newUnits];
+  const slateArray = [ ticketCategoryId, newUnits ];
   return await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slateArray);
 }
 
-export const _createTicketSubscription = async (req, res, next) => {
+export const _createTicketSubscription = async(req, res, next) => {
   try {
     const tickets = req.body.tickets;
     const ticket_purchase_logs = [];
@@ -529,7 +529,7 @@ export const _createTicketSubscription = async (req, res, next) => {
                 :::Info: user ticket QR Code successfully created. createTicketSubscription.controller.shop.js`);
         // update available ticket units
         const reduceTicket = available_tickets.units - 1;  // tickets[ticket].units;
-        const slate_array = [tickets[ticket].ticket_category_id, reduceTicket];
+        const slate_array = [ tickets[ticket].ticket_category_id, reduceTicket ];
         await processOneOrNoneData(adminShopQueries.updateTicketUnitsAvailable, slate_array);
       }
 
@@ -544,10 +544,10 @@ export const _createTicketSubscription = async (req, res, next) => {
   }
 };
 
-export const fetchUserSubscribedTickets = async (req, res, next) => {
+export const fetchUserSubscribedTickets = async(req, res, next) => {
   try {
     const user_id = req.user.user_id;
-    const user_tickets = await processAnyData(adminShopQueries.fetchUserTickets, [user_id]);
+    const user_tickets = await processAnyData(adminShopQueries.fetchUserTickets, [ user_id ]);
     if (user_tickets)
       return ApiResponse.success(res, enums.FETCHED_USER_TICKETS_SUCCESSFULLY, enums.HTTP_OK, user_tickets);
   } catch (error) {
@@ -557,13 +557,13 @@ export const fetchUserSubscribedTickets = async (req, res, next) => {
   }
 };
 
-export const _sendEventTicketToEmails = async (req, res, next) => {
+export const _sendEventTicketToEmails = async(req, res, next) => {
   try {
     const recipients = req.body.recipients;
     let data = {};
     const ticket_recipients = [];
     const ticket_id = req.body.ticket_id;
-    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ticket_id]);
+    const ticket = await processOneOrNoneData(adminShopQueries.getEventById, [ ticket_id ]);
     const title = 'Hurray! Ticket Booked';
     const content = `Your ticket for ${ ticket.ticket_name } has been booked on SeedFi!`;
     // Send Tickets to recipients
@@ -596,7 +596,7 @@ export const _sendEventTicketToEmails = async (req, res, next) => {
 };
 
 // Helper function to send a ticket email
-const sendTicketEmail = async (recipient, ticket) => {
+const sendTicketEmail = async(recipient, ticket) => {
   const title = 'Hurray! Ticket Booked';
   const content = `Your ticket for ${ ticket.ticket_name } has been booked on SeedFi!`;
 
@@ -619,7 +619,7 @@ const sendTicketEmail = async (recipient, ticket) => {
   return savedRecipient;
 };
 
-export const sendEventTicketToEmails = async (req, res, next) => {
+export const sendEventTicketToEmails = async(req, res, next) => {
   try {
     const { recipients, ticket_id, transaction_reference, reference } = req.body;
     // fetch the transaction record by transaction_reference
@@ -645,13 +645,13 @@ export const sendEventTicketToEmails = async (req, res, next) => {
   }
 };
 
-export const cancel_ticket_booking = async (req, res, next) => {
+export const cancel_ticket_booking = async(req, res, next) => {
   try {
     const ticket_id = req.params.ticket_id;
     const user_id = req.user.user_id;
     const data = {};
-    await processAnyData(adminShopQueries.deleteTicketInformationRecord, [ticket_id, user_id]);
-    await processAnyData(adminShopQueries.deleteTicketRecord, [ticket_id, user_id]);
+    await processAnyData(adminShopQueries.deleteTicketInformationRecord, [ ticket_id, user_id ]);
+    await processAnyData(adminShopQueries.deleteTicketRecord, [ ticket_id, user_id ]);
     return ApiResponse.success(res, enums.DELETE_TICKET_INFORMATION, enums.HTTP_OK, data);
   } catch (error) {
     await userActivityTracking(req.user.user_id, 117, 'fail');
@@ -660,7 +660,7 @@ export const cancel_ticket_booking = async (req, res, next) => {
   }
 };
 
-const getBookingTotalPrice = async (ticket_bookings) => {
+const getBookingTotalPrice = async(ticket_bookings) => {
   let booking_amount = 0;
 
   for (const ticket_record_id in ticket_bookings) {
@@ -675,7 +675,7 @@ const getBookingTotalPrice = async (ticket_bookings) => {
   }
   return booking_amount;
 };
-export const checkUserTicketLoanEligibility = async (req, res, next) => {
+export const checkUserTicketLoanEligibility = async(req, res, next) => {
   try {
     const { user, body, userEmploymentDetails, userLoanDiscount, clusterType,
       userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, maximumAmountForNoCreditHistoryDetails, params: {ticket_id} } = req;
@@ -683,10 +683,10 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
     // calculate amount to be booked
     const booking_amount = await getBookingTotalPrice(req.body.tickets);
-    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, ['loan application']);
+    const admins = await processAnyData(notificationQueries.fetchAdminsForNotification, [ 'loan application' ]);
 
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
-    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
     const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
@@ -696,17 +696,17 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     body.bank_statement_service_choice = SEEDFI_BANK_ACCOUNT_STATEMENT_PROCESSOR;
 
     const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplicationWithReturn,
-        [ user.user_id, booking_amount, booking_amount, 'Ticket Loan', body.duration_in_months, body.duration_in_months, 0, 0 ]
+      [ user.user_id, booking_amount, booking_amount, 'Ticket Loan', body.duration_in_months, body.duration_in_months, 0, 0 ]
     );
 
     req.params.loan_id = loanApplicationDetails.loan_id;
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
     let payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId,
-          userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails);
+      userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails);
     const result = await loanApplicationEligibilityCheck(payload);
 
-    if(result.status === 200 && result.statusText === 'OK') {
+    if (result.status === 200 && result.statusText === 'OK') {
       const { data } = result;
 
       if (data.final_decision === 'APPROVED') {
@@ -714,13 +714,13 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
         //   logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Applied for ${parseFloat(booking_amount).toFixed(2)}, elligible for ${parseFloat(data.max_approval).toFixed(2)}  checkUserLoanEligibility.controllers.loan.js`);
         //   return ApiResponse.error(res, `You're not eligible for the requested amount. Kindly try a lower amount`, 403, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
         // }
-        const ticket = await processOneOrNoneData(shopQueries.getTicketInformation, [ticket_id]);
+        const ticket = await processOneOrNoneData(shopQueries.getTicketInformation, [ ticket_id ]);
 
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status shows user is eligible for loan checkUserLoanEligibility.controllers.loan.js`);
         const initial_deposit = SEEDFI_SHOP_PERCENTAGE;
         const other_deposits = 1 - initial_deposit;
         const monthly_repayment = (booking_amount * other_deposits)/body.duration_in_months;
-        const first_installment  = ((booking_amount * initial_deposit) + parseFloat(ticket.processing_fee)).toFixed(2)
+        const first_installment  = ((booking_amount * initial_deposit) + parseFloat(ticket.processing_fee)).toFixed(2);
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user loan eligibility status passes and user is eligible for automatic loan approval checkUserLoanEligibility.controllers.loan.js`);
         data.monthly_repayment = monthly_repayment;
         const approvedDecisionPayload = LoanPayload.processShopLoanDecisionUpdatePayload(data, booking_amount, 0, 'approved');
@@ -751,11 +751,11 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
     }
 
     else if (result.status >= 400 && result.status < 500) {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: Info: returned response from underwriting is a 400 plus status checkUserLoanEligibility.controllers.loan.js`)
+      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::: Info: returned response from underwriting is a 400 plus status checkUserLoanEligibility.controllers.loan.js`);
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
       admins.map((admin) => {
         sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
+          [ `${ user.first_name } ${ user.last_name }` ], 'failed-loan-application');
       });
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_FAILURE, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
@@ -767,7 +767,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
       admins.map((admin) => {
         sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
+          [ `${ user.first_name } ${ user.last_name }` ], 'failed-loan-application');
       });
       userActivityTracking(req.user.user_id, 37, 'fail');
       return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
@@ -782,7 +782,7 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
       {
         admins.map((admin) => {
           sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-              [`${ user.first_name } ${ user.last_name }`], 'failed-loan-application');
+            [ `${ user.first_name } ${ user.last_name }` ], 'failed-loan-application');
         });
       }
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: User initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
@@ -800,9 +800,9 @@ export const checkUserTicketLoanEligibility = async (req, res, next) => {
   }
 };
 
-export const ticketPurchaseUpdate = async (req, res, next) => {
-  if(req.ticket_already_active) {
-    return ApiResponse.error(res, enums.TICKET_ALREADY_ACTIVE, enums.HTTP_OK)
+export const ticketPurchaseUpdate = async(req, res, next) => {
+  if (req.ticket_already_active) {
+    return ApiResponse.error(res, enums.TICKET_ALREADY_ACTIVE, enums.HTTP_OK);
   }
   try {
     const { user_id } = req.body;

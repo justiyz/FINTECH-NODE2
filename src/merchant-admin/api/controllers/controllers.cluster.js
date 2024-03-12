@@ -189,8 +189,8 @@ export const activateAndDeactivateCluster = async(req, res, next) => {
   const description = body.status === 'active' ? descriptions.activate_cluster(adminName, name) : descriptions.deactivate_cluster(adminName, name);
   try {
     const cluster = await processOneOrNoneData(ClusterQueries.activateOrDeactivateCluster, [ cluster_id, body.status ]);
-    if(body.status === 'deactivated'){
-      await processAnyData(ClusterQueries.deleteAllClusterMember, [ cluster_id ])
+    if (body.status === 'deactivated') {
+      await processAnyData(ClusterQueries.deleteAllClusterMember, [ cluster_id ]);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info:
     decoded that admin have ${body.status} ${name} cluster in the DB. activateAndDeactivateCluster.admin.controllers.cluster.js`);

@@ -5,7 +5,7 @@ import * as userMockedTestResponses from '../../../../tests/response/response.us
 import {
   dojahVerifyInternationPassportResponse,
   zeehVerifyInternationalPassportResponse
-} from "../../../../tests/response/response.user";
+} from '../../../../tests/response/response.user';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -37,11 +37,11 @@ const zeehBVNVerificationCheck = async(bvn, user) => {
     }
     const options = {
       method: 'POST',
-      url: `https://v2.api.zeeh.africa/nigeria_kyc/lookup_bvn_advance`,
+      url: 'https://v2.api.zeeh.africa/nigeria_kyc/lookup_bvn_advance',
       headers: {
         accept: 'application/json',
         'Secret_Key': config.SEEDFI_ZEEH_SECRET_KEY,
-        'content-type': 'application/json',
+        'content-type': 'application/json'
       },
       data: {
         bvn: bvn
@@ -60,7 +60,7 @@ const zeehBVNVerificationCheck = async(bvn, user) => {
   }
 };
 
-const zeehPassportNumberVerificationCheck = async (user, document_id) => {
+const zeehPassportNumberVerificationCheck = async(user, document_id) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyInternationalPassportResponse(user, document_id);
@@ -90,7 +90,7 @@ const zeehPassportNumberVerificationCheck = async (user, document_id) => {
   }
 };
 
-const zeehNINVerificationCheck = async (nin, user) => {
+const zeehNINVerificationCheck = async(nin, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, nin);
@@ -114,7 +114,7 @@ const zeehNINVerificationCheck = async (nin, user) => {
   }
 };
 
-const zeehVINVerificationCheck = async (vin, user, state) => {
+const zeehVINVerificationCheck = async(vin, user, state) => {
 
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {

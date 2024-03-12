@@ -36,8 +36,8 @@ export const adminAccess = (resource, action) => async(req, res, next) => {
     //   return  ApiResponse.error(res, enums.ADMIN_CANNOT_PERFORM_ACTION(action, resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
     // }
 
-    //get admin merchants and check if the merchants
-    const [membership] = await processAnyData(roleQueries.fetchMerchantAdminMembership, [headers['x-merchant-id'], admin.merchant_admin_id]);
+    // get admin merchants and check if the merchants
+    const [ membership ] = await processAnyData(roleQueries.fetchMerchantAdminMembership, [ headers['x-merchant-id'], admin.merchant_admin_id ]);
     if (membership) {
       return next();
     }

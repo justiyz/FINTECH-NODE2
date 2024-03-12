@@ -158,7 +158,7 @@ export default {
       AND is_deleted = false
       ORDER BY is_default DESC`,
 
-    fetchBankAccountDetailsByUserId: `
+  fetchBankAccountDetailsByUserId: `
       SELECT
         id,
         user_id,
@@ -819,5 +819,5 @@ export default {
     RETURNING user_id, email, phone_number, is_deleted, status`,
 
   fetchAllDetailsBelongingToUser: `
-    SELECT * FROM users WHERE user_id = $1`,
+    SELECT * FROM users WHERE user_id = $1`
 };

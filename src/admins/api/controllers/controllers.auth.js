@@ -53,7 +53,7 @@ export const completeAdminLoginRequest = async(req, res, next) => {
   }
 };
 
-export const completeMerchantLoginRequest = async (req, res, next ) => {
+export const completeMerchantLoginRequest = async(req, res, next) => {
   try {
     const merchant  = req.merchant; // await processAnyData(adminQueries.getMerchantByEmail, [ req.body.trim().toLowerCase() ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched merchant admin details from the database completeMerchantLoginRequest.admin.middlewares.admin.js`);
@@ -67,7 +67,7 @@ export const completeMerchantLoginRequest = async (req, res, next ) => {
     logger.error(`getting merchants details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_MERCHANT_MIDDLEWARE}`, error.message);
     return next(error);
   }
-}
+};
 
 /**
  * login admin
@@ -182,7 +182,7 @@ export const sendAdminPasswordToken = async(req, res, next) => {
     sendAdminPasswordToken.admin.controllers.auth.js`);
     await adminActivityTracking(req.admin.admin_id, 18, 'success', descriptions.verify_reset_pass_otp());
     merchant.password_token = passwordToken;
-    merchant.tokenExpireAt = tokenExpireAt
+    merchant.tokenExpireAt = tokenExpireAt;
     return ApiResponse.success(res, enums.GENERATE_ADMIN_RESET_PASSWORD_TOKEN, enums.HTTP_OK, { merchant });
   } catch (error) {
     await adminActivityTracking(req.admin.admin_id, 18, 'fail', descriptions.verify_reset_pass_otp_failed());

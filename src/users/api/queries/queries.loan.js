@@ -235,6 +235,27 @@ export default {
     AND user_id = $2
     ORDER BY repayment_order ASC`,
 
+  fetchLoanRepaymentScheduleForMandate: `
+    SELECT
+      id,
+      loan_repayment_id,
+      loan_id,
+      user_id,
+      repayment_order,
+      total_payment_amount,
+      principal_payment,
+      proposed_payment_date,
+      pre_reschedule_proposed_payment_date,
+      to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
+      to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
+      to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
+      status
+    FROM personal_loan_payment_schedules
+    WHERE loan_id = $1
+    AND user_id = $2
+    AND status != 'paid'
+    ORDER BY repayment_order ASC`,
+
   fetchLoanNextRepaymentDetails: `
     SELECT
       id,
@@ -284,7 +305,6 @@ export default {
       status = 'paid',
       post_payment_outstanding_amount = post_payment_outstanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
-
 
   updateFullyPaidLoanRepayment: `
     UPDATE personal_loan_payment_schedules
@@ -841,7 +861,6 @@ export default {
       post_payment_outstanding_amount = post_payment_outstanding_amount - $2::FLOAT
     WHERE loan_repayment_id = $1`,
 
-
   fetchLoanDetailsByLoanId: `
     SELECT
       id,
@@ -879,5 +898,4 @@ export default {
     FROM personal_loans
     WHERE loan_id = $1
     `,
-
 };

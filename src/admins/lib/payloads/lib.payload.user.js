@@ -37,7 +37,7 @@ export default {
     body.phone_number || user.phone_number,
     body.gender || user.gender,
     body.date_of_birth || user.date_of_birth,
-    body.number_of_children || user.number_of_children,
+    body.number_of_children || user.number_of_children, 
     body.marital_status || user.marital_status,
     body.first_name || user.first_name,
     (body.middle_name === '') ? null : body.middle_name,
@@ -64,7 +64,7 @@ export default {
     body.lga || result.lga,
     body.country || result.country,
     body.type_of_residence || result.type_of_residence,
-    body.rent_amount || result.rent_amount,
+    body.rent_amount || result.rent_amount
   ],
 
   updateNextOfKin: (body, result) => [
@@ -73,7 +73,7 @@ export default {
     body.last_name || result.last_name,
     body.phone_number ||  result.phone_number,
     body.email || result.email,
-    body.kind_of_relationship || result.kind_of_relationship,
-  ],
+    body.kind_of_relationship || result.kind_of_relationship
+  ]
 };
 

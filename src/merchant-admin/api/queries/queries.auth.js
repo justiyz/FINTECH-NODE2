@@ -1,9 +1,9 @@
 export default {
 
-fetchMerchantAdminByEmail:
-`SELECT * FROM merchant_admins WHERE email = $1`,
+  fetchMerchantAdminByEmail:
+'SELECT * FROM merchant_admins WHERE email = $1',
 
-updateMerchantAdminPassword: `
+  updateMerchantAdminPassword: `
   UPDATE merchant_admins
   SET
       password = $2,
@@ -14,19 +14,19 @@ updateMerchantAdminPassword: `
   RETURNING first_name, last_name, email, status, is_created_password
   `,
 
-fetchAdminPassword: `
+  fetchAdminPassword: `
     SELECT id, merchant_admin_id, password
     FROM merchant_admins
     WHERE merchant_admin_id = $1`,
 
 
-fetchAdminByVerificationToken: `
+  fetchAdminByVerificationToken: `
     SELECT id, email, merchant_admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
     FROM merchant_admins
     WHERE verification_token = $1`,
 
 
-updateLoginToken: `
+  updateLoginToken: `
     UPDATE merchant_admins
     SET
       updated_at = NOW(),
@@ -39,14 +39,14 @@ updateLoginToken: `
     RETURNING id, merchant_admin_id, first_name, last_name,  email, is_created_password, is_verified_email, status`,
 
 
-fetchAdminByVerificationTokenAndUniqueId: `
+  fetchAdminByVerificationTokenAndUniqueId: `
     SELECT id, email, merchant_admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, invalid_verification_token_count
     FROM merchant_admins
     WHERE verification_token = $1
     AND merchant_admin_id = $2`,
 
 
-fetchMerchantsByMerchantAdminId: `
+  fetchMerchantsByMerchantAdminId: `
     SELECT
         merchants.merchant_id,
         merchants.business_name,
@@ -62,7 +62,7 @@ fetchMerchantsByMerchantAdminId: `
 `,
 
 
-// ================================================
+  // ================================================
 
 
 

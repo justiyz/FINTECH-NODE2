@@ -10,6 +10,6 @@ rm -rf "$app_dir"
 unzip /home/ubuntu/seedfi-backend-test/seedfi-app.zip -d "$app_dir"
 
 # Restore .env file from backup directory to app folder
-cp "$env_dir/seedfi.env" "$app_dir/.env"
+cp "$env_dir/dev-seedfi.env" "$app_dir/.env"
 
 chown -R ubuntu:ubuntu "$app_dir"
