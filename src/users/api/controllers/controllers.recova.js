@@ -211,7 +211,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
   try {
     const [userDetails] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [user.user_id]);
-
+    //TODO create temporary repayment schedules for the loan and disburse it inside the mandate accepted event
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
 
@@ -220,14 +220,14 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     if (!accountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
-      return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+      return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
 
     if (accountDetails.bank_code.length > 3) {
       logger.info(
         `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user bank account code ${accountDetails.bank_code} is not a commercial bank code createMandateConsentRequest.controller.recova.js`
       );
-      return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+      return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
     const collectionPaymentSchedules = loanRepaymentDetails.map(repayment => {
       return {
@@ -236,6 +236,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       };
     });
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
+    console.log(loanDetails, 'loanDetails', loanRepaymentDetails, 'loanRepaymentDti');
 
     // const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
 
@@ -249,6 +250,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's  phone number is invalid  createMandateConsentRequest.controller.user.js`);
       return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
+    // console.log(collectionPaymentSchedules, totalRepaymentExpected, loanDetails);
     //call recova service to create mandate
     const data = {
       bvn: bvn,
