@@ -3,7 +3,7 @@ name: Docker Image CI for Seedfi-backend
 on:
   push:
     branches:
-      - "snapshots"
+      - "snapshot"
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          ref: 'snapshots'
+          ref: 'snapshot'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
