@@ -276,7 +276,11 @@ router.post(
 );
 
 router.post(
+<<<<<<< HEAD
   '/:loan_id/:user_id/reschedule',
+=======
+  '/:loan_id/:user_id/process-rescheduling',
+>>>>>>> 6e91a090 (manual loan rescheduling)
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'create'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,

@@ -1713,10 +1713,26 @@ export const processManualLoanRescheduling = async (req, res, next) => {
       body: { reschedule_tenor },
       userDetails,
     } = req;
-    const adminName = `${admin.first_name} ${admin.last_name}`;
+    console.log('I AM HERE NOW');
+    const allowableRescheduleCount = await processOneOrNoneData(userLoanQueries.fetchAdminSetEnvDetails, ['allowable_personal_loan_rescheduling_count']);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan rescheduling allowable count fetched processManualLoanRescheduling.controllers.loan.js`);
+    if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count
+      processManualLoanRescheduling.controllers.loan.js`);
+      userActivityTracking(req.userDetails.user_id, 75, 'fail');
+      return ApiResponse.error(
+        res,
+        enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)),
+        enums.HTTP_FORBIDDEN,
+        enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER
+      );
+    }
+    console.log('I AM HERE');
     const userUnpaidRepayments = await processAnyData(userLoanQueries.fetchUserUnpaidRepayments, [existingLoanApplication.loan_id, user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's unpaid repayments fetched processManualLoanRescheduling.controllers.loan.js`);
     const [nextRepayment] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [existingLoanApplication.loan_id, user_id]);
+    console.log('I AM HERE 2');
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's next loan repayment details fetched successfully
      processManualLoanRescheduling.controllers.loan.js`);
     const totalExtensionDays = userUnpaidRepayments.length * Number(reschedule_tenor);
@@ -1752,15 +1768,10 @@ export const processManualLoanRescheduling = async (req, res, next) => {
       total_loan_extension_days: parseFloat(totalExtensionDays),
       is_reschedule: true,
     };
-    await adminActivityTracking(req.admin.admin_id, 74, 'success', descriptions.reschedule_manual_loan(adminName, userDetails.name));
+    userActivityTracking(req.userDetails.user_id, 75, 'success');
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    await adminActivityTracking(
-      req.admin.admin_id,
-      74,
-      'fail',
-      descriptions.reschedule_manual_loan_failed(`${req.admin.first_name}, ${req.admin.last_name}`, req.userDetails.name)
-    );
+    userActivityTracking(req.userDetails.user_id, 75, 'fail');
     error.label = enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER;
     logger.error(`processing loan rescheduling loan failed::${enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER}`, error.message);
     return next(error);
