@@ -176,6 +176,7 @@ export const INDIVIDUAL_LOAN_RESCHEDULING_DURATIONS_CONTROLLER = 'LoanController
 export const LOAN_RESCHEDULING_SUMMARY_CONTROLLER = 'LoanController::loanReschedulingSummary';
 export const CLUSTER_LOAN_RESCHEDULING_SUMMARY_CONTROLLER = 'ClusterController::clusterLoanReschedulingSummary';
 export const PROCESS_LOAN_RESCHEDULING_CONTROLLER = 'LoanController::processLoanRescheduling';
+export const PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER = 'LoanController::processManualLoanRescheduling';
 export const PROCESS_CLUSTER_LOAN_RESCHEDULING_CONTROLLER = 'LoanController::processClusterLoanRescheduling';
 export const FETCH_USER_LOAN_PAYMENT_TRANSACTIONS_CONTROLLER = 'LoanController::fetchUserLoanPaymentTransactions';
 export const SUBMIT_PAYMENT_OTP_CONTROLLER = 'LoanController::submitPaymentOtp';
