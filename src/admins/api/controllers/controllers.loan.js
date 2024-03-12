@@ -1626,3 +1626,71 @@ export const updateUserPayment = async(req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * process the manual loan rescheduling
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns details of a personal loan
+ * @memberof LoanController
+ */
+export const processManualLoanRescheduling = async(req, res, next) => {
+  try {
+    const { params: { user_id }, admin, existingLoanApplication, body: { reschedule_tenor}, userDetails } = req;
+    console.log('I AM HERE NOW');
+    const allowableRescheduleCount = await processOneOrNoneData(userLoanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan rescheduling allowable count fetched processManualLoanRescheduling.controllers.loan.js`);
+    if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count
+      processManualLoanRescheduling.controllers.loan.js`);
+      userActivityTracking(req.userDetails.user_id, 75, 'fail');
+      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN,
+        enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER);
+    }
+    console.log('I AM HERE');
+    const userUnpaidRepayments = await processAnyData(userLoanQueries.fetchUserUnpaidRepayments, [ existingLoanApplication.loan_id, user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's unpaid repayments fetched processManualLoanRescheduling.controllers.loan.js`);
+    const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user_id ]);
+    console.log('I AM HERE 2');
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's next loan repayment details fetched successfully
+     processManualLoanRescheduling.controllers.loan.js`);
+    const totalExtensionDays = userUnpaidRepayments.length * Number(reschedule_tenor);
+    const newLoanDuration = `${existingLoanApplication.loan_tenor_in_months} month(s), ${totalExtensionDays} day(s)`;
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: updated total loan tenor fetched processManualLoanRescheduling.controllers.loan.js`);
+    await Promise.all([
+      userUnpaidRepayments.map((repayment) => {
+        processOneOrNoneData(userLoanQueries.updateNewRepaymentDate,
+          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(reschedule_tenor), 'days') ]);
+        return repayment;
+      }),
+      processOneOrNoneData(userLoanQueries.updateLoanWithRescheduleDetails, [ existingLoanApplication.loan_id, Number(reschedule_tenor),
+        parseFloat((existingLoanApplication.reschedule_count || 0) + 1), newLoanDuration, totalExtensionDays ])
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan rescheduling details updated successfully processManualLoanRescheduling.controllers.loan.js`);
+    const data = {
+      loan_id: existingLoanApplication.loan_id,
+      user_id: userDetails.user_id,
+      email: userDetails.email,
+      first_name: userDetails.first_name,
+      loan_reason: existingLoanApplication.loan_reason,
+      amount_requested: existingLoanApplication.amount_requested,
+      monthly_repayment: existingLoanApplication.monthly_repayment,
+      initial_loan_duration: existingLoanApplication.loan_tenor_in_months,
+      current_loan_duration: newLoanDuration,
+      next_repayment_date: dayjs(nextRepayment.proposed_payment_date).add(Number(reschedule_tenor), 'days').format('MMM DD, YYYY'),
+      status: existingLoanApplication.status,
+      reschedule_extension_days: Number(reschedule_tenor),
+      total_loan_extension_days: parseFloat(totalExtensionDays),
+      is_reschedule: true
+    };
+    userActivityTracking(req.userDetails.user_id, 75, 'success');
+    return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
+  } catch (error) {
+    userActivityTracking(req.userDetails.user_id, 75, 'fail');
+    error.label = enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER;
+    logger.error(`processing loan rescheduling loan failed::${enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER}`, error.message);
+    return next(error);
+  }
+};
