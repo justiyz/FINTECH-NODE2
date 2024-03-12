@@ -840,7 +840,7 @@ export default {
         is_disbursement_account,
         created_at
       FROM user_bank_accounts
-      WHERE user_id =$1 AND is_deleted = false
+      WHERE user_id =$1 AND is_deleted = false AND CHAR_LENGTH(bank_code) = 3
       `,
 
   fetchLoanIDFromUserTickets: `

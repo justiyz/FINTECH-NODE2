@@ -8,6 +8,7 @@ import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import { processAnyData, processNoneData, processOneOrNoneData } from '../services/services.db';
+
 import MailService from '../services/services.email';
 import { sendClusterNotification, sendMulticastPushNotification, sendPushNotification, sendUserPersonalNotification } from '../services/services.firebase';
 import * as PushNotifications from '../../../admins/lib/templates/pushNotification';
@@ -17,6 +18,7 @@ import { loanOrrScoreBreakdown } from '../services/services.seedfiUnderwriting';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
+
 import loanMandateQueries from '../../../users/api/queries/queries.recova';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import { parsePhoneNumber } from 'awesome-phonenumber';
@@ -29,7 +31,9 @@ import {
   generateLoanRepaymentScheduleV2,
   generateLoanRepaymentScheduleForManualCreation,
 } from '../../../users/lib/utils/lib.util.helpers';
+
 import { userActivityTracking } from '../../../users/lib/monitor';
+
 import config from '../../../users/config';
 import * as helpers from '../../lib/utils/lib.util.helpers';
 
@@ -914,6 +918,7 @@ export const adminFetchPersonalLoanDetails = async (req, res, next) => {
     loanApplication.next_repayment_date = next_repayment_date;
 
     const [loanMandateDetails] = await processAnyData(loanQueries.fetchLoanMandateDetails, [loan_id]);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
     const data = {
       nextLoanRepaymentDetails: nextRepaymentDetails,
@@ -1408,7 +1413,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
   try {
     const [userDetails] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [loanDetails.user_id]);
 
-    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [loanDetails.loan_id, loanDetails.user_id]);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, loanDetails.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, loanDetails.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
@@ -1563,6 +1568,7 @@ export const createManualLoan = async (req, res, next) => {
         advisoryFee,
         monthlyRepayment
       );
+
       const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully createManualLoan.admin.controllers.loan.js`);
 
@@ -1604,6 +1610,7 @@ export const createManualLoan = async (req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: repayment status successfully set to paid in the DB
           createManualLoan.controller.loan.js`);
       }
+
       await adminActivityTracking(req.admin.admin_id, 71, 'success', descriptions.create_manual_loan(adminName, userDetails.name));
       return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
     }
@@ -1618,6 +1625,7 @@ export const createManualLoan = async (req, res, next) => {
       advisoryFee,
       monthlyRepayment
     );
+
     const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: pre approved loan created successfully createManualLoan.admin.controllers.loan.js`);
     await adminActivityTracking(req.admin.admin_id, 72, 'success', descriptions.create_pre_approved_loan(adminName, userDetails.name));
