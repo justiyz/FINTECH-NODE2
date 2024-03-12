@@ -21,16 +21,16 @@ import * as PersonalNotifications from '../../lib/templates//personalNotificatio
 import MailService from '../services/services.email';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 import * as zeehService from '../services/services.zeeh';
-import * as S3 from "../services/services.s3";
-import * as dojahService from '../services/service.dojah'
+import * as S3 from '../services/services.s3';
+import * as dojahService from '../services/service.dojah';
 import sharp from 'sharp';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import {verifyBvnOTPSms} from '../../lib/templates/sms';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
-import {sendSms} from '../services/service.sms';
+import {sendSms} from '../services/service.sms'; 
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import moment from "moment-timezone";
-import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
+import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages"; 
 
 
 const { SEEDFI_API_VERSION } = config;
@@ -43,10 +43,10 @@ const { SEEDFI_API_VERSION } = config;
  * @returns { JSON } - A JSON with the users updated fcm token
  * @memberof UserController
  */
-export const updateFcmToken = async (req, res, next) => {
+export const updateFcmToken = async(req, res, next) => {
   try {
     const {user, body} = req;
-    await processAnyData(authQueries.setSameFcmTokenNull, [body.fcm_token.trim()]); // this is done to prevent two fcm tokens being attached to multiple accounts
+    await processAnyData(authQueries.setSameFcmTokenNull, [ body.fcm_token.trim() ]); // this is done to prevent two fcm tokens being attached to multiple accounts
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully set other accounts with same fcm token to null updateFcmToken.controllers.user.js`);
     await processOneOrNoneData(userQueries.updateUserFcmToken, [ user.user_id, body.fcm_token.trim() ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user fcm token to the database updateFcmToken.controllers.user.js`);
@@ -70,14 +70,14 @@ export const updateFcmToken = async (req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof UserController
  */
-export const updateUserRefreshToken = async (req, res, next) => {
+export const updateUserRefreshToken = async(req, res, next) => {
   try {
     const {user, userEmploymentDetails} = req;
     const token = await Hash.generateAuthToken(user);
     logger.info(`${ enums.CURRENT_TIME_STAMP },${ user.user_id }::: Info: successfully generated access token updateUserRefreshToken.controllers.user.js`);
     const refreshToken = await Hash.generateRandomString(50);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully generated refresh token updateUserRefreshToken.controllers.user.js`);
-    const [updatedUser] = await processAnyData(authQueries.loginUserAccount, [user.user_id, refreshToken]);
+    const [ updatedUser ] = await processAnyData(authQueries.loginUserAccount, [ user.user_id, refreshToken ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated new refresh token to the database updateUserRefreshToken.controllers.user.js`);
     const is_updated_advanced_kyc = (userEmploymentDetails?.monthly_income && user?.number_of_children && user?.marital_status && userEmploymentDetails?.employment_type) ?
       true : false;
@@ -102,17 +102,17 @@ export const updateUserRefreshToken = async (req, res, next) => {
  * @returns {object} - Returns a successful image upload response
  * @memberof UserController
  */
-export const updateSelfieImage = async (req, res, next) => {
+export const updateSelfieImage = async(req, res, next) => {
   try {
     const {user, body} = req;
     const token = Hash.generateRandomString(50);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, Info: random OTP generated updateSelfieImage.controllers.user.j`);
-    const [existingToken] = await processAnyData(authQueries.getUserByVerificationToken, [token]);
+    const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, Info: checked if OTP is existing in the database updateSelfieImage.controllers.user.j`);
     if (existingToken) {
       return updateSelfieImage(req, res, next);
     }
-    const [updateUserSelfie] = await processAnyData(userQueries.updateUserSelfieImage, [user.user_id, body.image_url.trim(), token]);
+    const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, body.image_url.trim(), token ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's selfie image and email verification token to the database
     updateSelfieImage.controllers.user.js`);
     await MailService('Welcome to SeedFi 🎉', 'verifyEmail', {otp: token, ...user});
@@ -134,14 +134,14 @@ export const updateSelfieImage = async (req, res, next) => {
  * @returns { JSON } - A JSON response with the users details
  * @memberof UserController
  */
-export const updateBvn = async (req, res, next) => {
+export const updateBvn = async(req, res, next) => {
   try {
     const {body: {bvn}, user, bvnData} = req;
     // const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     // const tier_upgraded = tierChoice === '1' ? true : false;
-    const otpData = await sendOtpToBvnUser(bvn, bvnData)
+    const otpData = await sendOtpToBvnUser(bvn, bvnData);
     // const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
     // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
@@ -167,19 +167,19 @@ export const updateBvn = async (req, res, next) => {
  * @returns { JSON } - A JSON response
  * @memberof AuthController
  */
-export const requestEmailVerification = async (req, res, next) => {
+export const requestEmailVerification = async(req, res, next) => {
   try {
     const {user} = req;
     const token = Hash.generateRandomString(50);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, Info: random OTP generated requestEmailVerification.controller.auth.js`);
-    const [existingToken] = await processAnyData(authQueries.getUserByVerificationToken, [token]);
+    const [ existingToken ] = await processAnyData(authQueries.getUserByVerificationToken, [ token ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, Info: checked if OTP is existing in the database requestEmailVerification.controller.auth.js`);
     if (existingToken) {
       return requestEmailVerification(req, res, next);
     }
     const expireAt = dayjs().add(10, 'minutes');
     const expirationTime = dayjs(expireAt);
-    const payload = [user.email, token, expireAt];
+    const payload = [ user.email, token, expireAt ];
     await processAnyData(userQueries.emailVerificationToken, payload);
     const data = {user_id: user.user_id, otp: token, otpExpire: expirationTime};
     if (SEEDFI_NODE_ENV === 'test') {
@@ -206,7 +206,7 @@ export const requestEmailVerification = async (req, res, next) => {
  * @returns { JSON } - A JSON response of the details of the list of available banks
  * @memberof UserController
  */
-export const fetchAvailableBankLists = async (req, res, next) => {
+export const fetchAvailableBankLists = async(req, res, next) => {
   try {
     const {user} = req;
     const data = await fetchBanks();
@@ -227,7 +227,7 @@ export const fetchAvailableBankLists = async (req, res, next) => {
  * @returns { JSON } - A JSON response of the details of the bank account number
  * @memberof UserController
  */
-export const returnAccountDetails = async (req, res, next) => {
+export const returnAccountDetails = async(req, res, next) => {
   try {
     const {user, accountNumberDetails} = req;
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: account number resolved successfully returnAccountDetails.controller.user.js`);
@@ -247,11 +247,11 @@ export const returnAccountDetails = async (req, res, next) => {
  * @returns { JSON } - A JSON response of the added bank account details
  * @memberof UserController
  */
-export const saveAccountDetails = async (req, res, next) => {
+export const saveAccountDetails = async(req, res, next) => {
   try {
     const {user, body, accountNumberDetails} = req;
     const payload = UserPayload.bankAccountPayload(user, body, accountNumberDetails);
-    const [accountDetails] = await processAnyData(userQueries.saveBankAccountDetails, payload);
+    const [ accountDetails ] = await processAnyData(userQueries.saveBankAccountDetails, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: account number resolved successfully returnAccountDetails.controller.user.js`);
     userActivityTracking(user.user_id, 27, 'success');
     return ApiResponse.success(res, enums.BANK_ACCOUNT_SAVED_SUCCESSFULLY, enums.HTTP_OK, accountDetails);
@@ -271,10 +271,10 @@ export const saveAccountDetails = async (req, res, next) => {
  * @returns { JSON } - A JSON response of all users added bank account details
  * @memberof UserController
  */
-export const fetchUserAccountDetails = async (req, res, next) => {
+export const fetchUserAccountDetails = async(req, res, next) => {
   try {
     const {user} = req;
-    const accountDetails = await processAnyData(userQueries.fetchBankAccountDetails, [user.user_id]);
+    const accountDetails = await processAnyData(userQueries.fetchBankAccountDetails, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's saved account details fetched successfully fetchUserAccountDetails.controller.user.js`);
     return ApiResponse.success(res, enums.BANK_ACCOUNTS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, accountDetails);
   } catch (error) {
@@ -292,13 +292,13 @@ export const fetchUserAccountDetails = async (req, res, next) => {
  * @returns { JSON } - A JSON response of all users added debit cards details
  * @memberof UserController
  */
-export const fetchUserDebitCards = async (req, res, next) => {
+export const fetchUserDebitCards = async(req, res, next) => {
   try {
     const {user} = req;
-    const debitCards = await processAnyData(userQueries.fetchUserDebitCards, [user.user_id]);
+    const debitCards = await processAnyData(userQueries.fetchUserDebitCards, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's saved debit cards fetched successfully fetchUserDebitCards.controller.user.js`);
     await Promise.all(
-      debitCards.map(async (card) => {
+      debitCards.map(async(card) => {
         const decryptedFirst6Digits = await Hash.decrypt(decodeURIComponent(card.first_6_digits));
         card.first_6_digits = decryptedFirst6Digits;
         const decryptedLast4Digits = await Hash.decrypt(decodeURIComponent(card.last_4_digits));
@@ -326,10 +326,10 @@ export const fetchUserDebitCards = async (req, res, next) => {
  * @returns { JSON } - A JSON response with a message of account deleted
  * @memberof UserController
  */
-export const deleteUserAccountDetails = async (req, res, next) => {
+export const deleteUserAccountDetails = async(req, res, next) => {
   try {
     const {user, params: {id}} = req;
-    await processAnyData(userQueries.deleteBankAccountDetails, [user.user_id, id]);
+    await processAnyData(userQueries.deleteBankAccountDetails, [ user.user_id, id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's saved account details deleted successfully deleteUserAccountDetails.controller.user.js`);
     userActivityTracking(req.user.user_id, 29, 'success');
     return ApiResponse.success(res, enums.BANK_ACCOUNT_DELETED_SUCCESSFULLY, enums.HTTP_OK);
@@ -349,22 +349,22 @@ export const deleteUserAccountDetails = async (req, res, next) => {
  * @returns { JSON } - A JSON response with a message of account deleted
  * @memberof UserController
  */
-export const updateAccountDetailsChoice = async (req, res, next) => {
+export const updateAccountDetailsChoice = async(req, res, next) => {
   const {user, params: {id}, query: {type}} = req;
   try {
     if (type === 'default') {
-      const [, [updatedAccount]] = await Promise.all([
-        processAnyData(userQueries.setExistingAccountDefaultFalse, [user.user_id]),
-        processAnyData(userQueries.SetNewAccountDefaultTrue, [user.user_id, id])
+      const [ , [ updatedAccount ] ] = await Promise.all([
+        processAnyData(userQueries.setExistingAccountDefaultFalse, [ user.user_id ]),
+        processAnyData(userQueries.SetNewAccountDefaultTrue, [ user.user_id, id ])
       ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: saved account default choice updated successfully updateAccountDetailsChoice.controller.user.js`);
       userActivityTracking(req.user.user_id, 35, 'success');
       return ApiResponse.success(res, enums.BANK_ACCOUNT_CHOICE_UPDATED_SUCCESSFULLY(type), enums.HTTP_OK, updatedAccount);
     }
     if (type === 'disbursement') {
-      const [, [updatedAccount]] = await Promise.all([
-        processAnyData(userQueries.setExistingAccountDisbursementFalse, [user.user_id]),
-        processAnyData(userQueries.SetNewAccountDisbursementTrue, [user.user_id, id])
+      const [ , [ updatedAccount ] ] = await Promise.all([
+        processAnyData(userQueries.setExistingAccountDisbursementFalse, [ user.user_id ]),
+        processAnyData(userQueries.SetNewAccountDisbursementTrue, [ user.user_id, id ])
       ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: saved account disbursement choice updated successfully updateAccountDetailsChoice.controller.user.js`);
       userActivityTracking(req.user.user_id, 36, 'success');
@@ -387,10 +387,10 @@ export const updateAccountDetailsChoice = async (req, res, next) => {
  * @returns { JSON } - A JSON response
  * @memberof UserController
  */
-export const verifyEmail = async (req, res, next) => {
+export const verifyEmail = async(req, res, next) => {
   try {
     const {user} = req;
-    await processAnyData(userQueries.verifyEmail, [user.user_id]);
+    await processAnyData(userQueries.verifyEmail, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:
     User email address verified in the DB verifyEmail.controller.user.js`);
     userActivityTracking(req.user.user_id, 4, 'success');
@@ -403,11 +403,11 @@ export const verifyEmail = async (req, res, next) => {
   }
 };
 
-export const availableVerificationMeans = async (req, res, next) => {
+export const availableVerificationMeans = async(req, res, next) => {
   const verification_means =  [
-      'nin'
+    'nin'
   ];
-// , 'international_passport'
+  // , 'international_passport'
   return ApiResponse.success(res, enums.AVAILABLE_VERIFICATION_MEANS, enums.HTTP_OK, verification_means);
 };
 
@@ -419,7 +419,7 @@ export const availableVerificationMeans = async (req, res, next) => {
  * @returns { JSON } - A JSON response
  * @memberof UserController
  */
-export const idUploadVerification = async (req, res, next) => {
+export const idUploadVerification = async(req, res, next) => {
   try {
     const {user, body} = req;
     const fileExt = path.extname(body.image_url.trim());
@@ -428,13 +428,13 @@ export const idUploadVerification = async (req, res, next) => {
     );
     const payload = UserPayload.imgVerification(user, body);
     await processAnyData(userQueries.updateIdVerification, payload);
-    await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [user.user_id, 'valid identification', document]);
+    await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'valid identification', document ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully saved uploaded selfie to user uploaded documents to the database
     idUploadVerification.controllers.user.js`);
     const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? '1' : '0';
     // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
     const tier_upgraded = tierChoice === '1' ? true : false;
-    const [data] = await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
+    const [ data ] = await processAnyData(userQueries.userIdVerification, [ user.user_id, tierChoice ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:
     user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
@@ -447,68 +447,68 @@ export const idUploadVerification = async (req, res, next) => {
   }
 };
 
-export const checkIfTheLengthOfThePassportNumberIsCorrect = async (passportNumber, user, res, next) => {
+export const checkIfTheLengthOfThePassportNumberIsCorrect = async(passportNumber, user, res, next) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now checking the length/format of the Passport Number checkIfTheLengthOfThePassportNumberIsCorrect.middlewares.user.js`);
   // const ipnRegex = /^\s{9}$/ // Matches exactly 9 digits
-  const ipnRegex = /^[a-zA-Z0-9]{9}$/ // Matches exactly 9 digits
+  const ipnRegex = /^[a-zA-Z0-9]{9}$/; // Matches exactly 9 digits
   if (!ipnRegex.test(passportNumber)) {
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: Passport Number is not in the correct format/length {internationPassportVerification} documentVerification.controller.user.js`);
     return false;
   }
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: International Passport Number is in the correct format/length {internationPassportVerification} documentVerification.controller.user.js`);
   return true;
-}
+};
 
-export const checkIfTheLengthOfTheNinIsCorrect = async (nin, user, res, next) => {
+export const checkIfTheLengthOfTheNinIsCorrect = async(nin, user, res, next) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now checking the length/format of the NIN checkIfTheLengthOfTheNinIsCorrect.middlewares.user.js`);
-  const ninRegex = /^\d{11}$/ // Matches exactly 11 digits
+  const ninRegex = /^\d{11}$/; // Matches exactly 11 digits
   if (!ninRegex.test(nin)) {
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: NIN is not in the correct format/length {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
     return false;
   }
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: NIN is in the correct format/length {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   return true;
-}
+};
 
-export const checkIfUserDetailsMatchNinResponse = async (user_data, user) => {
-  if(user_data.partner === 'zeeh') {
+export const checkIfUserDetailsMatchNinResponse = async(user_data, user) => {
+  if (user_data.partner === 'zeeh') {
     return (
-        user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
-        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-        user_data.date_of_birth === user.date_of_birth
-    );
-  }
-  if(user_data.partner === 'dojah') {
-    return (
-        user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
-        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
-        user_data.date_of_birth === user.date_of_birth
-    );
-  }
-
-}
-
-export const checkIfUserDetailsMatchDocumentCheckResponse = async (user_data, user) => {
-  return (
       user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+        user_data.date_of_birth === user.date_of_birth
+    );
+  }
+  if (user_data.partner === 'dojah') {
+    return (
+      user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
+        user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
+        user_data.date_of_birth === user.date_of_birth
+    );
+  }
+
+};
+
+export const checkIfUserDetailsMatchDocumentCheckResponse = async(user_data, user) => {
+  return (
+    user_data.first_name.toLowerCase() === user.first_name.toLowerCase() &&
       user_data.last_name.toLowerCase() === user.last_name.toLowerCase() &&
       // user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0') &&
       user_data.date_of_birth === user.dob
   );
-}
+};
 
-export const callTheZeehAfricaNINVerificationCheck = async (nin, user) => {
+export const callTheZeehAfricaNINVerificationCheck = async(nin, user) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user NIN with zeeh africa  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   const response = await zeehService.zeehNINVerificationCheck(nin, user);
   if (response.status === 'success') {
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with zeeh africa successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   } else {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   }
   return response;
-}
+};
 
-export const callTheDojahInternationPassportVerificationCheck = async (user_data, user) => {
+export const callTheDojahInternationPassportVerificationCheck = async(user_data, user) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user passport number with dojah  {passportNumberVerification} documentVerification.controller.user.js`);
   const response = await dojahService.dojahPassportNumberVerificationCheck(user_data, user);
   if (response.status === 'success') {
@@ -519,7 +519,7 @@ export const callTheDojahInternationPassportVerificationCheck = async (user_data
   return response;
 };
 
-export const callTheZeehAfricaInternationPassportVerificationCheck = async (user, document_id) => {
+export const callTheZeehAfricaInternationPassportVerificationCheck = async(user, document_id) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user passport number with zeeh africa  {passportNumberVerification} documentVerification.controller.user.js`);
   const response = await zeehService.zeehPassportNumberVerificationCheck(user, document_id);
   if (response.status === 'success') {
@@ -530,18 +530,18 @@ export const callTheZeehAfricaInternationPassportVerificationCheck = async (user
   return response;
 };
 
-export const callTheDojahNINVerificationCheck = async (nin, user) => {
+export const callTheDojahNINVerificationCheck = async(nin, user) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user NIN with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   const response = await dojahService.dojahNINVerification(nin, user);
   if (response.status === 200) {
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with dojah successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   } else {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user NIN with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   }
   return response;
-}
+};
 
-export const uploadImageToS3Bucket = async (user, document, user_data) => {
+export const uploadImageToS3Bucket = async(user, document, user_data) => {
   try {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: now trying to upload image to S3 bucket {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
@@ -570,7 +570,7 @@ export const uploadImageToS3Bucket = async (user, document, user_data) => {
   }
 };
 
-export const internationPassportVerification = async (req, res, next) => {
+export const internationPassportVerification = async(req, res, next) => {
   const { body, user } = req;
   logger.info('Now running InternationalPassportVerification');
   if (! await checkIfTheLengthOfThePassportNumberIsCorrect(body.document_id, user, res, next)) {
@@ -586,7 +586,7 @@ export const internationPassportVerification = async (req, res, next) => {
     internationalPassportVerificationResponse = await callTheDojahInternationPassportVerificationCheck(body.document_id, user);
     user_data = internationalPassportVerificationResponse.entity;
   }
-  if(internationalPassportVerificationResponse.status === 'success' || internationalPassportVerificationResponse.status === 200) {
+  if (internationalPassportVerificationResponse.status === 'success' || internationalPassportVerificationResponse.status === 200) {
     if (await checkIfUserDetailsMatchDocumentCheckResponse(user, user_data)) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the NIN details {internationPassportVerification} documentVerification.controller.user.js`);
 
@@ -602,16 +602,16 @@ export const internationPassportVerification = async (req, res, next) => {
 
       const fileExt = path.extname(user_data.photo.trim());
       const documen_t = encodeURIComponent(
-          await Hash.encrypt({document_url: user_data.photo.trim(), document_extension: fileExt})
+        await Hash.encrypt({document_url: user_data.photo.trim(), document_extension: fileExt})
       );
 
-      await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [user.user_id, 'valid identification', documen_t]);
+      await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'valid identification', documen_t ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_admin_uploaded_documents created successfully {internationPassportVerification} documentVerification.controller.user.js`);
 
-      //user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
+      // user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
       const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
       const tier_upgraded = tierChoice === 2 ? true : false;
-      const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
+      const [ response ] = await processAnyData(userQueries.userIdentityVerification, [ user.user_id, data.Location, tierChoice ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {internationPassportVerification} documentVerification.controller.user.js`);
 
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successful documentVerification.controller.user.js`);
@@ -630,7 +630,7 @@ export const internationPassportVerification = async (req, res, next) => {
   }
 };
 
-export const nationalIdentificationNumberVerification = async (document, user, res, next) => {
+export const nationalIdentificationNumberVerification = async(document, user, res, next) => {
   logger.info('Now running nationalIdentificationNumberVerification');
   if (! await checkIfTheLengthOfTheNinIsCorrect(document.document_id, user, res, next)) {
     return ApiResponse.error(res, 'NIN must be exactly 11 digits long and consist of numbers only', enums.HTTP_BAD_REQUEST, enums.CHECK_NIN_LENGTH_MIDDLEWARE);
@@ -638,7 +638,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   let user_data;
   let ninResponse;
   ninResponse = await callTheZeehAfricaNINVerificationCheck(document.document_id, user);
-  if(ninResponse.status === 'success') {
+  if (ninResponse.status === 'success') {
     user_data = ninResponse.data;
     user_data.partner = 'zeeh';
   }
@@ -646,7 +646,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
     ninResponse = await callTheDojahNINVerificationCheck(document.document_id, user);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:: ${ninResponse}`);
     user_data = ninResponse.data.entity;
-    if(user_data) {
+    if (user_data) {
       user_data.partner = 'dojah';
     }
   }
@@ -669,14 +669,14 @@ export const nationalIdentificationNumberVerification = async (document, user, r
         await Hash.encrypt({document_url: user_data.photo.trim(), document_extension: fileExt})
       );
 
-      await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [user.user_id, 'valid identification', documen_t]);
+      await processAnyData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'valid identification', documen_t ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user_admin_uploaded_documents created successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
-      //user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
+      // user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
       // const tierChoice = (user.is_completed_kyc && user.is_verified_bvn && user.tier === 1) ? 2 : user.tier;
       const tierChoice = (user.is_completed_kyc && user.is_verified_bvn) ? 1 : user.tier;
       const tier_upgraded = tierChoice === 1 ? true : false;
-      const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
+      const [ response ] = await processAnyData(userQueries.userIdentityVerification, [ user.user_id, data.Location, tierChoice ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user details updated successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
 
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user id verification successfull documentVerification.controller.user.js`);
@@ -695,29 +695,29 @@ export const nationalIdentificationNumberVerification = async (document, user, r
   }
 };
 
-export const callTheZeehAfricaVINVerificationCheck = async (vin, user, state) => {
+export const callTheZeehAfricaVINVerificationCheck = async(vin, user, state) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the the user VIN with zeeh africa  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   const response = await zeehService.zeehVINVerificationCheck(vin, user, state);
   if (response.status === 'success') {
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN verification with zeeh africa successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   } else {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN verification with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN verification with zeeh africa failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   }
   return response;
-}
+};
 
-export const callTheDojahVINVerificationCheck = async (vin, user) => {
+export const callTheDojahVINVerificationCheck = async(vin, user) => {
   logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: now trying to verify the user VIN with dojah  {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   const response = await dojahService.dojahNINVerification(vin, user);
   if (response.status === 200) {
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN with dojah successful {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   } else {
-      logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: verifying user VIN with dojah failed {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);
   }
   return response;
-}
+};
 
-export const checkIfUserDetailsMatchVINResponse = async (user_data, user) => {
+export const checkIfUserDetailsMatchVINResponse = async(user_data, user) => {
   const nameParts = user_data.full_name.split(' ');
   let firstName = '';
   let middleName = '';
@@ -736,9 +736,9 @@ export const checkIfUserDetailsMatchVINResponse = async (user_data, user) => {
     user_data.phone_number.replace('+234', '0') === user.phone_number.replace('+234', '0')
     // user_data.date_of_birth === user.date_of_birth
   );
-}
+};
 
-export const votersIdentificationNumberVerification = async (document_id, state, user, res) => {
+export const votersIdentificationNumberVerification = async(document_id, state, user, res) => {
   logger.info('Now running votersIdentificationNumberVerification');
   try {
     const response = await callTheZeehAfricaVINVerificationCheck(document_id, user, 'lagos');
@@ -758,7 +758,7 @@ export const votersIdentificationNumberVerification = async (document_id, state,
       if (checkIfUserDetailsMatchNinResponse(user_data, user)) {
         logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully checked that the user details match the VIN details {votersIdentificationNumberVerification} documentVerification.controller.user.js`);
 
-        //STOPPED HERE...
+        // STOPPED HERE...
       } else {
         const errorMessage = 'user details does not match the details on the provided VIN';
         logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }::::Info: ${ errorMessage } {votersIdentificationNumberVerification} documentVerification.controller.user.js`);
@@ -804,7 +804,7 @@ export const votersIdentificationNumberVerification = async (document_id, state,
 };
 
 
-export const documentVerification = async (req, res, next) => {
+export const documentVerification = async(req, res, next) => {
   try {
     const {user, body} = req;
     if (body.document_type == 'nin') {
@@ -836,7 +836,7 @@ export const documentVerification = async (req, res, next) => {
  * @memberof UserController
  */
 
-export const initiateAddressVerification = async (req, res) => {
+export const initiateAddressVerification = async(req, res) => {
   try {
     const {body, user, userAddressDetails, userYouVerifyCandidateDetails} = req;
     const candidateId = (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) ? userAddressDetails.you_verify_candidate_id :
@@ -883,13 +883,13 @@ export const initiateAddressVerification = async (req, res) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-export const updateUploadedUtilityBill = async (req, res, next) => {
+export const updateUploadedUtilityBill = async(req, res, next) => {
   try {
     const {user, document, userAddressDetails} = req;
     await Promise.all([
-      !userAddressDetails ? processOneOrNoneData(userQueries.addUserUtilityBillDocument, [user.user_id, document]) :
-        processOneOrNoneData(userQueries.updateUserUtilityBillDocument, [user.user_id, document]),
-      processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments, [user.user_id, 'utility bill', document])
+      !userAddressDetails ? processOneOrNoneData(userQueries.addUserUtilityBillDocument, [ user.user_id, document ]) :
+        processOneOrNoneData(userQueries.updateUserUtilityBillDocument, [ user.user_id, document ]),
+      processOneOrNoneData(userQueries.addDocumentTOUserUploadedDocuments, [ user.user_id, 'utility bill', document ])
     ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user uploaded utility bill document saved in the DB
     updateUploadedUtilityBill.controller.user.js`);
@@ -911,16 +911,16 @@ export const updateUploadedUtilityBill = async (req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-export const updateUserAddressVerificationStatus = async (req, res, next) => {
+export const updateUserAddressVerificationStatus = async(req, res, next) => {
   try {
     const {body, userAddressDetails} = req;
-    const [userDetails] = await processAnyData(userQueries.getUserByUserId, [userAddressDetails.user_id]);
+    const [ userDetails ] = await processAnyData(userQueries.getUserByUserId, [ userAddressDetails.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ userDetails.user_id }:::Info: user details fetched from the DB
     updateUserAddressVerificationStatus.controller.user.js`);
     if (body.data.taskStatus.toLowerCase() === 'verified') {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ userDetails.user_id }:::Info: user address verification successful
       updateUserAddressVerificationStatus.controller.user.js`);
-      await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [userAddressDetails.user_id, 'verified', false, true]);
+      await processOneOrNoneData(userQueries.updateAddressVerificationStatus, [ userAddressDetails.user_id, 'verified', false, true ]);
       const tierChoice = (userAddressDetails.is_verified_utility_bill) ? '2' : '1';
       // user needs address to have been verified and uploaded utility bill verified to move to tier 2
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ userDetails.user_id }:::Info: user tier value updated
@@ -967,7 +967,7 @@ export const updateUserAddressVerificationStatus = async (req, res, next) => {
  * @returns {object} - Returns user details.
  * @memberof UserController
  */
-export const updateUserProfile = async (req, res, next) => {
+export const updateUserProfile = async(req, res, next) => {
   try {
     const {body, user} = req;
     const payload = UserPayload.updateUserProfile(body, user);
@@ -1043,12 +1043,12 @@ export const getProfile = async(req, res, next) => {
  * @returns {object} - Returns the set default card
  * @memberof UserController
  */
-export const setDefaultCard = async (req, res, next) => {
+export const setDefaultCard = async(req, res, next) => {
   const {user, params: {id}} = req;
   try {
-    const [, [defaultCard]] = await Promise.all([
-      processAnyData(userQueries.setExistingCardDefaultFalse, [user.user_id]),
-      processAnyData(userQueries.setNewCardDefaultTrue, [user.user_id, id])
+    const [ , [ defaultCard ] ] = await Promise.all([
+      processAnyData(userQueries.setExistingCardDefaultFalse, [ user.user_id ]),
+      processAnyData(userQueries.setNewCardDefaultTrue, [ user.user_id, id ])
     ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:
     successfully set user's default card setDefaultCard.controller.user.js`);
@@ -1070,15 +1070,15 @@ export const setDefaultCard = async (req, res, next) => {
  * @memberof UserController
  */
 
-export const removeCard = async (req, res, next) => {
+export const removeCard = async(req, res, next) => {
   try {
     const {user, params: {id}, userDebitCard} = req;
-    await processAnyData(userQueries.removeCard, [user.user_id, id]);
+    await processAnyData(userQueries.removeCard, [ user.user_id, id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:
     successfully removed a user's saved card.controller.user.js`);
     if (userDebitCard.is_default) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: to be deleted debit card is default card removeCard.controller.user.js`);
-      await processAnyData(userQueries.updateSecondaryCardDefault, [user.user_id]);
+      await processAnyData(userQueries.updateSecondaryCardDefault, [ user.user_id ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: a new default card set automatically removeCard.controller.user.js`);
     }
     userActivityTracking(req.user.user_id, 28, 'success');
@@ -1099,24 +1099,24 @@ export const removeCard = async (req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const homepageDetails = async (req, res, next) => {
+export const homepageDetails = async(req, res, next) => {
   try {
     const {user} = req;
-    const [userOutstandingPersonalLoanRepayment] = await processAnyData(userQueries.userOutstandingPersonalLoan, [user.user_id]);
+    const [ userOutstandingPersonalLoanRepayment ] = await processAnyData(userQueries.userOutstandingPersonalLoan, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's personal loan outstanding fetched homepageDetails.controller.user.js`);
     const outstandingPersonalLoanAmount = !userOutstandingPersonalLoanRepayment ? 0 : parseFloat(userOutstandingPersonalLoanRepayment.total_outstanding_amount);
-    const [userOutstandingClusterLoanRepayment] = await processAnyData(userQueries.userOutstandingClusterLoan, [user.user_id]);
+    const [ userOutstandingClusterLoanRepayment ] = await processAnyData(userQueries.userOutstandingClusterLoan, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's cluster loan outstanding fetched homepageDetails.controller.user.js`);
     const outstandingClusterLoanAmount = !userOutstandingClusterLoanRepayment ? 0 : parseFloat(userOutstandingClusterLoanRepayment.total_outstanding_amount);
     const totalLoanObligation = parseFloat(parseFloat(outstandingPersonalLoanAmount) + parseFloat(outstandingClusterLoanAmount)).toFixed(2);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's total loan obligation calculated homepageDetails.controller.user.js`);
-    const personalLoanTransactions = await processAnyData(userQueries.userPersonalLoanTransactions, [user.user_id]);
+    const personalLoanTransactions = await processAnyData(userQueries.userPersonalLoanTransactions, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's personal loan repayment transactions fetched homepageDetails.controller.user.js`);
-    const underProcessingPersonalLoans = await processAnyData(userQueries.userExistingProcessingLoans, [user.user_id]);
+    const underProcessingPersonalLoans = await processAnyData(userQueries.userExistingProcessingLoans, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's still in process personal loans fetched from the DB homepageDetails.controller.user.jss`);
-    const clusterLoanTransactions = await processAnyData(userQueries.userClusterLoanTransactions, [user.user_id]);
+    const clusterLoanTransactions = await processAnyData(userQueries.userClusterLoanTransactions, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's cluster loan repayment transactions fetched homepageDetails.controller.user.js`);
-    const underProcessingClusterLoans = await processAnyData(userQueries.userExistingClusterProcessingLoans, [user.user_id]);
+    const underProcessingClusterLoans = await processAnyData(userQueries.userExistingClusterProcessingLoans, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: user's still in process cluster loans fetched from the DB homepageDetails.controller.user.js`);
     const activePromos = await processAnyData(userQueries.fetchAllActivePromos);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: all active promos fetched from the DB homepageDetails.controller.user.jss`);
@@ -1160,7 +1160,7 @@ export const homepageDetails = async (req, res, next) => {
  * @returns {object} - Returns successful or failed response of the updating action
  * @memberof UserController
  */
-export const updateNotificationIsRead = async (req, res, next) => {
+export const updateNotificationIsRead = async(req, res, next) => {
   try {
     const {body, user, params} = req;
     updateNotificationReadBoolean(user, params, body);
@@ -1181,7 +1181,7 @@ export const updateNotificationIsRead = async (req, res, next) => {
  * @returns {object} - Returns user created next of kin details
  * @memberof UserController
  */
-export const createNextOfKin = async (req, res, next) => {
+export const createNextOfKin = async(req, res, next) => {
   try {
     const {body, user} = req;
     const payload = UserPayload.createNextOfKin(body, user);
@@ -1205,7 +1205,7 @@ export const createNextOfKin = async (req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const createUserEmploymentDetails = async (req, res, next) => {
+export const createUserEmploymentDetails = async(req, res, next) => {
   try {
     const payload = UserPayload.employmentDetails(req.body, req.user);
     const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
@@ -1236,7 +1236,7 @@ export const createUserEmploymentDetails = async (req, res, next) => {
  * @returns {object} - Returns user homepage details
  * @memberof UserController
  */
-export const updateEmploymentDetails = async (req, res, next) => {
+export const updateEmploymentDetails = async(req, res, next) => {
   try {
     const result = await processOneOrNoneData(userQueries.fetchEmploymentDetails, [ req.user.user_id ]);
     const payload = UserPayload.updateEmploymentDetails(req.body, result);
@@ -1261,7 +1261,7 @@ export const updateEmploymentDetails = async (req, res, next) => {
  * @returns {object} - Returns user account details
  * @memberof UserController
  */
-export const updateMonoAccountId = async (req, res, next) => {
+export const updateMonoAccountId = async(req, res, next) => {
   try {
     const {user, body} = req;
     const result = await generateMonoAccountId(body);
@@ -1293,7 +1293,7 @@ export const updateMonoAccountId = async (req, res, next) => {
  * @returns {object} - Returns loan tier value
  * @memberof UserController
  */
-export const fetchLoanTierValue = async (req, res, next) => {
+export const fetchLoanTierValue = async(req, res, next) => {
   try {
     const {user} = req;
     const query = (req.query.type === 'tier_one') ? userQueries.fetchTierOneLoanValue : userQueries.fetchTierTwoLoanValue;
@@ -1315,7 +1315,7 @@ export const fetchLoanTierValue = async (req, res, next) => {
  * @returns {object} - Returns loan tier value
  * @memberof UserController
  */
-export const fetchAlertNotification = async (req, res, next) => {
+export const fetchAlertNotification = async(req, res, next) => {
   try {
     const {user} = req;
     const data = await processAnyData(userQueries.fetchAlert, []);
@@ -1336,10 +1336,10 @@ export const fetchAlertNotification = async (req, res, next) => {
  * @returns {object} - Returns user referral details
  * @memberof UserController
  */
-export const fetchUserReferralDetails = async (req, res, next) => {
+export const fetchUserReferralDetails = async(req, res, next) => {
   try {
     const {user} = req;
-    const [referralDetails] = await processAnyData(userQueries.fetchUserReferralDetails, [user.user_id]);
+    const [ referralDetails ] = await processAnyData(userQueries.fetchUserReferralDetails, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:: successfully fetched user referral details from the DB. fetchUserReferralDetails.controller.user.js`);
     return ApiResponse.success(res, enums.FETCHED_REFERRAL_DETAILS, enums.HTTP_OK, referralDetails);
   } catch (error) {
@@ -1357,10 +1357,10 @@ export const fetchUserReferralDetails = async (req, res, next) => {
  * @returns {object} - Returns user referral history
  * @memberof UserController
  */
-export const fetchUserReferralHistory = async (req, res, next) => {
+export const fetchUserReferralHistory = async(req, res, next) => {
   try {
     const {user} = req;
-    const referralHistory = await processAnyData(userQueries.fetchUserReferralHistory, [user.user_id]);
+    const referralHistory = await processAnyData(userQueries.fetchUserReferralHistory, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:: successfully fetched user referral history from the DB. fetchUserReferralHistory.controller.user.js`);
     return ApiResponse.success(res, enums.FETCHED_REFERRAL_HISTORY, enums.HTTP_OK, referralHistory);
   } catch (error) {
@@ -1378,17 +1378,17 @@ export const fetchUserReferralHistory = async (req, res, next) => {
  * @returns {object} - Returns success response
  * @memberof UserController
  */
-export const userClaimsReferralPoints = async (req, res, next) => {
+export const userClaimsReferralPoints = async(req, res, next) => {
   try {
     const {user} = req;
-    const [referralDetails] = await processAnyData(userQueries.fetchUserReferralDetails, [user.user_id]);
+    const [ referralDetails ] = await processAnyData(userQueries.fetchUserReferralDetails, [ user.user_id ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:: successfully fetched user referral details from the DB. userClaimsReferralPoints.controller.user.js`);
     if (parseFloat(referralDetails.unclaimed_reward_points) <= 0) {
       logger.info(`${ enums.CURRENT_TIME_STAMP }:::Info:: user has no unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
       return ApiResponse.error(res, enums.NO_UNCLAIMED_POINTS_TO_CLAIM, enums.HTTP_FORBIDDEN, enums.USER_CLAIMS_REFERRAL_POINTS_CONTROLLER);
     }
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info:: user has unclaimed points to claim. userClaimsReferralPoints.controller.user.js`);
-    const [updatedReferralValues] = await Promise.all([
+    const [ updatedReferralValues ] = await Promise.all([
       processOneOrNoneData(userQueries.updateUserClaimedPoints, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ]),
       processOneOrNoneData(userQueries.trackPointClaiming, [ user.user_id, parseFloat(referralDetails.unclaimed_reward_points) ])
     ]);
@@ -1415,7 +1415,7 @@ export const userClaimsReferralPoints = async (req, res, next) => {
  * @returns {object} - Returns user deleted response
  * @memberof UserController
  */
-export const deleteUserAccount = async (req, res, next) => {
+export const deleteUserAccount = async(req, res, next) => {
   try {
     const {user} = req;
     const deletedUser = await processOneOrNoneData(userQueries.deleteUserOwnAccount, [ user.user_id ]);
@@ -1434,12 +1434,12 @@ export const decryptUserBVN = async(req, res, next) => {
   try {
     const user_id = req.query.user_id;
     const user_bvn_data = await processOneOrNoneData(userQueries.fetchUserBvn, [ user_id ]);
-    if(user_bvn_data) {
+    if (user_bvn_data) {
       const result = await UserHash.decrypt(decodeURIComponent(user_bvn_data['bvn']));
       const data = {
         'bvn': user_bvn_data['bvn'],
         'unhashed': result
-      }
+      };
       return ApiResponse.success(res, enums.USER_DETAILS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
     } else {
       logger.error(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Error: error response returned from account id generation decryptUserBVN.controller.user.js`);
@@ -1449,29 +1449,29 @@ export const decryptUserBVN = async(req, res, next) => {
 
   } catch (error) {
     error.label = enums.FAILED_TO_FETCH_USER_BVN;
-    logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message)
+    logger.error(`failed to fetch the BVN record for user:::${enums.EDIT_USER_STATUS_CONTROLLER}`, error.message);
     return next(error);
-  };
+  }
 };
 
 export const sendBvnOtp = async(req, res, next) => {
   try {
     const {body: {bvn, date_of_birth}} = req;
-    //get bvn information from provider
+    // get bvn information from provider
     const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
 
       return ApiResponse.error(res, enums.UNABLE_TO_VERIFY_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
-    //compare bvn dob with provided dob information
+    // compare bvn dob with provided dob information
     if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
 
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
 
-    //if match, send otp to user
+    // if match, send otp to user
     const otpData = await sendOtpToBvnUser(bvn, data.data);
 
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
@@ -1481,7 +1481,7 @@ export const sendBvnOtp = async(req, res, next) => {
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
-}
+};
 
 export const verifyBvnInfo = async(req, res, next) => {
   try {
@@ -1489,14 +1489,14 @@ export const verifyBvnInfo = async(req, res, next) => {
     // run a query, if result exist, return result
 
     const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-    const result = data
+    const result = data;
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
     const parsedDate = moment(result.data.dateOfBirth, 'DD-MMM-YYYY');
-    let result_date = parsedDate.format('YYYY-MM-DD')
-    if(
+    let result_date = parsedDate.format('YYYY-MM-DD');
+    if (
       result.data.firstName.toLowerCase() === first_name
       && result.data.lastName.toLowerCase() === last_name
       && result.data.bvn.toLowerCase() === bvn
@@ -1512,7 +1512,7 @@ export const verifyBvnInfo = async(req, res, next) => {
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
   }
-}
+};
 
 
 export const verifyBvnOtp = async(req, res, next) => {
@@ -1521,12 +1521,12 @@ export const verifyBvnOtp = async(req, res, next) => {
 
     const [ existingOtp ] = await processAnyData(authQueries.getValidVerificationCode, [ code ]);
 
-    if(!existingOtp){
+    if (!existingOtp) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: no existing verification code found verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
     }
     const decryptedBvn = await Hash.decrypt(existingOtp.verification_key);
-    if(decryptedBvn !== bvn){
+    if (decryptedBvn !== bvn) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn does not match record verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
     }
@@ -1537,10 +1537,10 @@ export const verifyBvnOtp = async(req, res, next) => {
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code deleted verifyBvnOtp.controller.user.js`);
 
-    if(req.user){
-      const user = req.user
+    if (req.user) {
+      const user = req.user;
       const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-      const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
+      const [ updateBvn ] = await processAnyData(userQueries.updateUserBvn, [ user.user_id, hashedBvn ]);
       logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
       return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
     }
@@ -1557,50 +1557,51 @@ export const verifyBvnOtp = async(req, res, next) => {
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
   }
-}
+};
 
-const sendOtpToBvnUser = async (bvn, data) => {
+const sendOtpToBvnUser = async(bvn, data) => {
   const bvnHash = await Hash.encrypt(bvn.trim());
   const otp = Helpers.generateOtp();
-  //check if otp exist
+  // check if otp exist
   const [ existingOtp ] = await processAnyData(authQueries.getVerificationCode, [ otp ]);
   logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database sendBvnOtp.controllers.user.js`);
   if (existingOtp) {
     return sendBvnOtp(req, res, next);
   }
 
-    const expireAt = dayjs().add(10, 'minutes');
-    const expirationTime = dayjs(expireAt);
+  const expireAt = dayjs().add(10, 'minutes');
+  const expirationTime = dayjs(expireAt);
 
-    const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
-    const pn = parsePhoneNumber( data.phoneNumber1, { regionCode: 'NG' } )
+  const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
+  const pn = parsePhoneNumber(data.phoneNumber1, { regionCode: 'NG' });
 
-    if(!pn.valid){
-      logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
-      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+  if (!pn.valid) {
+    logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+  }
+
+  function maskString(str) {
+    if (str.length <= 7) {
+      return str;
     }
 
-    function maskString(str) {
-      if (str.length <= 7) {
-        return str;
-      }
+    const firstFour = str.slice(0, 4);
+    const lastThree = str.slice(-3);
+    const maskedPart = '*'.repeat(str.length - 7);
 
-      const firstFour = str.slice(0, 4);
-      const lastThree = str.slice(-3);
-      const maskedPart = '*'.repeat(str.length - 7);
+    return firstFour + maskedPart + lastThree;
+  }
 
-      return firstFour + maskedPart + lastThree;
-    }
+  otpData.recipientPhoneNumber = maskString(pn.number.e164);
+  otpData.recipientEmail = data.email ? maskString(data.email): null;
 
-    otpData.recipientPhoneNumber = maskString(pn.number.e164);
-    otpData.recipientEmail = data.email ? maskString(data.email): null;
+  await processAnyData(authQueries.upsertVerificationCode, [ bvnHash, otp, expirationTime, otpData.otpDuration ]);
+  logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
 
-    await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration])
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
+  await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
+  await MailService('BVN verification code', 'bvnOtp', {...otpData, email: data.email});
+  logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
 
-    await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
-    await MailService('BVN verification code', 'bvnOtp', {...otpData, email: data.email});
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
 
     return otpData
 }

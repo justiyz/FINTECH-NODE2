@@ -119,7 +119,7 @@ export const joinClusterOnInvitation = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user ${decisionType} cluster invitation joinClusterOnInvitation.controllers.cluster.js`);
       await Promise.all([
         formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ cluster_id, user.user_id ]) :
-            processOneOrNoneData(clusterQueries.createClusterMember, [ cluster_id, user.user_id, false ]),
+          processOneOrNoneData(clusterQueries.createClusterMember, [ cluster_id, user.user_id, false ]),
         processOneOrNoneData(clusterQueries.updateClusterInvitationStatus, [ user.user_id, cluster_id, true, false ]),
         processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ cluster_id ]),
         processOneOrNoneData(clusterQueries.updateRequestToJoinClusterTicketPreviouslyRaisedOnAcceptingClusterInvite, [ user.user_id, cluster_id, 'join cluster' ])
@@ -520,8 +520,8 @@ export const suggestNewClusterAdmin = async(req, res, next) => {
     const userDetails = await processOneOrNoneData(userQueries.getUserByUserId, [ params.invitee_id ]);
     const clusterDecisionType = await processOneOrNoneData(clusterQueries.fetchClusterDecisionType, [ 'cluster admin' ]);
     const suggestAdminClusterTicket =  await processOneOrNoneData(clusterQueries.suggestedAdmin,
-        [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`,
-          user.user_id, 1, params.invitee_id ]);
+      [ cluster.cluster_id, clusterDecisionType.name, `${user.first_name} ${user.last_name} suggest an admin for "${cluster.name}" cluster`,
+        user.user_id, 1, params.invitee_id ]);
     sendUserPersonalNotification(userDetails, `${cluster.name} new admin cluster request`, PersonalNotifications.selectNewAdmin(user, cluster), 'suggest-admin-cluster',
       { voting_ticket_id: suggestAdminClusterTicket.ticket_id, decision: 'none' });
     sendClusterNotification(user, cluster, clusterMember, `${user.first_name} ${user.last_name} is suggesting new cluster admin`, 'suggest-admin-cluster', {});
@@ -561,8 +561,8 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment
     checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
     const generalLoanApplicationDetails = await processOneOrNoneData(clusterQueries.initiateClusterLoanApplication,
-        [ cluster.cluster_id, cluster.name, user.user_id, parseFloat(body.total_amount), Number(body.duration_in_months), body.sharing_type,
-          parseFloat(body.total_amount), Number(body.duration_in_months) ]);
+      [ cluster.cluster_id, cluster.name, user.user_id, parseFloat(body.total_amount), Number(body.duration_in_months), body.sharing_type,
+        parseFloat(body.total_amount), Number(body.duration_in_months) ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated general loan application in the db
     checkClusterAdminClusterLoanEligibility.controllers.cluster.js`);
     const initiatorLoanApplicationDetails = await processOneOrNoneData(clusterQueries.createClusterMemberLoanApplication, [ generalLoanApplicationDetails.loan_id,
@@ -610,7 +610,7 @@ export const checkClusterAdminClusterLoanEligibility = async(req, res, next) => 
       const declinedDecisionPayload = ClusterPayload.processDeclinedClusterLoanDecisionUpdatePayload(data, body);
       await processOneOrNoneData(clusterQueries.updateUserDeclinedDecisionClusterLoanApplication, declinedDecisionPayload);
       const updatedClusterLoanDetails = await processOneOrNoneData(clusterQueries.updateDeclinedDecisionGeneralClusterLoanApplication,
-          [ initiatorLoanApplicationDetails.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility', parseFloat(body.total_amount) ]);
+        [ initiatorLoanApplicationDetails.loan_id, 'declined', 'cluster loan initiator did not qualify for loan facility', parseFloat(body.total_amount) ]);
       const returnData = await ClusterPayload.clusterLoanApplicationDeclinedDecisionResponse(user, initiatorLoanApplicationDetails,
         updatedClusterLoanDetails.status, 'DECLINED');
       sendClusterNotification(user, cluster, { is_admin: true }, `${user.first_name} ${user.last_name} initiates cluster loan application`, 'loan-application', {});
@@ -773,7 +773,7 @@ export const fetchClusterMemberLoanDetails = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: details of user cluster member cluster loan prepared
     fetchClusterMemberLoanDetails.controllers.cluster.js`);
     const [ nextRepaymentDetails ] = await processAnyData(clusterQueries.fetchClusterLoanNextRepaymentDetails, [ existingLoanApplication.member_loan_id, user.user_id ]);
-    if(typeof nextRepaymentDetails == 'undefined') {
+    if (typeof nextRepaymentDetails == 'undefined') {
       return ApiResponse.error(res, 'Repayment Information Not Found.', '404', enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next cluster loan repayment details fetched fetchClusterMemberLoanDetails.controllers.cluster.js`);
@@ -1317,7 +1317,7 @@ export const processClusterLoanRescheduling = async(req, res, next) => {
     await Promise.all([
       userUnpaidClusterRepayments.map((repayment) => {
         processOneOrNoneData(clusterQueries.updateNewClusterLoanRepaymentDate,
-            [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
         return repayment;
       }),
       processOneOrNoneData(clusterQueries.updateClusterLoanWithRescheduleDetails, [ existingLoanApplication.member_loan_id, Number(loanRescheduleRequest.extension_in_days),

@@ -16,7 +16,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 import * as zeehService from '../services/services.zeeh';
-import {FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED} from "../../lib/enums/lib.enum.messages";
+import {FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED} from '../../lib/enums/lib.enum.messages';
 
 const { SEEDFI_NODE_ENV } = config;
 

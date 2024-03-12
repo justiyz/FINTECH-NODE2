@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from '../../config';
 import enums from '../../lib/enums';
 import * as userMockedTestResponses from '../../../../tests/response/response.user';
-import {DOJAH_VIN_VERIFICATION_SERVICE} from "../../lib/enums/lib.enum.labels";
+import {DOJAH_VIN_VERIFICATION_SERVICE} from '../../lib/enums/lib.enum.labels';
 
 const {SEEDFI_NODE_ENV} = config;
 
@@ -12,7 +12,7 @@ const dojahAppId = '';
 const dojahApiURL = '';
 // dojahSDK.auth(dojahSecretKey);
 
-const dojahBvnVerificationCheck = async (bvn, user) => {
+const dojahBvnVerificationCheck = async(bvn, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       // Dojah sandbox returns a fixed value, this is done for flexibility sake while testing and developing
@@ -36,7 +36,7 @@ const dojahBvnVerificationCheck = async (bvn, user) => {
   }
 };
 
-const dojahPassportNumberVerificationCheck = async (passport_number, user) => {
+const dojahPassportNumberVerificationCheck = async(passport_number, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.dojahVerifyInternationPassportResponse(user, passport_number);
@@ -59,7 +59,7 @@ const dojahPassportNumberVerificationCheck = async (passport_number, user) => {
   }
 };
 
-const dojahVINVerification = async (vin, user) => {
+const dojahVINVerification = async(vin, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       // Dojah sandbox returns a fixed value, this is done for flexibility sake while testing and developing
@@ -84,7 +84,7 @@ const dojahVINVerification = async (vin, user) => {
   }
 };
 
-const dojahNINVerification = async (nin, user) => {
+const dojahNINVerification = async(nin, user) => {
   try {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyNinTestResponse(user, nin);
@@ -105,6 +105,6 @@ const dojahNINVerification = async (nin, user) => {
     logger.error(`Connecting to Dojah for NIN validation failed::${ enums.DOJAH_NIN_VERIFICATION_SERVICE }`, error.message);
     return error;
   }
-}
+};
 
 export {dojahBvnVerificationCheck, dojahVINVerification as dojahVINVerification, dojahNINVerification, dojahPassportNumberVerificationCheck};

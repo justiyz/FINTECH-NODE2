@@ -21,7 +21,8 @@ export default {
         to_char(DATE(loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
         to_char(DATE (created_at)::date, 'Mon DD YYYY') As application_date,
         rejection_reason,
-        offer_letter_url
+        offer_letter_url,
+        is_created_by_admin
     FROM personal_loans
     WHERE loan_id = $1`,
 
@@ -1085,7 +1086,8 @@ export default {
       to_char(DATE (loan_disbursed_at)::date, 'DDth Mon, YYYY') AS loan_start_date
     FROM cluster_member_loans
     WHERE user_id = $1
-    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' OR status = 'approved' OR status = 'completed' OR status='declined')
+    AND (status = 'pending' OR status = 'ongoing' OR status = 'over due' OR status = 'processing' OR status = 'in review' 
+    OR status = 'approved' OR status = 'completed' OR status='declined')
     ORDER BY created_at DESC`,
 
 
@@ -1125,7 +1127,8 @@ export default {
       to_char(DATE(proposed_payment_date)::date, 'Mon DD, YYYY') AS expected_repayment_date,
       to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
       to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
-      status
+      status,
+      amount_paid
     FROM personal_loan_payment_schedules
     WHERE loan_id = $1
     ORDER BY repayment_order ASC`,
@@ -1147,11 +1150,11 @@ export default {
 
 
 
-    fetchLoanMandateDetails: `
+  fetchLoanMandateDetails: `
         SELECT * FROM loan_mandate WHERE loan_id = $1
     `,
 
-    fetchBankAccountDetailsByUserId: `
+  fetchBankAccountDetailsByUserId: `
       SELECT
         id,
         user_id,
@@ -1166,7 +1169,7 @@ export default {
       WHERE user_id =$1 AND is_default = true AND is_deleted = false
       `,
 
-    fetchBankAccountDetailsByUserIdForMandate:`
+  fetchBankAccountDetailsByUserIdForMandate: `
       SELECT
         id,
         user_id,
@@ -1180,6 +1183,189 @@ export default {
       FROM user_bank_accounts
       WHERE user_id =$1 AND is_deleted = false
       `,
+  createManualLoan: `
+          INSERT INTO personal_loans(
+                user_id,
+                amount_requested,
+                loan_reason,
+                loan_tenor_in_months,
+                total_repayment_amount,
+                total_interest_amount,
+                percentage_pricing_band,
+                percentage_processing_fee,
+                percentage_insurance_fee,
+                percentage_advisory_fee,
+                monthly_interest,
+                processing_fee,
+                insurance_fee,
+                advisory_fee,
+                monthly_repayment,
+                loan_decision,
+                is_loan_disbursed,
+                loan_disbursed_at,
+                total_outstanding_amount,
+                status,
+                initial_amount_requested,
+                initial_loan_tenor_in_months,
+                created_at,
+                is_created_by_admin
+                ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+                $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, true
+                )
+                RETURNING loan_id`,
+        
+  fetchUsers: `
+        SELECT
+          id,
+          user_id,
+          TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) AS name,
+          email,
+          tier,
+          to_char(DATE (users.created_at)::date, 'Mon DD YYYY') As date,
+          loan_status,
+          status,
+            bvn
+      FROM users
+      WHERE (TRIM(CONCAT(users.first_name, ' ', users.middle_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.first_name, ' ', users.last_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.first_name, ' ', users.middle_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.last_name, ' ', users.middle_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.first_name, ' ', users.last_name)) ILIKE TRIM($1)
+        OR TRIM(CONCAT(users.middle_name, ' ', users.last_name, ' ', users.first_name)) ILIKE TRIM($1)
+        OR $1 IS NULL)
+      ORDER BY created_at DESC     
+        `,
+
+  fetchLoanPeriod: `
+      SELECT period
+      FROM loan_calculation_periods
+      WHERE period = CASE
+          WHEN $1 BETWEEN 1 AND 12 THEN 12
+          WHEN $1 BETWEEN 13 AND 24 THEN 24
+          ELSE 36
+          END; 
+   `,
+
+  checkIfUserAlreadyHasOngoingLoan: `
+          SELECT
+              id,
+              loan_id,
+              user_id,
+              loan_reason,
+              loan_tenor_in_months,
+              status,
+              created_at
+          FROM personal_loans  
+          WHERE user_id = $1 AND status IN ('ongoing', 'in review', 'processing', 'approved');
+  `,
+
+  fetchLoanDetailsByLoanId: `
+          SELECT
+          id,
+          loan_id,
+          user_id,
+          amount_requested,
+          loan_reason,
+          loan_tenor_in_months,
+          total_repayment_amount,
+          total_interest_amount,
+          percentage_orr_score,
+          percentage_pricing_band AS interest_rate,
+          monthly_interest,
+          monthly_repayment,
+          total_outstanding_amount,
+          extra_interests,
+          processing_fee,
+          insurance_fee,
+          advisory_fee,
+          status,
+          loan_decision,
+          is_loan_disbursed,
+          to_char(DATE(loan_disbursed_at)::date, 'Mon DD, YYYY') AS loan_disbursed_at,
+          to_char(DATE (created_at)::date, 'Mon DD YYYY') As application_date,
+          rejection_reason,
+          offer_letter_url
+      FROM personal_loans
+      WHERE loan_id = $1`,
+
+  updateRepaymentStatusToPaid: `
+            UPDATE personal_loan_payment_schedules
+            SET updated_at = NOW(),
+                status = 'paid'
+            WHERE loan_id = $1
+    `,
+
+  checkIfLoanIsActive: `
+        SELECT
+          id, 
+          total_outstanding_amount 
+        FROM personal_loans 
+        WHERE user_id = $1 AND loan_id = $2 AND status IN ('ongoing', 'over due')
+    `,
+  sumOfPaymentsRecordedOnPaymentSchedules: `
+        SELECT 
+        COALESCE(SUM(amount_paid), 0) AS total_recorded_amount_paid 
+        FROM personal_loan_payment_schedules
+        WHERE user_id = $1 AND loan_id = $2
+    `,
+
+  recordPayment: `
+        INSERT INTO personal_loan_payments 
+        (user_id, loan_id, amount, created_at, loan_purpose, transaction_type, status, payment_description, payment_means) 
+        VALUES ($1, $2, $3, $4, 'loan repayment', 'debit', 'paid', 'loan repayment', 'manual') 
+        RETURNING user_id, loan_id, amount, created_at, loan_purpose, transaction_type, status
+    `,
+
+  updateScheduleStatus: `
+        UPDATE personal_loan_payment_schedules
+        SET updated_at = NOW(),
+            status = $4, 
+            amount_paid = $3, 
+            payment_at = $2 
+        WHERE id = $1
+    `,
+
+  updateScheduleStatusToPaid: `
+      UPDATE personal_loan_payment_schedules
+      SET updated_at = NOW(),
+      status = 'paid'
+      WHERE loan_id = $1
+`,
+  updateLoanStatusToComplete: `
+      UPDATE personal_loans 
+      SET status = 'completed', 
+      completed_at = $3, 
+      updated_at = NOW() 
+      WHERE loan_id = $1 AND user_id = $2 
+      RETURNING status;  
+    `,
+
+  updateLoanOutstandingAmount: `
+        UPDATE personal_loans
+        SET
+            updated_at = NOW(),
+            total_outstanding_amount = total_outstanding_amount - $3::FLOAT
+        WHERE loan_id = $1
+        AND user_id = $2
+        RETURNING total_outstanding_amount 
+    `,
+
+  recordLoanDisbursementPaymentHistory: `       
+      INSERT INTO paystack_payment_histories (
+      user_id,
+      amount,
+      payment_platform,
+      transaction_reference,
+      payment_type,
+      payment_status,
+      refund_status,
+      transaction_type,
+      payment_reason,
+      loan_id
+  ) VALUES ($1, $2, $3, $4, $5, 'success', 'pending', 'debit', $6, $7) RETURNING id
+    `
 };
+
 
 

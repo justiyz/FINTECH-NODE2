@@ -623,7 +623,7 @@ export const loanReschedulingSummary = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next loan repayment details fetched loanReschedulingSummary.controllers.loan.js`);
     const returnData = await LoanPayload.loanReschedulingRequestSummaryResponse(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment);
     const rescheduleRequest = await processOneOrNoneData(loanQueries.createRescheduleRequest,
-        [ existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
+      [ existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request saved in the DB loanReschedulingSummary.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 94, 'success');
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY, enums.HTTP_OK, { ...returnData, reschedule_id: rescheduleRequest.reschedule_id });
@@ -665,7 +665,7 @@ export const processLoanRescheduling = async(req, res, next) => {
     await Promise.all([
       userUnpaidRepayments.map((repayment) => {
         processOneOrNoneData(loanQueries.updateNewRepaymentDate,
-            [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
         return repayment;
       }),
       processOneOrNoneData(loanQueries.updateLoanWithRescheduleDetails, [ existingLoanApplication.loan_id, Number(loanRescheduleRequest.extension_in_days),
