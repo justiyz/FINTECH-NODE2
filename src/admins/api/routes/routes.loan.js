@@ -276,7 +276,7 @@ router.post(
 );
 
 router.post(
-  '/:loan_id/:user_id/process-rescheduling',
+  '/:loan_id/:user_id/reschedule',
   AuthMiddleware.validateAdminAuthToken,
   RoleMiddleware.adminAccess('loan application', 'create'),
   LoanMiddleware.checkIfAdminIsSuperAdmin,
