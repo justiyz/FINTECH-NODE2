@@ -161,7 +161,7 @@ const loanRepaymentType = Joi.object().keys({
 });
 
 const createMandateRequestPayload = Joi.object().keys({
-  loan_id: Joi.string().required(),
+  loan_id: Joi.string().required()
 });
 
 

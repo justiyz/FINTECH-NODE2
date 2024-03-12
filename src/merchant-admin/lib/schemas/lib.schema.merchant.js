@@ -1,4 +1,4 @@
-const Joi = require('joi')//.extend(require('@joi/date'));
+const Joi = require('joi');// .extend(require('@joi/date'));
 
 const createMerchant = Joi.object().keys({
   business_name: Joi.string().min(3).required(),
@@ -7,7 +7,7 @@ const createMerchant = Joi.object().keys({
     .email()
     .messages({
       'string.pattern.base': 'Please enter a valid email.',
-      'string.empty': 'Email is not allowed to be empty',
+      'string.empty': 'Email is not allowed to be empty'
     }),
   phone_number: Joi.string()
     .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
@@ -17,7 +17,7 @@ const createMerchant = Joi.object().keys({
     }).required(),
   interest_rate: Joi.number().min(0).required().label('Interest Rate'),
   orr_score_threshold: Joi.string().required().regex(/^\d+$/).messages({
-    'string.pattern.base': 'ORR score must be a number',
+    'string.pattern.base': 'ORR score must be a number'
   }).label('ORR score'),
   processing_fee: Joi.number().min(0).required().label('Processing fee'),
   insurance_fee: Joi.number().min(0).required().label('Insurance fee'),
@@ -28,7 +28,7 @@ const createMerchant = Joi.object().keys({
   // bank account details
   bank_name: Joi.string().required().label('Bank Name'),
   bank_code: Joi.number().required().label('Bank Code'),
-  account_number: Joi.string().required().label('Account number'),
+  account_number: Joi.string().required().label('Account number')
 });
 
 const createMerchantAdmin = Joi.object().keys({
@@ -39,7 +39,7 @@ const createMerchantAdmin = Joi.object().keys({
     .email()
     .messages({
       'string.pattern.base': 'Please enter a valid email.',
-      'string.empty': 'Email is not allowed to be empty',
+      'string.empty': 'Email is not allowed to be empty'
     }),
   phone_number: Joi.string()
     .regex(new RegExp('^(\\+[0-9]{2,}[0-9]{4,}[0-9]*)(x?[0-9]{1,})?$'))
@@ -53,7 +53,7 @@ const createMerchantAdmin = Joi.object().keys({
 });
 
 const createMerchantAdminParams = Joi.object().keys({
-  merchant_id: Joi.string().required().label('Merchant ID'),
+  merchant_id: Joi.string().required().label('Merchant ID')
 });
 
 const fetchMerchants = Joi.object().keys({
@@ -67,7 +67,7 @@ const fetchMerchantUsers = Joi.object().keys({
   page: Joi.number().positive().optional(),
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
-  status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted'),
+  status: Joi.string().optional().valid('active', 'inactive', 'deactivated', 'suspended', 'watchlisted', 'blacklisted')
 });
 
 const fetchMerchantLoans = Joi.object().keys({
@@ -75,15 +75,15 @@ const fetchMerchantLoans = Joi.object().keys({
   per_page: Joi.number().positive().optional(),
   search: Joi.string().optional(),
   user_id: Joi.string().optional().allow(''),
-  status: Joi.string().optional().valid('pending', 'declined', 'approved', 'ongoing', 'over due', 'completed'),
+  status: Joi.string().optional().valid('pending', 'declined', 'approved', 'ongoing', 'over due', 'completed')
 });
 
 const filterByUserId = Joi.object().keys({
-  user_id: Joi.string().required(),
+  user_id: Joi.string().required()
 });
 
 const fetchRepaymentSchedule = Joi.object().keys({
-  loan_id: Joi.string().required(),
+  loan_id: Joi.string().required()
 });
 
 const updateMerchant = Joi.object().keys({
@@ -97,7 +97,7 @@ const updateMerchant = Joi.object().keys({
     }).optional(),
   interest_rate: Joi.number().min(0).optional().label('Interest Rate'),
   orr_score_threshold: Joi.string().optional().regex(/^\d+$/).messages({
-    'string.pattern.base': 'ORR score must be a number',
+    'string.pattern.base': 'ORR score must be a number'
   }).label('ORR score'),
   processing_fee: Joi.number().min(0).optional().label('Processing fee'),
   insurance_fee: Joi.number().min(0).optional().label('Insurance fee'),
@@ -108,12 +108,12 @@ const updateMerchant = Joi.object().keys({
   // bank account details
   bank_name: Joi.string().optional().label('Bank Name'),
   bank_code: Joi.number().optional().label('Bank Code'),
-  account_number: Joi.string().optional().label('Account number'),
+  account_number: Joi.string().optional().label('Account number')
 });
 
 const updateMerchantUser = Joi.object().keys({
   user_id: Joi.string().required(),
-  status: Joi.string().optional().valid('inactive', 'active', 'suspended', 'deactivated'),
+  status: Joi.string().optional().valid('inactive', 'active', 'suspended', 'deactivated')
 });
 
 const resolveAccountNumber = Joi.object().keys({
@@ -130,12 +130,12 @@ const merchantPassword = Joi.object().keys({
 
 const merchantAdminCredentials = Joi.object().keys({
   email: Joi.string()
-  .required()
-  .email()
-  .messages({
-    'string.pattern.base': 'Please enter a valid email.',
-    'string.empty': 'Email is not allowed to be empty',
-  }),
+    .required()
+    .email()
+    .messages({
+      'string.pattern.base': 'Please enter a valid email.',
+      'string.empty': 'Email is not allowed to be empty'
+    }),
   password: Joi.string().required()
 });
 

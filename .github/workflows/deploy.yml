@@ -1,0 +1,61 @@
+name: Docker Image CI for Seedfi-backend
+
+on:
+  push:
+    branches:
+      - "development"
+
+jobs:
+  build:
+    # runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON('["ubuntu-latest", "self-hosted"]')[github.repository == 'github/docs-internal'] }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: 'development'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Determine Image Tag
+        id: determine-tag
+        run: echo "::set-output name=tag::$(if [ -n "$GITHUB_TAG" ]; then echo $GITHUB_TAG; else echo $GITHUB_RUN_NUMBER; fi)"
+
+      - name: Build, tag, and push image to Amazon ECR 🏷
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: "dev/seedfi-api"
+          IMAGE_TAG: ${{ steps.determine-tag.outputs.tag }}
+        run: |
+          docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker images
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          
+      - uses: actions/checkout@v2 
+      
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.HOST }}
+          script: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            docker pull ${{ steps.login-ecr.outputs.registry }}/dev/seedfi-api:${{ steps.determine-tag.outputs.tag }}
+            docker stop seedfi-backend-test && docker rm seedfi-backend-test
+            docker run -id -p 4500:4000 --name seedfi-backend-test --env-file=/opt/vars/dev-seedfi.env --restart always ${{ steps.login-ecr.outputs.registry }}/dev/seedfi-api:${{ steps.determine-tag.outputs.tag }}
+            docker image prune -f --filter "dangling=true"
+
+            

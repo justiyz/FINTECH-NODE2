@@ -113,6 +113,6 @@ const expireBankStatementRecord = async(userID) => {
     logger.error(`Connecting to seedfi underwriting service for loan category orr average failed::${enums.LOAN_CATEGORY_ORR_AVERAGE_METRICS_SERVICE}`, error.message);
     return error;
   }
-}
+};
 
 export { userOrrScoreBreakdown, loanOrrScoreBreakdown, loanScoreCardBreakdown, loanCategoryOrrAverageMetrics, expireBankStatementRecord };

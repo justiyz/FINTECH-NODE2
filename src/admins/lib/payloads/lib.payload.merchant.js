@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 export default {
   createMerchant: (body) => [
@@ -40,7 +40,7 @@ export default {
     body.bank_code.trim(),
     body.account_number.trim(),
     body.account_name.trim(),
-    body.transfer_recipient_code.trim(),
+    body.transfer_recipient_code.trim()
   ],
   fetchMerchantUsers: (query) => [
     query.search ? `%${query.search}%` : null,
@@ -58,7 +58,7 @@ export default {
     req.params.merchant_id,
     req.query.user_id,
     req.query.status,
-    req.query.search ? `%${req.query.search}%` : null,
+    req.query.search ? `%${req.query.search}%` : null
   ],
   fetchMerchantLoans: (req) => {
     const page = req.query.page || 1;
@@ -70,7 +70,7 @@ export default {
       req.params.merchant_id,
       req.query.user_id,
       req.query.status,
-      req.query.search ? `%${req.query.search}%` : null,
-    ]
-  },
+      req.query.search ? `%${req.query.search}%` : null
+    ];
+  }
 };

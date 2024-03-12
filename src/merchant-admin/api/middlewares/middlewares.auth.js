@@ -7,8 +7,8 @@ import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import config from '../../../users/config/index';
-import {TOKEN_VALIDATION_UNSUCCESSFUL} from "../../../users/lib/enums/lib.enum.labels";
-import {INVALID_PASS_STRING} from "../../../users/lib/enums/lib.enum.messages";
+import {TOKEN_VALIDATION_UNSUCCESSFUL} from '../../../users/lib/enums/lib.enum.labels';
+import {INVALID_PASS_STRING} from '../../../users/lib/enums/lib.enum.messages';
 
 /**
  * check if password sent matches admins password in the DB

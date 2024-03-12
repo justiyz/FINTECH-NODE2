@@ -10,7 +10,7 @@ const mandateCreatedPayload = Joi.object().keys({
 });
 
 const createMandateRequestPayload = Joi.object().keys({
-  loanReference: Joi.string().required(),
+  loanReference: Joi.string().required()
 });
 
 const loanBalanceUpdate = Joi.object().keys({
@@ -20,7 +20,7 @@ const loanBalanceUpdate = Joi.object().keys({
   recoveryFee: Joi.number().required(),
   settlementAmount: Joi.number().required(),
   transactionReference: Joi.string().required(),
-  narration: Joi.string().required(),
+  narration: Joi.string().required()
 });
 
 
