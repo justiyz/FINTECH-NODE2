@@ -221,4 +221,55 @@ router.post(
   LoanController.createMandateConsentRequest
 );
 
+router.get(
+  '/users',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  LoanController.fetchUsers
+);
+
+router.post(
+  '/create-loan',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.createManualLoan, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  LoanController.createManualLoan
+);
+
+router.get(
+  '/:loan_id/outstanding-amount',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'read'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.loanId, 'params'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanController.fetchUserOutstandingAmount
+);
+
+router.post(
+  '/:loan_id/:user_id/update-payment',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.checkIfLoanIsActive, 'params'),
+  Model(Schema.updatePayment, 'payload'),
+  LoanMiddleware.checkIfLoanExists,
+  LoanMiddleware.checkIfLoanIsActive,
+  LoanMiddleware.checkIfAdminCreatedLoan,
+  LoanMiddleware.checkIfAmountPaidExceedsOutstanding,
+  LoanController.updateUserPayment
+);
+
+router.post(
+  '/pre-approved-loan',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.createPreApprovedLoan, 'payload'),
+  UserMiddleware.checkIfUserExists,
+  LoanController.createManualLoan
+);
 export default router;

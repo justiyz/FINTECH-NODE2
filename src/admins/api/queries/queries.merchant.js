@@ -15,7 +15,8 @@ export default {
       merchant_loan_limit
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
-    ) RETURNING id, merchant_id, business_name, email, phone_number, interest_rate, address, orr_score_threshold, processing_fee, insurance_fee, advisory_fee, customer_loan_max_amount, merchant_loan_limit, created_at;
+    ) RETURNING id, merchant_id, business_name, email, phone_number, interest_rate, address, orr_score_threshold,
+     processing_fee, insurance_fee, advisory_fee, customer_loan_max_amount, merchant_loan_limit, created_at;
   `,
   onboardMerchant: `
     UPDATE merchants
@@ -83,7 +84,7 @@ export default {
   `,
 
   fetchMerchantAdminByEmail:
-    `SELECT * FROM merchant_admins WHERE email = $1`,
+    'SELECT * FROM merchant_admins WHERE email = $1',
 
   fetchMerchantAdminPivotByAdminEmail:
   `SELECT mam.*
@@ -93,7 +94,7 @@ export default {
 
 
   fetchMerchantAdminByEmailAndPhoneNo:
-    `SELECT id FROM merchant_admins WHERE (email = $1 OR phone_number = $2) AND merchant_id = $3;`,
+    'SELECT id FROM merchant_admins WHERE (email = $1 OR phone_number = $2) AND merchant_id = $3;',
 
 
   fetchMerchantAdmins: `
@@ -140,7 +141,7 @@ export default {
       )
     `,
 
-  fetchMerchantByEmailAndPhoneNo: `SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;`,
+  fetchMerchantByEmailAndPhoneNo: 'SELECT id FROM merchants WHERE email = $1 OR phone_number = $2;',
   fetchSingleMerchant: `
     SELECT
       merchants.merchant_id,
@@ -484,7 +485,8 @@ export default {
       WHERE merchant_id = $1`,
 
   getMerchantByEmailV2: `
-    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, verification_token_request_count, invalid_verification_token_count, gender, created_at, updated_at
+    SELECT id, merchant_id, first_name, last_name, status, email, phone_number, verification_token_request_count, 
+    invalid_verification_token_count, gender, created_at, updated_at
     FROM merchants
     WHERE email = $1;
   `,
@@ -513,5 +515,5 @@ export default {
     SET
       updated_at = NOW(),
       status = 'deactivated'
-    WHERE merchant_id = $1`,
+    WHERE merchant_id = $1`
 };

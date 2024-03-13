@@ -7,7 +7,7 @@ export default {
     query.tier,
     query.loan_reason,
     query.page ? (query.page - 1) * (query.per_page || 10) : 0,
-    query.per_page ? query.per_page : '10',
+    query.per_page ? query.per_page : '10'
   ],
 
   fetchAllLoans: (query) => [
@@ -16,7 +16,7 @@ export default {
     query.start_date,
     query.end_date,
     query.tier,
-    query.loan_reason,
+    query.loan_reason
   ],
 
   fetchRepaidLoans: (query) => [

@@ -5,9 +5,9 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as RolesMiddleware from '../middlewares/middlewares.roles';
 import * as MerchantMiddleware from '../middlewares/middlewares.merchant';
 import * as MerchantController from '../controllers/controller.merchant';
-import * as AuthController from "../controllers/controllers.auth";
-import * as AdminMiddleware from "../middlewares/middlewares.admin";
-import {compareMerchantPassword, verifyMerchantLoginVerificationToken} from "../middlewares/middlewares.merchant";
+import * as AuthController from '../controllers/controllers.auth';
+import * as AdminMiddleware from '../middlewares/middlewares.admin';
+import {compareMerchantPassword, verifyMerchantLoginVerificationToken} from '../middlewares/middlewares.merchant';
 const router = Router();
 
 // ============== POST =================== //
@@ -78,7 +78,7 @@ router.post(
   '/:merchant_id/merchant-reset-password',
   Model(Schema.merchantPassword, 'payload'),
   MerchantController.setPassword
-)
+);
 
 router.post(
   '/:merchant_admin_id/password/update',

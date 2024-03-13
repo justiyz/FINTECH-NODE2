@@ -18,22 +18,22 @@ const { SEEDFI_NODE_ENV } = config;
  * @returns {object} - Returns user credit score breakdown.
  * @memberof SeedfiCreditscoringService
  */
-const userCreditScoreBreakdown = async (payload) => {
+const userCreditScoreBreakdown = async(payload) => {
   try {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.seedfiUnderwritingUserAndLoanApplicationOrrBreakdownTestResponse(user_id, loan_id);
     }
     const options = {
       method: 'post',
-      url: `https://stg-creditscoring.theseedfi.com/creditscoring/api/demo/calculate-credit-score/`,
+      url: 'https://stg-creditscoring.theseedfi.com/creditscoring/api/demo/calculate-credit-score/',
       data: {
         ...payload
-      },
+      }
     };
     const data = await axios(options);
     return data;
   } catch (error) {
-    logger.error(`Connecting to seedfi creditscoring service for merchant user credit score failed::SeedfiCreditscoringService::userCreditScoreBreakdown`, error.message);
+    logger.error('Connecting to seedfi creditscoring service for merchant user credit score failed::SeedfiCreditscoringService::userCreditScoreBreakdown', error.message);
     return error;
   }
 };

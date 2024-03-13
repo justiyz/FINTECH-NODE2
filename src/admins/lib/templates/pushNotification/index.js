@@ -22,3 +22,7 @@ export const userTierUpgraded = () => {
   return 'Your tier has been successfully upgraded to tier 2';
 };
 
+export const loanApproved = (loanAmount) => {
+  return `Your loan of ${loanAmount} has been approved, kindly login and accept the terms for disbursement to occur`;
+};
+

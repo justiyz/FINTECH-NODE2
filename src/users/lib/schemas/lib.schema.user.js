@@ -50,7 +50,7 @@ const verifyBVNInformation = Joi.object().keys({
   first_name: Joi.string().required(),
   last_name: Joi.string().required(),
   date_of_birth: Joi.string().required(),
-  gender: Joi.string().required(),
+  gender: Joi.string().required()
 });
 
 const idDocumentVerification = Joi.object().keys({

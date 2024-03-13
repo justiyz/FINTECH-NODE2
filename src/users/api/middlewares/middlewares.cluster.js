@@ -406,7 +406,7 @@ export const userTakesRequestToJoinClusterDecision = async(req, res, next) => {
         userTakesRequestToJoinClusterDecision.middleware.cluster.js`);
         await Promise.all([
           formerClusterMember ? processOneOrNoneData(clusterQueries.reinstateClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id ]) :
-              processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
+            processOneOrNoneData(clusterQueries.createClusterMember, [ votingTicketDetails.cluster_id, requestingNMemberDetails.user_id, false ]),
           processOneOrNoneData(clusterQueries.incrementClusterMembersCount, [ votingTicketDetails.cluster_id ]),
           processOneOrNoneData(clusterQueries.updateDecisionTicketFulfillment, [ ticket_id ])
         ]);
