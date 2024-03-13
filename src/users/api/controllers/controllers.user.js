@@ -33,7 +33,7 @@ import moment from "moment-timezone";
 import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
 
 
-const { SEEDFI_API_VERSION } = config;
+const { SEEDFI_NODE_ENV, SEEDFI_API_VERSION } = config;
 
 /**
  * update user device fcm token
