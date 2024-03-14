@@ -1,3 +1,4 @@
+import { parsePhoneNumber } from 'awesome-phonenumber';
 import { processOneOrNoneData, processAnyData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
@@ -8,8 +9,8 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import * as zeehService from '../services/services.zeeh';
 import * as recovaService from '../services/services.recova';
 import dayjs from 'dayjs';
-import { parsePhoneNumber } from 'awesome-phonenumber';
 import config from '../../config';
+import { generateLoanRepaymentSchedule } from '../../lib/utils/lib.util.helpers';
 
 /**
  * update user device fcm token
@@ -211,7 +212,26 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
   try {
     const [userDetails] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [user.user_id]);
-    //TODO create temporary repayment schedules for the loan and disburse it inside the mandate accepted event
+
+    const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.id);
+    repaymentSchedule.forEach(async schedule => {
+      await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
+        schedule.loan_id,
+        schedule.user_id,
+        schedule.repayment_order,
+        schedule.principal_payment,
+        schedule.interest_payment,
+        schedule.fees,
+        schedule.total_payment_amount,
+        schedule.pre_payment_outstanding_amount,
+        schedule.post_payment_outstanding_amount,
+        schedule.proposed_payment_date,
+        schedule.proposed_payment_date,
+      ]);
+      return schedule;
+    });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user pre disbursement loan repayment details saved createMandateConsentRequest.controllers.recova.js`);
+
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
 

@@ -173,8 +173,8 @@ export const isBvnPreviouslyExisting = async (req, res, next) => {
   try {
     const { body, user } = req;
     // const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvns, []);
-    const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvnsRefined, [ user.last_name ]);
-    if(allExistingBvns.length < 1) {
+    const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvnsRefined, [user.last_name]);
+    if (allExistingBvns.length < 1) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: related bvn not found isBvnPreviouslyExisting.middlewares.user.js`);
       return next();
     }
@@ -216,7 +216,7 @@ export const verifyBvn = async (req, res, next) => {
       user,
     } = req;
     const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Zeeh Africa verifyBvn.middlewares.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
     if (!data.success) {
       const data = await dojahBvnVerificationCheck(bvn.trim(), user);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Dojah verifyBvn.middlewares.user.js`);
@@ -233,7 +233,7 @@ export const verifyBvn = async (req, res, next) => {
         dateOfBirth: dojahData.date_of_birth,
         gender: dojahData.gender,
         phone_number1: dojahData.phone_number1,
-        phone_number2: dojahData.phone_number2
+        phone_number2: dojahData.phone_number2,
       };
       if (user.first_name.trim().toLowerCase() !== data.data.firstName.replace(/\s+/g, '').trim().toLowerCase()) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
@@ -340,7 +340,7 @@ export const checkIfBvnFlaggedBlacklisted = async (req, res, next) => {
 export const checkIfBvnFlaggedBlacklistedCheckByLastName = async (req, res, next) => {
   try {
     const { body, user } = req;
-    const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvnsByLastName, [ user.last_name, user.first_name ]);
+    const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvnsByLastName, [user.last_name, user.first_name]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     const plainBlacklistedBvns = [];
     const decryptBvns = allExistingBlacklistedBvns.forEach(async data => {
@@ -354,7 +354,9 @@ export const checkIfBvnFlaggedBlacklistedCheckByLastName = async (req, res, next
       await processOneOrNoneData(userQueries.blacklistUser, [user.user_id]);
       return ApiResponse.error(res, enums.USER_BVN_BLACKLISTED, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is clean and is not on blacklisted bvns list checkIfBvnFlaggedBlacklistedCheckByLastName.middlewares.user.js`);
+    logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is clean and is not on blacklisted bvns list checkIfBvnFlaggedBlacklistedCheckByLastName.middlewares.user.js`
+    );
     return next();
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');

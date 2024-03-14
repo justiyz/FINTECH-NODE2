@@ -215,6 +215,13 @@ export default {
       proposed_payment_date, pre_reschedule_proposed_payment_date
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 
+  updatePreDisbursementLoanRepaymentSchedule: `
+    INSERT INTO pre_disbursement_loan_payment_schedules(
+      loan_id, user_id, repayment_order, principal_payment, interest_payment, fees,
+      total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount,
+      proposed_payment_date, pre_reschedule_proposed_payment_date
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+
   fetchLoanRepaymentSchedule: `
     SELECT
       id,
@@ -250,7 +257,7 @@ export default {
       to_char(DATE(pre_reschedule_proposed_payment_date)::date, 'Mon DD, YYYY') AS pre_reschedule_repayment_date,
       to_char(DATE(payment_at)::date, 'Mon DD, YYYY') AS actual_payment_date,
       status
-    FROM personal_loan_payment_schedules
+    FROM pre_disbursement_loan_payment_schedules
     WHERE loan_id = $1
     AND user_id = $2
     AND status != 'paid'
