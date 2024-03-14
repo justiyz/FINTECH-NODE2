@@ -1509,6 +1509,7 @@ export const fetchLoanPeriod = async(req, res, next) => {
 export const createManualLoan = async(req, res, next) => {
   try {
     const {body, admin, userDetails} = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const existingUser = await processOneOrNoneData(loanQueries.checkIfUserAlreadyHasOngoingLoan, body.user_id);
     if (existingUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms user already has an ongoing loan createManualLoan.admin.controllers.loan.js`);
@@ -1564,20 +1565,21 @@ export const createManualLoan = async(req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: repayment status successfully set to paid in the DB
           createManualLoan.controller.loan.js`);
       } 
-      await userActivityTracking(body.user_id, 37, 'success');
-      await userActivityTracking(body.user_id, 39, 'success');
+      await adminActivityTracking(req.admin.admin_id, 'APLYLOAN', 'success', descriptions.create_manual_loan(adminName, userDetails.name));
       return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);  
     }
     const payload = loanPayload.createPreApprovedLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, 
       insuranceFee, advisoryFee, monthlyRepayment);
     const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: pre approved loan created successfully createManualLoan.admin.controllers.loan.js`);
-    await userActivityTracking(body.user_id, 37, 'success');
+    await adminActivityTracking(req.admin.admin_id, 'PLONAPAUT', 'success', descriptions.create_pre_approved_loan(adminName, userDetails.name));
 
     sendPushNotification(userDetails.user_id, PushNotifications.loanApproved(body.loan_amount), userDetails.fcm_token);
     return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
 
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 'APLYLOAN', 'fail', descriptions.create_manual_loan_failed(`${req.admin.first_name}, ${req.admin.last_name}`,
+      req.userDetails.name));
     error.label = enums.CREATE_MANUAL_LOAN_CONTROLLER;
     logger.error(`creating manual loan failed:::${enums.CREATE_MANUAL_LOAN_CONTROLLER}`, error.message);
     return next(error);
@@ -1617,10 +1619,15 @@ export const fetchUserOutstandingAmount = async(req, res, next) => {
 export const updateUserPayment = async(req, res, next) => {
   try {
     const { params: { user_id, loan_id}, body: { amount, payment_date }, admin, loanApplication} = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const user = await processOneOrNoneData(userQueries.getUserByUserId, user_id);
     const data = await loanService.updatePayment(user_id, loan_id, amount, payment_date, loanApplication);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: loan repaid successfully updateUserPayment.admin.controller.loan.js`);
+    await adminActivityTracking(req.admin.admin_id, 'IMNLNRPVBA', 'success', descriptions.manual_loan_repayment(adminName, user.name));
     return ApiResponse.success(res, enums.LOAN_REPAID_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 'IMNLNRPVBA', 'fail', descriptions.manual_loan_repayment_failed(`${req.admin.first_name}, ${req.admin.last_name}`,
+      req.user.name));
     error.label = enums.UPDATE_USER_PAYMENT_CONTROLLER;
     logger.error(`updating user's payment failed::${enums.UPDATE_USER_PAYMENT_CONTROLLER}`, error.message);
     return next(error);
@@ -1638,6 +1645,7 @@ export const updateUserPayment = async(req, res, next) => {
 export const processManualLoanRescheduling = async(req, res, next) => {
   try {
     const { params: { user_id }, admin, existingLoanApplication, body: { reschedule_tenor}, userDetails } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const userUnpaidRepayments = await processAnyData(userLoanQueries.fetchUserUnpaidRepayments, [ existingLoanApplication.loan_id, user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's unpaid repayments fetched processManualLoanRescheduling.controllers.loan.js`);
     const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user_id ]);
@@ -1672,10 +1680,11 @@ export const processManualLoanRescheduling = async(req, res, next) => {
       total_loan_extension_days: parseFloat(totalExtensionDays),
       is_reschedule: true
     };
-    userActivityTracking(req.userDetails.user_id, 75, 'success');
+    await adminActivityTracking(req.admin.admin_id, 'RSHDLONTN', 'success', descriptions.reschedule_manual_loan(adminName, userDetails.name));
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    userActivityTracking(req.userDetails.user_id, 75, 'fail');
+    await adminActivityTracking(req.admin.admin_id, 'RSHDLONTN', 'fail', descriptions.reschedule_manual_loan_failed(`${req.admin.first_name}, ${req.admin.last_name}`,
+      req.userDetails.name));
     error.label = enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER;
     logger.error(`processing loan rescheduling loan failed::${enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER}`, error.message);
     return next(error);
