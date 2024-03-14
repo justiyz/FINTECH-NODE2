@@ -16,7 +16,7 @@ import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
 import * as zeehService from '../services/services.zeeh';
-import {FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED} from '../../lib/enums/lib.enum.messages';
+import { FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED } from '../../lib/enums/lib.enum.messages';
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -26,49 +26,54 @@ const { SEEDFI_NODE_ENV } = config;
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) => {
-  try {
-    const { body } = req;
-    const payload = body.phone_number || body.email || req.user.phone_number;
-    const [ user ] = payload.startsWith('+') ? await processAnyData(userQueries.getUserByPhoneNumber, [ payload.trim() ]) :
-      await processAnyData(userQueries.getUserByEmail, [ payload.trim().toLowerCase() ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched users details from the database validateUnAuthenticatedUser.middlewares.user.js`);
-    if (user && user.is_verified_phone_number && user.is_created_password && type === 'validate') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account already exists in
+export const validateUnAuthenticatedUser =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { body } = req;
+      const payload = body.phone_number || body.email || req.user.phone_number;
+      const [user] = payload.startsWith('+')
+        ? await processAnyData(userQueries.getUserByPhoneNumber, [payload.trim()])
+        : await processAnyData(userQueries.getUserByEmail, [payload.trim().toLowerCase()]);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully fetched users details from the database validateUnAuthenticatedUser.middlewares.user.js`);
+      if (user && user.is_verified_phone_number && user.is_created_password && type === 'validate') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account already exists in
         the database validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACCOUNT_EXIST, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
-    }
-    if (user && user.is_verified_phone_number && user.is_created_password && type === 'authenticate') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account already exists in
+        return ApiResponse.error(res, enums.ACCOUNT_EXIST, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
+      }
+      if (user && user.is_verified_phone_number && user.is_created_password && type === 'authenticate') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account already exists in
         the database validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACCOUNT_ALREADY_VERIFIED, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
-    }
-    if (!user && type === 'authenticate') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that user account does not exists in
+        return ApiResponse.error(res, enums.ACCOUNT_ALREADY_VERIFIED, enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
+      }
+      if (!user && type === 'authenticate') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that user account does not exists in
         the database validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('User'), enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
-    }
-    if (!user && (type === 'login' || type === 'verify')) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that user's email is not existing in the database validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res,
-        type === 'login' ? enums.INVALID_EMAIL_ADDRESS : enums.ACCOUNT_NOT_EXIST('User'),
-        enums.HTTP_BAD_REQUEST,
-        enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
-    }
-    if (user && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
-      const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database
+        return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('User'), enums.HTTP_BAD_REQUEST, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
+      }
+      if (!user && (type === 'login' || type === 'verify')) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms that user's email is not existing in the database validateUnAuthenticatedUser.middlewares.user.js`);
+        return ApiResponse.error(
+          res,
+          type === 'login' ? enums.INVALID_EMAIL_ADDRESS : enums.ACCOUNT_NOT_EXIST('User'),
+          enums.HTTP_BAD_REQUEST,
+          enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE
+        );
+      }
+      if (user && (user.status === 'suspended' || user.is_deleted || user.status === 'deactivated')) {
+        const userStatus = user.is_deleted ? 'deleted, kindly contact support team' : `${user.status}, kindly contact support team`;
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database
       validateUnAuthenticatedUser.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
+        return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE);
+      }
+      req.user = user;
+      return next();
+    } catch (error) {
+      error.label = enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE;
+      logger.error(`getting user details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    req.user = user;
-    return next();
-  } catch (error) {
-    error.label = enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE;
-    logger.error(`getting user details from the database failed::${enums.VALIDATE_UNAUTHENTICATED_USER_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * validates user refresh token
@@ -78,10 +83,13 @@ export const validateUnAuthenticatedUser = (type = '') => async(req, res, next) 
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const validateRefreshToken = async(req, res, next) => {
+export const validateRefreshToken = async (req, res, next) => {
   try {
-    const { query: { refreshToken },  user } = req;
-    const [ userRefreshToken ] = await processAnyData(userQueries.fetchUserRefreshToken, [ user.user_id ]);
+    const {
+      query: { refreshToken },
+      user,
+    } = req;
+    const [userRefreshToken] = await processAnyData(userQueries.fetchUserRefreshToken, [user.user_id]);
     if (refreshToken !== userRefreshToken.refresh_token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that refresh token does not match the one in the database
       validateRefreshToken.middlewares.user.js`);
@@ -101,27 +109,29 @@ export const validateRefreshToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isUploadedImageSelfie = (type = '') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (user.is_uploaded_selfie_image && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image
+export const isUploadedImageSelfie =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (user.is_uploaded_selfie_image && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously uploaded selfie image
       isUploadedImageSelfie.middlewares.user.js`);
-      userActivityTracking(user.user_id, 17, 'fail');
-      return ApiResponse.error(res, enums.SELFIE_IMAGE_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
-    }
-    if (!user.is_uploaded_selfie_image && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image
+        userActivityTracking(user.user_id, 17, 'fail');
+        return ApiResponse.error(res, enums.SELFIE_IMAGE_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
+      }
+      if (!user.is_uploaded_selfie_image && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously uploaded selfie image
       isUploadedImageSelfie.middlewares.user.js`);
-      return ApiResponse.error(res, enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
+        return ApiResponse.error(res, enums.SELFIE_IMAGE_NOT_PREVIOUSLY_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      error.label = enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE;
+      logger.error(`checking if user selfie image previously uploaded failed::${enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    return next();
-  } catch (error) {
-    error.label = enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE;
-    logger.error(`checking if user selfie image previously uploaded failed::${enums.IS_UPLOADED_IMAGE_SELFIE_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check if user bvn previously verified
@@ -129,25 +139,27 @@ export const isUploadedImageSelfie = (type = '') => async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isVerifiedBvn = (type = '') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (user.is_verified_bvn && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously verified bvn isVerifiedBvn.middlewares.user.js`);
-      userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.BVN_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_BVN_MIDDLEWARE);
+export const isVerifiedBvn =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (user.is_verified_bvn && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously verified bvn isVerifiedBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.BVN_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_BVN_MIDDLEWARE);
+      }
+      if (!user.is_verified_bvn && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously verified bvn isVerifiedBvn.middlewares.user.js`);
+        return ApiResponse.error(res, enums.BVN_NOT_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_BVN_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      error.label = enums.IS_VERIFIED_BVN_MIDDLEWARE;
+      logger.error(`checking if user bvn previously verified failed::${enums.IS_VERIFIED_BVN_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    if (!user.is_verified_bvn && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously verified bvn isVerifiedBvn.middlewares.user.js`);
-      return ApiResponse.error(res, enums.BVN_NOT_PREVIOUSLY_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_BVN_MIDDLEWARE);
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.IS_VERIFIED_BVN_MIDDLEWARE;
-    logger.error(`checking if user bvn previously verified failed::${enums.IS_VERIFIED_BVN_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check if no previously existing BVN is verified again
@@ -157,17 +169,17 @@ export const isVerifiedBvn = (type = '') => async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isBvnPreviouslyExisting = async(req, res, next) => {
+export const isBvnPreviouslyExisting = async (req, res, next) => {
   try {
     const { body, user } = req;
     const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvns, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing bvns isBvnPreviouslyExisting.middlewares.user.js`);
     const plainBvns = [];
-    const decryptBvns = allExistingBvns.forEach(async(data) => {
+    const decryptBvns = allExistingBvns.forEach(async data => {
       const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
       plainBvns.push(decryptedBvn);
     });
-    await Promise.all([ decryptBvns ]);
+    await Promise.all([decryptBvns]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted bvns isBvnPreviouslyExisting.middlewares.user.js`);
     if (plainBvns.includes(body.bvn.trim())) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously used by another user isBvnPreviouslyExisting.middlewares.user.js`);
@@ -192,15 +204,34 @@ export const isBvnPreviouslyExisting = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const verifyBvn = async(req, res, next) => {
+export const verifyBvn = async (req, res, next) => {
   try {
-    const { body: { bvn },  user } = req;
-    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
+    const {
+      body: { bvn },
+      user,
+    } = req;
+    const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
     if (!data.success) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
-      userActivityTracking(user.user_id, 5, 'fail');
-      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      console.log('calling dojaahhhhhhhhhhhhhh');
+      const data = await dojahBvnVerificationCheck('kdjgjksjks', user);
+      console.log('data from dojah', data);
+
+      if (!data.success) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      }
+      const dojahData = data.data.entity;
+      console.log('dojahData', dojahData);
+      data.data = {
+        firstName: dojahData.first_name,
+        lastName: dojahData.last_name,
+        middleName: dojahData.middle_name,
+        dateOfBirth: dojahData.date_of_birth,
+        gender: dojahData.gender,
+      };
+      console.log('data.data', data.data);
     }
     // eslint-disable-next-line max-len
     // if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase() || user.first_name.trim().toLowerCase() !== data.data.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
@@ -248,21 +279,21 @@ export const verifyBvn = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfBvnFlaggedBlacklisted = async(req, res, next) => {
+export const checkIfBvnFlaggedBlacklisted = async (req, res, next) => {
   try {
     const { body, user } = req;
     const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvns, []);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     const plainBlacklistedBvns = [];
-    const decryptBvns = allExistingBlacklistedBvns.forEach(async(data) => {
+    const decryptBvns = allExistingBlacklistedBvns.forEach(async data => {
       const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
       plainBlacklistedBvns.push(decryptedBvn);
     });
-    await Promise.all([ decryptBvns ]);
+    await Promise.all([decryptBvns]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     if (plainBlacklistedBvns.includes(body.bvn.trim())) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously flagged blacklisted checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
-      await processOneOrNoneData(userQueries.blacklistUser, [ user.user_id ]);
+      await processOneOrNoneData(userQueries.blacklistUser, [user.user_id]);
       return ApiResponse.error(res, enums.USER_BVN_BLACKLISTED, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
       // return next();
     }
@@ -282,25 +313,27 @@ export const checkIfBvnFlaggedBlacklisted = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isEmailVerified = (type = 'authenticate') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (type === 'authenticate' && !user.is_verified_email) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user is not verified yet isEmailVerified.middleware.user.js`);
-      return ApiResponse.error(res, enums.EMAIL_NOT_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
-    }
-    if (type === 'validate' && user.is_verified_email) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user has already been
+export const isEmailVerified =
+  (type = 'authenticate') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (type === 'authenticate' && !user.is_verified_email) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user is not verified yet isEmailVerified.middleware.user.js`);
+        return ApiResponse.error(res, enums.EMAIL_NOT_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
+      }
+      if (type === 'validate' && user.is_verified_email) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decoded that user has already been
       isEmailVerified.middleware.user.js`);
-      return ApiResponse.error(res, enums.EMAIL_ALREADY_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
+        return ApiResponse.error(res, enums.EMAIL_ALREADY_VERIFIED, enums.HTTP_BAD_REQUEST, enums.IS_EMAIL_VERIFIED_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      error.label = enums.IS_EMAIL_VERIFIED_MIDDLEWARE;
+      logger.error(`checking user is verified failed:::${enums.IS_EMAIL_VERIFIED_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    return next();
-  } catch (error) {
-    error.label = enums.IS_EMAIL_VERIFIED_MIDDLEWARE;
-    logger.error(`checking user is verified failed:::${enums.IS_EMAIL_VERIFIED_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check if more than two cards already saved
@@ -310,10 +343,10 @@ export const isEmailVerified = (type = 'authenticate') => async(req, res, next) 
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfMaximumDebitCardsSaved = async(req, res, next) => {
+export const checkIfMaximumDebitCardsSaved = async (req, res, next) => {
   try {
     const { user } = req;
-    const [ existingCardsCount ] = await processAnyData(userQueries.checkMaximumExistingCardsCounts, [ user.user_id ]);
+    const [existingCardsCount] = await processAnyData(userQueries.checkMaximumExistingCardsCounts, [user.user_id]);
     if (Number(existingCardsCount.count) >= 2) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to two debit cards saved checkIfMaximumDebitCardsSaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 26, 'fail');
@@ -337,10 +370,10 @@ export const checkIfMaximumDebitCardsSaved = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
+export const checkIfMaximumBankAccountsSaved = async (req, res, next) => {
   try {
     const { user } = req;
-    const [ existingAccountsCount ] = await processAnyData(userQueries.checkMaximumExistingAccountCounts, [ user.user_id ]);
+    const [existingAccountsCount] = await processAnyData(userQueries.checkMaximumExistingAccountCounts, [user.user_id]);
     if (Number(existingAccountsCount.count) >= 3) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: user already has up to three bank accounts saved
       checkIfMaximumBankAccountsSaved.middlewares.user.js`);
@@ -365,10 +398,13 @@ export const checkIfMaximumBankAccountsSaved = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkAccountPreviouslySaved = async(req, res, next) => {
+export const checkAccountPreviouslySaved = async (req, res, next) => {
   try {
-    const { user, body: { account_number, bank_code } } = req;
-    const [ existingAccount ] = await processAnyData(userQueries.checkIfAccountExisting, [ user.user_id, account_number.trim(), bank_code.trim() ]);
+    const {
+      user,
+      body: { account_number, bank_code },
+    } = req;
+    const [existingAccount] = await processAnyData(userQueries.checkIfAccountExisting, [user.user_id, account_number.trim(), bank_code.trim()]);
     if (existingAccount) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: account has already been saved by user in the DB checkAccountPreviouslySaved.middlewares.user.js`);
       userActivityTracking(req.user.user_id, 27, 'fail');
@@ -393,20 +429,19 @@ export const checkAccountPreviouslySaved = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkAccountOwnership = async(req, res, next) => {
+export const checkAccountOwnership = async (req, res, next) => {
   try {
     const { user, accountNumberDetails } = req;
     const accountDetailsName = accountNumberDetails.data.account_name.trim().toLowerCase().split(',').join('').split(' ');
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account names converted to an array checkAccountOwnership.middlewares.user.js`);
     if (user.middle_name !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has middle name saved checkAccountOwnership.middlewares.user.js`);
-      if ((accountDetailsName.includes(user.first_name.toLowerCase()) &&
-        accountDetailsName.includes(user.middle_name.toLowerCase()) &&
-        accountDetailsName.includes(user.last_name.toLowerCase())
-      ) ||
-      (accountDetailsName.includes(user.first_name.toLowerCase()) &&
-      accountDetailsName.includes(user.last_name.toLowerCase())
-      )) {
+      if (
+        (accountDetailsName.includes(user.first_name.toLowerCase()) &&
+          accountDetailsName.includes(user.middle_name.toLowerCase()) &&
+          accountDetailsName.includes(user.last_name.toLowerCase())) ||
+        (accountDetailsName.includes(user.first_name.toLowerCase()) && accountDetailsName.includes(user.last_name.toLowerCase()))
+      ) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user names match account details names checkAccountOwnership.middlewares.user.js`);
         return next();
       }
@@ -437,7 +472,7 @@ export const checkAccountOwnership = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const resolveBankAccountNumberName = async(req, res, next) => {
+export const resolveBankAccountNumberName = async (req, res, next) => {
   try {
     const { user, query, body } = req;
     const accountNumberChoice = query.account_number || body.account_number;
@@ -466,7 +501,7 @@ export const resolveBankAccountNumberName = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkUserLoanStatus = async(req, res, next) => {
+export const checkUserLoanStatus = async (req, res, next) => {
   try {
     const { user } = req;
     if (user.loan_status !== 'inactive') {
@@ -490,13 +525,17 @@ export const checkUserLoanStatus = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfAccountDetailsExists = async(req, res, next) => {
+export const checkIfAccountDetailsExists = async (req, res, next) => {
   try {
-    const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
+    const {
+      user,
+      params: { id, payment_channel_id },
+      query: { payment_channel },
+    } = req;
     if (!payment_channel || payment_channel === 'bank') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for bank repayment checkIfAccountDetailsExists.middlewares.user.js`);
-      const [ accountIdExists ] = await processAnyData(userQueries.fetchBankAccountDetailsById, [ id, user.user_id ]);
+      const [accountIdExists] = await processAnyData(userQueries.fetchBankAccountDetailsById, [id, user.user_id]);
       if (!accountIdExists) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account details does not exists checkIfAccountDetailsExists.middlewares.user.js`);
         return ApiResponse.error(res, enums.ACCOUNT_DETAILS_NOT_EXISTING, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ACCOUNT_DETAILS_EXISTS_MIDDLEWARE);
@@ -528,8 +567,12 @@ export const checkIfAccountDetailsExists = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkAccountCurrentChoicesAndTypeSent = async(req, res, next) => {
-  const { user, query: { type }, accountDetails } = req;
+export const checkAccountCurrentChoicesAndTypeSent = async (req, res, next) => {
+  const {
+    user,
+    query: { type },
+    accountDetails,
+  } = req;
   try {
     if (accountDetails.is_default && type === 'default') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: account is already default checkAccountCurrentChoicesAndTypeSent.middlewares.user.js`);
@@ -561,16 +604,18 @@ export const checkAccountCurrentChoicesAndTypeSent = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const verifyEmailVerificationToken = async(req, res, next) => {
+export const verifyEmailVerificationToken = async (req, res, next) => {
   try {
-    const { query: { verifyValue } } = req;
-    const [ tokenUser ] = await processAnyData(AuthQueries.getUserByVerificationToken, [ verifyValue ]);
+    const {
+      query: { verifyValue },
+    } = req;
+    const [tokenUser] = await processAnyData(AuthQueries.getUserByVerificationToken, [verifyValue]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct verification token is sent verifyEmailVerificationToken.middlewares.user.js`);
     if (!tokenUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: sent token is invalid verifyEmailVerificationToken.middlewares.user.js`);
-      return SEEDFI_NODE_ENV === 'test' ? ApiResponse.error(res, enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION,
-        enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE) :
-        res.send(enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION);
+      return SEEDFI_NODE_ENV === 'test'
+        ? ApiResponse.error(res, enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION, enums.HTTP_BAD_REQUEST, enums.VERIFY_EMAIL_VERIFICATION_TOKEN_MIDDLEWARE)
+        : res.send(enums.FAILED_TO_PROCESS_EMAIL_VERIFICATION);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${tokenUser.user_id}:::Info: sent token is valid verifyEmailVerificationToken.middlewares.user.js`);
     req.user = tokenUser;
@@ -588,26 +633,28 @@ export const verifyEmailVerificationToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isUploadedVerifiedId  = (type = '') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (req.user.is_uploaded_identity_card && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+export const isUploadedVerifiedId =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (req.user.is_uploaded_identity_card && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that User valid id has been uploaded to the DB. isUploadedVerifiedId.middlewares.user.js`);
-      return ApiResponse.error(res, enums.CHECK_USER_ID_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
-    }
-    if (!req.user.is_uploaded_identity_card && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
+        return ApiResponse.error(res, enums.CHECK_USER_ID_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
+      }
+      if (!req.user.is_uploaded_identity_card && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
       decoded that User valid id has not been uploaded yet to the DB. isUploadedVerifiedId.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_VALID_ID_NOT_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
+        return ApiResponse.error(res, enums.USER_VALID_ID_NOT_UPLOADED, enums.HTTP_FORBIDDEN, enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      error.label = enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE;
+      logger.error(`checking if user valid id upload is or is not already existing failed::${enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    return next();
-  } catch (error) {
-    error.label = enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE;
-    logger.error(`checking if user valid id upload is or is not already existing failed::${enums.IS_UPDATED_VERIFICATION_ID_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check user address verification
@@ -615,26 +662,28 @@ export const isUploadedVerifiedId  = (type = '') => async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isVerifiedAddressDetails  = (type = '') => async(req, res, next) => {
-  try {
-    const { user, userAddressDetails } = req;
-    if (userAddressDetails && userAddressDetails.is_verified_address && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+export const isVerifiedAddressDetails =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user, userAddressDetails } = req;
+      if (userAddressDetails && userAddressDetails.is_verified_address && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that User address has been verified in the DB. isVerifiedAddressDetails.middlewares.user.js`);
-      return ApiResponse.error(res, enums.CHECK_USER_ADDRESS_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
-    }
-    if ((!userAddressDetails || !userAddressDetails.is_verified_address) && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
+        return ApiResponse.error(res, enums.CHECK_USER_ADDRESS_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
+      }
+      if ((!userAddressDetails || !userAddressDetails.is_verified_address) && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
       decoded that User address has not been verified yet in the DB. isVerifiedAddressDetails.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_ADDRESS_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
+        return ApiResponse.error(res, enums.USER_ADDRESS_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      error.label = enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE;
+      logger.error(`checking if user address is or is not already verified failed::${enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    return next();
-  } catch (error) {
-    error.label = enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE;
-    logger.error(`checking if user address is or is not already verified failed::${enums.IS_VERIFIED_ADDRESS_DETAILS_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check if user utility bill has been previously verified
@@ -642,31 +691,33 @@ export const isVerifiedAddressDetails  = (type = '') => async(req, res, next) =>
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const isVerifiedUtilityBill  = (type = '') => async(req, res, next) => {
-  try {
-    const { user, userAddressDetails } = req;
-    if (userAddressDetails && userAddressDetails.is_verified_utility_bill && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+export const isVerifiedUtilityBill =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user, userAddressDetails } = req;
+      if (userAddressDetails && userAddressDetails.is_verified_utility_bill && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that User utility bill has been verified in the DB. isVerifiedUtilityBill.middlewares.user.js`);
-      return ApiResponse.error(res, enums.CHECK_USER_UTILITY_BILL_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
-    }
-    if (userAddressDetails && !userAddressDetails.can_upload_utility_bill && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+        return ApiResponse.error(res, enums.CHECK_USER_UTILITY_BILL_VERIFICATION, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+      }
+      if (userAddressDetails && !userAddressDetails.can_upload_utility_bill && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that User utility bill is still under verification and cannot be updated yet. isVerifiedUtilityBill.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_UTILITY_BILL_VERIFICATION_PENDING, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
-    }
-    if ((!userAddressDetails || !userAddressDetails.is_verified_utility_bill) && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
+        return ApiResponse.error(res, enums.USER_UTILITY_BILL_VERIFICATION_PENDING, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+      }
+      if ((!userAddressDetails || !userAddressDetails.is_verified_utility_bill) && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP},${user.user_id}::: Info:
       decoded that User utility bill is yet to be verified in the DB. isVerifiedUtilityBill.middlewares.user.js`);
-      return ApiResponse.error(res, enums.USER_UTILITY_BILL_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+        return ApiResponse.error(res, enums.USER_UTILITY_BILL_NOT_VERIFIED, enums.HTTP_FORBIDDEN, enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      error.label = enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE;
+      logger.error(`checking if user uploaded utility bill is verified failed::${enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    return next();
-  } catch (error) {
-    error.label = enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE;
-    logger.error(`checking if user uploaded utility bill is verified failed::${enums.IS_VERIFIED_UTILITY_BILL_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check if user has verified his BVN
@@ -677,10 +728,10 @@ export const isVerifiedUtilityBill  = (type = '') => async(req, res, next) => {
  * @memberof UserMiddleware
  */
 
-export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
+export const createUserAddressYouVerifyCandidate = async (req, res, next) => {
   try {
     const { user, body } = req;
-    const [ userAddressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
+    const [userAddressDetails] = await processAnyData(userQueries.fetchUserAddressDetails, [user.user_id]);
     if (userAddressDetails && userAddressDetails.you_verify_candidate_id !== null) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has previously created on youVerify
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
@@ -700,11 +751,12 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has not been previously created on youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     const payload = UserPayload.addressVerification(body, user);
-    !userAddressDetails ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload) :
-      await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
+    !userAddressDetails
+      ? await processOneOrNoneData(userQueries.createUserAddressDetails, payload)
+      : await processOneOrNoneData(userQueries.updateUserAddressDetailsOnCreation, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user address details saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
-    let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    let userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
     userBvn = await Hash.decrypt(decodeURIComponent(userBvn.bvn));
     const result = await createUserYouVerifyCandidate(user, userBvn);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details creation has been initiated with youVerify
@@ -712,7 +764,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
     if (result && result.statusCode === 201 && result.message.toLowerCase() === 'candidate created successfully!') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
-      await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, result.data.id ]);
+      await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [user.user_id, result.data.id]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
       req.userYouVerifyCandidateDetails = result.data;
@@ -727,7 +779,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       if (retryResult && retryResult.statusCode === 201 && retryResult.message.toLowerCase() === 'candidate created successfully!') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details successfully created with youVerify
       createUserAddressYouVerifyCandidate.middlewares.user.js`);
-        await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [ user.user_id, retryResult.data.id ]);
+        await processOneOrNoneData(userQueries.updateYouVerifyCandidateId, [user.user_id, retryResult.data.id]);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user youVerify candidate id saved in the DB but still unverified
         createUserAddressYouVerifyCandidate.middlewares.user.js`);
         req.userYouVerifyCandidateDetails = retryResult.data;
@@ -736,14 +788,22 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
       userActivityTracking(req.user.user_id, 83, 'fail');
       // const errorMessage = !retryResult.response.data ? enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED : retryResult.response.data.message;
       // const errorCode = !retryResult.response.data ? enums.HTTP_FORBIDDEN : retryResult.response.data.statusCode;
-      return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED , enums.HTTP_FORBIDDEN,
-        enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+      return ApiResponse.error(
+        res,
+        enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_CANNOT_PROCEED,
+        enums.HTTP_FORBIDDEN,
+        enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE
+      );
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user candidate details could not be created with youVerify
     createUserAddressYouVerifyCandidate.middlewares.user.js`);
     userActivityTracking(req.user.user_id, 83, 'fail');
-    return ApiResponse.error(res, enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES, enums.HTTP_SERVICE_UNAVAILABLE,
-      enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE);
+    return ApiResponse.error(
+      res,
+      enums.USER_YOU_VERIFY_ADDRESS_VERIFICATION_ISSUES,
+      enums.HTTP_SERVICE_UNAVAILABLE,
+      enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE
+    );
   } catch (error) {
     error.label = enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE;
     logger.error(`creating user youVerify candidate failed::${enums.CREATE_USER_ADDRESS_YOU_VERIFY_CANDIDATE_MIDDLEWARE}`, error.message);
@@ -759,7 +819,7 @@ export const createUserAddressYouVerifyCandidate = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminUserMiddleware
  */
-export const uploadUtilityBillDocument = async(req, res, next) => {
+export const uploadUtilityBillDocument = async (req, res, next) => {
   try {
     const { files, user, body } = req;
     if (!files || (files && !files.document)) {
@@ -768,11 +828,12 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: to be uploaded file is existing uploadUtilityBillDocument.middlewares.user.js`);
     const fileExt = path.extname(files.document.name);
-    if (files.document.size > 3197152) { // 3 MB
+    if (files.document.size > 3197152) {
+      // 3 MB
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: file size is greater than 3MB uploadUtilityBillDocument.middlewares.user.js`);
       return ApiResponse.error(res, enums.FILE_SIZE_TOO_BIG, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
     }
-    const acceptedImageFileTypes = [ '.png', '.jpg', '.jpeg' ];
+    const acceptedImageFileTypes = ['.png', '.jpg', '.jpeg'];
     if (!acceptedImageFileTypes.includes(fileExt)) {
       logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: document type is not a jpeg, jpg or png file uploadUtilityBillDocument.middlewares.user.js`);
       return ApiResponse.error(res, enums.UPLOAD_AN_IMAGE_DOCUMENT_VALIDATION, enums.HTTP_BAD_REQUEST, enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE);
@@ -782,7 +843,7 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
       req.document = encodeURIComponent(
         await Hash.encrypt({
           document_url: 'https://p-i.s3.us-west-2.amazonaws.com/files/user-documents/user-af4922be60fd1b85068ed/land%20ownership%20proof.doc',
-          document_extension: fileExt
+          document_extension: fileExt,
         })
       );
       return next();
@@ -790,11 +851,9 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
     const payload = Buffer.from(files.document.data, 'binary');
     logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info: upload payload and url set uploadUtilityBillDocument.middlewares.user.js`);
     const contentType = body.type === 'file' ? 'application/pdf' : 'image/png';
-    const data  = await S3.uploadFile(url, payload, contentType);
+    const data = await S3.uploadFile(url, payload, contentType);
     logger.info(`${enums.CURRENT_TIME_STAMP},  ${user.user_id}:::Info:file uploaded to amazon s3 bucket uploadUtilityBillDocument.middlewares.user.js`);
-    req.document = encodeURIComponent(
-      await Hash.encrypt({ document_url: data.Location, document_extension: fileExt })
-    );
+    req.document = encodeURIComponent(await Hash.encrypt({ document_url: data.Location, document_extension: fileExt }));
     return next();
   } catch (error) {
     error.label = enums.UPLOAD_UTILITY_BILL_DOCUMENT_MIDDLEWARE;
@@ -802,7 +861,6 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
     return next(error);
   }
 };
-
 
 /**
  * check if user has verified his BVN
@@ -813,10 +871,10 @@ export const uploadUtilityBillDocument = async(req, res, next) => {
  * @memberof UserMiddleware
  */
 
-export const checkIfBvnIsVerified = async(req, res, next) => {
+export const checkIfBvnIsVerified = async (req, res, next) => {
   try {
     const { user, body } = req;
-    if ((user.is_verified_bvn) && (body.first_name ||  body.last_name || body.middle_name || body.date_of_birth || body.gender)) {
+    if (user.is_verified_bvn && (body.first_name || body.last_name || body.middle_name || body.date_of_birth || body.gender)) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully checked if BVN is verified checkIfBvnIsVerified.middlewares.user.js`);
       return ApiResponse.error(res, enums.DETAILS_CAN_NOT_BE_UPDATED, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_BVN_IS_VERIFIED_MIDDLEWARE);
@@ -829,7 +887,6 @@ export const checkIfBvnIsVerified = async(req, res, next) => {
   }
 };
 
-
 /**
  * check if card exists in the DB
  * @param {Request} req - The request from the endpoint.
@@ -838,13 +895,17 @@ export const checkIfBvnIsVerified = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfCardOrUserExist = async(req, res, next) => {
+export const checkIfCardOrUserExist = async (req, res, next) => {
   try {
-    const { user, params: { id, payment_channel_id }, query: { payment_channel } } = req;
+    const {
+      user,
+      params: { id, payment_channel_id },
+      query: { payment_channel },
+    } = req;
     if (!payment_channel || payment_channel === 'card') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       no query payment type sent or query payment type sent is to check for card repayment checkIfCardOrUserExist.middlewares.user.js`);
-      const query_params = [ id || payment_channel_id, user.user_id ];
+      const query_params = [id || payment_channel_id, user.user_id];
       const userCard = await processOneOrNoneData(userQueries.fetchCardsByIdOrUserId, query_params);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       successfully fetched a user's card checkIfCardOrUserExist.middlewares.user.js`);
@@ -881,7 +942,7 @@ export const checkIfCardOrUserExist = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
+export const checkIfCardAlreadyDefaultCard = async (req, res, next) => {
   try {
     const { user, userDebitCard } = req;
     if (userDebitCard.is_default) {
@@ -905,7 +966,7 @@ export const checkIfCardAlreadyDefaultCard = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkUserAdvancedKycUpdate = async(req, res, next) => {
+export const checkUserAdvancedKycUpdate = async (req, res, next) => {
   try {
     const { user, userEmploymentDetails } = req;
     if (!userEmploymentDetails || userEmploymentDetails.monthly_income === null) {
@@ -941,7 +1002,7 @@ export const checkUserAdvancedKycUpdate = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) => {
+export const checkIfUserHasPreviouslyCreatedNextOfKin = async (req, res, next) => {
   try {
     const { user } = req;
     const nextOfKin = await processOneOrNoneData(userQueries.getUserNextOfKin, user.user_id);
@@ -966,38 +1027,42 @@ export const checkIfUserHasPreviouslyCreatedNextOfKin = async(req, res, next) =>
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
-  try {
-    const {user, userEmploymentDetails, body} = req;
-    if (type === 'employment') {
-      if (!userEmploymentDetails) {
-        return ApiResponse.error(res, enums.EMPLOYMENT_DETAILS_NOT_PREVIOUSLY_SET, enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
-      }
-      const canUpdate = dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
-      if (!canUpdate) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their
+export const userProfileNextUpdate =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user, userEmploymentDetails, body } = req;
+      if (type === 'employment') {
+        if (!userEmploymentDetails) {
+          return ApiResponse.error(res, enums.EMPLOYMENT_DETAILS_NOT_PREVIOUSLY_SET, enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+        }
+        const canUpdate = dayjs().isAfter(dayjs(userEmploymentDetails.employment_next_update));
+        if (!canUpdate) {
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their
         details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
-        return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+          return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+        }
+        return next();
+      }
+      if (
+        user.next_profile_update !== null &&
+        (parseFloat(body.number_of_children) !== parseFloat(user.number_of_children) || body.marital_status.toLowerCase() !== user.marital_status?.toLowerCase())
+      ) {
+        const canUpdate = dayjs().isAfter(dayjs(user.next_profile_update));
+        if (!canUpdate) {
+          logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their
+        details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
+          return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
+        }
+        return next();
       }
       return next();
+    } catch (error) {
+      error.label = enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE;
+      logger.error(`checking user profile next update in the DB failed::${enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    if ((user.next_profile_update !== null) && ((parseFloat(body.number_of_children) !== parseFloat(user.number_of_children)) ||
-    (body.marital_status.toLowerCase() !== user.marital_status?.toLowerCase()))) {
-      const canUpdate = dayjs().isAfter(dayjs(user.next_profile_update));
-      if (!canUpdate) {
-        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.user.user_id}:::Info: user can only update their
-        details once in three months in the  DB userProfileNextUpdate.middlewares.user.js`);
-        return ApiResponse.error(res, enums.USER_PROFILE_NEXT_UPDATE(type), enums.HTTP_FORBIDDEN, enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE);
-      }
-      return next();
-    }
-    return next();
-  } catch (error) {
-    error.label = enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE;
-    logger.error(`checking user profile next update in the DB failed::${enums.USER_PROFILE_NEXT_UPDATE_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * verify the legibility of the webhook response if from YouVerify
@@ -1007,7 +1072,7 @@ export const userProfileNextUpdate = (type = '')=> async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const youVerifyWebhookVerification = async(req, res, next) => {
+export const youVerifyWebhookVerification = async (req, res, next) => {
   try {
     if (config.SEEDFI_NODE_ENV === 'test') {
       return next();
@@ -1044,11 +1109,11 @@ export const youVerifyWebhookVerification = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const verifyUserAndAddressResponse = async(req, res, next) => {
+export const verifyUserAndAddressResponse = async (req, res, next) => {
   try {
     const { body } = req;
     if (body.event.toLowerCase() === 'address.completed') {
-      const [ userAddressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ body.data.candidate.candidateId.trim() ]);
+      const [userAddressDetails] = await processAnyData(userQueries.fetchUserAddressDetails, [body.data.candidate.candidateId.trim()]);
       if (!userAddressDetails) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: no user exists for the candidate ID that was sent with the webhook
       verifyUserAndAddressResponse.middlewares.user.js`);
@@ -1065,7 +1130,6 @@ export const verifyUserAndAddressResponse = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the webhook event sent is not valid
     verifyUserAndAddressResponse.middlewares.user.js`);
     return ApiResponse.error(res, enums.INVALID_YOU_VERIFY_WEBHOOK_EVENT, enums.HTTP_FORBIDDEN, enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE);
-
   } catch (error) {
     error.label = enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE;
     logger.error(`verification of webhook details sent failed:::${enums.VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE}`, error.message);
@@ -1081,10 +1145,10 @@ export const verifyUserAndAddressResponse = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfUserBelongsToAnyCluster = async(req, res, next) => {
+export const checkIfUserBelongsToAnyCluster = async (req, res, next) => {
   try {
     const { user } = req;
-    const activeClusterMembership = await processAnyData(userQueries.checkUserClusterMembership, [ user.user_id ]);
+    const activeClusterMembership = await processAnyData(userQueries.checkUserClusterMembership, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user cluster membership list checkIfUserBelongsToAnyCluster.middlewares.user.js`);
     if (activeClusterMembership.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user still belongs to a cluster checkIfUserBelongsToAnyCluster.middlewares.user.js`);
@@ -1109,23 +1173,31 @@ export const checkIfUserBelongsToAnyCluster = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof UserMiddleware
  */
-export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
+export const checkIfUserOnAnyActiveLoan = async (req, res, next) => {
   try {
     const { user } = req;
-    const activeClusterLoan = await processAnyData(userQueries.checkUserClusterLoanActiveness, [ user.user_id ]);
+    const activeClusterLoan = await processAnyData(userQueries.checkUserClusterLoanActiveness, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active cluster loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeClusterLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'), enums.HTTP_FORBIDDEN,
-        enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
+      return ApiResponse.error(
+        res,
+        enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing cluster loans'),
+        enums.HTTP_FORBIDDEN,
+        enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE
+      );
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active cluster loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-    const activeIndividualLoan = await processAnyData(userQueries.checkUserIndividualLoanActiveness, [ user.user_id ]);
+    const activeIndividualLoan = await processAnyData(userQueries.checkUserIndividualLoanActiveness, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched user active individual loan lists checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     if (activeIndividualLoan.length > 0) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user has active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
-      return ApiResponse.error(res, enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'), enums.HTTP_FORBIDDEN,
-        enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE);
+      return ApiResponse.error(
+        res,
+        enums.ACTION_CANNOT_BE_DONE('kindly complete/cancel existing individual loans'),
+        enums.HTTP_FORBIDDEN,
+        enums.CHECK_IF_USER_ON_ANY_ACTIVE_LOAN_MIDDLEWARE
+      );
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does have active individual loan application checkIfUserOnAnyActiveLoan.middlewares.user.js`);
     return next();
@@ -1135,6 +1207,3 @@ export const checkIfUserOnAnyActiveLoan = async(req, res, next) => {
     return next(error);
   }
 };
-
-
-
