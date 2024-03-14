@@ -211,11 +211,10 @@ export const verifyBvn = async (req, res, next) => {
       user,
     } = req;
     const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Zeeh Africa verifyBvn.middlewares.user.js`);
     if (!data.success) {
-      console.log('calling dojaahhhhhhhhhhhhhh');
       const data = await dojahBvnVerificationCheck('kdjgjksjks', user);
-      console.log('data from dojah', data);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Dojah verifyBvn.middlewares.user.js`);
 
       if (!data.success) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
@@ -223,7 +222,6 @@ export const verifyBvn = async (req, res, next) => {
         return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
       }
       const dojahData = data.data.entity;
-      console.log('dojahData', dojahData);
       data.data = {
         firstName: dojahData.first_name,
         lastName: dojahData.last_name,
@@ -231,9 +229,7 @@ export const verifyBvn = async (req, res, next) => {
         dateOfBirth: dojahData.date_of_birth,
         gender: dojahData.gender,
       };
-      console.log('data.data', data.data);
     }
-    // eslint-disable-next-line max-len
     // if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase() || user.first_name.trim().toLowerCase() !== data.data.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
     if (user.first_name.trim().toLowerCase() !== data.data.firstName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
@@ -283,6 +279,34 @@ export const checkIfBvnFlaggedBlacklisted = async (req, res, next) => {
   try {
     const { body, user } = req;
     const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvns, []);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+    const plainBlacklistedBvns = [];
+    const decryptBvns = allExistingBlacklistedBvns.forEach(async data => {
+      const decryptedBvn = await Hash.decrypt(decodeURIComponent(data.bvn));
+      plainBlacklistedBvns.push(decryptedBvn);
+    });
+    await Promise.all([decryptBvns]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully decrypted all encrypted blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+    if (plainBlacklistedBvns.includes(body.bvn.trim())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn has been previously flagged blacklisted checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+      await processOneOrNoneData(userQueries.blacklistUser, [user.user_id]);
+      return ApiResponse.error(res, enums.USER_BVN_BLACKLISTED, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      // return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: sent bvn is clean and is not on blacklisted bvns list checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
+    return next();
+  } catch (error) {
+    userActivityTracking(req.user.user_id, 5, 'fail');
+    error.label = enums.CHECK_IF_BVN_FLAGGED_BLACKLISTED_MIDDLEWARE;
+    logger.error(`checking if sent bvn has not been blacklisted failed:::${enums.CHECK_IF_BVN_FLAGGED_BLACKLISTED_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+export const checkIfBvnFlaggedBlacklistedCheckByLastName = async (req, res, next) => {
+  try {
+    const { body, user } = req;
+    const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvnsByLastName, [ user.last_name ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     const plainBlacklistedBvns = [];
     const decryptBvns = allExistingBlacklistedBvns.forEach(async data => {

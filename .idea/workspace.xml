@@ -6,6 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
+=======
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/queries/queries.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/queries/queries.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.user.js" afterDir="false" />
+>>>>>>> 7bfa19b2 (cleaned up BVN verification, updated the condition for searching the blacklisted table with surname added as parameter)
       <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
