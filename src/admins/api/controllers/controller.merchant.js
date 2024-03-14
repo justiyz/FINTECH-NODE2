@@ -850,6 +850,7 @@ export const resolveBankAccountNumber = async(req, res, next) => {
 export const updateMerchant = async(req, res, next) => {
   try {
     const { admin, merchant } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const {
       business_name,
       status,
@@ -895,7 +896,7 @@ export const updateMerchant = async(req, res, next) => {
         );
       }
     }
-
+    await adminActivityTracking(req.admin.admin_id, 69, 'success', descriptions.update_merchant_account_info(adminName, merchant.business_name));
     return ApiResponse.success(
       res,
       enums.MERCHANT_UPDATED_SUCCESSFULLY,
@@ -903,6 +904,8 @@ export const updateMerchant = async(req, res, next) => {
       updatedMerchantDetails
     );
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 69, 'fail', descriptions.update_merchant_account_info_failed((`${req.admin.first_name}, ${req.admin.last_name}`,
+    req.merchant.business_name)));
     error.label = 'MerchantController::updateMerchant';
     logger.error(`Update merchant details failed:::${error.label}`, error.message);
     return next(error);
@@ -964,6 +967,7 @@ const addMerchantBankAccount = async(admin, payload, newAccount = false) => {
 export const updateMerchantUser = async(req, res, next) => {
   try {
     const { admin, user, merchant } = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
     const { status } = req.body;
     await processOneOrNoneData(
       merchantQueries.updateMerchantUsers,
@@ -973,13 +977,18 @@ export const updateMerchantUser = async(req, res, next) => {
         status || user.status
       ]
     );
-    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant user details has been edited and updated in the DB. updateMerchantUser.admin.controllers.merchant.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::Info: confirm that merchant user details has been edited and updated
+     in the DB. updateMerchantUser.admin.controllers.merchant.js`);
+    await adminActivityTracking(req.admin.admin_id, 66, 'success', descriptions.update_merchant_user_details(adminName, merchant.business_name));
+
     return ApiResponse.success(
       res,
       'User updated successfully',
       enums.HTTP_OK
     );
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 66, 'success', descriptions.update_merchant_user_details_failed(`${req.admin.first_name} ${req.admin.last_name}`,
+      req.merchant.business_name));
     error.label = 'MerchantController::updateMerchantUser';
     logger.error(`Update merchant user details failed:::${error.label}`, error.message);
     return next(error);
