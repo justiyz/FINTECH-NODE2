@@ -137,19 +137,13 @@ export const updateSelfieImage = async(req, res, next) => {
 export const updateBvn = async(req, res, next) => {
   try {
     const {body: {bvn}, user, bvnData} = req;
-    // const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-    // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
-    // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
-    // const tier_upgraded = tierChoice === '1' ? true : false;
     const otpData = await sendOtpToBvnUser(bvn, bvnData);
-    // const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
     // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
 
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...otpData});
     }
-
     return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, {...otpData, otp: undefined});
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
