@@ -239,6 +239,11 @@ export default {
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
 
+  fetchAllExistingBlacklistedBvnsByLastName: `
+      SELECT bvn
+      FROM blacklisted_bvns
+      WHERE (bvn IS NOT NULL and last_name = $1)`,
+
   blacklistUser: `
       UPDATE user
       SET
