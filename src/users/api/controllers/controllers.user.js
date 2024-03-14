@@ -141,7 +141,6 @@ export const updateBvn = async (req, res, next) => {
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     // const tier_upgraded = tierChoice === '1' ? true : false;
     const otpData = await sendOtpToBvnUser(bvn, bvnData);
-    // const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
     // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
 
