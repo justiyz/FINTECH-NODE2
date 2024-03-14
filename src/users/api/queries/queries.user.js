@@ -239,6 +239,11 @@ export default {
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
 
+  fetchAllExistingBlacklistedBvnsByLastName: `
+      SELECT bvn
+      FROM blacklisted_bvns
+      WHERE (bvn IS NOT NULL and last_name = $1)`,
+
   blacklistUser: `
       UPDATE user
       SET
@@ -806,7 +811,7 @@ export default {
       status
     FROM personal_loans
     WHERE user_id = $1
-    AND (status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
+    AND (status = 'pending' OR status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
 
   deleteUserOwnAccount: `
     UPDATE users

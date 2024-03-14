@@ -3,10 +3,11 @@ import Model from '../middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
-import * as UserController from '../controllers/controllers.user'; 
+import * as UserController from '../controllers/controllers.user';
 const { SEEDFI_NODE_ENV } = config;
 import {availableVerificationMeans} from "../controllers/controllers.user";
-import config from "../../config"; 
+import config from "../../config";
+import {checkIfBvnFlaggedBlacklistedCheckByLastName} from "../middlewares/middlewares.user";
 
 const router = Router();
 
@@ -42,7 +43,7 @@ router.post(
   UserMiddleware.isVerifiedBvn('complete'),
   UserMiddleware.isBvnPreviouslyExisting,
   UserMiddleware.verifyBvn,
-  // UserMiddleware.checkIfBvnFlaggedBlacklisted,
+  UserMiddleware.checkIfBvnFlaggedBlacklistedCheckByLastName,
   UserController.updateBvn
 );
 
