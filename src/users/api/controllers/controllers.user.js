@@ -1661,13 +1661,11 @@ const sendOtpToBvnUser = async (bvn, data) => {
 
   const expireAt = dayjs().add(10, 'minutes');
   const expirationTime = dayjs(expireAt);
-
   const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
-  const pn = parsePhoneNumber(data.phoneNumber1, { regionCode: 'NG' });
-
+  const pn = parsePhoneNumber(data.phone_number1, { regionCode: 'NG' });
   if (!pn.valid) {
     logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
-    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    return ApiResponse.error(bvn, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
 
   function maskString(str) {
