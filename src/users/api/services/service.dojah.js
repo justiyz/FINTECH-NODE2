@@ -29,7 +29,6 @@ const dojahBvnVerificationCheck = async (bvn, user) => {
       },
     };
     const data = await axios(options);
-    console.log('data doja', data);
     return data;
   } catch (error) {
     console.log('error', error);
