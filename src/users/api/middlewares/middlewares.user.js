@@ -172,7 +172,12 @@ export const isVerifiedBvn =
 export const isBvnPreviouslyExisting = async (req, res, next) => {
   try {
     const { body, user } = req;
-    const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvns, []);
+    // const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvns, []);
+    const allExistingBvns = await processAnyData(userQueries.fetchAllExistingBvnsRefined, [ user.last_name ]);
+    if(allExistingBvns.length < 1) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: related bvn not found isBvnPreviouslyExisting.middlewares.user.js`);
+      return next();
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing bvns isBvnPreviouslyExisting.middlewares.user.js`);
     const plainBvns = [];
     const decryptBvns = allExistingBvns.forEach(async data => {
@@ -215,8 +220,7 @@ export const verifyBvn = async (req, res, next) => {
     if (!data.success) {
       const data = await dojahBvnVerificationCheck(bvn.trim(), user);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Dojah verifyBvn.middlewares.user.js`);
-
-      if (!data.success) {
+      if (data.status !== 200) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification failed verifyBvn.middlewares.user.js`);
         userActivityTracking(user.user_id, 5, 'fail');
         return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
@@ -228,9 +232,38 @@ export const verifyBvn = async (req, res, next) => {
         middleName: dojahData.middle_name,
         dateOfBirth: dojahData.date_of_birth,
         gender: dojahData.gender,
+        phone_number1: dojahData.phone_number1,
+        phone_number2: dojahData.phone_number2
       };
+      if (user.first_name.trim().toLowerCase() !== data.data.firstName.replace(/\s+/g, '').trim().toLowerCase()) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      }
+      if (user.last_name.trim().toLowerCase() !== data.data.lastName.replace(/\s+/g, '').trim().toLowerCase()) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's last name don't match bvn last name verifyBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      }
+      if (user.middle_name !== null && user.middle_name.trim().toLowerCase() !== data.data.middleName.replace(/\s+/g, '').trim().toLowerCase()) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's middle name don't match bvn middle name verifyBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      }
+      if (user.gender.trim().toLowerCase() !== data.data.gender.trim().toLowerCase()) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's gender does not match bvn returned gender verifyBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      }
+      if (dayjs(user.date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's date of birth does not match bvn returned date of birth verifyBvn.middlewares.user.js`);
+        userActivityTracking(user.user_id, 5, 'fail');
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
+      }
+      req.bvnData = data.data;
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification successful verifyBvn.middlewares.user.js`);
+      return next();
     }
-    // if (user.first_name.trim().toLowerCase() !== data.data.entity.first_name.replace(/\s+/g, '').trim().toLowerCase() || user.first_name.trim().toLowerCase() !== data.data.first_name.replace(/\s+/g, '').trim().toLowerCase()) {
     if (user.first_name.trim().toLowerCase() !== data.data.firstName.replace(/\s+/g, '').trim().toLowerCase()) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's first name don't match bvn first name verifyBvn.middlewares.user.js`);
       userActivityTracking(user.user_id, 5, 'fail');
@@ -256,6 +289,7 @@ export const verifyBvn = async (req, res, next) => {
       userActivityTracking(user.user_id, 5, 'fail');
       return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_MIDDLEWARE);
     }
+
     req.bvnData = data.data;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's bvn verification successful verifyBvn.middlewares.user.js`);
     return next();
@@ -307,7 +341,6 @@ export const checkIfBvnFlaggedBlacklistedCheckByLastName = async (req, res, next
   try {
     const { body, user } = req;
     const allExistingBlacklistedBvns = await processAnyData(userQueries.fetchAllExistingBlacklistedBvnsByLastName, [ user.last_name, user.first_name ]);
-    console.log(allExistingBlacklistedBvns);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully fetched all existing blacklisted bvns checkIfBvnFlaggedBlacklisted.middlewares.user.js`);
     const plainBlacklistedBvns = [];
     const decryptBvns = allExistingBlacklistedBvns.forEach(async data => {

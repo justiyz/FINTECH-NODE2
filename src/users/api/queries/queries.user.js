@@ -234,6 +234,12 @@ export default {
       FROM users
       WHERE bvn IS NOT NULL`,
 
+  fetchAllExistingBvnsRefined: `
+    SELECT bvn
+    FROM users
+    WHERE bvn IS NOT NULL and (last_name ILIKE $1)
+  `,
+
   fetchAllExistingBlacklistedBvns: `
       SELECT bvn
       FROM blacklisted_bvns
