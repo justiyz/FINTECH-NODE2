@@ -5,7 +5,7 @@ import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
 const { SEEDFI_NODE_ENV } = config;
-import { availableVerificationMeans } from '../controllers/controllers.user';
+import { availableVerificationMeans, fetchLocalBanks, fetchLocalSingleBanks, updateBankRecord } from '../controllers/controllers.user';
 import config from '../../config';
 import { checkIfBvnFlaggedBlacklistedCheckByLastName } from '../middlewares/middlewares.user';
 
@@ -61,6 +61,16 @@ router.get(
 );
 
 router.get('/settings/list-banks', AuthMiddleware.validateAuthToken, UserController.fetchAvailableBankLists);
+
+router.post('/settings/bank/create', AuthMiddleware.validateAuthToken, UserController.createBankRecord);
+
+router.get('/settings/list-db-banks', AuthMiddleware.validateAuthToken, UserController.fetchLocalBanks);
+
+router.get('/settings/bank/:record_id', AuthMiddleware.validateAuthToken, UserController.fetchLocalSingleBanks);
+
+router.patch('/settings/bank/:record_id/update', AuthMiddleware.validateAuthToken, UserController.updateBankRecord);
+
+router.delete('/settings/bank/:record_id/delete', AuthMiddleware.validateAuthToken, UserController.deleteBankRecord);
 
 router.get(
   '/settings/resolve-account-number',

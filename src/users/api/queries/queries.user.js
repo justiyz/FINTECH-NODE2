@@ -830,5 +830,52 @@ export default {
     RETURNING user_id, email, phone_number, is_deleted, status`,
 
   fetchAllDetailsBelongingToUser: `
-    SELECT * FROM users WHERE user_id = $1`
+    SELECT * FROM users WHERE user_id = $1`,
+
+  getBankList: `
+    SELECT *
+    FROM
+      banks
+    WHERE
+      active = $1 and is_deleted = false    `,
+
+  getBankById: `
+    SELECT * FROM banks WHERE record_id = $1
+  `,
+
+  updateBankRecord: `
+    UPDATE banks
+    SET
+      id = $2,
+      name = $3,
+      slug = $4,
+      code = $5,
+      longcode = $6,
+      gateway = $7,
+      pay_with_bank = $8,
+      active = $9,
+      country = $10,
+      currency = $11,
+      type = $12,
+      updated_at = NOW()
+    WHERE
+      record_id = $1
+    RETURNING *
+  `,
+
+  deleteBankRecord: `
+    UPDATE banks
+    SET
+        is_deleted = true,
+        updated_at = NOW()
+    WHERE
+        record_id = $1
+  `,
+
+  createBankRecord: `
+    INSERT INTO banks(
+        id, name, slug, code, longcode, gateway, pay_with_bank, active, country , currency , type
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING *
+    `,
 };
