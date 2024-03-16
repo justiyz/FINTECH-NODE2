@@ -30,7 +30,13 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import {sendSms} from '../services/service.sms';
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import moment from "moment-timezone";
-import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
+import {
+  API_VERSION,
+  BANK_UPDATE_SUCCESSFUL,
+  BVN_INFORMATION_UNAVAILABLE, CREATE_BANK_RECORD,
+  DELETE_BANK_RECORD
+} from "../../lib/enums/lib.enum.messages";
+import {CREATE_BANK_CONTROLLER, DELETE_BANK_CONTROLLER, UPDATE_BANK_INFORMATION} from "../../lib/enums/lib.enum.labels";
 
 
 const { SEEDFI_NODE_ENV, SEEDFI_API_VERSION } = config;
@@ -209,6 +215,104 @@ export const fetchAvailableBankLists = async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_BANKS_CONTROLLER;
     logger.error(`fetching list of banks from paystack failed:::${ enums.FETCH_BANKS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const fetchLocalBanks = async(req, res, next) => {
+  try {
+    const {user} = req;
+    const data = await processAnyData(userQueries.getBankList, [ 'true' ]);
+    data.message = 'list of banks fetched successfully.';
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: bank lists returned successfully fetchLocalBanks.controller.user.js`);
+    return ApiResponse.success(res, data.message, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_BANKS_CONTROLLER;
+    logger.error(`fetching list of banks from database failed:::${ enums.FETCH_BANKS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+export const fetchLocalSingleBanks = async(req, res, next) => {
+  try {
+    const {user, params: { record_id }} = req;
+    const data = await processAnyData(userQueries.getBankById, [ record_id ]);
+    data.message = 'bank fetched successfully.';
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: bank  returned from the DB fetchLocalSingleBanks.controller.user.js`);
+    return ApiResponse.success(res, data.message, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_BANKS_CONTROLLER;
+    logger.error(`fetching list of banks from database failed:::${ enums.FETCH_BANKS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const updateBankRecord = async(req, res, next) => {
+  try {
+    const { user, params: { record_id }, body } = req;
+    let bank = await processOneOrNoneData(userQueries.getBankById, [ record_id ]);
+    const payload = UserPayload.updateBankRecord(body, bank);
+    const data = await processOneOrNoneData(userQueries.updateBankRecord, payload );
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: updated bank information successfully updateBankRecord.controller.user.js`);
+    return ApiResponse.success(res, enums.BANK_UPDATE_SUCCESSFUL, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_BANK_INFORMATION;
+    logger.error(`failed to update bank record:::${ enums.UPDATE_BANK_INFORMATION }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const deleteBankRecord = async(req, res, next) => {
+  try {
+    const { user, params: { record_id }} = req;
+    const data = await processOneOrNoneData(userQueries.deleteBankRecord, [ record_id ] );
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: deleted bank information successfully deleteBankRecord.controller.user.js`);
+    return ApiResponse.success(res, enums.DELETE_BANK_RECORD, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.DELETE_BANK_CONTROLLER;
+    logger.error(`failed to delete bank record:::${ enums.DELETE_BANK_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const createBankRecord = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const payload = UserPayload.createBankRecord(body);
+    const data = await processOneOrNoneData(userQueries.createBankRecord, payload );
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: created bank information successfully createBankRecord.controller.user.js`);
+    return ApiResponse.success(res, enums.CREATE_BANK_RECORD, enums.HTTP_OK, data);
+  } catch(error) {
+    error.label = enums.CREATE_BANK_CONTROLLER;
+    logger.error(`failed to create bank record:::${ enums.CREATE_BANK_CONTROLLER }`, error.message);
     return next(error);
   }
 };
