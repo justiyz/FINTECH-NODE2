@@ -27,13 +27,13 @@ import sharp from 'sharp';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
 import {verifyBvnOTPSms} from '../../lib/templates/sms';
 import * as Helpers from '../../lib/utils/lib.util.helpers';
-import {sendSms} from '../services/service.sms'; 
+import {sendSms} from '../services/service.sms';
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import moment from "moment-timezone";
-import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages"; 
+import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
 
 
-const { SEEDFI_API_VERSION } = config;
+const { SEEDFI_NODE_ENV, SEEDFI_API_VERSION } = config;
 
 /**
  * update user device fcm token
