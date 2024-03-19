@@ -213,8 +213,16 @@ export const createMandateConsentRequest = async (req, res, next) => {
   try {
     const [userDetails] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [user.user_id]);
 
-    const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.id);
-    repaymentSchedule.forEach(async schedule => {
+    const exisitingLoanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
+
+    if (exisitingLoanRepaymentDetails.length > 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User previouly accepted a mandate for this loan createMandateConsentRequest.controller.recova.js`);
+      return ApiResponse.error(res, enums.MANDATE_ALREADY_ACCEPTED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    }
+
+    const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.user_id);
+
+    await repaymentSchedule.forEach(async schedule => {
       await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
         schedule.loan_id,
         schedule.user_id,
@@ -233,8 +241,9 @@ export const createMandateConsentRequest = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user pre disbursement loan repayment details saved createMandateConsentRequest.controllers.recova.js`);
 
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
+    console.log(loanRepaymentDetails);
 
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
 
@@ -249,14 +258,14 @@ export const createMandateConsentRequest = async (req, res, next) => {
       );
       return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
-    const collectionPaymentSchedules = loanRepaymentDetails.map(repayment => {
+
+    const collectionPaymentSchedules = await loanRepaymentDetails.map(repayment => {
       return {
         repaymentDate: repayment.proposed_payment_date,
-        repaymentAmountInNaira: parseFloat(repayment.total_payment_amount),
+        repaymentAmountInNaira: repayment.total_payment_amount,
       };
     });
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
-    console.log(loanDetails, 'loanDetails', loanRepaymentDetails, 'loanRepaymentDti');
 
     // const bvnData = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
 
@@ -291,7 +300,13 @@ export const createMandateConsentRequest = async (req, res, next) => {
       collectionPaymentSchedules: collectionPaymentSchedules,
     };
 
+    console.log(data);
+
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's mandate data collated successfully createMandateConsentRequest.controller.recova.js`);
     const result = await recovaService.createConsentRequest(data);
+    logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's mandate saved on recova external endpoint successfully createMandateConsentRequest.controller.recova.js`
+    );
 
     if (result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
       const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [
@@ -306,6 +321,10 @@ export const createMandateConsentRequest = async (req, res, next) => {
     return ApiResponse.error(res, 'Unable to save initiated consent request', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
   } catch (error) {
     logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Error: ${error.message} createMandateConsentRequest.controller.recova.js`);
+    await processAnyData(loanQueries.deleteRecentlyCreatedLoanRepaymentScheduleForMandate, loanDetails.loan_id);
+    logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: recently create repayment schedule rollback and deleted  successfully createMandateConsentRequest.controller.recova.js`
+    );
     return ApiResponse.error(res, 'Unable to initiate consent request', enums.HTTP_INTERNAL_SERVER_ERROR, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
   }
 };

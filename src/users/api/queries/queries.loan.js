@@ -263,6 +263,11 @@ export default {
     AND status != 'paid'
     ORDER BY repayment_order ASC`,
 
+  deleteRecentlyCreatedLoanRepaymentScheduleForMandate: `
+    DELETE FROM pre_disbursement_loan_payment_schedules
+    WHERE loan_id = $1 AND created_at > NOW() - INTERVAL '1 minute';
+  `,
+
   fetchLoanNextRepaymentDetails: `
     SELECT
       id,
