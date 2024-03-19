@@ -1421,6 +1421,12 @@ export const createMandateConsentRequest = async (req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
       return ApiResponse.error(res, enums.NO_DEFAULT_ACCOUNT, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
+    if (accountDetails.bank_code.length > 3) {
+      logger.info(
+        `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user bank account code ${accountDetails.bank_code} is not a commercial bank code createMandateConsentRequest.controller.recova.js`
+      );
+      return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+    }
     const collectionPaymentSchedules = loanRepaymentDetails.map(repayment => {
       return {
         repaymentDate: repayment.proposed_payment_date,
@@ -1463,7 +1469,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     };
 
     const result = await recovaService.createConsentRequest(data);
-    console.log('result', result);
+
     if (result.requestStatus.toLowerCase() === 'awaitingconfirmation') {
       const mandate = await processOneOrNoneData(loanMandateQueries.initiateLoanMandate, [
         loanDetails.loan_id,

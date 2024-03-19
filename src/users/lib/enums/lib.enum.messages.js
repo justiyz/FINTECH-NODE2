@@ -464,6 +464,7 @@ export const LOAN_OVERPAID = 'Amount paid exceeds the amount expected to offset 
 export const OUTSTANDING_AMOUNT_FETCHED_SUCCESSFULLY = 'Outstanding amount fetched successfully';
 export const LOAN_REPAID_SUCCESSFULLY = 'Loan repaid successfully';
 export const LOAN_WAS_NOT_CREATED_BY_ADMIN = 'Loan can not be repaid manually, user should kindly login to repay loan';
+export const MANDATE_ALREADY_ACCEPTED = `Acceptance of mandate for this loan has already been attempted`;
 export const API_VERSION = 'API version returned successfully';
 export const COMMERCIAL_BANK_REQUIRED = `Change your bank account to a commercial bank account to proceed`;
 

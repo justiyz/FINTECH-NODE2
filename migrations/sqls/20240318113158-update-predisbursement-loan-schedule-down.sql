@@ -1,0 +1,2 @@
+ALTER TABLE pre_disbursement_loan_payment_schedules DROP COLUMN IF EXISTS pre_reschedule_proposed_payment_date;
+ALTER TABLE pre_disbursement_loan_payment_schedules DROP COLUMN IF EXISTS amount_paid;
