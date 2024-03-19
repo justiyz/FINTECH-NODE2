@@ -1556,7 +1556,7 @@ export const sendBvnOtp = async(req, res, next) => {
   try {
     const {body: {bvn, date_of_birth}} = req;
     // get bvn information from provider
-    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
 
@@ -1571,6 +1571,7 @@ export const sendBvnOtp = async(req, res, next) => {
 
     // if match, send otp to user
     const otpData = await sendOtpToBvnUser(bvn, data.data);
+    console.log('Number data: ', otpData)
 
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, {...otpData});
@@ -1585,9 +1586,8 @@ export const verifyBvnInfo = async(req, res, next) => {
   try {
     const {body: {bvn, first_name, last_name, date_of_birth, gender }} = req;
     // run a query, if result exist, return result
-
     const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-    const result = data;
+
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
@@ -1603,6 +1603,8 @@ export const verifyBvnInfo = async(req, res, next) => {
     ) {
       // create a migration
       // save information
+      console.log('we are here', data)
+      const result = data;
       return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
     } else {
       return ApiResponse.error(res, enums.BVN_INFORMATION_UNAVAILABLE, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
@@ -1657,6 +1659,15 @@ export const verifyBvnOtp = async(req, res, next) => {
   }
 };
 
+function getPhoneNumber(obj) {
+  // Check if either phoneNumber1 or phone_number1 exists in the object
+  if ('phoneNumber1' in obj) {
+    return obj.phoneNumber1;
+  } else if ('phone_number1' in obj) {
+    return obj.phone_number1;
+  }
+  return null;
+}
 const sendOtpToBvnUser = async(bvn, data) => {
   const bvnHash = await Hash.encrypt(bvn.trim());
   const otp = Helpers.generateOtp();
@@ -1670,7 +1681,8 @@ const sendOtpToBvnUser = async(bvn, data) => {
   const expireAt = dayjs().add(10, 'minutes');
   const expirationTime = dayjs(expireAt);
   const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
-  const pn = parsePhoneNumber(data.phone_number1, { regionCode: 'NG' });
+  let newPhoneNumber = getPhoneNumber(data);
+  const pn = parsePhoneNumber(newPhoneNumber, { regionCode: 'NG' });
   if (!pn.valid) {
     logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
     return ApiResponse.error(bvn, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);

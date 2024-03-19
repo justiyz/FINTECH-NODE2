@@ -1517,10 +1517,9 @@ export const createManualLoan = async(req, res, next) => {
 
     const totalFees = helpers.calculateTotalFees(body);
     const monthlyInterest = helpers.calculateMonthlyInterestRate(body, 12); // 12 is the constant value for loan period
-
     const monthlyRepaymentNumerator = helpers.monthlyRepaymentNumerator(monthlyInterest, parseFloat(body.loan_amount));
     const monthlyRepaymentDenominator = helpers.monthlyRepaymentDenominator(monthlyInterest, parseFloat(body.loan_tenor));
-    const monthlyRepayment = helpers.monthlyRepayment(monthlyRepaymentNumerator, monthlyRepaymentDenominator);
+    const monthlyRepayment = (body.interest_rate === 0) ? (body.loan_amount/body.loan_tenor) : helpers.monthlyRepayment(monthlyRepaymentNumerator, monthlyRepaymentDenominator);
     const totalMonthlyRepayment = helpers.calculateTotalMonthlyRepayment(monthlyRepayment, parseFloat(body.loan_tenor));
     const totalOutstandingAmount = helpers.calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
     const totalInterests = helpers.calculateTotalInterestAmount(totalMonthlyRepayment, parseFloat(body.loan_amount));
@@ -1529,14 +1528,14 @@ export const createManualLoan = async(req, res, next) => {
     const advisoryFee = helpers.advisoryFeeValue(parseFloat(body.advisory_fee), parseFloat(body.loan_amount));
 
     if (body.loan_type === 'manual') {
-      const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, 
+      const payload = loanPayload.createManualLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount,
         monthlyInterest, processingFee, insuranceFee, advisoryFee, monthlyRepayment);
       const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: manual loan created successfully createManualLoan.admin.controllers.loan.js`);
-  
+
       const existingLoanApplication = await processOneOrNoneData(loanQueries.fetchLoanDetailsByLoanId, userLoan.loan_id);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan details fetched successfully createManualLoan.admin.controllers.loan.js`);
-  
+
       const repaymentSchedule = await generateLoanRepaymentScheduleForManualCreation(existingLoanApplication, body.user_id, body.loan_disbursement_date);
       repaymentSchedule.forEach(async(schedule) => {
         await Promise.all([
@@ -1554,7 +1553,7 @@ export const createManualLoan = async(req, res, next) => {
       const loanDisbursementPaymentHistory =  await processOneOrNoneData(loanQueries.recordLoanDisbursementPaymentHistory, paymentHistoryPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in paystack_payment_histories table
       createManualLoan.controller.loan.js`);
-      
+
       const loanDisbursementPayload = loanPayload.recordPersonalLoanDisbursement(body, userLoan.loan_id, loanDisbursementPaymentHistory.id, userDetails.name);
       await processNoneData(userLoanQueries.updateLoanDisbursementTable, loanDisbursementPayload);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully recorded loan in personal_loan_disbursements table
@@ -1563,12 +1562,12 @@ export const createManualLoan = async(req, res, next) => {
         await processNoneData(loanQueries.updateRepaymentStatusToPaid, userLoan.loan_id);
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: repayment status successfully set to paid in the DB
           createManualLoan.controller.loan.js`);
-      } 
+      }
       await userActivityTracking(body.user_id, 37, 'success');
       await userActivityTracking(body.user_id, 39, 'success');
-      return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);  
+      return ApiResponse.success(res, enums.LOAN_CREATED_SUCCESSFULLY, enums.HTTP_OK, userLoan);
     }
-    const payload = loanPayload.createPreApprovedLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee, 
+    const payload = loanPayload.createPreApprovedLoan(body, totalOutstandingAmount, totalInterests, totalOutstandingAmount, monthlyInterest, processingFee,
       insuranceFee, advisoryFee, monthlyRepayment);
     const userLoan = await processOneOrNoneData(loanQueries.createManualLoan, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: pre approved loan created successfully createManualLoan.admin.controllers.loan.js`);
