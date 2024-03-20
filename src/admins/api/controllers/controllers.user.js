@@ -562,15 +562,19 @@ export const fetchUserRewards = async(req, res, next) => {
 export const updateUserProfile = async(req, res, next) => {
   try {
     const {body, admin, userDetails} = req;
-    if(body.middle_name === undefined) {
-      body.middle_name = userDetails.middle_name
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    if (body.middle_name === undefined) {
+      body.middle_name = userDetails.middle_name;
     }
     const payload = UserPayload.updateUserProfile(body, userDetails);
     const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info:
     successfully updated user profile in the DB updateUserProfile.controller.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 75, 'success', descriptions.update_user_details(adminName, userDetails.name));
     return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 75, 'fail', descriptions.update_user_details_failed(`${req.admin.first_name}, ${req.admin.last_name}`,
+      req.userDetails.name));
     error.label = enums.UPDATE_USER_PROFILE_CONTROLLER;
     logger.error(`updating user's profile failed:::${ enums.UPDATE_USER_PROFILE_CONTROLLER }`, error.message);
     return next(error);
@@ -588,12 +592,16 @@ export const updateUserProfile = async(req, res, next) => {
 export const updateEmploymentDetails = async(req, res, next) => {
   try {
     const {body, admin, userEmploymentDetails} = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const user = await processOneOrNoneData(userQueries.getUserByUserId, userEmploymentDetails.user_id);
     const payload = UserPayload.updateEmploymentDetails(body, userEmploymentDetails);
     const data = await processAnyData(userQueries.updateEmploymentDetails, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
     Admin successfully updated employment in the DB. updateEmploymentDetails.controller.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 77, 'success', descriptions.update_user_employment_details(adminName, user.name));
     return ApiResponse.success(res, enums.UPDATE_EMPLOYMENT_DETAILS, enums.HTTP_OK, data);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 77, 'fail', descriptions.update_user_employment_details_failed(`${req.admin.first_name}, ${req.admin.last_name}`));
     error.label = enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER;
     logger.error(`updating user employment details failed:::${ enums.UPDATE_EMPLOYMENT_DETAILS_CONTROLLER }`, error.message);
     return next(error);
@@ -611,12 +619,16 @@ export const updateEmploymentDetails = async(req, res, next) => {
 export const updateResidentialAddress = async(req, res, next) => {
   try {
     const {body, admin, userAddressDetails} = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const user = await processOneOrNoneData(userQueries.getUserByUserId, userAddressDetails.user_id);
     const payload = UserPayload.updateResidentialAddress(body, userAddressDetails);
     const data = await processAnyData(userQueries.updateUserAddressDetails, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
     Admin successfully updated residential address in the DB. updateEmploymentDetails.controller.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 75, 'success', descriptions.update_user_residential_details(adminName, user.name));
     return ApiResponse.success(res, enums.USER_ADDRESS_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 75, 'fail', descriptions.update_user_residential_details_failed(`${req.admin.first_name}, ${req.admin.last_name}`));
     error.label = enums.UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER;
     logger.error(`updating user residential address failed:::${ enums.UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER }`, error.message);
     return next(error);
@@ -634,12 +646,16 @@ export const updateResidentialAddress = async(req, res, next) => {
 export const updateNextOfKin = async(req, res, next) => {
   try {
     const {body, admin, userNextOfKinDetails} = req;
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    const user = await processOneOrNoneData(userQueries.getUserByUserId, userNextOfKinDetails.user_id);
     const payload = UserPayload.updateNextOfKin(body, userNextOfKinDetails);
     const data = await processAnyData(userQueries.updateUserNextOfKin, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id}:::Info:
     Admin successfully updated residential address in the DB. updateNextOfKin.controller.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 76, 'success', descriptions.update_user_next_of_kin_details(adminName, user.name));
     return ApiResponse.success(res, enums.NEXT_OF_KIN_UPDATED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 76, 'fail', descriptions.update_user_next_of_kin_details_failed(`${req.admin.first_name}, ${req.admin.last_name}`));
     error.label = enums.UPDATE_NEXT_OF_KIN_CONTROLLER;
     logger.error(`updating user residential address failed:::${ enums.UPDATE_NEXT_OF_KIN_CONTROLLER }`, error.message);
     return next(error);

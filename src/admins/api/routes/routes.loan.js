@@ -7,6 +7,8 @@ import * as RoleMiddleware from '../middlewares/middlewares.roles';
 import * as LoanMiddleware from '../middlewares/middlewares.loan';
 import * as LoanController from '../controllers/controllers.loan';
 import * as UserMiddleware from '../middlewares/middlewares.user';
+import * as UserLoanMiddleware from '../../../users/api/middlewares/middlewares.loan';
+
 
 const router = Router();
 
@@ -271,5 +273,18 @@ router.post(
   Model(Schema.createPreApprovedLoan, 'payload'),
   UserMiddleware.checkIfUserExists,
   LoanController.createManualLoan
+);
+
+router.post(
+  '/:loan_id/:user_id/reschedule',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('loan application', 'create'),
+  LoanMiddleware.checkIfAdminIsSuperAdmin,
+  Model(Schema.rescheduleLoanParams, 'params'),
+  Model(Schema.rescheduleTenor, 'payload'),
+  UserLoanMiddleware.checkUserLoanApplicationExists,
+  UserMiddleware.checkIfUserExists,
+  UserLoanMiddleware.checkIfOngoingLoanApplication,
+  LoanController.processManualLoanRescheduling
 );
 export default router;
