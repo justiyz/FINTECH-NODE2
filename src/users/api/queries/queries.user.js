@@ -878,4 +878,27 @@ export default {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *
     `,
+
+  saveBvnInformation: `
+    INSERT INTO verified_bvn_records(
+        first_name, last_name, bvn, gender, date_of_birth, phone_number, email
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+  `,
+  queryBvnInformation: `
+    SELECT * FROM verified_bvn_records
+    WHERE (first_name = $1 AND last_name = $2 AND date_of_birth = $3 AND gender = $4)
+  `,
+
+  queryBvnInformationByDob: `
+    SELECT * FROM verified_bvn_records
+    WHERE (date_of_birth = $1 and is_deleted = false)
+  `,
+
+  setDataToDeleted: `
+    UPDATE verified_bvn_records
+    SET
+        is_deleted = true
+    WHERE
+        record_id = $1
+  `
 };
