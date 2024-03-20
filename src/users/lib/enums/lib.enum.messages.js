@@ -188,6 +188,7 @@ export const USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL = type => `User ${type
 export const USER_CURRENT_LOANS_FETCHED_SUCCESSFUL = 'User current loans fetched successful';
 export const LOAN_RESCHEDULING_EXTENSION_DURATIONS_FETCHED_SUCCESSFULLY = 'Loan rescheduling extension durations in days fetched successfully';
 export const LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY = 'Loan rescheduling summary returned successfully';
+export const LOAN_DOES_NOT_HAVE_REPAYMENT_SCHEDULE = 'loan does not have repayment schedule';
 export const LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY = 'Loan rescheduling processed successfully';
 export const CLUSTER_NOT_EXISTING = 'Cluster does not exist';
 export const CLUSTER_NO_LONGER_EXISTING = 'Cluster no longer exist';

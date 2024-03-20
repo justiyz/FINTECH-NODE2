@@ -1707,6 +1707,13 @@ export const processManualLoanRescheduling = async(req, res, next) => {
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const userUnpaidRepayments = await processAnyData(userLoanQueries.fetchUserUnpaidRepayments, [ existingLoanApplication.loan_id, user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's unpaid repayments fetched processManualLoanRescheduling.controllers.loan.js`);
+
+    if (userUnpaidRepayments.length === 0) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: successfully confirms user does not have repayment schedule
+       processManualLoanRescheduling.controllers.loan.js`);
+      return ApiResponse.error(res, enums.LOAN_DOES_NOT_HAVE_REPAYMENT_SCHEDULE, enums.HTTP_BAD_REQUEST, enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER);
+    }
+    
     const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's next loan repayment details fetched successfully
      processManualLoanRescheduling.controllers.loan.js`);
