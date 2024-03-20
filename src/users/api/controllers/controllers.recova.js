@@ -222,7 +222,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.user_id);
 
-    await repaymentSchedule.forEach(async schedule => {
+    repaymentSchedule.forEach(async schedule => {
       await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
         schedule.loan_id,
         schedule.user_id,
@@ -236,12 +236,12 @@ export const createMandateConsentRequest = async (req, res, next) => {
         schedule.proposed_payment_date,
         schedule.proposed_payment_date,
       ]);
+
       return schedule;
     });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user pre disbursement loan repayment details saved createMandateConsentRequest.controllers.recova.js`);
 
-    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
-    console.log(loanRepaymentDetails);
+    // const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
@@ -259,10 +259,10 @@ export const createMandateConsentRequest = async (req, res, next) => {
       return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
 
-    const collectionPaymentSchedules = await loanRepaymentDetails.map(repayment => {
+    const collectionPaymentSchedules = await repaymentSchedule.map(repayment => {
       return {
         repaymentDate: repayment.proposed_payment_date,
-        repaymentAmountInNaira: repayment.total_payment_amount,
+        repaymentAmountInNaira: parseFloat(repayment.total_payment_amount),
       };
     });
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
@@ -299,8 +299,6 @@ export const createMandateConsentRequest = async (req, res, next) => {
       preferredRepaymentAccount: accountDetails.account_number,
       collectionPaymentSchedules: collectionPaymentSchedules,
     };
-
-    console.log(data);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's mandate data collated successfully createMandateConsentRequest.controller.recova.js`);
     const result = await recovaService.createConsentRequest(data);

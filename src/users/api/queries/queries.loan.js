@@ -220,7 +220,8 @@ export default {
       loan_id, user_id, repayment_order, principal_payment, interest_payment, fees,
       total_payment_amount, pre_payment_outstanding_amount, post_payment_outstanding_amount,
       proposed_payment_date, pre_reschedule_proposed_payment_date
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING *`,
 
   fetchLoanRepaymentSchedule: `
     SELECT

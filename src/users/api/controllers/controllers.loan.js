@@ -13,8 +13,13 @@ import LoanPayload from '../../lib/payloads/lib.payload.loan';
 import { sendNotificationToAdmin } from '../services/services.firebase';
 import { loanApplicationEligibilityCheck, loanApplicationRenegotiation } from '../services/service.seedfiUnderwriting';
 import { userActivityTracking } from '../../lib/monitor';
-import { initiateTransfer, initializeCardPayment, initializeBankAccountChargeForLoanRepayment,
-  initializeDebitCarAuthChargeForLoanRepayment, submitPaymentOtpWithReference, initializeBankTransferPayment
+import {
+  initiateTransfer,
+  initializeCardPayment,
+  initializeBankAccountChargeForLoanRepayment,
+  initializeDebitCarAuthChargeForLoanRepayment,
+  submitPaymentOtpWithReference,
+  initializeBankTransferPayment,
 } from '../services/service.paystack';
 import { generateOfferLetterPDF } from '../../lib/utils/lib.util.helpers';
 import * as adminNotification from '../../lib/templates/adminNotification';
@@ -27,39 +32,82 @@ import * as adminNotification from '../../lib/templates/adminNotification';
  * @returns {object} - Returns summary of loan based on loan decision
  * @memberof LoanController
  */
-export const checkUserLoanEligibility = async(req, res, next) => {
+export const checkUserLoanEligibility = async (req, res, next) => {
   try {
-    const { user, body, userEmploymentDetails, userLoanDiscount, userDefaultAccountDetails, clusterType,
-      userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, maximumAmountForNoCreditHistoryDetails } = req;
-    const admins = await processAnyData(notificationQueries.fetchAdminsForLoanNotification, [ 'loan application' ]);
+    const {
+      user,
+      body,
+      userEmploymentDetails,
+      userLoanDiscount,
+      userDefaultAccountDetails,
+      clusterType,
+      userMinimumAllowableAMount,
+      userMaximumAllowableAmount,
+      previousLoanCount,
+      maximumAmountForNoCreditHistoryDetails,
+    } = req;
+    const admins = await processAnyData(notificationQueries.fetchAdminsForLoanNotification, ['loan application']);
     const userMonoId = userDefaultAccountDetails.mono_account_id === null ? '' : userDefaultAccountDetails.mono_account_id;
-    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [ user.user_id ]);
+    const userBvn = await processOneOrNoneData(loanQueries.fetchUserBvn, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: fetched user bvn from the db checkUserLoanEligibility.controllers.loan.js`);
-    const [ userPreviouslyDefaulted ] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [ user.user_id ]);
+    const [userPreviouslyDefaulted] = await processAnyData(loanQueries.checkIfUserHasPreviouslyDefaultedInLoanRepayment, [user.user_id]);
     const previouslyDefaultedCount = parseFloat(userPreviouslyDefaulted.count);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if user previously defaulted in loan repayment checkUserLoanEligibility.controllers.loan.js`);
-    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication,
-      [ user.user_id, parseFloat(body.amount), parseFloat(body.amount), body.loan_reason, body.duration_in_months, body.duration_in_months ]);
+    const loanApplicationDetails = await processOneOrNoneData(loanQueries.initiatePersonalLoanApplication, [
+      user.user_id,
+      parseFloat(body.amount),
+      parseFloat(body.amount),
+      body.loan_reason,
+      body.duration_in_months,
+      body.duration_in_months,
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: initiated loan application in the db checkUserLoanEligibility.controllers.loan.js`);
-    const payload = await LoanPayload.checkUserEligibilityPayload(user, body, userDefaultAccountDetails, loanApplicationDetails, userEmploymentDetails, userBvn, userMonoId, userLoanDiscount, clusterType, userMinimumAllowableAMount, userMaximumAllowableAmount, previousLoanCount, previouslyDefaultedCount, maximumAmountForNoCreditHistoryDetails);
+    const payload = await LoanPayload.checkUserEligibilityPayload(
+      user,
+      body,
+      userDefaultAccountDetails,
+      loanApplicationDetails,
+      userEmploymentDetails,
+      userBvn,
+      userMonoId,
+      userLoanDiscount,
+      clusterType,
+      userMinimumAllowableAMount,
+      userMaximumAllowableAmount,
+      previousLoanCount,
+      previouslyDefaultedCount,
+      maximumAmountForNoCreditHistoryDetails
+    );
     const result = await loanApplicationEligibilityCheck(payload);
     if (result.status !== 200) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status check failed checkUserLoanEligibility.controllers.loan.js`);
-      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [ loanApplicationDetails.loan_id, user.user_id ]);
+      await processNoneData(loanQueries.deleteInitiatedLoanApplication, [loanApplicationDetails.loan_id, user.user_id]);
       if (result.status >= 500 || result.response.status >= 500) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: returned response from underwriting is of a 500 plus status
         checkUserLoanEligibility.controllers.loan.js`);
-        admins.map((admin) => {
-          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application', {});
+        admins.map(admin => {
+          sendNotificationToAdmin(
+            admin.admin_id,
+            'Failed Loan Application',
+            adminNotification.loanApplicationDownTime(),
+            [`${user.first_name} ${user.last_name}`],
+            'failed-loan-application',
+            {}
+          );
         });
         await userActivityTracking(req.user.user_id, 37, 'fail');
         return ApiResponse.error(res, enums.UNDERWRITING_SERVICE_NOT_AVAILABLE, enums.HTTP_SERVICE_UNAVAILABLE, enums.CHECK_USER_LOAN_ELIGIBILITY_CONTROLLER);
       }
-      if (result.response.data?.message === 'Service unavailable loan application can\'t be completed. Please try again later.') {
-        admins.map((admin) => {
-          sendNotificationToAdmin(admin.admin_id, 'Failed Loan Application', adminNotification.loanApplicationDownTime(),
-            [ `${user.first_name} ${user.last_name}` ], 'failed-loan-application', {});
+      if (result.response.data?.message === "Service unavailable loan application can't be completed. Please try again later.") {
+        admins.map(admin => {
+          sendNotificationToAdmin(
+            admin.admin_id,
+            'Failed Loan Application',
+            adminNotification.loanApplicationDownTime(),
+            [`${user.first_name} ${user.last_name}`],
+            'failed-loan-application',
+            {}
+          );
         });
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user just initiated loan application deleted checkUserLoanEligibility.controllers.loan.js`);
@@ -79,10 +127,10 @@ export const checkUserLoanEligibility = async(req, res, next) => {
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status shows user is eligible for loan
     checkUserLoanEligibility.controllers.loan.js`);
-    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
-    const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month));
-    const totalInterestAmount = data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) :
-      parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
+    const totalFees = parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee);
+    const totalMonthlyRepayment = parseFloat(data.monthly_repayment) * Number(data.loan_duration_in_month);
+    const totalInterestAmount =
+      data.max_approval === null ? parseFloat(totalMonthlyRepayment) - parseFloat(data.loan_amount) : parseFloat(totalMonthlyRepayment) - parseFloat(data.max_approval);
     const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     if (data.final_decision === 'MANUAL') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan eligibility status should be subjected to manual approval
@@ -92,20 +140,32 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
       const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
-      await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
-      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user,
-        updatedLoanDetails.status, 'MANUAL', offerLetterData.Location.trim());
+      await processNoneData(loanQueries.updateOfferLetter, [loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim()]);
+      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(
+        data,
+        totalAmountRepayable,
+        totalInterestAmount,
+        user,
+        updatedLoanDetails.status,
+        'MANUAL',
+        offerLetterData.Location.trim()
+      );
 
-      admins.map(async(admin) => {
+      admins.map(async admin => {
         const data = {
           email: admin.email,
           loanUser: `${user.first_name} ${user.last_name}`,
           type: 'an individual',
-          first_name: admin.first_name
+          first_name: admin.first_name,
         };
         await AdminMailService('Manual Loan Approval Required', 'manualLoanApproval', { ...data });
-        sendNotificationToAdmin(admin.admin_id, 'Manual Approval Required', adminNotification.loanApplicationApproval(),
-          [ `${user.first_name} ${user.last_name}` ], 'manual-approval');
+        sendNotificationToAdmin(
+          admin.admin_id,
+          'Manual Approval Required',
+          adminNotification.loanApplicationApproval(),
+          [`${user.first_name} ${user.last_name}`],
+          'manual-approval'
+        );
       });
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: Notification sent to admin successfully checkUserLoanEligibility.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 37, 'success');
@@ -120,9 +180,16 @@ export const checkUserLoanEligibility = async(req, res, next) => {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: latest loan details updated checkUserLoanEligibility.controllers.loan.js`);
       const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated checkUserLoanEligibility.controllers.loan.js`);
-      await processNoneData(loanQueries.updateOfferLetter, [ loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim() ]);
-      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(data, totalAmountRepayable, totalInterestAmount, user,
-        updatedLoanDetails.status, 'APPROVED', offerLetterData.Location.trim());
+      await processNoneData(loanQueries.updateOfferLetter, [loanApplicationDetails.loan_id, user.user_id, offerLetterData.Location.trim()]);
+      const returnData = await LoanPayload.loanApplicationApprovalDecisionResponse(
+        data,
+        totalAmountRepayable,
+        totalInterestAmount,
+        user,
+        updatedLoanDetails.status,
+        'APPROVED',
+        offerLetterData.Location.trim()
+      );
       userActivityTracking(req.user.user_id, 37, 'success');
       userActivityTracking(req.user.user_id, 39, 'success');
       return ApiResponse.success(res, enums.LOAN_APPLICATION_APPROVED_DECISION, enums.HTTP_OK, returnData);
@@ -143,7 +210,7 @@ export const checkUserLoanEligibility = async(req, res, next) => {
  * @returns {object} - Returns details of cancelled loan
  * @memberof LoanController
  */
-export const processLoanRenegotiation = async(req, res, next) => {
+export const processLoanRenegotiation = async (req, res, next) => {
   try {
     const { user, existingLoanApplication, body } = req;
     const result = await loanApplicationRenegotiation(body, user, existingLoanApplication);
@@ -163,23 +230,30 @@ export const processLoanRenegotiation = async(req, res, next) => {
     const { data } = result;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan renegotiation processing returns success response from underwriting service
     processLoanRenegotiation.controllers.loan.js`);
-    const totalFees = (parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee));
-    const totalMonthlyRepayment = (parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month));
+    const totalFees = parseFloat(data.fees.processing_fee) + parseFloat(data.fees.insurance_fee) + parseFloat(data.fees.advisory_fee);
+    const totalMonthlyRepayment = parseFloat(data.monthly_repayment) * Number(body.new_loan_duration_in_month);
     const totalInterestAmount = parseFloat(totalMonthlyRepayment) - parseFloat(body.new_loan_amount);
     const totalAmountRepayable = parseFloat(totalMonthlyRepayment);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: total interest amount and total amount repayable calculated
     processLoanRenegotiation.controllers.loan.js`);
     const renegotiationPayload = await LoanPayload.loanRenegotiationPayload(user, body, existingLoanApplication, data);
     const updateRenegotiationPayload = await LoanPayload.loanApplicationRenegotiationPayload(data, totalAmountRepayable, totalInterestAmount, body, existingLoanApplication);
-    const [ , updatedLoanDetails ] = await Promise.all([
+    const [, updatedLoanDetails] = await Promise.all([
       processOneOrNoneData(loanQueries.createRenegotiationDetails, renegotiationPayload),
-      processOneOrNoneData(loanQueries.updateLoanApplicationWithRenegotiation, updateRenegotiationPayload)
+      processOneOrNoneData(loanQueries.updateLoanApplicationWithRenegotiation, updateRenegotiationPayload),
     ]);
     const offerLetterData = await generateOfferLetterPDF(user, updatedLoanDetails);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan offer letter generated processLoanRenegotiation.controllers.loan.js`);
-    await processNoneData(loanQueries.updateOfferLetter, [ existingLoanApplication.loan_id, user.user_id, offerLetterData.Location.trim() ]);
-    const returningData = await LoanPayload.loanApplicationRenegotiationResponse(data, totalAmountRepayable, totalInterestAmount, user,
-      updatedLoanDetails, offerLetterData.Location.trim(), body);
+    await processNoneData(loanQueries.updateOfferLetter, [existingLoanApplication.loan_id, user.user_id, offerLetterData.Location.trim()]);
+    const returningData = await LoanPayload.loanApplicationRenegotiationResponse(
+      data,
+      totalAmountRepayable,
+      totalInterestAmount,
+      user,
+      updatedLoanDetails,
+      offerLetterData.Location.trim(),
+      body
+    );
     userActivityTracking(user.user_id, 74, 'success');
     return ApiResponse.success(res, enums.LOAN_RENEGOTIATION_SUCCESSFUL_SUCCESSFULLY, enums.HTTP_OK, returningData);
   } catch (error) {
@@ -198,10 +272,13 @@ export const processLoanRenegotiation = async(req, res, next) => {
  * @returns {object} - Returns details of cancelled loan
  * @memberof LoanController
  */
-export const cancelLoanApplication = async(req, res, next) => {
+export const cancelLoanApplication = async (req, res, next) => {
   try {
-    const { user, params: { loan_id } } = req;
-    const cancelLoanProcess = await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [ loan_id, user.user_id ]);
+    const {
+      user,
+      params: { loan_id },
+    } = req;
+    const cancelLoanProcess = await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 43, 'success');
     return ApiResponse.success(res, enums.LOAN_APPLICATION_CANCELLING_SUCCESSFUL, enums.HTTP_OK, cancelLoanProcess);
@@ -213,12 +290,15 @@ export const cancelLoanApplication = async(req, res, next) => {
   }
 };
 
-export const cancelShopLoanApplication = async(req, res, next) => {
+export const cancelShopLoanApplication = async (req, res, next) => {
   try {
-    const { user, params: { ticket_id } } = req;
-    const loanIds = await processAnyData(loanQueries.fetchLoanIDFromUserTickets, [ ticket_id, user.user_id ]);
+    const {
+      user,
+      params: { ticket_id },
+    } = req;
+    const loanIds = await processAnyData(loanQueries.fetchLoanIDFromUserTickets, [ticket_id, user.user_id]);
     for (let counter = 0; counter < Object.keys(loanIds).length; counter++) {
-      await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [ loanIds, user.user_id ]);
+      await processOneOrNoneData(loanQueries.cancelUserLoanApplication, [loanIds, user.user_id]);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application process cancelled successfully the db cancelLoanApplication.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 43, 'success');
@@ -239,28 +319,41 @@ export const cancelShopLoanApplication = async(req, res, next) => {
  * @returns {object} - Returns details of newly activated ongoing loan
  * @memberof LoanController
  */
-export const initiateLoanDisbursement = async(req, res, next) => {
+export const initiateLoanDisbursement = async (req, res, next) => {
   try {
-    const { user, params: { loan_id }, userTransferRecipient, existingLoanApplication } = req;
+    const {
+      user,
+      params: { loan_id },
+      userTransferRecipient,
+      existingLoanApplication,
+    } = req;
     const reference = uuidv4();
-    const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
+    console.log('reference', reference);
+    const loanFees = [parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee)];
     let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee)
-    await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, existingLoanApplication.amount_requested, 'paystack', reference,
-      'personal_loan_disbursement', 'requested personal loan facility disbursement', loan_id ]);
+    existingLoanApplication.amount_requested = parseFloat(existingLoanApplication.amount_requested) - parseFloat(totalFee);
+    await processAnyData(loanQueries.initializeBankTransferPayment, [
+      user.user_id,
+      existingLoanApplication.amount_requested,
+      'paystack',
+      reference,
+      'personal_loan_disbursement',
+      'requested personal loan facility disbursement',
+      loan_id,
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan payment initialized in the DB initiateLoanDisbursement.controllers.loan.js`);
     const result = await initiateTransfer(userTransferRecipient, existingLoanApplication, reference);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: transfer initiate via paystack returns response initiateLoanDisbursement.controllers.loan.js`);
     if (result.status === true && result.message === 'Transfer has been queued') {
-      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [ loan_id ]);
+      const updatedLoanDetails = await processOneOrNoneData(loanQueries.updateProcessingLoanDetails, [loan_id]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan details status set to processing in the DB initiateLoanDisbursement.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 44, 'success');
-      return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL, enums.HTTP_OK, { ...updatedLoanDetails , reference });
+      return ApiResponse.success(res, enums.LOAN_APPLICATION_DISBURSEMENT_INITIATION_SUCCESSFUL, enums.HTTP_OK, { ...updatedLoanDetails, reference });
     }
     if (result.response.status === 400 && result.response.data.message === 'Your balance is not enough to fulfil this request') {
       const data = {
         email: config.SEEDFI_ADMIN_EMAIL_ADDRESS,
-        currentBalance: 'Kindly login to confirm'
+        currentBalance: 'Kindly login to confirm',
       };
       await AdminMailService('Insufficient Paystack Balance', 'insufficientBalance', { ...data });
     }
@@ -286,21 +379,26 @@ export const initiateLoanDisbursement = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan
  * @memberof LoanController
  */
-export const fetchPersonalLoanDetails = async(req, res, next) => {
+export const fetchPersonalLoanDetails = async (req, res, next) => {
   try {
-    const { user, existingLoanApplication,  params: { loan_id } } = req;
-    const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
+    const {
+      user,
+      existingLoanApplication,
+      params: { loan_id },
+    } = req;
+    const [nextRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user next loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
-    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ loan_id, user.user_id ]);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
-    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
-    const next_repayment_date = (!selectedStatuses.includes(existingLoanApplication.status)) ? dayjs().add(30, 'days').format('MMM DD, YYYY') :
-      dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
+    const selectedStatuses = ['ongoing', 'over due', 'completed'];
+    const next_repayment_date = !selectedStatuses.includes(existingLoanApplication.status)
+      ? dayjs().add(30, 'days').format('MMM DD, YYYY')
+      : dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
     existingLoanApplication.next_repayment_date = next_repayment_date;
     const data = {
       nextLoanRepaymentDetails: nextRepaymentDetails,
       loanDetails: existingLoanApplication,
-      loanRepaymentDetails
+      loanRepaymentDetails,
     };
     return ApiResponse.success(res, enums.USER_LOAN_DETAILS_FETCHED_SUCCESSFUL('personal'), enums.HTTP_OK, data);
   } catch (error) {
@@ -318,17 +416,17 @@ export const fetchPersonalLoanDetails = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan payment details
  * @memberof LoanController
  */
-export const fetchPersonalLoanPaymentDetails = async(req, res, next) => {
+export const fetchPersonalLoanPaymentDetails = async (req, res, next) => {
   try {
     const { user, existingLoanPayment } = req;
-    const loanDetails = await processOneOrNoneData(loanQueries.fetchUserLoanDetailsByLoanId, [ existingLoanPayment.loan_id, user.user_id ]);
+    const loanDetails = await processOneOrNoneData(loanQueries.fetchUserLoanDetailsByLoanId, [existingLoanPayment.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan details fetched fetchPersonalLoanPaymentDetails.controllers.loan.js`);
-    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [ existingLoanPayment.loan_id, user.user_id ]);
+    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [existingLoanPayment.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched fetchPersonalLoanPaymentDetails.controllers.loan.js`);
     const data = {
       loanPaymentDetails: existingLoanPayment,
       loanDetails,
-      loanRepaymentDetails
+      loanRepaymentDetails,
     };
     return ApiResponse.success(res, enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('personal'), enums.HTTP_OK, data);
   } catch (error) {
@@ -346,17 +444,17 @@ export const fetchPersonalLoanPaymentDetails = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan payment details
  * @memberof LoanController
  */
-export const fetchClusterLoanPaymentDetails = async(req, res, next) => {
+export const fetchClusterLoanPaymentDetails = async (req, res, next) => {
   try {
     const { user, existingLoanPayment } = req;
-    const clusterLoanDetails = await processOneOrNoneData(clusterQueries.fetchClusterMemberLoanDetailsByLoanId, [ existingLoanPayment.member_loan_id, user.user_id ]);
+    const clusterLoanDetails = await processOneOrNoneData(clusterQueries.fetchClusterMemberLoanDetailsByLoanId, [existingLoanPayment.member_loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan details fetched fetchClusterLoanPaymentDetails.controllers.loan.js`);
-    const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [ existingLoanPayment.member_loan_id, user.user_id ]);
+    const clusterLoanRepaymentDetails = await processAnyData(clusterQueries.fetchClusterLoanRepaymentSchedule, [existingLoanPayment.member_loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched fetchClusterLoanPaymentDetails.controllers.loan.js`);
     const data = {
       clusterLoanPaymentDetails: existingLoanPayment,
       clusterLoanDetails,
-      clusterLoanRepaymentDetails
+      clusterLoanRepaymentDetails,
     };
     return ApiResponse.success(res, enums.USER_LOAN_PAYMENT_DETAILS_FETCHED_SUCCESSFUL('cluster'), enums.HTTP_OK, data);
   } catch (error) {
@@ -374,16 +472,16 @@ export const fetchClusterLoanPaymentDetails = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan
  * @memberof LoanController
  */
-export const fetchUserCurrentLoans = async(req, res, next) => {
+export const fetchUserCurrentLoans = async (req, res, next) => {
   try {
     const { user } = req;
-    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [ user.user_id ]);
+    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user current personal loan facilities fetched fetchUserCurrentLoans.controllers.loan.js`);
-    const currentClusterLoans = await processAnyData(loanQueries.fetchUserCurrentClusterLoans, [ user.user_id ]);
+    const currentClusterLoans = await processAnyData(loanQueries.fetchUserCurrentClusterLoans, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user current cluster loan facilities fetched fetchUserCurrentLoans.controllers.loan.js`);
     const data = {
       currentPersonalLoans,
-      currentClusterLoans
+      currentClusterLoans,
     };
     return ApiResponse.success(res, enums.USER_CURRENT_LOANS_FETCHED_SUCCESSFUL, enums.HTTP_OK, data);
   } catch (error) {
@@ -401,15 +499,18 @@ export const fetchUserCurrentLoans = async(req, res, next) => {
  * @returns {object} - Returns details of either cluster or personal loan payments
  * @memberof LoanController
  */
-export const fetchUserLoanPaymentTransactions = async(req, res, next) => {
+export const fetchUserLoanPaymentTransactions = async (req, res, next) => {
   try {
-    const { user, query: { type } } = req;
+    const {
+      user,
+      query: { type },
+    } = req;
     if (type === 'personal') {
-      const personalLoanPayments = await processAnyData(loanQueries.fetchUserPersonalLoanPayments, [ user.user_id ]);
+      const personalLoanPayments = await processAnyData(loanQueries.fetchUserPersonalLoanPayments, [user.user_id]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user personal loan payments fetched fetchUserLoanPaymentTransactions.controllers.loan.js`);
       return ApiResponse.success(res, enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('personal'), enums.HTTP_OK, personalLoanPayments);
     }
-    const clusterLoanPayments = await processAnyData(loanQueries.fetchUserClusterLoanPayments, [ user.user_id ]);
+    const clusterLoanPayments = await processAnyData(loanQueries.fetchUserClusterLoanPayments, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user cluster loan payments fetched fetchUserLoanPaymentTransactions.controllers.loan.js`);
     return ApiResponse.success(res, enums.USER_LOAN_PAYMENTS_FETCHED_SUCCESSFUL('cluster'), enums.HTTP_OK, clusterLoanPayments);
   } catch (error) {
@@ -427,42 +528,62 @@ export const fetchUserLoanPaymentTransactions = async(req, res, next) => {
  * @returns {object} - Returns details of an initiate paystack payment
  * @memberof LoanController
  */
-export const initiateManualLoanRepayment = async(req, res, next) => {
+export const initiateManualLoanRepayment = async (req, res, next) => {
   try {
-    const { user, params: { loan_id }, existingLoanApplication, query: { payment_type, payment_channel } } = req;
+    const {
+      user,
+      params: { loan_id },
+      existingLoanApplication,
+      query: { payment_type, payment_channel },
+    } = req;
     if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible
       initiateManualLoanRepayment.controllers.loan.js`);
       const reference = uuidv4();
-      const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
+      const [nextRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [loan_id, user.user_id]);
       if (nextRepaymentDetails === undefined) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: failed to fetch loan next repayment details initiateManualLoanRepayment.controllers.loan.js`);
         return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_FOR_USER, enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
       }
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan next repayment details fetched initiateManualLoanRepayment.controllers.loan.js`);
-      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2)
-        : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
+      const paymentAmount =
+        payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2) : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
       const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualLoanRepayment.controllers.loan.js`);
-      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`,
-        `user repays out of or all of existing personal loan facility via ${payment_channel}`, loan_id ]);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [
+        user.user_id,
+        parseFloat(paymentAmount),
+        'paystack',
+        reference,
+        `${payment_type}_loan_repayment`,
+        `user repays out of or all of existing personal loan facility via ${payment_channel}`,
+        loan_id,
+      ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB initiateManualLoanRepayment.controllers.loan.js`);
-      const result = payment_channel === 'card' ? await initializeCardPayment(user, paystackAmountFormatting, reference) :
-        await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
+      const result =
+        payment_channel === 'card'
+          ? await initializeCardPayment(user, paystackAmountFormatting, reference)
+          : await initializeBankTransferPayment(user, paystackAmountFormatting, reference);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response initiateManualLoanRepayment.controllers.loan.js`);
       if (result.status === true && result.message.trim().toLowerCase() === 'authorization url created') {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack initialized initiateManualLoanRepayment.controllers.loan.js`);
         userActivityTracking(req.user.user_id, 71, 'success');
         return ApiResponse.success(res, result.message, enums.HTTP_OK, result.data);
       }
-      logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`);
+      logger.error(
+        `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan repayment via paystack failed to be initialized initiateManualLoanRepayment.controllers.loan.js`
+      );
       userActivityTracking(req.user.user_id, 71, 'fail');
       return ApiResponse.error(res, result.message, enums.HTTP_SERVICE_UNAVAILABLE, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible
     initiateManualLoanRepayment.controllers.loan.js`);
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status),
-      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER);
+    return ApiResponse.error(
+      res,
+      enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status),
+      enums.HTTP_BAD_REQUEST,
+      enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER
+    );
   } catch (error) {
     userActivityTracking(req.user.user_id, 71, 'fail');
     error.label = enums.INITIATE_MANUAL_LOAN_REPAYMENT_CONTROLLER;
@@ -479,26 +600,42 @@ export const initiateManualLoanRepayment = async(req, res, next) => {
  * @returns {object} - Returns details of an initiate paystack payment
  * @memberof LoanController
  */
-export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
-  const { user, params: { loan_id }, existingLoanApplication, query: { payment_type, payment_channel }, userDebitCard, accountDetails } = req;
-  const activityType = payment_channel === 'card' ? 71: 73;
+export const initiateManualCardOrBankLoanRepayment = async (req, res, next) => {
+  const {
+    user,
+    params: { loan_id },
+    existingLoanApplication,
+    query: { payment_type, payment_channel },
+    userDebitCard,
+    accountDetails,
+  } = req;
+  const activityType = payment_channel === 'card' ? 71 : 73;
   try {
     if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} so repayment is possible
       initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       const reference = uuidv4();
-      const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id, user.user_id ]);
+      const [nextRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [loan_id, user.user_id]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan next repayment details fetched initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
-      const paymentAmount = payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2)
-        : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
+      const paymentAmount =
+        payment_type === 'full' ? parseFloat(existingLoanApplication.total_outstanding_amount).toFixed(2) : parseFloat(nextRepaymentDetails.total_payment_amount).toFixed(2);
       const paystackAmountFormatting = parseFloat(paymentAmount) * 100; // Paystack requires amount to be in kobo for naira payment
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment amount properly formatted initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
-      await processAnyData(loanQueries.initializeBankTransferPayment, [ user.user_id, parseFloat(paymentAmount), 'paystack', reference, `${payment_type}_loan_repayment`,
-        `user repays part of or all of existing personal loan facility via ${payment_channel}`, loan_id ]);
+      await processAnyData(loanQueries.initializeBankTransferPayment, [
+        user.user_id,
+        parseFloat(paymentAmount),
+        'paystack',
+        reference,
+        `${payment_type}_loan_repayment`,
+        `user repays part of or all of existing personal loan facility via ${payment_channel}`,
+        loan_id,
+      ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment reference and amount saved in the DB
       initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
-      const result = payment_channel === 'card' ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard) :
-        await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
+      const result =
+        payment_channel === 'card'
+          ? await initializeDebitCarAuthChargeForLoanRepayment(user, paystackAmountFormatting, reference, userDebitCard)
+          : await initializeBankAccountChargeForLoanRepayment(user, paystackAmountFormatting, reference, accountDetails);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: payment initialize via paystack returns response
       initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
       if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && (result.data.status === 'success' || result.data.status === 'send_otp')) {
@@ -511,7 +648,7 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
           payment_channel,
           reference: result.data.reference,
           status: result.data.status,
-          display_text: result.data.display_text || ''
+          display_text: result.data.display_text || '',
         });
       }
       if (result.response && result.response.status === 400) {
@@ -526,8 +663,12 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan has a status of ${existingLoanApplication.status} and repayment is not possible
     initiateManualCardOrBankLoanRepayment.controllers.loan.js`);
     userActivityTracking(req.user.user_id, activityType, 'fail');
-    return ApiResponse.error(res, enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status),
-      enums.HTTP_BAD_REQUEST, enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER);
+    return ApiResponse.error(
+      res,
+      enums.LOAN_APPLICATION_STATUS_NOT_FOR_REPAYMENT(existingLoanApplication.status),
+      enums.HTTP_BAD_REQUEST,
+      enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER
+    );
   } catch (error) {
     userActivityTracking(req.user.user_id, activityType, 'fail');
     error.label = enums.INITIATE_MANUAL_CARD_OR_BANK_LOAN_REPAYMENT_CONTROLLER;
@@ -544,9 +685,13 @@ export const initiateManualCardOrBankLoanRepayment = async(req, res, next) => {
  * @returns {object} - Returns details of the successful payment
  * @memberof LoanController
  */
-export const submitPaymentOtp = async(req, res, next) => {
+export const submitPaymentOtp = async (req, res, next) => {
   try {
-    const { user, params: { reference_id }, body } = req;
+    const {
+      user,
+      params: { reference_id },
+      body,
+    } = req;
     const result = await submitPaymentOtpWithReference(body, reference_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: otp submitted to paystack submitPaymentOtp.controllers.loan.js`);
     if (result.status === true && result.message.trim().toLowerCase() === 'charge attempted' && result.data.status === 'send_otp') {
@@ -583,7 +728,7 @@ export const submitPaymentOtp = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan
  * @memberof LoanController
  */
-export const individualLoanReschedulingDurations = async(req, res, next) => {
+export const individualLoanReschedulingDurations = async (req, res, next) => {
   try {
     const { user } = req;
     const data = await processAnyData(loanQueries.fetchIndividualLoanReschedulingDurations, []);
@@ -605,25 +750,32 @@ export const individualLoanReschedulingDurations = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan
  * @memberof LoanController
  */
-export const loanReschedulingSummary = async(req, res, next) => {
+export const loanReschedulingSummary = async (req, res, next) => {
   try {
     const { user, existingLoanApplication, loanRescheduleExtensionDetails } = req;
-    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, ['allowable_personal_loan_rescheduling_count']);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched loanReschedulingSummary.controllers.loan.js`);
     if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count
       loanReschedulingSummary.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 94, 'fail');
-      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN,
-        enums.LOAN_RESCHEDULING_SUMMARY_CONTROLLER);
+      return ApiResponse.error(
+        res,
+        enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)),
+        enums.HTTP_FORBIDDEN,
+        enums.LOAN_RESCHEDULING_SUMMARY_CONTROLLER
+      );
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count is less than system allowable rescheduling count
       loanReschedulingSummary.controllers.loan.js`);
-    const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user.user_id ]);
+    const [nextRepayment] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [existingLoanApplication.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next loan repayment details fetched loanReschedulingSummary.controllers.loan.js`);
     const returnData = await LoanPayload.loanReschedulingRequestSummaryResponse(existingLoanApplication, user, loanRescheduleExtensionDetails, nextRepayment);
-    const rescheduleRequest = await processOneOrNoneData(loanQueries.createRescheduleRequest,
-      [ existingLoanApplication.loan_id, user.user_id, loanRescheduleExtensionDetails.extension_in_days ]);
+    const rescheduleRequest = await processOneOrNoneData(loanQueries.createRescheduleRequest, [
+      existingLoanApplication.loan_id,
+      user.user_id,
+      loanRescheduleExtensionDetails.extension_in_days,
+    ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan reschedule request saved in the DB loanReschedulingSummary.controllers.loan.js`);
     userActivityTracking(req.user.user_id, 94, 'success');
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_SUMMARY_RETURNED_SUCCESSFULLY, enums.HTTP_OK, { ...returnData, reschedule_id: rescheduleRequest.reschedule_id });
@@ -643,34 +795,45 @@ export const loanReschedulingSummary = async(req, res, next) => {
  * @returns {object} - Returns details of a personal loan
  * @memberof LoanController
  */
-export const processLoanRescheduling = async(req, res, next) => {
+export const processLoanRescheduling = async (req, res, next) => {
   try {
     const { user, existingLoanApplication, loanRescheduleRequest } = req;
-    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, [ 'allowable_personal_loan_rescheduling_count' ]);
+    const allowableRescheduleCount = await processOneOrNoneData(loanQueries.fetchAdminSetEnvDetails, ['allowable_personal_loan_rescheduling_count']);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling allowable count fetched processLoanRescheduling.controllers.loan.js`);
     if (Number(existingLoanApplication.reschedule_count >= Number(allowableRescheduleCount.value))) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's rescheduling count equals or exceeds system allowable rescheduling count
       processLoanRescheduling.controllers.loan.js`);
       userActivityTracking(req.user.user_id, 75, 'fail');
-      return ApiResponse.error(res, enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)), enums.HTTP_FORBIDDEN,
-        enums.PROCESS_LOAN_RESCHEDULING_CONTROLLER);
+      return ApiResponse.error(
+        res,
+        enums.LOAN_RESCHEDULING_NOT_ALLOWED(Number(existingLoanApplication.reschedule_count)),
+        enums.HTTP_FORBIDDEN,
+        enums.PROCESS_LOAN_RESCHEDULING_CONTROLLER
+      );
     }
-    const userUnpaidRepayments = await processAnyData(loanQueries.fetchUserUnpaidRepayments, [ existingLoanApplication.loan_id, user.user_id ]);
+    const userUnpaidRepayments = await processAnyData(loanQueries.fetchUserUnpaidRepayments, [existingLoanApplication.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's unpaid repayments fetched processLoanRescheduling.controllers.loan.js`);
-    const [ nextRepayment ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ existingLoanApplication.loan_id, user.user_id ]);
+    const [nextRepayment] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [existingLoanApplication.loan_id, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's next loan repayment details fetched processLoanRescheduling.controllers.loan.js`);
     const totalExtensionDays = userUnpaidRepayments.length * Number(loanRescheduleRequest.extension_in_days);
     const newLoanDuration = `${existingLoanApplication.loan_tenor_in_months} month(s), ${totalExtensionDays} day(s)`;
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: updated total loan tenor fetched processLoanRescheduling.controllers.loan.js`);
     await Promise.all([
-      userUnpaidRepayments.map((repayment) => {
-        processOneOrNoneData(loanQueries.updateNewRepaymentDate,
-          [ repayment.id, dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days') ]);
+      userUnpaidRepayments.map(repayment => {
+        processOneOrNoneData(loanQueries.updateNewRepaymentDate, [
+          repayment.id,
+          dayjs(repayment.proposed_payment_date).add(Number(loanRescheduleRequest.extension_in_days), 'days'),
+        ]);
         return repayment;
       }),
-      processOneOrNoneData(loanQueries.updateLoanWithRescheduleDetails, [ existingLoanApplication.loan_id, Number(loanRescheduleRequest.extension_in_days),
-        parseFloat((existingLoanApplication.reschedule_count || 0) + 1), newLoanDuration, totalExtensionDays ]),
-      processOneOrNoneData(loanQueries.updateRescheduleRequestAccepted, [ loanRescheduleRequest.reschedule_id ])
+      processOneOrNoneData(loanQueries.updateLoanWithRescheduleDetails, [
+        existingLoanApplication.loan_id,
+        Number(loanRescheduleRequest.extension_in_days),
+        parseFloat((existingLoanApplication.reschedule_count || 0) + 1),
+        newLoanDuration,
+        totalExtensionDays,
+      ]),
+      processOneOrNoneData(loanQueries.updateRescheduleRequestAccepted, [loanRescheduleRequest.reschedule_id]),
     ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan rescheduling details updated successfully processLoanRescheduling.controllers.loan.js`);
     const data = {
@@ -687,9 +850,9 @@ export const processLoanRescheduling = async(req, res, next) => {
       status: existingLoanApplication.status,
       reschedule_extension_days: Number(loanRescheduleRequest.extension_in_days),
       total_loan_extension_days: parseFloat(totalExtensionDays),
-      is_reschedule: true
+      is_reschedule: true,
     };
-    await MailService('Loan Facility Rescheduled', 'loanRescheduled',  data);
+    await MailService('Loan Facility Rescheduled', 'loanRescheduled', data);
     userActivityTracking(req.user.user_id, 75, 'success');
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
