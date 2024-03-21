@@ -1546,10 +1546,9 @@ export const createManualLoan = async (req, res, next) => {
 
     const totalFees = helpers.calculateTotalFees(body);
     const monthlyInterest = helpers.calculateMonthlyInterestRate(body, 12); // 12 is the constant value for loan period
-
     const monthlyRepaymentNumerator = helpers.monthlyRepaymentNumerator(monthlyInterest, parseFloat(body.loan_amount));
     const monthlyRepaymentDenominator = helpers.monthlyRepaymentDenominator(monthlyInterest, parseFloat(body.loan_tenor));
-    const monthlyRepayment = helpers.monthlyRepayment(monthlyRepaymentNumerator, monthlyRepaymentDenominator);
+    const monthlyRepayment = body.interest_rate === 0 ? body.loan_amount / body.loan_tenor : helpers.monthlyRepayment(monthlyRepaymentNumerator, monthlyRepaymentDenominator);
     const totalMonthlyRepayment = helpers.calculateTotalMonthlyRepayment(monthlyRepayment, parseFloat(body.loan_tenor));
     const totalOutstandingAmount = helpers.calculateTotalAmountRepayable(totalMonthlyRepayment, totalFees);
     const totalInterests = helpers.calculateTotalInterestAmount(totalMonthlyRepayment, parseFloat(body.loan_amount));

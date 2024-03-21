@@ -118,16 +118,16 @@ export default {
 
   createManualLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue,
     insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
-    body.user_id, 
-    body.loan_amount, 
-    body.loan_reason, 
-    body.loan_tenor, 
-    totalRepayment, 
-    totalInterest, 
+    body.user_id,
+    body.loan_amount,
+    body.loan_reason,
+    body.loan_tenor,
+    totalRepayment,
+    totalInterest,
     body.interest_rate,  // same as the price_band
-    body.processing_fee, 
-    body.insurance_fee, 
-    body.advisory_fee, 
+    body.processing_fee,
+    body.insurance_fee,
+    body.advisory_fee,
     monthlyInterest,
     processingFeeValue,
     insuranceFeeValue,
@@ -143,18 +143,18 @@ export default {
     body.loan_disbursement_date
   ],
 
-  createPreApprovedLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue, 
+  createPreApprovedLoan: (body, totalRepayment, totalInterest, totalOutstandingAmount, monthlyInterest, processingFeeValue,
     insuranceFeeValue, advisoryFeeValue, monthlyRepayment) => [
-    body.user_id, 
-    body.loan_amount, 
-    body.loan_reason, 
-    body.loan_tenor, 
-    totalRepayment, 
-    totalInterest, 
+    body.user_id,
+    body.loan_amount,
+    body.loan_reason,
+    body.loan_tenor,
+    totalRepayment,
+    totalInterest,
     body.interest_rate,  // same as the price_band
-    body.processing_fee, 
-    body.insurance_fee, 
-    body.advisory_fee, 
+    body.processing_fee,
+    body.insurance_fee,
+    body.advisory_fee,
     monthlyInterest,
     processingFeeValue,
     insuranceFeeValue,
@@ -165,9 +165,10 @@ export default {
     null,
     totalOutstandingAmount,
     'approved',
-    body.loan_amount, 
-    body.loan_tenor, 
-    dayjs()
+    body.loan_amount,
+    body.loan_tenor,
+    dayjs(),
+    true
   ],
 
   recordLoanDisbursementPaymentHistory: (body, loan_id) => [
