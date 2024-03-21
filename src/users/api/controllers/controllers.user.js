@@ -30,7 +30,14 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import {sendSms} from '../services/service.sms';
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import moment from "moment-timezone";
-import {API_VERSION, BVN_INFORMATION_UNAVAILABLE} from "../../lib/enums/lib.enum.messages";
+import {
+  API_VERSION,
+  BANK_UPDATE_SUCCESSFUL,
+  BVN_INFORMATION_UNAVAILABLE, CREATE_BANK_RECORD,
+  DELETE_BANK_RECORD
+} from "../../lib/enums/lib.enum.messages";
+import {CREATE_BANK_CONTROLLER, DELETE_BANK_CONTROLLER, UPDATE_BANK_INFORMATION} from "../../lib/enums/lib.enum.labels";
+import {number} from "joi";
 
 
 const { SEEDFI_NODE_ENV, SEEDFI_API_VERSION } = config;
@@ -209,6 +216,104 @@ export const fetchAvailableBankLists = async(req, res, next) => {
   } catch (error) {
     error.label = enums.FETCH_BANKS_CONTROLLER;
     logger.error(`fetching list of banks from paystack failed:::${ enums.FETCH_BANKS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const fetchLocalBanks = async(req, res, next) => {
+  try {
+    const {user} = req;
+    const data = await processAnyData(userQueries.getBankList, [ 'true' ]);
+    data.message = 'list of banks fetched successfully.';
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: bank lists returned successfully fetchLocalBanks.controller.user.js`);
+    return ApiResponse.success(res, data.message, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_BANKS_CONTROLLER;
+    logger.error(`fetching list of banks from database failed:::${ enums.FETCH_BANKS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+export const fetchLocalSingleBanks = async(req, res, next) => {
+  try {
+    const {user, params: { record_id }} = req;
+    const data = await processAnyData(userQueries.getBankById, [ record_id ]);
+    data.message = 'bank fetched successfully.';
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: bank  returned from the DB fetchLocalSingleBanks.controller.user.js`);
+    return ApiResponse.success(res, data.message, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.FETCH_BANKS_CONTROLLER;
+    logger.error(`fetching list of banks from database failed:::${ enums.FETCH_BANKS_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const updateBankRecord = async(req, res, next) => {
+  try {
+    const { user, params: { record_id }, body } = req;
+    let bank = await processOneOrNoneData(userQueries.getBankById, [ record_id ]);
+    const payload = UserPayload.updateBankRecord(body, bank);
+    const data = await processOneOrNoneData(userQueries.updateBankRecord, payload );
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: updated bank information successfully updateBankRecord.controller.user.js`);
+    return ApiResponse.success(res, enums.BANK_UPDATE_SUCCESSFUL, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.UPDATE_BANK_INFORMATION;
+    logger.error(`failed to update bank record:::${ enums.UPDATE_BANK_INFORMATION }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const deleteBankRecord = async(req, res, next) => {
+  try {
+    const { user, params: { record_id }} = req;
+    const data = await processOneOrNoneData(userQueries.deleteBankRecord, [ record_id ] );
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: deleted bank information successfully deleteBankRecord.controller.user.js`);
+    return ApiResponse.success(res, enums.DELETE_BANK_RECORD, enums.HTTP_OK, data);
+  } catch (error) {
+    error.label = enums.DELETE_BANK_CONTROLLER;
+    logger.error(`failed to delete bank record:::${ enums.DELETE_BANK_CONTROLLER }`, error.message);
+    return next(error);
+  }
+};
+
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+export const createBankRecord = async(req, res, next) => {
+  try {
+    const { user, body } = req;
+    const payload = UserPayload.createBankRecord(body);
+    const data = await processOneOrNoneData(userQueries.createBankRecord, payload );
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: created bank information successfully createBankRecord.controller.user.js`);
+    return ApiResponse.success(res, enums.CREATE_BANK_RECORD, enums.HTTP_OK, data);
+  } catch(error) {
+    error.label = enums.CREATE_BANK_CONTROLLER;
+    logger.error(`failed to create bank record:::${ enums.CREATE_BANK_CONTROLLER }`, error.message);
     return next(error);
   }
 };
@@ -766,16 +871,6 @@ export const votersIdentificationNumberVerification = async(document_id, state, 
     if (response.response.statusText == 'Not Found' || response.response.status == 404) {
       return 'The information provided cannot be verified.';
     }
-    // if (response.status === 'success') {
-    //   const user_data = response.data.entity.data;
-    //   console.log(user_data.firstName.toLowerCase()+' '+user_data.lastName.toLowerCase());
-    //   console.log(user.first_name.toLowerCase()+' '+user.last_name.toLowerCase());
-    //   if (
-    //     user_data.firstName.toLowerCase()+' '+user_data.lastName.toLowerCase() == user.first_name.toLowerCase()+' '+user.last_name.toLowerCase()
-    //   ) {
-    //     console.log('phone number: ', user_data);
-    //   }
-    // }
   } catch (error) {
     userActivityTracking(user.user_id, 119, 'fail');
     error.label = enums.VERIFY_USER_IDENTITY_DOCUMENT;
@@ -1448,30 +1543,95 @@ export const decryptUserBVN = async(req, res, next) => {
   }
 };
 
+export const saveBvnInformation = async(data) => {
+  const parsedDate = moment(data.data.dateOfBirth, 'DD-MMM-YYYY');
+  let result_date = parsedDate.format('YYYY-MM-DD');
+  const bvnHash = await Hash.encrypt(data.data.bvn.toLowerCase().trim());
+  let data_phone_number = data.data.phone_number1 ? data.data.phone_number1: data.data.phoneNumber1;
+  let data_email_address = data.data.email;
+  const save_information = await processOneOrNoneData(userQueries.saveBvnInformation, [
+    data.data.firstName.toLowerCase(),
+    data.data.lastName.toLowerCase(),
+    bvnHash,
+    data.data.gender.toLowerCase(),
+    result_date,
+    data_phone_number,
+    data_email_address
+  ]);
+
+  if(save_information) {
+    return true;
+  }
+};
+
+export const reusableBvnInfo = async(res, bvn, saved_information) => {
+  for (let counter = 0; counter < saved_information.length; counter++) {
+    let  decrypted_bvn  = await Hash.decrypt(decodeURIComponent(saved_information[counter].bvn));
+    if(bvn.trim() === decrypted_bvn) {
+      // get the current date and the date three months ago
+      const createdAt = moment(saved_information[counter].updated_at); // Parse the createdAt date
+      const threeMonthsAgo = moment().subtract(3, 'months');
+      if (createdAt.isBefore(threeMonthsAgo)) {
+        /**
+         * if the updated_at field is older than 3 months ago, the process will end and the user will be prompted to try again
+         * */
+        await processAnyData(userQueries.setDataToDeleted, [ saved_information[counter].record_id ]);
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: Record with ID', ${saved_information[counter].record_id}, 'has been marked as deleted. sendBvnOtp.controller.user.js`);
+        // sendBvnOtp(req, res, next)
+        return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+      }
+      saved_information[counter].bvn = decrypted_bvn
+      const otpData = await sendOtpToBvnUser(bvn, saved_information[counter]);
+      if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+        return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, {...otpData});
+      }
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData });
+    }
+  }
+};
+
 export const sendBvnOtp = async(req, res, next) => {
   try {
-    const {body: {bvn, date_of_birth}} = req;
-    // get bvn information from provider
-    const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-    if (!data.success) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
+    const { body: { bvn, date_of_birth } } = req;
+    /**
+     * This process queries the database to see if the individual's bvn information exist in the database
+     * if the record exist, it checks if the updated_at column is not up to three months ago,
+     * else it will set the record to deleted
+     * otherwise the stored user information will be returned to the next process
+     */
 
-      return ApiResponse.error(res, enums.UNABLE_TO_VERIFY_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    let saved_information  = await processAnyData(userQueries.queryBvnInformationByDob, [ date_of_birth ]);
+
+    /**
+     * To reduce the number of records to be searched on, we query the verified_bvn_records table with the date_of_birth
+     * if any record matches, the loop below will run, decryption the hashed bvn on that record and comparing it with the
+     * bvn entered by the user. if the decrypted bvn matches, the user information is returned to the ongoing process
+     */
+    if(saved_information.length > 0) {
+      await reusableBvnInfo(res, bvn, saved_information)
+    } else {
+      /** return saved_information; */
+      const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+      if (!data.success) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
+
+        return ApiResponse.error(res, enums.UNABLE_TO_VERIFY_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+      }
+      // compare bvn dob with provided dob information
+      if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
+
+        return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+      }
+
+      /** if match, send otp to user */
+      await saveBvnInformation(data);
+      const otpData = await sendOtpToBvnUser(bvn, data.data);
+      if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+        return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, {...otpData});
+      }
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData });
     }
-    // compare bvn dob with provided dob information
-    if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
-
-      return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
-    }
-
-    // if match, send otp to user
-    const otpData = await sendOtpToBvnUser(bvn, data.data);
-
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
-      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, {...otpData});
-    }
-    return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
   }
@@ -1481,24 +1641,37 @@ export const verifyBvnInfo = async(req, res, next) => {
   try {
     const {body: {bvn, first_name, last_name, date_of_birth, gender }} = req;
     // run a query, if result exist, return result
+    // query the database if the data exists
+    await processAnyData(userQueries.queryBvnInformation, [ date_of_birth ]);
 
     const {data} = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
-    const result = data;
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
-    const parsedDate = moment(result.data.dateOfBirth, 'DD-MMM-YYYY');
+    const parsedDate = moment(data.data.dateOfBirth, 'DD-MMM-YYYY');
     let result_date = parsedDate.format('YYYY-MM-DD');
+
     if (
-      result.data.firstName.toLowerCase() === first_name
-      && result.data.lastName.toLowerCase() === last_name
-      && result.data.bvn.toLowerCase() === bvn
-      && result.data.gender.toLowerCase() === gender
+      data.data.firstName.toLowerCase() === first_name
+      && data.data.lastName.toLowerCase() === last_name
+      && data.data.bvn.toLowerCase() === bvn
+      && data.data.gender.toLowerCase() === gender
       && result_date === date_of_birth
     ) {
-      // create a migration
       // save information
+      let data_phone_number = data.data.phone_number1 ? data.data.phone_number1: data.data.phoneNumber1;
+      let data_email_address = data.data.email;
+      await processOneOrNoneData(userQueries.saveBvnInformation, [
+        data.data.firstName.toLowerCase(),
+        data.data.lastName.toLowerCase(),
+        bvnHash,
+        data.data.gender.toLowerCase(),
+        result_date,
+        data_phone_number,
+        data_email_address
+      ]);
+      // const result = data;
       return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
     } else {
       return ApiResponse.error(res, enums.BVN_INFORMATION_UNAVAILABLE, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
@@ -1514,7 +1687,6 @@ export const verifyBvnOtp = async(req, res, next) => {
     const {body: {bvn, code}} = req;
 
     const [ existingOtp ] = await processAnyData(authQueries.getValidVerificationCode, [ code ]);
-
     if (!existingOtp) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: no existing verification code found verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
@@ -1526,9 +1698,7 @@ export const verifyBvnOtp = async(req, res, next) => {
     }
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn match verification code bvn verifyBvnOtp.controller.user.js`);
-
     await processOneOrNoneData(authQueries.deleteVerificationCode, [ existingOtp.verification_key, code ]);
-
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code deleted verifyBvnOtp.controller.user.js`);
 
     if (req.user) {
@@ -1539,7 +1709,7 @@ export const verifyBvnOtp = async(req, res, next) => {
       return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
     }
 
-    const {data} = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
+    const { data } = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
 
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
@@ -1553,6 +1723,17 @@ export const verifyBvnOtp = async(req, res, next) => {
   }
 };
 
+function getPhoneNumber(obj) {
+  // Check if either phoneNumber1 or phone_number1 exists in the object
+  if ('phoneNumber1' in obj) {
+    return obj.phoneNumber1;
+  } else if ('phone_number1' in obj) {
+    return obj.phone_number1;
+  }else if ('phone_number' in obj) {
+    return obj.phone_number;
+  }
+  return null;
+}
 const sendOtpToBvnUser = async(bvn, data) => {
   const bvnHash = await Hash.encrypt(bvn.trim());
   const otp = Helpers.generateOtp();
@@ -1566,7 +1747,8 @@ const sendOtpToBvnUser = async(bvn, data) => {
   const expireAt = dayjs().add(10, 'minutes');
   const expirationTime = dayjs(expireAt);
   const otpData = { bvn, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
-  const pn = parsePhoneNumber(data.phone_number1, { regionCode: 'NG' });
+  let newPhoneNumber = getPhoneNumber(data);
+  const pn = parsePhoneNumber(newPhoneNumber, { regionCode: 'NG' });
   if (!pn.valid) {
     logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn phone number is invalid  sendBvnOtp.controller.user.js`);
     return ApiResponse.error(bvn, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
@@ -1593,7 +1775,6 @@ const sendOtpToBvnUser = async(bvn, data) => {
   await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
   await MailService('BVN verification code', 'bvnOtp', {...otpData, email: data.email});
   logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
-
   return otpData
 }
 
