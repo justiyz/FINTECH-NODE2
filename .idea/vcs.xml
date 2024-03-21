@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../seedfi-merchant-api" vcs="Git" />
+    <mapping directory="$USER_HOME$/fundme-admin" vcs="Git" />
   </component>
 </project>
