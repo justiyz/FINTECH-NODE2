@@ -10,5 +10,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="seedfi-admin-dashboard" />
     <orderEntry type="module" module-name="seedfi-merchant-api" />
+    <orderEntry type="module" module-name="fundme-admin" />
   </component>
 </module>

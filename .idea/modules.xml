@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/fundme-admin/.idea/fundme-admin.iml" filepath="$USER_HOME$/fundme-admin/.idea/fundme-admin.iml" />
       <module fileurl="file://$PROJECT_DIR$/../seedfi-admin-dashboard/.idea/seedfi-admin-dashboard.iml" filepath="$PROJECT_DIR$/../seedfi-admin-dashboard/.idea/seedfi-admin-dashboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/seedfi-api.iml" filepath="$PROJECT_DIR$/.idea/seedfi-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/../seedfi-merchant-api/.idea/seedfi-merchant-api.iml" filepath="$PROJECT_DIR$/../seedfi-merchant-api/.idea/seedfi-merchant-api.iml" />

@@ -231,6 +231,9 @@ export const fetchLocalBanks = async(req, res, next) => {
   try {
     const {user} = req;
     const data = await processAnyData(userQueries.getBankList, [ 'true' ]);
+    for (let counter = 0; counter < data.length; counter++) {
+      data[counter].id = parseInt(data[counter].id)
+    }
     data.message = 'list of banks fetched successfully.';
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: bank lists returned successfully fetchLocalBanks.controller.user.js`);
     return ApiResponse.success(res, data.message, enums.HTTP_OK, data);
