@@ -87,7 +87,7 @@ const verifyOtpViaPhoneNumber = Joi.object().keys({
       'string.empty': 'Phone Number is not allowed to be empty'
     }).required()
 });
- 
+
 const password = Joi.object().keys({
   password: Joi.string().regex(new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$')).messages({
     'string.pattern.base': 'Invalid password combination'
@@ -109,7 +109,7 @@ const changePin = Joi.object().keys({
   oldPin: Joi.string().length(4).required(),
   newPin: Joi.string().length(4).required()
 });
- 
+
 export default {
   signup,
   resendPhoneNumberVerificationOTP,
