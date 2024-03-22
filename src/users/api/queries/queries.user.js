@@ -427,7 +427,7 @@ export default {
     `,
 
 
-  userIdentityVerification: `
+  userIdentityVerification_old: `
     UPDATE users
     SET
     updated_at = NOW(),
@@ -440,7 +440,16 @@ export default {
     is_created_password, is_created_pin, is_completed_kyc, status
     `,
 
-
+  userIdentityVerification: `
+    UPDATE users
+    SET
+    updated_at = NOW(),
+    tier = $3,
+    is_uploaded_identity_card = true,
+    WHERE user_id = $1
+    RETURNING user_id, first_name, last_name, image_url, is_uploaded_identity_card, is_uploaded_selfie_image,
+    is_created_password, is_created_pin, is_completed_kyc, status
+    `,
 
   updateUserTierValue: `
     UPDATE users
