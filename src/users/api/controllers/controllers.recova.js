@@ -222,23 +222,41 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.user_id);
 
-    repaymentSchedule.forEach(async schedule => {
-      await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
-        schedule.loan_id,
-        schedule.user_id,
-        schedule.repayment_order,
-        schedule.principal_payment,
-        schedule.interest_payment,
-        schedule.fees,
-        schedule.total_payment_amount,
-        schedule.pre_payment_outstanding_amount,
-        schedule.post_payment_outstanding_amount,
-        schedule.proposed_payment_date,
-        schedule.proposed_payment_date,
-      ]);
+    const loanRepaymentDetails = await Promise.all(
+      repaymentSchedule.map(async schedule => {
+        return await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
+          schedule.loan_id,
+          schedule.user_id,
+          schedule.repayment_order,
+          schedule.principal_payment,
+          schedule.interest_payment,
+          schedule.fees,
+          schedule.total_payment_amount,
+          schedule.pre_payment_outstanding_amount,
+          schedule.post_payment_outstanding_amount,
+          schedule.proposed_payment_date,
+          schedule.proposed_payment_date,
+        ]);
+      })
+    );
 
-      return schedule;
-    });
+    // repaymentSchedule.forEach(async schedule => {
+    //   await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
+    //     schedule.loan_id,
+    //     schedule.user_id,
+    //     schedule.repayment_order,
+    //     schedule.principal_payment,
+    //     schedule.interest_payment,
+    //     schedule.fees,
+    //     schedule.total_payment_amount,
+    //     schedule.pre_payment_outstanding_amount,
+    //     schedule.post_payment_outstanding_amount,
+    //     schedule.proposed_payment_date,
+    //     schedule.proposed_payment_date,
+    //   ]);
+
+    //   return schedule;
+    // });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user pre disbursement loan repayment details saved createMandateConsentRequest.controllers.recova.js`);
 
     // const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
@@ -246,7 +264,6 @@ export const createMandateConsentRequest = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
-
     if (!accountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
       return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
@@ -259,7 +276,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
 
-    const collectionPaymentSchedules = await repaymentSchedule.map(repayment => {
+    const collectionPaymentSchedules = await loanRepaymentDetails.map(repayment => {
       return {
         repaymentDate: repayment.proposed_payment_date,
         repaymentAmountInNaira: parseFloat(repayment.total_payment_amount),
