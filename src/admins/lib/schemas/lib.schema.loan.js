@@ -211,6 +211,16 @@ const createPreApprovedLoan = Joi.object().keys({
   insurance_fee: Joi.number().min(0).required(),
   advisory_fee: Joi.number().min(0).required()
 });
+
+const rescheduleLoanParams = Joi.object().keys({
+  loan_id: Joi.string().required(),
+  user_id: Joi.string().required()
+});
+
+const rescheduleTenor = Joi.object().keys({
+  reschedule_tenor: Joi.number().positive().required()
+});
+
 export default {
   manualLoanApproval,
   manualLoanRejection,
@@ -236,5 +246,7 @@ export default {
   loanId,
   checkIfLoanIsActive,
   updatePayment,
-  createPreApprovedLoan
+  createPreApprovedLoan,
+  rescheduleLoanParams,
+  rescheduleTenor
 };
