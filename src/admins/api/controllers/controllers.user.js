@@ -562,15 +562,19 @@ export const fetchUserRewards = async(req, res, next) => {
 export const updateUserProfile = async(req, res, next) => {
   try {
     const {body, admin, userDetails} = req;
-    if(body.middle_name === undefined) {
-      body.middle_name = userDetails.middle_name
+    const adminName = `${admin.first_name} ${admin.last_name}`;
+    if (body.middle_name === undefined) {
+      body.middle_name = userDetails.middle_name;
     }
     const payload = UserPayload.updateUserProfile(body, userDetails);
     const updatedUser = await processOneOrNoneData(userQueries.updateUserProfile, payload);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ admin.admin_id }:::Info:
     successfully updated user profile in the DB updateUserProfile.controller.user.js`);
+    await adminActivityTracking(req.admin.admin_id, 'UPPRFL', 'success', descriptions.update_user_details(adminName, userDetails.name));
     return ApiResponse.success(res, enums.UPDATED_USER_PROFILE_SUCCESSFULLY, enums.HTTP_OK, updatedUser);
   } catch (error) {
+    await adminActivityTracking(req.admin.admin_id, 'UPPRFL', 'fail', descriptions.update_user_details_failed(`${req.admin.first_name}, ${req.admin.last_name}`,
+      req.userDetails.name));
     error.label = enums.UPDATE_USER_PROFILE_CONTROLLER;
     logger.error(`updating user's profile failed:::${ enums.UPDATE_USER_PROFILE_CONTROLLER }`, error.message);
     return next(error);
