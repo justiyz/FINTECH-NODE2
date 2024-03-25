@@ -1768,10 +1768,15 @@ export const processManualLoanRescheduling = async (req, res, next) => {
       total_loan_extension_days: parseFloat(totalExtensionDays),
       is_reschedule: true,
     };
-    userActivityTracking(req.userDetails.user_id, 75, 'success');
+    await adminActivityTracking(req.admin.admin_id, 'RSHDLONTN', 'success', descriptions.reschedule_manual_loan(adminName, userDetails.name));
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    userActivityTracking(req.userDetails.user_id, 75, 'fail');
+    await adminActivityTracking(
+      req.admin.admin_id,
+      'RSHDLONTN',
+      'fail',
+      descriptions.reschedule_manual_loan_failed(`${req.admin.first_name}, ${req.admin.last_name}`, req.userDetails.name)
+    );
     error.label = enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER;
     logger.error(`processing loan rescheduling loan failed::${enums.PROCESS_MANUAL_LOAN_RESCHEDULING_CONTROLLER}`, error.message);
     return next(error);
