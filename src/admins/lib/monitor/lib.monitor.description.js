@@ -105,3 +105,9 @@ export const update_merchant_user_details= (adminName, businessName) => `Admin $
 export const update_merchant_user_details_failed= (adminName, businessName) => `Admin ${adminName}, updating ${businessName}'s details failed`;
 export const update_user_details = (adminName, userName) => `Admin ${adminName}, updates ${userName}'s details successfully`;
 export const update_user_details_failed = (adminName, userName) => `Admin ${adminName}, updating ${userName}'s details failed`;
+export const update_user_employment_details = (adminName, userName) => `Admin ${adminName}, updates ${userName}'s employment details successfully`;
+export const update_user_employment_details_failed = (adminName) => `Admin ${adminName}, updating employment details failed`;
+export const update_user_next_of_kin_details = (adminName, userName) => `Admin ${adminName}, updates ${userName}'s next of kin details successfully`;
+export const update_user_next_of_kin_details_failed = (adminName) => `Admin ${adminName}, updating next of kin details failed`;
+export const update_user_residential_details = (adminName, userName) => `Admin ${adminName}, updates ${userName}'s residential address successfully`;
+export const update_user_residential_details_failed = (adminName) => `Admin ${adminName}, updating residential details failed`;

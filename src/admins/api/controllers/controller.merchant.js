@@ -987,7 +987,7 @@ export const updateMerchantUser = async(req, res, next) => {
       enums.HTTP_OK
     );
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 66, 'success', descriptions.update_merchant_user_details_failed(`${admin.first_name} ${admin.last_name}`,
+    await adminActivityTracking(req.admin.admin_id, 66, 'success', descriptions.update_merchant_user_details_failed(`${req.admin.first_name} ${req.admin.last_name}`,
       req.merchant.business_name));
     error.label = 'MerchantController::updateMerchantUser';
     logger.error(`Update merchant user details failed:::${error.label}`, error.message);
