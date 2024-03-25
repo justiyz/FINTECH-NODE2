@@ -828,7 +828,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
         `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user_admin_uploaded_documents created successfully {nationalIdentificationNumberVerification} documentVerification.controller.user.js`
       );
 
-      // user must have been on teir 0 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 1 
+      // user must have been on teir 0 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 1
       const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? 1 : user.tier;
       const tier_upgraded = tierChoice === 1 ? true : false;
       const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
@@ -1869,6 +1869,7 @@ const sendOtpToBvnUser = async (bvn, data) => {
   otpData.recipientPhoneNumber = maskString(pn.number.e164);
   otpData.recipientEmail = data.email ? maskString(data.email) : null;
 
+  // await processOneOrNoneData(authQueries.insertNewToken, [otp]);
   await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration]);
   logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
 
