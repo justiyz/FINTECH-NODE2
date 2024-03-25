@@ -1768,7 +1768,7 @@ export const processManualLoanRescheduling = async (req, res, next) => {
       total_loan_extension_days: parseFloat(totalExtensionDays),
       is_reschedule: true,
     };
-    await adminActivityTracking(req.admin.admin_id, 'RSHDLONTN', 'success', descriptions.reschedule_manual_loan(adminName, userDetails.name));
+    await adminActivityTracking(req.admin.admin_id, 74, 'success', descriptions.reschedule_manual_loan(adminName, userDetails.name));
     return ApiResponse.success(res, enums.LOAN_RESCHEDULING_PROCESSED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
     await adminActivityTracking(
