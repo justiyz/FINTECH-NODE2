@@ -216,7 +216,8 @@ export const verifyBvn = async (req, res, next) => {
       user,
     } = req;
     const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), user);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call verifyBvn.middlewares.user.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Zeeh Africa verifyBvn.middlewares.user.js`);
+
     if (!data.success) {
       const data = await dojahBvnVerificationCheck(bvn.trim(), user);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: response returned from verify bvn external API call with Dojah verifyBvn.middlewares.user.js`);

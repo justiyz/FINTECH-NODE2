@@ -32,6 +32,7 @@ import { number } from 'joi';
 
 const { SEEDFI_API_VERSION, SEEDFI_NODE_ENV } = config;
 
+
 /**
  * update user device fcm token
  * @param {Request} req - The request from the endpoint.
@@ -138,10 +139,12 @@ export const updateBvn = async (req, res, next) => {
       user,
       bvnData,
     } = req;
+
     // const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
     // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
     // const tier_upgraded = tierChoice === '1' ? true : false;
+
     const otpData = await sendOtpToBvnUser(bvn, bvnData);
     // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
@@ -232,6 +235,7 @@ export const fetchLocalBanks = async (req, res, next) => {
     const data = await processAnyData(userQueries.getBankList, ['true']);
     for (let counter = 0; counter < data.length; counter++) {
       data[counter].id = parseInt(data[counter].id);
+
     }
     data.message = 'list of banks fetched successfully.';
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: bank lists returned successfully fetchLocalBanks.controller.user.js`);
@@ -834,6 +838,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       );
 
       // user must have been on teir 0 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 1
+
       const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? 1 : user.tier;
       const tier_upgraded = tierChoice === 1 ? true : false;
       const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
@@ -1716,8 +1721,10 @@ export const sendBvnOtp = async (req, res, next) => {
       if (dayjs(date_of_birth.trim()).format('YYYY-MM-DD') !== dayjs(data.data.dateOfBirth.trim()).format('YYYY-MM-DD')) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
 
+
         return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
       }
+
 
       /** if match, send otp to user */
       await saveBvnInformation(data);

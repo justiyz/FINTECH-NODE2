@@ -847,9 +847,11 @@ export const adminFetchUserCurrentLoans = async (req, res, next) => {
   try {
     const {
       params: { user_id },
-      admin,
+
+      admin
     } = req;
-    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [user_id]);
+    const currentPersonalLoans = await processAnyData(loanQueries.fetchUserCurrentPersonalLoans, [ user_id ]);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current personal loan facilities fetched fetchUserCurrentLoans.admin.controllers.loan.js`);
     const currentClusterLoans = await processAnyData(loanQueries.fetchUserCurrentClusterLoans, [user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current cluster loan facilities fetched fetchUserCurrentLoans.admin.controllers.loan.js`);
@@ -878,9 +880,11 @@ export const adminFetchUserLoanHistory = async (req, res, next) => {
   try {
     const {
       params: { user_id },
+
       admin,
     } = req;
     const currentPersonalLoans = await processAnyData(loanQueries.fetchUserPersonalLoanHistory, [user_id]);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current personal loan facilities fetched adminFetchUserLoanHistory.admin.controllers.loan.js`);
     const currentClusterLoans = await processAnyData(loanQueries.fetchUserClusterLoanHistory, [user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user current cluster loan facilities fetched adminFetchUserLoanHistory.admin.controllers.loan.js`);
@@ -901,13 +905,17 @@ export const adminFetchPersonalLoanDetails = async (req, res, next) => {
     const {
       admin,
       loanApplication,
-      params: { loan_id },
+
+      params: { loan_id }
     } = req;
-    const [nextRepaymentDetails] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [loan_id]);
+    const [ nextRepaymentDetails ] = await processAnyData(loanQueries.fetchLoanNextRepaymentDetails, [ loan_id ]);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user next loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentSchedule, [loan_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched fetchPersonalLoanDetails.controllers.loan.js`);
-    const selectedStatuses = ['ongoing', 'over due', 'completed'];
+
+    const selectedStatuses = [ 'ongoing', 'over due', 'completed' ];
+
     const next_repayment_date = !selectedStatuses.includes(loanApplication.status)
       ? dayjs().add(30, 'days').format('MMM DD, YYYY')
       : dayjs(nextRepaymentDetails.proposed_payment_date).format('MMM DD, YYYY');
@@ -1295,13 +1303,17 @@ export const manuallyInitiatePersonalLoanApplication = async (req, res, next) =>
  * @returns {object} - Returns details of an initiate paystack payment
  * @memberof LoanController
  */
+
 export const adminInitiateManualCardLoanRepayment = async (req, res, next) => {
+
   const {
     admin,
     loanApplication,
     params: { loan_id },
     query: { payment_type, custom_amount },
-    userDebitCard,
+
+    userDebitCard
+
   } = req;
   const payment_channel = 'card';
   try {
@@ -1346,7 +1358,9 @@ export const adminInitiateManualCardLoanRepayment = async (req, res, next) => {
         reference,
         `${payment_type}_loan_repayment`,
         `user repays part of or all of existing personal loan facility via ${payment_channel}`,
-        loan_id,
+
+        loan_id
+
       ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: payment reference and amount saved in the DB
       adminInitiateManualCardOrBankLoanRepayment.admin.controllers.loan.js`);
@@ -1411,6 +1425,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, loanDetails.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, loanDetails.user_id);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
     if (!accountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
@@ -1461,6 +1476,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       preferredRepaymentBankCBNCode: accountDetails.bank_code,
       preferredRepaymentAccount: accountDetails.account_number,
       collectionPaymentSchedules: collectionPaymentSchedules,
+
     };
 
     const result = await recovaService.createConsentRequest(data);
@@ -1471,6 +1487,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
         config.SEEDFI_RECOVA_INSTITUTION_CODE,
         result.requestStatus.toLowerCase(),
         result.consentConfirmationUrl,
+
       ]);
       return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
     }
@@ -1591,6 +1608,7 @@ export const createManualLoan = async (req, res, next) => {
             schedule.proposed_payment_date,
             schedule.proposed_payment_date,
           ]),
+
         ]);
         return schedule;
       });
@@ -1681,6 +1699,7 @@ export const updateUserPayment = async (req, res, next) => {
       body: { amount, payment_date },
       admin,
       loanApplication,
+
     } = req;
     const adminName = `${admin.first_name} ${admin.last_name}`;
     const user = await processOneOrNoneData(userQueries.getUserByUserId, user_id);

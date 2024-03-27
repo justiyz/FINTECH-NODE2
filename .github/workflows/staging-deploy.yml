@@ -3,7 +3,9 @@ name: Docker Image CI for Seedfi-backend
 on:
   push:
     branches:
-      - 'snapsho'
+
+      - 'snapshot'
+
 
 jobs:
   build:
