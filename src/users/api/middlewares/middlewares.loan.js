@@ -21,16 +21,17 @@ const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = conf
  */
 export const checkUserLoanApplicationExists = async(req, res, next) => {
   try {
-    const { params: { loan_id }, user } = req;
-    const [ existingLoanApplication ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ loan_id, user.user_id ]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: checked if loan application exists in the db checkUserLoanApplicationExists.middlewares.loan.js`);
+    const { params: { loan_id } } = req;
+    const user_id = req.params.user_id || req.user.user_id;
+    const [ existingLoanApplication ] = await processAnyData(loanQueries.fetchUserLoanDetailsByLoanId, [ loan_id, user_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: checked if loan application exists in the db checkUserLoanApplicationExists.middlewares.loan.js`);
     if (existingLoanApplication) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application exists and belongs to authenticated user
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan application exists and belongs to authenticated user
       checkUserLoanApplicationExists.middlewares.loan.js`);
       req.existingLoanApplication = existingLoanApplication;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: loan application does not exist for authenticated user
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user_id}:::Info: loan application does not exist for authenticated user
     checkUserLoanApplicationExists.middlewares.loan.js`);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_NOT_EXISTING_FOR_USER, enums.HTTP_BAD_REQUEST, enums.CHECK_USER_LOAN_APPLICATION_EXISTS_MIDDLEWARE);
   } catch (error) {
@@ -567,12 +568,12 @@ export const checkAvailableNumberOfTicketsBeforePurchase = async(req, res, next)
  */
 export const checkIfOngoingLoanApplication = async(req, res, next) => {
   try {
-    const { existingLoanApplication, user } = req;
+    const { existingLoanApplication, userDetails} = req;
     if (existingLoanApplication.status === 'ongoing') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application is an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}::: Info: loan application is an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::: Info: loan application is not an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}::: Info: loan application is not an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
     return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), enums.HTTP_FORBIDDEN,
       enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE);
   } catch (error) {
