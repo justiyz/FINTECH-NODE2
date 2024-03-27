@@ -550,9 +550,10 @@ export const idUploadVerification = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully saved uploaded selfie to user uploaded documents to the database
     idUploadVerification.controllers.user.js`);
     const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
-    // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
+    // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1 [if they have verified their identity]
     const tier_upgraded = tierChoice === '1' ? true : false;
     const [data] = await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
+
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     user id verification uploaded successfully DB idUploadVerification.controller.user.js`);
     userActivityTracking(req.user.user_id, 18, 'success');
@@ -838,7 +839,6 @@ export const nationalIdentificationNumberVerification = async (document, user, r
       );
 
       // user must have been on teir 0 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 1
-
       const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? 1 : user.tier;
       const tier_upgraded = tierChoice === 1 ? true : false;
       const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
@@ -1821,6 +1821,12 @@ export const verifyBvnOtp = async (req, res, next) => {
 
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
+    const tierChoice = user.is_completed_kyc && user.is_uploaded_identity_card ? '1' : '0';
+    // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
+    // const tier_upgraded = tierChoice === '1' ? true : false;
+    // if the user has verified their bvn before this point, they will be upgraded to tier 1
+    await processAnyData(userQueries.userVerificationIdWithBvn, [user.user_id, tierChoice]);
+
     return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, {
       bvn: bvn,
       email: data.data.email,
@@ -1834,6 +1840,17 @@ export const verifyBvnOtp = async (req, res, next) => {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
   }
 };
+
+// export const tierOneUpgrade = async (user) => {
+//   const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
+//   // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
+//   const tier_upgraded = tierChoice === '1' ? true : false;
+//   if(tier_upgraded) {
+//     await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
+//   }
+//   return tier_upgraded
+//
+// }
 
 function getPhoneNumber(obj) {
   // Check if either phoneNumber1 or phone_number1 exists in the object
@@ -1881,6 +1898,7 @@ const sendOtpToBvnUser = async (bvn, data) => {
   otpData.recipientPhoneNumber = maskString(pn.number.e164);
   otpData.recipientEmail = data.email ? maskString(data.email) : null;
 
+  // await processOneOrNoneData(authQueries.insertNewToken, [otp]);
   await processAnyData(authQueries.upsertVerificationCode, [bvnHash, otp, expirationTime, otpData.otpDuration]);
   logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code recorded sendBvnOtp.controller.user.js`);
 

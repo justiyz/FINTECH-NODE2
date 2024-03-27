@@ -308,5 +308,13 @@ export default {
 
   deleteVerificationCode: `
     DELETE FROM verification_codes WHERE verification_key = $1 AND code = $2;
+  `,
+
+  insertNewToken: `
+    UPDATE users
+    SET verification_token = $1
+    WHERE user_id = $2
   `
+
+
 };

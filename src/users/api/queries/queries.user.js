@@ -426,6 +426,15 @@ export default {
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
 
+  userVerificationIdWithBvn: `
+    UPDATE users
+    SET
+    is_verified_bvn = true,
+    tier = $2
+    WHERE user_id = $1
+    RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn,
+    is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
+  `,
 
   userIdentityVerification_old: `
     UPDATE users

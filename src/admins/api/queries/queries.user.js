@@ -126,20 +126,22 @@ export default {
   `,
 
   fetchUserBankAccounts: `
-      SELECT
-        id,
-        user_id,
-        bank_name,
-        bank_code,
-        account_number,
-        account_name,
-        is_default,
-        is_disbursement_account,
-        created_at
-      FROM user_bank_accounts
-      WHERE user_id = $1
-      AND is_deleted = false
-      ORDER BY is_default DESC`,
+    SELECT
+        user_bank_accounts.id,
+        user_bank_accounts.user_id,
+        banks.name,
+        user_bank_accounts.bank_code,
+        user_bank_accounts.account_number,
+        user_bank_accounts.account_name,
+        user_bank_accounts.is_default,
+        user_bank_accounts.is_disbursement_account,
+        user_bank_accounts.created_at
+        FROM user_bank_accounts
+        LEFT JOIN banks ON user_bank_accounts.bank_code = banks.code
+        WHERE user_bank_accounts.user_id = $1
+        AND user_bank_accounts.is_deleted = false
+        ORDER BY user_bank_accounts.is_default DESC
+  `,
 
   fetchUserDebitCards: `
       SELECT
