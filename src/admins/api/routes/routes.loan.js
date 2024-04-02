@@ -274,7 +274,7 @@ router.post(
   Model(Schema.rescheduleTenor, 'payload'),
   UserLoanMiddleware.checkUserLoanApplicationExists,
   UserMiddleware.checkIfUserExists,
-  UserLoanMiddleware.checkIfOngoingLoanApplication,
+  UserLoanMiddleware.checkIfOngoingOrOverDueLoanApplication,
   LoanController.processManualLoanRescheduling
 );
 

@@ -584,6 +584,32 @@ export const checkIfOngoingLoanApplication = async(req, res, next) => {
 };
 
 /**
+ * check loan application status is currently ongoing or over due
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns an object (error or response).
+ * @memberof LoanMiddleware
+ */
+export const checkIfOngoingOrOverDueLoanApplication = async(req, res, next) => {
+  try {
+    const { existingLoanApplication, userDetails} = req;
+    if (existingLoanApplication.status === 'ongoing' || existingLoanApplication.status === 'over due') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}::: Info: loan application is an ongoing or overdue 
+      loan checkIfOngoingLoanApplication.middlewares.loan.js`);
+      return next();
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${userDetails.user_id}::: Info: loan application is not an ongoing loan checkIfOngoingLoanApplication.middlewares.loan.js`);
+    return ApiResponse.error(res, enums.LOAN_APPLICATION_CANCELLING_FAILED_DUE_TO_CURRENT_STATUS(existingLoanApplication.status), enums.HTTP_FORBIDDEN,
+      enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE);
+  } catch (error) {
+    error.label = enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE;
+    logger.error(`checking if loan application is an ongoing or over due one failed::${enums.CHECK_IF_ONGOING_LOAN_APPLICATION_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
+
+/**
  * check loan reschedule request exists
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.

@@ -10,7 +10,6 @@ import { availableVerificationMeans, fetchLocalBanks, fetchLocalSingleBanks, upd
 import config from '../../config';
 import { checkIfBvnFlaggedBlacklistedCheckByLastName } from '../middlewares/middlewares.user';
 
-
 const router = Router();
 
 router.patch('/fcm-token', AuthMiddleware.validateAuthToken, Model(Schema.updateFcmToken, 'payload'), UserController.updateFcmToken);
@@ -74,35 +73,15 @@ router.patch('/settings/bank/:record_id/update', AuthMiddleware.validateAuthToke
 
 router.delete('/settings/bank/:record_id/delete', AuthMiddleware.validateAuthToken, UserController.deleteBankRecord);
 
-router.post(
-  '/settings/bank/create',
-  AuthMiddleware.validateAuthToken,
-  UserController.createBankRecord
-);
+router.post('/settings/bank/create', AuthMiddleware.validateAuthToken, UserController.createBankRecord);
 
-router.get(
-  '/settings/list-db-banks',
-  AuthMiddleware.validateAuthToken,
-  UserController.fetchLocalBanks
-);
+router.get('/settings/list-db-banks', AuthMiddleware.validateAuthToken, UserController.fetchLocalBanks);
 
-router.get(
-  '/settings/bank/:record_id',
-  AuthMiddleware.validateAuthToken,
-  UserController.fetchLocalSingleBanks
-);
+router.get('/settings/bank/:record_id', AuthMiddleware.validateAuthToken, UserController.fetchLocalSingleBanks);
 
-router.patch(
-  '/settings/bank/:record_id/update',
-  AuthMiddleware.validateAuthToken,
-  UserController.updateBankRecord
-);
+router.patch('/settings/bank/:record_id/update', AuthMiddleware.validateAuthToken, UserController.updateBankRecord);
 
-router.delete(
-  '/settings/bank/:record_id/delete',
-  AuthMiddleware.validateAuthToken,
-  UserController.deleteBankRecord
-);
+router.delete('/settings/bank/:record_id/delete', AuthMiddleware.validateAuthToken, UserController.deleteBankRecord);
 
 router.get(
   '/settings/resolve-account-number',
@@ -167,7 +146,7 @@ router.post(
   Model(Schema.idDocumentVerification, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('confirm'),
-  UserMiddleware.isUploadedVerifiedId('complete'),
+  // UserMiddleware.isUploadedVerifiedId('complete'),
   UserController.documentVerification
 );
 
@@ -291,10 +270,8 @@ router.post('/verify-bvn-otp', Model(Schema.verifyBvnOtp, 'payload'), UserContro
 
 router.post('/verify-bvn-otp-beta', AuthMiddleware.validateInfoCall, Model(Schema.verifyBVNInformation, 'payload'), UserController.verifyBvnInfo);
 
-
 router.post('/validate-user-bvn-otp', AuthMiddleware.validateAuthToken, Model(Schema.verifyBvnOtp, 'payload'), UserController.verifyBvnOtp);
 
 router.get('/version', AuthMiddleware.validateAuthToken, UserController.getVersionNumber);
-
 
 export default router;

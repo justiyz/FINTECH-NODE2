@@ -284,6 +284,7 @@ export const CREATE_ROLE_CONTROLLER = 'AdminRoleController::createRole';
 export const USER_PROFILE_DETAILS_CONTROLLER = 'AdminRoleController::userProfileDetails';
 export const USER_ACCOUNT_INFORMATION_CONTROLLER = 'AdminRoleController::userAccountInformation';
 export const ADMIN_PERMISSION_RESOURCES_CONTROLLER = 'AdminRoleController::adminPermissionResources';
+export const MERCHANT_ADMIN_PERMISSION_RESOURCES_CONTROLLER = 'MerchantAdminRoleController::merchantAdminPermissionResources';
 export const ROLE_PERMISSIONS_CONTROLLER = 'AdminRoleController::rolePermissions';
 export const ACTIVATE_DEACTIVATE_ROLE_CONTROLLER = 'AdminRoleController::activateDeactivateRole';
 export const EDIT_ADMIN_PERMISSIONS_CONTROLLER = 'AdminAdminController::editAdminPermissions';

@@ -285,7 +285,7 @@ export const ADMIN_ALREADY_SET_NEW_PASSWORD = 'admin has previously set new pass
 export const ADMIN_ALREADY_COMPLETED_PROFILE = 'admin has previously completed profile, kindly do edit profile';
 export const ADMIN_ROLE_NAME_EXISTS = name => `A role withe the name "${name}" already exists in the DB`;
 export const ADMIN_CANNOT_PERFORM_ACTION = (action, resource) => `Admin cannot perform "${action}" action on ${resource} module`;
-export const ADMIN_NO_RESOURCE_ACCESS = resource => `Admin dose not have access to ${resource} resource.`;
+export const ADMIN_NO_RESOURCE_ACCESS = resource => `Admin does not have access to ${resource} resource.`;
 export const RESOURCE_ID_SENT_NOT_EXISTS = resource_id => `resource with resource id ${resource_id} does not exist`;
 export const RESOURCE_REPEATING_IN_PAYLOAD = resource_name => `resource "${resource_name}" is repeating more than once`;
 export const CANNOT_PERFORM_ACTION_BASED_ON_CURRENT_STATUS = (action, status) => `cannot ${action} a role with ${status} status`;
