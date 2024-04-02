@@ -20,7 +20,7 @@ router.post(
 );
 
 router.get(
-  '/:admin_id/permissions',
+  '/:merchant_admin_id/permissions',
   AuthMiddleware.validateAdminAuthToken,
   Model(Schema.adminIdParams, 'params'),
   RolesMiddleware.adminAccess('administrators', 'read'),
@@ -49,9 +49,7 @@ router.post(
   Model(RoleSchema.inviteAdmin, 'payload'),
   RolesMiddleware.adminAccess('administrators', 'create'),
   AdminMiddleware.checkIfAdminEmailAlreadyExist,
-  RolesMiddleware.validateRoleCode,
   RolesMiddleware.checkIfSuperAdminRole,
-  RolesMiddleware.IsRoleActive,
   AdminController.inviteAdmin
 );
 
