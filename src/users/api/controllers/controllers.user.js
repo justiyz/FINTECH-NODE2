@@ -1742,8 +1742,7 @@ export const verifyBvnInfo = async (req, res, next) => {
     } = req;
     // run a query, if result exist, return result
     // query the database if the data exists
-    await processAnyData(userQueries.queryBvnInformation, [date_of_birth]);
-
+    // await processAnyData(userQueries.queryBvnInformation, [date_of_birth]);
     const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
@@ -1751,7 +1750,7 @@ export const verifyBvnInfo = async (req, res, next) => {
     }
     const parsedDate = moment(data.data.dateOfBirth, 'DD-MMM-YYYY');
     let result_date = parsedDate.format('YYYY-MM-DD');
-
+    const bvnHash = encodeURIComponent(await Hash.encrypt(bvn.trim()));
     if (
       data.data.firstName.toLowerCase() === first_name &&
       data.data.lastName.toLowerCase() === last_name &&
@@ -1805,6 +1804,7 @@ export const verifyBvnOtp = async (req, res, next) => {
     if (req.user) {
       const user = req.user;
       const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
+      await tierOneUpgradeByBVN(user);
       const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
       return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
@@ -1814,14 +1814,10 @@ export const verifyBvnOtp = async (req, res, next) => {
 
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
-
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
-    const tierChoice = user.is_completed_kyc && user.is_uploaded_identity_card ? '1' : '0';
-    // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
-    // const tier_upgraded = tierChoice === '1' ? true : false;
-    // if the user has verified their bvn before this point, they will be upgraded to tier 1
-    await processAnyData(userQueries.userVerificationIdWithBvn, [user.user_id, tierChoice]);
+
+    await tierOneUpgradeByBVN(req.user);
 
     return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, {
       bvn: bvn,
@@ -1847,6 +1843,18 @@ export const verifyBvnOtp = async (req, res, next) => {
 //   return tier_upgraded
 //
 // }
+
+/**
+ *
+ * @param user
+ * @returns {Promise<void>}
+ */
+export const tierOneUpgradeByBVN = async (user) => {
+  // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
+  const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
+  // if the user has verified their identity document before this point, they will be upgraded to tier 1
+  await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
+}
 
 function getPhoneNumber(obj) {
   // Check if either phoneNumber1 or phone_number1 exists in the object
