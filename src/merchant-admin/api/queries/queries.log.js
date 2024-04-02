@@ -1,7 +1,7 @@
 export default {
   createAdminActivityLogs: `
-    INSERT INTO admin_activity_logs (
-        admin_id, 
+    INSERT INTO merchant_admin_activity_logs (
+        merchant_admin_id, 
         activity_type,
         activity_status,
         description

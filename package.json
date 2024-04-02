@@ -50,6 +50,8 @@
   "dependencies": {
     "@joi/date": "^2.1.0",
     "@sendgrid/mail": "^8.1.0",
+    "@sentry/node": "^7.108.0",
+    "@sentry/profiling-node": "^7.108.0",
     "api": "^6.1.1",
     "awesome-phonenumber": "^6.4.0",
     "aws-sdk": "^2.1333.0",
@@ -82,7 +84,7 @@
     "puppeteer": "^19.8.0",
     "puppeteer-core": "^21.5.2",
     "qrcode": "^1.5.3",
-    "sharp": "^0.33.2",
+    "sharp": "^0.33.3",
     "uuid": "^9.0.0",
     "winston": "^3.8.2"
   },
