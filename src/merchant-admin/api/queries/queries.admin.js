@@ -2,7 +2,7 @@ export default {
 
   getAdminByEmail: `
   SELECT id, merchant_admin_id, email, phone_number, first_name, last_name, gender,
-    is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count
+    is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count, role_type, is_created_by_seedfi
   FROM merchant_admins
   WHERE email = $1`,
 
@@ -22,7 +22,7 @@ export default {
 
   getAdminByAdminId: `
     SELECT id, merchant_admin_id, email, phone_number, INITCAP(first_name) AS first_name, INITCAP(last_name) AS last_name, gender,
-      is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count
+      is_verified_email, is_created_password, status, is_deleted, verification_token_request_count, invalid_verification_token_count, role_type, is_created_by_seedfi
     FROM merchant_admins
     WHERE merchant_admin_id = $1`,
 
@@ -42,9 +42,9 @@ export default {
     WHERE admin_id = $1
     RETURNING id, admin_id, first_name, last_name, gender, role_type, image_url, email, is_created_password, is_verified_email, is_completed_profile, status`,
 
-  createAdminUserPermissions: `
-    INSERT INTO admin_user_permissions(
-      admin_id, resource_id, permissions
+  createMerchantAdminPermissions: `
+    INSERT INTO merchant_admin_permissions(
+      merchant_admin_id, resource_id, permissions
     ) VALUES($1, $2, $3)`,
 
   updateMerchantLoginToken: `
@@ -120,15 +120,17 @@ export default {
 
 
   inviteAdmin: `
-    INSERT INTO admins (
+    INSERT INTO merchant_admins (
       first_name,
       last_name,
       email,
       role_type,
+      phone_number,
       password,
-      status
-    )VALUES($1, $2, $3, $4, $5, 'active')
-    RETURNING admin_id,  first_name,
+      status,
+      is_created_by_seedfi
+    )VALUES($1, $2, $3, $4, $5, $6, 'active', false)
+    RETURNING merchant_admin_id,  first_name,
     last_name,
     email`,
 
@@ -786,6 +788,12 @@ export default {
       FROM cluster_member_loan_disbursements
       WHERE status = 'success'
       AND (created_at::DATE BETWEEN $1::DATE AND $2::DATE)
+  `,
+
+  fetchAdminMerchant: `
+    SELECT merchant_id
+    FROM merchant_admins_merchants 
+    WHERE merchant_admin_id = $1
   `
 
 

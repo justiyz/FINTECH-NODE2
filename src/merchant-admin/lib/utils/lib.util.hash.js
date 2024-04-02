@@ -9,10 +9,10 @@ const { SEEDFI_ENCODING_AUTHENTICATION_SECRET, SEEDFI_BCRYPT_SALT_ROUND } = conf
 
 
 
-export const generateMerchantAdminAuthToken = (merchantAdmin, permissions = []) => {
+export const generateMerchantAdminAuthToken = (merchantAdmin, permissions) => {
   try {
-    const { merchant_admin_id } = merchantAdmin;
-    return jwt.sign({ merchant_admin_id, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
+    const { merchant_admin_id, role_type } = merchantAdmin;
+    return jwt.sign({ merchant_admin_id, role_type, ...permissions }, SEEDFI_ENCODING_AUTHENTICATION_SECRET, { expiresIn: '1h' });
   } catch (error) {
     return error;
   }
