@@ -15,7 +15,7 @@ const expressConfig = app => {
   let logger;
 
   Sentry.init({
-    dsn: process.env.SEEDFI_DEV_SENTRY_DSN,
+    dsn: process.env.SEEDFI_DEV_SENTRY_DSN ?? 'https://5cb4454c9872755170b003956fbc1fe1@o4506989301465088.ingest.us.sentry.io/4506989343997952',
     integrations: [
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),
