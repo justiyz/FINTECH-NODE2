@@ -7,11 +7,12 @@ export default {
     body.gender
   ],
   
-  addAdmin: (body, hash) => [ 
-    body.first_name.trim().toLowerCase(), 
-    body.last_name.trim().toLowerCase(), 
-    body.email.trim().toLowerCase(),
-    body.role_code.trim(),
+  addAdmin: (admin_details, hash) => [ 
+    admin_details.first_name.trim().toLowerCase(), 
+    admin_details.last_name.trim().toLowerCase(), 
+    admin_details.email.trim().toLowerCase(),
+    admin_details.role_name.trim(),
+    admin_details.phone_number.trim(),
     hash
   ],
 

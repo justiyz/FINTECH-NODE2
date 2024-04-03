@@ -180,7 +180,7 @@ export const validateAdminAuthToken = async(req, res, next) => {
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     req.admin = admin;
-    // req.admin.permissions = { role_permissions: decoded.role_permissions, admin_permissions: decoded.admin_permissions };
+    req.admin.permissions = { admin_permissions: decoded.admin_permissions };
     return next();
   } catch (error) {
     error.label = enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE;
@@ -212,35 +212,23 @@ export const adminPermissions = async(req, res, next) => {
     if (admin.role_type === 'SADM') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: confirms this is super admin role type adminPermissions.admin.middlewares.auth.js`);
       req.permissions = {
-        role_permissions: {},
         admin_permissions: {}
       };
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: confirms this is another admin role type asides super admin
     adminPermissions.admin.middlewares.auth.js`);
-    const [ rolePermissions, adminPermissions ] = await Promise.all([
-      processAnyData(authQueries.fetchRolePermissions, admin.role_type),
-      processAnyData(authQueries.fetchAdminPermissions, admin.merchant_admin_id)
-    ]);
+
+    const  adminPermissions  = await processAnyData(authQueries.fetchMerchantAdminPermissions, [ admin.merchant_admin_id ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: fetches admin roles adminPermissions.admin.middlewares.auth.js`);
-    if ((rolePermissions && rolePermissions[0]) || (adminPermissions && adminPermissions[0])) {
-      const role_permissions = {};
+    if ((adminPermissions && adminPermissions[0])) {
       const admin_permissions = {};
-      rolePermissions.forEach((permission) => {
-        role_permissions[
-          permission.name
-        ] = permission.permissions;
-      });
       adminPermissions.forEach((permission) => {
         admin_permissions[
           permission.name
         ] = permission.permissions;
       });
-      req.permissions = {
-        role_permissions,
-        admin_permissions
-      };
+      req.permissions = { admin_permissions };
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: admin roles properly aggregated adminPermissions.admin.middlewares.auth.js`);
       return next();
     }

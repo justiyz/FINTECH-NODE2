@@ -34,7 +34,7 @@ export const processRoleBasedPermissions = async(role_type, adminResources, role
   return rolePermissions;
 };
 
-export const processAdminBasedPermissions = async(admin_id, adminResources, adminPermissions) => {
+export const processMerchantAdminBasedPermissions = async(merchant_admin_id, adminResources, adminPermissions) => {
   const rolePermissionsResourceIds = adminPermissions.map((permission) => permission['resource_id']);
   
   const processFullPermissions = await adminResources.map((resource) => {
@@ -42,7 +42,7 @@ export const processAdminBasedPermissions = async(admin_id, adminResources, admi
       return resource;
     }
     adminPermissions.push({
-      admin_id: admin_id,
+      admin_id: merchant_admin_id,
       name: resource.name,
       resource_id: resource.resource_id,
       permissions: []
