@@ -41,9 +41,10 @@ export default {
         gender,
         password,
         verification_token,
-        verification_token_expires
+        verification_token_expires,
+        role_name
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, 'SADM'
       ) RETURNING *
   `,
   fetchMerchantAdminIdByMerchantEmail: `
@@ -455,5 +456,12 @@ export default {
     SET
       updated_at = NOW(),
       status = 'deactivated'
-    WHERE merchant_id = $1`
+    WHERE merchant_id = $1`,
+
+  fetchMerchantAdminResources: `
+    SELECT 
+      id,
+      resource_id,
+      name
+    FROM merchant_admin_resources`
 };

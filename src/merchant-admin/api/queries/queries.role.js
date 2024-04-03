@@ -31,13 +31,6 @@ export default {
       role_type, resource_id, permissions
     ) VALUES($1, $2, $3)`,
 
-  fetchAdminResources: `
-    SELECT
-      id,
-      resource_id,
-      name
-    FROM admin_resources`,
-
   updateRoleName: `
     UPDATE admin_roles
     SET
@@ -171,5 +164,12 @@ export default {
   AND (TRIM(CONCAT(first_name, ' ', last_name)) ILIKE TRIM($5)
   OR TRIM(CONCAT(last_name, ' ', first_name)) ILIKE TRIM($5)
   OR $5 IS NULL)
-  `
+  `,
+
+  fetchMerchantAdminResources: `
+    SELECT
+      id,
+      resource_id,
+      name
+    FROM merchant_admin_resources`
 };
