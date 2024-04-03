@@ -765,7 +765,7 @@ export const internationPassportVerification = async (req, res, next) => {
 
       // user must have been on teir 1 prior and also now needs to verify their nin/vin (in this case, nin) to move to tier 2
       const tierChoice = user.is_completed_kyc && user.is_verified_bvn && user.tier === 1 ? 2 : user.tier;
-      const tier_upgraded = tierChoice === 2 ? true : false;
+      const tier_upgraded = tierChoice === 1 ? true : false;
       const [response] = await processAnyData(userQueries.userIdentityVerification, [user.user_id, data.Location, tierChoice]);
       logger.info(
         `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user details updated successfully {internationPassportVerification} documentVerification.controller.user.js`
