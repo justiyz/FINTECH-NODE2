@@ -625,9 +625,9 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
 
 export const validateInfoCall = async(req, res, next) => {
   try {
-    const valString = req.headers['x_token_check'];
+    const valString = req.body['x_token_check'];
     console.log(req.headers)
-    console.log('valString: ', valString);
+    console.log('valString body: ', valString);
     console.log('SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN: ', SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN);
     if (valString !== SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
