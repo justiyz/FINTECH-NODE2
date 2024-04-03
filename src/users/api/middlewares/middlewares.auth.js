@@ -626,7 +626,9 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
 export const validateInfoCall = async(req, res, next) => {
   try {
     const valString = req.headers['x_token_check'];
-    if (valString != SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
+    console.log('valString: ', valString);
+    console.log('SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN: ', SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN);
+    if (valString !== SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
       validateInfoCall.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_PASS_STRING, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
