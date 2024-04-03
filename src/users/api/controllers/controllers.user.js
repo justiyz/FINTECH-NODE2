@@ -1744,11 +1744,12 @@ export const verifyBvnInfo = async (req, res, next) => {
     const parsedDate = moment(data.data.dateOfBirth, 'DD-MMM-YYYY');
     let result_date = parsedDate.format('YYYY-MM-DD');
     const bvnHash = encodeURIComponent(await Hash.encrypt(bvn.trim()));
+
     if (
-      data.data.firstName.toLowerCase() === first_name &&
-      data.data.lastName.toLowerCase() === last_name &&
-      data.data.bvn.toLowerCase() === bvn &&
-      data.data.gender.toLowerCase() === gender &&
+      data.data.firstName.toLowerCase().trim() === first_name.trim() &&
+      data.data.lastName.toLowerCase().trim() === last_name.trim() &&
+      data.data.bvn.toLowerCase().trim() === bvn.trim() &&
+      data.data.gender.toLowerCase().trim() === gender.trim() &&
       result_date === date_of_birth
     ) {
       // save information
