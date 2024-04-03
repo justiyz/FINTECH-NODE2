@@ -5,14 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
-
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/seedfi-api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/seedfi-api.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/merchant-admin/api/controllers/controller.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/merchant-admin/api/controllers/controller.merchant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/merchant-admin/api/routes/routes.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/merchant-admin/api/routes/routes.merchant.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/merchant-admin/lib/schemas/lib.schema.merchant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/merchant-admin/lib/schemas/lib.schema.merchant.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.auth.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" afterDir="false" />
     </list>
@@ -78,8 +71,8 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "Rebasing fix/tkaccess",
+    "WebServerToolWindowFactoryState": "false", 
+    "git-widget-placeholder": "Rebasing fix/tk__access", 
     "last_opened_file_path": "/Users/otjake/Sites/localhost/seedfi-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
