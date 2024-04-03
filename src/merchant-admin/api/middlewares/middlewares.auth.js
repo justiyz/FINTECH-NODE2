@@ -4,11 +4,11 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../../users/lib/http/lib.http.responses';
 import enums from '../../../users/lib/enums';
 import * as UserHash from '../../../users/lib/utils/lib.util.hash';
-import { adminActivityTracking } from '../../lib/monitor';
+import { merchantAdminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import config from '../../../users/config/index';
-import {TOKEN_VALIDATION_UNSUCCESSFUL} from '../../../users/lib/enums/lib.enum.labels';
-import {INVALID_PASS_STRING} from '../../../users/lib/enums/lib.enum.messages';
+import { TOKEN_VALIDATION_UNSUCCESSFUL } from '../../../users/lib/enums/lib.enum.labels';
+import { INVALID_PASS_STRING } from '../../../users/lib/enums/lib.enum.messages';
 
 /**
  * check if password sent matches admins password in the DB
@@ -18,19 +18,22 @@ import {INVALID_PASS_STRING} from '../../../users/lib/enums/lib.enum.messages';
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminAuthMiddleware
  */
-export const compareAdminPassword = async(req, res, next) => {
+export const compareAdminPassword = async (req, res, next) => {
   try {
     const {
-      body: { password }, admin
+      body: { password },
+      admin,
     } = req;
-    const [ adminPasswordDetails ] = await processAnyData(authQueries.fetchAdminPassword, [ admin.merchant_admin_id ]);
-    const passwordValid =  UserHash.compareData(password, adminPasswordDetails.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: successfully returned compared passwords response compareAdminPassword.admin.middlewares.auth.js`);
+    const [adminPasswordDetails] = await processAnyData(authQueries.fetchAdminPassword, [admin.merchant_admin_id]);
+    const passwordValid = UserHash.compareData(password, adminPasswordDetails.password);
+    logger.info(
+      `${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: successfully returned compared passwords response compareAdminPassword.admin.middlewares.auth.js`
+    );
     if (passwordValid) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: login password matches compareAdminPassword.admin.middlewares.auth.js`);
       return next();
     }
-    await adminActivityTracking(req.admin.merchant_admin_id, 9, 'fail', descriptions.login_request_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await merchantAdminActivityTracking(req.admin.merchant_admin_id, 9, 'fail', descriptions.login_request_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: login password does not match compareAdminPassword.admin.middlewares.auth.js`);
     return ApiResponse.error(res, enums.INVALID_PASSWORD, enums.HTTP_BAD_REQUEST, enums.COMPARE_ADMIN_PASSWORD_MIDDLEWARE);
   } catch (error) {
@@ -40,7 +43,6 @@ export const compareAdminPassword = async(req, res, next) => {
   }
 };
 
-
 /**
  * check if admin OTP verification request is not getting suspicious
  * @param {Request} req - The request from the endpoint.
@@ -49,13 +51,14 @@ export const compareAdminPassword = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminAuthMiddleware
  */
-export const checkOtpVerificationRequestCount = async(req, res, next) => {
+export const checkOtpVerificationRequestCount = async (req, res, next) => {
   try {
     const { admin } = req;
-    if (admin && (admin.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
+    if (admin && admin.verification_token_request_count >= 4) {
+      // at 5th attempt or greater perform action
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it
       checkOtpVerificationRequestCount.admin.middlewares.auth.js`);
-      await processOneOrNoneData(adminQueries.deactivateAdmin, [ admin.merchant_admin_id ]);
+      await processOneOrNoneData(adminQueries.deactivateAdmin, [admin.merchant_admin_id]);
       return ApiResponse.error(res, enums.ADMIN_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.CHECK_ADMIN_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user otp verification request still within limit checkOtpVerificationRequestCount.admin.middlewares.auth.js`);
@@ -74,15 +77,15 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
  * @returns {object} - Returns a response
  * @memberof AuthMiddleware
  */
-const recordAdminInvalidOtpInputCount = async(res, admin) => {
-  await processOneOrNoneData(adminQueries.updateAdminInvalidOtpCount, [ admin.merchant_admin_id ]);
-  if (admin.invalid_verification_token_count >= 4) { // at 5th attempt or greater perform action
+const recordAdminInvalidOtpInputCount = async (res, admin) => {
+  await processOneOrNoneData(adminQueries.updateAdminInvalidOtpCount, [admin.merchant_admin_id]);
+  if (admin.invalid_verification_token_count >= 4) {
+    // at 5th attempt or greater perform action
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has entered invalid otp more than required limit recordAdminInvalidOtpInputCount.admin.middlewares.auth.js`);
-    await processOneOrNoneData(adminQueries.deactivateAdmin, [ admin.merchant_admin_id ]);
+    await processOneOrNoneData(adminQueries.deactivateAdmin, [admin.merchant_admin_id]);
     return ApiResponse.error(res, enums.ADMIN_ACCOUNT_DEACTIVATED, enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
   }
 };
-
 
 /**
  * verify validity and expiry of admin login verification token
@@ -92,16 +95,18 @@ const recordAdminInvalidOtpInputCount = async(res, admin) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminAuthMiddleware
  */
-export const verifyLoginVerificationToken = async(req, res, next) => {
+export const verifyLoginVerificationToken = async (req, res, next) => {
   try {
-    const { body: { otp, email } } = req;
-    const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ email.trim().toLowerCase() ]);
+    const {
+      body: { otp, email },
+    } = req;
+    const [admin] = await processAnyData(adminQueries.getAdminByEmail, [email.trim().toLowerCase()]);
     if (!admin) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the email does not exist in the DB
       verifyLoginVerificationToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('Admin'), enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
     }
-    const [ otpAdmin ] = await processAnyData(authQueries.fetchAdminByVerificationTokenAndUniqueId, [ otp, admin.merchant_admin_id ]);
+    const [otpAdmin] = await processAnyData(authQueries.fetchAdminByVerificationTokenAndUniqueId, [otp, admin.merchant_admin_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct OTP is sent verifyLoginVerificationToken.admin.middlewares.auth.js`);
     if (!otpAdmin) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: OTP is invalid verifyVerificationToken.middlewares.auth.js`);
@@ -129,7 +134,6 @@ export const verifyLoginVerificationToken = async(req, res, next) => {
   }
 };
 
-
 /**
  * validate the admin auth token
  * @param {Request} req - The request from the endpoint.
@@ -139,7 +143,7 @@ export const verifyLoginVerificationToken = async(req, res, next) => {
  * @memberof AdminAuthMiddleware
  */
 
-export const validateAdminAuthToken = async(req, res, next) => {
+export const validateAdminAuthToken = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
@@ -165,7 +169,7 @@ export const validateAdminAuthToken = async(req, res, next) => {
       error message validateAdminAuthToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
-    const [ admin ] = await processAnyData(adminQueries.getAdminByAdminId, [ decoded.merchant_admin_id ]);
+    const [admin] = await processAnyData(adminQueries.getAdminByAdminId, [decoded.merchant_admin_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully fetched the users details using the decoded id
     validateAdminAuthToken.admin.middlewares.auth.js`);
     if (!admin) {
@@ -174,7 +178,7 @@ export const validateAdminAuthToken = async(req, res, next) => {
       return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
     }
     if (admin && (admin.is_deleted || admin.status !== 'active')) {
-      const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team'  : `${admin.status}, kindly contact support team`;
+      const adminStatus = admin.is_deleted ? 'deleted, kindly contact support team' : `${admin.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.merchant_admin_id}:::Info: successfully confirms that user account is ${adminStatus} in the database
       validateAdminAuthToken.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(adminStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
@@ -189,14 +193,7 @@ export const validateAdminAuthToken = async(req, res, next) => {
   }
 };
 
-
-
 // ======================================================================================================== //
-
-
-
-
-
 
 /**
  * sort out admin permissions
@@ -206,33 +203,31 @@ export const validateAdminAuthToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminAuthMiddleware
  */
-export const adminPermissions = async(req, res, next) => {
+export const adminPermissions = async (req, res, next) => {
   try {
     const { admin } = req;
     if (admin.role_type === 'SADM') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: confirms this is super admin role type adminPermissions.admin.middlewares.auth.js`);
       req.permissions = {
-        admin_permissions: {}
+        admin_permissions: {},
       };
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: confirms this is another admin role type asides super admin
     adminPermissions.admin.middlewares.auth.js`);
 
-    const  adminPermissions  = await processAnyData(authQueries.fetchMerchantAdminPermissions, [ admin.merchant_admin_id ]);
+    const adminPermissions = await processAnyData(authQueries.fetchMerchantAdminPermissions, [admin.merchant_admin_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: fetches admin roles adminPermissions.admin.middlewares.auth.js`);
-    if ((adminPermissions && adminPermissions[0])) {
+    if (adminPermissions && adminPermissions[0]) {
       const admin_permissions = {};
-      adminPermissions.forEach((permission) => {
-        admin_permissions[
-          permission.name
-        ] = permission.permissions;
+      adminPermissions.forEach(permission => {
+        admin_permissions[permission.name] = permission.permissions;
       });
       req.permissions = { admin_permissions };
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.merchant_admin_id}:::Info: admin roles properly aggregated adminPermissions.admin.middlewares.auth.js`);
       return next();
     }
-    await adminActivityTracking(req.admin.merchant_admin_id, 10, 'fail', descriptions.login_approved_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await merchantAdminActivityTracking(req.admin.merchant_admin_id, 10, 'fail', descriptions.login_approved_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     return ApiResponse.error(res, enums.ADMIN_HAS_NO_PERMISSIONS, enums.HTTP_UNAUTHORIZED, enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE);
   } catch (error) {
     error.label = enums.VERIFY_LOGIN_VERIFICATION_TOKEN_MIDDLEWARE;
@@ -241,33 +236,36 @@ export const adminPermissions = async(req, res, next) => {
   }
 };
 
-
 /**
  * check if admin has changed their default password
  * @param {String} type - The type to know which of the conditions to run.
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminAuthMiddleware
  */
-export const checkIfChangedDefaultPassword = (type = '') => async(req, res, next) => {
-  try {
-    const { admin: { is_created_password } } = req;
-    if (!is_created_password && type === 'verify') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin is yet to change from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.ADMIN_NOT_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
-    }
-    if (is_created_password && type === 'validate') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has previously changed from their system default password
+export const checkIfChangedDefaultPassword =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const {
+        admin: { is_created_password },
+      } = req;
+      if (!is_created_password && type === 'verify') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin is yet to change from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
+        return ApiResponse.error(res, enums.ADMIN_NOT_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
+      }
+      if (is_created_password && type === 'validate') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has previously changed from their system default password
       checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.ADMIN_ALREADY_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
+        return ApiResponse.error(res, enums.ADMIN_ALREADY_SET_NEW_PASSWORD, enums.HTTP_BAD_REQUEST, enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has changed from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
+      return next();
+    } catch (error) {
+      error.label = enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE;
+      logger.error(`checking if admin has changed default password failed:::${enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: admin has changed from their system default password checkIfChangedDefaultPassword.admin.middlewares.auth.js`);
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE;
-    logger.error(`checking if admin has changed default password failed:::${enums.CHECK_IF_CHANGED_DEFAULT_PASSWORD_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * validate admin reset password token
@@ -277,7 +275,7 @@ export const checkIfChangedDefaultPassword = (type = '') => async(req, res, next
  * @returns {object} - Returns an object (error or response).
  * @memberof AdminAuthMiddleware
  */
-export const validateAdminResetPasswordToken = async(req, res, next) => {
+export const validateAdminResetPasswordToken = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
@@ -306,7 +304,7 @@ export const validateAdminResetPasswordToken = async(req, res, next) => {
     if (decoded.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded authentication token sent using the authentication secret
       validateAdminResetPasswordToken.admin.middlewares.auth.js`);
-      const [ admin ] = await processAnyData(adminQueries.getAdminByEmail, [ decoded.email ]);
+      const [admin] = await processAnyData(adminQueries.getAdminByEmail, [decoded.email]);
       req.admin = admin;
       return next();
     }
@@ -317,8 +315,6 @@ export const validateAdminResetPasswordToken = async(req, res, next) => {
   }
 };
 
-
-
 /**
  * Checks if reset password is same as current
  * @param {Request} req - The request from the endpoint.
@@ -327,11 +323,13 @@ export const validateAdminResetPasswordToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfResetCredentialsSameAsOld = async(req, res, next) => {
+export const checkIfResetCredentialsSameAsOld = async (req, res, next) => {
   try {
     const {
-      body: { password }, admin } = req;
-    const [ adminPasswordDetails ] = await processAnyData(authQueries.fetchAdminPassword, [ admin.merchant_admin_id ]);
+      body: { password },
+      admin,
+    } = req;
+    const [adminPasswordDetails] = await processAnyData(authQueries.fetchAdminPassword, [admin.merchant_admin_id]);
     const isValidCredentials = UserHash.compareData(password, adminPasswordDetails.password);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.user_id}:::Info: successfully returned compared user response checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
     if (isValidCredentials) {
