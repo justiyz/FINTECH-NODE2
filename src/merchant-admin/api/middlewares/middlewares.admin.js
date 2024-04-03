@@ -59,15 +59,15 @@ export const validateUnAuthenticatedAdmin = (type = '') => async(req, res, next)
  */
 export const checkIfAdminExists = async(req, res, next) => {
   try {
-    const { params: { admin_id } } = req;
-    const [ adminUser ] = await processAnyData(adminQueries.getAdminByAdminId, [ admin_id ]);
+    const { params: { merchant_admin_id } } = req;
+    const [ adminUser ] = await processAnyData(adminQueries.getAdminByAdminId, [ merchant_admin_id ]);
     if (adminUser) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info:
       successfully confirms that admin being queries exists in the DB checkIfAdminExists.admin.middlewares.auth.js`);
       req.adminUser = adminUser;
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info:
     successfully confirms that admin being queries does not exists in the DB checkIfAdminExists.admin.middlewares.auth.js`);
     return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('admin'), enums.HTTP_BAD_REQUEST, enums.CHECK_IF_ADMIN_EXISTS_MIDDLEWARE);
   } catch (error) {
@@ -89,10 +89,10 @@ export const checkIfSuperAdmin = async(req, res, next) => {
   try {
     const { adminUser } = req;
     if (adminUser.role_type === 'SADM') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info: queried admin is super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ACTION_NOT_ALLOWED_FOR_SUPER_ADMIN, enums.HTTP_FORBIDDEN, enums.CHECK_IF_SUPER_ADMIN_MIDDLEWARE);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: queried admin is not super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info: queried admin is not super admin checkIfSuperAdmin.admin.middlewares.auth.js`);
     return next();
   } catch (error) {
     error.label = enums.CHECK_IF_SUPER_ADMIN_MIDDLEWARE;
@@ -137,13 +137,13 @@ export const checkIfAuthenticatedAdmin = async(req, res, next) => {
  */
 export const checkIfAdminEmailAlreadyExist = async(req, res, next) => {
   try {
-    const [ adminEmail ] = await processAnyData(adminQueries.getAdminByEmail, [ req.body.email.trim().toLowerCase() ]);
+    const [ adminEmail ] = await processAnyData(adminQueries.getAdminByEmail, [ req.body.admin_details.email.trim().toLowerCase() ]);
     if (!adminEmail) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info:
       successfully confirms that admin's email is not existing in the database checkIfAdminEmailAlreadyExist.middlewares.admin.js`);
       return next();
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info:
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info:
     successfully confirms that admin's email is existing in the database checkIfAminEmailAlreadyExist.middlewares.admin.js`);
     return ApiResponse.error(res, enums.ADMIN_EMAIL_EXIST, enums.HTTP_CONFLICT, enums.CHECK_IF_ADMIN_EMAIL_ALREADY_EXIST_MIDDLEWARE);
   } catch (error) {

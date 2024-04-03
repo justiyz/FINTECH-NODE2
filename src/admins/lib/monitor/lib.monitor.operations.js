@@ -68,6 +68,19 @@ export const operations = {
   67: 'ACTMERCH', // admin activated a merchant account
   68: 'DACTMERCH', // admin deactivated a merchant account
   69: 'EDMERCHINT', // admin edited a merchant interest rate details
-  70: 'CRMERADM' // admin created merchant admin record
+  70: 'CRMERADM', // admin created merchant admin record
+  71: 'APLYLOAN', // apply for personal loan
+  72: 'PLONAPAUT', // personal loan approved automatically
+  73: 'IMNLNRPVBA', // admin initiates manual loan repayment 
+  74: 'RSHDLONTN', // admin reschedules loan tenor
+  75: 'UPPRFL', // admin updates user profile
+  76: 'UPTNOKDTLS', // admin updates next of kin details
+  77: 'UPDTEMPDTS' // admin updates employment type details
+  
+
+
+
+
+
 };
 

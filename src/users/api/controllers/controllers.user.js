@@ -30,7 +30,7 @@ import { API_VERSION, BANK_UPDATE_SUCCESSFUL, BVN_INFORMATION_UNAVAILABLE, CREAT
 import { CREATE_BANK_CONTROLLER, DELETE_BANK_CONTROLLER, UPDATE_BANK_INFORMATION } from '../../lib/enums/lib.enum.labels';
 import { number } from 'joi';
 
-const { SEEDFI_NODE_ENV, SEEDFI_API_VERSION } = config;
+const { SEEDFI_API_VERSION, SEEDFI_NODE_ENV } = config;
 
 /**
  * update user device fcm token
@@ -138,6 +138,12 @@ export const updateBvn = async (req, res, next) => {
       user,
       bvnData,
     } = req;
+
+    // const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
+    // const tierChoice = (user.is_completed_kyc && user.is_uploaded_identity_card) ? '1' : '0';
+    // user needs to upload valid id, verify bvn and complete basic profile details to move to tier 1
+    // const tier_upgraded = tierChoice === '1' ? true : false;
+
     const otpData = await sendOtpToBvnUser(bvn, bvnData);
     // logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
     userActivityTracking(user.user_id, 5, 'success');
@@ -145,6 +151,7 @@ export const updateBvn = async (req, res, next) => {
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, { ...otpData });
     }
+
     return ApiResponse.success(res, enums.USER_BVN_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, { ...otpData, otp: undefined });
   } catch (error) {
     userActivityTracking(req.user.user_id, 5, 'fail');
@@ -223,10 +230,10 @@ export const fetchAvailableBankLists = async (req, res, next) => {
  */
 export const fetchLocalBanks = async (req, res, next) => {
   try {
-    const {user} = req;
-    const data = await processAnyData(userQueries.getBankList, [ 'true' ]);
+    const { user } = req;
+    const data = await processAnyData(userQueries.getBankList, ['true']);
     for (let counter = 0; counter < data.length; counter++) {
-      data[counter].id = parseInt(data[counter].id)
+      data[counter].id = parseInt(data[counter].id);
     }
     data.message = 'list of banks fetched successfully.';
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: bank lists returned successfully fetchLocalBanks.controller.user.js`);
@@ -839,7 +846,7 @@ export const nationalIdentificationNumberVerification = async (document, user, r
 
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user id verification successfull documentVerification.controller.user.js`);
       userActivityTracking(user.user_id, 119, 'success');
-      return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, { ...response, tier_upgraded });
+      return ApiResponse.success(res, enums.USER_IDENTITY_DOCUMENT_VERIFIED_SUCCESSFULLY, enums.HTTP_OK, { ...response, tier_upgraded, tier: tierChoice });
     } else {
       const errorMessage = 'user details does not match the details on the provided NIN ';
       logger.error(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}::::Info: ${errorMessage} {nationalIdentificationNumberVerification} documentVerification.controller.user.js`);

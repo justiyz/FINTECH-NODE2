@@ -47,10 +47,10 @@ export const createRole = async(req, res, next) => {
  * @returns {object} - Returns admin resources details.
  * @memberof AdminRoleController
  */
-export const adminPermissionResources = async(req, res, next) => {
+export const merchantAdminPermissionResources = async(req, res, next) => {
   try {
     const { admin } = req;
-    const resources = await processAnyData(roleQueries.fetchAdminResources, [  ]);
+    const resources = await processAnyData(roleQueries.fetchMerchantAdminResources, [  ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id} Info: admin module permission resources fetched from the DB 
     adminPermissionResources.admin.controllers.roles.js`);
     return ApiResponse.success(res, enums.ADMIN_RESOURCES_FETCHED_SUCCESSFULLY, enums.HTTP_OK, resources);

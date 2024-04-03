@@ -41,9 +41,10 @@ export default {
         gender,
         password,
         verification_token,
-        verification_token_expires
+        verification_token_expires,
+        role_type
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8
+        $1, $2, $3, $4, $5, $6, $7, $8, 'SADM'
       ) RETURNING *
   `,
 
