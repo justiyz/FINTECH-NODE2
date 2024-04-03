@@ -31,9 +31,7 @@ export default {
       number_of_children, marital_status, loan_status, device_token, verification_token_request_count, invalid_verification_token_count,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
     FROM users
-    WHERE email = $1`
-  ,
-
+    WHERE email = $1`,
   updateUserFcmToken: `
       UPDATE users
       SET
@@ -454,7 +452,7 @@ export default {
     SET
     updated_at = NOW(),
     tier = $3,
-    is_uploaded_identity_card = true,
+    is_uploaded_identity_card = true
     WHERE user_id = $1
     RETURNING user_id, first_name, last_name, image_url, is_uploaded_identity_card, is_uploaded_selfie_image,
     is_created_password, is_created_pin, is_completed_kyc, status
@@ -918,5 +916,5 @@ export default {
         is_deleted = true
     WHERE
         record_id = $1
-  `
+  `,
 };

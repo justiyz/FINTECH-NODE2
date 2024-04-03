@@ -33,10 +33,19 @@ const activateDeactivateRole = Joi.object().keys({
 });
 
 const inviteAdmin = Joi.object().keys({
-  first_name: Joi.string().required(), 
-  last_name: Joi.string().required(), 
-  email: Joi.string().email().required(),
-  role_code: Joi.string().required()
+  admin_details: Joi.object({
+    first_name: Joi.string().required(), 
+    last_name: Joi.string().required(), 
+    email: Joi.string().email().required(),
+    phone_number: Joi.string().required(),
+    role_name: Joi.string().required()
+  }).required(),
+  permissions: Joi.array().min(1).items(
+    Joi.object().keys({
+      resource_id: Joi.string().required(),
+      user_permissions: Joi.array().items(Joi.string().valid('create', 'read', 'update', 'delete', 'export', 'deactivate', 'initiate repayment')).required()
+    }).required()
+  ).required()
 });
 
 const editAdminStatus = Joi.object().keys({

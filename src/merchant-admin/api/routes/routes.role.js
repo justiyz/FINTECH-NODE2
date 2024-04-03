@@ -20,8 +20,8 @@ router.post(
 router.get(
   '/admin-resources',
   AuthMiddleware.validateAdminAuthToken,
-  RoleMiddleware.adminAccess('role management', 'read'),
-  RolesController.adminPermissionResources
+  RoleMiddleware.adminAccess('administrators', 'read'),
+  RolesController.merchantAdminPermissionResources
 );
 
 router.get(
@@ -88,6 +88,13 @@ router.get(
   Model(Schema.roleType, 'params'),
   Model(Schema.fetchAdminsPerRole, 'query'),
   RolesController.fetchAdminsPerRole
+);
+
+router.get(
+  '/merchant-resources',
+  AuthMiddleware.validateAdminAuthToken,
+  RoleMiddleware.adminAccess('administrators', 'read'),
+  RolesController.merchantAdminPermissionResources
 );
 
 export default router;
