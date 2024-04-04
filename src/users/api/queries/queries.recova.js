@@ -9,5 +9,9 @@ export default {
     UPDATE loan_mandate
     SET request_status = $1
     WHERE loan_id = $2;
-  `
+  `,
+
+  getLoanMandateByLoanId: `
+    SELECT * FROM loan_mandate WHERE loan_id = $1;
+  `,
 };
