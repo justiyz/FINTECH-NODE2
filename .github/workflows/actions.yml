@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NAME_ADMIN1: ftomiiwo
-      NAME_ADMIN2: eloka2023
+      NAME_ADMIN2: yusufola
 
     steps:
       - name: st1
