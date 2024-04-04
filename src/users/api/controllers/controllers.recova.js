@@ -278,7 +278,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const totalRepayment = loanRepaymentDetails.reduce((acc, repayment) => {
-      return acc + parseFloat(repayment.total_payment_amount);
+      return acc + parseFloat(repayment.total_payment_amount) * 100;
     }, 0);
 
     const collectionPaymentSchedules = await loanRepaymentDetails.map(repayment => {
@@ -301,7 +301,6 @@ export const createMandateConsentRequest = async (req, res, next) => {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's  phone number is invalid  createMandateConsentRequest.controller.user.js`);
       return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
-
     const data = {
       bvn: bvn,
       businessRegistrationNumber: 'string',
@@ -312,7 +311,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       customerEmail: userDetails.email,
       phoneNumber: pn.number.national.replace(/\s+/g, ''),
       loanAmount: loanDetails.amount_requested,
-      totalRepaymentExpected: totalRepayment,
+      totalRepaymentExpected: totalRepayment / 100,
       loanTenure: loanDetails.loan_tenor_in_months,
       linkedAccountNumber: accountDetails.account_number,
       repaymentType: 'Collection',
