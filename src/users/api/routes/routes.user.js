@@ -244,6 +244,8 @@ router.put(
 
 router.patch('/mono-account-id', AuthMiddleware.validateAuthToken, Model(Schema.updateMonoId, 'payload'), UserController.updateMonoAccountId);
 
+router.post('/initiate-mono-account-linking', AuthMiddleware.validateAuthToken, UserController.initiateMonoAccount);
+
 router.get('/tiers', AuthMiddleware.validateAuthToken, Model(Schema.tierLoanValue, 'query'), UserController.fetchLoanTierValue);
 
 router.get('/alert-notifications', AuthMiddleware.validateAuthToken, UserController.fetchAlertNotification);
