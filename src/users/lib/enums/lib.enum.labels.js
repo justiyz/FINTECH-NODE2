@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {onboardMerchant} from '../../../admins/api/controllers/controller.merchant';
+import { onboardMerchant } from '../../../admins/api/controllers/controller.merchant';
 
 export const CURRENT_TIME_STAMP = `${dayjs().format('DD-MMM-YYYY, HH:mm:ss')}`;
 // User related labels
@@ -25,6 +25,7 @@ export const COMPARE_DEVICE_TOKEN_MIDDLEWARE = 'AuthMiddleware::compareDeviceTok
 export const LOAN_APPLICATION_ELIGIBILITY_CHECK_SERVICE = 'SeedfiUnderwritingService::loanApplicationEligibilityCheck';
 export const LOAN_APPLICATION_RENEGOTIATION_SERVICE = 'SeedfiUnderwritingService::loanApplicationRenegotiation';
 export const GENERATE_MONO_ACCOUNT_ID_SERVICE = 'MonoService::generateMonoAccountId';
+export const INITIATE_MONO_ACCOUNT_LINKING = 'MonoService::initiateMonoAccountLinking';
 export const CREATE_USER_YOU_VERIFY_CANDIDATE_SERVICE = 'YouVerifyService::createUserYouVerifyCandidate';
 export const INITIATE_YOU_VERIFY_ADDRESS_VERIFICATION_SERVICE = 'YouVerifyService::initiateUserYouVerifyAddressVerification';
 export const DOJAH_BVN_VERIFICATION_SERVICE = 'DojahService::dojahBvnVerificationCheck';
@@ -250,8 +251,6 @@ export const CREATE_CONSENT_REQUEST_SERVICE = 'RecovaService::createConsentReque
 export const CANCEL_MANDATE_SERVICE = 'RecovaService::cancelMandateService';
 export const CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER = 'RecovaController::createMandateConsentRequest';
 
-
-
 // Admin related labels
 export const UPDATE_RESIDENTIAL_ADDRESS_CONTROLLER = 'AdminUserController::updateUserResidentialAddress';
 export const UPDATE_NEXT_OF_KIN_CONTROLLER = 'AdminUserController::updateNextOfKin';
@@ -389,7 +388,7 @@ export const EDIT_PROMO_DETAILS_CONTROLLER = 'AdminSettingsController::editPromo
 export const CANCEL_PROMO_CONTROLLER = 'AdminSettingsController::cancelPromo';
 export const DELETE_PROMO_CONTROLLER = 'AdminSettingsController::deletePromo';
 export const CHECK_IF_PROMO_ALREADY_EXIST_MIDDLEWARE = 'AdminSettingsMiddleware::checkIfPromoAlreadyExists';
-export const CHECK_IF_START_OR_END_DATE_HAS_PASSED_MIDDLEWARE='AdminSettingsMiddleware::checkIfStartOrEndDateHasPassed';
+export const CHECK_IF_START_OR_END_DATE_HAS_PASSED_MIDDLEWARE = 'AdminSettingsMiddleware::checkIfStartOrEndDateHasPassed';
 export const CHECK_IF_PROMO_EXISTS_MIDDLEWARE = 'AdminSettingsMiddleware::checkIfPromoExists';
 export const CHECK_IF_PROMO_IS_ACTIVE_MIDDLEWARE = 'AdminSettingsMiddleware::checkIfPromoIsActive';
 export const CHECK_PROMO_STATUS_MIDDLEWARE = 'AdminSettingsMiddleware::checkPromoStatus';
@@ -447,4 +446,3 @@ export const CHECK_IF_AMOUNT_PAID_EXCEEDS_OUTSTANDING_AMOUNT_MIDDLEWARE = 'Admin
 export const FETCH_OUTSTANDING_AMOUNT_CONTROLLER = 'AdminLoanController::fetchUserOutstandingAmount';
 export const UPDATE_USER_PAYMENT_CONTROLLER = 'AdminLoanController::updateUserPayment';
 export const CREATE_PRE_APPROVED_LOAN_CONTROLLER = 'AdminLoanController::createPreApprovedLoans';
-

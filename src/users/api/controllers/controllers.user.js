@@ -11,7 +11,7 @@ import { userActivityTracking } from '../../lib/monitor';
 import config from '../../config';
 import { fetchBanks } from '../services/service.paystack';
 import { sendPushNotification, sendUserPersonalNotification, updateNotificationReadBoolean } from '../services/services.firebase';
-import { generateMonoAccountId } from '../services/services.mono';
+import { generateMonoAccountId, initiateMonoAccountLinking } from '../services/services.mono';
 import * as PushNotifications from '../../lib/templates/pushNotification';
 import * as PersonalNotifications from '../../lib/templates//personalNotification';
 import MailService from '../services/services.email';
@@ -1469,6 +1469,41 @@ export const updateMonoAccountId = async (req, res, next) => {
 };
 
 /**
+ * user update mono account id details
+ * @param {Request} req - The request from the endpoint.
+ * @param {Response} res - The response returned by the method.
+ * @param {Next} next - Call the next operation.
+ * @returns {object} - Returns user account details
+ * @memberof UserController
+ */
+export const initiateMonoAccount = async (req, res, next) => {
+  const { user } = req;
+  try {
+    const result = await initiateMonoAccountLinking({ name: `${user.first_name} ${user.middle_name} ${user.last_name}`, email: user.email, ref: user.id });
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User mono account linking response returned. initiateMonoAccountLinking.controller.user.js`);
+    console.log('result', result);
+    if (result && result.status === 'successful') {
+      const { data } = result;
+      const response = {
+        mono_url: data.mono_url,
+        redirect_url: data.redirect_url,
+        customer: data.customer,
+        created_at: data.created_at,
+        ref: data.meta.ref,
+      };
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user mono account linking successful. initiateMonoAccountLinking.controller.user.js`);
+      return ApiResponse.success(res, enums.INITIATE_MONO_ACCOUNT_LINKING_SUCCESSFUL, enums.HTTP_OK, response);
+    }
+
+    return ApiResponse.error(res, 'Unable to initiate Mono', result.response.status, enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER);
+  } catch (error) {
+    error.label = enums.UPDATE_MONO_ACCOUNT_ID_CONTROLLER;
+    logger.error('updating user mono id failed:::initiateMonoAccountLinking.controller.user.js', error.message);
+    return next(error);
+  }
+};
+
+/**
  * fetch loan tier value
  * @param {Request} req - The request from the endpoint.
  * @param {Response} res - The response returned by the method.
@@ -1850,12 +1885,12 @@ export const verifyBvnOtp = async (req, res, next) => {
  * @param user
  * @returns {Promise<void>}
  */
-export const tierOneUpgradeByBVN = async (user) => {
+export const tierOneUpgradeByBVN = async user => {
   // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
   const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
   // if the user has verified their identity document before this point, they will be upgraded to tier 1
   await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
-}
+};
 
 function getPhoneNumber(obj) {
   // Check if either phoneNumber1 or phone_number1 exists in the object
