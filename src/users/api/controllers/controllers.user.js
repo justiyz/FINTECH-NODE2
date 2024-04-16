@@ -1728,7 +1728,7 @@ export const sendBvnOtp = async (req, res, next) => {
       if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
         return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData });
       }
-      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData });
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
     }
   } catch (error) {
     return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
@@ -1786,7 +1786,6 @@ export const verifyBvnOtp = async (req, res, next) => {
     const {
       body: { bvn, code },
     } = req;
-
     const [existingOtp] = await processAnyData(authQueries.getValidVerificationCode, [code]);
     if (!existingOtp) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: no existing verification code found verifyBvnOtp.controller.user.js`);
@@ -1801,7 +1800,6 @@ export const verifyBvnOtp = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn match verification code bvn verifyBvnOtp.controller.user.js`);
     await processOneOrNoneData(authQueries.deleteVerificationCode, [existingOtp.verification_key, code]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code deleted verifyBvnOtp.controller.user.js`);
-
     if (req.user) {
       const user = req.user;
       const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
@@ -1812,7 +1810,6 @@ export const verifyBvnOtp = async (req, res, next) => {
     }
 
     const { data } = await zeehService.zeehBVNVerificationCheck(decryptedBvn.trim(), {});
-
     if (!data.success) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
@@ -1852,9 +1849,13 @@ export const verifyBvnOtp = async (req, res, next) => {
  */
 export const tierOneUpgradeByBVN = async (user) => {
   // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
-  const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
-  // if the user has verified their identity document before this point, they will be upgraded to tier 1
-  await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
+  if(user) {
+    const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
+    // if the user has verified their identity document before this point, they will be upgraded to tier 1
+    await processAnyData(userQueries.userIdVerification, [user.user_id, tierChoice]);
+  } else {
+    return true;
+  }
 }
 
 function getPhoneNumber(obj) {
@@ -1910,6 +1911,9 @@ const sendOtpToBvnUser = async (bvn, data) => {
   await sendSms(pn.number.e164, verifyBvnOTPSms(otpData));
   await MailService('BVN verification code', 'bvnOtp', { ...otpData, email: data.email });
   logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's bvn otp code sent  sendBvnOtp.controller.user.js`);
+  if (SEEDFI_NODE_ENV === 'production') {
+    otpData.otp = '';
+  }
   return otpData;
 };
 
