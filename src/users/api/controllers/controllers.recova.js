@@ -278,7 +278,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
     }
 
     const totalRepayment = loanRepaymentDetails.reduce((acc, repayment) => {
-      return acc + parseFloat(repayment.total_payment_amount) * 100;
+      return acc + parseFloat(repayment.total_payment_amount);
     }, 0);
 
     const collectionPaymentSchedules = await loanRepaymentDetails.map(repayment => {
@@ -311,7 +311,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       customerEmail: userDetails.email,
       phoneNumber: pn.number.national.replace(/\s+/g, ''),
       loanAmount: loanDetails.amount_requested,
-      totalRepaymentExpected: totalRepayment / 100,
+      totalRepaymentExpected: parseFloat(totalRepayment).toFixed(2),
       loanTenure: loanDetails.loan_tenor_in_months,
       linkedAccountNumber: accountDetails.account_number,
       repaymentType: 'Collection',
