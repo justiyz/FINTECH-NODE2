@@ -5,8 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/admins/api/controllers/controllers.auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/admins/api/controllers/controllers.auth.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/routes/routes.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/routes/routes.user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/development.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/development.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/production.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/production.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/env/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/env/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/config/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/enums/lib.enum.labels.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/lib/schemas/lib.schema.user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +80,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "fix-env-config",
+    "git-widget-placeholder": "Rebasing snapshot",
     "last_opened_file_path": "/Users/otjake/Sites/localhost/seedfi-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

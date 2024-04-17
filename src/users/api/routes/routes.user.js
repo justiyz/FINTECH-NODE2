@@ -3,10 +3,10 @@ import Model from '../middlewares/middlewares.model';
 import Schema from '../../lib/schemas/lib.schema.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
-import * as UserController from '../controllers/controllers.user'; 
+import * as UserController from '../controllers/controllers.user';
 const { SEEDFI_NODE_ENV } = config;
 import {availableVerificationMeans} from "../controllers/controllers.user";
-import config from "../../config"; 
+import config from "../../config";
 
 const router = Router();
 
@@ -337,6 +337,15 @@ router.get(
   AuthMiddleware.validateAuthToken,
   UserController.getVersionNumber
 )
+
+router.post(
+  '/dojah-upload-selfie',
+  UserMiddleware.dojahWebhookVerification,
+  Model(Schema.selfieUpload, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('complete'),
+  UserController.updateSelfieImage
+);
 
 
 export default router;

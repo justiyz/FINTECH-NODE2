@@ -112,7 +112,8 @@ export const updateSelfieImage = async(req, res, next) => {
     if (existingToken) {
       return updateSelfieImage(req, res, next);
     }
-    const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, body.image_url.trim(), token ]);
+    const image_url = body.image_url ? body.image_url.trim() : body.data?.selfie?.data?.selfieUrl.trim();
+    const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, image_url, token ]);
     logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's selfie image and email verification token to the database
     updateSelfieImage.controllers.user.js`);
     await MailService('Welcome to SeedFi 🎉', 'verifyEmail', {otp: token, ...user});

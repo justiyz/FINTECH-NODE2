@@ -58,6 +58,7 @@ export const INITIATE_LOAN_REPAYMENT_CONTROLLER = 'CronController::initiateLoanR
 export const NON_PERFORMING_LOANS_CONTROLLER = 'CronController::nonPerformingLoans';
 export const NON_PERFORMING_CLUSTER_LOANS_CONTROLLER = 'CronController::nonPerformingClusterLoans';
 export const PAYSTACK_WEBHOOK_VERIFICATION_MIDDLEWARE = 'PaymentMiddleware::paystackWebhookVerification';
+export const DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE = 'UserMiddleware::dojahWebhookVerification';
 export const EVENT_RECORD_ALREADY_CREATED = 'ShopController::createEventRecord';
 export const YOU_VERIFY_WEBHOOK_VERIFICATION_MIDDLEWARE = 'UserMiddleware::youVerifyWebhookVerification';
 export const VERIFY_USER_AND_ADDRESS_RESPONSE_MIDDLEWARE = 'UserMiddleware::verifyUserAndAddressResponse';
