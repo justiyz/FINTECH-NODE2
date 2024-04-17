@@ -124,19 +124,19 @@ export const isUploadedImageSelfie = (type = '') => async(req, res, next) => {
 
 export const dojahWebhookVerification = async(req, res, next) => {
   try {
-    const secret = config.SEEDFI_DOJAH_SIGNATURE;
-    // const hash = crypto.createHmac('sha256', secret).update(JSON.stringify(req.body)).digest('hex');
-    // if (!hash) {
-    //   logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that no hash is returned in
-    //   the headers of the response paystackWebhookVerification.middlewares.payment.js`);
-    //   return ApiResponse.error(res, enums.NO_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.PAYSTACK_WEBHOOK_VERIFICATION_MIDDLEWARE);
-    // }
+    const secret = config.SEEDFI_DOJAH_SECRET_KEY;
+    const hash = crypto.createHmac('sha256', secret).update(JSON.stringify(req.body)).digest('hex');
+    if (!hash) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that no hash is returned in
+      the headers of the response paystackWebhookVerification.middlewares.payment.js`);
+      return ApiResponse.error(res, enums.NO_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.PAYSTACK_WEBHOOK_VERIFICATION_MIDDLEWARE);
+    }
 
     if (config.SEEDFI_NODE_ENV === 'test') {
       return next();
     }
 
-    if (secret !== req.headers['x-dojah-signature']) {
+    if (hash !== req.headers['x-dojah-signature']) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the Dojah authorization token is invalid dojahWebhookVerification.middlewares.user.js`);
       return ApiResponse.error(res, enums.INVALID_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE);
     }
@@ -149,6 +149,7 @@ export const dojahWebhookVerification = async(req, res, next) => {
       );
       if(signed_up_user !== null) {
         req.user = signed_up_user;
+        res.send(200);
       } else {
         logger.error(`${enums.CURRENT_TIME_STAMP}, Error: user not found dojahWebhookVerification.middlewares.user.js`);
 
