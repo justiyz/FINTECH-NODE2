@@ -108,16 +108,16 @@ export default {
       WHERE admin_role_permissions.role_type = $1
       AND admin_roles.status = 'active'`,
 
-  fetchAdminPermissions: `
+  fetchMerchantAdminPermissions: `
       SELECT
-        admin_user_permissions.admin_id,
-        admin_resources.name,
-        admin_user_permissions.resource_id,
-        string_to_array(admin_user_permissions.permissions, ',') AS permissions
-      FROM admin_user_permissions
-      LEFT JOIN admin_resources
-      ON admin_user_permissions.resource_id = admin_resources.resource_id
-      WHERE admin_user_permissions.admin_id = $1`,
+      merchant_admin_permissions.merchant_admin_id,
+      merchant_admin_resources.name,
+      merchant_admin_permissions.resource_id,
+      string_to_array(merchant_admin_permissions.permissions, ',') AS permissions
+      FROM merchant_admin_permissions
+      LEFT JOIN merchant_admin_resources
+      ON merchant_admin_permissions.resource_id = merchant_admin_resources.resource_id
+      WHERE merchant_admin_permissions.merchant_admin_id = $1`,
 
   adminForgotPassword: `
     UPDATE admins

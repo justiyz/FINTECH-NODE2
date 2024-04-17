@@ -16,21 +16,63 @@ import { fetchBanks, resolveAccount, createTransferRecipient } from '../services
 import { userCreditScoreBreakdown } from '../services/services.seedfiCreditscoring';
 import * as Helpers from '../../../users/lib/utils/lib.util.helpers';
 import authQueries from '../../../users/api/queries/queries.auth';
+import userModuleQueries from '../../../users/api/queries/queries.user';
+
 import queriesAdmin from '../queries/queries.admin';
 import MailService from '../services/services.email';
-import {
-  CREATE_MERCHANT_PASSWORD_CONTROLLER,
-  ONBOARD_MERCHANT_ADMIN_CONTROLLER, SET_MERCHANT_PASSWORD_CONTROLLER,
-  UPDATE_MERCHANT_ADMIN_PASSWORD
-} from '../../../users/lib/enums/lib.enum.labels';
-import {
-  MERCHANT_ADMIN_PASSWORD_UPDATE_FAILED,
-  MERCHANT_ADMIN_PASSWORD_UPDATE_SUCCESSFUL, MERCHANT_ONBOARDED_SUCCESSFULLY
-} from '../../../users/lib/enums/lib.enum.messages';
+import * as zeehService from '../../../../src/users/api/services/services.zeeh';
+
 import adminQueries from '../queries/queries.admin';
 import * as UserHelpers from '../../../users/lib/utils/lib.util.helpers';
+import moment from "moment-timezone";
+import userQueries from "../queries/queries.user";
 
 const { SEEDFI_NODE_ENV } = config;
+
+export const verifyBvnInfo = async (req, res, next) => {
+  try {
+    const {
+      body: { bvn, first_name, last_name, date_of_birth, gender },
+    } = req;
+    // run a query, if result exist, return result
+    // query the database if the data exists
+    // await processAnyData(userQueries.queryBvnInformation, [date_of_birth]);
+    const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+    if (!data.success) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed verifyBvnOtp.controller.user.js`);
+      return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
+    }
+    const parsedDate = moment(data.data.dateOfBirth, 'DD-MMM-YYYY');
+    let result_date = parsedDate.format('YYYY-MM-DD');
+    const bvnHash = encodeURIComponent(await Hash.encrypt(bvn.trim()));
+    if (
+      data.data.firstName.toLowerCase().trim() === first_name.trim() &&
+      data.data.lastName.toLowerCase().trim() === last_name.trim() &&
+      data.data.bvn.toLowerCase().trim() === bvn.trim() &&
+      data.data.gender.toLowerCase().trim() === gender.trim() &&
+      result_date === date_of_birth
+    ) {
+      // save information
+      let data_phone_number = data.data.phone_number1 ? data.data.phone_number1 : data.data.phoneNumber1;
+      let data_email_address = data.data.email ? data.data.email: '';
+      await processOneOrNoneData(userModuleQueries.saveBvnInformation, [
+        data.data.firstName.toLowerCase(),
+        data.data.lastName.toLowerCase(),
+        bvnHash,
+        data.data.gender.toLowerCase(),
+        result_date,
+        data_phone_number,
+        data_email_address,
+      ]);
+      return ApiResponse.success(res, enums.SUCCESSFUL_VERIFICATION, enums.HTTP_CREATED, []);
+    } else {
+      return ApiResponse.error(res, enums.BVN_INFORMATION_UNAVAILABLE, enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
+    }
+  } catch (error) {
+    console.log("Error: ", error)
+    return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_INTERNAL_SERVER_ERROR, enums.VERIFY_BVN_OTP_CONTROLLER);
+  }
+};
 
 /**
  * Create Merchant Admin Record

@@ -20,10 +20,10 @@ const { SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN, SEEDFI_RECOVA_BEARER_TOKEN } = con
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const generateReferralCode = async(req, res, next) => {
+export const generateReferralCode = async (req, res, next) => {
   try {
     const referralCode = await Helpers.generateReferralCode(5);
-    const [ existingReferralCode ] = await processAnyData(authQueries.checkIfExistingReferralCode, [ referralCode ]);
+    const [existingReferralCode] = await processAnyData(authQueries.checkIfExistingReferralCode, [referralCode]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if referral code previously existed in the db generateReferralCode.middlewares.auth.js`);
     if (existingReferralCode) {
       return generateReferralCode(req, res, next);
@@ -39,7 +39,6 @@ export const generateReferralCode = async(req, res, next) => {
   }
 };
 
-
 /**
  * check if signup referral code exists
  * @param {Request} req - The request from the endpoint.
@@ -48,7 +47,7 @@ export const generateReferralCode = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfReferralCodeExists = async(req, res, next) => {
+export const checkIfReferralCodeExists = async (req, res, next) => {
   try {
     const { body } = req;
     if (!body.referral_code) {
@@ -56,7 +55,7 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
       return next();
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: referral code is part of signup payload middlewares.auth.js`);
-    const [ referringUserDetails ] = await processAnyData(authQueries.checkIfExistingReferralCode, [ body.referral_code.trim().toUpperCase() ]);
+    const [referringUserDetails] = await processAnyData(authQueries.checkIfExistingReferralCode, [body.referral_code.trim().toUpperCase()]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if referral code previously existed in the db checkIfReferralCodeExists.middlewares.auth.js`);
     if (!referringUserDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully confirms that referral code does not belongs to an existing user
@@ -80,11 +79,12 @@ export const checkIfReferralCodeExists = async(req, res, next) => {
  * @returns {object} - Returns a response
  * @memberof AuthMiddleware
  */
-const recordUserInvalidOtpInputCount = async(res, user) => {
-  await processOneOrNoneData(authQueries.updateUserInvalidOtpCount, [ user.user_id ]);
-  if (user.invalid_verification_token_count >= 4) { // at 5th attempt or greater perform action
+const recordUserInvalidOtpInputCount = async (res, user) => {
+  await processOneOrNoneData(authQueries.updateUserInvalidOtpCount, [user.user_id]);
+  if (user.invalid_verification_token_count >= 4) {
+    // at 5th attempt or greater perform action
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has entered invalid otp more than required limit recordUserInvalidOtpInputCount.middlewares.auth.js`);
-    await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
+    await processOneOrNoneData(authQueries.deactivateUserAccount, [user.user_id]);
     return ApiResponse.error(res, enums.ACCOUNT_DEACTIVATED, enums.HTTP_UNAUTHORIZED, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
   }
 };
@@ -97,16 +97,19 @@ const recordUserInvalidOtpInputCount = async(res, user) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const verifyVerificationToken = async(req, res, next) => {
+export const verifyVerificationToken = async (req, res, next) => {
   try {
-    const { body: { otp, phone_number, email } } = req;
-    const [ user ] = !email ? await processAnyData(userQueries.getUserByPhoneNumber, [ phone_number.trim() ]) :
-      await processAnyData(userQueries.getUserByEmail, [ email.trim().toLowerCase() ]);
+    const {
+      body: { otp, phone_number, email },
+    } = req;
+    const [user] = !email
+      ? await processAnyData(userQueries.getUserByPhoneNumber, [phone_number.trim()])
+      : await processAnyData(userQueries.getUserByEmail, [email.trim().toLowerCase()]);
     if (!user) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.ACCOUNT_NOT_EXIST('User'), enums.HTTP_UNAUTHORIZED, enums.VERIFY_VERIFICATION_TOKEN_MIDDLEWARE);
     }
-    const [ otpUser ] = await processAnyData(authQueries.getUserByVerificationTokenAndUniqueField, [ otp, user.user_id ]);
+    const [otpUser] = await processAnyData(authQueries.getUserByVerificationTokenAndUniqueField, [otp, user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if correct OTP is sent verifyVerificationToken.middlewares.auth.js`);
     if (!otpUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: OTP is invalid verifyVerificationToken.middlewares.auth.js`);
@@ -143,7 +146,7 @@ export const verifyVerificationToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfUserAccountNotVerified = async(req, res, next) => {
+export const checkIfUserAccountNotVerified = async (req, res, next) => {
   try {
     const { user } = req;
     if (!user.is_verified_phone_number && user.referral_code === null) {
@@ -167,7 +170,7 @@ export const checkIfUserAccountNotVerified = async(req, res, next) => {
  * @returns { JSON } - A JSON response with the validated user's details
  * @memberof AuthMiddleware
  */
-export const validateAuthToken = async(req, res, next) => {
+export const validateAuthToken = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
@@ -193,16 +196,16 @@ export const validateAuthToken = async(req, res, next) => {
       error message validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, decoded.message, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
-    const [ user ] = await processAnyData(userQueries.getUserByUserId, [ decoded.user_id ]);
-    const [ employmentDetails ] = await processAnyData(userQueries.fetchEmploymentDetails, [ user.user_id ]);
-    const [ addressDetails ] = await processAnyData(userQueries.fetchUserAddressDetails, [ user.user_id ]);
+    const [user] = await processAnyData(userQueries.getUserByUserId, [decoded.user_id]);
+    const [employmentDetails] = await processAnyData(userQueries.fetchEmploymentDetails, [user.user_id]);
+    const [addressDetails] = await processAnyData(userQueries.fetchUserAddressDetails, [user.user_id]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully fetched the users details using the decoded id validateAuthToken.middlewares.auth.js`);
     if (!user) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded that the user with the decoded id does not exist in the DB validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_TOKEN, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
     }
     if (user && (user.is_deleted || user.status === 'suspended' || user.status === 'deactivated')) {
-      const userStatus = user.is_deleted ? 'deleted, kindly contact support team'  : `${user.status}, kindly contact support team`;
+      const userStatus = user.is_deleted ? 'deleted, kindly contact support team' : `${user.status}, kindly contact support team`;
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${decoded.user_id}:::Info: successfully confirms that user account is ${userStatus} in the database
       validateAuthToken.middlewares.auth.js`);
       return ApiResponse.error(res, enums.USER_ACCOUNT_STATUS(userStatus), enums.HTTP_UNAUTHORIZED, enums.VALIDATE_AUTH_TOKEN_MIDDLEWARE);
@@ -224,57 +227,61 @@ export const validateAuthToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const isCompletedKyc = (type = '') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (user.is_completed_kyc && type === 'complete') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously completed their kyc
+export const isCompletedKyc =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (user.is_completed_kyc && type === 'complete') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has been previously completed their kyc
       isCompletedKyc.middlewares.auth.js`);
-      userActivityTracking(user.user_id, 7, 'fail');
-      return ApiResponse.error(res, enums.KYC_PREVIOUSLY_COMPLETED, enums.HTTP_FORBIDDEN, enums.IS_COMPLETED_KYC_MIDDLEWARE);
+        userActivityTracking(user.user_id, 7, 'fail');
+        return ApiResponse.error(res, enums.KYC_PREVIOUSLY_COMPLETED, enums.HTTP_FORBIDDEN, enums.IS_COMPLETED_KYC_MIDDLEWARE);
+      }
+      if (!user.is_completed_kyc && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not completed their kyc isCompletedKyc.middlewares.auth.js`);
+        return ApiResponse.error(res, enums.KYC_NOT_PREVIOUSLY_COMPLETED, enums.HTTP_FORBIDDEN, enums.IS_COMPLETED_KYC_MIDDLEWARE);
+      }
+      return next();
+    } catch (error) {
+      userActivityTracking(req.user.user_id, 7, 'fail');
+      error.label = enums.IS_COMPLETED_KYC_MIDDLEWARE;
+      logger.error(`checking if user has completed their kyc failed::${enums.IS_COMPLETED_KYC_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    if (!user.is_completed_kyc && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not completed their kyc isCompletedKyc.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.KYC_NOT_PREVIOUSLY_COMPLETED, enums.HTTP_FORBIDDEN, enums.IS_COMPLETED_KYC_MIDDLEWARE);
-    }
-    return next();
-  } catch (error) {
-    userActivityTracking(req.user.user_id, 7, 'fail');
-    error.label = enums.IS_COMPLETED_KYC_MIDDLEWARE;
-    logger.error(`checking if user has completed their kyc failed::${enums.IS_COMPLETED_KYC_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * check if user has previously created password
-*  @param {String} type - The type request from the endpoint.
+ *  @param {String} type - The type request from the endpoint.
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const isPasswordCreated = (type = '') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (!user.is_created_password && type === 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user have not created password in the DB. isPasswordCreated.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.USER_CREDENTIALS('password'), enums.HTTP_BAD_REQUEST, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
-    }
-    if (user.is_created_password && type === 'validate') {
-      userActivityTracking(user.user_id, 7, 'fail');
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password
+export const isPasswordCreated =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (!user.is_created_password && type === 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user have not created password in the DB. isPasswordCreated.middlewares.auth.js`);
+        return ApiResponse.error(res, enums.USER_CREDENTIALS('password'), enums.HTTP_BAD_REQUEST, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
+      }
+      if (user.is_created_password && type === 'validate') {
+        userActivityTracking(user.user_id, 7, 'fail');
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created password
       isPasswordCreated.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created password
+        return ApiResponse.error(res, enums.ALREADY_CREATED('password'), enums.HTTP_FORBIDDEN, enums.IS_PASSWORD_CREATED_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created password
     isPasswordCreated.middlewares.auth.js`);
-    return next();
-  } catch (error) {
-    userActivityTracking(req.user.user_id, 7, 'fail');
-    error.label = enums.IS_PASSWORD_CREATED_MIDDLEWARE;
-    logger.error(`checking if user already created password failed::${enums.IS_PASSWORD_CREATED_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+      return next();
+    } catch (error) {
+      userActivityTracking(req.user.user_id, 7, 'fail');
+      error.label = enums.IS_PASSWORD_CREATED_MIDDLEWARE;
+      logger.error(`checking if user already created password failed::${enums.IS_PASSWORD_CREATED_MIDDLEWARE}`, error.message);
+      return next(error);
+    }
+  };
 
 /**
  * check if email being sent previously exists in the DB
@@ -284,10 +291,10 @@ export const isPasswordCreated = (type = '') => async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfEmailAlreadyExist = async(req, res, next) => {
+export const checkIfEmailAlreadyExist = async (req, res, next) => {
   try {
     const { user, body } = req;
-    const [ emailUser ] = await processAnyData(userQueries.getUserByEmail, [ body.email.trim().toLowerCase() ]);
+    const [emailUser] = await processAnyData(userQueries.getUserByEmail, [body.email.trim().toLowerCase()]);
     if (!emailUser) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user's email is not existing in
       the database checkIfEmailAlreadyExist.middlewares.auth.js`);
@@ -313,12 +320,13 @@ export const checkIfEmailAlreadyExist = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const comparePassword = async(req, res, next) => {
+export const comparePassword = async (req, res, next) => {
   try {
     const {
-      body: { password }, user
+      body: { password },
+      user,
     } = req;
-    const [ userPasswordDetails ] = await processAnyData(authQueries.fetchUserPassword, [ user.user_id ]);
+    const [userPasswordDetails] = await processAnyData(authQueries.fetchUserPassword, [user.user_id]);
     const passwordValid = await Hash.compareData(password, userPasswordDetails.password);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared passwords response comparePassword.middlewares.auth.js`);
     if (passwordValid) {
@@ -342,9 +350,12 @@ export const comparePassword = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const compareDeviceToken = async(req, res, next) => {
+export const compareDeviceToken = async (req, res, next) => {
   try {
-    const { user, query: { type } } = req;
+    const {
+      user,
+      query: { type },
+    } = req;
     if (type === 'web') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user login is being processed from the web compareDeviceToken.middlewares.auth.js`);
       return next();
@@ -361,22 +372,23 @@ export const compareDeviceToken = async(req, res, next) => {
     }
     if (req.body.device_token.trim() !== user.device_token) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user device token does not match compareDeviceToken.middlewares.auth.js`);
-      if (user && (user.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
+      if (user && user.verification_token_request_count >= 4) {
+        // at 5th attempt or greater perform action
         logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it
         checkOtpVerificationRequestCount.middlewares.auth.js`);
-        await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
+        await processOneOrNoneData(authQueries.deactivateUserAccount, [user.user_id]);
         return ApiResponse.error(res, enums.USER_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.COMPARE_DEVICE_TOKEN_MIDDLEWARE);
       }
-      const otp =  Helpers.generateOtp();
+      const otp = Helpers.generateOtp();
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random OTP generated compareDeviceToken.middlewares.auth.jss`);
-      const [ existingOtp ] = await processAnyData(authQueries.getUserByVerificationToken, [ otp ]);
+      const [existingOtp] = await processAnyData(authQueries.getUserByVerificationToken, [otp]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database compareDeviceToken.middlewares.auth.js`);
       if (existingOtp) {
         return compareDeviceToken(req, res, next);
       }
       const expireAt = dayjs().add(10, 'minutes');
       const expirationTime = dayjs(expireAt);
-      await processAnyData(authQueries.updateVerificationToken, [ user.phone_number, otp, expireAt, (Number(user.verification_token_request_count) + 1) ]);
+      await processAnyData(authQueries.updateVerificationToken, [user.phone_number, otp, expireAt, Number(user.verification_token_request_count) + 1]);
       const data = { otp, otpDuration: `${10} minutes` };
       await sendSms(user.phone_number, verifyAccountOTPSms(data));
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: New token successfully sent to user registered phone number compareDeviceToken.middlewares.auth.js`);
@@ -402,7 +414,7 @@ export const compareDeviceToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const validateForgotPasswordAndPinToken = async(req, res, next) => {
+export const validateForgotPasswordAndPinToken = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
@@ -431,7 +443,7 @@ export const validateForgotPasswordAndPinToken = async(req, res, next) => {
     if (decoded.email) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decoded authentication token sent using the authentication secret
       validateForgotPasswordAndPinToken.middlewares.auth.js`);
-      const [ user ] = await processAnyData(userQueries.getUserByEmail, [ decoded.email ]);
+      const [user] = await processAnyData(userQueries.getUserByEmail, [decoded.email]);
       req.user = user;
       return next();
     }
@@ -451,28 +463,32 @@ export const validateForgotPasswordAndPinToken = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfNewCredentialsSameAsOld = (type = '') => async(req, res, next) => {
-  try {
-    const {
-      body: { newPassword, newPin }, user } = req;
-    const [ userPasswordDetails ] = type == 'pin' ?  await processAnyData(authQueries.fetchUserPin, [ user.user_id ]) :
-      await processAnyData(authQueries.fetchUserPassword, [ user.user_id ]);
-    const isValidCredentials = type == 'pin' ? Hash.compareData(newPin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
-    if (isValidCredentials) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+export const checkIfNewCredentialsSameAsOld =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const {
+        body: { newPassword, newPin },
+        user,
+      } = req;
+      const [userPasswordDetails] =
+        type == 'pin' ? await processAnyData(authQueries.fetchUserPin, [user.user_id]) : await processAnyData(authQueries.fetchUserPassword, [user.user_id]);
+      const isValidCredentials = type == 'pin' ? Hash.compareData(newPin, userPasswordDetails.pin) : Hash.compareData(newPassword, userPasswordDetails.password);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
+      if (isValidCredentials) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that new ${type} matches with old ${type}. checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+        return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     confirms that users new ${type} pin is not the same as the currently set ${type} checkIfNewCredentialsSameAsOld.middlewares.auth.js`);
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
-    logger.error(`Checking if password/pin sent matches in the DB failed:::${enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+      return next();
+    } catch (error) {
+      error.label = enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
+      logger.error(`Checking if password/pin sent matches in the DB failed:::${enums.CHECK_IF__NEW_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
+      return next(error);
+    }
+  };
 
 /**
  * Checks if reset password/pin is same as current
@@ -483,28 +499,32 @@ export const checkIfNewCredentialsSameAsOld = (type = '') => async(req, res, nex
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkIfResetCredentialsSameAsOld = (type = '') => async(req, res, next) => {
-  try {
-    const {
-      body: { password, pin }, user } = req;
-    const [ userPasswordDetails ] = type == 'pin' ?  await processAnyData(authQueries.fetchUserPin, [ user.user_id ]) :
-      await processAnyData(authQueries.fetchUserPassword, [ user.user_id ]);
-    const isValidCredentials = type == 'pin' ? Hash.compareData(pin, userPasswordDetails.pin) : Hash.compareData(password, userPasswordDetails.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
-    if (isValidCredentials) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+export const checkIfResetCredentialsSameAsOld =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const {
+        body: { password, pin },
+        user,
+      } = req;
+      const [userPasswordDetails] =
+        type == 'pin' ? await processAnyData(authQueries.fetchUserPin, [user.user_id]) : await processAnyData(authQueries.fetchUserPassword, [user.user_id]);
+      const isValidCredentials = type == 'pin' ? Hash.compareData(pin, userPasswordDetails.pin) : Hash.compareData(password, userPasswordDetails.password);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared user response checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
+      if (isValidCredentials) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
       decoded that new ${type} matches with old ${type}. checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
+        return ApiResponse.error(res, enums.IS_VALID_CREDENTIALS(`${type}`), enums.HTTP_BAD_REQUEST, enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info:
     confirms that users new ${type} pin is not the same as the currently set ${type} checkIfResetCredentialsSameAsOld.middlewares.auth.js`);
-    return next();
-  } catch (error) {
-    error.label = enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
-    logger.error(`Checking if password/pin sent matches in the DB failed:::${enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+      return next();
+    } catch (error) {
+      error.label = enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE;
+      logger.error(`Checking if password/pin sent matches in the DB failed:::${enums.CHECK_IF__RESET_CREDENTIALS_IS_SAME_AS_OLD_MIDDLEWARE}`, error.message);
+      return next(error);
+    }
+  };
 
 /**
  * check if pin sent matches user's pin in the DB
@@ -514,11 +534,13 @@ export const checkIfResetCredentialsSameAsOld = (type = '') => async(req, res, n
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const comparePin = async(req, res, next) => {
+export const comparePin = async (req, res, next) => {
   try {
     const {
-      body: { pin }, user } = req;
-    const [ userPin ] = await processAnyData(authQueries.fetchUserPin, [ user.user_id ]);
+      body: { pin },
+      user,
+    } = req;
+    const [userPin] = await processAnyData(authQueries.fetchUserPin, [user.user_id]);
     const isPinValid = Hash.compareData(pin, userPin.pin);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared pin response comparePin.middlewares.auth.js`);
     if (isPinValid) {
@@ -543,27 +565,29 @@ export const comparePin = async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const isPinCreated = (type = '') => async(req, res, next) => {
-  try {
-    const { user } = req;
-    if (!user.is_created_pin && type == 'confirm') {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user have not created pin in the DB. isPinCreated.middlewares.auth.js`);
-      userActivityTracking(user.user_id, 11, 'fail');
-      return ApiResponse.error(res, enums.USER_CREDENTIALS('pin'), enums.HTTP_BAD_REQUEST, enums.IS_PIN_CREATED_MIDDLEWARE);
+export const isPinCreated =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { user } = req;
+      if (!user.is_created_pin && type == 'confirm') {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: decoded that user have not created pin in the DB. isPinCreated.middlewares.auth.js`);
+        userActivityTracking(user.user_id, 11, 'fail');
+        return ApiResponse.error(res, enums.USER_CREDENTIALS('pin'), enums.HTTP_BAD_REQUEST, enums.IS_PIN_CREATED_MIDDLEWARE);
+      }
+      if (user.is_created_pin && type === 'validate') {
+        userActivityTracking(req.user.user_id, 11, 'fail');
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin isPinCreated.middlewares.auth.js`);
+        return ApiResponse.error(res, enums.ALREADY_CREATED('pin'), enums.HTTP_FORBIDDEN, enums.IS_PIN_CREATED_MIDDLEWARE);
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created pin isPinCreated.middlewares.auth.js`);
+      return next();
+    } catch (error) {
+      error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
+      logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    if (user.is_created_pin && type === 'validate') {
-      userActivityTracking(req.user.user_id, 11, 'fail');
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has previously created pin isPinCreated.middlewares.auth.js`);
-      return ApiResponse.error(res, enums.ALREADY_CREATED('pin'), enums.HTTP_FORBIDDEN, enums.IS_PIN_CREATED_MIDDLEWARE);
-    }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully confirms that user has not previously created pin isPinCreated.middlewares.auth.js`);
-    return next();
-  } catch (error) {
-    error.label = enums.IS_PIN_CREATED_MIDDLEWARE;
-    logger.error(`checking if user already created pin  failed::${enums.IS_PIN_CREATED_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
+  };
 
 /**
  * validate password/pin pin in the DB
@@ -574,28 +598,28 @@ export const isPinCreated = (type = '') => async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
-  try {
-    const {
-      body, user } = req;
-    const condition = body.oldPin || body.oldPassword;
-    const [ credentials ] = type == 'pin' ? await processAnyData(authQueries.fetchUserPin, [ user.user_id ]) :
-      await processAnyData(authQueries.fetchUserPassword, [ user.user_id ]);
-    const isValidCredentials = type == 'pin' ? Hash.compareData(condition, credentials.pin) : Hash.compareData(condition, credentials.password);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
-    if (isValidCredentials) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully validate password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
-      return next();
+export const validatePasswordOrPin =
+  (type = '') =>
+  async (req, res, next) => {
+    try {
+      const { body, user } = req;
+      const condition = body.oldPin || body.oldPassword;
+      const [credentials] =
+        type == 'pin' ? await processAnyData(authQueries.fetchUserPin, [user.user_id]) : await processAnyData(authQueries.fetchUserPassword, [user.user_id]);
+      const isValidCredentials = type == 'pin' ? Hash.compareData(condition, credentials.pin) : Hash.compareData(condition, credentials.password);
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully returned compared password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
+      if (isValidCredentials) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully validate password/pin in the DB validatePasswordOrPin.middlewares.auth.js`);
+        return next();
+      }
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: password/pin does not match in the DB validatePasswordOrPin.middlewares.auth.js`);
+      return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN(`${type}`), enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
+    } catch (error) {
+      error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
+      logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
+      return next(error);
     }
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: password/pin does not match in the DB validatePasswordOrPin.middlewares.auth.js`);
-    return ApiResponse.error(res, enums.VALIDATE_PASSWORD_OR_PIN(`${type}`), enums.HTTP_BAD_REQUEST, enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE);
-  } catch (error) {
-    error.label = enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE;
-    logger.error(`validate password/pin in the DB failed:::${enums.VALIDATE_PASSWORD_OR_PIN_MIDDLEWARE}`, error.message);
-    return next(error);
-  }
-};
-
+  };
 
 /**
  * check if user OTP verification request is not getting suspicious
@@ -605,13 +629,14 @@ export const validatePasswordOrPin = (type = '') => async(req, res, next) => {
  * @returns {object} - Returns an object (error or response).
  * @memberof AuthMiddleware
  */
-export const checkOtpVerificationRequestCount = async(req, res, next) => {
+export const checkOtpVerificationRequestCount = async (req, res, next) => {
   try {
     const { user } = req;
-    if (user && (user.verification_token_request_count >= 4)) { // at 5th attempt or greater perform action
+    if (user && user.verification_token_request_count >= 4) {
+      // at 5th attempt or greater perform action
       logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user has requested for otp verification consistently without using it
       checkOtpVerificationRequestCount.middlewares.auth.js`);
-      await processOneOrNoneData(authQueries.deactivateUserAccount, [ user.user_id ]);
+      await processOneOrNoneData(authQueries.deactivateUserAccount, [user.user_id]);
       return ApiResponse.error(res, enums.USER_CANNOT_REQUEST_VERIFICATION_ANYMORE, enums.HTTP_UNAUTHORIZED, enums.CHECK_OTP_VERIFICATION_REQUEST_COUNT_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: confirms user otp verification request still within limit checkOtpVerificationRequestCount.middlewares.auth.js`);
@@ -623,10 +648,10 @@ export const checkOtpVerificationRequestCount = async(req, res, next) => {
   }
 };
 
-export const validateInfoCall = async(req, res, next) => {
+export const validateInfoCall = async (req, res, next) => {
   try {
-    const valString = req.headers.x_token_check;
-    if (valString != SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
+    const valString = req.headers['x_token_check'];
+    if (valString !== SEEDFI_UNDERWRITING_APP_ACCESS_TOKEN) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Error: Failed to validate the authorization token
       validateInfoCall.admin.middlewares.auth.js`);
       return ApiResponse.error(res, enums.INVALID_PASS_STRING, enums.HTTP_UNAUTHORIZED, enums.VALIDATE_ADMIN_AUTH_TOKEN_MIDDLEWARE);
@@ -639,7 +664,7 @@ export const validateInfoCall = async(req, res, next) => {
   }
 };
 
-export const validateRecovaRequest = async(req, res, next) => {
+export const validateRecovaRequest = async (req, res, next) => {
   try {
     const token = req.headers.authorization;
     if (!token || token != SEEDFI_RECOVA_BEARER_TOKEN) {

@@ -295,7 +295,7 @@ describe('Admin', () => {
           expect(res.statusCode).to.equal(enums.HTTP_FORBIDDEN);
           expect(res.body).to.have.property('message');
           expect(res.body).to.have.property('status');
-          expect(res.body.message).to.equal('Admin dose not have access to role management resource.');
+          expect(res.body.message).to.equal('Admin does not have access to role management resource.');
           expect(res.body.status).to.equal(enums.ERROR_STATUS);
           done();
         });

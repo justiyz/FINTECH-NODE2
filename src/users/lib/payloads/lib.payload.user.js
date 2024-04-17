@@ -89,6 +89,36 @@ export default {
     body.phone_number,
     body.email,
     body.kind_of_relationship
-  ]
+  ],
+
+  updateBankRecord: (body, bank) => [
+    bank.record_id,
+    body.id || bank.id,
+    body.name || bank.name,
+    body.slug || bank.slug,
+    body.code || bank.code,
+    body.longcode || bank.longcode,
+    body.gateway || bank.gateway,
+    body.pay_with_bank || bank.pay_with_bank,
+    body.active || bank.active,
+    body.country || bank.country,
+    body.currency || bank.currency,
+    body.type || bank.type
+  ],
+
+  createBankRecord: (body) => [
+    body.id,
+    body.name,
+    body.slug,
+    body.code,
+    body.longcode,
+    body.gateway,
+    body.pay_with_bank,
+    body.active,
+    body.country,
+    body.currency,
+    body.type
+  ],
+
 };
 
