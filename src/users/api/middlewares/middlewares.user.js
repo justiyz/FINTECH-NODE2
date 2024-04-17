@@ -15,9 +15,8 @@ import * as S3 from '../../api/services/services.s3';
 import * as Hash from '../../lib/utils/lib.util.hash';
 import config from '../../config';
 import UserPayload from '../../lib/payloads/lib.payload.user';
-import * as zeehService from '../services/services.zeeh';
-import { FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED } from '../../lib/enums/lib.enum.messages';
-
+import * as zeehService from '../services/services.zeeh'; 
+import {FAILED_TO_PROCESS_EMAIL_VERIFICATION, USER_BVN_BLACKLISTED} from '../../lib/enums/lib.enum.messages';
 const { SEEDFI_NODE_ENV } = config;
 
 /**
@@ -132,6 +131,52 @@ export const isUploadedImageSelfie =
       return next(error);
     }
   };
+
+export const dojahWebhookVerification = async(req, res, next) => {
+  try {
+    const secret = config.SEEDFI_DOJAH_SIGNATURE;
+    // const hash = crypto.createHmac('sha256', secret).update(JSON.stringify(req.body)).digest('hex');
+    // if (!hash) {
+    //   logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that no hash is returned in
+    //   the headers of the response paystackWebhookVerification.middlewares.payment.js`);
+    //   return ApiResponse.error(res, enums.NO_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.PAYSTACK_WEBHOOK_VERIFICATION_MIDDLEWARE);
+    // }
+
+    if (config.SEEDFI_NODE_ENV === 'test') {
+      return next();
+    }
+
+    if (secret !== req.headers['x-dojah-signature']) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that the Dojah authorization token is invalid dojahWebhookVerification.middlewares.user.js`);
+      return ApiResponse.error(res, enums.INVALID_AUTHORIZATION, enums.HTTP_FORBIDDEN, enums.DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE);
+    }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully decodes that Dojah authorization token is a valid one from dojahWebhookVerification.middlewares.user.js`);
+
+    try {
+      const signed_up_user = await processOneOrNoneData(
+        userQueries.getUserByEmail,
+        [ req.body.data.email.data['email'].trim().toLowerCase() ]
+      );
+      if(signed_up_user !== null) {
+        req.user = signed_up_user;
+      } else {
+        logger.error(`${enums.CURRENT_TIME_STAMP}, Error: user not found dojahWebhookVerification.middlewares.user.js`);
+
+        return ApiResponse.error(res, `User with email ${req.body.data.email.data['email'].trim().toLowerCase()} not found`, enums.HTTP_UNAUTHORIZED);
+      }
+    } catch (error) {
+      error.label = enums.DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE;
+      logger.error(`verification of dojah webhook hash failed:::${enums.DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE}`, error.message);
+      return next(error);
+    }
+
+    return next();
+  } catch (error) {
+    error.label = enums.DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE;
+    logger.error(`verification of dojah webhook hash failed:::${enums.DOJAH_WEBHOOK_VERIFICATION_MIDDLEWARE}`, error.message);
+    return next(error);
+  }
+};
 
 /**
  * check if user bvn previously verified

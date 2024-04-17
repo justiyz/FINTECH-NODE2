@@ -4,7 +4,7 @@ import Schema from '../../lib/schemas/lib.schema.user';
 import * as AuthMiddleware from '../middlewares/middlewares.auth';
 import * as UserMiddleware from '../middlewares/middlewares.user';
 import * as UserController from '../controllers/controllers.user';
-const { SEEDFI_NODE_ENV } = config;
+const { SEEDFI_NODE_ENV } = config; 
 
 import { availableVerificationMeans, fetchLocalBanks, fetchLocalSingleBanks, updateBankRecord } from '../controllers/controllers.user';
 import config from '../../config';
@@ -274,6 +274,15 @@ router.post('/verify-bvn-otp-beta', AuthMiddleware.validateInfoCall, Model(Schem
 
 router.post('/validate-user-bvn-otp', AuthMiddleware.validateAuthToken, Model(Schema.verifyBvnOtp, 'payload'), UserController.verifyBvnOtp);
 
+router.post(
+  '/dojah-upload-selfie',
+  UserMiddleware.dojahWebhookVerification,
+  Model(Schema.selfieUploadNew, 'payload'),
+  AuthMiddleware.isCompletedKyc('confirm'),
+  UserMiddleware.isUploadedImageSelfie('complete'),
+  UserController.updateSelfieImage
+);
+ 
 router.get('/version', AuthMiddleware.validateAuthToken, UserController.getVersionNumber);
 
 export default router;

@@ -108,9 +108,10 @@ export const updateSelfieImage = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if OTP is existing in the database updateSelfieImage.controllers.user.j`);
     if (existingToken) {
       return updateSelfieImage(req, res, next);
-    }
-    const [updateUserSelfie] = await processAnyData(userQueries.updateUserSelfieImage, [user.user_id, body.image_url.trim(), token]);
-    logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's selfie image and email verification token to the database
+    } 
+    const image_url = body.image_url ? body.image_url.trim() : body.data?.selfie?.data?.selfieUrl.trim();
+    const [ updateUserSelfie ] = await processAnyData(userQueries.updateUserSelfieImage, [ user.user_id, image_url, token ]);
+    logger.info(`${ enums.CURRENT_TIME_STAMP }, ${ user.user_id }:::Info: successfully updated user's selfie image and email verification token to the database 
     updateSelfieImage.controllers.user.js`);
     await MailService('Welcome to SeedFi 🎉', 'verifyEmail', { otp: token, ...user });
     userActivityTracking(user.user_id, 17, 'success');
