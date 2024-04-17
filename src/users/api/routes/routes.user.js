@@ -341,7 +341,7 @@ router.get(
 router.post(
   '/dojah-upload-selfie',
   UserMiddleware.dojahWebhookVerification,
-  Model(Schema.selfieUpload, 'payload'),
+  Model(Schema.selfieUploadNew, 'payload'),
   AuthMiddleware.isCompletedKyc('confirm'),
   UserMiddleware.isUploadedImageSelfie('complete'),
   UserController.updateSelfieImage

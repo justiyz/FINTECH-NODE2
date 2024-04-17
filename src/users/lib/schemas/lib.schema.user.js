@@ -9,6 +9,10 @@ const updateRefreshToken = Joi.object().keys({
 });
 
 const selfieUpload = Joi.object().keys({
+  image_url: Joi.string().required()
+});
+
+const selfieUploadNew = Joi.object().keys({
   metadata: Joi.object().required(),
   data: Joi.object().required(),
   message: Joi.string().required(),
