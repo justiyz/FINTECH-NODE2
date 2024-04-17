@@ -219,5 +219,6 @@ export default  {
   idDocumentVerification,
   sendBvnOtp,
   verifyBvnOtp,
-  verifyBVNInformation
+  verifyBVNInformation,
+  selfieUploadNew
 };
