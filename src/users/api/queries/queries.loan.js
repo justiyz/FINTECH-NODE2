@@ -266,7 +266,12 @@ export default {
 
   deleteRecentlyCreatedLoanRepaymentScheduleForMandate: `
     DELETE FROM pre_disbursement_loan_payment_schedules
-    WHERE loan_id = $1 AND created_at > NOW() - INTERVAL '1 minute';
+    WHERE loan_id = $1 AND created_at > NOW() - INTERVAL '10 minute';
+  `,
+
+  deleteLoanRepaymentScheduleForMandate: `
+  DELETE FROM pre_disbursement_loan_payment_schedules
+  WHERE loan_id = $1;
   `,
 
   fetchLoanNextRepaymentDetails: `
