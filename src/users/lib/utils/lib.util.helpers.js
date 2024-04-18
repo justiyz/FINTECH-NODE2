@@ -8,9 +8,8 @@ import * as S3 from '../../api/services/services.s3';
 import config from '../../config';
 import * as Hash from '../../../users/lib/utils/lib.util.hash';
 
-
 export const generateOtp = () => Crypto.randomInt(0, 1000000).toString().padStart(6, '0');
-export const generateReferralCode = (size) => {
+export const generateReferralCode = size => {
   try {
     return Crypto.randomBytes(size).toString('hex').toUpperCase();
   } catch (error) {
@@ -18,7 +17,7 @@ export const generateReferralCode = (size) => {
   }
 };
 
-export const generatePassword = (length) => {
+export const generatePassword = length => {
   // Define characters allowed in the password
   // const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()+{}|:<>?-=[]';
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -33,10 +32,9 @@ export const generatePassword = (length) => {
   return password;
 };
 
-
 export const generateElevenDigits = () => Crypto.randomInt(0, 10000000000).toString().padStart(11, '22');
 
-export const generateLoanRepaymentScheduleForShop = async(existingLoanApplication, user_id, activationCharge, monthly_installment) => {
+export const generateLoanRepaymentScheduleForShop = async (existingLoanApplication, user_id, activationCharge, monthly_installment) => {
   let activationChargePlusCharges = parseFloat(activationCharge);
   let repaymentOrder = 1;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested) - activationCharge;
@@ -48,12 +46,12 @@ export const generateLoanRepaymentScheduleForShop = async(existingLoanApplicatio
       repayment_order: repaymentOrder,
       principal_payment: parseFloat(parseFloat(activationCharge).toFixed(2)),
       interest_payment: 0,
-      fees: 100.00,
+      fees: 100.0,
       pre_payment_outstanding_amount: immediateOutstanding, // parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       total_payment_amount: activationChargePlusCharges, // parseFloat(activationCharge + 100).toFixed(2),
       post_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(2)),
-      proposed_payment_date: dayjs().format('YYYY-MM-DD')
-    }
+      proposed_payment_date: dayjs().format('YYYY-MM-DD'),
+    },
   ];
   let prePaymentOutstandingAmount = immediateOutstanding - activationCharge;
   let postPaymentOutstandingAmount = prePaymentOutstandingAmount - monthly_installment;
@@ -71,17 +69,17 @@ export const generateLoanRepaymentScheduleForShop = async(existingLoanApplicatio
       pre_payment_outstanding_amount: parseFloat(prePaymentOutstandingAmount.toFixed(2)), // parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       total_payment_amount: parseFloat(parseFloat(monthly_installment).toFixed(2)),
       post_payment_outstanding_amount: parseFloat(postPaymentOutstandingAmount.toFixed(2)), // parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(repaymentOrderCounter, 'month').format('YYYY-MM-DD')  // dayjs().add((additionalMonth * (i + 1)) * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
+      proposed_payment_date: dayjs().add(repaymentOrderCounter, 'month').format('YYYY-MM-DD'), // dayjs().add((additionalMonth * (i + 1)) * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
     };
     prePaymentOutstandingAmount = postPaymentOutstandingAmount;
     postPaymentOutstandingAmount = postPaymentOutstandingAmount - monthly_installment;
     repaymentArray.push(nextRepaymentDetails);
   }
-  await Promise.all([ repaymentArray ]);
+  await Promise.all([repaymentArray]);
   return repaymentArray;
 };
 
-export const generateLoanRepaymentSchedule = async(existingLoanApplication, user_id) => {
+export const generateLoanRepaymentSchedule = async (existingLoanApplication, user_id) => {
   // const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
   // let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   let totalFee = 0;
@@ -89,7 +87,7 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
   let monthlyRepayment = parseFloat(existingLoanApplication.monthly_repayment);
   let monthlyInterest = parseFloat(existingLoanApplication.monthly_interest);
-  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(preOutstandingLoanAmount)));
+  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(preOutstandingLoanAmount));
   let firstPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(firstRepaymentInterest));
   let firstRepaymentDue = parseFloat(parseFloat(firstPrincipalPayment) + parseFloat(firstRepaymentInterest) + parseFloat(totalFee));
   let postOutstandingLoanAmount = parseFloat(parseFloat(preOutstandingLoanAmount) - parseFloat(firstPrincipalPayment));
@@ -104,14 +102,13 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
       total_payment_amount: parseFloat(parseFloat(firstRepaymentDue).toFixed(2)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD')
-    }
+      proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD'),
+    },
   ];
-
 
   for (let i = 0; i < Number(existingLoanApplication.loan_tenor_in_months - 1); i++) {
     let repaymentOrder = 1 + i + 1;
-    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(postOutstandingLoanAmount)));
+    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(postOutstandingLoanAmount));
     let nextPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(nextInterestPayment));
     let nextTotalPaymentAmount = parseFloat(parseFloat(nextPrincipalPayment) + parseFloat(nextInterestPayment) + parseFloat(subsequentFee));
     preOutstandingLoanAmount = parseFloat(postOutstandingLoanAmount);
@@ -126,22 +123,24 @@ export const generateLoanRepaymentSchedule = async(existingLoanApplication, user
       total_payment_amount: parseFloat(parseFloat(nextTotalPaymentAmount).toFixed(2)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(30 * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
+      proposed_payment_date: dayjs()
+        .add(30 * Number(repaymentOrder), 'days')
+        .format('YYYY-MM-DD'),
     };
     repaymentArray.push(nextRepaymentDetails);
   }
-  await Promise.all([ repaymentArray ]);
+  await Promise.all([repaymentArray]);
   return repaymentArray;
 };
 
-export const generateLoanRepaymentScheduleV2 = async(existingLoanApplication, user_id) => {
-  const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
+export const generateLoanRepaymentScheduleV2 = async (existingLoanApplication, user_id) => {
+  const loanFees = [parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee)];
   let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   let subsequentFee = 0;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
   let monthlyRepayment = parseFloat(existingLoanApplication.monthly_repayment);
   let monthlyInterest = parseFloat(existingLoanApplication.monthly_interest);
-  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(preOutstandingLoanAmount)));
+  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(preOutstandingLoanAmount));
   let firstPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(firstRepaymentInterest));
   let firstRepaymentDue = parseFloat(parseFloat(firstPrincipalPayment) + parseFloat(firstRepaymentInterest) + parseFloat(totalFee));
   let postOutstandingLoanAmount = parseFloat(parseFloat(preOutstandingLoanAmount) - parseFloat(firstPrincipalPayment));
@@ -156,14 +155,13 @@ export const generateLoanRepaymentScheduleV2 = async(existingLoanApplication, us
       total_payment_amount: parseFloat(parseFloat(firstRepaymentDue).toFixed(2)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD')
-    }
+      proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD'),
+    },
   ];
-
 
   for (let i = 0; i < Number(existingLoanApplication.loan_tenor_in_months - 1); i++) {
     let repaymentOrder = 1 + i + 1;
-    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(postOutstandingLoanAmount)));
+    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(postOutstandingLoanAmount));
     let nextPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(nextInterestPayment));
     let nextTotalPaymentAmount = parseFloat(parseFloat(nextPrincipalPayment) + parseFloat(nextInterestPayment) + parseFloat(subsequentFee));
     preOutstandingLoanAmount = parseFloat(postOutstandingLoanAmount);
@@ -178,43 +176,49 @@ export const generateLoanRepaymentScheduleV2 = async(existingLoanApplication, us
       total_payment_amount: parseFloat(parseFloat(nextTotalPaymentAmount).toFixed(2)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(30 * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
+      proposed_payment_date: dayjs()
+        .add(30 * Number(repaymentOrder), 'days')
+        .format('YYYY-MM-DD'),
     };
     repaymentArray.push(nextRepaymentDetails);
   }
-  await Promise.all([ repaymentArray ]);
+  await Promise.all([repaymentArray]);
   return repaymentArray;
 };
-export const collateUsersFcmTokens = async(users) => {
+export const collateUsersFcmTokens = async users => {
   const tokens = [];
-  await Promise.all(users.map(async(user) => {
-    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [ user.user_id ]);
-    if (userFcmToken?.fcm_token) {
-      tokens.push(userFcmToken.fcm_token);
-    }
-    return user;
-  }));
-  await Promise.all([ tokens ]);
+  await Promise.all(
+    users.map(async user => {
+      const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [user.user_id]);
+      if (userFcmToken?.fcm_token) {
+        tokens.push(userFcmToken.fcm_token);
+      }
+      return user;
+    })
+  );
+  await Promise.all([tokens]);
   return tokens;
 };
 
-export const collateUsersFcmTokensExceptAuthenticatedUser = async(users, user_id) => {
+export const collateUsersFcmTokensExceptAuthenticatedUser = async (users, user_id) => {
   const otherClusterMembers = await users.filter(user => user.user_id != user_id);
   const tokens = [];
-  await Promise.all(otherClusterMembers.map(async(user) => {
-    const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [ user.user_id ]);
-    if (userFcmToken?.fcm_token) {
-      tokens.push(userFcmToken.fcm_token);
-    }
-    return user;
-  }));
-  await Promise.all([ tokens ]);
-  return [ tokens, otherClusterMembers ];
+  await Promise.all(
+    otherClusterMembers.map(async user => {
+      const userFcmToken = await processOneOrNoneData(userQueries.fetchUserFcmTOken, [user.user_id]);
+      if (userFcmToken?.fcm_token) {
+        tokens.push(userFcmToken.fcm_token);
+      }
+      return user;
+    })
+  );
+  await Promise.all([tokens]);
+  return [tokens, otherClusterMembers];
 };
 
-export const generateOfferLetterPDF = async(user, loanDetails) => {
-  const [ userOfferLetterDetail ] = await processAnyData(userQueries.userOfferLetterDetails, [ user.user_id ]);
-  const [ userOfferLetterAddressDetail ] = await processAnyData(userQueries.fetchUserOfferLetterAddressDetails, [ user.user_id ]);
+export const generateOfferLetterPDF = async (user, loanDetails) => {
+  const [userOfferLetterDetail] = await processAnyData(userQueries.userOfferLetterDetails, [user.user_id]);
+  const [userOfferLetterAddressDetail] = await processAnyData(userQueries.fetchUserOfferLetterAddressDetails, [user.user_id]);
   const genderType = userOfferLetterDetail.gender === 'male' ? 'Sir' : 'Ma';
   if (config.SEEDFI_NODE_ENV === 'test' || config.SEEDFI_NODE_ENV === 'development') {
     userOfferLetterDetail.bvn = '12345678910';
@@ -239,7 +243,13 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   //   return data;
   // }
 
-  const browser = config.SEEDFI_NODE_ENV === 'production' ? await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000'}) : await puppeteer.launch();
+  const browser =
+    config.SEEDFI_NODE_ENV === 'production'
+      ? await puppeteer.connect({ browserWSEndpoint: 'ws://seedfibrowser:3000' })
+      : await puppeteer.launch({
+          headless: true,
+          args: ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox'],
+        });
 
   const page = await browser.newPage();
   await page.setContent(html);
@@ -248,24 +258,24 @@ export const generateOfferLetterPDF = async(user, loanDetails) => {
   const document = await page.pdf({
     format: 'a4',
     scale: 0.5,
-    printBackground: true
+    printBackground: true,
   });
 
   // upload to Amazon s3
   const url = `files/user-documents/${user.user_id}/loan-offer-letter/${loanDetails.loan_id}.pdf`;
   const payload = Buffer.from(document, 'binary');
-  const data  = await S3.uploadFile(url, payload, 'application/pdf');
+  const data = await S3.uploadFile(url, payload, 'application/pdf');
   return data;
 };
 
-export const generateClusterLoanRepaymentSchedule = async(existingLoanApplication) => {
-  const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
+export const generateClusterLoanRepaymentSchedule = async existingLoanApplication => {
+  const loanFees = [parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee)];
   let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   let subsequentFee = 0;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
   let monthlyRepayment = parseFloat(existingLoanApplication.monthly_repayment);
   let monthlyInterest = parseFloat(existingLoanApplication.monthly_interest);
-  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(preOutstandingLoanAmount)));
+  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(preOutstandingLoanAmount));
   let firstPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(firstRepaymentInterest));
   let firstRepaymentDue = parseFloat(parseFloat(firstPrincipalPayment) + parseFloat(firstRepaymentInterest) + parseFloat(totalFee));
   let postOutstandingLoanAmount = parseFloat(parseFloat(preOutstandingLoanAmount) - parseFloat(firstPrincipalPayment));
@@ -283,14 +293,13 @@ export const generateClusterLoanRepaymentSchedule = async(existingLoanApplicatio
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
       proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD'),
-      pre_reschedule_proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD')
-    }
+      pre_reschedule_proposed_payment_date: dayjs().add(30, 'days').format('YYYY-MM-DD'),
+    },
   ];
-
 
   for (let i = 0; i < Number(existingLoanApplication.loan_tenor_in_months - 1); i++) {
     let repaymentOrder = 1 + i + 1;
-    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(postOutstandingLoanAmount)));
+    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(postOutstandingLoanAmount));
     let nextPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(nextInterestPayment));
     let nextTotalPaymentAmount = parseFloat(parseFloat(nextPrincipalPayment) + parseFloat(nextInterestPayment) + parseFloat(subsequentFee));
     preOutstandingLoanAmount = parseFloat(postOutstandingLoanAmount);
@@ -307,23 +316,27 @@ export const generateClusterLoanRepaymentSchedule = async(existingLoanApplicatio
       total_payment_amount: parseFloat(parseFloat(nextTotalPaymentAmount).toFixed(2)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount).toFixed(1)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount).toFixed(1)),
-      proposed_payment_date: dayjs().add(30 * Number(repaymentOrder), 'days').format('YYYY-MM-DD'),
-      pre_reschedule_proposed_payment_date: dayjs().add(30 * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
+      proposed_payment_date: dayjs()
+        .add(30 * Number(repaymentOrder), 'days')
+        .format('YYYY-MM-DD'),
+      pre_reschedule_proposed_payment_date: dayjs()
+        .add(30 * Number(repaymentOrder), 'days')
+        .format('YYYY-MM-DD'),
     };
     repaymentArray.push(nextRepaymentDetails);
   }
-  await Promise.all([ repaymentArray ]);
+  await Promise.all([repaymentArray]);
   return repaymentArray;
 };
 
-export const generateLoanRepaymentScheduleForManualCreation = async(existingLoanApplication, user_id, loan_disbursement_date) => {
-  const loanFees = [ parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee) ];
+export const generateLoanRepaymentScheduleForManualCreation = async (existingLoanApplication, user_id, loan_disbursement_date) => {
+  const loanFees = [parseFloat(existingLoanApplication.processing_fee), parseFloat(existingLoanApplication.insurance_fee), parseFloat(existingLoanApplication.advisory_fee)];
   let totalFee = loanFees.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   let subsequentFee = 0;
   let preOutstandingLoanAmount = parseFloat(existingLoanApplication.amount_requested);
   let monthlyRepayment = parseFloat(existingLoanApplication.monthly_repayment);
   let monthlyInterest = parseFloat(existingLoanApplication.monthly_interest);
-  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(preOutstandingLoanAmount)));
+  let firstRepaymentInterest = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(preOutstandingLoanAmount));
   let firstPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(firstRepaymentInterest));
   let firstRepaymentDue = parseFloat(parseFloat(firstPrincipalPayment) + parseFloat(firstRepaymentInterest) + parseFloat(totalFee));
   let postOutstandingLoanAmount = parseFloat(parseFloat(preOutstandingLoanAmount) - parseFloat(firstPrincipalPayment));
@@ -338,13 +351,13 @@ export const generateLoanRepaymentScheduleForManualCreation = async(existingLoan
       total_payment_amount: parseFloat(parseFloat(firstRepaymentDue)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount)),
-      proposed_payment_date: dayjs(loan_disbursement_date).add(30, 'days').format('YYYY-MM-DD')
-    }
+      proposed_payment_date: dayjs(loan_disbursement_date).add(30, 'days').format('YYYY-MM-DD'),
+    },
   ];
-  
+
   for (let i = 0; i < Number(existingLoanApplication.loan_tenor_in_months - 1); i++) {
     let repaymentOrder = 1 + i + 1;
-    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * (parseFloat(postOutstandingLoanAmount)));
+    let nextInterestPayment = parseFloat((parseFloat(monthlyInterest) / 100) * parseFloat(postOutstandingLoanAmount));
     let nextPrincipalPayment = parseFloat(parseFloat(monthlyRepayment) - parseFloat(nextInterestPayment));
     let nextTotalPaymentAmount = parseFloat(parseFloat(nextPrincipalPayment) + parseFloat(nextInterestPayment) + parseFloat(subsequentFee));
     preOutstandingLoanAmount = parseFloat(postOutstandingLoanAmount);
@@ -359,10 +372,12 @@ export const generateLoanRepaymentScheduleForManualCreation = async(existingLoan
       total_payment_amount: parseFloat(parseFloat(nextTotalPaymentAmount)),
       pre_payment_outstanding_amount: parseFloat(parseFloat(preOutstandingLoanAmount)),
       post_payment_outstanding_amount: parseFloat(parseFloat(postOutstandingLoanAmount)),
-      proposed_payment_date: dayjs(loan_disbursement_date).add(30 * Number(repaymentOrder), 'days').format('YYYY-MM-DD')
+      proposed_payment_date: dayjs(loan_disbursement_date)
+        .add(30 * Number(repaymentOrder), 'days')
+        .format('YYYY-MM-DD'),
     };
     repaymentArray.push(nextRepaymentDetails);
   }
-  await Promise.all([ repaymentArray ]);
+  await Promise.all([repaymentArray]);
   return repaymentArray;
 };
