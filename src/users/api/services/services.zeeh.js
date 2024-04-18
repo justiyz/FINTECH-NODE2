@@ -28,7 +28,7 @@ const zeehDriversLicenseVerificationCheck = async (license_number, user) => {
 };
 const zeehBVNVerificationCheck = async (bvn, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+    if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, bvn);
     }
 
@@ -43,8 +43,9 @@ const zeehBVNVerificationCheck = async (bvn, user) => {
       data: {
         bvn: bvn,
       },
-    }; 
+    };
     const data = await axios(options);
+    console.log('data', data);
     return data;
   } catch (error) {
     if (error.message === 'Not Found') {
