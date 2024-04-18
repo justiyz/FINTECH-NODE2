@@ -16,31 +16,33 @@ import * as descriptions from '../../lib/monitor/lib.monitor.description';
  */
 export const adminAccess = (resource, action) => async(req, res, next) => {
   try {
-    const { admin, headers } = req;
-    // if (req.admin.role_type === 'SADM') {
-    //   logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms this is a super admin initiated action adminAccess.admin.middlewares.roles.js`);
-    //   return next();
-    // }
-    // logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms this is not a super admin initiated action adminAccess.admin.middlewares.roles.js`);
-    // const allowedRoleResource = Object.keys(permissions.role_permissions);
-    // const allowedAdminResource = Object.keys(permissions.admin_permissions);
-    // if (allowedRoleResource.includes(resource.trim()) || allowedAdminResource.includes(resource.trim())) {
-    //   logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}::: Info: admin have access to perform action adminAccess.admin.middlewares.roles.js`);
-    //   const allowedRolePermissions = permissions.role_permissions[`${resource}`] || [];
-    //   const allowedAdminPermissions = permissions.admin_permissions[`${resource}`] || [];
-    //   logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: check if admin have resource permissions adminAccess.admin.middlewares.roles.js`);
-    //   if (allowedRolePermissions.includes(action) || allowedAdminPermissions.includes(action)) {
-    //     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}::: Info: admin have access to perform action adminAccess.admin.middlewares.roles.js`);
-    //     return next();
-    //   }
-    //   return  ApiResponse.error(res, enums.ADMIN_CANNOT_PERFORM_ACTION(action, resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
-    // }
-
-    // get admin merchants and check if the merchants
-    const [ membership ] = await processAnyData(roleQueries.fetchMerchantAdminMembership, [ headers['x-merchant-id'], admin.merchant_admin_id ]);
-    if (membership) {
+    const { permissions } = req.admin;
+    if (req.admin.role_type === 'SADM') {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info: confirms this is a super admin initiated action 
+      adminAccess.admin.middlewares.roles.js`);
       return next();
     }
+    logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info: confirms this is not a super admin initiated action
+     adminAccess.admin.middlewares.roles.js`);
+
+    console.log('PERMISSIONS adminAccess MIDDLEWARE ===>>>', permissions);
+    const allowedAdminResource = Object.keys(permissions.admin_permissions);
+    if (allowedAdminResource.includes(resource.trim())) {
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}::: Info: admin have access to perform action adminAccess.admin.middlewares.roles.js`);
+      const allowedAdminPermissions = permissions.admin_permissions[`${resource}`] || [];
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}:::Info: check if admin have resource permissions adminAccess.admin.middlewares.roles.js`);
+      if (allowedAdminPermissions.includes(action)) {
+        logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.merchant_admin_id}::: Info: admin have access to perform action adminAccess.admin.middlewares.roles.js`);
+        return next();
+      }
+      return  ApiResponse.error(res, enums.ADMIN_CANNOT_PERFORM_ACTION(action, resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
+    }
+
+    // get admin merchants and check if the merchants
+    // const [ membership ] = await processAnyData(roleQueries.fetchMerchantAdminMembership, [ headers['x-merchant-id'], admin.merchant_admin_id ]);
+    // if (membership) {
+    //   return next();
+    // }
     return  ApiResponse.error(res, enums.ADMIN_NO_RESOURCE_ACCESS(resource), enums.HTTP_FORBIDDEN, enums.ADMIN_ACCESS_MIDDLEWARE);
   } catch (error) {
     error.label = enums.ADMIN_ACCESS_MIDDLEWARE;
@@ -99,13 +101,13 @@ export const checkRoleNameIsUnique = async(req, res, next) => {
  */
 export const checkIfSuperAdminRole = async(req, res, next) => {
   try {
-    const role = req.body.role_code || req.params.role_code;
+    const role = req.body.role_name || req.params.role_name;
     if (!role) {
       return next();
     }
     if (role === 'SADM') {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms that role is a super admin role checkIfSuperAdminRole.admin.middlewares.admin.js`);
-      return ApiResponse.error(res, req.body.role_code ? enums.SUPER_ADMIN_ROLE_NONASSIGNABLE : enums.ACTION_NOT_ALLOWED_FOR_SUPER_ADMIN,
+      return ApiResponse.error(res, req.body.role_name ? enums.SUPER_ADMIN_ROLE_NONASSIGNABLE : enums.ACTION_NOT_ALLOWED_FOR_SUPER_ADMIN,
         enums.HTTP_FORBIDDEN, enums.CHECK_IF_SUPER_ADMIN_ROLE_MIDDLEWARE);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${req.admin.admin_id}:::Info: confirms that role is a non super admin role checkIfSuperAdminRole.admin.middlewares.admin.js`);

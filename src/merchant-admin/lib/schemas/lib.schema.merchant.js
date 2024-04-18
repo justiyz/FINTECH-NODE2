@@ -148,6 +148,14 @@ const verifyLogin = Joi.object().keys({
   email: Joi.string().email().required()
 });
 
+const verifyBVNInformation = Joi.object().keys({
+  bvn: Joi.string().required().length(11),
+  first_name: Joi.string().required(),
+  last_name: Joi.string().required(),
+  date_of_birth: Joi.string().required(),
+  gender: Joi.string().required()
+});
+
 export default {
   createMerchant,
   fetchMerchants,
@@ -163,5 +171,6 @@ export default {
   merchantPassword,
   forgotPassword,
   verifyLogin,
-  createMerchantAdminParams
+  createMerchantAdminParams,
+  verifyBVNInformation
 };

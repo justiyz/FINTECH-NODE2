@@ -1,0 +1,6 @@
+DROP INDEX IF EXISTS pre_disbursement_loan_payment_schedules_user_id_index;
+DROP INDEX IF EXISTS pre_disbursement_loan_payment_schedules_loan_id_index;
+DROP INDEX IF EXISTS pre_disbursement_loan_payment_schedules_loan_repayment_id_index;
+DROP INDEX IF EXISTS pre_disbursement_loan_payment_schedules_status_index;
+
+DROP TABLE IF EXISTS pre_disbursement_loan_payment_schedules CASCADE;

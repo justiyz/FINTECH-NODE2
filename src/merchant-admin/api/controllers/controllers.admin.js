@@ -11,9 +11,11 @@ import * as Helpers from '../../lib/utils/lib.util.helpers';
 import enums from '../../../users/lib/enums';
 import config from '../../../users/config/index';
 import * as fetchAdminServices from '../services/services.admin';
-import { adminActivityTracking } from '../../lib/monitor';
+import { merchantAdminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 import { loanCategoryOrrAverageMetrics } from '../services/services.seedfiUnderwriting';
+import merchantQueries from '../../../admins/api/queries/queries.merchant';
+
 
 const { SEEDFI_NODE_ENV } = config;
 
@@ -36,10 +38,10 @@ export const completeAdminProfile = async(req, res, next) => {
     const payload = AdminPayload.completeAdminProfile(admin, body);
     const [ updatedAdmin ] = await processAnyData(adminQueries.updateAdminProfile, payload);
     logger.info(`${enums.CURRENT_TIME_STAMP},${admin.admin_id}::: Info: admin profile completed successfully completeAdminProfile.admin.controllers.admin.js`);
-    await adminActivityTracking(req.admin.admin_id, 7, 'success', descriptions.completes_profile());
+    await merchantAdminActivityTracking(req.admin.admin_id, 7, 'success', descriptions.completes_profile());
     return ApiResponse.success(res, enums.ADMIN_COMPLETE_PROFILE_SUCCESSFUL, enums.HTTP_OK, updatedAdmin);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 7, 'fail', descriptions.completes_profile_failed());
+    await merchantAdminActivityTracking(req.admin.admin_id, 7, 'fail', descriptions.completes_profile_failed());
     error.label = enums.COMPLETE_ADMIN_PROFILE_CONTROLLER;
     logger.error(`completing admin profile in the DB failed${enums.COMPLETE_ADMIN_PROFILE_CONTROLLER}`, error.message);
     return next(error);
@@ -57,23 +59,17 @@ export const completeAdminProfile = async(req, res, next) => {
 export const adminPermissions = async(req, res, next) => {
   try {
     const { admin, adminUser } = req;
-    const [ adminRole ] = await processAnyData(roleQueries.fetchRole, [ adminUser.role_type ]);
+    // const [ adminRole ] = await processAnyData(roleQueries.fetchRole, [ adminUser.role_type ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched role type details adminPermissions.admin.controllers.amin.js`);
-    const adminResources = await processAnyData(roleQueries.fetchAdminResources, [  ]);
-    const [ rolePermissions, adminPermissions ] = await Promise.all([
-      processAnyData(authQueries.fetchRolePermissions, adminUser.role_type),
-      processAnyData(authQueries.fetchAdminPermissions, adminUser.admin_id)
-    ]);
+    const adminResources = await processAnyData(roleQueries.fetchMerchantAdminResources, [  ]);
+    const [ adminPermissions ] = await processAnyData(authQueries.fetchMerchantAdminPermissions, adminUser.merchant_admin_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: fetched system resources and admin's role and personal permissions 
     adminPermissions.admin.controllers.amin.js`);
-    const fullRoleBasedResources = await Helpers.processRoleBasedPermissions(adminUser.admin_id, adminResources, rolePermissions);
     const fullAdminBasedResources = await Helpers.processAdminBasedPermissions(adminUser.role_type, adminResources, adminPermissions);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}::: Info: admin role and personal permissions aggregated adminPermissions.admin.controllers.amin.js`);
     const data = {
       admin_id: admin.admin_id,
       role_type: adminUser.role_type,
-      role_name: adminRole.name,
-      fullRoleBasedResources,
       fullAdminBasedResources
     };
     return ApiResponse.success(res, enums.ADMIN_PERMISSIONS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
@@ -110,10 +106,10 @@ export const editAdminPermissions = async(req, res, next) => {
       await Promise.all([ editAdminPermissions ]);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: admin permissions edited successfully editAdminPermissions.admin.controllers.admin.js`);
     }
-    await adminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(adminName));
+    await merchantAdminActivityTracking(req.admin.admin_id, 8, 'success', descriptions.edit_permission(adminName));
     return ApiResponse.success(res, enums.EDIT_ADMIN_PERMISSIONS_SUCCESSFUL, enums.HTTP_OK, { admin_id, ...body });
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await merchantAdminActivityTracking(req.admin.admin_id, 8, 'fail', descriptions.edit_permission_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER;
     logger.error(`editing admin permissions failed:::${enums.EDIT_ADMIN_PERMISSIONS_CONTROLLER}`, error.message);
     return next(error);
@@ -130,11 +126,24 @@ export const editAdminPermissions = async(req, res, next) => {
  */
 export const inviteAdmin = async(req, res, next) => {
   try {
+    const {admin,  body } = req;
     const password = Hash.generateRandomString(4);
     const hash = Hash.hashData(password);
-    const payload = AdminPayload.addAdmin(req.body, hash);
+    const payload = AdminPayload.addAdmin(body.admin_details, hash);
+    const merchantId = await processOneOrNoneData(adminQueries.fetchAdminMerchant, admin.merchant_admin_id);
+
     const [ newAdmin ] = await processAnyData(adminQueries.inviteAdmin, payload);
-    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully created inviteAdmin.controllers.admin.admin.js`);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully invited inviteAdmin.controllers.admin.admin.js`);
+    await Promise.all([
+      body.permissions.map(async(permission) => {
+        processAnyData(adminQueries.createMerchantAdminPermissions, [ newAdmin.merchant_admin_id,  permission.resource_id, permission.user_permissions.join() ]);
+        return permission;
+      })
+    ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully created permissions for invited admin inviteAdmin.controllers.admin.admin.js`);
+    await processOneOrNoneData(merchantQueries.createMerchantAdminPivot, [ merchantId.merchant_id, newAdmin.merchant_admin_id ]);
+    logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: admin successfully created merchant admin pivot for invited admin inviteAdmin.controllers.admin.admin.js`);
+
     const data = {
       firstName: newAdmin.first_name,
       email: newAdmin.email,
@@ -145,11 +154,11 @@ export const inviteAdmin = async(req, res, next) => {
     }
     await MailService('Admin Invite', 'adminInviteMail', { ...data });
     logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: invite admin mail successfully sent. inviteAdmin.controllers.admin.admin.js`);
-    await adminActivityTracking(req.admin.admin_id, 6, 'success', 
+    await merchantAdminActivityTracking(req.admin.admin_id, 71, 'success', 
       descriptions.invite_admin(`${req.admin.first_name} ${req.admin.last_name}`, `${req.body.first_name} ${req.body.last_name}`));
     return ApiResponse.success(res, enums.ADMIN_SUCCESSFULLY_INVITED, enums.HTTP_OK,  newAdmin);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 6, 'fail', 
+    await merchantAdminActivityTracking(req.admin.admin_id, 71, 'fail', 
       descriptions.invite_admin_failed(`${req.admin.first_name} ${req.admin.last_name}`, `${req.body.first_name} ${req.body.last_name}`));
     error.label = enums.INVITE_ADMIN_CONTROLLER;
     logger.error(`Inviting new admin failed:::${enums.INVITE_ADMIN_CONTROLLER}`, error.message);
@@ -178,7 +187,7 @@ export const fetchAllAdmins = async(req, res, next) => {
         total_count: admins.admins.length,
         ...admins                                           
       };
-      await adminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'admins'));
+      await merchantAdminActivityTracking(req.admin.admin_id, 41, 'success', descriptions.initiate_document_type_export(adminName, 'admins'));
       logger.info(`${enums.CURRENT_TIME_STAMP}:::Info: successfully fetched admins from the DB fetchAllAdmins.controllers.admin.admin.js`);
       return ApiResponse.success(res, enums.SEARCH_FILTER_ADMINS, enums.HTTP_OK, data);
     }
@@ -386,10 +395,10 @@ export const fetchLoanManagementAnalytics = async(req, res, next) => {
       total_customer: Number(totalCustomer.count),
       disbursed_loans: disbursedLoans
     };
-    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_reports_and_analytics(adminName, loanReports));
+    await merchantAdminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_reports_and_analytics(adminName, loanReports));
     return ApiResponse.success(res, enums.LOAN_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.loan_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await merchantAdminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.loan_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER;
     logger.error(`Fetching loan management analytic details failed:::${enums.FETCH_LOAN_MANAGEMENT_ANALYTICS_CONTROLLER}`, error.message);
     return next(error);
@@ -471,12 +480,12 @@ export const loanRepaymentReport = async(req, res, next) => {
       loanTenor,
       orrScore: orrCategoryAverageScores.data || {}
     };
-    adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
+    merchantAdminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.loan_repayment(adminName));
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${admin.admin_id}:::Info: 
     loan payment report arranged and set to be returned loanRepaymentReport.controllers.admin.admin.js`);
     return ApiResponse.success(res, enums.LOAN_REPAYMENT_REPORT, enums.HTTP_OK, data);
   } catch (error) {
-    adminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
+    merchantAdminActivityTracking(req.admin.admin_id, 42, 'failed', descriptions.loan_failed_repayment(adminName));
     error.label = enums.LOAN_REPAYMENT_REPORT_CONTROLLER;
     logger.error(`fetching report and analytics in the DB failed:::${enums.LOAN_REPAYMENT_REPORT_CONTROLLER}`, error.message);
     return next(error);
@@ -516,10 +525,10 @@ export const fetchClusterManagementAnalytics = async(req, res, next) => {
       total_loan_defaulters: Number(totalLoanDefaulters.count),
       total_loan_disbursed: totalDisbursedClusterLoan
     };
-    await adminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.cluster_reports_and_analytics(adminName));
+    await merchantAdminActivityTracking(req.admin.admin_id, 42, 'success', descriptions.cluster_reports_and_analytics(adminName));
     return ApiResponse.success(res, enums.CLUSTER_MANAGEMENT_ANALYTICS_FETCHED_SUCCESSFULLY, enums.HTTP_OK, data);
   } catch (error) {
-    await adminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.cluster_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
+    await merchantAdminActivityTracking(req.admin.admin_id, 42, 'fail', descriptions.cluster_reports_and_analytics_failed(`${req.admin.first_name} ${req.admin.last_name}`));
     error.label = enums.FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER;
     logger.error(`Fetching cluster management analytic details failed:::${enums.FETCH_CLUSTER_MANAGEMENT_ANALYTICS_CONTROLLER}`, error.message);
     return next(error);
