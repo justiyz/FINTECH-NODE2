@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b99141a8-6828-4946-906e-9aee48d23656" name="Changes" comment="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
-      <change beforePath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/controllers/controllers.user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" beforeDir="false" afterPath="$PROJECT_DIR$/../seedfi-merchant-api/.husky/pre-push" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/users/api/middlewares/middlewares.user.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,8 +14,18 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="fix/merchant-validation" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+  }
+}]]></component>
   <component name="GitToolBoxStore">
     <option name="recentBranches">
       <RecentBranches>
@@ -53,6 +63,14 @@
       </RecentBranches>
     </option>
   </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="bc2b9c34-6e2f-42cb-ae74-8aa4fa7ccffc" />
+        <option name="url" value="https://github.com/theseedfi/seedfi-backend.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -69,9 +87,9 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "fix-env-config",
+    "RunOnceActivity.ShowReadmeOnStart": "true", 
+    "WebServerToolWindowFactoryState": "false", 
+    "git-widget-placeholder": "Rebasing fix/dojah-webhook-update",  
     "last_opened_file_path": "/Users/otjake/Sites/localhost/seedfi-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -92,6 +110,8 @@
       <workItem from="1701245742936" duration="21132000" />
       <workItem from="1703496827479" duration="2222000" />
       <workItem from="1704369336110" duration="1852000" />
+      <workItem from="1711536129519" duration="183000" />
+      <workItem from="1711536362657" duration="5556000" />
     </task>
     <task id="LOCAL-00001" summary="1. Complete Merchant Onboarding&#10;2. Merchant Password Setup&#10;3. Merchant Password Reset&#10;4. Merchant Admin Sign In&#10;5. Merchant Verify Log In">
       <option name="closed" value="true" />

@@ -31,9 +31,7 @@ export default {
       number_of_children, marital_status, loan_status, device_token, verification_token_request_count, invalid_verification_token_count,
       to_char(created_at, 'DDth, Month YYYY') AS date_joined, next_profile_update
     FROM users
-    WHERE email = $1`
-  ,
-
+    WHERE email = $1`,
   updateUserFcmToken: `
       UPDATE users
       SET
@@ -234,10 +232,21 @@ export default {
       FROM users
       WHERE bvn IS NOT NULL`,
 
+  fetchAllExistingBvnsRefined: `
+    SELECT bvn
+    FROM users
+    WHERE bvn IS NOT NULL and (last_name ILIKE $1)
+  `,
+
   fetchAllExistingBlacklistedBvns: `
       SELECT bvn
       FROM blacklisted_bvns
       WHERE bvn IS NOT NULL`,
+
+  fetchAllExistingBlacklistedBvnsByLastName: `
+      SELECT bvn
+      FROM blacklisted_bvns
+      WHERE (bvn IS NOT NULL and (last_name ILIKE $1 or first_name = $2))`,
 
   blacklistUser: `
       UPDATE user
@@ -415,8 +424,17 @@ export default {
     is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
     `,
 
+  userVerificationIdWithBvn: `
+    UPDATE users
+    SET
+    is_verified_bvn = true,
+    tier = $2
+    WHERE user_id = $1
+    RETURNING user_id, first_name, last_name, tier, is_verified_phone_number, is_verified_email, is_verified_bvn,
+    is_uploaded_selfie_image, is_created_password, is_created_pin, is_completed_kyc, is_uploaded_identity_card, status
+  `,
 
-  userIdentityVerification: `
+  userIdentityVerification_old: `
     UPDATE users
     SET
     updated_at = NOW(),
@@ -429,7 +447,16 @@ export default {
     is_created_password, is_created_pin, is_completed_kyc, status
     `,
 
-
+  userIdentityVerification: `
+    UPDATE users
+    SET
+    updated_at = NOW(),
+    tier = $3,
+    is_uploaded_identity_card = true
+    WHERE user_id = $1
+    RETURNING user_id, first_name, last_name, image_url, is_uploaded_identity_card, is_uploaded_selfie_image,
+    is_created_password, is_created_pin, is_completed_kyc, status
+    `,
 
   updateUserTierValue: `
     UPDATE users
@@ -806,7 +833,7 @@ export default {
       status
     FROM personal_loans
     WHERE user_id = $1
-    AND (status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
+    AND (status = 'pending' OR status = 'approved' OR status = 'in review' OR status = 'ongoing' OR status = 'over due' OR status = 'processing')`,
 
   deleteUserOwnAccount: `
     UPDATE users
@@ -819,5 +846,75 @@ export default {
     RETURNING user_id, email, phone_number, is_deleted, status`,
 
   fetchAllDetailsBelongingToUser: `
-    SELECT * FROM users WHERE user_id = $1`
+    SELECT * FROM users WHERE user_id = $1`,
+
+  getBankList: `
+    SELECT *
+    FROM
+      banks
+    WHERE
+      active = $1 and is_deleted = false    `,
+
+  getBankById: `
+    SELECT * FROM banks WHERE record_id = $1
+  `,
+
+  updateBankRecord: `
+    UPDATE banks
+    SET
+      id = $2,
+      name = $3,
+      slug = $4,
+      code = $5,
+      longcode = $6,
+      gateway = $7,
+      pay_with_bank = $8,
+      active = $9,
+      country = $10,
+      currency = $11,
+      type = $12,
+      updated_at = NOW()
+    WHERE
+      record_id = $1
+    RETURNING *
+  `,
+
+  deleteBankRecord: `
+    UPDATE banks
+    SET
+        is_deleted = true,
+        updated_at = NOW()
+    WHERE
+        record_id = $1
+  `,
+
+  createBankRecord: `
+    INSERT INTO banks(
+        id, name, slug, code, longcode, gateway, pay_with_bank, active, country , currency , type
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING *
+    `,
+
+  saveBvnInformation: `
+    INSERT INTO verified_bvn_records(
+        first_name, last_name, bvn, gender, date_of_birth, phone_number, email
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+  `,
+  queryBvnInformation: `
+    SELECT * FROM verified_bvn_records
+    WHERE (first_name = $1 AND last_name = $2 AND date_of_birth = $3 AND gender = $4)
+  `,
+
+  queryBvnInformationByDob: `
+    SELECT * FROM verified_bvn_records
+    WHERE (date_of_birth = $1 and is_deleted = false)
+  `,
+
+  setDataToDeleted: `
+    UPDATE verified_bvn_records
+    SET
+        is_deleted = true
+    WHERE
+        record_id = $1
+  `,
 };

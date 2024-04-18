@@ -93,6 +93,9 @@ export const BANK_ACCOUNTS_FETCHED_SUCCESSFULLY = 'Bank accounts fetched success
 export const DEBIT_CARDS_FETCHED_SUCCESSFULLY = 'Debit cards fetched successfully';
 export const BANK_ACCOUNT_DELETED_SUCCESSFULLY = 'Bank account deleted successfully';
 export const REQUEST_EMAIL_VERIFICATION = 'Email verification link sent Successfully to user email.';
+export const BANK_UPDATE_SUCCESSFUL = 'Bank information updated successfully.';
+export const DELETE_BANK_RECORD = 'Bank information deleted successfully.';
+export const CREATE_BANK_RECORD = 'Bank information created successfully.';
 export const VERIFY_EMAIL = 'Email verified successfully.';
 export const EMAIL_ALREADY_VERIFIED = 'User email already verified.';
 export const EMAIL_NOT_VERIFIED = 'User email not verified, kindly verify email to continue';
@@ -255,6 +258,7 @@ export const EMPLOYMENT_TYPE_ALREADY_EXIST = 'User already created employment ty
 export const BLACKLISTED_BVN_USER_DENIED_LOAN_APPLICATION = 'You are not allowed to access loan facility at the moment';
 export const UPDATE_EMPLOYMENT_DETAILS = 'User employment detail has been updated successfully';
 export const UPDATE_USER_MONO_ID = 'User mono account id updated successfully';
+export const INITIATE_MONO_ACCOUNT_LINKING_SUCCESSFUL = 'User mono account linking initiated successfully';
 export const FETCH_LOAN_VALUE = 'successfully fetch loan user loan value';
 export const NON_PERFORMING_LOANS = 'notification sent to non performing loans';
 export const FETCH_ALERT_NOTIFICATION = 'successfully fetch alert notification';
@@ -283,7 +287,7 @@ export const ADMIN_ALREADY_SET_NEW_PASSWORD = 'admin has previously set new pass
 export const ADMIN_ALREADY_COMPLETED_PROFILE = 'admin has previously completed profile, kindly do edit profile';
 export const ADMIN_ROLE_NAME_EXISTS = name => `A role withe the name "${name}" already exists in the DB`;
 export const ADMIN_CANNOT_PERFORM_ACTION = (action, resource) => `Admin cannot perform "${action}" action on ${resource} module`;
-export const ADMIN_NO_RESOURCE_ACCESS = resource => `Admin dose not have access to ${resource} resource.`;
+export const ADMIN_NO_RESOURCE_ACCESS = resource => `Admin does not have access to ${resource} resource.`;
 export const RESOURCE_ID_SENT_NOT_EXISTS = resource_id => `resource with resource id ${resource_id} does not exist`;
 export const RESOURCE_REPEATING_IN_PAYLOAD = resource_name => `resource "${resource_name}" is repeating more than once`;
 export const CANNOT_PERFORM_ACTION_BASED_ON_CURRENT_STATUS = (action, status) => `cannot ${action} a role with ${status} status`;

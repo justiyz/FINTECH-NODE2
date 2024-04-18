@@ -8,7 +8,7 @@ import { processAnyData, processOneOrNoneData } from '../services/services.db';
 import ApiResponse from '../../lib/http/lib.http.responses';
 import enums from '../../lib/enums';
 import config from '../../config';
-import { sendSms } from '../services/service.sms';
+import { sendSms, sendWhatsAppMsg } from '../services/service.sms';
 import { signupSms, verifyAccountOTPSms, resetPinOTPSms } from '../../lib/templates/sms';
 import { userActivityTracking } from '../../lib/monitor';
 import * as Hash from '../../lib/utils/lib.util.hash';
@@ -57,6 +57,7 @@ export const signup = async(req, res, next) => {
     const data = { ...registeredUser, otp, otpExpire: expirationTime, otpDuration: `${10} minutes` };
     userActivityTracking(registeredUser.user_id, 1, 'success');
     await sendSms(body.phone_number, signupSms(data));
+    await sendWhatsAppMsg(body.phone_number, signupSms(data))
     if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return ApiResponse.success(res, enums.ACCOUNT_CREATED, enums.HTTP_CREATED, data);
     }

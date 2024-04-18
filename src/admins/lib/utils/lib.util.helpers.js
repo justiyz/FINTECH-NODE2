@@ -1,4 +1,4 @@
-import { processAnyData, processOneOrNoneData } from '../../api/services/services.db';
+import {processAnyData, processOneOrNoneData} from '../../api/services/services.db';
 import usersQueries from '../../api/queries/queries.user';
 import loanQueries from '../../api/queries/queries.loan';
 
@@ -19,7 +19,7 @@ export const calculatePages = (total, limit) => {
 
 export const processRoleBasedPermissions = async(role_type, adminResources, rolePermissions) => {
   const rolePermissionsResourceIds = rolePermissions.map((permission) => permission['resource_id']);
-  
+
   const processFullPermissions = await adminResources.map((resource) => {
     if (rolePermissionsResourceIds.includes(resource.resource_id)) {
       return resource;
@@ -38,7 +38,7 @@ export const processRoleBasedPermissions = async(role_type, adminResources, role
 
 export const processAdminBasedPermissions = async(admin_id, adminResources, adminPermissions) => {
   const rolePermissionsResourceIds = adminPermissions.map((permission) => permission['resource_id']);
-  
+
   const processFullPermissions = await adminResources.map((resource) => {
     if (rolePermissionsResourceIds.includes(resource.resource_id)) {
       return resource;
@@ -110,8 +110,7 @@ export const calculateTotalInterestAmount = (totalMonthlyRepayment, loanAmount) 
 };
 
 export const calculateMonthlyInterestRate = (body, period) => {
-  const monthlyInterest = (parseFloat(body.interest_rate)) / period;
-  return  monthlyInterest;
+  return (parseFloat(body.interest_rate)) / period;
 };
 
 export const monthlyRepaymentNumerator = (monthlyInterest, loanAmount) => {

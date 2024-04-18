@@ -177,7 +177,7 @@ const createManualLoan = Joi.object().keys({
   loan_decision: Joi.string().required(),
   loan_disbursed: Joi.boolean().required(),
   loan_disbursement_date: Joi.date().max('now').required(),
-  loan_status: Joi.string().valid('ongoing', 'completed', 'overdue').required(),
+  loan_status: Joi.string().valid('ongoing', 'completed', 'over due').required(),
   initial_amount_requested: Joi.number().positive().required(),
   initial_loan_tenor: Joi.number().integer().min(1).max(24).required()
 });
@@ -192,7 +192,7 @@ export const loanId = Joi.object().keys({
 
 export const updatePayment = Joi.object().keys({
   amount: Joi.number().positive().required(),
-  payment_date: Joi.date().max('now').required()  
+  payment_date: Joi.date().max('now').required()
 });
 
 export const checkIfLoanIsActive = Joi.object().keys({
@@ -206,10 +206,10 @@ const createPreApprovedLoan = Joi.object().keys({
   loan_amount: Joi.number().positive().required(),
   loan_reason: Joi.string().required(),
   loan_tenor: Joi.number().integer().min(1).max(24).required(),
-  interest_rate: Joi.number().positive().required(),
-  processing_fee: Joi.number().positive().required(),
-  insurance_fee: Joi.number().positive().required(),
-  advisory_fee: Joi.number().positive().required()
+  interest_rate: Joi.number().min(0).required(),
+  processing_fee: Joi.number().min(0).required(),
+  insurance_fee: Joi.number().min(0).required(),
+  advisory_fee: Joi.number().min(0).required()
 });
 
 const rescheduleLoanParams = Joi.object().keys({

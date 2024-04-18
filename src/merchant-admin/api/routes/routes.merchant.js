@@ -8,9 +8,17 @@ import * as MerchantController from '../controllers/controller.merchant';
 import * as AuthController from '../controllers/controllers.auth';
 import * as AdminMiddleware from '../middlewares/middlewares.admin';
 import {compareMerchantPassword, verifyMerchantLoginVerificationToken} from '../middlewares/middlewares.merchant';
+import * as UserController from "../controllers/controllers.user";
+import {verifyBvnInfo} from "../controllers/controller.merchant";
 const router = Router();
 
 
+router.post(
+  '/verify-bvn-otp-beta',
+  AuthMiddleware.validateAdminAuthToken,
+  Model(Schema.verifyBVNInformation, 'payload'),
+  MerchantController.verifyBvnInfo
+);
 
 router.get(
   '/',

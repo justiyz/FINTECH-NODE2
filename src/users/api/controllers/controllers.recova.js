@@ -91,7 +91,7 @@ export const loanBalanceUpdate = async (req, res, next) => {
     const paymentDescriptionType = Number(outstandingRepaymentCount.count) > 1 ? 'part loan repayment' : 'full loan repayment';
     const completedAtType = statusType === 'completed' ? dayjs().format('YYYY-MM-DD HH:mm:ss') : null;
 
-    //total outstanding repayment amount
+    // total outstanding repayment amount
 
     await Promise.all([
       processAnyData(loanQueries.updatePersonalLoanPaymentTable, [
@@ -101,7 +101,7 @@ export const loanBalanceUpdate = async (req, res, next) => {
         'debit',
         loanDetails.loan_reason,
         paymentDescriptionType,
-        `recova loan balance update`,
+        'recova loan balance update',
       ]),
       processAnyData(loanQueries.updateNextLoanRepayment, [nextRepayment.loan_repayment_id]),
       processAnyData(loanQueries.updateLoanWithRepayment, [loanDetails.loan_id, loanDetails.user_id, statusType, parseFloat(debitedAmount / 100), completedAtType]),
@@ -112,12 +112,12 @@ export const loanBalanceUpdate = async (req, res, next) => {
     if (checkIfUserOnClusterLoan) {
       const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
       await processOneOrNoneData(loanQueries.updateUserLoanStatus, [loanDetails.user_id, statusChoice]);
-      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+      logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
     }
     if (!checkIfUserOnClusterLoan) {
       const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
       await processOneOrNoneData(loanQueries.updateUserLoanStatus, [loanDetails.user_id, statusOption]);
-      logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+      logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
     }
 
     return ApiResponse.json(res, enums.LOAN_BALANCE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, {});
@@ -142,7 +142,7 @@ export const loanBalanceUpdateAlgo = async (req, res, next) => {
 
   let currentRepaymentIndex = 0;
   let currentRepayment = parseFloat(unCompletedRepayments[currentRepaymentIndex].total_payment_amount) - paidRepaymentNotInRecord;
-  outstanding = outstanding - payment; //new total outstanding amount
+  outstanding = outstanding - payment; // new total outstanding amount
   let fullyPaidRepayments = [];
 
   while (payment > 0 && currentRepaymentIndex < unCompletedRepayments.length) {
@@ -169,7 +169,7 @@ export const loanBalanceUpdateAlgo = async (req, res, next) => {
       'debit',
       loanDetails.loan_reason,
       paymentDescriptionType,
-      `recova loan balance update`,
+      'recova loan balance update',
     ]),
     processAnyData(loanQueries.updateFullyPaidLoanRepayment, [fullyPaidRepayments]),
     processAnyData(loanQueries.updateLoanWithRepayment, [loanDetails.loan_id, loanDetails.user_id, statusType, parseFloat(debitedAmount), completedAtType]),
@@ -183,12 +183,12 @@ export const loanBalanceUpdateAlgo = async (req, res, next) => {
   if (checkIfUserOnClusterLoan) {
     const statusChoice = checkIfUserOnClusterLoan.loan_status === 'active' ? 'active' : 'over due';
     await processOneOrNoneData(loanQueries.updateUserLoanStatus, [loanDetails.user_id, statusChoice]);
-    logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+    logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
   }
   if (!checkIfUserOnClusterLoan) {
     const statusOption = statusType === 'ongoing' ? 'active' : 'inactive';
     await processOneOrNoneData(loanQueries.updateUserLoanStatus, [loanDetails.user_id, statusOption]);
-    logger.info(`Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js`);
+    logger.info('Recova:::Info: user loan status set to active processPersonalLoanRepayments.middlewares.payment.js');
   }
 
   return ApiResponse.json(res, enums.LOAN_BALANCE_UPDATED_SUCCESSFULLY, enums.HTTP_OK, {});
@@ -222,31 +222,48 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.user_id);
 
-    await repaymentSchedule.forEach(async schedule => {
-      await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
-        schedule.loan_id,
-        schedule.user_id,
-        schedule.repayment_order,
-        schedule.principal_payment,
-        schedule.interest_payment,
-        schedule.fees,
-        schedule.total_payment_amount,
-        schedule.pre_payment_outstanding_amount,
-        schedule.post_payment_outstanding_amount,
-        schedule.proposed_payment_date,
-        schedule.proposed_payment_date,
-      ]);
-      return schedule;
-    });
+    const loanRepaymentDetails = await Promise.all(
+      repaymentSchedule.map(async schedule => {
+        return await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
+          schedule.loan_id,
+          schedule.user_id,
+          schedule.repayment_order,
+          schedule.principal_payment,
+          schedule.interest_payment,
+          schedule.fees,
+          schedule.total_payment_amount,
+          schedule.pre_payment_outstanding_amount,
+          schedule.post_payment_outstanding_amount,
+          schedule.proposed_payment_date,
+          schedule.proposed_payment_date,
+        ]);
+      })
+    );
+
+    // repaymentSchedule.forEach(async schedule => {
+    //   await processOneOrNoneData(loanQueries.updatePreDisbursementLoanRepaymentSchedule, [
+    //     schedule.loan_id,
+    //     schedule.user_id,
+    //     schedule.repayment_order,
+    //     schedule.principal_payment,
+    //     schedule.interest_payment,
+    //     schedule.fees,
+    //     schedule.total_payment_amount,
+    //     schedule.pre_payment_outstanding_amount,
+    //     schedule.post_payment_outstanding_amount,
+    //     schedule.proposed_payment_date,
+    //     schedule.proposed_payment_date,
+    //   ]);
+
+    //   return schedule;
+    // });
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user pre disbursement loan repayment details saved createMandateConsentRequest.controllers.recova.js`);
 
-    const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
-    console.log(loanRepaymentDetails);
+    // const loanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user loan repayment details fetched createMandateConsentRequest.controllers.recova.js`);
     const [accountDetails] = await processAnyData(loanQueries.fetchBankAccountDetailsByUserIdForMandate, user.user_id);
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's default account details fetched successfully createMandateConsentRequest.controller.recova.js`);
-
     if (!accountDetails) {
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user does not have a default account createMandateConsentRequest.controller.recova.js`);
       return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
@@ -254,15 +271,20 @@ export const createMandateConsentRequest = async (req, res, next) => {
 
     if (accountDetails.bank_code.length > 3) {
       logger.info(
-        `${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user bank account code ${accountDetails.bank_code} is not a commercial bank code createMandateConsentRequest.controller.recova.js`
+        `${enums.CURRENT_TIME_STAMP}, ${user.user_id}
+        :::Info: user bank account code ${accountDetails.bank_code} is not a commercial bank code createMandateConsentRequest.controller.recova.js`
       );
       return ApiResponse.error(res, enums.COMMERCIAL_BANK_REQUIRED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
 
+    const totalRepayment = loanRepaymentDetails.reduce((acc, repayment) => {
+      return acc + parseFloat(repayment.total_payment_amount);
+    }, 0);
+
     const collectionPaymentSchedules = await loanRepaymentDetails.map(repayment => {
       return {
         repaymentDate: repayment.proposed_payment_date,
-        repaymentAmountInNaira: repayment.total_payment_amount,
+        repaymentAmountInNaira: parseFloat(repayment.total_payment_amount),
       };
     });
     const bvn = await Hash.decrypt(decodeURIComponent(userDetails.bvn));
@@ -279,8 +301,6 @@ export const createMandateConsentRequest = async (req, res, next) => {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: user's  phone number is invalid  createMandateConsentRequest.controller.user.js`);
       return ApiResponse.error(res, 'Invalid phone number', enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
-    // console.log(collectionPaymentSchedules, totalRepaymentExpected, loanDetails);
-    //call recova service to create mandate
     const data = {
       bvn: bvn,
       businessRegistrationNumber: 'string',
@@ -291,7 +311,7 @@ export const createMandateConsentRequest = async (req, res, next) => {
       customerEmail: userDetails.email,
       phoneNumber: pn.number.national.replace(/\s+/g, ''),
       loanAmount: loanDetails.amount_requested,
-      totalRepaymentExpected: loanDetails.total_repayment_amount,
+      totalRepaymentExpected: parseFloat(totalRepayment).toFixed(2),
       loanTenure: loanDetails.loan_tenor_in_months,
       linkedAccountNumber: accountDetails.account_number,
       repaymentType: 'Collection',
@@ -299,8 +319,6 @@ export const createMandateConsentRequest = async (req, res, next) => {
       preferredRepaymentAccount: accountDetails.account_number,
       collectionPaymentSchedules: collectionPaymentSchedules,
     };
-
-    console.log(data);
 
     logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: user's mandate data collated successfully createMandateConsentRequest.controller.recova.js`);
     const result = await recovaService.createConsentRequest(data);

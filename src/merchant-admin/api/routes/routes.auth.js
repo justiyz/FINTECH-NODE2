@@ -28,6 +28,7 @@ router.post(
   Model(Schema.verifyLogin, 'payload'),
   AuthMiddleware.verifyLoginVerificationToken,
   AdminMiddleware.validateUnAuthenticatedAdmin('login'),
+  AuthMiddleware.adminPermissions,
   AuthController.login
 );
 

@@ -12,6 +12,23 @@ const selfieUpload = Joi.object().keys({
   image_url: Joi.string().required()
 });
 
+const selfieUploadNew = Joi.object().keys({
+  metadata: Joi.object().required(),
+  data: Joi.object().required(),
+  message: Joi.string().required(),
+  referenceId: Joi.string().required(),
+  verificationMode: Joi.string().allow('').required(),
+  verificationType: Joi.string().allow(null).required(),
+  verificationValue: Joi.string().allow(null).required(),
+  verificationUrl: Joi.string().uri().required(),
+  selfieUrl: Joi.string().uri().required(),
+  status: Joi.boolean().required(),
+  aml: Joi.object({
+      status: Joi.boolean().required()
+    }).required(),
+  verificationStatus: Joi.string().required(),
+});
+
 const resolveAccountNumber = Joi.object().keys({
   account_number: Joi.string().required(),
   bank_code: Joi.string().required()
@@ -202,5 +219,6 @@ export default  {
   idDocumentVerification,
   sendBvnOtp,
   verifyBvnOtp,
-  verifyBVNInformation
+  verifyBVNInformation,
+  selfieUploadNew
 };

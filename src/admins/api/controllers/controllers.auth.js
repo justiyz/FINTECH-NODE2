@@ -12,7 +12,7 @@ import config from '../../../users/config/index';
 import { adminActivityTracking } from '../../lib/monitor';
 import * as descriptions from '../../lib/monitor/lib.monitor.description';
 
-const { SEEDFI_NODE_ENV } = config;
+const { SEEDFI_NODE_ENV, SEEDFI_DEV_NEW_DEVICE_LOGIN_WAVER_USERS } = config;
 
 /**
  * complete admin login request
@@ -25,12 +25,16 @@ const { SEEDFI_NODE_ENV } = config;
 export const completeAdminLoginRequest = async(req, res, next) => {
   try {
     const { admin } = req;
-    const token = UserHelpers.generateOtp();
+    let token = UserHelpers.generateOtp();
     const adminName = `${admin.first_name} ${admin.last_name}`;
+    // This is strictly for the test environments
+    if (SEEDFI_NODE_ENV === 'development' && admin.email === config.SEEDFI_NEW_DEVICE_LOGIN_WAVER_USERS) {
+      token = '123456';
+    }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: random token generated completeAdminLoginRequest.admin.controllers.auth.js`);
     const [ existingToken ] = await processAnyData(authQueries.fetchAdminByVerificationToken, [ token ]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: checked if token is existing in the database completeAdminLoginRequest.admin.controllers.auth.js`);
-    if (existingToken) {
+    if (existingToken && admin.email !== config.SEEDFI_NEW_DEVICE_LOGIN_WAVER_USERS) {
       return completeAdminLoginRequest(req, res, next);
     }
     logger.info(`${enums.CURRENT_TIME_STAMP}, Info: successfully generates unique random token completeAdminLoginRequest.admin.controllers.auth.js`);
