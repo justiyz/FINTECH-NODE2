@@ -209,15 +209,18 @@ export const createMandateConsentRequest = async (req, res, next) => {
     loanDetails,
     user,
   } = req;
-
   try {
     const [userDetails] = await processAnyData(userQueries.fetchAllDetailsBelongingToUser, [user.user_id]);
 
     const exisitingLoanRepaymentDetails = await processAnyData(loanQueries.fetchLoanRepaymentScheduleForMandate, [loanDetails.loan_id, user.user_id]);
-
     if (exisitingLoanRepaymentDetails.length > 0) {
-      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User previouly accepted a mandate for this loan createMandateConsentRequest.controller.recova.js`);
-      return ApiResponse.error(res, enums.MANDATE_ALREADY_ACCEPTED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
+      const mandate = await processOneOrNoneData(loanMandateQueries.getLoanMandateByLoanId, [loanDetails.loan_id]);
+      if (mandate) return ApiResponse.success(res, enums.CONSENT_REQUEST_INITIATED_SUCCESSFULLY, enums.HTTP_OK, mandate);
+
+      await processAnyData(loanQueries.deleteLoanRepaymentScheduleForMandate, loanDetails.loan_id);
+
+      logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: User previouly created temporary loan schedule loan createMandateConsentRequest.controller.recova.js`);
+      // return ApiResponse.error(res, enums.MANDATE_ALREADY_ACCEPTED, enums.HTTP_BAD_REQUEST, enums.CREATE_MANDATE_CONSENT_REQUEST_CONTROLLER);
     }
 
     const repaymentSchedule = await generateLoanRepaymentSchedule(loanDetails, user.user_id);

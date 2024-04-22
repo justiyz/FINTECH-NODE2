@@ -1694,17 +1694,17 @@ export const saveBvnInformation = async data => {
   }
 };
 
-export const reusableBvnInfo = async (res, bvn, saved_information) => {
-  for (let counter = 0; counter < saved_information.length; counter++) {
-    let decrypted_bvn = await Hash.decrypt(decodeURIComponent(saved_information[counter].bvn));
-    if (bvn.trim() === decrypted_bvn) {
+export const reusableBvnInfo = async (res, bvn, saved_information) => {  
+  for (let counter = 0; counter < saved_information.length; counter++) {  
+    let decrypted_bvn =  await Hash.decrypt(decodeURIComponent(saved_information[counter].bvn));  
+    if (bvn.trim() === decrypted_bvn) {  
       // get the current date and the date three months ago
       const createdAt = moment(saved_information[counter].updated_at); // Parse the createdAt date
-      const threeMonthsAgo = moment().subtract(3, 'months');
+      const threeMonthsAgo = moment().subtract(3, 'months'); 
       if (createdAt.isBefore(threeMonthsAgo)) {
         /**
          * if the updated_at field is older than 3 months ago, the process will end and the user will be prompted to try again
-         * */
+         * */ 
         await processAnyData(userQueries.setDataToDeleted, [saved_information[counter].record_id]);
         logger.info(
           `${enums.CURRENT_TIME_STAMP}, Guest user:::Info: Record with ID', ${saved_information[counter].record_id}, 'has been marked as deleted. sendBvnOtp.controller.user.js`
@@ -1712,12 +1712,13 @@ export const reusableBvnInfo = async (res, bvn, saved_information) => {
         // sendBvnOtp(req, res, next)
         return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
       }
+
       saved_information[counter].bvn = decrypted_bvn;
       const otpData = await sendOtpToBvnUser(bvn, saved_information[counter]);
       if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
         return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData });
       }
-      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData });
+      return ApiResponse.success(res, enums.VERIFICATION_OTP_RESENT, enums.HTTP_CREATED, { ...otpData, otp: undefined });
     }
   }
 };
@@ -1735,7 +1736,6 @@ export const sendBvnOtp = async (req, res, next) => {
      */
 
     let saved_information = await processAnyData(userQueries.queryBvnInformationByDob, [date_of_birth]);
-
     /**
      * To reduce the number of records to be searched on, we query the verified_bvn_records table with the date_of_birth
      * if any record matches, the loop below will run, decryption the hashed bvn on that record and comparing it with the
@@ -1744,8 +1744,8 @@ export const sendBvnOtp = async (req, res, next) => {
     if (saved_information.length > 0) {
       await reusableBvnInfo(res, bvn, saved_information);
     } else {
-      /** return saved_information; */
-      const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {});
+      /** return saved_information; */ 
+      const { data } = await zeehService.zeehBVNVerificationCheck(bvn.trim(), {}); 
       if (!data.success) {
         logger.info(`${enums.CURRENT_TIME_STAMP}, Guest user:::Info: user's bvn verification failed sendBvnOtp.controller.user.js`);
 
@@ -1756,8 +1756,7 @@ export const sendBvnOtp = async (req, res, next) => {
         logger.info(`${enums.CURRENT_TIME_STAMP}, ${'Guest user'}:::Info: provided date of birth does not match bvn returned date of birth sendBvnOtp.controller.user.js`);
 
         return ApiResponse.error(res, enums.USER_BVN_NOT_MATCHING_RETURNED_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
-      }
-
+      } 
       /** if match, send otp to user */
       await saveBvnInformation(data);
       const otpData = await sendOtpToBvnUser(bvn, data.data);
@@ -1821,8 +1820,8 @@ export const verifyBvnOtp = async (req, res, next) => {
   try {
     const {
       body: { bvn, code },
-    } = req;
-    const [existingOtp] = await processAnyData(authQueries.getValidVerificationCode, [code]);
+    } = req; 
+    const [existingOtp] = await processAnyData(authQueries.getValidVerificationCode, [code]);    
     if (!existingOtp) {
       logger.error(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: no existing verification code found verifyBvnOtp.controller.user.js`);
       return ApiResponse.error(res, enums.INVALID('OTP code'), enums.HTTP_BAD_REQUEST, enums.VERIFY_BVN_OTP_CONTROLLER);
@@ -1836,11 +1835,12 @@ export const verifyBvnOtp = async (req, res, next) => {
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: provided bvn match verification code bvn verifyBvnOtp.controller.user.js`);
     await processOneOrNoneData(authQueries.deleteVerificationCode, [existingOtp.verification_key, code]);
     logger.info(`${enums.CURRENT_TIME_STAMP}, Guest:::Info: verification code deleted verifyBvnOtp.controller.user.js`);
+    
     if (req.user) {
       const user = req.user;
       const hashedBvn = encodeURIComponent(await Hash.encrypt(bvn.trim()));
-      await tierOneUpgradeByBVN(user);
       const [updateBvn] = await processAnyData(userQueries.updateUserBvn, [user.user_id, hashedBvn]);
+      await tierOneUpgradeByBVN(user);
       logger.info(`${enums.CURRENT_TIME_STAMP}, ${user.user_id}:::Info: successfully updated user's bvn and updating user tier to the database updateBvn.controllers.user.js`);
       return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, { ...updateBvn });
     }
@@ -1851,7 +1851,7 @@ export const verifyBvnOtp = async (req, res, next) => {
       return ApiResponse.error(res, enums.UNABLE_TO_PROCESS_BVN, enums.HTTP_BAD_REQUEST, enums.SEND_BVN_OTP_CONTROLLER);
     }
 
-    await tierOneUpgradeByBVN(req.user);
+    // await tierOneUpgradeByBVN(req.user);
 
     return ApiResponse.success(res, enums.VERIFIED('OTP code'), enums.HTTP_OK, {
       bvn: bvn,
@@ -1882,9 +1882,9 @@ export const verifyBvnOtp = async (req, res, next) => {
  *
  * @param user
  * @returns {Promise<void>}
- */
-export const tierOneUpgradeByBVN = async user => {
-  // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1
+ */ 
+export const tierOneUpgradeByBVN = async (user) => { 
+    // user needs to verify bvn, upload valid id and complete basic profile details to move to tier 1 
   if(user) {
     const tierChoice = user.is_completed_kyc && user.is_verified_bvn ? '1' : '0';
     // if the user has verified their identity document before this point, they will be upgraded to tier 1
@@ -1892,7 +1892,8 @@ export const tierOneUpgradeByBVN = async user => {
   } else {
     return true;
   }
-} 
+}
+ 
 
 function getPhoneNumber(obj) {
   // Check if either phoneNumber1 or phone_number1 exists in the object

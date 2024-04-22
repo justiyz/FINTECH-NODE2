@@ -12,7 +12,7 @@ zeehSDK.auth(config.SEEDFI_ZEEH_PUBLIC_KEY);
 
 const zeehDriversLicenseVerificationCheck = async (license_number, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
+    if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, license_number);
     }
     const result = await zeehSDK.getDriverInformation({
@@ -31,6 +31,7 @@ const zeehBVNVerificationCheck = async (bvn, user) => {
     if (SEEDFI_NODE_ENV === 'test') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, bvn);
     }
+
     const options = {
       method: 'POST',
       url: 'https://v2.api.zeeh.africa/nigeria_kyc/lookup_bvn_advance',
@@ -44,6 +45,7 @@ const zeehBVNVerificationCheck = async (bvn, user) => {
       },
     };
     const data = await axios(options);
+    console.log('data', data);
     return data;
   } catch (error) {
     if (error.message === 'Not Found') {
@@ -88,7 +90,7 @@ const zeehPassportNumberVerificationCheck = async (user, document_id) => {
 
 const zeehNINVerificationCheck = async (nin, user) => {
   try {
-    if (SEEDFI_NODE_ENV === 'test') {
+    if (SEEDFI_NODE_ENV === 'test' || SEEDFI_NODE_ENV === 'development') {
       return userMockedTestResponses.zeehVerifyBvnTestResponse(user, nin);
     }
     const options = {
