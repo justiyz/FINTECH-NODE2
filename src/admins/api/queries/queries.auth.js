@@ -4,10 +4,10 @@ export default {
       FROM admins
       WHERE admin_id = $1`,
 
-  fetchAdminByVerificationToken: `
-      SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
-      FROM admins
-      WHERE verification_token = $1`,
+    fetchAdminByVerificationToken: `
+        SELECT id, email, admin_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count
+        FROM admins
+        WHERE verification_token = $1`,
 
   fetchMerchantByVerificationToken: `
       SELECT id, email, merchant_id, verification_token, verification_token_expires, is_created_password, verification_token_request_count, otp
